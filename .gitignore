@@ -1,0 +1,12 @@
+.idea
+/node_modules/
+/build/
+/dist/
+/.env
+/yarn-error.log
+/.data/
+/test/enviroment.ts
+/coverage/
+/test/env.js
+/.env.relayer
+/e2e/env.js
