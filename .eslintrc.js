@@ -11,7 +11,8 @@ module.exports = {
                 createDefaultProgram: true
             },
             plugins: [
-                '@typescript-eslint'
+                '@typescript-eslint',
+                'unused-imports'
             ],
             extends: [
                 'airbnb-typescript/base',
@@ -81,7 +82,8 @@ module.exports = {
                     {
                         allow: ['debug', 'error', 'info']
                     }
-                ]
+                ],
+                'import/export': 0
             }
         }
     ]
