@@ -55,6 +55,7 @@ module.exports = {
                         format: ['UPPER_CASE']
                     }
                 ],
+                'no-empty': ['error', { 'allowEmptyCatch': true }],
                 // Styling.
                 'array-bracket-spacing': ['error', 'never'],
                 'object-curly-spacing': ['error', 'always'],

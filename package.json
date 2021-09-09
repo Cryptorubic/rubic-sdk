@@ -11,6 +11,8 @@
     "build": "tsc"
   },
   "dependencies": {
+    "bignumber.js": "^9.0.1",
+    "web3": "^1.5.2"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
