@@ -20,31 +20,61 @@ import { RpcResponse } from './models/rpc-response';
 import { BatchCall } from './models/batch-call';
 import { HttpClient } from '../../common/models/http-client';
 
+/**
+ * Class containing methods for calling contracts in order to obtain information from the blockchain
+ */
 export class Web3Public {
     private multicallAddresses: Partial<Record<BLOCKCHAIN_NAME, string>> = MULTICALL_ADDRESSES;
 
+    /**
+     * @param web3 web3 instance
+     * @param blockchain blockchain in which you need to execute requests
+     * @param [httpClient=axios] http client that implements {@link HttpClient} interface
+     */
     constructor(
         private web3: Web3,
         public blockchain: Blockchain,
         private httpClient?: HttpClient
     ) {}
 
+    /**
+     * @description gets address of native coin {@link NATIVE_TOKEN_ADDRESS}
+     */
     static get nativeTokenAddress(): string {
         return NATIVE_TOKEN_ADDRESS;
     }
 
+    /**
+     * @description increases the gas limit value by the specified percentage and rounds to the nearest integer
+     * @param amount gas limit value to increase
+     * @param percent the percentage by which the gas limit will be increased
+     */
     static calculateGasMargin(amount: BigNumber | string | number, percent: number): string {
         return new BigNumber(amount || '0').multipliedBy(percent).toFixed(0);
     }
 
+    /**
+     * @description convert amount from Ether to Wei units
+     * @param amount amount to convert
+     * @param [decimals=18] token decimals
+     */
     static toWei(amount: BigNumber | string | number, decimals = 18): string {
         return new BigNumber(amount || 0).times(new BigNumber(10).pow(decimals)).toFixed(0);
     }
 
+    /**
+     * @description convert amount from Wei to Ether units
+     * @param amountInWei amount to convert
+     * @param [decimals=18] token decimals
+     */
     static fromWei(amountInWei: BigNumber | string | number, decimals = 18): BigNumber {
         return new BigNumber(amountInWei).div(new BigNumber(10).pow(decimals));
     }
 
+    /**
+     * @description convert address to bytes32 format
+     * @param address address to convert
+     */
     static addressToBytes32(address: string): string {
         if (address.slice(0, 2) !== '0x' || address.length !== 42) {
             console.error('Wrong address format');
@@ -54,6 +84,10 @@ export class Web3Public {
         return `0x${address.slice(2).padStart(64, '0')}`;
     }
 
+    /**
+     * @description convert address to checksum format
+     * @param address address to convert
+     */
     static toChecksumAddress(address: string): string {
         return toChecksumAddress(address);
     }
@@ -155,7 +189,7 @@ export class Web3Public {
 
         const gasLimit = await contract.methods[methodName](...methodArguments).estimateGas({
             from: fromAddress,
-            gas: 40000000,
+            gas: 10000000,
             ...(value && { value })
         });
         return new BigNumber(gasLimit);
@@ -212,14 +246,9 @@ export class Web3Public {
     /**
      * @description gets mined transaction gas fee in Ether
      * @param hash transaction hash
-     * @param [options] additional options
-     * @param [options.inWei = false] if true, then the return value will be in Wei
-     * @return transaction gas fee in Ether (or in Wei if options.inWei = true) or null if transaction is not mined
+     * @return transaction gas fee in Wei or null if transaction is not mined
      */
-    public async getTransactionGasFee(
-        hash: string,
-        options: { inWei?: boolean } = {}
-    ): Promise<BigNumber | null> {
+    public async getTransactionGasFee(hash: string): Promise<BigNumber | null> {
         const transaction = await this.getTransactionByHash(hash);
         const receipt = await this.web3.eth.getTransactionReceipt(hash);
 
@@ -230,11 +259,16 @@ export class Web3Public {
         const gasPrice = new BigNumber(transaction.gasPrice);
         const gasLimit = new BigNumber(receipt.gasUsed);
 
-        return options.inWei
-            ? gasPrice.multipliedBy(gasLimit)
-            : gasPrice.multipliedBy(gasLimit).div(10 ** 18);
+        return gasPrice.multipliedBy(gasLimit);
     }
 
+    /**
+     * @description get a transaction by hash in several attempts
+     * @param hash hash of the target transaction
+     * @param attempt current attempt number
+     * @param attemptsLimit maximum allowed number of attempts
+     * @param delay ms delay before next attempt
+     */
     public async getTransactionByHash(
         hash: string,
         attempt?: number,
@@ -284,6 +318,11 @@ export class Web3Public {
         });
     }
 
+    /**
+     * @description get balance of multiple tokens via multicall
+     * @param address wallet address
+     * @param tokensAddresses tokens addresses
+     */
     public async getTokensBalances(
         address: string,
         tokensAddresses: string[]
@@ -319,6 +358,13 @@ export class Web3Public {
         return tokensBalances;
     }
 
+    /**
+     * @description use multicall to make many calls in the single rpc request
+     * @param contractAddress target contract address
+     * @param contractAbi target contract abi
+     * @param methodName target method name
+     * @param methodCallsArguments list method calls parameters arrays
+     */
     public async multicallContractMethod<Output>(
         contractAddress: string,
         contractAbi: AbiItem[],
@@ -349,6 +395,13 @@ export class Web3Public {
         }));
     }
 
+    /**
+     * @description Checks if the specified address contains the required amount of these tokens.
+     * Throws an InsufficientFundsError if the balance is insufficient
+     * @param token token balance for which you need to check
+     * @param amount required balance
+     * @param userAddress the address where the required balance should be
+     */
     public async checkBalance(
         token: { address: string; symbol: string; decimals: number },
         amount: BigNumber,
@@ -443,7 +496,7 @@ export class Web3Public {
      * @description send batch request to rpc provider directly
      * @see {@link https://playground.open-rpc.org/?schemaUrl=https://raw.githubusercontent.com/ethereum/eth1.0-apis/assembled-spec/openrpc.json&uiSchema%5BappBar%5D%5Bui:splitView%5D=false&uiSchema%5BappBar%5D%5Bui:input%5D=false&uiSchema%5BappBar%5D%5Bui:examplesDropdown%5D=false|EthereumJSON-RPC}
      * @param rpcCallsData rpc methods and parameters list
-     * @returns rpc batch request call result sorted in order of input parameters
+     * @returns rpc batch request call result sorted in order of input 1parameters
      */
     public async rpcBatchRequest<T extends string | string[]>(
         rpcCallsData: {
@@ -469,6 +522,11 @@ export class Web3Public {
         return response.sort((a, b) => a.id - b.id).map(item => (item.error ? null : item.result));
     }
 
+    /**
+     * @description execute multiplie calls in the single contract call
+     * @param calls multicall calls data list
+     * @return result of calls execution
+     */
     private async multicall(calls: Call[]): Promise<MulticallResponse[]> {
         const contract = new this.web3.eth.Contract(
             MULTICALL_ABI,
@@ -477,6 +535,9 @@ export class Web3Public {
         return contract.methods.tryAggregate(false, calls).call();
     }
 
+    /**
+     * @description returns httpClient if it exists or imports the axios client
+     */
     private async getHttpClient(): Promise<HttpClient> {
         if (!this.httpClient) {
             this.httpClient = (await import('axios')) as unknown as AxiosInstance;
