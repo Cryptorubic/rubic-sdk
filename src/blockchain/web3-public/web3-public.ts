@@ -21,13 +21,14 @@ import { BatchCall } from './models/batch-call';
 import { HttpClient } from '../../common/models/http-client';
 
 /**
- * Class containing methods for calling contracts in order to obtain information from the blockchain
+ * Class containing methods for calling contracts in order to obtain information from the blockchain.
+ * To send transaction or execute contract method use {@link Web3Private}.
  */
 export class Web3Public {
     private multicallAddresses: Partial<Record<BLOCKCHAIN_NAME, string>> = MULTICALL_ADDRESSES;
 
     /**
-     * @param web3 web3 instance
+     * @param web3 web3 instance initialized with ethereum provider, e.g. rpc link
      * @param blockchain blockchain in which you need to execute requests
      * @param [httpClient=axios] http client that implements {@link HttpClient} interface
      */
@@ -124,6 +125,10 @@ export class Web3Public {
         return address === NATIVE_TOKEN_ADDRESS;
     };
 
+    /**
+     * @description set new provider to web3 instance
+     * @param provider new web3 provider, e.g. rpc link
+     */
     public setProvider(provider: Provider): void {
         this.web3.setProvider(provider);
     }

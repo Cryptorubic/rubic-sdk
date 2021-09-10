@@ -11,13 +11,27 @@ import { ProviderConnector } from '../models/provider-connector';
 import { Web3Error } from '../models/web3-error';
 import { RubicError } from '../../common/errors/rubic-error';
 
-export class Web3PrivateService {
+/**
+ * Class containing methods for executing the functions of contracts and sending transactions in order to change the state of the blockchain.
+ * To get information from the blockchain use {@link Web3Public}.
+ */
+export class Web3Private {
+    /**
+     * @description instance of web3, initialized with ethereum wallet, e.g. Metamask, WalletConnect
+     */
     private readonly web3: Web3;
 
+    /**
+     * @description current wallet provider address
+     */
     private get address(): string {
         return this.providerConnector.address;
     }
 
+    /**
+     * @description converts number, string or BigNumber value to integer string
+     * @param amount value to convert
+     */
     private static stringifyAmount(amount: number | string | BigNumber): string {
         const bnAmount = new BigNumber(amount);
         if (!bnAmount.isInteger()) {
@@ -27,10 +41,18 @@ export class Web3PrivateService {
         return bnAmount.toFixed(0);
     }
 
+    /**
+     * @param providerConnector provider that implements {@link ProviderConnector} interface.
+     * The provider must contain an instance of web3, initialized with ethereum wallet, e.g. Metamask, WalletConnect
+     */
     constructor(private readonly providerConnector: ProviderConnector) {
         this.web3 = providerConnector.web3;
     }
 
+    /**
+     * @description parse web3 error by its code
+     * @param err web3 error to parse
+     */
     private static parseError(err: Web3Error): RubicError {
         if (err.message.includes('Transaction has been reverted by the EVM')) {
             return new TransactionRevertedError();
@@ -69,19 +91,19 @@ export class Web3PrivateService {
 
         return new Promise((resolve, reject) => {
             contract.methods
-                .transfer(toAddress, Web3PrivateService.stringifyAmount(amount))
+                .transfer(toAddress, Web3Private.stringifyAmount(amount))
                 .send({
                     from: this.address,
-                    ...(options.gas && { gas: Web3PrivateService.stringifyAmount(options.gas) }),
+                    ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                     ...(options.gasPrice && {
-                        gasPrice: Web3PrivateService.stringifyAmount(options.gasPrice)
+                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                     })
                 })
                 .on('transactionHash', options.onTransactionHash || (() => {}))
                 .on('receipt', resolve)
                 .on('error', (err: Web3Error) => {
                     console.error(`Tokens transfer error. ${err}`);
-                    reject(Web3PrivateService.parseError(err));
+                    reject(Web3Private.parseError(err));
                 });
         });
     }
@@ -105,18 +127,18 @@ export class Web3PrivateService {
 
         return new Promise((resolve, reject) => {
             contract.methods
-                .transfer(toAddress, Web3PrivateService.stringifyAmount(amount))
+                .transfer(toAddress, Web3Private.stringifyAmount(amount))
                 .send({
                     from: this.address,
-                    ...(options.gas && { gas: Web3PrivateService.stringifyAmount(options.gas) }),
+                    ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                     ...(options.gasPrice && {
-                        gasPrice: Web3PrivateService.stringifyAmount(options.gasPrice)
+                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                     })
                 })
                 .on('transactionHash', (hash: string) => resolve(hash))
                 .on('error', (err: Web3Error) => {
                     console.error(`Tokens transfer error. ${err}`);
-                    reject(Web3PrivateService.parseError(err));
+                    reject(Web3Private.parseError(err));
                 });
         });
     }
@@ -144,17 +166,17 @@ export class Web3PrivateService {
             await this.web3.eth.call({
                 from: this.address,
                 to: toAddress,
-                value: Web3PrivateService.stringifyAmount(value),
-                ...(options.gas && { gas: Web3PrivateService.stringifyAmount(options.gas) }),
+                value: Web3Private.stringifyAmount(value),
+                ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                 ...(options.gasPrice && {
-                    gasPrice: Web3PrivateService.stringifyAmount(options.gasPrice)
+                    gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                 }),
                 ...(options.data && { data: options.data })
             });
             return await this.sendTransaction(toAddress, value, options);
         } catch (err: unknown) {
             console.error(`Tokens transfer error. ${err}`);
-            throw Web3PrivateService.parseError(err as Web3Error);
+            throw Web3Private.parseError(err as Web3Error);
         }
     }
 
@@ -182,10 +204,10 @@ export class Web3PrivateService {
                 .sendTransaction({
                     from: this.address,
                     to: toAddress,
-                    value: Web3PrivateService.stringifyAmount(value),
-                    ...(options.gas && { gas: Web3PrivateService.stringifyAmount(options.gas) }),
+                    value: Web3Private.stringifyAmount(value),
+                    ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                     ...(options.gasPrice && {
-                        gasPrice: Web3PrivateService.stringifyAmount(options.gasPrice)
+                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                     }),
                     ...(options.data && { data: options.data })
                 })
@@ -193,7 +215,7 @@ export class Web3PrivateService {
                 .on('receipt', receipt => resolve(receipt))
                 .on('error', err => {
                     console.error(`Tokens transfer error. ${err}`);
-                    reject(Web3PrivateService.parseError(err as Web3Error));
+                    reject(Web3Private.parseError(err as Web3Error));
                 });
         });
     }
@@ -216,17 +238,17 @@ export class Web3PrivateService {
                 .sendTransaction({
                     from: this.address,
                     to: toAddress,
-                    value: Web3PrivateService.stringifyAmount(value),
-                    ...(options.gas && { gas: Web3PrivateService.stringifyAmount(options.gas) }),
+                    value: Web3Private.stringifyAmount(value),
+                    ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                     ...(options.gasPrice && {
-                        gasPrice: Web3PrivateService.stringifyAmount(options.gasPrice)
+                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                     }),
                     ...(options.data && { data: options.data })
                 })
                 .on('transactionHash', hash => resolve(hash))
                 .on('error', err => {
                     console.error(`Tokens transfer error. ${err}`);
-                    reject(Web3PrivateService.parseError(err as Web3Error));
+                    reject(Web3Private.parseError(err as Web3Error));
                 });
         });
     }
@@ -259,16 +281,16 @@ export class Web3PrivateService {
                 .approve(spenderAddress, rawValue.toFixed(0))
                 .send({
                     from: this.address,
-                    ...(options.gas && { gas: Web3PrivateService.stringifyAmount(options.gas) }),
+                    ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                     ...(options.gasPrice && {
-                        gasPrice: Web3PrivateService.stringifyAmount(options.gasPrice)
+                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                     })
                 })
                 .on('transactionHash', options.onTransactionHash || (() => {}))
                 .on('receipt', resolve)
                 .on('error', (err: Web3Error) => {
                     console.error(`Tokens approve error. ${err}`);
-                    reject(Web3PrivateService.parseError(err));
+                    reject(Web3Private.parseError(err));
                 });
         });
     }
@@ -297,10 +319,10 @@ export class Web3PrivateService {
         try {
             await contract.methods[methodName](...methodArguments).call({
                 from: this.address,
-                ...(options.value && { value: Web3PrivateService.stringifyAmount(options.value) }),
-                ...(options.gas && { gas: Web3PrivateService.stringifyAmount(options.gas) }),
+                ...(options.value && { value: Web3Private.stringifyAmount(options.value) }),
+                ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                 ...(options.gasPrice && {
-                    gasPrice: Web3PrivateService.stringifyAmount(options.gasPrice)
+                    gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                 })
             });
             return await this.executeContractMethod(
@@ -321,7 +343,7 @@ export class Web3PrivateService {
                 );
             }
             console.error('Method execution error: ', err);
-            throw Web3PrivateService.parseError(err as Web3Error);
+            throw Web3Private.parseError(err as Web3Error);
         }
     }
 
@@ -350,18 +372,18 @@ export class Web3PrivateService {
                 .send({
                     from: this.address,
                     ...(options.value && {
-                        value: Web3PrivateService.stringifyAmount(options.value)
+                        value: Web3Private.stringifyAmount(options.value)
                     }),
-                    ...(options.gas && { gas: Web3PrivateService.stringifyAmount(options.gas) }),
+                    ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                     ...(options.gasPrice && {
-                        gasPrice: Web3PrivateService.stringifyAmount(options.gasPrice)
+                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                     })
                 })
                 .on('transactionHash', options.onTransactionHash || (() => {}))
                 .on('receipt', resolve)
                 .on('error', (err: Web3Error) => {
                     console.error(`Method execution error. ${err}`);
-                    reject(Web3PrivateService.parseError(err));
+                    reject(Web3Private.parseError(err));
                 });
         });
     }
@@ -390,15 +412,15 @@ export class Web3PrivateService {
             contract.methods[methodName](...methodArguments)
                 .send({
                     from: this.address,
-                    ...(options.gas && { gas: Web3PrivateService.stringifyAmount(options.gas) }),
+                    ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                     ...(options.gasPrice && {
-                        gasPrice: Web3PrivateService.stringifyAmount(options.gasPrice)
+                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                     })
                 })
                 .on('transactionHash', resolve)
                 .on('error', (err: Web3Error) => {
                     console.error(`Tokens approve error. ${err}`);
-                    reject(Web3PrivateService.parseError(err));
+                    reject(Web3Private.parseError(err));
                 });
         });
     }
