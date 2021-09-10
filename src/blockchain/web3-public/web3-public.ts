@@ -1,0 +1,486 @@
+import Web3 from 'web3';
+import BigNumber from 'bignumber.js';
+import { Method } from 'web3-core-method';
+import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
+import { AbiItem, toChecksumAddress, isAddress, toWei, fromWei } from 'web3-utils';
+import { BlockTransactionString } from 'web3-eth';
+import { AxiosInstance } from 'axios';
+import ERC20_TOKEN_ABI from '../constants/erc-20-abi';
+import { BLOCKCHAIN_NAME } from '../models/BLOCKCHAIN_NAME';
+import { Blockchain } from '../models/blockchain';
+import { NATIVE_TOKEN_ADDRESS } from '../constants/native-token-address';
+import { RubicError } from '../../common/errors/rubic-error';
+import { InsufficientFundsError } from '../../common/errors/insufficient-funds-error';
+import { MULTICALL_ADDRESSES } from './constants/multicall-addresses';
+import { Call } from './models/call';
+import { MulticallResponse } from './models/multicall-response';
+import { MULTICALL_ABI } from './constants/multicall-abi';
+import { ContractMulticallResponse } from './models/contract-multicall-response';
+import { RpcResponse } from './models/rpc-response';
+import { BatchCall } from './models/batch-call';
+import { HttpClient } from '../../common/models/http-client';
+
+export class Web3Public {
+    private multicallAddresses: Partial<Record<BLOCKCHAIN_NAME, string>> = MULTICALL_ADDRESSES;
+
+    constructor(
+        private web3: Web3,
+        public blockchain: Blockchain,
+        private httpClient?: HttpClient
+    ) {}
+
+    static get nativeTokenAddress(): string {
+        return NATIVE_TOKEN_ADDRESS;
+    }
+
+    static calculateGasMargin(amount: BigNumber | string | number, percent: number): string {
+        return new BigNumber(amount || '0').multipliedBy(percent).toFixed(0);
+    }
+
+    static toWei(amount: BigNumber | string | number, decimals = 18): string {
+        return new BigNumber(amount || 0).times(new BigNumber(10).pow(decimals)).toFixed(0);
+    }
+
+    static fromWei(amountInWei: BigNumber | string | number, decimals = 18): BigNumber {
+        return new BigNumber(amountInWei).div(new BigNumber(10).pow(decimals));
+    }
+
+    static addressToBytes32(address: string): string {
+        if (address.slice(0, 2) !== '0x' || address.length !== 42) {
+            console.error('Wrong address format');
+            throw new RubicError('Wrong address format');
+        }
+
+        return `0x${address.slice(2).padStart(64, '0')}`;
+    }
+
+    static toChecksumAddress(address: string): string {
+        return toChecksumAddress(address);
+    }
+
+    /**
+     * @description checks if a given address is a valid Ethereum address
+     * @param address the address to check validity
+     */
+    static isAddressCorrect(address: string): boolean {
+        return isAddress(address);
+    }
+
+    /**
+     * @description converts Eth amount into Wei
+     * @param value to convert in Eth
+     */
+    static ethToWei(value: string | BigNumber): string {
+        return toWei(value.toString(), 'ether');
+    }
+
+    /**
+     * @description converts Wei amount into Eth
+     * @param value to convert in Wei
+     */
+    static weiToEth(value: string | BigNumber): string {
+        return fromWei(value.toString(), 'ether');
+    }
+
+    /**
+     * @description checks if address is Ether native address
+     * @param address address to check
+     */
+    static isNativeAddress = (address: string): boolean => {
+        return address === NATIVE_TOKEN_ADDRESS;
+    };
+
+    public setProvider(provider: Provider): void {
+        this.web3.setProvider(provider);
+    }
+
+    /**
+     * @description gets block by blockId
+     * @param [blockId] block id: hash, number ... Default is 'latest'.
+     * @returns {BlockTransactionString} block by blockId parameter.
+     */
+    public getBlock(blockId: BlockNumber | string = 'latest'): Promise<BlockTransactionString> {
+        return this.web3.eth.getBlock(blockId);
+    }
+
+    /**
+     * @description gets account eth or token balance as integer (multiplied to 10 ** decimals)
+     * @param address wallet address whose balance you want to find out
+     * @param [tokenAddress] address of the smart-contract corresponding to the token, or {@link NATIVE_TOKEN_ADDRESS}.
+     * If not passed the balance in the native currency will be returned.
+     * @returns address eth or token balance as integer (multiplied to 10 ** decimals)
+     */
+    public async getBalance(address: string, tokenAddress?: string): Promise<BigNumber> {
+        let balance;
+        if (tokenAddress && !Web3Public.isNativeAddress(tokenAddress)) {
+            balance = await this.getTokenBalance(address, tokenAddress);
+        } else {
+            balance = await this.web3.eth.getBalance(address);
+        }
+        return new BigNumber(balance);
+    }
+
+    /**
+     * @description gets ERC-20 tokens balance as integer (multiplied to 10 ** decimals)
+     * @param tokenAddress address of the smart-contract corresponding to the token
+     * @param address wallet address whose balance you want to find out
+     * @returns address tokens balance as integer (multiplied to 10 ** decimals)
+     */
+    public async getTokenBalance(address: string, tokenAddress: string): Promise<BigNumber> {
+        const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI as AbiItem[], tokenAddress);
+
+        const balance = await contract.methods.balanceOf(address).call();
+        return new BigNumber(balance);
+    }
+
+    /**
+     * @description predicts the volume of gas required to execute the contract method
+     * @param contractAbi abi of smart-contract
+     * @param contractAddress address of smart-contract
+     * @param methodName method whose execution gas number is to be calculated
+     * @param methodArguments arguments of the executed contract method
+     * @param fromAddress the address for which the gas calculation will be called
+     * @param [value] The value transferred for the call “transaction” in wei.
+     * @return The gas amount estimated
+     */
+    public async getEstimatedGas(
+        contractAbi: AbiItem[],
+        contractAddress: string,
+        methodName: string,
+        methodArguments: unknown[],
+        fromAddress: string,
+        value?: string | BigNumber
+    ): Promise<BigNumber> {
+        const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
+
+        const gasLimit = await contract.methods[methodName](...methodArguments).estimateGas({
+            from: fromAddress,
+            gas: 40000000,
+            ...(value && { value })
+        });
+        return new BigNumber(gasLimit);
+    }
+
+    /**
+     * @description calculates the average price per unit of gas according to web3
+     * @return average gas price in Wei
+     */
+    public async getGasPrice(): Promise<string> {
+        return this.web3.eth.getGasPrice();
+    }
+
+    /**
+     * @description calculates the average price per unit of gas according to web3
+     * @return average gas price in ETH
+     */
+    public async getGasPriceInETH(): Promise<BigNumber> {
+        const gasPrice = await this.web3.eth.getGasPrice();
+        return new BigNumber(gasPrice).div(10 ** 18);
+    }
+
+    /**
+     * @description calculates the gas fee using average price per unit of gas according to web3 and Eth price according to coingecko
+     * @param gasLimit gas limit
+     * @param etherPrice price of Eth unit
+     * @return gas fee in usd$
+     */
+    public async getGasFee(gasLimit: BigNumber, etherPrice: BigNumber): Promise<BigNumber> {
+        const gasPrice = await this.getGasPriceInETH();
+        return gasPrice.multipliedBy(gasLimit).multipliedBy(etherPrice);
+    }
+
+    /**
+     * @description executes allowance method in ERC-20 token contract
+     * @param tokenAddress address of the smart-contract corresponding to the token
+     * @param spenderAddress wallet or contract address, allowed to spend
+     * @param ownerAddress wallet address to spend from
+     * @return tokens amount, allowed to be spent
+     */
+    public async getAllowance(
+        tokenAddress: string,
+        ownerAddress: string,
+        spenderAddress: string
+    ): Promise<BigNumber> {
+        const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI as AbiItem[], tokenAddress);
+
+        const allowance = await contract.methods
+            .allowance(ownerAddress, spenderAddress)
+            .call({ from: ownerAddress });
+        return new BigNumber(allowance);
+    }
+
+    /**
+     * @description gets mined transaction gas fee in Ether
+     * @param hash transaction hash
+     * @param [options] additional options
+     * @param [options.inWei = false] if true, then the return value will be in Wei
+     * @return transaction gas fee in Ether (or in Wei if options.inWei = true) or null if transaction is not mined
+     */
+    public async getTransactionGasFee(
+        hash: string,
+        options: { inWei?: boolean } = {}
+    ): Promise<BigNumber | null> {
+        const transaction = await this.getTransactionByHash(hash);
+        const receipt = await this.web3.eth.getTransactionReceipt(hash);
+
+        if (!transaction || !receipt) {
+            return null;
+        }
+
+        const gasPrice = new BigNumber(transaction.gasPrice);
+        const gasLimit = new BigNumber(receipt.gasUsed);
+
+        return options.inWei
+            ? gasPrice.multipliedBy(gasLimit)
+            : gasPrice.multipliedBy(gasLimit).div(10 ** 18);
+    }
+
+    public async getTransactionByHash(
+        hash: string,
+        attempt?: number,
+        attemptsLimit?: number,
+        delay?: number
+    ): Promise<Transaction | null> {
+        attempt = attempt || 0;
+        const limit = attemptsLimit || 10;
+        const timeoutMs = delay || 500;
+
+        if (attempt >= limit) {
+            return null;
+        }
+
+        const transaction = await this.web3.eth.getTransaction(hash);
+        if (transaction === null) {
+            return new Promise(resolve =>
+                setTimeout(() => resolve(this.getTransactionByHash(hash, attempt!! + 1)), timeoutMs)
+            );
+        }
+        return transaction;
+    }
+
+    /**
+     * @description call smart-contract pure method of smart-contract and returns its output value
+     * @param contractAddress address of smart-contract which method is to be executed
+     * @param contractAbi abi of smart-contract which method is to be executed
+     * @param methodName calling method name
+     * @param [options] additional options
+     * @param [options.from] the address the call “transaction” should be made from
+     * @param [options.methodArguments] executing method arguments
+     * @return smart-contract pure method returned value
+     */
+    public async callContractMethod(
+        contractAddress: string,
+        contractAbi: AbiItem[],
+        methodName: string,
+        options: {
+            methodArguments?: unknown[];
+            from?: string;
+        } = { methodArguments: [] }
+    ): Promise<string | string[]> {
+        const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
+
+        return contract.methods[methodName](...options.methodArguments!!).call({
+            ...(options.from && { from: options.from })
+        });
+    }
+
+    public async getTokensBalances(
+        address: string,
+        tokensAddresses: string[]
+    ): Promise<BigNumber[]> {
+        const contract = new this.web3.eth.Contract(
+            ERC20_TOKEN_ABI as AbiItem[],
+            tokensAddresses[0]
+        );
+        const indexOfNativeCoin = tokensAddresses.findIndex(Web3Public.isNativeAddress);
+        const promises: [Promise<MulticallResponse[]>?, Promise<BigNumber>?] = [];
+
+        if (indexOfNativeCoin !== -1) {
+            tokensAddresses.splice(indexOfNativeCoin, 1);
+            promises[1] = this.getBalance(address);
+        }
+        const calls: Call[] = tokensAddresses.map(tokenAddress => ({
+            target: tokenAddress,
+            callData: contract.methods.balanceOf(address).encodeABI()
+        }));
+        promises[0] = this.multicall(calls);
+
+        const results = await Promise.all(
+            promises as [Promise<MulticallResponse[]>, Promise<BigNumber>]
+        );
+        const tokensBalances = results[0].map(({ success, returnData }) =>
+            success ? new BigNumber(returnData) : new BigNumber(0)
+        );
+
+        if (indexOfNativeCoin !== -1) {
+            tokensBalances.splice(indexOfNativeCoin, 0, results[1]);
+        }
+
+        return tokensBalances;
+    }
+
+    public async multicallContractMethod<Output>(
+        contractAddress: string,
+        contractAbi: AbiItem[],
+        methodName: string,
+        methodCallsArguments: unknown[][]
+    ): Promise<ContractMulticallResponse<Output>[]> {
+        const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
+        const calls: Call[] = methodCallsArguments.map(callArguments => ({
+            callData: contract.methods[methodName](...callArguments).encodeABI(),
+            target: contractAddress
+        }));
+
+        const outputs = await this.multicall(calls);
+
+        const methodOutputAbi = contractAbi.find(
+            funcSignature => funcSignature.name === methodName
+        )?.outputs;
+
+        if (!methodOutputAbi) {
+            throw new RubicError(`Contract method ${methodName} does not exist.`);
+        }
+
+        return outputs.map(output => ({
+            success: output.success,
+            output: output.success
+                ? (this.web3.eth.abi.decodeParameters(methodOutputAbi, output.returnData) as Output)
+                : null
+        }));
+    }
+
+    public async checkBalance(
+        token: { address: string; symbol: string; decimals: number },
+        amount: BigNumber,
+        userAddress: string
+    ): Promise<void> {
+        let balance: BigNumber;
+        if (Web3Public.isNativeAddress(token.address)) {
+            balance = await this.getBalance(userAddress);
+        } else {
+            balance = await this.getTokenBalance(userAddress, token.address);
+        }
+
+        const amountAbsolute = Web3Public.toWei(amount, token.decimals);
+        if (balance.lt(amountAbsolute)) {
+            throw new InsufficientFundsError(amount.toFixed(0));
+        }
+    }
+
+    /**
+     * @description get estimated gas of several contract method execution via rpc batch request
+     * @param abi contract ABI
+     * @param contractAddress contract address
+     * @param fromAddress sender address
+     * @param callsData transactions parameters
+     * @returns list of contract execution estimated gases.
+     * if the execution of the method in the real blockchain would not be reverted,
+     * then the list item would be equal to the predicted gas limit.
+     * Else (if you have not enough balance, allowance ...) then the list item would be equal to null
+     */
+    public async batchEstimatedGas(
+        abi: AbiItem[],
+        contractAddress: string,
+        fromAddress: string,
+        callsData: BatchCall[]
+    ): Promise<(BigNumber | null)[]> {
+        try {
+            const contract = new this.web3.eth.Contract(abi, contractAddress);
+
+            const dataList = callsData.map(callData =>
+                contract.methods[callData.contractMethod](...callData.params).encodeABI()
+            );
+
+            const rpcCallsData = dataList.map((data, index) => ({
+                rpcMethod: 'eth_estimateGas',
+                params: {
+                    from: fromAddress,
+                    to: contractAddress,
+                    data,
+                    ...(callsData[index].value && {
+                        value: `0x${callsData[index].value!!.toString(16)}`
+                    })
+                }
+            }));
+
+            const result = await this.rpcBatchRequest<string>(rpcCallsData);
+            return result.map(value => (value ? new BigNumber(value) : null));
+        } catch (e) {
+            console.error(e);
+            return callsData.map(() => null);
+        }
+    }
+
+    /**
+     * @description send batch request via web3
+     * @see {@link https://web3js.readthedocs.io/en/v1.3.0/web3-eth.html#batchrequest|Web3BatchRequest}
+     * @param calls Web3 method calls
+     * @param callsParams ethereum method transaction parameters
+     * @returns batch request call result sorted in order of input parameters
+     */
+    public web3BatchRequest<T extends string | string[]>(
+        calls: { request: (...params: unknown[]) => Method }[],
+        callsParams: Object[]
+    ): Promise<T[]> {
+        const batch = new this.web3.BatchRequest();
+        const promises: Promise<T>[] = calls.map(
+            (call, index) =>
+                new Promise((resolve, reject) =>
+                    batch.add(
+                        call.request({ ...callsParams[index] }, (error: Error, result: T) =>
+                            error ? reject(error) : resolve(result)
+                        )
+                    )
+                )
+        );
+
+        batch.execute();
+
+        return Promise.all(promises);
+    }
+
+    /**
+     * @description send batch request to rpc provider directly
+     * @see {@link https://playground.open-rpc.org/?schemaUrl=https://raw.githubusercontent.com/ethereum/eth1.0-apis/assembled-spec/openrpc.json&uiSchema%5BappBar%5D%5Bui:splitView%5D=false&uiSchema%5BappBar%5D%5Bui:input%5D=false&uiSchema%5BappBar%5D%5Bui:examplesDropdown%5D=false|EthereumJSON-RPC}
+     * @param rpcCallsData rpc methods and parameters list
+     * @returns rpc batch request call result sorted in order of input parameters
+     */
+    public async rpcBatchRequest<T extends string | string[]>(
+        rpcCallsData: {
+            rpcMethod: string;
+            params: Object;
+        }[]
+    ): Promise<(T | null)[]> {
+        const seed = Date.now();
+        const batch = rpcCallsData.map((callData, index) => ({
+            id: seed + index,
+            jsonrpc: '2.0',
+            method: callData.rpcMethod,
+            params: [{ ...callData.params }]
+        }));
+
+        const httpClient = await this.getHttpClient();
+
+        const response = await httpClient.post<RpcResponse<T>[]>(
+            (<HttpProvider>this.web3.currentProvider).host,
+            batch
+        );
+
+        return response.sort((a, b) => a.id - b.id).map(item => (item.error ? null : item.result));
+    }
+
+    private async multicall(calls: Call[]): Promise<MulticallResponse[]> {
+        const contract = new this.web3.eth.Contract(
+            MULTICALL_ABI,
+            this.multicallAddresses[this.blockchain.name]
+        );
+        return contract.methods.tryAggregate(false, calls).call();
+    }
+
+    private async getHttpClient(): Promise<HttpClient> {
+        if (!this.httpClient) {
+            this.httpClient = (await import('axios')) as unknown as AxiosInstance;
+        }
+        return this.httpClient;
+    }
+}
