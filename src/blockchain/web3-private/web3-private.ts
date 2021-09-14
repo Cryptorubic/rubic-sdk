@@ -24,7 +24,7 @@ export class Web3Private {
     /**
      * @description current wallet provider address
      */
-    private get address(): string {
+    public get address(): string {
         return this.providerConnector.address;
     }
 
