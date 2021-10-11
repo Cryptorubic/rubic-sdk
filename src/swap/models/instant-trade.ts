@@ -1,17 +1,26 @@
 import BigNumber from 'bignumber.js';
 import { Token } from '../../blockchain/models/token';
-import { SwapOptions } from './swap-options';
 
 export interface InstantTrade {
-    fromToken: Token;
-    fromAmount: BigNumber;
-    toToken: Token;
-    toAmount: BigNumber;
-    options: SwapOptions;
-    gasInfo: {
-        gasLimit?: string;
-        gasPrice?: string;
-        gasFeeInUsd?: BigNumber;
-        gasFeeInEth?: BigNumber;
+    from: {
+        token: Token;
+        amount: BigNumber;
     };
+    to: {
+        token: Token;
+        amount: BigNumber;
+    };
+    gasInfo: {
+        gasLimit: string | null;
+        gasPrice: string | null;
+        gasFeeInUsd: BigNumber | null;
+        gasFeeInEth: BigNumber | null;
+    };
+}
+
+export interface Uniswapv2InstantTrade extends InstantTrade {
+    path: string[];
+    deadline: number;
+    exact: 'input' | 'output';
+    slippageTolerance: number;
 }

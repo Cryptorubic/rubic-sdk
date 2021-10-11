@@ -4,7 +4,6 @@ import { Method } from 'web3-core-method';
 import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
 import { AbiItem, toChecksumAddress, isAddress, toWei, fromWei } from 'web3-utils';
 import { BlockTransactionString } from 'web3-eth';
-import { AxiosInstance } from 'axios';
 import ERC20_TOKEN_ABI from '../constants/erc-20-abi';
 import { BLOCKCHAIN_NAME } from '../models/BLOCKCHAIN_NAME';
 import { Blockchain } from '../models/blockchain';
@@ -19,6 +18,7 @@ import { ContractMulticallResponse } from './models/contract-multicall-response'
 import { RpcResponse } from './models/rpc-response';
 import { BatchCall } from './models/batch-call';
 import { HttpClient } from '../../common/models/http-client';
+import { DefaultHttpClient } from '../../common/default-http-client/default-http-client';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
@@ -50,7 +50,10 @@ export class Web3Public {
      * @param amount gas limit value to increase
      * @param percent the percentage by which the gas limit will be increased
      */
-    static calculateGasMargin(amount: BigNumber | string | number, percent: number): string {
+    static calculateGasMargin(
+        amount: BigNumber | string | number | undefined,
+        percent: number
+    ): string {
         return new BigNumber(amount || '0').multipliedBy(percent).toFixed(0);
     }
 
@@ -545,7 +548,7 @@ export class Web3Public {
      */
     private async getHttpClient(): Promise<HttpClient> {
         if (!this.httpClient) {
-            this.httpClient = (await import('axios')) as unknown as AxiosInstance;
+            this.httpClient = await DefaultHttpClient.getInstance();
         }
         return this.httpClient;
     }

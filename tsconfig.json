@@ -10,6 +10,7 @@
       "ES2020",
       "ESNext"
     ],
+    "experimentalDecorators": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "target": "es5",

@@ -1,7 +1,8 @@
-export interface UniswapV2Trade {
+export interface InternalUniswapV2Trade {
     amountIn: string;
-    amountOutMin: string;
+    amountOut: string;
     path: string[];
     to: string;
     deadline: number;
+    exact: 'input' | 'output';
 }
