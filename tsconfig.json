@@ -33,7 +33,10 @@
     "paths": {
       "*": [
         "node_modules/*"
-      ]
+      ],
+      "@core/*": ["./src/core/*"],
+      "@common/*": ["./src/common/*"],
+      "@features/*": ["./src/features/*"]
     },
     "rootDir": "src"
   },

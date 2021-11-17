@@ -6129,6 +6129,11 @@ ts-cacheable@^1.0.5:
   resolved "https://registry.yarnpkg.com/ts-cacheable/-/ts-cacheable-1.0.5.tgz#c409ad5ed6ab41bf8b256ddb351c01904c242fbf"
   integrity sha512-g0hLCOfKJM1dtqBTI0AsXTkkSkwg5urFF64cl7BfPnaiz+QnoJT+XtcC+mLlbubU/AOsww6fZ4MWIVK2WoEZrg==
 
+ts-essentials@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/ts-essentials/-/ts-essentials-9.0.0.tgz#6196b7f390926429256c70951c8edd260e8e5097"
+  integrity sha512-pow5YBSknf/PyoDhr8vsb93+hZah/jSzhdHA3GMjSzUuZIDZH+rV7tvN5DCbN4hi7QJXdteDv8D9HdDCSwXBUw==
+
 ts-jest@^26.5.5:
   version "26.5.6"
   resolved "https://registry.yarnpkg.com/ts-jest/-/ts-jest-26.5.6.tgz#c32e0746425274e1dfe333f43cd3c800e014ec35"
