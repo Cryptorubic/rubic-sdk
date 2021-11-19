@@ -4,6 +4,7 @@ import { BlockchainsInfo } from '@core/blockchain/blockchains-info';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { WalletConnectionConfiguration } from '@core/blockchain/models/wallet-connection-configuration';
 import { Web3Private } from '@core/blockchain/web3-private/web3-private';
+import { WalletProvider } from '@core/sdk/models/configuration';
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { provider } from 'web3-core';
@@ -15,13 +16,33 @@ export class Web3PrivateFactory {
 
     private blockchainName: BLOCKCHAIN_NAME | undefined;
 
-    public static async buildWeb3Private(
-        core: provider | Web3,
-        addrrss: string,
-        chainId: number
-    ): Promise<Web3Private> {
-        const web3PrivateFactory = new Web3PrivateFactory(core, addrrss, chainId);
-        return web3PrivateFactory.buildWeb3Private();
+    public static async createWeb3Private(walletProvider?: WalletProvider): Promise<Web3Private> {
+        if (!walletProvider) {
+            return Web3PrivateFactory.createWeb3PrivateEmptyProxy();
+        }
+
+        const web3PrivateFactory = new Web3PrivateFactory(
+            walletProvider.core,
+            walletProvider.address,
+            new BigNumber(walletProvider.chainId).toNumber()
+        );
+        return web3PrivateFactory.createWeb3Private();
+    }
+
+    private static createWeb3PrivateEmptyProxy(): Web3Private {
+        const web3Private = new Web3Private({
+            web3: new Web3(),
+            address: '',
+            blockchainName: BLOCKCHAIN_NAME.ETHEREUM
+        });
+
+        return new Proxy(web3Private, {
+            get() {
+                throw new RubicError(
+                    'Cant call web3Private method because walletProvider was not configurated. Try to pass walletProvider to sdk configuration'
+                );
+            }
+        });
     }
 
     constructor(
@@ -30,7 +51,7 @@ export class Web3PrivateFactory {
         private readonly chainId: number
     ) {}
 
-    public async buildWeb3Private(): Promise<Web3Private> {
+    public async createWeb3Private(): Promise<Web3Private> {
         this.createWeb3();
         await this.parseChainId();
         this.parseAddress();

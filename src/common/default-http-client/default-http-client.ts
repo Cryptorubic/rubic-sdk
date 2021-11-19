@@ -1,8 +1,8 @@
+import { PCache } from '@common/decorators/cache.decorator';
 import { AxiosInstance } from 'axios';
-import { PCacheable } from 'ts-cacheable';
 
 export class DefaultHttpClient {
-    @PCacheable()
+    @PCache
     public static getInstance(): Promise<AxiosInstance> {
         return import('axios') as unknown as Promise<AxiosInstance>;
     }
