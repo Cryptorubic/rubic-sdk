@@ -26,7 +26,7 @@ import { RubicError } from '@common/errors/rubic-error';
 import { InsufficientFundsError } from '@common/errors/insufficient-funds-error';
 
 import { HttpClient } from '@common/models/http-client';
-import { DefaultHttpClient } from '@common/default-http-client/default-http-client';
+import { DefaultHttpClient } from '@common/http/default-http-client';
 
 type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 

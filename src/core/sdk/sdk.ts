@@ -1,4 +1,4 @@
-import { DefaultHttpClient } from '@common/default-http-client/default-http-client';
+import { DefaultHttpClient } from '@common/http/default-http-client';
 import { HttpClient } from '@common/models/http-client';
 import { Web3Private } from '@core/blockchain/web3-private/web3-private';
 import { Web3PrivateFactory } from '@core/blockchain/web3-private/web3-private-factory';
