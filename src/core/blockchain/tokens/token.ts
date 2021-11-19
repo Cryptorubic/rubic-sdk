@@ -1,13 +1,16 @@
 import { TokenLikeStruct } from '@core/blockchain/models/token-like-struct';
 import { BlockchainToken } from '@core/blockchain/tokens/blockchain-token';
+import { Injector } from '@core/sdk/injector';
 import BigNumber from 'bignumber.js';
 
 type TokenStruct = ConstructorParameters<typeof BlockchainToken>[number] & { price: BigNumber };
 
 export class Token extends BlockchainToken {
     public static async createToken(tokenLikeStruct: TokenLikeStruct): Promise<Token> {
+        const { coingeckoApi } = Injector;
+
         const blockchainTokenPromise = super.createToken(tokenLikeStruct);
-        const pricePromise = Promise.resolve(new BigNumber(1)); // TODO: call coingecko
+        const pricePromise = coingeckoApi.getTokenPrice(tokenLikeStruct);
         const results = await Promise.all([blockchainTokenPromise, pricePromise]);
 
         return new Token({ ...results[0], price: results[1] });
@@ -37,7 +40,7 @@ export class Token extends BlockchainToken {
     }
 
     private async updateTokenPrice(): Promise<void> {
-        // TODO: реализовать метод
-        this._price = new BigNumber(0);
+        const { coingeckoApi } = Injector;
+        this._price = await coingeckoApi.getTokenPrice({ ...this });
     }
 }
