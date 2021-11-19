@@ -13,6 +13,7 @@
   "dependencies": {
     "axios": "^0.22.0",
     "bignumber.js": "^9.0.1",
+    "p-timeout": "^5.0.2",
     "rxjs": "^7.3.0",
     "web3": "^1.5.2"
   },

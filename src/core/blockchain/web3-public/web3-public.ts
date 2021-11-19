@@ -1,4 +1,10 @@
+import { PCache } from '@common/decorators/cache.decorator';
+import { HealthcheckError } from '@common/errors/healthcheck.error';
 import { ERC20_TOKEN_ABI } from '@core/blockchain/constants/erc-20-abi';
+import {
+    HEALTHCHECK,
+    isBlockchainHealthcheckAvailable
+} from '@core/blockchain/constants/healthcheck';
 import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { MULTICALL_ABI } from '@core/blockchain/web3-public/constants/multicall-abi';
@@ -8,6 +14,7 @@ import { Call } from '@core/blockchain/web3-public/models/call';
 import { ContractMulticallResponse } from '@core/blockchain/web3-public/models/contract-multicall-response';
 import { MulticallResponse } from '@core/blockchain/web3-public/models/multicall-response';
 import { RpcResponse } from '@core/blockchain/web3-public/models/rpc-response';
+import pTimeout, { TimeoutError } from 'p-timeout';
 import Web3 from 'web3';
 import BigNumber from 'bignumber.js';
 import { Method } from 'web3-core-method';
@@ -20,6 +27,8 @@ import { InsufficientFundsError } from '@common/errors/insufficient-funds-error'
 
 import { HttpClient } from '@common/models/http-client';
 import { DefaultHttpClient } from '@common/default-http-client/default-http-client';
+
+type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
@@ -128,6 +137,44 @@ export class Web3Public {
     static isNativeAddress = (address: string): boolean => {
         return address === NATIVE_TOKEN_ADDRESS;
     };
+
+    /**
+     * HealthCheck current rpc node
+     * @param timeoutMs acceptable node response timeout
+     * @return null if healthcheck is not defined for current blockchain, else is node works status
+     */
+    public async healthCheck(timeoutMs: number = 4000): Promise<boolean> {
+        if (!isBlockchainHealthcheckAvailable(this.blockchainName)) {
+            return true;
+        }
+        const healthcheckData = HEALTHCHECK[this.blockchainName];
+
+        const contract = new this.web3.eth.Contract(
+            healthcheckData.contractAbi,
+            healthcheckData.contractAddress
+        );
+
+        try {
+            const result = await pTimeout(
+                contract.methods[healthcheckData.method]().call(),
+                timeoutMs
+            );
+
+            if (result !== healthcheckData.expected) {
+                throw new HealthcheckError();
+            }
+            return true;
+        } catch (e: unknown) {
+            if (e instanceof TimeoutError) {
+                console.debug(
+                    `${this.blockchainName} node healthcheck timeout (${timeoutMs}ms) has occurred.`
+                );
+            } else {
+                console.debug(`${this.blockchainName} node healthcheck fail: ${e}`);
+            }
+            return false;
+        }
+    }
 
     /**
      * @description set new provider to web3 instance
@@ -427,6 +474,26 @@ export class Web3Public {
         if (balance.lt(amountAbsolute)) {
             throw new InsufficientFundsError(amount.toFixed(0));
         }
+    }
+
+    /**
+     * Gets ERC-20 token info by address.
+     * @param tokenAddress Address of token.
+     * @param tokenFields Token's fields to get.
+     */
+    @PCache
+    public async callForTokenInfo(
+        tokenAddress: string,
+        tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
+    ): Promise<Partial<Record<SupportedTokenField, string>>> {
+        const tokenFieldsPromises = tokenFields.map(method =>
+            this.callContractMethod(tokenAddress, ERC20_TOKEN_ABI, method)
+        );
+        const tokenFieldsResults = await Promise.all(tokenFieldsPromises);
+        return tokenFieldsResults.reduce(
+            (acc, field, index) => ({ ...acc, [tokenFields[index]]: field }),
+            {} as Record<SupportedTokenField, string>
+        );
     }
 
     /**

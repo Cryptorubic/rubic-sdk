@@ -40,7 +40,7 @@ module.exports = {
                 '@typescript-eslint/no-inferrable-types': 'off',
                 'class-methods-use-this': 'off',
                 complexity: ['error', 20],
-                eqeqeq: ['error', 'always'],
+                eqeqeq: ['error', 'smart'],
                 'no-magic-numbers': 'off',
                 '@typescript-eslint/no-magic-numbers': [
                     'warn',

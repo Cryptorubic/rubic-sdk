@@ -1,4 +1,7 @@
+import { RubicError } from '@common/errors/rubic-error';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { Injector } from '@core/sdk/injector';
+import BigNumber from 'bignumber.js';
 
 interface TokenLikeStruct {
     address: string;
@@ -14,6 +17,22 @@ type BlockchainTokenStruct = {
 };
 
 export class BlockchainToken {
+    public static async createToken(tokenLikeStruct: TokenLikeStruct) {
+        const web3Public = Injector.web3PublicService.getWeb3Public(tokenLikeStruct.blockchain);
+        const tokenInfo = await web3Public.callForTokenInfo(tokenLikeStruct.address);
+
+        if (tokenInfo.decimals == null || tokenInfo.name == null || tokenInfo.symbol == null) {
+            throw new RubicError('Error while loading token');
+        }
+
+        return new BlockchainToken({
+            ...tokenLikeStruct,
+            name: tokenInfo.name,
+            symbol: tokenInfo.symbol,
+            decimals: new BigNumber(tokenInfo.decimals).toNumber()
+        });
+    }
+
     public readonly blockchain: BLOCKCHAIN_NAME;
 
     public readonly address: string;

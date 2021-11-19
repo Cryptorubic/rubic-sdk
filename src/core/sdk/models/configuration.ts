@@ -10,5 +10,7 @@ export interface Configuration {
 
 export interface RpcProvider {
     mainRpc: string;
-    spareRpc: string;
+    spareRpc?: string;
+    mainPrcTimeout?: number;
+    healthCheckTimeout?: number;
 }
