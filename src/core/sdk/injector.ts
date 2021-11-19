@@ -9,11 +9,11 @@ export class Injector {
         return Injector.injector.web3PublicService;
     }
 
-    public static get web3Private(): Web3PublicService {
+    public static get web3Private(): Web3Private {
         return Injector.injector.web3Private;
     }
 
-    public static get httpClient(): Web3PublicService {
+    public static get httpClient(): HttpClient {
         return Injector.injector.httpClient;
     }
 
