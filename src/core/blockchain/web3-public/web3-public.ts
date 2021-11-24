@@ -23,7 +23,7 @@ import { AbiItem } from 'web3-utils';
 import { BlockTransactionString } from 'web3-eth';
 
 import { RubicError } from '@common/errors/rubic-error';
-import { InsufficientFundsError } from '@common/errors/insufficient-funds-error';
+import { InsufficientFundsError } from '@common/errors/swap/insufficient-funds-error';
 
 import { HttpClient } from '@common/models/http-client';
 import { DefaultHttpClient } from '@common/http/default-http-client';

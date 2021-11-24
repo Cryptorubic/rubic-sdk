@@ -30,6 +30,13 @@ export class Web3Private {
     }
 
     /**
+     * @description current wallet blockchainName
+     */
+    public get blockchainName(): string {
+        return this.walletConnectionConfiguration.blockchainName;
+    }
+
+    /**
      * @description converts number, string or BigNumber value to integer string
      * @param amount value to convert
      */
