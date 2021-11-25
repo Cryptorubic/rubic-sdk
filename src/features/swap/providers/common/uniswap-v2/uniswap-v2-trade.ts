@@ -1,14 +1,36 @@
 import { cloneObject } from '@common/utils/object';
+import { Token } from '@core/blockchain/tokens/token';
 import { TokenAmount } from '@core/blockchain/tokens/token-amount';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { Injector } from '@core/sdk/injector';
 import { GasInfo } from '@features/swap/models/gas-info';
 import { InstantTrade } from '@features/swap/models/instant-trade';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
-import { InternalUniswapV2Trade } from '@features/swap/providers/common/uniswap-v2/models/uniswap-v2-trade';
+import {
+    SWAP_METHOD,
+    SwapMethod
+} from '@features/swap/providers/common/uniswap-v2/constants/SWAP_METHOD';
 import BigNumber from 'bignumber.js';
+import { AbiItem } from 'web3-utils';
 
 export class UniswapV2Trade extends InstantTrade {
+    public gasInfo: {
+        gasLimit: string | null;
+        gasPrice: string | null;
+        gasFeeInUsd: BigNumber | null;
+        gasFeeInEth: BigNumber | null;
+    };
+
+    public readonly exact: 'input' | 'output';
+
+    public readonly path: Token[];
+
+    public readonly deadlineMinutes: number;
+
+    protected contractAddress: string;
+
+    protected contractAbi: AbiItem[];
+
     public get to(): TokenAmount {
         return cloneObject(this._to);
     }
@@ -17,14 +39,9 @@ export class UniswapV2Trade extends InstantTrade {
         return cloneObject(this._from);
     }
 
-    public gasInfo: {
-        gasLimit: string | null;
-        gasPrice: string | null;
-        gasFeeInUsd: BigNumber | null;
-        gasFeeInEth: BigNumber | null;
-    };
-
-    public exact: 'input' | 'output';
+    private get deadlineMinutesTimestamp(): number {
+        return Math.floor(Date.now() / 1000 + 60 * this.deadlineMinutes);
+    }
 
     constructor(
         private readonly _from: TokenAmount,
@@ -36,28 +53,15 @@ export class UniswapV2Trade extends InstantTrade {
 
     public async swap(options: SwapTransactionOptions = {}) {
         await this.checkSettings();
-        const web3Public = Injector.web3PublicService.getWeb3Public(this.from.token.blockchain);
+        const web3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
 
         let amountIn = this.from.weiAmount;
         let amountOut = this.toTokenAmountMin.weiAmount;
 
         if (this.exact === 'output') {
-            amountIn = Web3Public.toWei(
-                trade.from.amount.multipliedBy(new BigNumber(1).minus(trade.slippageTolerance)),
-                trade.from.token.decimals
-            );
-
-            amountOut = Web3Public.toWei(trade.to.amount, trade.to.token.decimals);
+            amountIn = this.from.weiAmountPlusSlippage(this.slippageTolerance);
+            amountOut = this.to.weiAmount;
         }
-
-        const uniswapV2Trade: InternalUniswapV2Trade = {
-            amountIn,
-            amountOut,
-            path: trade.path,
-            to: this.walletAddress,
-            exact: trade.exact,
-            deadline: Math.floor(Date.now() / 1000) + 60 * trade.deadline
-        };
 
         let defaultGasLimit = this.defaultEstimateGas.tokensToTokens[trade.path.length - 2];
         let createTradeMethod = this.createTokensToTokensTrade;
@@ -74,4 +78,70 @@ export class UniswapV2Trade extends InstantTrade {
 
         return createTradeMethod(uniswapV2Trade, options as SwapTransactionOptionsWithGasLimit);
     }
+
+    private getAmountInAndAmountOut(): { amountIn: string; amountOut: string } {
+        let amountIn = this.from.stringWeiAmount;
+        let amountOut = this.toTokenAmountMin.stringWeiAmount;
+
+        if (this.exact === 'output') {
+            amountIn = this.from.weiAmountPlusSlippage(this.slippageTolerance).toFixed(0);
+            amountOut = this.to.stringWeiAmount;
+        }
+
+        return { amountIn, amountOut };
+    }
+
+    private createTokensToTokensTrade = (options: ItOptions) => {
+        const { amountIn, amountOut } = this.getAmountInAndAmountOut();
+        const { web3Private } = Injector;
+
+        return web3Private.tryExecuteContractMethod(
+            this.contractAddress,
+            this.contractAbi,
+            SWAP_METHOD[this.exact].TOKENS_TO_TOKENS,
+            [
+                amountIn,
+                amountOut,
+                this.path.map(t => t.address),
+                this.to.address,
+                this.deadlineMinutesTimestamp
+            ],
+            {
+                onTransactionHash: options.onConfirm,
+                gas: options.gasLimit,
+                gasPrice: options.gasPrice
+            }
+        );
+    };
+
+    private createTokensToEthTrade = (options: ItOptions) => {
+        this.createAnyToAnyTrade(options, SWAP_METHOD[this.exact].TOKENS_TO_ETH)
+    };
+
+    private createAnyToAnyTrade = (
+        options: ItOptions & { value?: number },
+        swapMethod: SwapMethod
+    ) => {
+        const { amountIn, amountOut } = this.getAmountInAndAmountOut();
+        const { web3Private } = Injector;
+
+        return web3Private.tryExecuteContractMethod(
+            this.contractAddress,
+            this.contractAbi,
+            swapMethod,
+            [
+                amountIn,
+                amountOut,
+                this.path.map(t => t.address),
+                this.to.address,
+                this.deadlineMinutesTimestamp
+            ],
+            {
+                onTransactionHash: options.onConfirm,
+                gas: options.gasLimit,
+                gasPrice: options.gasPrice,
+                ...(options.value && { value: options.value })
+            }
+        );
+    };
 }

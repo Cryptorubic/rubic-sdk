@@ -46,4 +46,12 @@ export class TokenAmount extends Token {
         super(tokenStruct);
         this._weiAmount = new BigNumber(tokenStruct.weiAmount);
     }
+
+    public weiAmountMinusSlippage(slippage: number): BigNumber {
+        return new BigNumber(this._weiAmount).multipliedBy(new BigNumber(1).minus(slippage));
+    }
+
+    public weiAmountPlusSlippage(slippage: number): BigNumber {
+        return new BigNumber(this._weiAmount).multipliedBy(new BigNumber(1).plus(slippage));
+    }
 }

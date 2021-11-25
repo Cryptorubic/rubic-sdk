@@ -19,4 +19,8 @@ export enum EXACT_OUTPUT_SWAP_METHOD {
 export const SWAP_METHOD = {
     input: EXACT_INPUT_SWAP_METHOD,
     output: EXACT_OUTPUT_SWAP_METHOD
-}
+};
+
+export type SwapMethod =
+    | keyof typeof EXACT_OUTPUT_SWAP_METHOD
+    | keyof typeof EXACT_INPUT_SWAP_METHOD;
