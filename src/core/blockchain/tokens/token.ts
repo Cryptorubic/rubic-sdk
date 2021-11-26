@@ -2,6 +2,7 @@ import { RubicError } from '@common/errors/rubic-error';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
 import { Injector } from '@core/sdk/injector';
+import { compareAddresses } from '@common/utils/blockchain';
 
 type TokenStruct = {
     blockchain: BLOCKCHAIN_NAME;
@@ -48,8 +49,7 @@ export class Token {
 
     public isEqualTo(token: TokenBaseStruct): boolean {
         return (
-            token.blockchain === this.blockchain &&
-            token.address.toLowerCase() === this.address.toLowerCase()
+            token.blockchain === this.blockchain && compareAddresses(token.address, this.address)
         );
     }
 }
