@@ -1,46 +1,55 @@
-import { TokenLikeStruct } from '@core/blockchain/models/token-like-struct';
-import { BlockchainToken } from '@core/blockchain/tokens/blockchain-token';
+import { RubicError } from '@common/errors/rubic-error';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
 import { Injector } from '@core/sdk/injector';
-import BigNumber from 'bignumber.js';
+import { compareAddresses } from '@common/utils/blockchain';
 
-type TokenStruct = ConstructorParameters<typeof BlockchainToken>[number] & { price: BigNumber };
+type TokenStruct = {
+    blockchain: BLOCKCHAIN_NAME;
+    address: string;
+    name: string;
+    symbol: string;
+    decimals: number;
+};
 
-export class Token extends BlockchainToken {
-    public static async createToken(tokenLikeStruct: TokenLikeStruct): Promise<Token> {
-        const { coingeckoApi } = Injector;
+export class Token {
+    public static async createToken(tokenBaseStruct: TokenBaseStruct): Promise<Token> {
+        const web3Public = Injector.web3PublicService.getWeb3Public(tokenBaseStruct.blockchain);
+        const tokenInfo = await web3Public.callForTokenInfo(tokenBaseStruct.address);
 
-        const blockchainTokenPromise = super.createToken(tokenLikeStruct);
-        const pricePromise = coingeckoApi.getTokenPrice(tokenLikeStruct);
-        const results = await Promise.all([blockchainTokenPromise, pricePromise]);
+        if (tokenInfo.decimals == null || tokenInfo.name == null || tokenInfo.symbol == null) {
+            throw new RubicError('Error while loading token');
+        }
 
-        return new Token({ ...results[0], price: results[1] });
+        return new Token({
+            ...tokenBaseStruct,
+            name: tokenInfo.name,
+            symbol: tokenInfo.symbol,
+            decimals: parseInt(tokenInfo.decimals)
+        });
     }
 
-    private _price: BigNumber;
+    public readonly blockchain: BLOCKCHAIN_NAME;
 
-    public get price(): BigNumber {
-        return this._price;
-    }
+    public readonly address: string;
 
-    public get asStruct(): TokenStruct {
-        return {
-            ...this,
-            price: this.price
-        };
-    }
+    public readonly name: string;
+
+    public readonly symbol: string;
+
+    public readonly decimals: number;
 
     constructor(tokenStruct: TokenStruct) {
-        super(tokenStruct);
-        this._price = tokenStruct.price;
+        this.blockchain = tokenStruct.blockchain;
+        this.address = tokenStruct.address;
+        this.name = tokenStruct.name;
+        this.symbol = tokenStruct.symbol;
+        this.decimals = tokenStruct.decimals;
     }
 
-    public async getAndUpdateTokenPrice(): Promise<BigNumber> {
-        await this.updateTokenPrice();
-        return this.price;
-    }
-
-    private async updateTokenPrice(): Promise<void> {
-        const { coingeckoApi } = Injector;
-        this._price = await coingeckoApi.getTokenPrice({ ...this });
+    public isEqualTo(token: TokenBaseStruct): boolean {
+        return (
+            token.blockchain === this.blockchain && compareAddresses(token.address, this.address)
+        );
     }
 }

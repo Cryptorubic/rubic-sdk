@@ -1,6 +1,6 @@
 import { cloneObject } from '@common/utils/object';
-import { Token } from '@core/blockchain/tokens/token';
-import { TokenAmount } from '@core/blockchain/tokens/token-amount';
+import { PriceToken } from '@core/blockchain/tokens/price-token';
+import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { Injector } from '@core/sdk/injector';
 import { GasInfo } from '@features/swap/models/gas-info';
@@ -23,7 +23,7 @@ export class UniswapV2Trade extends InstantTrade {
 
     public readonly exact: 'input' | 'output';
 
-    public readonly path: Token[];
+    public readonly path: PriceToken[];
 
     public readonly deadlineMinutes: number;
 
@@ -31,11 +31,11 @@ export class UniswapV2Trade extends InstantTrade {
 
     protected contractAbi: AbiItem[];
 
-    public get to(): TokenAmount {
+    public get to(): PriceTokenAmount {
         return cloneObject(this._to);
     }
 
-    public get from(): TokenAmount {
+    public get from(): PriceTokenAmount {
         return cloneObject(this._from);
     }
 
@@ -44,9 +44,9 @@ export class UniswapV2Trade extends InstantTrade {
     }
 
     constructor(
-        private readonly _from: TokenAmount,
+        private readonly _from: PriceTokenAmount,
         public readonly _gasInfo: GasInfo,
-        public readonly _to: TokenAmount
+        public readonly _to: PriceTokenAmount
     ) {
         super();
     }
@@ -115,7 +115,7 @@ export class UniswapV2Trade extends InstantTrade {
     };
 
     private createTokensToEthTrade = (options: ItOptions) => {
-        this.createAnyToAnyTrade(options, SWAP_METHOD[this.exact].TOKENS_TO_ETH)
+        this.createAnyToAnyTrade(options, SWAP_METHOD[this.exact].TOKENS_TO_ETH);
     };
 
     private createAnyToAnyTrade = (

@@ -1,14 +1,14 @@
 import { InsufficientFundsError } from '@common/errors/swap/insufficient-funds-error';
 import { WalletNotConnectedError } from '@common/errors/swap/wallet-not-connected.error';
 import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
-import { TokenAmount } from '@core/blockchain/tokens/token-amount';
+import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Injector } from '@core/sdk/injector';
 import BigNumber from 'bignumber.js';
 
 export abstract class InstantTrade {
-    public abstract readonly from: TokenAmount;
+    public abstract readonly from: PriceTokenAmount;
 
-    public abstract readonly to: TokenAmount;
+    public abstract readonly to: PriceTokenAmount;
 
     public abstract readonly gasInfo: {
         gasLimit: string | null;
@@ -19,11 +19,11 @@ export abstract class InstantTrade {
 
     protected abstract readonly slippageTolerance: number;
 
-    public get toTokenAmountMin(): TokenAmount {
+    public get toTokenAmountMin(): PriceTokenAmount {
         const weiAmountOutMin = this.to.weiAmount.multipliedBy(
             new BigNumber(1).minus(this.slippageTolerance)
         );
-        return new TokenAmount({ ...this.to.asStruct, weiAmount: weiAmountOutMin });
+        return new PriceTokenAmount({ ...this.to.asStruct, weiAmount: weiAmountOutMin });
     }
 
     protected async checkSettings(): Promise<void> {
