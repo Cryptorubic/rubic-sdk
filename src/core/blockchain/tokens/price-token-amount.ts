@@ -11,7 +11,7 @@ type TokenAmountBaseStruct = TokenBaseStruct & { weiAmount: BigNumber };
 export class PriceTokenAmount extends PriceToken {
     public static async createToken(
         tokenAmountBaseStruct: TokenAmountBaseStruct
-    ): Promise<PriceToken> {
+    ): Promise<PriceTokenAmount> {
         const token = await super.createToken(tokenAmountBaseStruct);
         return new PriceTokenAmount({
             ...token.asStruct,
