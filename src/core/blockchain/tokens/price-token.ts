@@ -16,6 +16,14 @@ export class PriceToken extends Token {
         return new PriceToken({ ...results[0], price: results[1] });
     }
 
+    public static async createTokenFromToken(token: Token): Promise<PriceToken> {
+        const { coingeckoApi } = Injector;
+
+        const price = await coingeckoApi.getTokenPrice(token);
+
+        return new PriceToken({ ...token, price });
+    }
+
     private _price: BigNumber;
 
     public get price(): BigNumber {
