@@ -4,7 +4,7 @@ import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
 import { Injector } from '@core/sdk/injector';
 import { compareAddresses } from '@common/utils/blockchain';
 
-type TokenStruct = {
+export type TokenStruct = {
     blockchain: BLOCKCHAIN_NAME;
     address: string;
     name: string;

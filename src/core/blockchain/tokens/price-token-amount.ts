@@ -1,6 +1,7 @@
 import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import BigNumber from 'bignumber.js';
+import { TokenStruct } from '@core/blockchain/tokens/token';
 
 type PriceTokenAmountStruct = ConstructorParameters<typeof PriceToken>[number] & {
     weiAmount: BigNumber;
@@ -16,6 +17,16 @@ export class PriceTokenAmount extends PriceToken {
         return new PriceTokenAmount({
             ...token.asStruct,
             weiAmount: tokenAmountBaseStruct.weiAmount
+        });
+    }
+
+    public static async createTokenFromToken(
+        tokenAmount: TokenStruct & { weiAmount: BigNumber }
+    ): Promise<PriceTokenAmount> {
+        const priceToken = await super.createTokenFromToken(tokenAmount);
+        return new PriceTokenAmount({
+            ...priceToken.asStruct,
+            weiAmount: tokenAmount.weiAmount
         });
     }
 
