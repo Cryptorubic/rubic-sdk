@@ -1,6 +1,7 @@
+import { DefaultEstimatedGas } from '@features/swap/providers/common/uniswap-v2/models/default-estimated-gas';
 import BigNumber from 'bignumber.js';
 
-export const defaultEstimatedGas = {
+export const defaultEstimatedGas: DefaultEstimatedGas = {
     tokensToTokens: [
         new BigNumber(120_000),
         new BigNumber(220_000),

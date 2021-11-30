@@ -3,19 +3,16 @@ import { WalletNotConnectedError } from '@common/errors/swap/wallet-not-connecte
 import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Injector } from '@core/sdk/injector';
+import { GasInfo } from '@features/swap/models/gas-info';
 import BigNumber from 'bignumber.js';
+import { DeepReadonly } from 'src/common/utils/types/deep-readonly';
 
 export abstract class InstantTrade {
-    public abstract readonly from: PriceTokenAmount;
+    public abstract from: DeepReadonly<PriceTokenAmount>;
 
-    public abstract readonly to: PriceTokenAmount;
+    public abstract to: DeepReadonly<PriceTokenAmount>;
 
-    public abstract readonly gasInfo: {
-        gasLimit: string | null;
-        gasPrice: string | null;
-        gasFeeInUsd: BigNumber | null;
-        gasFeeInEth: BigNumber | null;
-    };
+    public abstract readonly gasInfo: DeepReadonly<GasInfo>;
 
     protected abstract readonly slippageTolerance: number;
 

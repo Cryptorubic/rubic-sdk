@@ -1,4 +1,4 @@
-import { cloneObject } from '@common/utils/object';
+import { DeepReadonly } from '@common/utils/types/deep-readonly';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
@@ -6,48 +6,43 @@ import { Injector } from '@core/sdk/injector';
 import { GasInfo } from '@features/swap/models/gas-info';
 import { InstantTrade } from '@features/swap/models/instant-trade';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
+import { defaultEstimatedGas } from '@features/swap/providers/common/uniswap-v2/constants/default-estimated-gas';
 import {
     SWAP_METHOD,
     SwapMethod
 } from '@features/swap/providers/common/uniswap-v2/constants/SWAP_METHOD';
-import BigNumber from 'bignumber.js';
+import { defaultUniswapV2Abi } from '@features/swap/providers/common/uniswap-v2/constants/uniswap-v2-abi';
+import { DefaultEstimatedGas } from '@features/swap/providers/common/uniswap-v2/models/default-estimated-gas';
 import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
 
-export class UniswapV2Trade extends InstantTrade {
-    public gasInfo: {
-        gasLimit: string | null;
-        gasPrice: string | null;
-        gasFeeInUsd: BigNumber | null;
-        gasFeeInEth: BigNumber | null;
-    };
+export abstract class UniswapV2Trade extends InstantTrade {
+    public gasInfo: DeepReadonly<GasInfo>;
 
     public readonly exact: 'input' | 'output';
 
-    public readonly path: PriceToken[];
+    public path: DeepReadonly<PriceToken[]>;
 
     public readonly deadlineMinutes: number;
 
-    protected contractAddress: string;
+    protected abstract contractAddress: string;
 
-    protected contractAbi: AbiItem[];
+    protected contractAbi: AbiItem[] = defaultUniswapV2Abi;
 
-    public get to(): PriceTokenAmount {
-        return cloneObject(this._to);
-    }
+    protected defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
 
-    public get from(): PriceTokenAmount {
-        return cloneObject(this._from);
+    private get defaultEstimatedGas(): number {
+
     }
 
     private get deadlineMinutesTimestamp(): number {
         return Math.floor(Date.now() / 1000 + 60 * this.deadlineMinutes);
     }
 
-    constructor(
-        private readonly _from: PriceTokenAmount,
-        public readonly _gasInfo: GasInfo,
-        public readonly _to: PriceTokenAmount
+    protected constructor(
+        public from: DeepReadonly<PriceTokenAmount>,
+        public to: DeepReadonly<PriceTokenAmount>,
+        public gasInfo: DeepReadonly<GasInfo>
     ) {
         super();
     }
