@@ -1,15 +1,18 @@
+import { tryExecuteAsync } from '@common/utils/functions';
 import { DeepReadonly } from '@common/utils/types/deep-readonly';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { Web3Public } from '@core/blockchain/web3-public/web3-public';
+import { Web3Private } from '@core/blockchain/web3-private/web3-private';
 import { Injector } from '@core/sdk/injector';
 import { GasInfo } from '@features/swap/models/gas-info';
 import { InstantTrade } from '@features/swap/models/instant-trade';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import { defaultEstimatedGas } from '@features/swap/providers/common/uniswap-v2/constants/default-estimated-gas';
 import {
-    SWAP_METHOD,
-    SwapMethod
+    REGULAR_SWAP_METHOD,
+    RegularSwapMethod,
+    SupportingFeeMethodsMapping,
+    SupportingFeeSwapMethod
 } from '@features/swap/providers/common/uniswap-v2/constants/SWAP_METHOD';
 import { defaultUniswapV2Abi } from '@features/swap/providers/common/uniswap-v2/constants/uniswap-v2-abi';
 import { DefaultEstimatedGas } from '@features/swap/providers/common/uniswap-v2/models/default-estimated-gas';
@@ -17,13 +20,11 @@ import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
 
 export abstract class UniswapV2Trade extends InstantTrade {
-    public gasInfo: DeepReadonly<GasInfo>;
+    public abstract readonly exact: 'input' | 'output';
 
-    public readonly exact: 'input' | 'output';
+    public abstract path: DeepReadonly<PriceToken[]>;
 
-    public path: DeepReadonly<PriceToken[]>;
-
-    public readonly deadlineMinutes: number;
+    public abstract readonly deadlineMinutes: number;
 
     protected abstract contractAddress: string;
 
@@ -31,48 +32,58 @@ export abstract class UniswapV2Trade extends InstantTrade {
 
     protected defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
 
-    private get defaultEstimatedGas(): number {
-
-    }
-
     private get deadlineMinutesTimestamp(): number {
         return Math.floor(Date.now() / 1000 + 60 * this.deadlineMinutes);
     }
 
     protected constructor(
-        public from: DeepReadonly<PriceTokenAmount>,
-        public to: DeepReadonly<PriceTokenAmount>,
-        public gasInfo: DeepReadonly<GasInfo>
+        public readonly from: DeepReadonly<PriceTokenAmount>,
+        public readonly to: DeepReadonly<PriceTokenAmount>,
+        public readonly gasInfo: DeepReadonly<GasInfo>
     ) {
         super();
     }
 
     public async swap(options: SwapTransactionOptions = {}) {
         await this.checkSettings();
-        const web3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
 
-        let amountIn = this.from.weiAmount;
-        let amountOut = this.toTokenAmountMin.weiAmount;
+        if (this.from.isNative) {
+            return this.createEthToTokensTrade(options);
+        }
+        if (this.to.isNative) {
+            return this.createTokensToEthTrade(options);
+        }
+        return this.createTokensToTokensTrade(options);
+    }
 
-        if (this.exact === 'output') {
-            amountIn = this.from.weiAmountPlusSlippage(this.slippageTolerance);
-            amountOut = this.to.weiAmount;
+    private getGasLimit(options: { gasLimit?: string | null }): string {
+        if (options.gasLimit) {
+            return options.gasLimit;
+        }
+        if (this.gasInfo.gasLimit) {
+            return this.gasInfo.gasLimit;
         }
 
-        let defaultGasLimit = this.defaultEstimateGas.tokensToTokens[trade.path.length - 2];
-        let createTradeMethod = this.createTokensToTokensTrade;
-        if (Web3Public.isNativeAddress(trade.from.token.address)) {
-            createTradeMethod = this.createEthToTokensTrade;
-            defaultGasLimit = this.defaultEstimateGas.ethToTokens[trade.path.length - 2];
-        }
-        if (Web3Public.isNativeAddress(trade.to.token.address)) {
-            createTradeMethod = this.createTokensToEthTrade;
-            defaultGasLimit = this.defaultEstimateGas.tokensToEth[trade.path.length - 2];
-        }
-        options.gasLimit ||= trade.gasInfo.gasLimit || defaultGasLimit.toFixed(0);
-        options.gasPrice ||= trade.gasInfo.gasPrice;
+        const transitTokensNumber = this.path.length - 2;
+        let methodName: keyof DefaultEstimatedGas = 'tokensToTokens';
 
-        return createTradeMethod(uniswapV2Trade, options as SwapTransactionOptionsWithGasLimit);
+        if (this.from.isNative) {
+            methodName = 'ethToTokens';
+        }
+        if (this.to.isNative) {
+            methodName = 'tokensToEth';
+        }
+        return this.defaultEstimatedGasInfo[methodName][transitTokensNumber].toFixed(0);
+    }
+
+    private getGasPrice(options: { gasPrice?: string | null }): string | null {
+        if (options.gasPrice) {
+            return options.gasPrice;
+        }
+        if (this.gasInfo.gasPrice) {
+            return this.gasInfo.gasPrice;
+        }
+        return null;
     }
 
     private getAmountInAndAmountOut(): { amountIn: string; amountOut: string } {
@@ -87,43 +98,53 @@ export abstract class UniswapV2Trade extends InstantTrade {
         return { amountIn, amountOut };
     }
 
-    private createTokensToTokensTrade = (options: ItOptions) => {
-        const { amountIn, amountOut } = this.getAmountInAndAmountOut();
-        const { web3Private } = Injector;
+    private createTokensToTokensTrade = (options: SwapTransactionOptions) =>
+        this.createAnyToAnyTrade(options, REGULAR_SWAP_METHOD[this.exact].TOKENS_TO_TOKENS);
 
-        return web3Private.tryExecuteContractMethod(
-            this.contractAddress,
-            this.contractAbi,
-            SWAP_METHOD[this.exact].TOKENS_TO_TOKENS,
-            [
-                amountIn,
-                amountOut,
-                this.path.map(t => t.address),
-                this.to.address,
-                this.deadlineMinutesTimestamp
-            ],
-            {
-                onTransactionHash: options.onConfirm,
-                gas: options.gasLimit,
-                gasPrice: options.gasPrice
-            }
+    private createTokensToEthTrade = (options: SwapTransactionOptions) =>
+        this.createAnyToAnyTrade(options, REGULAR_SWAP_METHOD[this.exact].TOKENS_TO_ETH);
+
+    private createEthToTokensTrade = (options: SwapTransactionOptions) => {
+        const { amountIn } = this.getAmountInAndAmountOut();
+        return this.createAnyToAnyTrade(
+            { ...options, value: amountIn },
+            REGULAR_SWAP_METHOD[this.exact].TOKENS_TO_ETH
         );
     };
 
-    private createTokensToEthTrade = (options: ItOptions) =>
-        this.createAnyToAnyTrade(options, SWAP_METHOD[this.exact].TOKENS_TO_ETH);
-
-    private createAnyToAnyTrade(
-        options: ItOptions & { value?: number },
-        swapMethod: SwapMethod
+    private async createAnyToAnyTrade(
+        options: SwapTransactionOptions & { value?: string },
+        swapMethod: RegularSwapMethod
     ): Promise<TransactionReceipt> {
-        const { amountIn, amountOut } = this.getAmountInAndAmountOut();
         const { web3Private } = Injector;
 
+        const regularMethodResult = await tryExecuteAsync(
+            web3Private.tryExecuteContractMethod,
+            this.getSwapParameters(swapMethod, options)
+        );
+
+        if (regularMethodResult.success) {
+            return regularMethodResult.value;
+        }
+
         return web3Private.tryExecuteContractMethod(
+            ...this.getSwapParameters(SupportingFeeMethodsMapping[swapMethod], options)
+        );
+    }
+
+    private getSwapParameters(
+        method: RegularSwapMethod | SupportingFeeSwapMethod,
+        options: SwapTransactionOptions & { value?: string }
+    ): Parameters<InstanceType<typeof Web3Private>['tryExecuteContractMethod']> {
+        const { amountIn, amountOut } = this.getAmountInAndAmountOut();
+
+        const gasPrice = this.getGasPrice(options);
+        const gas = this.getGasLimit(options);
+
+        return [
             this.contractAddress,
             this.contractAbi,
-            swapMethod,
+            method,
             [
                 amountIn,
                 amountOut,
@@ -133,10 +154,10 @@ export abstract class UniswapV2Trade extends InstantTrade {
             ],
             {
                 onTransactionHash: options.onConfirm,
-                gas: options.gasLimit,
-                gasPrice: options.gasPrice,
+                gas,
+                ...(gasPrice && { gasPrice }),
                 ...(options.value && { value: options.value })
             }
-        );
+        ];
     }
 }

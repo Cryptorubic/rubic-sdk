@@ -1,6 +1,7 @@
 import { RubicError } from '@common/errors/rubic-error';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
+import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@core/sdk/injector';
 import { compareAddresses } from '@common/utils/blockchain';
 
@@ -38,6 +39,10 @@ export class Token {
     public readonly symbol: string;
 
     public readonly decimals: number;
+
+    public get isNative(): boolean {
+        return Web3Pure.isNativeAddress(this.address);
+    }
 
     constructor(tokenStruct: TokenStruct) {
         this.blockchain = tokenStruct.blockchain;
