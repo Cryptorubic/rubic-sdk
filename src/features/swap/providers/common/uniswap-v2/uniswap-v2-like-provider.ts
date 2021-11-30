@@ -18,13 +18,9 @@ import { UniswapRoute } from 'src/features/swap/providers/common/uniswap-v2/mode
 import { CreateTradeMethod } from 'src/features/swap/providers/common/uniswap-v2/models/create-trade-method';
 import { InternalUniswapV2Trade } from 'src/features/swap/providers/common/uniswap-v2/models/uniswap-v2-trade';
 import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity-error';
-import {
-    SwapTransactionOptions,
-    SwapTransactionOptionsWithGasLimit
-} from 'src/features/swap/models/swap-transaction-options';
-import { cloneObject } from '@common/utils/object';
+import { SwapTransactionOptionsWithGasLimit } from 'src/features/swap/models/swap-transaction-options';
 
-export abstract class UniswapV2 {
+export abstract class UniswapV2LikeProvider {
     protected abstract wethAddress: string;
 
     protected abstract contractAddress: string;
