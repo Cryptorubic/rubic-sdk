@@ -1,7 +1,7 @@
+import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import BigNumber from 'bignumber.js';
 import { from, Observable, of } from 'rxjs';
 import UNISWAP_V2_ABI from 'src/features/swap/providers/common/uniswap-v2/constants/uniswap-v2-abi';
-import { Web3Public } from 'src/core/blockchain/web3-public/web3-public';
 import { Web3Private } from 'src/core/blockchain/web3-private/web3-private';
 import { TransactionOptions } from 'src/core/blockchain/models/transaction-options';
 import { defaultEstimatedGas } from 'src/features/swap/providers/common/uniswap-v2/constants/default-estimated-gas';

@@ -21,6 +21,4 @@ export const SWAP_METHOD = {
     output: EXACT_OUTPUT_SWAP_METHOD
 };
 
-export type SwapMethod =
-    | keyof typeof EXACT_OUTPUT_SWAP_METHOD
-    | keyof typeof EXACT_INPUT_SWAP_METHOD;
+export type SwapMethod = EXACT_OUTPUT_SWAP_METHOD | EXACT_INPUT_SWAP_METHOD;

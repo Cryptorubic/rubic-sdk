@@ -34,6 +34,7 @@
       "*": [
         "node_modules/*"
       ],
+      "src/*": ["./src/*"],
       "@core/*": ["./src/core/*"],
       "@common/*": ["./src/common/*"],
       "@features/*": ["./src/features/*"]

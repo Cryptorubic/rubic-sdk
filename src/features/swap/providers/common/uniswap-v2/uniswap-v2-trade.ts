@@ -11,6 +11,7 @@ import {
     SwapMethod
 } from '@features/swap/providers/common/uniswap-v2/constants/SWAP_METHOD';
 import BigNumber from 'bignumber.js';
+import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
 
 export class UniswapV2Trade extends InstantTrade {
@@ -114,14 +115,13 @@ export class UniswapV2Trade extends InstantTrade {
         );
     };
 
-    private createTokensToEthTrade = (options: ItOptions) => {
-        this.createAnyToAnyTrade(options, SWAP_METHOD[this.exact].TOKENS_TO_ETH)
-    };
+    private createTokensToEthTrade = (options: ItOptions) =>
+        this.createAnyToAnyTrade(options, SWAP_METHOD[this.exact].TOKENS_TO_ETH);
 
-    private createAnyToAnyTrade = (
+    private createAnyToAnyTrade(
         options: ItOptions & { value?: number },
         swapMethod: SwapMethod
-    ) => {
+    ): Promise<TransactionReceipt> {
         const { amountIn, amountOut } = this.getAmountInAndAmountOut();
         const { web3Private } = Injector;
 
@@ -143,5 +143,5 @@ export class UniswapV2Trade extends InstantTrade {
                 ...(options.value && { value: options.value })
             }
         );
-    };
+    }
 }
