@@ -7,7 +7,7 @@ import { PangolinAvalancheProvider } from '@features/swap/providers/blockchains/
 import { JoeAvalancheProvider } from '@features/swap/providers/blockchains/avalanche/joe/joe-avalanche-provider';
 import { SolarbeamMoonriverProvider } from '@features/swap/providers/blockchains/moonriver/solarbeam/solarbeam-moonriver-provider';
 import { SpookySwapFantomProvider } from '@features/swap/providers/blockchains/fantom/spooky-swap/spooky-swap-fantom-provider';
-import { SupportedCrossChainBlockchain } from '@features/cross-chain/constants/SupportedCrossChainBlockchains';
+import { SupportedCrossChainBlockchain } from '@features/cross-chain/constants/SupportedCrossChainBlockchain';
 
 export const crossChainContracts: Record<SupportedCrossChainBlockchain, CrossChainContract[]> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: [

@@ -1,6 +1,6 @@
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 
-export const supportedCrossChainBlockchains = [
+export const supportedCrossChainBlockchain = [
     BLOCKCHAIN_NAME.ETHEREUM,
     BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
     BLOCKCHAIN_NAME.POLYGON,
@@ -9,4 +9,4 @@ export const supportedCrossChainBlockchains = [
     BLOCKCHAIN_NAME.FANTOM
 ] as const;
 
-export type SupportedCrossChainBlockchain = typeof supportedCrossChainBlockchains[number];
+export type SupportedCrossChainBlockchain = typeof supportedCrossChainBlockchain[number];

@@ -1,4 +1,4 @@
-import { SupportedCrossChainBlockchain } from '@features/cross-chain/constants/SupportedCrossChainBlockchains';
+import { SupportedCrossChainBlockchain } from '@features/cross-chain/constants/SupportedCrossChainBlockchain';
 import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/CrossChainContract';
 import BigNumber from 'bignumber.js';
 

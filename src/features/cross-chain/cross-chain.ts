@@ -1,8 +1,8 @@
 import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/CrossChainContract';
 import {
     SupportedCrossChainBlockchain,
-    supportedCrossChainBlockchains
-} from '@features/cross-chain/constants/SupportedCrossChainBlockchains';
+    supportedCrossChainBlockchain
+} from '@features/cross-chain/constants/SupportedCrossChainBlockchain';
 import { crossChainContracts } from '@features/cross-chain/constants/crossChainContracts';
 import { Token } from '@core/blockchain/tokens/token';
 import BigNumber from 'bignumber.js';
@@ -27,7 +27,9 @@ interface ItCalculatedTrade extends CalculatedTrade {
     instantTrade: Uniswapv2InstantTrade;
 }
 
-interface DirectCalculatedTrade extends CalculatedTrade {}
+interface DirectCalculatedTrade extends CalculatedTrade {
+    token: PriceTokenAmount;
+}
 
 interface CalculatedContractTrade {
     contract: CrossChainContract;
@@ -38,7 +40,7 @@ export class CrossChain {
     public static isSupportedBlockchain(
         blockchain: BLOCKCHAIN_NAME
     ): blockchain is SupportedCrossChainBlockchain {
-        return supportedCrossChainBlockchains.some(
+        return supportedCrossChainBlockchain.some(
             supportedBlockchain => supportedBlockchain === blockchain
         );
     }
@@ -106,7 +108,7 @@ export class CrossChain {
             }
         );
 
-        return this.getBestContractTrade(blockchain, fromToken, fromAmount, slippage, promises);
+        return this.getBestContractTrade(blockchain, slippage, promises);
     }
 
     private async getToTransitTokenAmount(fromTrade: ContractTrade, fromSlippage: number) {
@@ -144,13 +146,11 @@ export class CrossChain {
             }
         );
 
-        return this.getBestContractTrade(blockchain, toToken, fromAmount, slippage, promises);
+        return this.getBestContractTrade(blockchain, slippage, promises);
     }
 
     private async getBestContractTrade(
         blockchain: SupportedCrossChainBlockchain,
-        tokenToTrade: Token,
-        tokenAmountToTrade: BigNumber,
         slippage: number,
         promises: Promise<CalculatedContractTrade>[]
     ): Promise<ContractTrade> {
@@ -176,16 +176,16 @@ export class CrossChain {
             return new ItContractTrade(
                 blockchain,
                 bestContract,
-                slippage,
-                calculatedContractTrade.trade.instantTrade
+                calculatedContractTrade.trade.instantTrade,
+                slippage
             );
         }
 
-        const token = await PriceTokenAmount.createTokenFromToken({
-            ...tokenToTrade,
-            weiAmount: new BigNumber(Web3Pure.toWei(tokenAmountToTrade, tokenToTrade.decimals))
-        });
-        return new DirectContractTrade(blockchain, bestContract, token);
+        return new DirectContractTrade(
+            blockchain,
+            bestContract,
+            calculatedContractTrade.trade.token
+        );
     }
 
     private async getCalculatedTrade(
@@ -210,8 +210,14 @@ export class CrossChain {
                 instantTrade
             };
         }
+
+        const token = await PriceTokenAmount.createTokenFromToken({
+            ...fromToken,
+            weiAmount: new BigNumber(Web3Pure.toWei(fromAmount, fromToken.decimals))
+        });
         return {
-            toAmount: fromAmount
+            toAmount: fromAmount,
+            token
         };
     }
 }

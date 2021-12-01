@@ -1,4 +1,4 @@
-import { SupportedCrossChainBlockchain } from '@features/cross-chain/constants/SupportedCrossChainBlockchains';
+import { SupportedCrossChainBlockchain } from '@features/cross-chain/constants/SupportedCrossChainBlockchain';
 import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/CrossChainContract';
 import { Uniswapv2InstantTrade } from '@features/swap/models/instant-trade';
 import { ContractTrade } from '@features/cross-chain/models/ContractTrade/ContractTrade';
@@ -16,8 +16,8 @@ export class ItContractTrade extends ContractTrade {
     constructor(
         public readonly blockchain: SupportedCrossChainBlockchain,
         public readonly contract: CrossChainContract,
-        private readonly slippage: number,
-        private readonly instantTrade: Uniswapv2InstantTrade
+        private readonly instantTrade: Uniswapv2InstantTrade,
+        private readonly slippage: number
     ) {
         super(blockchain, contract);
     }
