@@ -3,7 +3,7 @@ import {
     RegularSwapMethodsList,
     SupportingFeeSwapMethodsList,
     SwapMethodsList
-} from '@features/swap/trades/common/uniswap-v2/constants/SWAP_METHOD';
+} from '@features/swap/providers/common/uniswap-v2-abstract-provider/constants/SWAP_METHOD';
 
 export const AVALANCHE_EXACT_INPUT_REGULAR_SWAP_METHOD: RegularSwapMethodsList = {
     TOKENS_TO_TOKENS: 'swapExactTokensForTokens',

@@ -1,4 +1,4 @@
-import { DefaultEstimatedGas } from '@features/swap/trades/common/uniswap-v2/models/default-estimated-gas';
+import { DefaultEstimatedGas } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/default-estimated-gas';
 import BigNumber from 'bignumber.js';
 
 export const defaultEstimatedGas: DefaultEstimatedGas = {

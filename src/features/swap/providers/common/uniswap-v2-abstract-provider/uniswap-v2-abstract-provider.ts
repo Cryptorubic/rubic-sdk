@@ -1,26 +1,25 @@
-import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import BigNumber from 'bignumber.js';
 import { from, Observable, of } from 'rxjs';
-import UNISWAP_V2_ABI from 'src/features/swap/trades/common/uniswap-v2/constants/uniswap-v2-abi';
-import { Web3Private } from 'src/core/blockchain/web3-private/web3-private';
+import UNISWAP_V2_ABI from 'src/features/swap/providers/common/uniswap-v2/constants/uniswap-v2-abi';
+import { Web3Public } from 'src/core/blockchain/web3-public/web3-public';
 import { TransactionOptions } from 'src/core/blockchain/models/transaction-options';
-import { defaultEstimatedGas } from 'src/features/swap/trades/common/uniswap-v2/constants/default-estimated-gas';
-import { GasCalculationMethod } from 'src/features/swap/trades/common/uniswap-v2/models/gas-calculation-method';
-import { SWAP_METHOD } from 'src/features/swap/trades/common/uniswap-v2/constants/SWAP_METHOD';
+import { defaultEstimatedGas } from 'src/features/swap/providers/common/uniswap-v2/constants/default-estimated-gas';
+import { GasCalculationMethod } from 'src/features/swap/providers/common/uniswap-v2/models/gas-calculation-method';
+import { SWAP_METHOD } from 'src/features/swap/providers/common/uniswap-v2/constants/SWAP_METHOD';
 import { Token } from 'src/core/blockchain/models/token';
 import { SwapOptions } from 'src/features/swap/models/swap-options';
-import { Uniswapv2InstantTrade } from 'src/features/swap/models/instant-trade';
+import { Uniswapv2InstantTrade } from '@features/swap/trades/instant-trade';
 import {
     UniswapCalculatedInfo,
     UniswapCalculatedInfoWithProfit
-} from 'src/features/swap/trades/common/uniswap-v2/models/uniswap-calculated-info';
-import { UniswapRoute } from 'src/features/swap/trades/common/uniswap-v2/models/uniswap-route';
-import { CreateTradeMethod } from 'src/features/swap/trades/common/uniswap-v2/models/create-trade-method';
-import { InternalUniswapV2Trade } from 'src/features/swap/trades/common/uniswap-v2/models/uniswap-v2-trade';
+} from 'src/features/swap/providers/common/uniswap-v2/models/uniswap-calculated-info';
+import { UniswapRoute } from 'src/features/swap/providers/common/uniswap-v2/models/uniswap-route';
+import { CreateTradeMethod } from 'src/features/swap/providers/common/uniswap-v2/models/create-trade-method';
+import { InternalUniswapV2Trade } from 'src/features/swap/providers/common/uniswap-v2/models/uniswap-v2-trade';
 import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity-error';
 import { SwapTransactionOptionsWithGasLimit } from 'src/features/swap/models/swap-transaction-options';
 
-export abstract class UniswapV2LikeProvider {
+export abstract class UniswapV2AbstractProvider {
     protected abstract wethAddress: string;
 
     protected abstract contractAddress: string;
@@ -39,10 +38,7 @@ export abstract class UniswapV2LikeProvider {
         return this.web3Private.address;
     }
 
-    constructor(
-        private readonly web3Public: Web3Public,
-        private readonly web3Private: Web3Private
-    ) {}
+    protected constructor() {}
 
     public needApprove(tokenAddress: string, contractAddress: string): Observable<BigNumber> {
         if (Web3Public.isNativeAddress(tokenAddress)) {

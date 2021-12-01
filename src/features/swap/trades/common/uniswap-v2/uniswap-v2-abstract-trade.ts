@@ -5,18 +5,18 @@ import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Web3Private } from '@core/blockchain/web3-private/web3-private';
 import { Injector } from '@core/sdk/injector';
 import { GasInfo } from '@features/swap/models/gas-info';
-import { InstantTrade } from '@features/swap/models/instant-trade';
+import { InstantTrade } from '@features/swap/trades/instant-trade';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
-import { defaultEstimatedGas } from '@features/swap/trades/common/uniswap-v2/constants/default-estimated-gas';
+import { defaultEstimatedGas } from '@features/swap/providers/common/uniswap-v2-abstract-provider/constants/default-estimated-gas';
 import {
     ExactInputOutputSwapMethodsList,
     RegularSwapMethod,
     SUPPORTING_FEE_SWAP_METHODS_MAPPING,
     SWAP_METHOD
-} from '@features/swap/trades/common/uniswap-v2/constants/SWAP_METHOD';
+} from '@features/swap/providers/common/uniswap-v2-abstract-provider/constants/SWAP_METHOD';
 
-import { defaultUniswapV2Abi } from '@features/swap/trades/common/uniswap-v2/constants/uniswap-v2-abi';
-import { DefaultEstimatedGas } from '@features/swap/trades/common/uniswap-v2/models/default-estimated-gas';
+import { defaultUniswapV2Abi } from '@features/swap/providers/common/uniswap-v2-abstract-provider/constants/uniswap-v2-abi';
+import { DefaultEstimatedGas } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/default-estimated-gas';
 import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
 
@@ -44,8 +44,6 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     public readonly exact: 'input' | 'output';
 
     public readonly slippageTolerance: number;
-
-    protected abstract contractAddress: string;
 
     protected readonly contractAbi: AbiItem[] = defaultUniswapV2Abi;
 
