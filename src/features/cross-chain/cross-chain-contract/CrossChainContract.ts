@@ -2,12 +2,12 @@ import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { Injector } from '@core/sdk/injector';
 import { PCache } from '@common/decorators/cache.decorator';
-import crossChainContractAbi from '@features/cross-chain/cross-chain-contract/constants/crossChainContractAbi';
 import { Token } from '@core/blockchain/tokens/token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import BigNumber from 'bignumber.js';
 import { BlockchainsInfo } from '@core/blockchain/blockchains-info';
 import { UniswapV2LikeProvider } from '@features/swap/providers/common/uniswap-v2/uniswap-v2-like-provider';
+import crossChainContractAbi from '@features/cross-chain/constants/crossChainContractAbi';
 
 export class CrossChainContract {
     private readonly web3Public: Web3Public;

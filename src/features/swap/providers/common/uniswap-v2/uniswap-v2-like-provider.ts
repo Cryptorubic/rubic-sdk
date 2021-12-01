@@ -7,7 +7,6 @@ import { TransactionOptions } from 'src/core/blockchain/models/transaction-optio
 import { defaultEstimatedGas } from 'src/features/swap/providers/common/uniswap-v2/constants/default-estimated-gas';
 import { GasCalculationMethod } from 'src/features/swap/providers/common/uniswap-v2/models/gas-calculation-method';
 import { SWAP_METHOD } from 'src/features/swap/providers/common/uniswap-v2/constants/SWAP_METHOD';
-import { Token } from 'src/core/blockchain/models/token';
 import { SwapOptions } from 'src/features/swap/models/swap-options';
 import { Uniswapv2InstantTrade } from 'src/features/swap/models/instant-trade';
 import {
@@ -19,6 +18,8 @@ import { CreateTradeMethod } from 'src/features/swap/providers/common/uniswap-v2
 import { InternalUniswapV2Trade } from 'src/features/swap/providers/common/uniswap-v2/models/uniswap-v2-trade';
 import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity-error';
 import { SwapTransactionOptionsWithGasLimit } from 'src/features/swap/models/swap-transaction-options';
+import { Token } from '@core/blockchain/tokens/token';
+import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 
 export abstract class UniswapV2LikeProvider {
     protected abstract wethAddress: string;
@@ -260,10 +261,7 @@ export abstract class UniswapV2LikeProvider {
                 fromTokenAddress,
                 toToken.address,
                 amountAbsolute,
-                this.routingProviders,
                 options.disableMultihops ? 0 : this.maxTransitTokens,
-                this.contractAddress,
-                this.web3Public,
                 exact === 'output' ? 'getAmountsOut' : 'getAmountsIn'
             )
         ).sort((a, b) => (b.outputAbsoluteAmount.gt(a.outputAbsoluteAmount) ? 1 : -1));
@@ -352,13 +350,10 @@ export abstract class UniswapV2LikeProvider {
         fromTokenAddress: string,
         toTokenAddress: string,
         amountAbsolute: string,
-        routingProviders: string[],
         maxTransitTokens: number,
-        contractAddress: string,
-        web3Public: Web3Public,
         uniswapMethodName: 'getAmountsOut' | 'getAmountsIn'
     ): Promise<UniswapRoute[]> {
-        const vertexes: string[] = routingProviders
+        const vertexes: string[] = this.routingProviders
             .map(elem => elem.toLowerCase())
             .filter(
                 elem =>
@@ -389,9 +384,9 @@ export abstract class UniswapV2LikeProvider {
         }
 
         const routes: UniswapRoute[] = [];
-        await web3Public
+        await this.web3Public
             .multicallContractMethod<{ amounts: string[] }>(
-                contractAddress,
+                this.contractAddress,
                 this.abi,
                 uniswapMethodName,
                 routesMethodArguments
@@ -419,5 +414,31 @@ export abstract class UniswapV2LikeProvider {
             });
 
         return routes;
+    }
+
+    public async getFromAmount(
+        fromToken: Token,
+        toToken: Token,
+        toAmount: BigNumber
+    ): Promise<BigNumber> {
+        const fromTokenAddress = Web3Pure.isNativeAddress(fromToken.address)
+            ? this.wethAddress
+            : fromToken.address;
+        const toTokenAddress = Web3Pure.isNativeAddress(toToken.address)
+            ? this.wethAddress
+            : toToken.address;
+
+        const toAmountAbsolute = Web3Pure.toWei(toAmount, toToken.decimals);
+
+        const routes = (
+            await this.getAllRoutes(
+                fromTokenAddress,
+                toTokenAddress,
+                toAmountAbsolute,
+                this.maxTransitTokens,
+                'getAmountsIn'
+            )
+        ).sort((a, b) => a.outputAbsoluteAmount.comparedTo(b.outputAbsoluteAmount));
+        return routes[0]?.outputAbsoluteAmount;
     }
 }

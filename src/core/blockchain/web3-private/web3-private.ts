@@ -444,4 +444,8 @@ export class Web3Private {
     ): Promise<TransactionReceipt> {
         return this.approveTokens(tokenAddress, spenderAddress, new BigNumber(0));
     }
+
+    public getGasPrice(): Promise<string> {
+        return this.web3.eth.getGasPrice();
+    }
 }
