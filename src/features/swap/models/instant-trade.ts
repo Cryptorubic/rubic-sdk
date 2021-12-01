@@ -14,7 +14,7 @@ export abstract class InstantTrade {
 
     public abstract readonly gasInfo: DeepReadonly<GasInfo>;
 
-    protected abstract readonly slippageTolerance: number;
+    public abstract readonly slippageTolerance: number;
 
     public get toTokenAmountMin(): PriceTokenAmount {
         const weiAmountOutMin = this.to.weiAmount.multipliedBy(
