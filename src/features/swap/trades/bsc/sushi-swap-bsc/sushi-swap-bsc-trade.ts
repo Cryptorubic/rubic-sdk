@@ -1,4 +1,4 @@
-import { SUSHI_SWAP_BSC_CONTRACT_ADDRESS } from '@features/swap/trades/bsc/sushi-swap/constants';
+import { SUSHI_SWAP_BSC_CONTRACT_ADDRESS } from '@features/swap/trades/bsc/sushi-swap-bsc/constants';
 import {
     UniswapV2AbstractTrade,
     UniswapV2TradeStruct

@@ -9,11 +9,12 @@ import { InstantTrade } from '@features/swap/models/instant-trade';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import { defaultEstimatedGas } from '@features/swap/trades/common/uniswap-v2/constants/default-estimated-gas';
 import {
-    REGULAR_SWAP_METHOD,
+    ExactInputOutputSwapMethodsList,
     RegularSwapMethod,
-    SupportingFeeMethodsMapping,
-    SupportingFeeSwapMethod
+    SUPPORTING_FEE_SWAP_METHODS_MAPPING,
+    SWAP_METHOD
 } from '@features/swap/trades/common/uniswap-v2/constants/SWAP_METHOD';
+
 import { defaultUniswapV2Abi } from '@features/swap/trades/common/uniswap-v2/constants/uniswap-v2-abi';
 import { DefaultEstimatedGas } from '@features/swap/trades/common/uniswap-v2/models/default-estimated-gas';
 import { TransactionReceipt } from 'web3-eth';
@@ -46,9 +47,11 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     protected abstract contractAddress: string;
 
-    protected contractAbi: AbiItem[] = defaultUniswapV2Abi;
+    protected readonly contractAbi: AbiItem[] = defaultUniswapV2Abi;
 
-    protected defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
+    protected readonly swapMethods: ExactInputOutputSwapMethodsList = SWAP_METHOD;
+
+    protected readonly defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
 
     private get deadlineMinutesTimestamp(): number {
         return Math.floor(Date.now() / 1000 + 60 * this.deadlineMinutes);
@@ -120,17 +123,14 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     }
 
     private createTokensToTokensTrade = (options: SwapTransactionOptions) =>
-        this.createAnyToAnyTrade(options, REGULAR_SWAP_METHOD[this.exact].TOKENS_TO_TOKENS);
+        this.createAnyToAnyTrade(options, 'TOKENS_TO_TOKENS');
 
     private createTokensToEthTrade = (options: SwapTransactionOptions) =>
-        this.createAnyToAnyTrade(options, REGULAR_SWAP_METHOD[this.exact].TOKENS_TO_ETH);
+        this.createAnyToAnyTrade(options, 'TOKENS_TO_ETH');
 
     private createEthToTokensTrade = (options: SwapTransactionOptions) => {
         const { amountIn } = this.getAmountInAndAmountOut();
-        return this.createAnyToAnyTrade(
-            { ...options, value: amountIn },
-            REGULAR_SWAP_METHOD[this.exact].TOKENS_TO_ETH
-        );
+        return this.createAnyToAnyTrade({ ...options, value: amountIn }, 'TOKENS_TO_ETH');
     };
 
     private async createAnyToAnyTrade(
@@ -141,7 +141,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
         const regularMethodResult = await tryExecuteAsync(
             web3Private.tryExecuteContractMethod,
-            this.getSwapParameters(swapMethod, options)
+            this.getSwapParameters(this.swapMethods[this.exact][swapMethod], options)
         );
 
         if (regularMethodResult.success) {
@@ -149,12 +149,15 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         }
 
         return web3Private.tryExecuteContractMethod(
-            ...this.getSwapParameters(SupportingFeeMethodsMapping[swapMethod], options)
+            ...this.getSwapParameters(
+                this.swapMethods[this.exact][SUPPORTING_FEE_SWAP_METHODS_MAPPING[swapMethod]],
+                options
+            )
         );
     }
 
     private getSwapParameters(
-        method: RegularSwapMethod | SupportingFeeSwapMethod,
+        method: string,
         options: SwapTransactionOptions & { value?: string }
     ): Parameters<InstanceType<typeof Web3Private>['tryExecuteContractMethod']> {
         const { amountIn, amountOut } = this.getAmountInAndAmountOut();
