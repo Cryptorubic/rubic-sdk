@@ -1,5 +1,5 @@
 import { SupportedCrossChainBlockchain } from '@features/cross-chain/constants/SupportedCrossChainBlockchain';
-import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/CrossChainContract';
+import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 

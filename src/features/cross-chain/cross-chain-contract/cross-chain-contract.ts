@@ -8,6 +8,7 @@ import BigNumber from 'bignumber.js';
 import { BlockchainsInfo } from '@core/blockchain/blockchains-info';
 import { UniswapV2LikeProvider } from '@features/swap/providers/common/uniswap-v2/uniswap-v2-like-provider';
 import crossChainContractAbi from '@features/cross-chain/constants/crossChainContractAbi';
+import { DeepReadonly } from '@common/utils/types/deep-readonly';
 
 export class CrossChainContract {
     private readonly web3Public: Web3Public;
@@ -15,32 +16,32 @@ export class CrossChainContract {
     constructor(
         private readonly blockchain: BLOCKCHAIN_NAME,
         public readonly address: string,
-        public readonly uniswapV2Provider: UniswapV2LikeProvider
+        public readonly uniswapV2Provider: DeepReadonly<UniswapV2LikeProvider>
     ) {
         this.web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
     }
 
     @PCache
     public async getNumOfContract(): Promise<number> {
-        const numOfContract = (await this.web3Public.callContractMethod(
+        const numOfContract = await this.web3Public.callContractMethod(
             this.address,
             crossChainContractAbi,
             'numOfThisBlockchain'
-        )) as string;
+        );
         return parseInt(numOfContract);
     }
 
     @PCache
     public async getTransitToken(): Promise<Token> {
         const numOfContract = await this.getNumOfContract();
-        const transitTokenAddress = (await this.web3Public.callContractMethod(
+        const transitTokenAddress = await this.web3Public.callContractMethod(
             this.address,
             crossChainContractAbi,
             'RubicAddresses',
             {
                 methodArguments: [numOfContract]
             }
-        )) as string;
+        );
         return Token.createToken({
             address: transitTokenAddress,
             blockchain: this.blockchain
@@ -49,33 +50,59 @@ export class CrossChainContract {
 
     public async getFeeInPercents(): Promise<number> {
         const numOfContract = await this.getNumOfContract();
-        const feeAbsolute = (await this.web3Public.callContractMethod(
+        const feeAbsolute = await this.web3Public.callContractMethod(
             this.address,
             crossChainContractAbi,
             'feeAmountOfBlockchain',
             {
                 methodArguments: [numOfContract]
             }
-        )) as string;
+        );
         return parseInt(feeAbsolute) / 10000;
     }
 
     public async getCryptoFeeToken(toContract: CrossChainContract): Promise<PriceTokenAmount> {
         const numOfToContract = await toContract.getNumOfContract();
         const feeAmount = new BigNumber(
-            (await this.web3Public.callContractMethod(
+            await this.web3Public.callContractMethod(
                 this.address,
                 crossChainContractAbi,
                 'blockchainCryptoFee',
                 {
                     methodArguments: [numOfToContract]
                 }
-            )) as string
+            )
         );
         const nativeToken = BlockchainsInfo.getBlockchainByName(this.blockchain).nativeCoin;
         return PriceTokenAmount.createTokenFromToken({
             ...nativeToken,
             weiAmount: feeAmount
         });
+    }
+
+    public getMinOrMaxTransitTokenAmount(type: 'minAmount' | 'maxAmount'): Promise<string> {
+        return this.web3Public.callContractMethod(
+            this.address,
+            crossChainContractAbi,
+            type === 'minAmount' ? 'minTokenAmount' : 'maxTokenAmount'
+        );
+    }
+
+    public isContractPaused(): Promise<boolean> {
+        return this.web3Public.callContractMethod<boolean>(
+            this.address,
+            crossChainContractAbi,
+            'paused'
+        );
+    }
+
+    public async getMaxGasPrice(): Promise<BigNumber> {
+        return new BigNumber(
+            await this.web3Public.callContractMethod(
+                this.address,
+                crossChainContractAbi,
+                'maxGasPrice'
+            )
+        );
     }
 }

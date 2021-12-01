@@ -11,6 +11,7 @@ import { TransactionRevertedError } from '@common/errors/transaction-reverted-er
 import { WalletConnectionConfiguration } from '@core/blockchain/models/wallet-connection-configuration';
 
 import { RubicError } from '@common/errors/rubic-error';
+import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/FailedToCheckForTransactionReceiptError';
 
 /**
  * Class containing methods for executing the functions of contracts and sending transactions in order to change the state of the blockchain.
@@ -64,6 +65,9 @@ export class Web3Private {
     private static parseError(err: Web3Error): RubicError {
         if (err.message.includes('Transaction has been reverted by the EVM')) {
             return new TransactionRevertedError();
+        }
+        if (err.message.includes('Failed to check for transaction receipt')) {
+            return new FailedToCheckForTransactionReceiptError();
         }
         if (err.code === -32603) {
             return new LowGasError();

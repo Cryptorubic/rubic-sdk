@@ -1,5 +1,5 @@
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
-import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/CrossChainContract';
+import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
 import { UniSwapV2Provider } from '@features/swap/providers/blockchains/ethereum/uni-swap-v2/uni-swap-v2-provider';
 import { PancakeSwapProvider } from '@features/swap/providers/blockchains/bsc/pancake-swap/pancake-swap-provider';
 import { QuickSwapProvider } from '@features/swap/providers/blockchains/polygon/quick-swap/quick-swap-provider';

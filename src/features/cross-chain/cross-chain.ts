@@ -1,4 +1,4 @@
-import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/CrossChainContract';
+import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
 import {
     SupportedCrossChainBlockchain,
     supportedCrossChainBlockchain
@@ -9,7 +9,6 @@ import BigNumber from 'bignumber.js';
 import { CrossChainOptions } from '@features/cross-chain/models/CrossChainOptions';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { compareAddresses } from '@common/utils/blockchain';
-import { UniswapV2LikeProvider } from '@features/swap/providers/common/uniswap-v2/uniswap-v2-like-provider';
 
 import { Uniswapv2InstantTrade } from '@features/swap/models/instant-trade';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
@@ -19,7 +18,6 @@ import { DirectContractTrade } from '@features/cross-chain/models/ContractTrade/
 import { ItContractTrade } from '@features/cross-chain/models/ContractTrade/ItContractTrade';
 import { CrossChainTrade } from '@features/cross-chain/cross-chain-trade/cross-chain-trade';
 import { Injector } from '@core/sdk/injector';
-import crossChainContractAbi from '@features/cross-chain/constants/crossChainContractAbi';
 import { MinMaxAmountsErrors } from '@features/cross-chain/cross-chain-trade/models/MinMaxAmountsErrors';
 import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity-error';
 import { MinMaxAmounts } from '@features/cross-chain/models/MinMaxAmounts';
@@ -129,12 +127,7 @@ export class CrossChain {
                 const toToken = await contract.getTransitToken();
                 return {
                     contract,
-                    trade: await this.getCalculatedTrade(
-                        contract.uniswapV2Provider,
-                        fromToken,
-                        toToken,
-                        fromAmount
-                    )
+                    trade: await this.getCalculatedTrade(contract, fromToken, toToken, fromAmount)
                 };
             }
         );
@@ -167,12 +160,7 @@ export class CrossChain {
                 const fromToken = await contract.getTransitToken();
                 return {
                     contract,
-                    trade: await this.getCalculatedTrade(
-                        contract.uniswapV2Provider,
-                        fromToken,
-                        toToken,
-                        fromAmount
-                    )
+                    trade: await this.getCalculatedTrade(contract, fromToken, toToken, fromAmount)
                 };
             }
         );
@@ -220,13 +208,13 @@ export class CrossChain {
     }
 
     private async getCalculatedTrade(
-        uniswapV2Provider: UniswapV2LikeProvider,
+        contract: CrossChainContract,
         fromToken: Token,
         toToken: Token,
         fromAmount: BigNumber
     ): Promise<ItCalculatedTrade | DirectCalculatedTrade> {
         if (!compareAddresses(fromToken.address, toToken.address)) {
-            const instantTrade = await uniswapV2Provider.calculateTrade(
+            const instantTrade = await contract.uniswapV2Provider.calculateTrade(
                 fromToken,
                 fromAmount,
                 toToken,
@@ -285,15 +273,10 @@ export class CrossChain {
 
     private async getMinMaxTransitTokenAmounts(fromTrade: ContractTrade): Promise<MinMaxAmounts> {
         const fromTransitToken = await fromTrade.contract.getTransitToken();
-        const fromContractAddress = fromTrade.contract.address;
-        const web3Public = this.getWeb3Public(fromTrade.blockchain);
 
         const getAmount = async (type: 'minAmount' | 'maxAmount'): Promise<BigNumber> => {
-            const fromTransitTokenAmountAbsolute = (await web3Public.callContractMethod(
-                fromContractAddress,
-                crossChainContractAbi,
-                type === 'minAmount' ? 'minTokenAmount' : 'maxTokenAmount'
-            )) as string;
+            const fromTransitTokenAmountAbsolute =
+                await fromTrade.contract.getMinOrMaxTransitTokenAmount(type);
             const fromTransitTokenAmount = Web3Pure.fromWei(
                 fromTransitTokenAmountAbsolute,
                 fromTransitToken.decimals

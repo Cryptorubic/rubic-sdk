@@ -38,7 +38,8 @@
       "@common/*": ["./src/common/*"],
       "@features/*": ["./src/features/*"]
     },
-    "rootDir": "src"
+    "rootDir": "src",
+    "useUnknownInCatchVariables": false
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

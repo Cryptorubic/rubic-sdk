@@ -268,7 +268,7 @@ export class Web3Public {
      * @param [options.methodArguments] executing method arguments
      * @return smart-contract pure method returned value
      */
-    public async callContractMethod(
+    public async callContractMethod<T = string>(
         contractAddress: string,
         contractAbi: AbiItem[],
         methodName: string,
@@ -276,7 +276,7 @@ export class Web3Public {
             methodArguments?: unknown[];
             from?: string;
         } = { methodArguments: [] }
-    ): Promise<string | string[]> {
+    ): Promise<T> {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
 
         return contract.methods[methodName](...options.methodArguments!!).call({

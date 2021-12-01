@@ -1,5 +1,5 @@
 import { SupportedCrossChainBlockchain } from '@features/cross-chain/constants/SupportedCrossChainBlockchain';
-import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/CrossChainContract';
+import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
 import { Uniswapv2InstantTrade } from '@features/swap/models/instant-trade';
 import { ContractTrade } from '@features/cross-chain/models/ContractTrade/ContractTrade';
 import BigNumber from 'bignumber.js';
