@@ -17,12 +17,15 @@ import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/Fai
 import { InsufficientFundsGasPriceValueError } from '@common/errors/cross-chain/InsufficientFundsGasPriceValueError';
 import BigNumber from 'bignumber.js';
 import { TransactionReceipt } from 'web3-eth';
+import { DeepReadonly } from '@common/utils/types/deep-readonly';
+import { PriceImpact } from '@common/utils/price-impact';
 
 export class CrossChainTrade {
     public static async getGasData(
         fromTrade: ContractTrade,
         toTrade: ContractTrade,
-        cryptoFeeToken: PriceTokenAmount
+        cryptoFeeToken: PriceTokenAmount,
+        transitFeeToken: PriceTokenAmount
     ): Promise<GasData | null> {
         const fromBlockchain = fromTrade.blockchain;
         const { web3Private } = Injector;
@@ -37,6 +40,7 @@ export class CrossChainTrade {
                     fromTrade,
                     toTrade,
                     cryptoFeeToken,
+                    transitFeeToken,
                     {},
                     null
                 ).getContractMethodData();
@@ -51,7 +55,7 @@ export class CrossChainTrade {
                     walletAddress,
                     value
                 ),
-                web3Private.getGasPrice()
+                new BigNumber(await web3Private.getGasPrice()).dividedBy(10 ** 9).toFixed()
             ]);
 
             return {
@@ -73,10 +77,45 @@ export class CrossChainTrade {
         return this.web3Private.address;
     }
 
+    public get fromToken(): PriceTokenAmount {
+        return this.fromTrade.fromToken;
+    }
+
+    public get toToken(): PriceTokenAmount {
+        return this.toTrade.toToken;
+    }
+
+    public get estimatedGas(): BigNumber | null {
+        if (!this.gasData) {
+            return null;
+        }
+        return new BigNumber(this.gasData.gasLimit).multipliedBy(this.gasData.gasPrice);
+    }
+
+    public get priceImpactData(): {
+        priceImpactFrom: number | null;
+        priceImpactTo: number | null;
+    } {
+        const calculatePriceImpact = (trade: ContractTrade): number | null => {
+            return PriceImpact.calculatePriceImpact(
+                trade.fromToken.price,
+                trade.fromToken.tokenAmount,
+                trade.toToken.price,
+                trade.toToken.tokenAmount
+            );
+        };
+
+        return {
+            priceImpactFrom: calculatePriceImpact(this.fromTrade),
+            priceImpactTo: calculatePriceImpact(this.toTrade)
+        };
+    }
+
     constructor(
         private readonly fromTrade: ContractTrade,
         private readonly toTrade: ContractTrade,
-        private readonly cryptoFeeToken: PriceTokenAmount,
+        public readonly cryptoFeeToken: DeepReadonly<PriceTokenAmount>,
+        public readonly transitFeeToken: DeepReadonly<PriceTokenAmount>,
         private readonly minMaxAmountsErrors: MinMaxAmountsErrors,
         private readonly gasData: GasData | null
     ) {
@@ -120,7 +159,7 @@ export class CrossChainTrade {
 
         const [maxGasPrice, currentGasPrice] = await Promise.all([
             this.toTrade.contract.getMaxGasPrice(),
-            this.web3Private.getGasPrice()
+            new BigNumber(await this.web3Private.getGasPrice()).dividedBy(10 ** 9).toFixed()
         ]);
         if (maxGasPrice.lt(currentGasPrice)) {
             throw new MaxGasPriceOverflowError();

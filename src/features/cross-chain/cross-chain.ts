@@ -81,7 +81,10 @@ export class CrossChain {
             fromSlippage
         );
 
-        const toTransitTokenAmount = await this.getToTransitTokenAmount(fromTrade, fromSlippage);
+        const { toTransitTokenAmount, transitFeeToken } = await this.getToTransitTokenAmount(
+            fromTrade,
+            fromSlippage
+        );
 
         const toSlippage = 1 - options.toSlippageTolerance;
         const toTrade = await this.calculateBestToTrade(
@@ -97,7 +100,8 @@ export class CrossChain {
                 const gasData = await CrossChainTrade.getGasData(
                     fromTrade,
                     toTrade,
-                    cryptoFeeToken
+                    cryptoFeeToken,
+                    transitFeeToken
                 );
                 return {
                     cryptoFeeToken,
@@ -111,6 +115,7 @@ export class CrossChain {
             fromTrade,
             toTrade,
             cryptoFeeToken,
+            transitFeeToken,
             minMaxAmountsErrors,
             gasData
         );
@@ -135,18 +140,35 @@ export class CrossChain {
         return this.getBestContractTrade(blockchain, slippage, promises);
     }
 
-    private async getToTransitTokenAmount(fromTrade: ContractTrade, fromSlippage: number) {
-        const feeInPercents = await fromTrade.contract.getFeeInPercents();
+    private async getToTransitTokenAmount(
+        fromTrade: ContractTrade,
+        fromSlippage: number
+    ): Promise<{
+        toTransitTokenAmount: BigNumber;
+        transitFeeToken: PriceTokenAmount;
+    }> {
+        const fromTransitToken = fromTrade.toToken;
         const fromTransitTokenAmount = fromTrade.toAmountMin;
+        const feeInPercents = await fromTrade.contract.getFeeInPercents();
+        const transitFeeToken = new PriceTokenAmount({
+            ...fromTransitToken.asStruct,
+            weiAmount: new BigNumber(
+                Web3Pure.toWei(
+                    fromTransitTokenAmount.multipliedBy(feeInPercents),
+                    fromTransitToken.decimals
+                )
+            )
+        });
 
-        let toTransitTokenAmount = fromTransitTokenAmount
-            .multipliedBy(100 - feeInPercents)
-            .dividedBy(100);
-
+        let toTransitTokenAmount = fromTransitTokenAmount.minus(transitFeeToken.tokenAmount);
         if (fromTrade instanceof ItContractTrade) {
             toTransitTokenAmount = toTransitTokenAmount.multipliedBy(fromSlippage);
         }
-        return toTransitTokenAmount;
+
+        return {
+            toTransitTokenAmount,
+            transitFeeToken
+        };
     }
 
     private async calculateBestToTrade(
