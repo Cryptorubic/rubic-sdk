@@ -1,9 +1,14 @@
 import { RubicError } from '@common/errors/rubic-error';
 import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
+import { EncodableSwapTransactionOptions } from '@features/swap/models/encodable-swap-transaction-options';
 import BigNumber from 'bignumber.js';
-import { toChecksumAddress, isAddress, toWei, fromWei } from 'web3-utils';
+import Web3 from 'web3';
+import { TransactionConfig } from 'web3-core';
+import { toChecksumAddress, isAddress, toWei, fromWei, AbiItem } from 'web3-utils';
 
 export class Web3Pure {
+    private static web3 = new Web3();
+
     /**
      * @description gets address of native coin {@link NATIVE_TOKEN_ADDRESS}
      */
@@ -93,4 +98,23 @@ export class Web3Pure {
     static isNativeAddress = (address: string): boolean => {
         return address === NATIVE_TOKEN_ADDRESS;
     };
+
+    static encodeMethodCall(
+        contractAddress: string,
+        contractAbi: AbiItem[],
+        method: string,
+        parameters: unknown[] = [],
+        value?: string,
+        options: EncodableSwapTransactionOptions = {}
+    ): TransactionConfig {
+        const contract = new this.web3.eth.Contract(contractAbi);
+        const data = contract.methods[method](...parameters).encodeABI();
+        return {
+            to: contractAddress,
+            data,
+            ...((value as unknown as object) && { value }),
+            ...(options.gasLimit && { gas: options.gasLimit! }),
+            ...(options.gasPrice && { gasPrice: options.gasLimit! })
+        };
+    }
 }

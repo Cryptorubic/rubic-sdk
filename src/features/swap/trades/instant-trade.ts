@@ -5,9 +5,12 @@ import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
 import { BasicTransactionOptions } from '@core/blockchain/models/basic-transaction-options';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Injector } from '@core/sdk/injector';
+import { EncodableSwapTransactionOptions } from '@features/swap/models/encodable-swap-transaction-options';
 import { GasInfo } from '@features/swap/models/gas-info';
+import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import BigNumber from 'bignumber.js';
 import { DeepReadonly } from '@common/utils/types/deep-readonly';
+import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 
 export abstract class InstantTrade {
@@ -66,6 +69,10 @@ export abstract class InstantTrade {
             options
         );
     }
+
+    public abstract swap(options: SwapTransactionOptions): Promise<TransactionReceipt>;
+
+    public abstract encode(options: EncodableSwapTransactionOptions): TransactionConfig;
 
     protected async checkSettings(): Promise<void> {
         this.checkWalletConnected();

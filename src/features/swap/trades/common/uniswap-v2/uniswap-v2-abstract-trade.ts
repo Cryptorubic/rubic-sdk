@@ -3,7 +3,9 @@ import { DeepReadonly } from '@common/utils/types/deep-readonly';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Web3Private } from '@core/blockchain/web3-private/web3-private';
+import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@core/sdk/injector';
+import { EncodableSwapTransactionOptions } from '@features/swap/models/encodable-swap-transaction-options';
 import { GasInfo } from '@features/swap/models/gas-info';
 import { InstantTrade } from '@features/swap/trades/instant-trade';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
@@ -17,6 +19,7 @@ import {
 
 import { defaultUniswapV2Abi } from '@features/swap/providers/common/uniswap-v2-abstract-provider/constants/uniswap-v2-abi';
 import { DefaultEstimatedGas } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/default-estimated-gas';
+import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
 
@@ -66,7 +69,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         this.slippageTolerance = tradeStruct.slippageTolerance;
     }
 
-    public async swap(options: SwapTransactionOptions = {}) {
+    public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
         await this.checkSettings();
 
         if (this.from.isNative) {
@@ -76,6 +79,16 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             return this.createTokensToEthTrade(options);
         }
         return this.createTokensToTokensTrade(options);
+    }
+
+    public encode(options: EncodableSwapTransactionOptions): TransactionConfig {
+        if (this.from.isNative) {
+            return this.encodeEthToTokensTrade(options);
+        }
+        if (this.to.isNative) {
+            return this.encodeTokensToEthTrade(options);
+        }
+        return this.encodeTokensToTokensTrade(options);
     }
 
     private getGasLimit(options: { gasLimit?: string | null }): string {
@@ -131,6 +144,17 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         return this.createAnyToAnyTrade({ ...options, value: amountIn }, 'TOKENS_TO_ETH');
     };
 
+    private encodeTokensToTokensTrade = (options: EncodableSwapTransactionOptions) =>
+        this.encodeAnyToAnyTrade(options, 'TOKENS_TO_TOKENS');
+
+    private encodeTokensToEthTrade = (options: EncodableSwapTransactionOptions) =>
+        this.encodeAnyToAnyTrade(options, 'TOKENS_TO_ETH');
+
+    private encodeEthToTokensTrade = (options: EncodableSwapTransactionOptions) => {
+        const { amountIn } = this.getAmountInAndAmountOut();
+        return this.encodeAnyToAnyTrade({ ...options, value: amountIn }, 'TOKENS_TO_ETH');
+    };
+
     private async createAnyToAnyTrade(
         options: SwapTransactionOptions & { value?: string },
         swapMethod: RegularSwapMethod
@@ -181,5 +205,30 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
                 ...(options.value && { value: options.value })
             }
         ];
+    }
+
+    private encodeAnyToAnyTrade(
+        options: EncodableSwapTransactionOptions & { value?: string },
+        swapMethod: RegularSwapMethod
+    ): TransactionConfig {
+        const { amountIn, amountOut } = this.getAmountInAndAmountOut();
+        const method = this.swapMethods[this.exact][swapMethod];
+        const parameters = [
+            amountIn,
+            amountOut,
+            this.path.map(t => t.address),
+            this.to.address,
+            this.deadlineMinutesTimestamp
+        ];
+        const gasPrice = this.getGasPrice(options);
+        const gasLimit = this.getGasLimit(options);
+        return Web3Pure.encodeMethodCall(
+            this.contractAddress,
+            this.contractAbi,
+            method,
+            parameters,
+            options.value,
+            { gasLimit, gasPrice }
+        );
     }
 }
