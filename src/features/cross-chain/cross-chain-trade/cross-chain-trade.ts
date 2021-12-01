@@ -7,7 +7,7 @@ import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { CrossChainContractMethodData } from '@features/cross-chain/cross-chain-trade/models/CrossChainContractMethodData';
 import { GasData } from '@common/models/GasData';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
-import crossChainContractAbi from '@features/cross-chain/constants/crossChainContractAbi';
+import { crossChainContractAbi } from '@features/cross-chain/constants/crossChainContractAbi';
 import { MinMaxAmountsErrors } from '@features/cross-chain/cross-chain-trade/models/MinMaxAmountsErrors';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { CrossChainIsUnavailableError } from '@common/errors/cross-chain/CrossChainIsUnavailableWarning';
@@ -15,6 +15,8 @@ import { MaxGasPriceOverflowError } from '@common/errors/cross-chain/MaxGasPrice
 import { TransactionOptions } from '@core/blockchain/models/transaction-options';
 import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/FailedToCheckForTransactionReceiptError';
 import { InsufficientFundsGasPriceValueError } from '@common/errors/cross-chain/InsufficientFundsGasPriceValueError';
+import BigNumber from 'bignumber.js';
+import { TransactionReceipt } from 'web3-eth';
 
 export class CrossChainTrade {
     public static async getGasData(
@@ -81,6 +83,23 @@ export class CrossChainTrade {
         this.web3Private = Injector.web3Private;
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(fromTrade.blockchain);
         this.toWeb3Public = Injector.web3PublicService.getWeb3Public(toTrade.blockchain);
+    }
+
+    public getAllowance(tokenAddress: string): Promise<BigNumber> {
+        return this.fromWeb3Public.getAllowance(
+            tokenAddress,
+            this.walletAddress,
+            this.fromTrade.contract.address
+        );
+    }
+
+    public approve(tokenAddress: string, options: TransactionOptions): Promise<TransactionReceipt> {
+        return this.web3Private.approveTokens(
+            tokenAddress,
+            this.fromTrade.contract.address,
+            'infinity',
+            options
+        );
     }
 
     private async checkContractsState(): Promise<void> {

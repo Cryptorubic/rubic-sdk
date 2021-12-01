@@ -7,7 +7,7 @@ import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import BigNumber from 'bignumber.js';
 import { BlockchainsInfo } from '@core/blockchain/blockchains-info';
 import { UniswapV2LikeProvider } from '@features/swap/providers/common/uniswap-v2/uniswap-v2-like-provider';
-import crossChainContractAbi from '@features/cross-chain/constants/crossChainContractAbi';
+import { crossChainContractAbi } from '@features/cross-chain/constants/crossChainContractAbi';
 import { DeepReadonly } from '@common/utils/types/deep-readonly';
 
 export class CrossChainContract {

@@ -1,6 +1,6 @@
 import { AbiItem } from 'web3-utils';
 
-const crossChainContractAbi = [
+export const crossChainContractAbi = [
     {
         inputs: [
             { internalType: 'uint128', name: '_numOfThisBlockchain', type: 'uint128' },
@@ -670,5 +670,3 @@ const crossChainContractAbi = [
     },
     { stateMutability: 'payable', type: 'receive' }
 ] as AbiItem[];
-
-export default crossChainContractAbi;
