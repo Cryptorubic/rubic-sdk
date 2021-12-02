@@ -1,5 +1,5 @@
 import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
-import { Token } from '@core/blockchain/tokens/token';
+import { Token, TokenStruct } from '@core/blockchain/tokens/token';
 import { Injector } from '@core/sdk/injector';
 import BigNumber from 'bignumber.js';
 
@@ -14,6 +14,14 @@ export class PriceToken extends Token {
         const results = await Promise.all([tokenPromise, pricePromise]);
 
         return new PriceToken({ ...results[0], price: results[1] });
+    }
+
+    public static async createFromToken(token: TokenStruct): Promise<PriceToken> {
+        const { coingeckoApi } = Injector;
+
+        const price = await coingeckoApi.getTokenPrice(token);
+
+        return new PriceToken({ ...token, price });
     }
 
     private _price: BigNumber;

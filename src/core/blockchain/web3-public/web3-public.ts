@@ -21,8 +21,7 @@ import { Method } from 'web3-core-method';
 import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
 import { AbiItem } from 'web3-utils';
 import { BlockTransactionString } from 'web3-eth';
-
-import { RubicError } from '@common/errors/rubic-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { InsufficientFundsError } from '@common/errors/swap/insufficient-funds-error';
 
 import { HttpClient } from '@common/models/http-client';
@@ -150,7 +149,7 @@ export class Web3Public {
         methodArguments: unknown[],
         fromAddress: string,
         value?: string | BigNumber
-    ): Promise<BigNumber> {
+    ): Promise<string> {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
 
         const gasLimit = await contract.methods[methodName](...methodArguments).estimateGas({
@@ -158,7 +157,7 @@ export class Web3Public {
             gas: 10000000,
             ...(value && { value })
         });
-        return new BigNumber(gasLimit);
+        return new BigNumber(gasLimit).toFixed(0);
     }
 
     /**
@@ -201,7 +200,7 @@ export class Web3Public {
         ownerAddress: string,
         spenderAddress: string
     ): Promise<BigNumber> {
-        const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI as AbiItem[], tokenAddress);
+        const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
 
         const allowance = await contract.methods
             .allowance(ownerAddress, spenderAddress)
@@ -268,7 +267,7 @@ export class Web3Public {
      * @param [options.methodArguments] executing method arguments
      * @return smart-contract pure method returned value
      */
-    public async callContractMethod(
+    public async callContractMethod<T = string>(
         contractAddress: string,
         contractAbi: AbiItem[],
         methodName: string,
@@ -276,7 +275,7 @@ export class Web3Public {
             methodArguments?: unknown[];
             from?: string;
         } = { methodArguments: [] }
-    ): Promise<string | string[]> {
+    ): Promise<T> {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
 
         return contract.methods[methodName](...options.methodArguments!!).call({
@@ -350,7 +349,7 @@ export class Web3Public {
         )?.outputs;
 
         if (!methodOutputAbi) {
-            throw new RubicError(`Contract method ${methodName} does not exist.`);
+            throw new RubicSdkError(`Contract method ${methodName} does not exist.`);
         }
 
         return outputs.map(output => ({

@@ -1,4 +1,4 @@
-import { RubicError } from '@common/errors/rubic-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 
 type Func<A, R> = (...args: A[]) => R;
 
@@ -16,7 +16,7 @@ export function Cache<A, R>(
 ): TypedPropertyDescriptor<Func<A, R>> | void {
     const originalMethod = descriptor.value;
     if (!originalMethod) {
-        throw new RubicError('Descriptor value is undefined.');
+        throw new RubicSdkError('Descriptor value is undefined.');
     }
 
     const storage = new Map<string, R>();
@@ -40,7 +40,7 @@ export function PCache<T>(
 ): TypedPropertyDescriptor<T> | void {
     const originalMethod = descriptor.value;
     if (!originalMethod) {
-        throw new RubicError('Descriptor value is undefined.');
+        throw new RubicSdkError('Descriptor value is undefined.');
     }
 
     const storage = new Map<string, unknown>();

@@ -1,10 +1,10 @@
-import { RubicError } from '@common/errors/rubic-error';
 import { HttpClient } from '@common/models/http-client';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import BigNumber from 'bignumber.js';
 import pTimeout, { TimeoutError } from 'p-timeout';
 import { PCacheable } from 'ts-cacheable';
+import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 
 const supportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,
@@ -61,7 +61,7 @@ export class CoingeckoApi {
     })
     public async getNativeCoinPrice(blockchain: BLOCKCHAIN_NAME): Promise<BigNumber> {
         if (!this.isSupportedBlockchain(blockchain)) {
-            throw new RubicError(`Blockchain ${blockchain} is not supported by coingecko-api`);
+            throw new RubicSdkError(`Blockchain ${blockchain} is not supported by coingecko-api`);
         }
 
         const coingeckoId = this.nativeCoinsCoingeckoIds[blockchain];
@@ -102,7 +102,7 @@ export class CoingeckoApi {
         tokenAddress: string
     ): Promise<BigNumber> {
         if (!this.isSupportedBlockchain(blockchain)) {
-            throw new RubicError(`Blockchain ${blockchain} is not supported by coingecko-api`);
+            throw new RubicSdkError(`Blockchain ${blockchain} is not supported by coingecko-api`);
         }
 
         const blockchainId = this.tokenBlockchainId[blockchain];

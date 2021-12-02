@@ -11,7 +11,7 @@ export class BlockchainsInfo {
         return BlockchainsInfo.blockchains.find(blockchain => blockchain.id === chainIdNumber);
     }
 
-    public static getBlockchainByName(blockchainName: BLOCKCHAIN_NAME): Blockchain | undefined {
-        return BlockchainsInfo.blockchains.find(blockchain => blockchain.name === blockchainName);
+    public static getBlockchainByName(blockchainName: BLOCKCHAIN_NAME): Blockchain {
+        return BlockchainsInfo.blockchains.find(blockchain => blockchain.name === blockchainName)!;
     }
 }

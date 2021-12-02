@@ -86,7 +86,8 @@ module.exports = {
                         allow: ['debug', 'error', 'info']
                     }
                 ],
-                'import/export': 0
+                'import/export': 0,
+                '@typescript-eslint/no-shadow': 'off'
             }
         }
     ]

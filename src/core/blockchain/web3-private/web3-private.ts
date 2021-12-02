@@ -9,8 +9,8 @@ import { LowGasError } from '@common/errors/low-gas-error';
 import { UserRejectError } from '@common/errors/user-reject-error';
 import { TransactionRevertedError } from '@common/errors/transaction-reverted-error';
 import { WalletConnectionConfiguration } from '@core/blockchain/models/wallet-connection-configuration';
-
-import { RubicError } from '@common/errors/rubic-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk-error';
+import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/FailedToCheckForTransactionReceiptError';
 
 /**
  * Class containing methods for executing the functions of contracts and sending transactions in order to change the state of the blockchain.
@@ -43,7 +43,7 @@ export class Web3Private {
     private static stringifyAmount(amount: number | string | BigNumber): string {
         const bnAmount = new BigNumber(amount);
         if (!bnAmount.isInteger()) {
-            throw new RubicError(`Value ${amount} is not integer`);
+            throw new RubicSdkError(`Value ${amount} is not integer`);
         }
 
         return bnAmount.toFixed(0);
@@ -61,9 +61,12 @@ export class Web3Private {
      * @description parse web3 error by its code
      * @param err web3 error to parse
      */
-    private static parseError(err: Web3Error): RubicError {
+    private static parseError(err: Web3Error): RubicSdkError {
         if (err.message.includes('Transaction has been reverted by the EVM')) {
             return new TransactionRevertedError();
+        }
+        if (err.message.includes('Failed to check for transaction receipt')) {
+            return new FailedToCheckForTransactionReceiptError();
         }
         if (err.code === -32603) {
             return new LowGasError();
