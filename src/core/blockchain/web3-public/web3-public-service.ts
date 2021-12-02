@@ -1,4 +1,4 @@
-import { RubicError } from '@common/errors/rubic-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { RpcProvider } from '@core/sdk/models/configuration';
@@ -25,7 +25,7 @@ export class Web3PublicService {
     public getWeb3Public(blockchainName: BLOCKCHAIN_NAME): Web3Public {
         const web3Public = this.web3PublicStorage[blockchainName];
         if (!web3Public) {
-            throw new RubicError(
+            throw new RubicSdkError(
                 `Provider for ${blockchainName} was not initialized. Pass rpc link for this blockchain to sdk configuration object.`
             );
         }

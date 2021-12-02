@@ -1,3 +1,3 @@
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 
-export class HealthcheckError extends RubicSdkError {}
+export class NotSupportedBlockchain extends RubicSdkError {}

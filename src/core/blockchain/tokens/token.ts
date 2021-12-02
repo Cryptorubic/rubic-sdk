@@ -1,10 +1,11 @@
-import { RubicError } from '@common/errors/rubic-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
 import { Injector } from '@core/sdk/injector';
 import { compareAddresses } from '@common/utils/blockchain';
+import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 
-type TokenStruct = {
+export type TokenStruct = {
     blockchain: BLOCKCHAIN_NAME;
     address: string;
     name: string;
@@ -18,7 +19,7 @@ export class Token {
         const tokenInfo = await web3Public.callForTokenInfo(tokenBaseStruct.address);
 
         if (tokenInfo.decimals == null || tokenInfo.name == null || tokenInfo.symbol == null) {
-            throw new RubicError('Error while loading token');
+            throw new RubicSdkError('Error while loading token');
         }
 
         return new Token({
@@ -38,6 +39,10 @@ export class Token {
     public readonly symbol: string;
 
     public readonly decimals: number;
+
+    public get isNative(): boolean {
+        return Web3Pure.isNativeAddress(this.address);
+    }
 
     constructor(tokenStruct: TokenStruct) {
         this.blockchain = tokenStruct.blockchain;

@@ -1,6 +1,7 @@
 import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import BigNumber from 'bignumber.js';
+import { TokenStruct } from '@core/blockchain/tokens/token';
 
 type PriceTokenAmountStruct = ConstructorParameters<typeof PriceToken>[number] & {
     weiAmount: BigNumber;
@@ -16,6 +17,16 @@ export class PriceTokenAmount extends PriceToken {
         return new PriceTokenAmount({
             ...token.asStruct,
             weiAmount: tokenAmountBaseStruct.weiAmount
+        });
+    }
+
+    public static async createFromToken(
+        tokenAmount: TokenStruct & { weiAmount: BigNumber }
+    ): Promise<PriceTokenAmount> {
+        const priceToken = await super.createFromToken(tokenAmount);
+        return new PriceTokenAmount({
+            ...priceToken.asStruct,
+            weiAmount: tokenAmount.weiAmount
         });
     }
 
@@ -44,5 +55,25 @@ export class PriceTokenAmount extends PriceToken {
 
     public weiAmountPlusSlippage(slippage: number): BigNumber {
         return new BigNumber(this._weiAmount).multipliedBy(new BigNumber(1).plus(slippage));
+    }
+
+    public calculatePriceImpact(toToken: PriceTokenAmount): number | null {
+        if (
+            !this.price ||
+            !toToken.price ||
+            !this.tokenAmount?.isFinite() ||
+            !toToken.tokenAmount?.isFinite()
+        ) {
+            return null;
+        }
+
+        const fromTokenCost = this.tokenAmount.multipliedBy(this.price);
+        const toTokenCost = toToken.tokenAmount.multipliedBy(toToken.price);
+        return fromTokenCost
+            .minus(toTokenCost)
+            .dividedBy(fromTokenCost)
+            .multipliedBy(100)
+            .dp(2, BigNumber.ROUND_HALF_UP)
+            .toNumber();
     }
 }
