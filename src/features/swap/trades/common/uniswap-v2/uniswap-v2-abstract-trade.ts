@@ -1,5 +1,4 @@
 import { tryExecuteAsync } from '@common/utils/functions';
-import { DeepReadonly } from '@common/utils/types/deep-readonly';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Web3Private } from '@core/blockchain/web3-private/web3-private';
@@ -34,13 +33,13 @@ export type UniswapV2TradeStruct = {
 };
 
 export abstract class UniswapV2AbstractTrade extends InstantTrade {
-    public readonly from: DeepReadonly<PriceTokenAmount>;
+    public readonly from: PriceTokenAmount;
 
-    public readonly to: DeepReadonly<PriceTokenAmount>;
+    public readonly to: PriceTokenAmount;
 
-    public readonly gasInfo: DeepReadonly<GasInfo>;
+    public readonly gasInfo: GasInfo;
 
-    public readonly path: DeepReadonly<PriceToken[]>;
+    public readonly path: ReadonlyArray<PriceToken>;
 
     public readonly deadlineMinutes: number;
 

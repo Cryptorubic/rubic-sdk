@@ -43,4 +43,16 @@ export class PriceToken extends Token {
         const { coingeckoApi } = Injector;
         this._price = await coingeckoApi.getTokenPrice({ ...this });
     }
+
+    public async cloneAndCreate(tokenStruct?: Partial<PriceTokenStruct>): Promise<PriceToken> {
+        const { coingeckoApi } = Injector;
+
+        const price = await coingeckoApi.getTokenPrice(this);
+
+        return new PriceToken({ ...this.asStruct, price, ...tokenStruct });
+    }
+
+    public clone(tokenStruct?: Partial<PriceTokenStruct>): PriceToken {
+        return new PriceToken({ ...this, ...tokenStruct });
+    }
 }

@@ -5,7 +5,7 @@ import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@core/sdk/injector';
 import { compareAddresses } from '@common/utils/blockchain';
 
-type TokenStruct = {
+export type TokenStruct = {
     blockchain: BLOCKCHAIN_NAME;
     address: string;
     name: string;
@@ -56,5 +56,9 @@ export class Token {
         return (
             token.blockchain === this.blockchain && compareAddresses(token.address, this.address)
         );
+    }
+
+    public clone(tokenStruct?: Partial<TokenStruct>): Token {
+        return new Token({ ...this, ...tokenStruct });
     }
 }

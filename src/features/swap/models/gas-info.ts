@@ -1,8 +1,8 @@
 import BigNumber from 'bignumber.js';
 
 export interface GasInfo {
-    gasLimit: string | null;
-    gasPrice: string | null;
-    gasFeeInUsd: BigNumber | null;
-    gasFeeInEth: BigNumber | null;
+    readonly gasLimit: string | null;
+    readonly gasPrice: string | null;
+    readonly gasFeeInUsd: BigNumber | null;
+    readonly gasFeeInEth: BigNumber | null;
 }

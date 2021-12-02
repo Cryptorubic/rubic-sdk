@@ -1,12 +1,13 @@
+import { DeepReadonly } from '@common/utils/types/deep-readonly';
+import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
+import { Token } from '@core/blockchain/tokens/token';
+import { Injector } from '@core/sdk/injector';
 import BigNumber from 'bignumber.js';
-import { from, Observable, of } from 'rxjs';
 import UNISWAP_V2_ABI from 'src/features/swap/providers/common/uniswap-v2/constants/uniswap-v2-abi';
 import { Web3Public } from 'src/core/blockchain/web3-public/web3-public';
-import { TransactionOptions } from 'src/core/blockchain/models/transaction-options';
 import { defaultEstimatedGas } from 'src/features/swap/providers/common/uniswap-v2/constants/default-estimated-gas';
 import { GasCalculationMethod } from 'src/features/swap/providers/common/uniswap-v2/models/gas-calculation-method';
 import { SWAP_METHOD } from 'src/features/swap/providers/common/uniswap-v2/constants/SWAP_METHOD';
-import { Token } from 'src/core/blockchain/models/token';
 import { SwapOptions } from 'src/features/swap/models/swap-options';
 import { Uniswapv2InstantTrade } from '@features/swap/trades/instant-trade';
 import {
@@ -28,34 +29,19 @@ export abstract class UniswapV2AbstractProvider {
 
     protected abstract maxTransitTokens: number;
 
-    private readonly abi = UNISWAP_V2_ABI;
+    protected readonly contractAbi = UNISWAP_V2_ABI;
 
     private readonly defaultEstimateGas = defaultEstimatedGas;
 
     private readonly GAS_MARGIN = 1.2;
 
-    private get walletAddress(): string {
+    private readonly web3Private = Injector.web3Private;
+
+    private get walletAddress(): string | undefined {
         return this.web3Private.address;
     }
 
     protected constructor() {}
-
-    public needApprove(tokenAddress: string, contractAddress: string): Observable<BigNumber> {
-        if (Web3Public.isNativeAddress(tokenAddress)) {
-            return of(new BigNumber(Infinity));
-        }
-        return from(
-            this.web3Public.getAllowance(tokenAddress, this.walletAddress, contractAddress)
-        );
-    }
-
-    public async approve(
-        tokenAddress: string,
-        contractAddress: string,
-        options: TransactionOptions
-    ): Promise<void> {
-        await this.web3Private.approveTokens(tokenAddress, contractAddress, 'infinity', options);
-    }
 
     private calculateTokensToTokensGasLimit: GasCalculationMethod = (
         trade: InternalUniswapV2Trade
@@ -100,7 +86,7 @@ export abstract class UniswapV2AbstractProvider {
     ) => {
         return this.web3Private.tryExecuteContractMethod(
             this.contractAddress,
-            this.abi,
+            this.contractAbi,
             SWAP_METHOD[trade.exact].ETH_TO_TOKENS,
             [trade.amountOut, trade.path, trade.to, trade.deadline],
             {
@@ -118,7 +104,7 @@ export abstract class UniswapV2AbstractProvider {
     ) => {
         return this.web3Private.tryExecuteContractMethod(
             this.contractAddress,
-            this.abi,
+            this.contractAbi,
             SWAP_METHOD[trade.exact].TOKENS_TO_ETH,
             [trade.amountIn, trade.amountOut, trade.path, trade.to, trade.deadline],
             {
@@ -135,7 +121,7 @@ export abstract class UniswapV2AbstractProvider {
     ) => {
         return this.web3Private.tryExecuteContractMethod(
             this.contractAddress,
-            this.abi,
+            this.contractAbi,
             SWAP_METHOD[trade.exact].TOKENS_TO_TOKENS,
             [trade.amountIn, trade.amountOut, trade.path, trade.to, trade.deadline],
             {
@@ -147,9 +133,8 @@ export abstract class UniswapV2AbstractProvider {
     };
 
     public async calculateTrade(
-        fromToken: Token,
-        fromAmount: BigNumber,
-        toToken: Token,
+        from: DeepReadonly<PriceTokenAmount>,
+        to: DeepReadonly<Token>,
         exact: 'input' | 'output',
         options: SwapOptions = {
             shouldCalculateGas: true,
@@ -159,17 +144,17 @@ export abstract class UniswapV2AbstractProvider {
             slippageTolerance: 0.05
         }
     ): Promise<Uniswapv2InstantTrade> {
-        const { blockchain } = fromToken;
-        let fromTokenAddress = fromToken.address;
-        const toTokenClone = { ...toToken };
+        const { blockchain } = from;
+        const fromClone = from.clone();
+        const toClone = to.clone();
 
         let gasCalculationMethodName = this.calculateTokensToTokensGasLimit;
 
-        if (Web3Public.isNativeAddress(fromTokenAddress)) {
-            fromTokenAddress = this.wethAddress;
+        if (from.isNative) {
+            fromClone.address = this.wethAddress;
             gasCalculationMethodName = this.calculateEthToTokensGasLimit;
         }
-        if (Web3Public.isNativeAddress(toTokenClone.address)) {
+        if (from.isNative) {
             toTokenClone.address = this.wethAddress;
             gasCalculationMethodName = this.calculateTokensToEthGasLimit;
         }
@@ -388,7 +373,7 @@ export abstract class UniswapV2AbstractProvider {
         await web3Public
             .multicallContractMethod<{ amounts: string[] }>(
                 contractAddress,
-                this.abi,
+                this.contractAbi,
                 uniswapMethodName,
                 routesMethodArguments
             )

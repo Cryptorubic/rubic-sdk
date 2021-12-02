@@ -45,4 +45,19 @@ export class PriceTokenAmount extends PriceToken {
     public weiAmountPlusSlippage(slippage: number): BigNumber {
         return new BigNumber(this._weiAmount).multipliedBy(new BigNumber(1).plus(slippage));
     }
+
+    public async cloneAndCreate(
+        tokenStruct?: Partial<PriceTokenAmountStruct>
+    ): Promise<PriceTokenAmount> {
+        const priceToken = await PriceToken.prototype.cloneAndCreate.call(this, tokenStruct);
+        return new PriceTokenAmount({
+            ...priceToken.asStruct,
+            weiAmount: this.weiAmount,
+            ...tokenStruct
+        });
+    }
+
+    public clone(tokenStruct?: Partial<PriceTokenAmountStruct>): PriceTokenAmount {
+        return new PriceTokenAmount({ ...this, ...tokenStruct });
+    }
 }
