@@ -53,7 +53,9 @@ export class CrossChainTrade {
                     walletAddress,
                     value
                 ),
-                new BigNumber(await web3Public.getGasPrice()).dividedBy(10 ** 9).toFixed()
+                new BigNumber(
+                    await Injector.gasPriceApi.getGasPrice(fromTrade.blockchain)
+                ).toFixed()
             ]);
 
             return {
@@ -173,7 +175,7 @@ export class CrossChainTrade {
 
         const [maxGasPrice, currentGasPrice] = await Promise.all([
             this.toTrade.contract.getMaxGasPrice(),
-            new BigNumber(await this.toWeb3Public.getGasPrice()).dividedBy(10 ** 9).toFixed()
+            new BigNumber(await Injector.gasPriceApi.getGasPrice(this.toTrade.blockchain))
         ]);
         if (maxGasPrice.lt(currentGasPrice)) {
             throw new MaxGasPriceOverflowError();
