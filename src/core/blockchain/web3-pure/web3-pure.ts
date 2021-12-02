@@ -1,4 +1,4 @@
-import { RubicError } from '@common/errors/rubic-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
 import BigNumber from 'bignumber.js';
 import { toChecksumAddress, isAddress, toWei, fromWei } from 'web3-utils';
@@ -48,7 +48,7 @@ export class Web3Pure {
     static addressToBytes32(address: string): string {
         if (address.slice(0, 2) !== '0x' || address.length !== 42) {
             console.error('Wrong address format');
-            throw new RubicError('Wrong address format');
+            throw new RubicSdkError('Wrong address format');
         }
 
         return `0x${address.slice(2).padStart(64, '0')}`;

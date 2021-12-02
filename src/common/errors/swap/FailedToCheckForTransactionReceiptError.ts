@@ -1,3 +1,3 @@
-import { RubicError } from '@common/errors/rubic-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 
-export class FailedToCheckForTransactionReceiptError extends RubicError {}
+export class FailedToCheckForTransactionReceiptError extends RubicSdkError {}

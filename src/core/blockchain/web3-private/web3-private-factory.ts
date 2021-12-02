@@ -1,5 +1,5 @@
 import { WrongChainIdError } from '@common/errors/provider/wrong-chain-id.error';
-import { RubicError } from '@common/errors/rubic-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { BlockchainsInfo } from '@core/blockchain/blockchains-info';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { WalletConnectionConfiguration } from '@core/blockchain/models/wallet-connection-configuration';
@@ -38,7 +38,7 @@ export class Web3PrivateFactory {
 
         return new Proxy(web3Private, {
             get() {
-                throw new RubicError(
+                throw new RubicSdkError(
                     'Cant call web3Private method because walletProvider was not configurated. Try to pass walletProvider to sdk configuration'
                 );
             }
@@ -68,7 +68,7 @@ export class Web3PrivateFactory {
 
     private async parseChainId(): Promise<void | never> {
         if (!this.web3) {
-            throw new RubicError('Web3 is not initialized');
+            throw new RubicSdkError('Web3 is not initialized');
         }
 
         const realChainId = await this.web3.eth.getChainId();
@@ -86,7 +86,7 @@ export class Web3PrivateFactory {
 
     private parseAddress(): void {
         if (!this.web3) {
-            throw new RubicError('Web3 is not initialized');
+            throw new RubicSdkError('Web3 is not initialized');
         }
 
         this.address = this.web3.utils.toChecksumAddress(this.walletAddrrss);

@@ -21,8 +21,7 @@ import { Method } from 'web3-core-method';
 import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
 import { AbiItem } from 'web3-utils';
 import { BlockTransactionString } from 'web3-eth';
-
-import { RubicError } from '@common/errors/rubic-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { InsufficientFundsError } from '@common/errors/swap/insufficient-funds-error';
 
 import { HttpClient } from '@common/models/http-client';
@@ -350,7 +349,7 @@ export class Web3Public {
         )?.outputs;
 
         if (!methodOutputAbi) {
-            throw new RubicError(`Contract method ${methodName} does not exist.`);
+            throw new RubicSdkError(`Contract method ${methodName} does not exist.`);
         }
 
         return outputs.map(output => ({

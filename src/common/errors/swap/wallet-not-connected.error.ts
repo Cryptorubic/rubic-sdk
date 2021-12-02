@@ -1,3 +1,3 @@
-import { RubicError } from '@common/errors/rubic-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 
-export class WalletNotConnectedError extends RubicError {}
+export class WalletNotConnectedError extends RubicSdkError {}

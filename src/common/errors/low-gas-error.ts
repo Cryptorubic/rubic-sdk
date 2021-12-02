@@ -1,3 +1,3 @@
-import { RubicError } from './rubic-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 
-export class LowGasError extends RubicError {}
+export class LowGasError extends RubicSdkError {}
