@@ -74,7 +74,7 @@ export class CrossChainContract {
             )
         );
         const nativeToken = BlockchainsInfo.getBlockchainByName(this.blockchain).nativeCoin;
-        return PriceTokenAmount.createTokenFromToken({
+        return PriceTokenAmount.createFromToken({
             ...nativeToken,
             weiAmount: feeAmount
         });

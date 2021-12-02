@@ -16,7 +16,7 @@ export class PriceToken extends Token {
         return new PriceToken({ ...results[0], price: results[1] });
     }
 
-    public static async createTokenFromToken(token: TokenStruct): Promise<PriceToken> {
+    public static async createFromToken(token: TokenStruct): Promise<PriceToken> {
         const { coingeckoApi } = Injector;
 
         const price = await coingeckoApi.getTokenPrice(token);

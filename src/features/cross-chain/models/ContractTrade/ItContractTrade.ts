@@ -6,29 +6,17 @@ import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 
 export class ItContractTrade extends ContractTrade {
-    public get fromToken(): PriceTokenAmount {
-        return this.instantTrade.from;
-    }
+    public readonly fromToken: PriceTokenAmount = this.instantTrade.from;
 
-    public get toToken(): PriceTokenAmount {
-        return this.instantTrade.to;
-    }
+    public readonly toToken: PriceTokenAmount = this.instantTrade.to;
 
-    public get toAmount(): BigNumber {
-        return this.instantTrade.to.tokenAmount;
-    }
+    public readonly toAmount: BigNumber = this.instantTrade.to.tokenAmount;
 
-    public get toAmountWei(): BigNumber {
-        return this.instantTrade.to.weiAmount;
-    }
+    public readonly toAmountWei: BigNumber = this.instantTrade.to.weiAmount;
 
-    public get toAmountMin(): BigNumber {
-        return this.toAmount.multipliedBy(this.slippage);
-    }
+    public readonly toAmountMin: BigNumber = this.toAmount.multipliedBy(this.slippage);
 
-    public get path(): string[] {
-        return this.instantTrade.path;
-    }
+    public readonly path: string[] = this.instantTrade.path;
 
     constructor(
         public readonly blockchain: SupportedCrossChainBlockchain,

@@ -22,6 +22,8 @@ import { MinMaxAmountsErrors } from '@features/cross-chain/cross-chain-trade/mod
 import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity-error';
 import { MinMaxAmounts } from '@features/cross-chain/models/MinMaxAmounts';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
+import { GasData } from '@common/models/GasData';
+import { NotSupportedBlockchain } from '@common/errors/cross-chain/NotSupportedBlockchain';
 
 interface CalculatedTrade {
     toAmount: BigNumber;
@@ -67,10 +69,10 @@ export class CrossChain {
         const fromBlockchain = fromToken.blockchain;
         const toBlockchain = toToken.blockchain;
         if (!CrossChain.isSupportedBlockchain(fromBlockchain)) {
-            throw Error(`Not supported blockchain: ${fromBlockchain}`);
+            throw new NotSupportedBlockchain();
         }
         if (!CrossChain.isSupportedBlockchain(toBlockchain)) {
-            throw Error(`Not supported blockchain: ${toBlockchain}`);
+            throw new NotSupportedBlockchain();
         }
 
         const fromSlippage = 1 - options.fromSlippageTolerance;
@@ -95,30 +97,18 @@ export class CrossChain {
         );
 
         const [{ cryptoFeeToken, gasData }, minMaxAmountsErrors] = await Promise.all([
-            (async () => {
-                const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
-                const gasData = await CrossChainTrade.getGasData(
-                    fromTrade,
-                    toTrade,
-                    cryptoFeeToken,
-                    transitFeeToken
-                );
-                return {
-                    cryptoFeeToken,
-                    gasData
-                };
-            })(),
+            this.getCryptoFeeTokenAndGasData(fromTrade, toTrade),
             this.getMinMaxAmountsErrors(fromTrade)
         ]);
 
-        return new CrossChainTrade(
+        return new CrossChainTrade({
             fromTrade,
             toTrade,
             cryptoFeeToken,
             transitFeeToken,
             minMaxAmountsErrors,
             gasData
-        );
+        });
     }
 
     private async calculateBestFormTrade(
@@ -252,7 +242,7 @@ export class CrossChain {
             };
         }
 
-        const token = await PriceTokenAmount.createTokenFromToken({
+        const token = await PriceTokenAmount.createFromToken({
             ...fromToken,
             weiAmount: new BigNumber(Web3Pure.toWei(fromAmount, fromToken.decimals))
         });
@@ -338,5 +328,20 @@ export class CrossChain {
               )
             : 0;
         return Web3Pure.fromWei(amountAbsolute, fromTrade.fromToken.decimals);
+    }
+
+    private async getCryptoFeeTokenAndGasData(
+        fromTrade: ContractTrade,
+        toTrade: ContractTrade
+    ): Promise<{
+        cryptoFeeToken: PriceTokenAmount;
+        gasData: GasData | null;
+    }> {
+        const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
+        const gasData = await CrossChainTrade.getGasData(fromTrade, toTrade, cryptoFeeToken);
+        return {
+            cryptoFeeToken,
+            gasData
+        };
     }
 }
