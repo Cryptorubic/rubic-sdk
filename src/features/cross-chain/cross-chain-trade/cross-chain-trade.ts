@@ -18,6 +18,7 @@ import { InsufficientFundsGasPriceValueError } from '@common/errors/cross-chain/
 import BigNumber from 'bignumber.js';
 import { TransactionReceipt } from 'web3-eth';
 import { DeepReadonly } from '@common/utils/types/deep-readonly';
+import { UnnecessaryApprove } from '@common/errors/swap/UnnecessaryApprove';
 
 export class CrossChainTrade {
     public static async getGasData(
@@ -133,15 +134,19 @@ export class CrossChainTrade {
         this.toWeb3Public = Injector.web3PublicService.getWeb3Public(this.toTrade.blockchain);
     }
 
-    public getAllowance(tokenAddress: string): Promise<BigNumber> {
-        return this.fromWeb3Public.getAllowance(
-            tokenAddress,
+    public async needApprove(): Promise<boolean> {
+        const allowance = await this.fromWeb3Public.getAllowance(
+            this.fromTrade.fromToken.address,
             this.walletAddress,
             this.fromTrade.contract.address
         );
+        return this.fromTrade.fromToken.weiAmount.gt(allowance);
     }
 
     public approve(tokenAddress: string, options: TransactionOptions): Promise<TransactionReceipt> {
+        if (!this.needApprove()) {
+            throw new UnnecessaryApprove();
+        }
         return this.web3Private.approveTokens(
             tokenAddress,
             this.fromTrade.contract.address,

@@ -23,7 +23,7 @@ import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liq
 import { MinMaxAmounts } from '@features/cross-chain/models/MinMaxAmounts';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { GasData } from '@common/models/GasData';
-import { NotSupportedBlockchain } from '@common/errors/cross-chain/NotSupportedBlockchain';
+import { NotSupportedBlockchain } from '@common/errors/swap/NotSupportedBlockchain';
 
 interface CalculatedTrade {
     toAmount: BigNumber;
