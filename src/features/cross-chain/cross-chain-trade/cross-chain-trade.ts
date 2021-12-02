@@ -217,8 +217,7 @@ export class CrossChainTrade {
 
         const contractAddress = fromTrade.contract.address;
 
-        const isFromTokenNative = Web3Pure.isNativeAddress(fromTrade.fromToken.address);
-        const methodName = isFromTokenNative
+        const methodName = fromTrade.fromToken.isNative
             ? CROSS_CHAIN_ROUTING_SWAP_METHOD.SWAP_CRYPTO
             : CROSS_CHAIN_ROUTING_SWAP_METHOD.SWAP_TOKENS;
 
@@ -242,13 +241,13 @@ export class CrossChainTrade {
                 fromTransitTokenAmountAbsolute,
                 tokenOutAmountMinAbsolute,
                 this.walletAddress,
-                Web3Pure.isNativeAddress(toTrade.toToken.address),
+                toTrade.toToken.isNative,
                 true
             ]
         ];
 
         const value = this.cryptoFeeToken.weiAmount
-            .plus(isFromTokenNative ? tokenInAmountAbsolute : 0)
+            .plus(fromTrade.fromToken.isNative ? tokenInAmountAbsolute : 0)
             .toFixed(0);
 
         return {
