@@ -1,7 +1,6 @@
 export interface SwapOptions {
-    shouldCalculateGas: boolean;
-    slippageTolerance: number;
-    deadline: number;
-    disableMultihops: boolean;
-    rubicOptimisation: boolean;
+    readonly gasCalculation: 'disabled' | 'calculate' | 'rubicOptimisation';
+    readonly slippageTolerance: number;
+    readonly deadline: number;
+    readonly disableMultihops: boolean;
 }

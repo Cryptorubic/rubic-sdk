@@ -1,7 +1,7 @@
-import { DeepReadonly } from '@common/utils/types/deep-readonly';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { Token } from '@core/blockchain/tokens/token';
 import { Injector } from '@core/sdk/injector';
+import { GasInfo } from '@features/swap/models/gas-info';
 import BigNumber from 'bignumber.js';
 import UNISWAP_V2_ABI from 'src/features/swap/providers/common/uniswap-v2/constants/uniswap-v2-abi';
 import { Web3Public } from 'src/core/blockchain/web3-public/web3-public';
@@ -38,6 +38,10 @@ export abstract class UniswapV2AbstractProvider {
     private readonly GAS_MARGIN = 1.2;
 
     private readonly web3Private = Injector.web3Private;
+
+    private readonly web3PublicService = Injector.web3PublicService;
+
+    private readonly coingeckoApi = Injector.coingeckoApi;
 
     private get walletAddress(): string | undefined {
         return this.web3Private.address;
@@ -134,34 +138,47 @@ export abstract class UniswapV2AbstractProvider {
         );
     };
 
+    private createTokenWETHAbleProxy<T extends Token>(token: T): T {
+        const wethAbleAddress = token.isNative ? this.wethAddress : token.address;
+        return new Proxy<T>(token, {
+            get: (target, key) => {
+                if (!(key in target)) {
+                    return undefined;
+                }
+                if (key === 'address') {
+                    return wethAbleAddress;
+                }
+                return target[key as keyof T];
+            }
+        });
+    }
+
+    private async getGasInfo(blockchain: BLOCKCHAIN_NAME): Omit<Required<GasInfo>, 'gasLimit'> {
+        const gasPrice = await this.web3PublicService.getWeb3Public(blockchain).getGasPrice();
+        const gasPriceInEth = Web3Pure.fromWei(gasPrice);
+        const nativeCoinPrice = await this.coingeckoApi.getNativeCoinPrice(blockchain);
+        const gasPriceInUsd = gasPriceInEth.multipliedBy(nativeCoinPrice);
+        return {
+            gasPrice,
+            gasFeeInEth,
+            gasPriceInUsd
+        };
+    }
+
     public async calculateTrade(
-        from: DeepReadonly<PriceTokenAmount>,
-        to: DeepReadonly<Token>,
+        from: PriceTokenAmount,
+        to: Token,
         exact: 'input' | 'output',
         options: SwapOptions = {
-            shouldCalculateGas: true,
-            rubicOptimisation: true,
+            gasCalculation: 'calculate',
             disableMultihops: false,
             deadline: 1200000, // 20 min
             slippageTolerance: 0.05
         }
     ): Promise<Uniswapv2InstantTrade> {
         const { blockchain } = from;
-        const fromClone = from.clone();
-        const toClone = to.clone();
-
-        let gasCalculationMethodName = this.calculateTokensToTokensGasLimit;
-
-        if (from.isNative) {
-            fromClone.address = this.wethAddress;
-            gasCalculationMethodName = this.calculateEthToTokensGasLimit;
-        }
-        if (from.isNative) {
-            toTokenClone.address = this.wethAddress;
-            gasCalculationMethodName = this.calculateTokensToEthGasLimit;
-        }
-
-        const fromAmountAbsolute = Web3Public.toWei(fromAmount, fromToken.decimals);
+        const fromClone = this.createTokenWETHAbleProxy(from);
+        const toClone = this.createTokenWETHAbleProxy(to);
 
         let gasPrice;
         let gasPriceInEth: BigNumber | undefined;
@@ -173,17 +190,11 @@ export abstract class UniswapV2AbstractProvider {
             gasPriceInUsd = gasPriceInEth.multipliedBy(nativeCoinPrice);
         }
 
-        const { route, estimatedGas } = await this.getAmountAndPath(
-            fromTokenAddress,
-            toTokenClone,
-            fromAmountAbsolute,
-            exact,
-            {
-                ...options,
-                gasCalculationMethodName,
-                gasPriceInUsd
-            }
-        );
+        const { route, estimatedGas } = await this.getAmountAndPath(fromClone, toClone, exact, {
+            ...options,
+            gasCalculationMethodName,
+            gasPriceInUsd
+        });
 
         const instantTrade: Uniswapv2InstantTrade = {
             from: {
@@ -229,9 +240,8 @@ export abstract class UniswapV2AbstractProvider {
     }
 
     private async getAmountAndPath(
-        fromTokenAddress: string,
+        from: PriceTokenAmount,
         toToken: Token,
-        amountAbsolute: string,
         exact: 'input' | 'output',
         options: SwapOptions & {
             gasCalculationMethodName: GasCalculationMethod;
