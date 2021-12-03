@@ -2,10 +2,10 @@ import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { Injector } from '@core/sdk/injector';
 import { PCacheable } from 'ts-cacheable';
 import BigNumber from 'bignumber.js';
-import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import pTimeout from 'p-timeout';
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { HttpClient } from '@common/models/http-client';
+import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 
 const supportedBlockchains = [BLOCKCHAIN_NAME.ETHEREUM, BLOCKCHAIN_NAME.AVALANCHE] as const;
 
@@ -26,7 +26,7 @@ export class GasPriceApi {
     /**
      * Gas price functions for different networks.
      */
-    private readonly gasPriceFunctions: Record<SupportedBlockchain, () => Promise<BigNumber>>;
+    private readonly gasPriceFunctions: Record<SupportedBlockchain, () => Promise<string>>;
 
     constructor(private readonly httpClient: HttpClient) {
         this.gasPriceFunctions = {
@@ -36,11 +36,11 @@ export class GasPriceApi {
     }
 
     /**
-     * Gas price in Eth units for selected blockchain.
+     * Gas price in Wei for selected blockchain.
      * @param blockchain Blockchain to get gas price from.
-     * @return Promise<BigNumber> Average gas price in Eth units.
+     * @return Promise<BigNumber> Average gas price in Wei.
      */
-    public getGasPrice(blockchain: BLOCKCHAIN_NAME): Promise<BigNumber> {
+    public getGasPrice(blockchain: BLOCKCHAIN_NAME): Promise<string> {
         if (!GasPriceApi.isSupportedBlockchain(blockchain)) {
             throw new RubicSdkError(`Blockchain ${blockchain} is not supported by gas-price-api`);
         }
@@ -48,13 +48,22 @@ export class GasPriceApi {
     }
 
     /**
-     * Gets Ethereum gas price from different APIs, sorted by priority.
+     * Gas price in Eth units for selected blockchain.
+     * @param blockchain Blockchain to get gas price from.
      * @return Promise<BigNumber> Average gas price in Eth units.
+     */
+    public async getGasPriceInEthUnits(blockchain: BLOCKCHAIN_NAME): Promise<BigNumber> {
+        return Web3Pure.fromWei(await this.getGasPrice(blockchain));
+    }
+
+    /**
+     * Gets Ethereum gas price from different APIs, sorted by priority.
+     * @return Promise<BigNumber> Average gas price in Wei.
      */
     @PCacheable({
         maxAge: GasPriceApi.requestInterval
     })
-    private async fetchEthGas(): Promise<BigNumber> {
+    private async fetchEthGas(): Promise<string> {
         const requestTimeout = 3000;
 
         try {
@@ -62,7 +71,7 @@ export class GasPriceApi {
                 this.httpClient.get('https://gas-price-api.1inch.io/v1.2/1'),
                 requestTimeout
             );
-            return Web3Pure.fromWei(response.medium.maxFeePerGas);
+            return response.medium.maxFeePerGas;
         } catch (_err) {}
 
         try {
@@ -70,24 +79,22 @@ export class GasPriceApi {
                 this.httpClient.get('https://ethgasstation.info/api/ethgasAPI.json'),
                 requestTimeout
             );
-            return new BigNumber(response.average / 10).dividedBy(10 ** 9);
+            return new BigNumber(response.average / 10).multipliedBy(10 ** 9).toFixed(0);
         } catch (_err) {}
 
         const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ETHEREUM);
-        const gasPriceInWei = await web3Public.getGasPrice();
-        return Web3Pure.fromWei(gasPriceInWei);
+        return web3Public.getGasPrice();
     }
 
     /**
      * Gets Avalanche gas price.
-     * @return Promise<BigNumber> Average gas price in Eth units.
+     * @return Promise<BigNumber> Average gas price in Wei.
      */
     @PCacheable({
         maxAge: GasPriceApi.requestInterval
     })
-    private async fetchAvalancheGas(): Promise<BigNumber> {
+    private fetchAvalancheGas(): Promise<string> {
         const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.AVALANCHE);
-        const gasPriceInWei = await web3Public.getGasPrice();
-        return Web3Pure.fromWei(gasPriceInWei);
+        return web3Public.getGasPrice();
     }
 }
