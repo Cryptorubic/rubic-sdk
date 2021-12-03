@@ -2,10 +2,17 @@ import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import BigNumber from 'bignumber.js';
 import { TokenStruct } from '@core/blockchain/tokens/token';
+import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 
-type PriceTokenAmountStruct = ConstructorParameters<typeof PriceToken>[number] & {
-    weiAmount: BigNumber;
-};
+type PriceTokenAmountStruct = ConstructorParameters<typeof PriceToken>[number] &
+    (
+        | {
+              weiAmount: BigNumber;
+          }
+        | {
+              tokenAmount: BigNumber;
+          }
+    );
 
 type TokenAmountBaseStruct = TokenBaseStruct & { weiAmount: BigNumber };
 
@@ -21,12 +28,12 @@ export class PriceTokenAmount extends PriceToken {
     }
 
     public static async createFromToken(
-        tokenAmount: TokenStruct & { weiAmount: BigNumber }
+        tokenAmount: TokenStruct & ({ weiAmount: BigNumber } | { tokenAmount: BigNumber })
     ): Promise<PriceTokenAmount> {
         const priceToken = await super.createFromToken(tokenAmount);
         return new PriceTokenAmount({
-            ...priceToken.asStruct,
-            weiAmount: tokenAmount.weiAmount
+            ...tokenAmount,
+            price: priceToken.price
         });
     }
 
@@ -46,7 +53,13 @@ export class PriceTokenAmount extends PriceToken {
 
     constructor(tokenStruct: PriceTokenAmountStruct) {
         super(tokenStruct);
-        this._weiAmount = new BigNumber(tokenStruct.weiAmount);
+        if ('weiAmount' in tokenStruct) {
+            this._weiAmount = new BigNumber(tokenStruct.weiAmount);
+        } else {
+            this._weiAmount = new BigNumber(
+                Web3Pure.toWei(tokenStruct.tokenAmount, tokenStruct.decimals)
+            );
+        }
     }
 
     public weiAmountMinusSlippage(slippage: number): BigNumber {
