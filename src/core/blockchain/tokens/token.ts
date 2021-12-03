@@ -1,6 +1,7 @@
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
+import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@core/sdk/injector';
 import { compareAddresses } from '@common/utils/blockchain';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
@@ -56,5 +57,9 @@ export class Token {
         return (
             token.blockchain === this.blockchain && compareAddresses(token.address, this.address)
         );
+    }
+
+    public clone(tokenStruct?: Partial<TokenStruct>): Token {
+        return new Token({ ...this, ...tokenStruct });
     }
 }
