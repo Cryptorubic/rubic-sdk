@@ -5,17 +5,29 @@ import { ContractTrade } from '@features/cross-chain/models/ContractTrade/Contra
 import BigNumber from 'bignumber.js';
 
 export class DirectContractTrade extends ContractTrade {
-    public readonly fromToken: PriceTokenAmount = this.token;
+    public get fromToken(): PriceTokenAmount {
+        return this.token;
+    }
 
-    public readonly toToken: PriceTokenAmount = this.token;
+    public get toToken(): PriceTokenAmount {
+        return this.token;
+    }
 
-    public readonly toAmount: BigNumber = this.token.tokenAmount;
+    public get toAmount(): BigNumber {
+        return this.token.tokenAmount;
+    }
 
-    public readonly toAmountWei: BigNumber = this.token.weiAmount;
+    public get toAmountWei(): BigNumber {
+        return this.token.weiAmount;
+    }
 
-    public readonly toAmountMin: BigNumber = this.toAmount;
+    public get toAmountMin(): BigNumber {
+        return this.toAmount;
+    }
 
-    public readonly path: string[] = [this.token.address];
+    public get path(): string[] {
+        return [this.token.address];
+    }
 
     constructor(
         public readonly blockchain: SupportedCrossChainBlockchain,

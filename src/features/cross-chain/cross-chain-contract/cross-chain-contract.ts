@@ -6,9 +6,8 @@ import { Token } from '@core/blockchain/tokens/token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import BigNumber from 'bignumber.js';
 import { BlockchainsInfo } from '@core/blockchain/blockchains-info';
-import { UniswapV2LikeProvider } from '@features/swap/providers/common/uniswap-v2/uniswap-v2-like-provider';
 import { crossChainContractAbi } from '@features/cross-chain/constants/crossChainContractAbi';
-import { DeepReadonly } from '@common/utils/types/deep-readonly';
+import { UniswapV2AbstractProvider } from '@features/swap/providers/common/uniswap-v2-abstract-provider/uniswap-v2-abstract-provider';
 
 export class CrossChainContract {
     private readonly web3Public: Web3Public;
@@ -16,7 +15,7 @@ export class CrossChainContract {
     constructor(
         private readonly blockchain: BLOCKCHAIN_NAME,
         public readonly address: string,
-        public readonly uniswapV2Provider: DeepReadonly<UniswapV2LikeProvider>
+        public readonly uniswapV2Provider: UniswapV2AbstractProvider
     ) {
         this.web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
     }

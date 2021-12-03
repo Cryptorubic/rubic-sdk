@@ -17,7 +17,6 @@ import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/Fai
 import { InsufficientFundsGasPriceValueError } from '@common/errors/cross-chain/InsufficientFundsGasPriceValueError';
 import BigNumber from 'bignumber.js';
 import { TransactionReceipt } from 'web3-eth';
-import { DeepReadonly } from '@common/utils/types/deep-readonly';
 import { UnnecessaryApprove } from '@common/errors/swap/UnnecessaryApprove';
 
 export class CrossChainTrade {
@@ -69,13 +68,9 @@ export class CrossChainTrade {
 
     private readonly toTrade: ContractTrade;
 
-    public readonly fromToken: DeepReadonly<PriceTokenAmount>;
+    public readonly cryptoFeeToken: PriceTokenAmount;
 
-    public readonly toToken: DeepReadonly<PriceTokenAmount>;
-
-    public readonly cryptoFeeToken: DeepReadonly<PriceTokenAmount>;
-
-    public readonly transitFeeToken: DeepReadonly<PriceTokenAmount>;
+    public readonly transitFeeToken: PriceTokenAmount;
 
     private readonly minMaxAmountsErrors: MinMaxAmountsErrors;
 
@@ -89,6 +84,14 @@ export class CrossChainTrade {
 
     private get walletAddress(): string {
         return this.web3Private.address;
+    }
+
+    public get fromToken(): PriceTokenAmount {
+        return this.fromTrade.fromToken;
+    }
+
+    public get toToken(): PriceTokenAmount {
+        return this.fromTrade.toToken;
     }
 
     public get estimatedGas(): BigNumber | null {
@@ -115,15 +118,13 @@ export class CrossChainTrade {
     constructor(crossChainTrade: {
         fromTrade: ContractTrade;
         toTrade: ContractTrade;
-        cryptoFeeToken: DeepReadonly<PriceTokenAmount>;
-        transitFeeToken: DeepReadonly<PriceTokenAmount>;
+        cryptoFeeToken: PriceTokenAmount;
+        transitFeeToken: PriceTokenAmount;
         minMaxAmountsErrors: MinMaxAmountsErrors;
         gasData: GasData | null;
     }) {
         this.fromTrade = crossChainTrade.fromTrade;
         this.toTrade = crossChainTrade.toTrade;
-        this.fromToken = this.fromTrade.fromToken;
-        this.toToken = this.toTrade.toToken;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.transitFeeToken = crossChainTrade.transitFeeToken;
         this.minMaxAmountsErrors = crossChainTrade.minMaxAmountsErrors;
