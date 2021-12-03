@@ -2,6 +2,7 @@ import { CoingeckoApi } from '@common/http/coingecko-api';
 import { HttpClient } from '@common/models/http-client';
 import { Web3Private } from '@core/blockchain/web3-private/web3-private';
 import { Web3PublicService } from '@core/blockchain/web3-public/web3-public-service';
+import { GasPriceApi } from '@common/http/gas-price-api';
 
 export class Injector {
     private static injector: Injector;
@@ -22,6 +23,10 @@ export class Injector {
         return Injector.injector.coingeckoApi;
     }
 
+    public static get gasPriceApi(): GasPriceApi {
+        return Injector.injector.gasPriceApi;
+    }
+
     public static createInjector(
         web3PublicService: Web3PublicService,
         web3Private: Web3Private,
@@ -31,7 +36,9 @@ export class Injector {
         new Injector(web3PublicService, web3Private, httpClient);
     }
 
-    private coingeckoApi: CoingeckoApi;
+    private readonly coingeckoApi: CoingeckoApi;
+
+    private readonly gasPriceApi: GasPriceApi;
 
     private constructor(
         private readonly web3PublicService: Web3PublicService,
@@ -39,6 +46,7 @@ export class Injector {
         private readonly httpClient: HttpClient
     ) {
         this.coingeckoApi = new CoingeckoApi(httpClient);
+        this.gasPriceApi = new GasPriceApi(httpClient);
         Injector.injector = this;
     }
 }

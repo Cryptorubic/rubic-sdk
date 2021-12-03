@@ -53,7 +53,7 @@ export class CrossChainTrade {
                     walletAddress,
                     value
                 ),
-                new BigNumber(await web3Public.getGasPrice()).dividedBy(10 ** 9).toFixed()
+                (await Injector.gasPriceApi.getGasPriceInEthUnits(fromTrade.blockchain)).toFixed()
             ]);
 
             return {
@@ -173,7 +173,7 @@ export class CrossChainTrade {
 
         const [maxGasPrice, currentGasPrice] = await Promise.all([
             this.toTrade.contract.getMaxGasPrice(),
-            new BigNumber(await this.toWeb3Public.getGasPrice()).dividedBy(10 ** 9).toFixed()
+            Injector.gasPriceApi.getGasPriceInEthUnits(this.toTrade.blockchain)
         ]);
         if (maxGasPrice.lt(currentGasPrice)) {
             throw new MaxGasPriceOverflowError();
@@ -306,7 +306,7 @@ export class CrossChainTrade {
     }
 
     private parseSwapErrors(err: Error): never {
-        const errMessage = err!.message || err.toString?.();
+        const errMessage = err?.message || err?.toString?.();
         if (errMessage?.includes('swapContract: Not enough amount of tokens')) {
             throw new CrossChainIsUnavailableError();
         }
