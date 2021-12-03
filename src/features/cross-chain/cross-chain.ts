@@ -9,8 +9,6 @@ import BigNumber from 'bignumber.js';
 import { CrossChainOptions } from '@features/cross-chain/models/CrossChainOptions';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { compareAddresses } from '@common/utils/blockchain';
-
-import { Uniswapv2InstantTrade } from '@features/swap/models/instant-trade';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { ContractTrade } from '@features/cross-chain/models/ContractTrade/ContractTrade';
@@ -24,6 +22,7 @@ import { MinMaxAmounts } from '@features/cross-chain/models/MinMaxAmounts';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { GasData } from '@common/models/GasData';
 import { NotSupportedBlockchain } from '@common/errors/swap/NotSupportedBlockchain';
+import { Uniswapv2InstantTrade } from '@features/swap/trades/instant-trade';
 
 interface CalculatedTrade {
     toAmount: BigNumber;
@@ -142,12 +141,7 @@ export class CrossChain {
         const feeInPercents = await fromTrade.contract.getFeeInPercents();
         const transitFeeToken = new PriceTokenAmount({
             ...fromTransitToken.asStruct,
-            weiAmount: new BigNumber(
-                Web3Pure.toWei(
-                    fromTransitTokenAmount.multipliedBy(feeInPercents),
-                    fromTransitToken.decimals
-                )
-            )
+            tokenAmount: fromTransitTokenAmount.multipliedBy(feeInPercents)
         });
 
         let toTransitTokenAmount = fromTransitTokenAmount.minus(transitFeeToken.tokenAmount);
@@ -244,7 +238,7 @@ export class CrossChain {
 
         const token = await PriceTokenAmount.createFromToken({
             ...fromToken,
-            weiAmount: new BigNumber(Web3Pure.toWei(fromAmount, fromToken.decimals))
+            tokenAmount: fromAmount
         });
         return {
             toAmount: fromAmount,
