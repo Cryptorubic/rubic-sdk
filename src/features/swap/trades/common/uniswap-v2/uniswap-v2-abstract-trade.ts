@@ -1,6 +1,6 @@
 import { tryExecuteAsync } from '@common/utils/functions';
-import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
+import { Token } from '@core/blockchain/tokens/token';
 import { Web3Private } from '@core/blockchain/web3-private/web3-private';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@core/sdk/injector';
@@ -28,32 +28,37 @@ export type UniswapV2TradeStruct = {
     from: PriceTokenAmount;
     to: PriceTokenAmount;
     gasInfo: FeeInfo;
-    path: PriceToken[];
-    deadlineMinutes: number;
+    path: ReadonlyArray<Token> | Token[];
+    deadlineMinutes?: number;
     exact: 'input' | 'output';
-    slippageTolerance: number;
+    slippageTolerance?: number;
 };
 
 export abstract class UniswapV2AbstractTrade extends InstantTrade {
+    public deadlineMinutes: number;
+
+    public slippageTolerance: number;
+
     public readonly from: PriceTokenAmount;
 
     public readonly to: PriceTokenAmount;
 
     public readonly gasInfo: FeeInfo;
 
-    public readonly path: ReadonlyArray<PriceToken>;
-
-    public readonly deadlineMinutes: number;
+    public readonly path: ReadonlyArray<Token>;
 
     public readonly exact: 'input' | 'output';
-
-    public readonly slippageTolerance: number;
 
     protected readonly contractAbi: AbiItem[] = defaultUniswapV2Abi;
 
     protected readonly swapMethods: ExactInputOutputSwapMethodsList = SWAP_METHOD;
 
     protected readonly defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
+
+    public set settings(value: { deadlineMinutes?: number; slippageTolerance?: number }) {
+        this.deadlineMinutes = value.deadlineMinutes || this.deadlineMinutes;
+        this.slippageTolerance = value.slippageTolerance || this.slippageTolerance;
+    }
 
     private get deadlineMinutesTimestamp(): number {
         return Math.floor(Date.now() / 1000 + 60 * this.deadlineMinutes);
@@ -104,9 +109,9 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         this.to = tradeStruct.to;
         this.gasInfo = tradeStruct.gasInfo;
         this.path = tradeStruct.path;
-        this.deadlineMinutes = tradeStruct.deadlineMinutes;
+        this.deadlineMinutes = tradeStruct.deadlineMinutes || 1; // TODO: default child config
         this.exact = tradeStruct.exact;
-        this.slippageTolerance = tradeStruct.slippageTolerance;
+        this.slippageTolerance = tradeStruct.slippageTolerance || 1; // TODO: default child config
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {

@@ -4,7 +4,6 @@ import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@core/sdk/injector';
 import { compareAddresses } from '@common/utils/blockchain';
-import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 
 export type TokenStruct = {
     blockchain: BLOCKCHAIN_NAME;
@@ -28,6 +27,32 @@ export class Token {
             name: tokenInfo.name,
             symbol: tokenInfo.symbol,
             decimals: parseInt(tokenInfo.decimals)
+        });
+    }
+
+    public static async createTokens(
+        tokensAddresses: string[],
+        blockchain: BLOCKCHAIN_NAME
+    ): Promise<Token[]> {
+        const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
+        const tokenInfo = await web3Public.callForTokensInfo(tokensAddresses);
+
+        return tokenInfo.map((tokenInfo, index) => {
+            if (
+                tokenInfo.decimals === undefined ||
+                tokenInfo.name === undefined ||
+                tokenInfo.symbol === undefined
+            ) {
+                throw new RubicSdkError('Error while loading token');
+            }
+
+            return new Token({
+                address: tokensAddresses[index],
+                blockchain,
+                name: tokenInfo.name,
+                symbol: tokenInfo.symbol,
+                decimals: parseInt(tokenInfo.decimals)
+            });
         });
     }
 
