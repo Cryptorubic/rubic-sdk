@@ -26,6 +26,7 @@ import { InsufficientFundsError } from '@common/errors/swap/insufficient-funds-e
 
 import { HttpClient } from '@common/models/http-client';
 import { DefaultHttpClient } from '@common/http/default-http-client';
+import { MethodData } from '@core/blockchain/web3-public/models/method-data';
 
 type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 
@@ -324,40 +325,45 @@ export class Web3Public {
     }
 
     /**
-     * @description use multicall to make many calls in the single rpc request
-     * @param contractAddress target contract address
-     * @param contractAbi target contract abi
-     * @param methodName target method name
-     * @param methodCallsArguments list method calls parameters arrays
+     * Uses multicall to make many methods calls in one contract.
+     * @param contractAddress Target contract address.
+     * @param contractAbi Target contract abi.
+     * @param methodsData Methods data, containing methods' names and arguments.
      */
-    public async multicallContractMethod<Output>(
+    public async multicallContractMethods<Output>(
         contractAddress: string,
         contractAbi: AbiItem[],
-        methodName: string,
-        methodCallsArguments: unknown[][]
+        methodsData: MethodData[]
     ): Promise<ContractMulticallResponse<Output>[]> {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
-        const calls: Call[] = methodCallsArguments.map(callArguments => ({
-            callData: contract.methods[methodName](...callArguments).encodeABI(),
+        const calls: Call[] = methodsData.map(({ methodName, methodArguments }) => ({
+            callData: contract.methods[methodName](...methodArguments).encodeABI(),
             target: contractAddress
         }));
 
         const outputs = await this.multicall(calls);
 
-        const methodOutputAbi = contractAbi.find(
-            funcSignature => funcSignature.name === methodName
-        )?.outputs;
+        return outputs.map((output, index) => {
+            const methodOutputAbi = contractAbi.find(
+                funcSignature => funcSignature.name === methodsData[index].methodName
+            )?.outputs;
 
-        if (!methodOutputAbi) {
-            throw new RubicSdkError(`Contract method ${methodName} does not exist.`);
-        }
+            if (!methodOutputAbi) {
+                throw new RubicSdkError(
+                    `Contract method ${methodsData[index].methodName} does not exist.`
+                );
+            }
 
-        return outputs.map(output => ({
-            success: output.success,
-            output: output.success
-                ? (this.web3.eth.abi.decodeParameters(methodOutputAbi, output.returnData) as Output)
-                : null
-        }));
+            return {
+                success: output.success,
+                output: output.success
+                    ? (this.web3.eth.abi.decodeParameters(
+                          methodOutputAbi,
+                          output.returnData
+                      ) as Output)
+                    : null
+            };
+        });
     }
 
     /**
@@ -436,7 +442,7 @@ export class Web3Public {
                     to: contractAddress,
                     data,
                     ...(callsData[index].value && {
-                        value: `0x${callsData[index].value!!.toString(16)}`
+                        value: `0x${parseInt(callsData[index].value!).toString(16)}`
                     })
                 }
             }));

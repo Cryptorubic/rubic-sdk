@@ -136,6 +136,10 @@ export class CrossChainTrade {
     }
 
     public async needApprove(): Promise<boolean> {
+        if (this.fromTrade.fromToken.isNative) {
+            return false;
+        }
+
         const allowance = await this.fromWeb3Public.getAllowance(
             this.fromTrade.fromToken.address,
             this.walletAddress,

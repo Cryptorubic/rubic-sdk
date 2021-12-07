@@ -23,6 +23,7 @@ import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { GasData } from '@common/models/GasData';
 import { NotSupportedBlockchain } from '@common/errors/swap/NotSupportedBlockchain';
 import { Uniswapv2InstantTrade } from '@features/swap/trades/instant-trade';
+import { notNull } from '@common/utils/object';
 
 interface CalculatedTrade {
     toAmount: BigNumber;
@@ -187,13 +188,13 @@ export class CrossChain {
                     }
                     return null;
                 })
-                .filter(value => value !== null)
-                .sort((a, b) => b!.trade.toAmount.comparedTo(a!.trade.toAmount));
+                .filter(notNull)
+                .sort((a, b) => b.trade.toAmount.comparedTo(a.trade.toAmount));
 
             if (!sortedResults.length) {
                 throw (results[0] as PromiseRejectedResult).reason;
             }
-            return sortedResults[0]!;
+            return sortedResults[0];
         });
         const bestContract = calculatedContractTrade.contract;
 

@@ -4,7 +4,6 @@ import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@core/sdk/injector';
 import { compareAddresses } from '@common/utils/blockchain';
-import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 
 export type TokenStruct = {
     blockchain: BLOCKCHAIN_NAME;

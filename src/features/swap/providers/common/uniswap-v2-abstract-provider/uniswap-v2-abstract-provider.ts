@@ -10,10 +10,6 @@ import { GasCalculationMethod } from 'src/features/swap/providers/common/uniswap
 import { SWAP_METHOD } from 'src/features/swap/providers/common/uniswap-v2/constants/SWAP_METHOD';
 import { SwapOptions } from 'src/features/swap/models/swap-options';
 import { Uniswapv2InstantTrade } from '@features/swap/trades/instant-trade';
-import {
-    UniswapCalculatedInfo,
-    UniswapCalculatedInfoWithProfit
-} from 'src/features/swap/providers/common/uniswap-v2/models/uniswap-calculated-info';
 import { UniswapRoute } from 'src/features/swap/providers/common/uniswap-v2/models/uniswap-route';
 import { CreateTradeMethod } from 'src/features/swap/providers/common/uniswap-v2/models/create-trade-method';
 import { InternalUniswapV2Trade } from 'src/features/swap/providers/common/uniswap-v2/models/uniswap-v2-trade';
@@ -21,6 +17,11 @@ import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liq
 import { SwapTransactionOptionsWithGasLimit } from 'src/features/swap/models/swap-transaction-options';
 import { Token } from '@core/blockchain/tokens/token';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
+import {
+    UniswapCalculatedInfo,
+    UniswapCalculatedInfoWithProfit
+} from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/uniswap-calculated-info';
+import { createTokenWethAbleProxy } from '@features/swap/providers/common/utils/weth';
 
 export abstract class UniswapV2AbstractProvider {
     protected abstract wethAddress: string;
@@ -138,21 +139,6 @@ export abstract class UniswapV2AbstractProvider {
         );
     };
 
-    private createTokenWETHAbleProxy<T extends Token>(token: T): T {
-        const wethAbleAddress = token.isNative ? this.wethAddress : token.address;
-        return new Proxy<T>(token, {
-            get: (target, key) => {
-                if (!(key in target)) {
-                    return undefined;
-                }
-                if (key === 'address') {
-                    return wethAbleAddress;
-                }
-                return target[key as keyof T];
-            }
-        });
-    }
-
     private async getGasInfo(blockchain: BLOCKCHAIN_NAME): Omit<Required<GasInfo>, 'gasLimit'> {
         const gasPrice = await this.web3PublicService.getWeb3Public(blockchain).getGasPrice();
         const gasPriceInEth = Web3Pure.fromWei(gasPrice);
@@ -177,8 +163,8 @@ export abstract class UniswapV2AbstractProvider {
         }
     ): Promise<Uniswapv2InstantTrade> {
         const { blockchain } = from;
-        const fromClone = this.createTokenWETHAbleProxy(from);
-        const toClone = this.createTokenWETHAbleProxy(to);
+        const fromClone = createTokenWethAbleProxy(from, this.wethAddress);
+        const toClone = createTokenWethAbleProxy(to, this.wethAddress);
 
         let gasPrice;
         let gasPriceInEth: BigNumber | undefined;
@@ -205,12 +191,7 @@ export abstract class UniswapV2AbstractProvider {
                 token: toToken,
                 amount: Web3Public.fromWei(route.outputAbsoluteAmount, toToken.decimals)
             },
-            gasInfo: {
-                gasLimit: null,
-                gasPrice: null,
-                gasFeeInEth: null,
-                gasFeeInUsd: null
-            },
+            gasInfo: null,
             path: route.path,
             deadline: options.deadline,
             slippageTolerance: options.slippageTolerance,
@@ -221,19 +202,16 @@ export abstract class UniswapV2AbstractProvider {
             return instantTrade;
         }
 
-        const gasLimit = estimatedGas
-            ? Web3Public.calculateGasMargin(estimatedGas, this.GAS_MARGIN)
-            : null;
-        const gasFeeInEth = gasPriceInEth && gasLimit ? gasPriceInEth.multipliedBy(gasLimit) : null;
-        const gasFeeInUsd =
-            gasPriceInEth && gasLimit ? gasPriceInUsd?.multipliedBy(gasLimit) : null;
+        const gasLimit = Web3Pure.calculateGasMargin(estimatedGas, this.GAS_MARGIN);
+        const gasFeeInEth = gasPriceInEth!.multipliedBy(gasLimit);
+        const gasFeeInUsd = gasPriceInUsd!.multipliedBy(gasLimit);
 
         return {
             ...instantTrade,
             gasInfo: {
                 gasLimit,
-                gasPrice: gasPrice || null,
-                gasFeeInUsd: gasFeeInUsd || null,
+                gasPrice,
+                gasFeeInUsd,
                 gasFeeInEth
             }
         };
@@ -377,7 +355,7 @@ export abstract class UniswapV2AbstractProvider {
 
         const routes: UniswapRoute[] = [];
         await this.web3Public
-            .multicallContractMethod<{ amounts: string[] }>(
+            .multicallContractMethods<{ amounts: string[] }>(
                 this.contractAddress,
                 this.contractAbi,
                 uniswapMethodName,

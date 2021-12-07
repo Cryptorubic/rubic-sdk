@@ -21,6 +21,7 @@ import { DefaultEstimatedGas } from '@features/swap/providers/common/uniswap-v2-
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
+import { deadlineMinutesTimestamp } from '@common/utils/blockchain';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount;
@@ -37,7 +38,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     public readonly to: PriceTokenAmount;
 
-    public readonly gasInfo: GasInfo;
+    public readonly gasInfo: GasInfo | null;
 
     public readonly path: ReadonlyArray<PriceToken>;
 
@@ -54,11 +55,11 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     protected readonly defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
 
     private get deadlineMinutesTimestamp(): number {
-        return Math.floor(Date.now() / 1000 + 60 * this.deadlineMinutes);
+        return deadlineMinutesTimestamp(this.deadlineMinutes);
     }
 
     protected constructor(tradeStruct: UniswapV2TradeStruct) {
-        super();
+        super(Injector.web3PublicService.getWeb3Public(tradeStruct.from.blockchain));
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
         this.gasInfo = tradeStruct.gasInfo;
@@ -69,7 +70,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
-        await this.checkSettings();
+        await this.checkWalletState();
 
         if (this.from.isNative) {
             return this.createEthToTokensTrade(options);
@@ -94,19 +95,19 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         if (options.gasLimit) {
             return options.gasLimit;
         }
-        if (this.gasInfo.gasLimit) {
+        if (this.gasInfo) {
             return this.gasInfo.gasLimit;
         }
 
         const transitTokensNumber = this.path.length - 2;
         let methodName: keyof DefaultEstimatedGas = 'tokensToTokens';
-
         if (this.from.isNative) {
             methodName = 'ethToTokens';
         }
         if (this.to.isNative) {
             methodName = 'tokensToEth';
         }
+
         return this.defaultEstimatedGasInfo[methodName][transitTokensNumber].toFixed(0);
     }
 
@@ -114,7 +115,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         if (options.gasPrice) {
             return options.gasPrice;
         }
-        if (this.gasInfo.gasPrice) {
+        if (this.gasInfo) {
             return this.gasInfo.gasPrice;
         }
         return null;
@@ -158,10 +159,8 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         options: SwapTransactionOptions & { value?: string },
         swapMethod: RegularSwapMethod
     ): Promise<TransactionReceipt> {
-        const { web3Private } = Injector;
-
         const regularMethodResult = await tryExecuteAsync(
-            web3Private.tryExecuteContractMethod,
+            this.web3Private.tryExecuteContractMethod,
             this.getSwapParameters(this.swapMethods[this.exact][swapMethod], options)
         );
 
@@ -169,7 +168,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             return regularMethodResult.value;
         }
 
-        return web3Private.tryExecuteContractMethod(
+        return this.web3Private.tryExecuteContractMethod(
             ...this.getSwapParameters(
                 this.swapMethods[this.exact][SUPPORTING_FEE_SWAP_METHODS_MAPPING[swapMethod]],
                 options
