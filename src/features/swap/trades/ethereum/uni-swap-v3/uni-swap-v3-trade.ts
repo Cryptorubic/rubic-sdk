@@ -22,6 +22,8 @@ import {
 import { SymbolToken } from '@core/blockchain/tokens/symbol-token';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { Injector } from '@core/sdk/injector';
+import { TransactionConfig } from 'web3-core';
+import { EncodableSwapTransactionOptions } from '@features/swap/models/encodable-swap-transaction-options';
 
 type UniswapV3TradeStruct = {
     from: PriceTokenAmount;
@@ -174,6 +176,8 @@ export class UniSwapV3Trade extends InstantTrade {
         await this.checkWalletState();
 
         const { methodName, methodArguments } = this.getSwapRouterMethodData();
+        const gasLimit = options.gasLimit || this.gasInfo?.gasLimit;
+        const gasPrice = options.gasPrice || this.gasInfo?.gasPrice;
         return this.web3Private.tryExecuteContractMethod(
             swapRouterContractAddress,
             swapRouterContractAbi,
@@ -182,9 +186,25 @@ export class UniSwapV3Trade extends InstantTrade {
             {
                 value: this.from.isNative ? this.from.stringWeiAmount : undefined,
                 onTransactionHash: options.onConfirm,
-                gas: this.gasInfo?.gasLimit,
-                gasPrice: this.gasInfo?.gasPrice
+                gas: gasLimit,
+                gasPrice
             }
+        );
+    }
+
+    public encode(options: EncodableSwapTransactionOptions = {}): TransactionConfig {
+        const { methodName, methodArguments } = this.getSwapRouterMethodData();
+        const gasInfo = {
+            gasLimit: options.gasLimit || this.gasInfo?.gasLimit,
+            gasPrice: options.gasPrice || this.gasInfo?.gasPrice
+        };
+        return Web3Pure.encodeMethodCall(
+            swapRouterContractAddress,
+            swapRouterContractAbi,
+            methodName,
+            methodArguments,
+            this.from.isNative ? this.from.stringWeiAmount : undefined,
+            gasInfo
         );
     }
 
