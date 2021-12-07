@@ -1,7 +1,5 @@
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 
-type Func<A, R> = (...args: A[]) => R;
-
 function generateKey(...args: unknown[]): string {
     return args.reduce(
         (acc, arg) => (Object(arg) === arg ? acc + JSON.stringify(arg) : acc + String(arg)),
@@ -9,28 +7,28 @@ function generateKey(...args: unknown[]): string {
     ) as string;
 }
 
-export function Cache<A, R>(
+export function Cache<T>(
     _: Object,
     __: string | symbol,
-    descriptor: TypedPropertyDescriptor<Func<A, R>>
-): TypedPropertyDescriptor<Func<A, R>> | void {
+    descriptor: TypedPropertyDescriptor<T>
+): TypedPropertyDescriptor<T> | void {
     const originalMethod = descriptor.value;
     if (!originalMethod) {
         throw new RubicSdkError('Descriptor value is undefined.');
     }
 
-    const storage = new Map<string, R>();
+    const storage = new Map<string, unknown>();
 
-    descriptor.value = function method(...args: A[]): R {
+    descriptor.value = function method(this: Function, ...args: unknown[]): unknown {
         const key = generateKey(args);
         if (storage.has(key)) {
-            return storage.get(key) as R;
+            return storage.get(key);
         }
 
-        const result = originalMethod.apply<ThisType<unknown>, A[], R>(this, args);
+        const result = (originalMethod as unknown as Function).apply(this, args);
         storage.set(key, result);
         return result;
-    };
+    } as unknown as T;
 }
 
 export function PCache<T>(

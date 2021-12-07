@@ -14,7 +14,7 @@ export abstract class ContractTrade {
 
     public abstract get toAmountMin(): BigNumber;
 
-    public abstract get path(): string[];
+    public abstract get path(): ReadonlyArray<string>;
 
     protected constructor(
         public readonly blockchain: SupportedCrossChainBlockchain,

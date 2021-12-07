@@ -18,6 +18,7 @@ import { InsufficientFundsGasPriceValueError } from '@common/errors/cross-chain/
 import BigNumber from 'bignumber.js';
 import { TransactionReceipt } from 'web3-eth';
 import { UnnecessaryApprove } from '@common/errors/swap/UnnecessaryApprove';
+import { Pure } from '@common/decorators/pure.decorator';
 
 export class CrossChainTrade {
     public static async getGasData(
@@ -101,6 +102,7 @@ export class CrossChainTrade {
         return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
     }
 
+    @Pure
     public get priceImpactData(): {
         priceImpactFrom: number | null;
         priceImpactTo: number | null;

@@ -25,7 +25,7 @@ export class DirectContractTrade extends ContractTrade {
         return this.toAmount;
     }
 
-    public get path(): string[] {
+    public get path(): ReadonlyArray<string> {
         return [this.token.address];
     }
 

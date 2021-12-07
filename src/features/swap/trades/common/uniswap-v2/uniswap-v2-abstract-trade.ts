@@ -21,6 +21,7 @@ import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
 import { deadlineMinutesTimestamp } from '@common/utils/blockchain';
+import { Pure } from '@common/decorators/pure.decorator';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount;
@@ -53,6 +54,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     protected readonly defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
 
+    @Pure
     private get deadlineMinutesTimestamp(): number {
         return deadlineMinutesTimestamp(this.deadlineMinutes);
     }

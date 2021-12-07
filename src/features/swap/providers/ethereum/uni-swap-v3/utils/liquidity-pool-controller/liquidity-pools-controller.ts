@@ -22,7 +22,7 @@ import { EMPTY_ADDRESS } from '@core/blockchain/web3-public/constants/EMPTY_ADDR
 import { notNull } from '@common/utils/object';
 import { UniSwapV3Route } from '@features/swap/providers/ethereum/uni-swap-v3/models/uni-swap-v3-route';
 import { Token } from '@core/blockchain/tokens/token';
-import { PCache } from '@common/decorators/cache.decorator';
+import { Cache } from '@common/decorators/cache.decorator';
 import {
     quoterContractAbi,
     quoterContractAddress
@@ -46,7 +46,7 @@ export class LiquidityPoolsController {
      * @param initialTokenAddress From token address.
      * @return string Encoded string.
      */
-    @PCache
+    @Cache
     public static getEncodedPoolsPath(pools: LiquidityPool[], initialTokenAddress: string): string {
         let contractPath = initialTokenAddress.slice(2).toLowerCase();
         let lastTokenAddress = initialTokenAddress;
@@ -67,7 +67,7 @@ export class LiquidityPoolsController {
      * @param from From token and amount.
      * @param toToken To token.
      */
-    @PCache
+    @Cache
     private static getQuoterMethodData(
         poolsPath: LiquidityPool[],
         from: PriceTokenAmount,

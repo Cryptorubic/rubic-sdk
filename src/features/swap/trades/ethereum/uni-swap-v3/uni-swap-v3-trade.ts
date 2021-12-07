@@ -24,6 +24,7 @@ import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { Injector } from '@core/sdk/injector';
 import { TransactionConfig } from 'web3-core';
 import { EncodableSwapTransactionOptions } from '@features/swap/models/encodable-swap-transaction-options';
+import { Pure } from '@common/decorators/pure.decorator';
 
 type UniswapV3TradeStruct = {
     from: PriceTokenAmount;
@@ -140,10 +141,12 @@ export class UniSwapV3Trade extends InstantTrade {
 
     private readonly route: UniSwapV3Route;
 
+    @Pure
     private get deadlineMinutesTimestamp(): number {
         return deadlineMinutesTimestamp(this.deadlineMinutes);
     }
 
+    @Pure
     public get path(): SymbolToken[] {
         const initialPool = this.route.poolsPath[0];
         const path: SymbolToken[] = [
