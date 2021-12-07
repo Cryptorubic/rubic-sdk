@@ -22,8 +22,11 @@ import { EMPTY_ADDRESS } from '@core/blockchain/web3-public/constants/EMPTY_ADDR
 import { notNull } from '@common/utils/object';
 import { UniSwapV3Route } from '@features/swap/providers/ethereum/uni-swap-v3/models/uni-swap-v3-route';
 import { Token } from '@core/blockchain/tokens/token';
-import { uniSwapV3ContractData } from '@features/swap/providers/ethereum/uni-swap-v3/uni-swap-v3-constants';
 import { PCache } from '@common/decorators/cache.decorator';
+import {
+    quoterContractAbi,
+    quoterContractAddress
+} from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/constants/quoter-contract-data';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
@@ -213,8 +216,8 @@ export class LiquidityPoolsController {
 
         return this.web3Public
             .multicallContractMethods<{ 0: string }>(
-                uniSwapV3ContractData.quoter.address,
-                uniSwapV3ContractData.quoter.abi,
+                quoterContractAddress,
+                quoterContractAbi,
                 quoterMethodsData.map(quoterMethodData => quoterMethodData.methodData)
             )
             .then(results => {

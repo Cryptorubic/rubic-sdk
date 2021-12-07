@@ -52,7 +52,7 @@ export class CrossChainTrade {
                     walletAddress,
                     value
                 ),
-                (await Injector.gasPriceApi.getGasPriceInEthUnits(fromTrade.blockchain)).toFixed()
+                Injector.gasPriceApi.getGasPrice(fromTrade.blockchain)
             ]);
 
             return {
@@ -98,7 +98,7 @@ export class CrossChainTrade {
         if (!this.gasData) {
             return null;
         }
-        return new BigNumber(this.gasData.gasLimit).multipliedBy(this.gasData.gasPrice);
+        return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
     }
 
     public get priceImpactData(): {

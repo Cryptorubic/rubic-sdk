@@ -3,16 +3,9 @@ import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Injector } from '@core/sdk/injector';
 import { GasInfo } from '@features/swap/models/gas-info';
 import BigNumber from 'bignumber.js';
-import UNISWAP_V2_ABI from 'src/features/swap/providers/common/uniswap-v2/constants/uniswap-v2-abi';
 import { Web3Public } from 'src/core/blockchain/web3-public/web3-public';
-import { defaultEstimatedGas } from 'src/features/swap/providers/common/uniswap-v2/constants/default-estimated-gas';
-import { GasCalculationMethod } from 'src/features/swap/providers/common/uniswap-v2/models/gas-calculation-method';
-import { SWAP_METHOD } from 'src/features/swap/providers/common/uniswap-v2/constants/SWAP_METHOD';
 import { SwapOptions } from 'src/features/swap/models/swap-options';
 import { Uniswapv2InstantTrade } from '@features/swap/trades/instant-trade';
-import { UniswapRoute } from 'src/features/swap/providers/common/uniswap-v2/models/uniswap-route';
-import { CreateTradeMethod } from 'src/features/swap/providers/common/uniswap-v2/models/create-trade-method';
-import { InternalUniswapV2Trade } from 'src/features/swap/providers/common/uniswap-v2/models/uniswap-v2-trade';
 import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity-error';
 import { SwapTransactionOptionsWithGasLimit } from 'src/features/swap/models/swap-transaction-options';
 import { Token } from '@core/blockchain/tokens/token';
@@ -22,6 +15,12 @@ import {
     UniswapCalculatedInfoWithProfit
 } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/uniswap-calculated-info';
 import { createTokenWethAbleProxy } from '@features/swap/providers/common/utils/weth';
+import { InternalUniswapV2Trade } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/uniswap-v2-trade';
+import { GasCalculationMethod } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/gas-calculation-method';
+import { SWAP_METHOD } from '@features/swap/providers/common/uniswap-v2-abstract-provider/constants/SWAP_METHOD';
+import { defaultEstimatedGas } from '@features/swap/providers/common/uniswap-v2-abstract-provider/constants/default-estimated-gas';
+import { CreateTradeMethod } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/create-trade-method';
+import { UniswapRoute } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/uniswap-route';
 
 export abstract class UniswapV2AbstractProvider {
     protected abstract wethAddress: string;

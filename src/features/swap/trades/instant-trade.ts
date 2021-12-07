@@ -10,6 +10,7 @@ import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-o
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 
 export abstract class InstantTrade {
     public abstract readonly from: PriceTokenAmount;
@@ -24,7 +25,9 @@ export abstract class InstantTrade {
 
     protected readonly web3Private = Injector.web3Private;
 
-    private get walletAddress(): string {
+    protected readonly web3Public: Web3Public;
+
+    protected get walletAddress(): string {
         return this.web3Private.address;
     }
 
@@ -33,7 +36,9 @@ export abstract class InstantTrade {
         return new PriceTokenAmount({ ...this.to.asStruct, weiAmount: weiAmountOutMin });
     }
 
-    constructor(protected readonly web3Public: Web3Public) {}
+    constructor(blockchain: BLOCKCHAIN_NAME) {
+        this.web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
+    }
 
     public async needApprove(): Promise<boolean | undefined> {
         if (!this.walletAddress) {

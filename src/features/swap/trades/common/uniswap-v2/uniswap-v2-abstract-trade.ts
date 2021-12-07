@@ -3,7 +3,6 @@ import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Web3Private } from '@core/blockchain/web3-private/web3-private';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
-import { Injector } from '@core/sdk/injector';
 import { EncodableSwapTransactionOptions } from '@features/swap/models/encodable-swap-transaction-options';
 import { GasInfo } from '@features/swap/models/gas-info';
 import { InstantTrade } from '@features/swap/trades/instant-trade';
@@ -59,7 +58,8 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     }
 
     protected constructor(tradeStruct: UniswapV2TradeStruct) {
-        super(Injector.web3PublicService.getWeb3Public(tradeStruct.from.blockchain));
+        super(tradeStruct.from.blockchain);
+
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
         this.gasInfo = tradeStruct.gasInfo;
