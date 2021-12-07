@@ -17,7 +17,7 @@ export abstract class InstantTrade {
 
     public abstract to: PriceTokenAmount;
 
-    public abstract readonly gasInfo: FeeInfo;
+    public abstract readonly gasInfo: FeeInfo | null;
 
     public abstract readonly slippageTolerance: number;
 

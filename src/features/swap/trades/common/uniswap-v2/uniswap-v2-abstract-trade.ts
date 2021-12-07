@@ -27,7 +27,7 @@ import { AbiItem } from 'web3-utils';
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount;
     to: PriceTokenAmount;
-    gasInfo: FeeInfo;
+    gasInfo: FeeInfo | null;
     path: ReadonlyArray<Token> | Token[];
     deadlineMinutes?: number;
     exact: 'input' | 'output';
@@ -43,7 +43,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     public readonly to: PriceTokenAmount;
 
-    public readonly gasInfo: FeeInfo;
+    public readonly gasInfo: FeeInfo | null;
 
     public readonly path: ReadonlyArray<Token>;
 
@@ -132,7 +132,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         if (options?.gasLimit) {
             return options.gasLimit;
         }
-        if (this.gasInfo.gasLimit) {
+        if (this.gasInfo?.gasLimit) {
             return this.gasInfo.gasLimit;
         }
 
@@ -152,7 +152,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         if (options.gasPrice) {
             return options.gasPrice;
         }
-        if (this.gasInfo.gasPrice) {
+        if (this.gasInfo?.gasPrice) {
             return this.gasInfo.gasPrice;
         }
         return null;
