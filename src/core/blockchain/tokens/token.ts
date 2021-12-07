@@ -30,6 +30,32 @@ export class Token {
         });
     }
 
+    public static async createTokens(
+        tokensAddresses: string[],
+        blockchain: BLOCKCHAIN_NAME
+    ): Promise<Token[]> {
+        const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
+        const tokenInfo = await web3Public.callForTokensInfo(tokensAddresses);
+
+        return tokenInfo.map((tokenInfo, index) => {
+            if (
+                tokenInfo.decimals === undefined ||
+                tokenInfo.name === undefined ||
+                tokenInfo.symbol === undefined
+            ) {
+                throw new RubicSdkError('Error while loading token');
+            }
+
+            return new Token({
+                address: tokensAddresses[index],
+                blockchain,
+                name: tokenInfo.name,
+                symbol: tokenInfo.symbol,
+                decimals: parseInt(tokenInfo.decimals)
+            });
+        });
+    }
+
     public readonly blockchain: BLOCKCHAIN_NAME;
 
     public readonly address: string;

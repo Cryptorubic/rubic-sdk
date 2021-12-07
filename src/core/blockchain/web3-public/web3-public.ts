@@ -1,10 +1,11 @@
-import { PCache } from '@common/decorators/cache.decorator';
+import { ConditionalResult, PCache, PConditionalCache } from '@common/decorators/cache.decorator';
 import { HealthcheckError } from '@common/errors/healthcheck.error';
 import { ERC20_TOKEN_ABI } from '@core/blockchain/constants/erc-20-abi';
 import {
     HEALTHCHECK,
     isBlockchainHealthcheckAvailable
 } from '@core/blockchain/constants/healthcheck';
+import { MethodData } from '@core/blockchain/constants/method-data';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { MULTICALL_ABI } from '@core/blockchain/web3-public/constants/multicall-abi';
 import { MULTICALL_ADDRESSES } from '@core/blockchain/web3-public/constants/multicall-addresses';
@@ -36,6 +37,8 @@ type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
  */
 export class Web3Public {
     private multicallAddresses: Partial<Record<BLOCKCHAIN_NAME, string>> = MULTICALL_ADDRESSES;
+
+    private readonly clearController: { clear: boolean } = { clear: false };
 
     /**
      * @param web3 web3 instance initialized with ethereum provider, e.g. rpc link
@@ -367,6 +370,55 @@ export class Web3Public {
     }
 
     /**
+     * Uses multicall to make many methods calls in several contracts.
+     * @param contractAbi Target contract abi.
+     * @param contractsData Contract addresses and methods data, containing methods' names and arguments.
+     */
+    public async multicallContractsMethods<Output>(
+        contractAbi: AbiItem[],
+        contractsData: {
+            contractAddress: string;
+            methodsData: MethodData[];
+        }[]
+    ): Promise<
+        {
+            success: boolean;
+            output: Output | null;
+        }[][]
+    > {
+        const calls: Call[][] = contractsData.map(({ contractAddress, methodsData }) => {
+            const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
+            return methodsData.map(({ methodName, methodArguments }) => ({
+                callData: contract.methods[methodName](...methodArguments).encodeABI(),
+                target: contractAddress
+            }));
+        });
+
+        const outputs = await this.multicall(calls.flat());
+
+        let outputIndex = 0;
+        return contractsData.map(contractData =>
+            contractData.methodsData.map(methodData => {
+                const methodOutputAbi = contractAbi.find(
+                    funcSignature => funcSignature.name === methodData.methodName
+                )!.outputs!;
+                const output = outputs[outputIndex];
+                outputIndex++;
+
+                return {
+                    success: output.success,
+                    output: output.success
+                        ? (this.web3.eth.abi.decodeParameters(
+                              methodOutputAbi,
+                              output.returnData
+                          ) as Output)
+                        : null
+                };
+            })
+        );
+    }
+
+    /**
      * @description Checks if the specified address contains the required amount of these tokens.
      * Throws an InsufficientFundsError if the balance is insufficient
      * @param token token balance for which you need to check
@@ -409,6 +461,50 @@ export class Web3Public {
             (acc, field, index) => ({ ...acc, [tokenFields[index]]: field }),
             {} as Record<SupportedTokenField, string>
         );
+    }
+
+    /**
+     * Gets ERC-20 tokens info by addresses.
+     * @param tokenAddresses Addresses of tokens.
+     */
+    @PConditionalCache
+    public async callForTokensInfo(
+        tokenAddresses: string[]
+    ): Promise<Record<SupportedTokenField, string | undefined>[]> {
+        const tokenFields = ['decimals', 'symbol', 'name'] as const;
+        const contractsData = tokenAddresses.map(contractAddress => ({
+            contractAddress,
+            methodsData: tokenFields.map(methodName => ({
+                methodName,
+                methodArguments: []
+            }))
+        }));
+
+        const results = await this.multicallContractsMethods(ERC20_TOKEN_ABI, contractsData);
+        let notSave = false;
+        const tokensInfo = results.map(contractCallResult => {
+            const token = {} as Record<SupportedTokenField, string | undefined>;
+            contractCallResult.forEach((field, index) => {
+                token[tokenFields[index] as SupportedTokenField] = field.success
+                    ? (field.output as string)
+                    : undefined;
+                if (!field.success) {
+                    notSave = false;
+                }
+            });
+            return token;
+        });
+
+        const conditionalReturns: ConditionalResult<
+            Record<SupportedTokenField, string | undefined>[]
+        > = {
+            notSave,
+            value: tokensInfo
+        };
+
+        // see https://github.com/microsoft/TypeScript/issues/4881
+        // @ts-ignore
+        return conditionalReturns;
     }
 
     /**
