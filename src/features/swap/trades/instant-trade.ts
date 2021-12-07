@@ -6,7 +6,7 @@ import { BasicTransactionOptions } from '@core/blockchain/models/basic-transacti
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Injector } from '@core/sdk/injector';
 import { EncodableSwapTransactionOptions } from '@features/swap/models/encodable-swap-transaction-options';
-import { GasInfo } from '@features/swap/models/gas-info';
+import { FeeInfo } from '@features/swap/models/fee-info';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import BigNumber from 'bignumber.js';
 import { TransactionConfig } from 'web3-core';
@@ -17,7 +17,7 @@ export abstract class InstantTrade {
 
     public abstract to: PriceTokenAmount;
 
-    public abstract readonly gasInfo: GasInfo;
+    public abstract readonly gasInfo: FeeInfo | null;
 
     public abstract readonly slippageTolerance: number;
 
@@ -106,10 +106,4 @@ export abstract class InstantTrade {
             throw new InsufficientFundsError();
         }
     }
-}
-
-export interface Uniswapv2InstantTrade extends InstantTrade {
-    path: string[];
-    deadline: number;
-    exact: 'input' | 'output';
 }

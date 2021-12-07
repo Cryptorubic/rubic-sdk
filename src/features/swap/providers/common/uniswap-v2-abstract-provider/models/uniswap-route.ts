@@ -1,6 +1,7 @@
+import { Token } from '@core/blockchain/tokens/token';
 import BigNumber from 'bignumber.js';
 
 export interface UniswapRoute {
-    path: string[];
-    outputAbsoluteAmount: BigNumber;
+    readonly path: ReadonlyArray<Token>;
+    readonly outputAbsoluteAmount: BigNumber;
 }

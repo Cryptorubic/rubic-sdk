@@ -1,28 +1,29 @@
+import { AbstractConstructorParameters } from '@common/utils/types/abstract-constructor-parameters';
+import { Constructor } from '@common/utils/types/constructor';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Injector } from '@core/sdk/injector';
 import { GasInfo } from '@features/swap/models/gas-info';
+import { GasCalculationMethod } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/gas-calculation-method';
+import { UniswapCalculatedInfoWithProfit } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/uniswap-calculated-info';
+import { UniswapRoute } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/uniswap-route';
+import { UniswapV2AbstractTrade } from '@features/swap/trades/common/uniswap-v2/uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
-import UNISWAP_V2_ABI from 'src/features/swap/providers/common/uniswap-v2/constants/uniswap-v2-abi';
 import { Web3Public } from 'src/core/blockchain/web3-public/web3-public';
-import { defaultEstimatedGas } from 'src/features/swap/providers/common/uniswap-v2/constants/default-estimated-gas';
-import { GasCalculationMethod } from 'src/features/swap/providers/common/uniswap-v2/models/gas-calculation-method';
-import { SWAP_METHOD } from 'src/features/swap/providers/common/uniswap-v2/constants/SWAP_METHOD';
 import { SwapOptions } from 'src/features/swap/models/swap-options';
-import { Uniswapv2InstantTrade } from '@features/swap/trades/instant-trade';
-import {
-    UniswapCalculatedInfo,
-    UniswapCalculatedInfoWithProfit
-} from 'src/features/swap/providers/common/uniswap-v2/models/uniswap-calculated-info';
-import { UniswapRoute } from 'src/features/swap/providers/common/uniswap-v2/models/uniswap-route';
-import { CreateTradeMethod } from 'src/features/swap/providers/common/uniswap-v2/models/create-trade-method';
-import { InternalUniswapV2Trade } from 'src/features/swap/providers/common/uniswap-v2/models/uniswap-v2-trade';
+
 import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity-error';
 import { SwapTransactionOptionsWithGasLimit } from 'src/features/swap/models/swap-transaction-options';
 import { Token } from '@core/blockchain/tokens/token';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 
-export abstract class UniswapV2AbstractProvider {
+export abstract class UniswapV2AbstractProvider<T extends UniswapV2AbstractTrade> {
+    protected abstract InstantTradeClass: Constructor<
+        AbstractConstructorParameters<typeof UniswapV2AbstractTrade>,
+        T
+    >;
+
     protected abstract wethAddress: string;
 
     protected abstract contractAddress: string;
@@ -47,7 +48,9 @@ export abstract class UniswapV2AbstractProvider {
         return this.web3Private.address;
     }
 
-    protected constructor() {}
+    protected constructor() {
+        const x = new this.InstantTradeClass({});
+    }
 
     private calculateTokensToTokensGasLimit: GasCalculationMethod = (
         trade: InternalUniswapV2Trade
@@ -153,21 +156,21 @@ export abstract class UniswapV2AbstractProvider {
         });
     }
 
-    private async getGasInfo(blockchain: BLOCKCHAIN_NAME): Omit<Required<GasInfo>, 'gasLimit'> {
+    private async getGasInfo(blockchain: BLOCKCHAIN_NAME): Promise<GasInfo> {
         const gasPrice = await this.web3PublicService.getWeb3Public(blockchain).getGasPrice();
         const gasPriceInEth = Web3Pure.fromWei(gasPrice);
         const nativeCoinPrice = await this.coingeckoApi.getNativeCoinPrice(blockchain);
         const gasPriceInUsd = gasPriceInEth.multipliedBy(nativeCoinPrice);
         return {
-            gasPrice,
-            gasFeeInEth,
+            gasPrice: new BigNumber(gasPrice),
+            gasPriceInEth,
             gasPriceInUsd
         };
     }
 
     public async calculateTrade(
         from: PriceTokenAmount,
-        to: Token,
+        to: PriceToken,
         exact: 'input' | 'output',
         options: SwapOptions = {
             gasCalculation: 'calculate',
@@ -175,22 +178,16 @@ export abstract class UniswapV2AbstractProvider {
             deadline: 1200000, // 20 min
             slippageTolerance: 0.05
         }
-    ): Promise<Uniswapv2InstantTrade> {
-        const { blockchain } = from;
-        const fromClone = this.createTokenWETHAbleProxy(from);
-        const toClone = this.createTokenWETHAbleProxy(to);
+    ): Promise<UniswapV2AbstractTrade> {
+        const fromProxy = this.createTokenWETHAbleProxy(from);
+        const toProxy = this.createTokenWETHAbleProxy(to);
 
-        let gasPrice;
-        let gasPriceInEth: BigNumber | undefined;
-        let gasPriceInUsd: BigNumber | undefined;
-        if (options.shouldCalculateGas) {
-            gasPrice = await this.web3Public.getGasPrice();
-            gasPriceInEth = Web3Public.fromWei(gasPrice);
-            const nativeCoinPrice = await this.tokensService.getNativeCoinPriceInUsd(blockchain);
-            gasPriceInUsd = gasPriceInEth.multipliedBy(nativeCoinPrice);
+        let gasInfo: Partial<GasInfo> = {};
+        if (options.gasCalculation !== 'disabled') {
+            gasInfo = await this.getGasInfo(from.blockchain);
         }
 
-        const { route, estimatedGas } = await this.getAmountAndPath(fromClone, toClone, exact, {
+        const { route, estimatedGas } = await this.getAmountAndPath(fromProxy, toProxy, exact, {
             ...options,
             gasCalculationMethodName,
             gasPriceInUsd
@@ -241,18 +238,17 @@ export abstract class UniswapV2AbstractProvider {
 
     private async getAmountAndPath(
         from: PriceTokenAmount,
-        toToken: Token,
+        to: PriceToken,
         exact: 'input' | 'output',
-        options: SwapOptions & {
-            gasCalculationMethodName: GasCalculationMethod;
-            gasPriceInUsd?: BigNumber;
-        }
+        gasPriceInUsd: BigNumber | undefined,
+        options: SwapOptions
     ): Promise<UniswapCalculatedInfo> {
+        const web3Public = this.web3PublicService.getWeb3Public(from.blockchain);
         const routes = (
             await this.getAllRoutes(
-                fromTokenAddress,
-                toToken.address,
-                amountAbsolute,
+                from.address,
+                to.address,
+                from.stringWeiAmount,
                 options.disableMultihops ? 0 : this.maxTransitTokens,
                 exact === 'output' ? 'getAmountsOut' : 'getAmountsIn'
             )
@@ -261,59 +257,54 @@ export abstract class UniswapV2AbstractProvider {
             throw new InsufficientLiquidityError();
         }
 
-        if (!options.shouldCalculateGas) {
+        if (options.gasCalculation === 'disabled') {
             return {
                 route: routes[0]
             };
         }
 
-        const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
-        const slippage = new BigNumber(1).minus(options.slippageTolerance);
-
         const gasRequests = routes.map(route => {
-            let amountIn = amountAbsolute;
-            let amountOut = route.outputAbsoluteAmount.multipliedBy(slippage).toFixed(0);
-            if (exact === 'input') {
-                [amountIn, amountOut] = [amountOut, amountIn];
-            }
-            return options.gasCalculationMethodName({
-                amountIn,
-                amountOut,
+            const trade: UniswapV2AbstractTrade = new this.InstantTradeClass({
+                from,
+                to: new PriceTokenAmount({ ...to.asStruct, weiAmount: route.outputAbsoluteAmount }),
                 path: route.path,
-                deadline,
-                to: this.walletAddress,
-                exact
+                exact,
+                gasInfo: null,
+                ...(options.deadline && { deadlineMinutes: options.deadline }),
+                ...(options.slippageTolerance && { slippageTolerance: options.slippageTolerance })
             });
+
+            return trade.getEstimatedGasCallData();
         });
 
         const gasLimits = gasRequests.map(item => item.defaultGasLimit);
 
         if (this.walletAddress) {
-            const estimatedGasLimits = await this.web3Public.batchEstimatedGas(
-                UNISWAP_V2_ABI,
+            const estimatedGasLimits = await web3Public.batchEstimatedGas(
+                this.contractAbi,
                 this.contractAddress,
                 this.walletAddress,
                 gasRequests.map(item => item.callData)
             );
             estimatedGasLimits.forEach((elem, index) => {
-                if (elem && !elem.isNaN()) {
+                if (elem?.isFinite()) {
                     gasLimits[index] = elem;
                 }
             });
         }
 
         if (
-            options.rubicOptimisation &&
-            toToken.price &&
-            options.gasPriceInUsd &&
+            options.gasCalculation === 'rubicOptimisation' &&
+            to.price?.isFinite() &&
+            gasPriceInUsd &&
             this.walletAddress
         ) {
             const routesWithProfit: UniswapCalculatedInfoWithProfit[] = routes.map(
                 (route, index) => {
                     const estimatedGas = gasLimits[index];
-                    const gasFeeInUsd = estimatedGas.multipliedBy(options.gasPriceInUsd!!);
-                    const profit = Web3Public.fromWei(route.outputAbsoluteAmount, toToken.decimals)
-                        .multipliedBy(toToken.price!!)
+                    const gasFeeInUsd = estimatedGas.multipliedBy(gasPriceInUsd);
+                    const profit = Web3Pure.fromWei(route.outputAbsoluteAmount, to.decimals)
+                        .multipliedBy(to.price)
                         .multipliedBy(exact === 'output' ? 1 : -1)
                         .minus(gasFeeInUsd);
 
