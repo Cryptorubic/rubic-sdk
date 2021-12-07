@@ -9,7 +9,7 @@ import {
 } from '@features/swap/trades/ethereum/uni-swap-v3/constants/swap-router-contract-data';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import { TransactionReceipt } from 'web3-eth';
-import { compareAddresses, deadlineMinutesTimestamp } from '@common/utils/blockchain';
+import { compareAddresses, Utils } from '@common/utils/blockchain';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
 import { LiquidityPoolsController } from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/liquidity-pools-controller';
 import { EMPTY_ADDRESS } from '@core/blockchain/web3-public/constants/EMPTY_ADDRESS';
@@ -43,7 +43,7 @@ export class UniSwapV3Trade extends InstantTrade {
         deadlineMinutes: number,
         route: UniSwapV3Route
     ): Promise<string> {
-        const estimateGasParams = UniSwapV3Trade.getEstimateGasMethodSignature(
+        const estimateGasParams = UniSwapV3Trade.getEstimateGasParams(
             from,
             toToken,
             slippageTolerance,
@@ -77,8 +77,8 @@ export class UniSwapV3Trade extends InstantTrade {
         deadlineMinutes: number,
         routes: UniSwapV3Route[]
     ): Promise<string[]> {
-        const gasRequests = routes.map(route =>
-            UniSwapV3Trade.getEstimateGasMethodSignature(
+        const routesEstimateGasParams = routes.map(route =>
+            UniSwapV3Trade.getEstimateGasParams(
                 from,
                 toToken,
                 slippageTolerance,
@@ -86,7 +86,9 @@ export class UniSwapV3Trade extends InstantTrade {
                 route
             )
         );
-        const gasLimits = gasRequests.map(item => item.defaultGasLimit);
+        const gasLimits = routesEstimateGasParams.map(
+            estimateGasParams => estimateGasParams.defaultGasLimit
+        );
 
         const walletAddress = Injector.web3Private.address;
         if (walletAddress) {
@@ -95,7 +97,7 @@ export class UniSwapV3Trade extends InstantTrade {
                 swapRouterContractAbi,
                 swapRouterContractAddress,
                 walletAddress,
-                gasRequests.map(item => item.callData)
+                routesEstimateGasParams.map(estimateGasParams => estimateGasParams.callData)
             );
             estimatedGasLimits.forEach((elem, index) => {
                 if (elem?.isFinite()) {
@@ -107,7 +109,7 @@ export class UniSwapV3Trade extends InstantTrade {
         return gasLimits;
     }
 
-    private static getEstimateGasMethodSignature(
+    private static getEstimateGasParams(
         from: PriceTokenAmount,
         toToken: PriceToken,
         slippageTolerance: number,
@@ -129,22 +131,17 @@ export class UniSwapV3Trade extends InstantTrade {
 
     protected readonly contractAddress = swapRouterContractAddress;
 
-    readonly from: PriceTokenAmount;
+    public readonly from: PriceTokenAmount;
 
     public readonly to: PriceTokenAmount;
 
     public readonly gasInfo: GasInfo | null;
 
-    public readonly slippageTolerance: number;
+    public slippageTolerance: number;
 
-    public readonly deadlineMinutes: number;
+    public deadlineMinutes: number;
 
     private readonly route: UniSwapV3Route;
-
-    @Pure
-    private get deadlineMinutesTimestamp(): number {
-        return deadlineMinutesTimestamp(this.deadlineMinutes);
-    }
 
     @Pure
     public get path(): SymbolToken[] {
@@ -257,7 +254,7 @@ export class UniSwapV3Trade extends InstantTrade {
                         this.to.address,
                         this.route.poolsPath[0].fee,
                         walletAddress,
-                        this.deadlineMinutesTimestamp,
+                        Utils.deadlineMinutesTimestamp(this.deadlineMinutes),
                         this.from.weiAmount,
                         amountOutMin,
                         0
@@ -274,7 +271,7 @@ export class UniSwapV3Trade extends InstantTrade {
                         this.route.initialTokenAddress
                     ),
                     walletAddress,
-                    this.deadlineMinutesTimestamp,
+                    Utils.deadlineMinutesTimestamp(this.deadlineMinutes),
                     this.from.weiAmount,
                     amountOutMin
                 ]

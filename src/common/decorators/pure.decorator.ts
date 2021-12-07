@@ -1,10 +1,12 @@
+import { RubicSdkError } from '@common/errors/rubic-sdk-error';
+
 export function Pure<T>(
     _target: Object,
     propertyKey: string,
     { get, enumerable }: TypedPropertyDescriptor<T>
 ): TypedPropertyDescriptor<T> {
     if (!get) {
-        throw new Error('pure can only be used with getters');
+        throw new RubicSdkError('Pure can only be used with getters');
     }
 
     return {

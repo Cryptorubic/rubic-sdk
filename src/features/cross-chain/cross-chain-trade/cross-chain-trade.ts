@@ -19,6 +19,8 @@ import BigNumber from 'bignumber.js';
 import { TransactionReceipt } from 'web3-eth';
 import { UnnecessaryApprove } from '@common/errors/swap/UnnecessaryApprove';
 import { Pure } from '@common/decorators/pure.decorator';
+import { WalletNotConnectedError } from '@common/errors/swap/wallet-not-connected.error';
+import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
 
 export class CrossChainTrade {
     public static async getGasData(
@@ -138,6 +140,8 @@ export class CrossChainTrade {
     }
 
     public async needApprove(): Promise<boolean> {
+        this.checkWalletConnected();
+
         if (this.fromTrade.fromToken.isNative) {
             return false;
         }
@@ -154,12 +158,28 @@ export class CrossChainTrade {
         if (!this.needApprove()) {
             throw new UnnecessaryApprove();
         }
+
+        this.checkWalletConnected();
+        this.checkBlockchainCorrect();
+
         return this.web3Private.approveTokens(
             tokenAddress,
             this.fromTrade.contract.address,
             'infinity',
             options
         );
+    }
+
+    private checkWalletConnected(): never | void {
+        if (!this.walletAddress) {
+            throw new WalletNotConnectedError();
+        }
+    }
+
+    private checkBlockchainCorrect(): never | void {
+        if (this.web3Private.blockchainName !== this.from.blockchain) {
+            throw new WrongNetworkError();
+        }
     }
 
     private async checkContractsState(): Promise<void> {
@@ -204,6 +224,9 @@ export class CrossChainTrade {
     }
 
     private async checkTradeErrors(): Promise<void | never> {
+        this.checkWalletConnected();
+        this.checkBlockchainCorrect();
+
         await Promise.all([
             this.checkContractsState(),
             this.checkToBlockchainGasPrice(),

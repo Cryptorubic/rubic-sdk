@@ -20,8 +20,7 @@ import { DefaultEstimatedGas } from '@features/swap/providers/common/uniswap-v2-
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
-import { deadlineMinutesTimestamp } from '@common/utils/blockchain';
-import { Pure } from '@common/decorators/pure.decorator';
+import { Utils } from '@common/utils/blockchain';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount;
@@ -53,11 +52,6 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     protected readonly swapMethods: ExactInputOutputSwapMethodsList = SWAP_METHOD;
 
     protected readonly defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
-
-    @Pure
-    private get deadlineMinutesTimestamp(): number {
-        return deadlineMinutesTimestamp(this.deadlineMinutes);
-    }
 
     protected constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct.from.blockchain);
@@ -196,7 +190,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
                 amountOut,
                 this.path.map(t => t.address),
                 this.to.address,
-                this.deadlineMinutesTimestamp
+                Utils.deadlineMinutesTimestamp(this.deadlineMinutes)
             ],
             {
                 onTransactionHash: options.onConfirm,
@@ -218,7 +212,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             amountOut,
             this.path.map(t => t.address),
             this.to.address,
-            this.deadlineMinutesTimestamp
+            Utils.deadlineMinutesTimestamp(this.deadlineMinutes)
         ];
         const gasPrice = this.getGasPrice(options);
         const gasLimit = this.getGasLimit(options);

@@ -40,10 +40,8 @@ export abstract class InstantTrade {
         this.web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
     }
 
-    public async needApprove(): Promise<boolean | undefined> {
-        if (!this.walletAddress) {
-            return undefined;
-        }
+    public async needApprove(): Promise<boolean> {
+        this.checkWalletConnected();
 
         if (this.from.isNative) {
             return false;
@@ -65,6 +63,9 @@ export abstract class InstantTrade {
                 'You should check allowance via `needApprove` method before calling `approve`. Current allowance is enough for swap.'
             );
         }
+
+        this.checkWalletConnected();
+        this.checkBlockchainCorrect();
 
         return this.web3Private.approveTokens(
             this.from.address,

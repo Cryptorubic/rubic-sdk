@@ -238,7 +238,6 @@ export class LiquidityPoolsController {
 
     /**
      * Returns swap methods' names and arguments, built with passed pools' addresses, to use it in Quoter contract.
-     * @private
      */
     private getQuoterMethodsData(
         options: GetQuoterMethodsDataOptions,
