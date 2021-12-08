@@ -13,6 +13,17 @@ import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 
 export abstract class InstantTrade {
+    public static getContractAddress(): string {
+        if (!(this as unknown as { contractAddress: string })?.contractAddress) {
+            throw new RubicSdkError('Trying to read abstract class field');
+        }
+
+        // see  https://github.com/microsoft/TypeScript/issues/34516
+        // @ts-ignore
+        const instance = new this();
+        return instance.contractAddress;
+    }
+
     public abstract from: PriceTokenAmount;
 
     public abstract to: PriceTokenAmount;
@@ -21,7 +32,7 @@ export abstract class InstantTrade {
 
     public abstract readonly slippageTolerance: number;
 
-    protected abstract contractAddress: string;
+    protected abstract contractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
     public get toTokenAmountMin(): PriceTokenAmount {
         const weiAmountOutMin = this.to.weiAmount.multipliedBy(

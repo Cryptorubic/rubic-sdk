@@ -27,14 +27,20 @@ import { AbiItem } from 'web3-utils';
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount;
     to: PriceTokenAmount;
-    gasInfo: FeeInfo | null;
-    path: ReadonlyArray<Token> | Token[];
-    deadlineMinutes?: number;
     exact: 'input' | 'output';
+    path: ReadonlyArray<Token> | Token[];
+    gasInfo?: FeeInfo;
+    deadlineMinutes?: number;
     slippageTolerance?: number;
 };
 
 export abstract class UniswapV2AbstractTrade extends InstantTrade {
+    static readonly contractAbi: AbiItem[] = defaultUniswapV2Abi;
+
+    static readonly swapMethods: ExactInputOutputSwapMethodsList = SWAP_METHOD;
+
+    static readonly defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
+
     public deadlineMinutes: number;
 
     public slippageTolerance: number;
@@ -48,12 +54,6 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     public readonly path: ReadonlyArray<Token>;
 
     public readonly exact: 'input' | 'output';
-
-    protected readonly contractAbi: AbiItem[] = defaultUniswapV2Abi;
-
-    protected readonly swapMethods: ExactInputOutputSwapMethodsList = SWAP_METHOD;
-
-    protected readonly defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
 
     public set settings(value: { deadlineMinutes?: number; slippageTolerance?: number }) {
         this.deadlineMinutes = value.deadlineMinutes || this.deadlineMinutes;
@@ -84,11 +84,13 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     }
 
     private get regularSwapMethod(): string {
-        return this.swapMethods[this.exact][this.regularSwapMethodKey];
+        return (<typeof UniswapV2AbstractTrade>this.constructor).swapMethods[this.exact][
+            this.regularSwapMethodKey
+        ];
     }
 
     private get supportedFeeSwapMethod(): string {
-        return this.swapMethods[this.exact][
+        return (<typeof UniswapV2AbstractTrade>this.constructor).swapMethods[this.exact][
             SUPPORTING_FEE_SWAP_METHODS_MAPPING[this.regularSwapMethodKey]
         ];
     }
@@ -103,11 +105,11 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         return 'TOKENS_TO_TOKENS';
     }
 
-    protected constructor(tradeStruct: UniswapV2TradeStruct) {
+    constructor(tradeStruct: UniswapV2TradeStruct) {
         super();
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
-        this.gasInfo = tradeStruct.gasInfo;
+        this.gasInfo = tradeStruct.gasInfo || null;
         this.path = tradeStruct.path;
         this.deadlineMinutes = tradeStruct.deadlineMinutes || 1; // TODO: default child config
         this.exact = tradeStruct.exact;
@@ -145,7 +147,9 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         if (this.to.isNative) {
             methodName = 'tokensToEth';
         }
-        return this.defaultEstimatedGasInfo[methodName][transitTokensNumber].toFixed(0);
+        return (<typeof UniswapV2AbstractTrade>this.constructor).defaultEstimatedGasInfo[
+            methodName
+        ][transitTokensNumber].toFixed(0);
     }
 
     private getGasPrice(options: { gasPrice?: string | null }): string | null {
@@ -199,7 +203,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
         return [
             this.contractAddress,
-            this.contractAbi,
+            (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
             method,
             this.callParameters,
             {
@@ -217,7 +221,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
         return Web3Pure.encodeMethodCall(
             this.contractAddress,
-            this.contractAbi,
+            (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
             this.regularSwapMethod,
             this.callParameters,
             this.nativeValueToSend,

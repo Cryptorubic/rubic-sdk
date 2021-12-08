@@ -463,7 +463,7 @@ export class Web3Public {
      */
     @PConditionalCache
     public async callForTokensInfo(
-        tokenAddresses: string[]
+        tokenAddresses: string[] | ReadonlyArray<string>
     ): Promise<Record<SupportedTokenField, string | undefined>[]> {
         const tokenFields = ['decimals', 'symbol', 'name'] as const;
         const contractsData = tokenAddresses.map(contractAddress => ({
