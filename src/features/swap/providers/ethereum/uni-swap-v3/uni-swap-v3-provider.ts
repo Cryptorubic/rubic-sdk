@@ -16,6 +16,7 @@ import {
 import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity-error';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { UniSwapV3Trade } from '@features/swap/trades/ethereum/uni-swap-v3/uni-swap-v3-trade';
+import { GasPriceInfo } from '@features/swap/models/gas-price-info';
 
 const RUBIC_OPTIMIZATION_DISABLED = true;
 
@@ -54,20 +55,17 @@ export class UniSwapV3Provider {
         const fromClone = createTokenWethAbleProxy(from, this.wethAddress);
         const toClone = createTokenWethAbleProxy(toToken, this.wethAddress);
 
-        let gasPrice: string | undefined;
-        let gasPriceInEth: BigNumber | undefined;
-        let gasPriceInUsd: BigNumber | undefined;
+        let gasPriceInfo: GasPriceInfo | undefined;
         if (options.gasCalculation !== 'disabled') {
-            let nativeCoinPrice: BigNumber;
-            [gasPrice, nativeCoinPrice] = await Promise.all([
-                this.gasPriceApi.getGasPrice(this.blockchain),
-                this.coingeckoApi.getNativeCoinPrice(this.blockchain)
-            ]);
-            gasPriceInEth = Web3Pure.fromWei(gasPrice);
-            gasPriceInUsd = gasPriceInEth.multipliedBy(nativeCoinPrice);
+            gasPriceInfo = await this.getGasPriceInfo();
         }
 
-        const { route, gasLimit } = await this.getRoute(fromClone, toClone, options, gasPriceInUsd);
+        const { route, gasLimit } = await this.getRoute(
+            fromClone,
+            toClone,
+            options,
+            gasPriceInfo?.gasPriceInUsd
+        );
 
         const trade = {
             from,
@@ -75,7 +73,7 @@ export class UniSwapV3Provider {
                 ...toToken.asStruct,
                 weiAmount: route.outputAbsoluteAmount
             }),
-            gasInfo: null,
+            gasFeeInfo: null,
             slippageTolerance: options.slippageTolerance,
             deadlineMinutes: options.deadline,
             route
@@ -85,18 +83,32 @@ export class UniSwapV3Provider {
         }
 
         const increasedGas = Web3Pure.calculateGasMargin(gasLimit, this.GAS_MARGIN);
-        const gasFeeInEth = gasPriceInEth!.multipliedBy(increasedGas);
-        const gasFeeInUsd = gasPriceInUsd!.multipliedBy(increasedGas);
+        const gasFeeInEth = gasPriceInfo!.gasPriceInEth.multipliedBy(increasedGas);
+        const gasFeeInUsd = gasPriceInfo!.gasPriceInUsd.multipliedBy(increasedGas);
 
         return new UniSwapV3Trade({
             ...trade,
-            gasInfo: {
+            gasFeeInfo: {
                 gasLimit: increasedGas,
-                gasPrice: gasPrice!,
+                gasPrice: gasPriceInfo!.gasPrice,
                 gasFeeInEth,
                 gasFeeInUsd
             }
         });
+    }
+
+    private async getGasPriceInfo(): Promise<GasPriceInfo> {
+        const [gasPrice, nativeCoinPrice] = await Promise.all([
+            this.gasPriceApi.getGasPrice(this.blockchain),
+            this.coingeckoApi.getNativeCoinPrice(this.blockchain)
+        ]);
+        const gasPriceInEth = Web3Pure.fromWei(gasPrice);
+        const gasPriceInUsd = gasPriceInEth.multipliedBy(nativeCoinPrice);
+        return {
+            gasPrice: new BigNumber(gasPrice),
+            gasPriceInEth,
+            gasPriceInUsd
+        };
     }
 
     /**

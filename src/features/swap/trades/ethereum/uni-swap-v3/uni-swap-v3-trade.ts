@@ -1,6 +1,5 @@
 import { InstantTrade } from '@features/swap/trades/instant-trade';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { GasInfo } from '@features/swap/models/gas-info';
 import { UniSwapV3Route } from '@features/swap/providers/ethereum/uni-swap-v3/models/uni-swap-v3-route';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import {
@@ -25,11 +24,12 @@ import { Injector } from '@core/sdk/injector';
 import { TransactionConfig } from 'web3-core';
 import { EncodableSwapTransactionOptions } from '@features/swap/models/encodable-swap-transaction-options';
 import { Pure } from '@common/decorators/pure.decorator';
+import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 
 type UniswapV3TradeStruct = {
     from: PriceTokenAmount;
     to: PriceTokenAmount;
-    gasInfo: GasInfo | null;
+    gasFeeInfo: GasFeeInfo | null;
     slippageTolerance: number;
     deadlineMinutes: number;
     route: UniSwapV3Route;
@@ -122,7 +122,7 @@ export class UniSwapV3Trade extends InstantTrade {
                 ...toToken.asStruct,
                 weiAmount: route.outputAbsoluteAmount
             }),
-            gasInfo: null,
+            gasFeeInfo: null,
             slippageTolerance,
             deadlineMinutes,
             route
@@ -135,7 +135,7 @@ export class UniSwapV3Trade extends InstantTrade {
 
     public readonly to: PriceTokenAmount;
 
-    public readonly gasInfo: GasInfo | null;
+    public readonly gasFeeInfo: GasFeeInfo | null;
 
     public slippageTolerance: number;
 
@@ -166,7 +166,7 @@ export class UniSwapV3Trade extends InstantTrade {
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
-        this.gasInfo = tradeStruct.gasInfo;
+        this.gasFeeInfo = tradeStruct.gasFeeInfo;
         this.slippageTolerance = tradeStruct.slippageTolerance;
         this.deadlineMinutes = tradeStruct.deadlineMinutes;
         this.route = tradeStruct.route;
@@ -176,8 +176,8 @@ export class UniSwapV3Trade extends InstantTrade {
         await this.checkWalletState();
 
         const { methodName, methodArguments } = this.getSwapRouterMethodData();
-        const gasLimit = options.gasLimit || this.gasInfo?.gasLimit;
-        const gasPrice = options.gasPrice || this.gasInfo?.gasPrice;
+        const gasLimit = options.gasLimit || this.gasFeeInfo?.gasLimit;
+        const gasPrice = options.gasPrice || this.gasFeeInfo?.gasPrice;
         return this.web3Private.tryExecuteContractMethod(
             swapRouterContractAddress,
             swapRouterContractAbi,
@@ -195,8 +195,8 @@ export class UniSwapV3Trade extends InstantTrade {
     public encode(options: EncodableSwapTransactionOptions = {}): TransactionConfig {
         const { methodName, methodArguments } = this.getSwapRouterMethodData();
         const gasInfo = {
-            gasLimit: options.gasLimit || this.gasInfo?.gasLimit,
-            gasPrice: options.gasPrice || this.gasInfo?.gasPrice
+            gasLimit: options.gasLimit || this.gasFeeInfo?.gasLimit,
+            gasPrice: options.gasPrice || this.gasFeeInfo?.gasPrice.toFixed(0)
         };
         return Web3Pure.encodeMethodCall(
             swapRouterContractAddress,

@@ -5,7 +5,7 @@ import { BasicTransactionOptions } from '@core/blockchain/models/basic-transacti
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Injector } from '@core/sdk/injector';
 import { EncodableSwapTransactionOptions } from '@features/swap/models/encodable-swap-transaction-options';
-import { FeeInfo } from '@features/swap/models/fee-info';
+import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
@@ -17,7 +17,7 @@ export abstract class InstantTrade {
 
     public abstract readonly to: PriceTokenAmount;
 
-    public abstract readonly gasInfo: FeeInfo | null;
+    public abstract readonly gasFeeInfo: GasFeeInfo | null;
 
     public abstract readonly slippageTolerance: number;
 
@@ -36,7 +36,7 @@ export abstract class InstantTrade {
         return new PriceTokenAmount({ ...this.to.asStruct, weiAmount: weiAmountOutMin });
     }
 
-    constructor(blockchain: BLOCKCHAIN_NAME) {
+    protected constructor(blockchain: BLOCKCHAIN_NAME) {
         this.web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
     }
 

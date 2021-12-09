@@ -61,7 +61,11 @@ export class CoingeckoApi {
         maxAge: 15_000,
         maxCacheCount: supportedBlockchains.length
     })
-    public async getNativeCoinPrice(blockchain: SupportedBlockchain): Promise<BigNumber> {
+    public async getNativeCoinPrice(blockchain: BLOCKCHAIN_NAME): Promise<BigNumber> {
+        if (!CoingeckoApi.isSupportedBlockchain(blockchain)) {
+            throw new RubicSdkError(`Blockchain ${blockchain} is not supported by coingecko-api`);
+        }
+
         const coingeckoId = this.nativeCoinsCoingeckoIds[blockchain];
 
         try {
@@ -88,23 +92,27 @@ export class CoingeckoApi {
 
     /**
      * Gets price of token in usd from coingecko.
-     * @param blockchain Supported by {@link supportedBlockchains} blockchain.
-     * @param tokenAddress Address of token to get price for.
+     * @param token Token to get price for.
      */
     @PCacheable({
         maxAge: 15_000,
         maxCacheCount: 4
     })
-    public async getErc20TokenPrice(
-        blockchain: SupportedBlockchain,
-        tokenAddress: string
-    ): Promise<BigNumber> {
+    public async getErc20TokenPrice(token: {
+        address: string;
+        blockchain: BLOCKCHAIN_NAME;
+    }): Promise<BigNumber> {
+        const { blockchain } = token;
+        if (!CoingeckoApi.isSupportedBlockchain(blockchain)) {
+            throw new RubicSdkError(`Blockchain ${blockchain} is not supported by coingecko-api`);
+        }
+
         const blockchainId = this.tokenBlockchainId[blockchain];
 
         try {
             const response = await pTimeout(
                 this.httpClient.get<{ market_data: { current_price: { usd: number } } }>(
-                    `${API_BASE_URL}coins/${blockchainId}/contract/${tokenAddress.toLowerCase()}`
+                    `${API_BASE_URL}coins/${blockchainId}/contract/${token.address.toLowerCase()}`
                 ),
                 3_000
             );
@@ -128,14 +136,9 @@ export class CoingeckoApi {
         address: string;
         blockchain: BLOCKCHAIN_NAME;
     }): Promise<BigNumber> {
-        const { blockchain } = token;
-        if (!CoingeckoApi.isSupportedBlockchain(blockchain)) {
-            throw new RubicSdkError(`Blockchain ${blockchain} is not supported by coingecko-api`);
-        }
-
         if (Web3Pure.isNativeAddress(token.address)) {
-            return this.getNativeCoinPrice(blockchain);
+            return this.getNativeCoinPrice(token.blockchain);
         }
-        return this.getErc20TokenPrice(blockchain, token.address);
+        return this.getErc20TokenPrice(token);
     }
 }

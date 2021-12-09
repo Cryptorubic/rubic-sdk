@@ -4,7 +4,7 @@ import { Token } from '@core/blockchain/tokens/token';
 import { Web3Private } from '@core/blockchain/web3-private/web3-private';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { EncodableSwapTransactionOptions } from '@features/swap/models/encodable-swap-transaction-options';
-import { FeeInfo } from '@features/swap/models/fee-info';
+import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { EstimatedGasCallData } from '@features/swap/trades/common/uniswap-v2/models/estimated-gas-call-data';
 import { InstantTrade } from '@features/swap/trades/instant-trade';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
@@ -27,7 +27,7 @@ import { Utils } from '@common/utils/blockchain';
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount;
     to: PriceTokenAmount;
-    gasInfo: FeeInfo | null;
+    gasFeeInfo: GasFeeInfo | null;
     path: ReadonlyArray<Token> | Token[];
     deadlineMinutes?: number;
     exact: 'input' | 'output';
@@ -43,7 +43,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     public readonly to: PriceTokenAmount;
 
-    public readonly gasInfo: FeeInfo | null;
+    public readonly gasFeeInfo: GasFeeInfo | null;
 
     public readonly path: ReadonlyArray<Token>;
 
@@ -75,7 +75,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             amountOut,
             this.path.map(t => t.address),
             this.to.address,
-            this.deadlineMinutesTimestamp
+            Utils.deadlineMinutesTimestamp(this.deadlineMinutes)
         ];
     }
 
@@ -104,7 +104,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
-        this.gasInfo = tradeStruct.gasInfo;
+        this.gasFeeInfo = tradeStruct.gasFeeInfo;
         this.path = tradeStruct.path;
         this.deadlineMinutes = tradeStruct.deadlineMinutes || 1; // TODO: default child config
         this.exact = tradeStruct.exact;
@@ -129,8 +129,8 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         if (options?.gasLimit) {
             return options.gasLimit;
         }
-        if (this.gasInfo) {
-            return this.gasInfo.gasLimit;
+        if (this.gasFeeInfo) {
+            return this.gasFeeInfo.gasLimit;
         }
 
         const transitTokensNumber = this.path.length - 2;
@@ -149,8 +149,8 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         if (options.gasPrice) {
             return options.gasPrice;
         }
-        if (this.gasInfo) {
-            return this.gasInfo.gasPrice;
+        if (this.gasFeeInfo) {
+            return this.gasFeeInfo.gasPrice;
         }
         return null;
     }
