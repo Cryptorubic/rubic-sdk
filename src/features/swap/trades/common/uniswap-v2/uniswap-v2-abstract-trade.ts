@@ -1,7 +1,9 @@
 import { tryExecuteAsync } from '@common/utils/functions';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Token } from '@core/blockchain/tokens/token';
 import { Web3Private } from '@core/blockchain/web3-private/web3-private';
+import { ContractMulticallResponse } from '@core/blockchain/web3-public/models/contract-multicall-response';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@core/sdk/injector';
 import { EncodableSwapTransactionOptions } from '@features/swap/models/encodable-swap-transaction-options';
@@ -40,6 +42,20 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     public static readonly swapMethods: ExactInputOutputSwapMethodsList = SWAP_METHOD;
 
     public static readonly defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
+
+    public static callForRoutes(
+        blockchain: BLOCKCHAIN_NAME,
+        exact: 'input' | 'output',
+        routesMethodArguments: [string, string[]][]
+    ): Promise<ContractMulticallResponse<{ amounts: string[] }>[]> {
+        const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
+        return web3Public.multicallContractMethod<{ amounts: string[] }>(
+            this.getContractAddress(),
+            this.contractAbi,
+            exact === 'input' ? 'getAmountsOut' : 'getAmountsIn',
+            routesMethodArguments
+        );
+    }
 
     public deadlineMinutes: number;
 

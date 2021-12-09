@@ -193,10 +193,9 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             recGraphVisitor(initialPath, i);
         }
 
-        const responses = await this.web3Public.multicallContractMethod<{ amounts: string[] }>(
-            this.InstantTradeClass.getContractAddress(),
-            this.InstantTradeClass.contractAbi,
-            this.exact === 'input' ? 'getAmountsOut' : 'getAmountsIn',
+        const responses = await this.InstantTradeClass.callForRoutes(
+            this.from.blockchain,
+            this.exact,
             routesMethodArguments
         );
 
