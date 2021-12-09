@@ -9,13 +9,16 @@ import { UniswapCalculatedInfo } from '@features/swap/providers/common/uniswap-v
 import { UniswapV2ProviderConfiguration } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/uniswap-v2-provider-configuration';
 import { UniswapV2TradeClass } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/uniswap-v2-trade-class';
 import { PathFactory } from '@features/swap/providers/common/uniswap-v2-abstract-provider/path-factory';
+import { InstantTradeProvider } from '@features/swap/providers/instant-trade-provider';
 import { UniswapV2AbstractTrade } from '@features/swap/trades/common/uniswap-v2/uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
 import { Token } from '@core/blockchain/tokens/token';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 
-export abstract class UniswapV2AbstractProvider<T extends UniswapV2AbstractTrade> {
-    public abstract InstantTradeClass: UniswapV2TradeClass<T>;
+export abstract class UniswapV2AbstractProvider<
+    T extends UniswapV2AbstractTrade
+> extends InstantTradeProvider {
+    public abstract readonly InstantTradeClass: UniswapV2TradeClass<T>;
 
     public abstract readonly providerSettings: UniswapV2ProviderConfiguration;
 
@@ -32,7 +35,14 @@ export abstract class UniswapV2AbstractProvider<T extends UniswapV2AbstractTrade
 
     private readonly coingeckoApi = Injector.coingeckoApi;
 
-    public async calculateTrade(
+    public async calculate(
+        from: PriceTokenAmount,
+        to: PriceToken
+    ): Promise<UniswapV2AbstractTrade> {
+        return this.calculateDifficultTrade(from, to, 'input');
+    }
+
+    public async calculateDifficultTrade(
         from: PriceTokenAmount,
         to: PriceToken,
         exact: 'input' | 'output',
