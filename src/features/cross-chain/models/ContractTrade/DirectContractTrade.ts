@@ -1,8 +1,9 @@
-import { SupportedCrossChainBlockchain } from '@features/cross-chain/constants/SupportedCrossChainBlockchain';
+import { CrossChainSupportedBlockchain } from '@features/cross-chain/constants/CrossChainSupportedBlockchains';
 import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { ContractTrade } from '@features/cross-chain/models/ContractTrade/ContractTrade';
 import BigNumber from 'bignumber.js';
+import { Token } from '@core/blockchain/tokens/token';
 
 export class DirectContractTrade extends ContractTrade {
     public get fromToken(): PriceTokenAmount {
@@ -25,12 +26,12 @@ export class DirectContractTrade extends ContractTrade {
         return this.toAmount;
     }
 
-    public get path(): ReadonlyArray<string> {
-        return [this.token.address];
+    public get path(): ReadonlyArray<Token> {
+        return [this.token];
     }
 
     constructor(
-        public readonly blockchain: SupportedCrossChainBlockchain,
+        public readonly blockchain: CrossChainSupportedBlockchain,
         public readonly contract: CrossChainContract,
         private readonly token: PriceTokenAmount
     ) {

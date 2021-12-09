@@ -85,13 +85,13 @@ export abstract class InstantTrade {
         await this.web3Public.checkBalance(this.from, this.from.tokenAmount, this.walletAddress);
     }
 
-    private checkWalletConnected(): never | void {
+    protected checkWalletConnected(): never | void {
         if (!this.walletAddress) {
             throw new WalletNotConnectedError();
         }
     }
 
-    private checkBlockchainCorrect(): never | void {
+    protected checkBlockchainCorrect(): never | void {
         if (this.web3Private.blockchainName !== this.from.blockchain) {
             throw new WrongNetworkError();
         }

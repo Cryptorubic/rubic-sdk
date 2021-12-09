@@ -1,69 +1,80 @@
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Token } from '@core/blockchain/tokens/token';
-import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
-import { BlockchainsInfo } from '@core/blockchain/blockchains-info';
 import { Injector } from '@core/sdk/injector';
 import { OneinchTokensResponse } from '@features/swap/providers/common/oneinch-abstract-provider/models/OneinchTokensResponse';
-import { InstantTrade } from '@features/swap/trades/instant-trade';
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { SwapOptions } from '@features/swap/models/swap-options';
 import BigNumber from 'bignumber.js';
 import { OneinchQuoteRequest } from '@features/swap/providers/common/oneinch-abstract-provider/models/OneinchQuoteRequest';
 import { OneinchQuoteResponse } from '@features/swap/providers/common/oneinch-abstract-provider/models/OneinchQuoteResponse';
 import { OneinchSwapResponse } from '@features/swap/providers/common/oneinch-abstract-provider/models/OneinchSwapResponse';
-import { OneinchSwapRequest } from '@features/swap/providers/common/oneinch-abstract-provider/models/OneinchSwapRequest';
-import { Web3Public } from '@core/blockchain/web3-public/web3-public';
+import { OneinchSwapRequest } from '@features/swap/models/one-inch/OneinchSwapRequest';
 import { getGasPriceInfo } from '@features/swap/providers/common/utils/gas-price';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
+import { oneinchApiParams } from '@features/swap/constants/oneinch/oneinch-api-params';
+import { OneinchTrade } from '@features/swap/trades/common/oneinch-abstract-trade/oneinch-trade';
+import {
+    isOneinchSupportedBlockchain,
+    OneinchSupportedBlockchain
+} from '@features/swap/constants/oneinch/supported-blockchains';
+import { getOneinchApiBaseUrl } from '@features/swap/utils/oneinch';
 
-export class OneinchAbstractProvider {
-    private readonly oneInchNativeAddress = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-
-    private readonly apiBaseUrl = 'https://api.1inch.exchange/v4.0/';
-
+export class OneinchProvider {
     private readonly httpClient = Injector.httpClient;
 
-    private supportedTokens: string[] | undefined;
+    private readonly getWeb3Public = Injector.web3PublicService.getWeb3Public;
 
-    private readonly web3Public: Web3Public;
+    private readonly supportedTokens: Record<OneinchSupportedBlockchain, string[] | undefined>;
 
-    private get walletAddress() {
+    private get walletAddress(): string {
         return Injector.web3Private.address;
     }
 
-    constructor(private readonly blockchain: BLOCKCHAIN_NAME) {
-        this.web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
+    constructor() {
+        this.supportedTokens = {} as Record<OneinchSupportedBlockchain, string[] | undefined>;
     }
 
-    private getOneInchTokenSpecificAddresses(
-        fromTokenAddress: string,
-        toTokenAddress: string
-    ): { fromTokenAddress: string; toTokenAddress: string } {
-        if (fromTokenAddress === NATIVE_TOKEN_ADDRESS) {
-            fromTokenAddress = this.oneInchNativeAddress;
-        }
-        if (toTokenAddress === NATIVE_TOKEN_ADDRESS) {
-            toTokenAddress = this.oneInchNativeAddress;
-        }
-        return { fromTokenAddress, toTokenAddress };
+    private createTokenProxy<T extends Token>(token: T): T {
+        const tokenAddress = token.isNative ? oneinchApiParams.nativeAddress : token.address;
+        return new Proxy<T>(token, {
+            get: (target, key) => {
+                if (!(key in target)) {
+                    return undefined;
+                }
+                if (key === 'address') {
+                    return tokenAddress;
+                }
+                return target[key as keyof T];
+            }
+        });
     }
 
-    private async getSupportedTokensByBlockchain(): Promise<string[]> {
-        if (this.supportedTokens) {
-            return this.supportedTokens;
+    private async getSupportedTokensByBlockchain(blockchain: BLOCKCHAIN_NAME): Promise<string[]> {
+        if (!isOneinchSupportedBlockchain(blockchain)) {
+            throw new RubicSdkError(`${blockchain} is not supported by oneinch`);
         }
 
-        const blockchainId = BlockchainsInfo.getBlockchainByName(this.blockchain).id;
+        if (this.supportedTokens[blockchain]) {
+            return this.supportedTokens[blockchain]!;
+        }
+
         const oneinchTokensResponse: OneinchTokensResponse = await this.httpClient.get(
-            `${this.apiBaseUrl}${blockchainId}/tokens`
+            `${getOneinchApiBaseUrl(blockchain)}/tokens`
         );
         const supportedTokensByBlockchain = Object.keys(oneinchTokensResponse.tokens).map(
             tokenAddress => tokenAddress.toLowerCase()
         );
-        this.supportedTokens = supportedTokensByBlockchain;
+        this.supportedTokens[blockchain] = supportedTokensByBlockchain;
 
         return supportedTokensByBlockchain;
+    }
+
+    private async loadContractAddress(blockchain: BLOCKCHAIN_NAME): Promise<string> {
+        const response = await this.httpClient.get<{
+            address: string;
+        }>(`${getOneinchApiBaseUrl(blockchain)}/approve/spender`);
+        return response.address;
     }
 
     public async calculateTrade(
@@ -75,53 +86,54 @@ export class OneinchAbstractProvider {
             deadline: 1200000, // 20 min
             slippageTolerance: 0.05
         }
-    ): Promise<InstantTrade> {
-        const { fromTokenAddress, toTokenAddress } = this.getOneInchTokenSpecificAddresses(
-            from.address,
-            toToken.address
-        );
+    ): Promise<OneinchTrade> {
+        const fromClone = this.createTokenProxy(from);
+        const toTokenClone = this.createTokenProxy(toToken);
 
-        const supportedTokensAddresses = await this.getSupportedTokensByBlockchain();
+        const supportedTokensAddresses = await this.getSupportedTokensByBlockchain(from.blockchain);
         if (
-            !supportedTokensAddresses.includes(fromTokenAddress.toLowerCase()) ||
-            !supportedTokensAddresses.includes(toTokenAddress.toLowerCase())
+            !supportedTokensAddresses.includes(fromClone.address.toLowerCase()) ||
+            !supportedTokensAddresses.includes(toTokenClone.address.toLowerCase())
         ) {
             throw new RubicSdkError("Oneinch doesn't support this tokens");
         }
 
-        const { toTokenAmount, estimatedGas, path } = await this.getTradeInfo(
-            from,
-            toToken,
-            options
-        );
+        const [contractAddress, { toTokenAmount, estimatedGas, path }] = await Promise.all([
+            this.loadContractAddress(from.blockchain),
+            this.getTradeInfo(fromClone, toTokenClone, options)
+        ]);
+        path[0] = from;
+        path[path.length - 1] = toToken;
 
-        const instantTrade: InstantTrade = {
-            from,
+        const oneinchTrade = {
+            contractAddress,
+            from: fromClone,
             to: new PriceTokenAmount({
-                ...toToken.asStruct,
+                ...toTokenClone.asStruct,
                 tokenAmount: toTokenAmount
             }),
             gasFeeInfo: null,
             slippageTolerance: options.slippageTolerance,
+            disableMultihops: options.disableMultihops,
             path
         };
         if (options.gasCalculation === 'disabled') {
-            return instantTrade;
+            return new OneinchTrade(oneinchTrade);
         }
 
-        const gasPriceInfo = await getGasPriceInfo(this.blockchain);
+        const gasPriceInfo = await getGasPriceInfo(from.blockchain);
         const gasFeeInEth = gasPriceInfo.gasPriceInEth.multipliedBy(estimatedGas);
         const gasFeeInUsd = gasPriceInfo.gasPriceInUsd.multipliedBy(estimatedGas);
 
-        return {
-            ...instantTrade,
+        return new OneinchTrade({
+            ...oneinchTrade,
             gasFeeInfo: {
                 gasLimit: estimatedGas.toFixed(0),
                 gasPrice: gasPriceInfo.gasPrice,
                 gasFeeInUsd,
                 gasFeeInEth
             }
-        };
+        });
     }
 
     private async getTradeInfo(
@@ -129,17 +141,14 @@ export class OneinchAbstractProvider {
         toToken: Token,
         options: SwapOptions
     ): Promise<{ toTokenAmount: BigNumber; estimatedGas: BigNumber; path: Token[] }> {
-        const blockchainId = BlockchainsInfo.getBlockchainByName(this.blockchain).id;
         const quoteTradeParams: OneinchQuoteRequest = {
             params: {
                 fromTokenAddress: from.address,
                 toTokenAddress: toToken.address,
-                amount: from.stringWeiAmount
+                amount: from.stringWeiAmount,
+                mainRouteParts: options.disableMultihops ? '1' : undefined
             }
         };
-        if (options.disableMultihops) {
-            quoteTradeParams.params.mainRouteParts = '1';
-        }
 
         let oneInchTrade: OneinchSwapResponse | OneinchQuoteResponse;
         let estimatedGas: BigNumber;
@@ -149,10 +158,10 @@ export class OneinchAbstractProvider {
                 throw new Error('User has not connected');
             }
 
-            if (from.address !== this.oneInchNativeAddress) {
+            if (!from.isNative) {
                 const response = await this.httpClient.get<{
                     allowance: string;
-                }>(`${this.apiBaseUrl}${blockchainId}/approve/allowance`, {
+                }>(`${getOneinchApiBaseUrl(from.blockchain)}/approve/allowance`, {
                     params: {
                         tokenAddress: from.address,
                         walletAddress: this.walletAddress
@@ -171,7 +180,7 @@ export class OneinchAbstractProvider {
                 }
             };
             oneInchTrade = await this.httpClient.get<OneinchSwapResponse>(
-                `${this.apiBaseUrl}${blockchainId}/swap`,
+                `${getOneinchApiBaseUrl(from.blockchain)}/swap`,
                 swapTradeParams
             );
 
@@ -179,7 +188,7 @@ export class OneinchAbstractProvider {
             toTokenAmount = oneInchTrade.toTokenAmount;
         } catch (_err) {
             oneInchTrade = await this.httpClient.get<OneinchQuoteResponse>(
-                `${this.apiBaseUrl}${blockchainId}/quote`,
+                `${getOneinchApiBaseUrl(from.blockchain)}/quote`,
                 quoteTradeParams
             );
             if (oneInchTrade.hasOwnProperty('errors') || !oneInchTrade.toTokenAmount) {
@@ -206,7 +215,10 @@ export class OneinchAbstractProvider {
     ): Promise<Token[]> {
         const addressesPath = oneInchTrade.protocols[0].map(protocol => protocol[0].toTokenAddress);
         addressesPath.pop();
-        const tokensPath = await this.web3Public.callForTokens(addressesPath);
+
+        const tokensPath = await this.getWeb3Public(fromToken.blockchain).callForTokens(
+            addressesPath
+        );
 
         return [fromToken, ...tokensPath, toToken];
     }

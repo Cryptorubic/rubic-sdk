@@ -1,8 +1,8 @@
 import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
 import {
-    SupportedCrossChainBlockchain,
-    supportedCrossChainBlockchain
-} from '@features/cross-chain/constants/SupportedCrossChainBlockchain';
+    CrossChainSupportedBlockchain,
+    crossChainSupportedBlockchains
+} from '@features/cross-chain/constants/CrossChainSupportedBlockchains';
 import { crossChainContracts } from '@features/cross-chain/constants/crossChainContracts';
 import { Token } from '@core/blockchain/tokens/token';
 import BigNumber from 'bignumber.js';
@@ -45,13 +45,13 @@ interface CalculatedContractTrade {
 export class CrossChain {
     public static isSupportedBlockchain(
         blockchain: BLOCKCHAIN_NAME
-    ): blockchain is SupportedCrossChainBlockchain {
-        return supportedCrossChainBlockchain.some(
+    ): blockchain is CrossChainSupportedBlockchain {
+        return crossChainSupportedBlockchains.some(
             supportedBlockchain => supportedBlockchain === blockchain
         );
     }
 
-    private readonly contracts: Record<SupportedCrossChainBlockchain, CrossChainContract[]>;
+    private readonly contracts: Record<CrossChainSupportedBlockchain, CrossChainContract[]>;
 
     private readonly getWeb3Public: (blockchain: BLOCKCHAIN_NAME) => Web3Public;
 
@@ -111,7 +111,7 @@ export class CrossChain {
     }
 
     private async calculateBestFormTrade(
-        blockchain: SupportedCrossChainBlockchain,
+        blockchain: CrossChainSupportedBlockchain,
         fromToken: Token,
         fromAmount: BigNumber,
         slippageTolerance: number
@@ -151,7 +151,7 @@ export class CrossChain {
     }
 
     private async calculateBestToTrade(
-        blockchain: SupportedCrossChainBlockchain,
+        blockchain: CrossChainSupportedBlockchain,
         fromAmount: BigNumber,
         toToken: Token,
         slippage: number
@@ -170,7 +170,7 @@ export class CrossChain {
     }
 
     private async getBestContractTrade(
-        blockchain: SupportedCrossChainBlockchain,
+        blockchain: CrossChainSupportedBlockchain,
         slippageTolerance: number,
         promises: Promise<CalculatedContractTrade>[]
     ): Promise<ContractTrade> {
