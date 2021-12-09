@@ -4,13 +4,13 @@ import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Injector } from '@core/sdk/injector';
 import { FeeInfo } from '@features/swap/models/fee-info';
 import { GasPriceInfo } from '@features/swap/models/gas-price-info';
+import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
 import { UniswapCalculatedInfo } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/uniswap-calculated-info';
 import { UniswapV2ProviderConfiguration } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/uniswap-v2-provider-configuration';
 import { UniswapV2TradeClass } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/uniswap-v2-trade-class';
 import { PathFactory } from '@features/swap/providers/common/uniswap-v2-abstract-provider/path-factory';
 import { UniswapV2AbstractTrade } from '@features/swap/trades/common/uniswap-v2/uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
-import { SwapOptions } from 'src/features/swap/models/swap-options';
 import { Token } from '@core/blockchain/tokens/token';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 
@@ -19,10 +19,10 @@ export abstract class UniswapV2AbstractProvider<T extends UniswapV2AbstractTrade
 
     public abstract readonly providerSettings: UniswapV2ProviderConfiguration;
 
-    protected readonly defaultOptions: SwapOptions = {
+    protected readonly defaultOptions: SwapCalculationOptions = {
         gasCalculation: 'calculate',
         disableMultihops: false,
-        deadline: 1200000, // 20 min
+        deadlineMinutes: 20,
         slippageTolerance: 0.05
     };
 
@@ -36,15 +36,15 @@ export abstract class UniswapV2AbstractProvider<T extends UniswapV2AbstractTrade
         from: PriceTokenAmount,
         to: PriceToken,
         exact: 'input' | 'output',
-        options?: SwapOptions
+        options?: Partial<SwapCalculationOptions>
     ): Promise<UniswapV2AbstractTrade> {
-        options = { ...this.defaultOptions, ...options };
+        const fullOptions: SwapCalculationOptions = { ...this.defaultOptions, ...options };
 
         const fromProxy = this.createTokenWETHAbleProxy(from);
         const toProxy = this.createTokenWETHAbleProxy(to);
 
         let gasPriceInfo: Partial<GasPriceInfo> = {};
-        if (options.gasCalculation !== 'disabled') {
+        if (fullOptions.gasCalculation !== 'disabled') {
             gasPriceInfo = await this.getGasInfo(from.blockchain);
         }
 
@@ -52,7 +52,7 @@ export abstract class UniswapV2AbstractProvider<T extends UniswapV2AbstractTrade
             fromProxy,
             toProxy,
             exact,
-            options,
+            fullOptions,
             gasPriceInfo.gasPriceInUsd
         );
 
@@ -61,11 +61,11 @@ export abstract class UniswapV2AbstractProvider<T extends UniswapV2AbstractTrade
             to: new PriceTokenAmount({ ...to.asStruct, weiAmount: route.outputAbsoluteAmount }),
             exact,
             path: route.path,
-            deadlineMinutes: options.deadline,
-            slippageTolerance: options.slippageTolerance
+            deadlineMinutes: fullOptions.deadlineMinutes,
+            slippageTolerance: fullOptions.slippageTolerance
         });
 
-        if (options.gasCalculation === 'disabled') {
+        if (fullOptions.gasCalculation === 'disabled') {
             return instantTrade;
         }
 
@@ -77,7 +77,7 @@ export abstract class UniswapV2AbstractProvider<T extends UniswapV2AbstractTrade
         from: PriceTokenAmount,
         to: PriceToken,
         exact: 'input' | 'output',
-        options: SwapOptions,
+        options: SwapCalculationOptions,
         gasPriceInUsd: BigNumber | undefined
     ): Promise<UniswapCalculatedInfo> {
         const pathFactory = new PathFactory(this, { from, to, exact, options });

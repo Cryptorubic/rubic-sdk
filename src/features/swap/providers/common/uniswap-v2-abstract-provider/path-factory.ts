@@ -6,7 +6,7 @@ import { Token } from '@core/blockchain/tokens/token';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@core/sdk/injector';
-import { SwapOptions } from '@features/swap/models/swap-options';
+import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
 import {
     UniswapCalculatedInfo,
     UniswapCalculatedInfoWithProfit
@@ -21,7 +21,7 @@ export interface PathFactoryStruct {
     readonly from: PriceTokenAmount;
     readonly to: PriceToken;
     readonly exact: 'input' | 'output';
-    readonly options: SwapOptions;
+    readonly options: SwapCalculationOptions;
 }
 
 export interface UniswapV2AbstractProviderStruct<T extends UniswapV2AbstractTrade> {
@@ -40,7 +40,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
     private readonly exact: 'input' | 'output';
 
-    private readonly options: SwapOptions;
+    private readonly options: SwapCalculationOptions;
 
     private readonly InstantTradeClass: UniswapV2TradeClass<T>;
 
@@ -67,7 +67,9 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         this.InstantTradeClass = uniswapProviderStruct.InstantTradeClass;
         this.routingProvidersAddresses =
             uniswapProviderStruct.providerSettings.routingProvidersAddresses;
-        this.maxTransitTokens = uniswapProviderStruct.providerSettings.maxTransitTokens;
+        this.maxTransitTokens = pathFactoryStruct.options.disableMultihops
+            ? 0
+            : uniswapProviderStruct.providerSettings.maxTransitTokens;
     }
 
     public async getAmountAndPath(
@@ -96,11 +98,8 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
                 }),
                 path: route.path,
                 exact: this.exact,
-                gasInfo: null,
-                ...(this.options.deadline && { deadlineMinutes: this.options.deadline }),
-                ...(this.options.slippageTolerance && {
-                    slippageTolerance: this.options.slippageTolerance
-                })
+                deadlineMinutes: this.options.deadlineMinutes,
+                slippageTolerance: this.options.slippageTolerance
             });
 
             return trade.getEstimatedGasCallData();

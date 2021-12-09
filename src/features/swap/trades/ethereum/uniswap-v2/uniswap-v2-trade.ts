@@ -5,7 +5,7 @@ import {
 import { UNISWAP_ETHEREUM_CONTRACT_ADDRESS } from '@features/swap/trades/ethereum/uniswap-v2/constants';
 
 export class UniswapV2Trade extends UniswapV2AbstractTrade {
-    protected contractAddress = UNISWAP_ETHEREUM_CONTRACT_ADDRESS;
+    protected readonly contractAddress = UNISWAP_ETHEREUM_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);

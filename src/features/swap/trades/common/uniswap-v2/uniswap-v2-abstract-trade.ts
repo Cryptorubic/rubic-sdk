@@ -29,17 +29,17 @@ export type UniswapV2TradeStruct = {
     to: PriceTokenAmount;
     exact: 'input' | 'output';
     path: ReadonlyArray<Token> | Token[];
+    deadlineMinutes: number;
+    slippageTolerance: number;
     gasInfo?: FeeInfo;
-    deadlineMinutes?: number;
-    slippageTolerance?: number;
 };
 
 export abstract class UniswapV2AbstractTrade extends InstantTrade {
-    static readonly contractAbi: AbiItem[] = defaultUniswapV2Abi;
+    public static readonly contractAbi: AbiItem[] = defaultUniswapV2Abi;
 
-    static readonly swapMethods: ExactInputOutputSwapMethodsList = SWAP_METHOD;
+    public static readonly swapMethods: ExactInputOutputSwapMethodsList = SWAP_METHOD;
 
-    static readonly defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
+    public static readonly defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
 
     public deadlineMinutes: number;
 
@@ -105,15 +105,15 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         return 'TOKENS_TO_TOKENS';
     }
 
-    constructor(tradeStruct: UniswapV2TradeStruct) {
+    protected constructor(tradeStruct: UniswapV2TradeStruct) {
         super();
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
         this.feeInfo = tradeStruct.gasInfo || null;
         this.path = tradeStruct.path;
-        this.deadlineMinutes = tradeStruct.deadlineMinutes || 1; // TODO: default child config
+        this.deadlineMinutes = tradeStruct.deadlineMinutes;
         this.exact = tradeStruct.exact;
-        this.slippageTolerance = tradeStruct.slippageTolerance || 1; // TODO: default child config
+        this.slippageTolerance = tradeStruct.slippageTolerance;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
