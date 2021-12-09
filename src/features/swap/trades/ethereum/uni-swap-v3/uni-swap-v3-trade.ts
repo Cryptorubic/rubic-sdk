@@ -144,7 +144,7 @@ export class UniSwapV3Trade extends InstantTrade {
     private readonly route: UniSwapV3Route;
 
     @Pure
-    public get path(): Token[] {
+    public get path(): ReadonlyArray<Token> {
         const initialPool = this.route.poolsPath[0];
         const path: Token[] = [
             compareAddresses(initialPool.token0.address, this.route.initialTokenAddress)
