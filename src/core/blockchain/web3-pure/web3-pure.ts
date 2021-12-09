@@ -19,13 +19,13 @@ export class Web3Pure {
     /**
      * @description increases the gas limit value by the specified percentage and rounds to the nearest integer
      * @param amount gas limit value to increase
-     * @param percent the percentage by which the gas limit will be increased
+     * @param multiplier the multiplier by which the gas limit will be increased
      */
     static calculateGasMargin(
         amount: BigNumber | string | number | undefined,
-        percent: number
+        multiplier: number
     ): string {
-        return new BigNumber(amount || '0').multipliedBy(percent).toFixed(0);
+        return new BigNumber(amount || '0').multipliedBy(multiplier).toFixed(0);
     }
 
     /**

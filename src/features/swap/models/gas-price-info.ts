@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 
-export interface GasInfo {
+export interface GasPriceInfo {
     readonly gasPrice: BigNumber;
     readonly gasPriceInUsd: BigNumber;
     readonly gasPriceInEth: BigNumber;

@@ -49,7 +49,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     public readonly to: PriceTokenAmount;
 
-    public readonly gasInfo: FeeInfo | null;
+    public feeInfo: FeeInfo | null;
 
     public readonly path: ReadonlyArray<Token>;
 
@@ -109,7 +109,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         super();
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
-        this.gasInfo = tradeStruct.gasInfo || null;
+        this.feeInfo = tradeStruct.gasInfo || null;
         this.path = tradeStruct.path;
         this.deadlineMinutes = tradeStruct.deadlineMinutes || 1; // TODO: default child config
         this.exact = tradeStruct.exact;
@@ -134,8 +134,8 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         if (options?.gasLimit) {
             return options.gasLimit;
         }
-        if (this.gasInfo?.gasLimit) {
-            return this.gasInfo.gasLimit;
+        if (this.feeInfo?.gasLimit?.isFinite()) {
+            return this.feeInfo.gasLimit.toFixed(0);
         }
 
         const transitTokensNumber = this.path.length - 2;
@@ -156,8 +156,8 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         if (options.gasPrice) {
             return options.gasPrice;
         }
-        if (this.gasInfo?.gasPrice) {
-            return this.gasInfo.gasPrice;
+        if (this.feeInfo?.gasPrice?.isFinite()) {
+            return this.feeInfo.gasPrice.toFixed(0);
         }
         return null;
     }
