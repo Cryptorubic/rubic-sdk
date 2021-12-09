@@ -17,6 +17,7 @@ import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liq
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { UniSwapV3Trade } from '@features/swap/trades/ethereum/uni-swap-v3/uni-swap-v3-trade';
 import { GasPriceInfo } from '@features/swap/models/gas-price-info';
+import { getGasPriceInfo } from '@features/swap/providers/common/utils/gas-price';
 
 const RUBIC_OPTIMIZATION_DISABLED = true;
 
@@ -33,10 +34,6 @@ export class UniSwapV3Provider {
     private wethAddress = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 
     private web3Public = Injector.web3PublicService.getWeb3Public(this.blockchain);
-
-    private gasPriceApi = Injector.gasPriceApi;
-
-    private coingeckoApi = Injector.coingeckoApi;
 
     private liquidityPoolsController = new LiquidityPoolsController(this.web3Public);
 
@@ -57,7 +54,7 @@ export class UniSwapV3Provider {
 
         let gasPriceInfo: GasPriceInfo | undefined;
         if (options.gasCalculation !== 'disabled') {
-            gasPriceInfo = await this.getGasPriceInfo();
+            gasPriceInfo = await getGasPriceInfo(this.blockchain);
         }
 
         const { route, gasLimit } = await this.getRoute(
@@ -95,20 +92,6 @@ export class UniSwapV3Provider {
                 gasFeeInUsd
             }
         });
-    }
-
-    private async getGasPriceInfo(): Promise<GasPriceInfo> {
-        const [gasPrice, nativeCoinPrice] = await Promise.all([
-            this.gasPriceApi.getGasPrice(this.blockchain),
-            this.coingeckoApi.getNativeCoinPrice(this.blockchain)
-        ]);
-        const gasPriceInEth = Web3Pure.fromWei(gasPrice);
-        const gasPriceInUsd = gasPriceInEth.multipliedBy(nativeCoinPrice);
-        return {
-            gasPrice: new BigNumber(gasPrice),
-            gasPriceInEth,
-            gasPriceInUsd
-        };
     }
 
     /**

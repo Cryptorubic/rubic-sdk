@@ -22,15 +22,15 @@ import { MinMaxAmounts } from '@features/cross-chain/models/MinMaxAmounts';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { GasData } from '@common/models/GasData';
 import { NotSupportedBlockchain } from '@common/errors/swap/NotSupportedBlockchain';
-import { Uniswapv2InstantTrade } from '@features/swap/trades/instant-trade';
 import { notNull } from '@common/utils/object';
+import { UniSwapV2Trade } from '@features/swap/trades/ethereum/uni-swap-v2/uni-swap-v2-trade';
 
 interface CalculatedTrade {
     toAmount: BigNumber;
 }
 
 interface ItCalculatedTrade extends CalculatedTrade {
-    instantTrade: Uniswapv2InstantTrade;
+    instantTrade: UniSwapV2Trade;
 }
 
 interface DirectCalculatedTrade extends CalculatedTrade {

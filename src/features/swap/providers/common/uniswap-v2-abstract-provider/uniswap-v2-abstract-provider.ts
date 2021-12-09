@@ -1,6 +1,5 @@
 import { AbstractConstructorParameters } from '@common/utils/types/abstract-constructor-parameters';
 import { Constructor } from '@common/utils/types/constructor';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Injector } from '@core/sdk/injector';
@@ -25,6 +24,7 @@ import {
     UniswapCalculatedInfoWithProfit
 } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/uniswap-calculated-info';
 import { createTokenWethAbleProxy } from '@features/swap/providers/common/utils/weth';
+import { getGasPriceInfo } from '@features/swap/providers/common/utils/gas-price';
 
 export abstract class UniswapV2AbstractProvider<T extends UniswapV2AbstractTrade> {
     protected abstract InstantTradeClass: Constructor<
@@ -149,18 +149,6 @@ export abstract class UniswapV2AbstractProvider<T extends UniswapV2AbstractTrade
         );
     };
 
-    private async getGasPriceInfo(blockchain: BLOCKCHAIN_NAME): Promise<GasPriceInfo> {
-        const gasPrice = await this.web3PublicService.getWeb3Public(blockchain).getGasPrice();
-        const gasPriceInEth = Web3Pure.fromWei(gasPrice);
-        const nativeCoinPrice = await this.coingeckoApi.getNativeCoinPrice(blockchain);
-        const gasPriceInUsd = gasPriceInEth.multipliedBy(nativeCoinPrice);
-        return {
-            gasPrice: new BigNumber(gasPrice),
-            gasPriceInEth,
-            gasPriceInUsd
-        };
-    }
-
     public async calculateTrade(
         from: PriceTokenAmount,
         to: PriceToken,
@@ -177,7 +165,7 @@ export abstract class UniswapV2AbstractProvider<T extends UniswapV2AbstractTrade
 
         let gasPriceInfo: Partial<GasPriceInfo> = {};
         if (options.gasCalculation !== 'disabled') {
-            gasPriceInfo = await this.getGasPriceInfo(from.blockchain);
+            gasPriceInfo = await getGasPriceInfo(from.blockchain);
         }
 
         const { route, estimatedGas } = await this.getAmountAndPath(fromProxy, toProxy, exact, {
