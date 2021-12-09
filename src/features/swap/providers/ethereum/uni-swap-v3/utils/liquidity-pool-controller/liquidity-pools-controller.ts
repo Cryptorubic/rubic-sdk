@@ -7,11 +7,6 @@ import {
     LiquidityPool
 } from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/models/liquidity-pool';
 import { compareAddresses } from '@common/utils/blockchain';
-import { SymbolToken } from '@core/blockchain/tokens/symbol-token';
-import {
-    routerLiquidityPools,
-    routerTokens
-} from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/constants/router-liqudity-pools';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
 import {
@@ -27,6 +22,7 @@ import {
     quoterContractAbi,
     quoterContractAddress
 } from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/constants/quoter-contract-data';
+import { getRouterTokensAndLiquidityPools } from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/constants/router-liqudity-pools';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
@@ -103,13 +99,30 @@ export class LiquidityPoolsController {
         };
     }
 
-    private readonly routerTokens = routerTokens;
+    private routerTokens: Token[] | undefined;
 
-    private readonly routerLiquidityPools = routerLiquidityPools;
+    private routerLiquidityPools: LiquidityPool[] | undefined;
 
     private readonly feeAmounts: FeeAmount[] = [500, 3000, 10000];
 
     constructor(private readonly web3Public: Web3Public) {}
+
+    private async getRouterTokensAndLiquidityPools(): Promise<{
+        routerTokens: Token[];
+        routerLiquidityPools: LiquidityPool[];
+    }> {
+        if (this.routerTokens && this.routerLiquidityPools) {
+            return {
+                routerTokens: this.routerTokens,
+                routerLiquidityPools: this.routerLiquidityPools
+            };
+        }
+
+        const routerParams = await getRouterTokensAndLiquidityPools();
+        this.routerTokens = routerParams.routerTokens;
+        this.routerLiquidityPools = routerParams.routerLiquidityPools;
+        return routerParams;
+    }
 
     /**
      * Returns all liquidity pools, containing passed tokens addresses, and concatenates with most popular pools.
@@ -122,13 +135,12 @@ export class LiquidityPoolsController {
         firstToken: Token,
         secondToken: Token
     ): Promise<LiquidityPool[]> {
-        const firstSymbolToken = SymbolToken.createFromToken(firstToken);
-        const secondSymbolToken = SymbolToken.createFromToken(secondToken);
+        const { routerTokens, routerLiquidityPools } =
+            await this.getRouterTokensAndLiquidityPools();
 
-        let getPoolMethodArguments: { tokenA: SymbolToken; tokenB: SymbolToken; fee: FeeAmount }[] =
-            [];
+        let getPoolMethodArguments: { tokenA: Token; tokenB: Token; fee: FeeAmount }[] = [];
         getPoolMethodArguments.push(
-            ...Object.values(this.routerTokens)
+            ...Object.values(routerTokens)
                 .filter(
                     routerToken =>
                         !compareAddresses(firstToken.address, routerToken.address) &&
@@ -137,8 +149,8 @@ export class LiquidityPoolsController {
                 .map(routerToken =>
                     this.feeAmounts
                         .map(fee => [
-                            { tokenA: firstSymbolToken, tokenB: routerToken, fee },
-                            { tokenA: secondSymbolToken, tokenB: routerToken, fee }
+                            { tokenA: firstToken, tokenB: routerToken, fee },
+                            { tokenA: secondToken, tokenB: routerToken, fee }
                         ])
                         .flat()
                 )
@@ -153,7 +165,7 @@ export class LiquidityPoolsController {
         );
         getPoolMethodArguments = getPoolMethodArguments.filter(
             methodArguments =>
-                !this.routerLiquidityPools.find(
+                !routerLiquidityPools.find(
                     pool =>
                         pool.isPoolWithTokens(
                             methodArguments.tokenA.address,
@@ -190,7 +202,7 @@ export class LiquidityPoolsController {
                 return null;
             })
             .filter(notNull)
-            .concat(this.routerLiquidityPools);
+            .concat(routerLiquidityPools);
     }
 
     /**

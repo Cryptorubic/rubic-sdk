@@ -1,5 +1,5 @@
-import { SymbolToken } from '@core/blockchain/tokens/symbol-token';
 import { compareAddresses } from '@common/utils/blockchain';
+import { Token } from '@core/blockchain/tokens/token';
 
 export type FeeAmount = 500 | 3000 | 10000;
 
@@ -9,8 +9,8 @@ export type FeeAmount = 500 | 3000 | 10000;
 export class LiquidityPool {
     constructor(
         public readonly address: string,
-        public readonly token0: SymbolToken,
-        public readonly token1: SymbolToken,
+        public readonly token0: Token,
+        public readonly token1: Token,
         public readonly fee: FeeAmount
     ) {}
 

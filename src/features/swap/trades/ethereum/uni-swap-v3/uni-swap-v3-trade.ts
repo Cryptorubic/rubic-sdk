@@ -18,13 +18,13 @@ import {
     swapEstimatedGas,
     WethToEthEstimatedGas
 } from '@features/swap/providers/ethereum/uni-swap-v3/constants/estimated-gas';
-import { SymbolToken } from '@core/blockchain/tokens/symbol-token';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { Injector } from '@core/sdk/injector';
 import { TransactionConfig } from 'web3-core';
 import { EncodableSwapTransactionOptions } from '@features/swap/models/encodable-swap-transaction-options';
 import { Pure } from '@common/decorators/pure.decorator';
 import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
+import { Token } from '@core/blockchain/tokens/token';
 
 type UniswapV3TradeStruct = {
     from: PriceTokenAmount;
@@ -144,9 +144,9 @@ export class UniSwapV3Trade extends InstantTrade {
     private readonly route: UniSwapV3Route;
 
     @Pure
-    public get path(): SymbolToken[] {
+    public get path(): Token[] {
         const initialPool = this.route.poolsPath[0];
-        const path: SymbolToken[] = [
+        const path: Token[] = [
             compareAddresses(initialPool.token0.address, this.route.initialTokenAddress)
                 ? initialPool.token0
                 : initialPool.token1
