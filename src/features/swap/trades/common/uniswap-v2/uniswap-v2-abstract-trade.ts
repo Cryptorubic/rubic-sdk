@@ -22,7 +22,7 @@ import BigNumber from 'bignumber.js';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
-import { Utils } from '@common/utils/blockchain';
+import { deadlineMinutesTimestamp } from '@common/utils/blockchain';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount;
@@ -60,6 +60,10 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         this.slippageTolerance = value.slippageTolerance || this.slippageTolerance;
     }
 
+    private get deadlineMinutesTimestamp(): number {
+        return deadlineMinutesTimestamp(this.deadlineMinutes);
+    }
+
     private get nativeValueToSend(): string | undefined {
         if (this.from.isNative) {
             return this.getAmountInAndAmountOut().amountIn;
@@ -75,7 +79,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             amountOut,
             this.path.map(t => t.address),
             this.to.address,
-            Utils.deadlineMinutesTimestamp(this.deadlineMinutes)
+            this.deadlineMinutesTimestamp
         ];
     }
 

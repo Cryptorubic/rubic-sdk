@@ -8,7 +8,7 @@ import {
 } from '@features/swap/trades/ethereum/uni-swap-v3/constants/swap-router-contract-data';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import { TransactionReceipt } from 'web3-eth';
-import { compareAddresses, Utils } from '@common/utils/blockchain';
+import { compareAddresses, deadlineMinutesTimestamp } from '@common/utils/blockchain';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
 import { LiquidityPoolsController } from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/liquidity-pools-controller';
 import { EMPTY_ADDRESS } from '@core/blockchain/web3-public/constants/EMPTY_ADDRESS';
@@ -143,6 +143,10 @@ export class UniSwapV3Trade extends InstantTrade {
 
     private readonly route: UniSwapV3Route;
 
+    private get deadlineMinutesTimestamp(): number {
+        return deadlineMinutesTimestamp(this.deadlineMinutes);
+    }
+
     @Pure
     public get path(): ReadonlyArray<Token> {
         const initialPool = this.route.poolsPath[0];
@@ -254,7 +258,7 @@ export class UniSwapV3Trade extends InstantTrade {
                         this.to.address,
                         this.route.poolsPath[0].fee,
                         walletAddress,
-                        Utils.deadlineMinutesTimestamp(this.deadlineMinutes),
+                        this.deadlineMinutesTimestamp,
                         this.from.weiAmount,
                         amountOutMin,
                         0
@@ -271,7 +275,7 @@ export class UniSwapV3Trade extends InstantTrade {
                         this.route.initialTokenAddress
                     ),
                     walletAddress,
-                    Utils.deadlineMinutesTimestamp(this.deadlineMinutes),
+                    this.deadlineMinutesTimestamp,
                     this.from.weiAmount,
                     amountOutMin
                 ]
