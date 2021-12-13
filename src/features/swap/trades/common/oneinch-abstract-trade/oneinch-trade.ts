@@ -8,22 +8,22 @@ import { OneinchSwapRequest } from '@features/swap/models/one-inch/OneinchSwapRe
 import { OneinchSwapResponse } from '@features/swap/providers/common/oneinch-abstract-provider/models/OneinchSwapResponse';
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import InsufficientFundsOneinchError from '@common/errors/swap/InsufficientFundsOneinchError';
-import { TokenWithFeeError } from '@common/errors/swap/TokenWithFeeError';
 import { blockchains } from '@core/blockchain/constants/blockchains';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { Token } from '@core/blockchain/tokens/token';
 import { TransactionConfig } from 'web3-core';
+import { LowSlippageError } from '@common/errors/swap/low-slippage.error';
 
 type OneinchTradeStruct = {
     contractAddress: string;
     from: PriceTokenAmount;
     to: PriceTokenAmount;
-    gasFeeInfo: GasFeeInfo | null;
     slippageTolerance: number;
     disableMultihops: boolean;
     path: ReadonlyArray<Token>;
+    gasFeeInfo?: GasFeeInfo | null;
 };
 
 export class OneinchTrade extends InstantTrade {
@@ -46,7 +46,7 @@ export class OneinchTrade extends InstantTrade {
 
     public readonly to: PriceTokenAmount;
 
-    public readonly gasFeeInfo: GasFeeInfo | null;
+    public gasFeeInfo: GasFeeInfo | null;
 
     public slippageTolerance: number;
 
@@ -59,13 +59,26 @@ export class OneinchTrade extends InstantTrade {
         return getOneinchApiBaseUrl(this.from.blockchain);
     }
 
+    private get swapTradeParams(): OneinchSwapRequest {
+        return {
+            params: {
+                fromTokenAddress: this.from.address,
+                toTokenAddress: this.to.address,
+                amount: this.from.stringWeiAmount,
+                slippage: (this.slippageTolerance * 100).toString(),
+                fromAddress: this.walletAddress,
+                mainRouteParts: this.disableMultihops ? '1' : undefined
+            }
+        };
+    }
+
     constructor(oneinchTradeStruct: OneinchTradeStruct) {
         super(oneinchTradeStruct.from.blockchain);
 
         this.contractAddress = oneinchTradeStruct.contractAddress;
         this.from = oneinchTradeStruct.from;
         this.to = oneinchTradeStruct.to;
-        this.gasFeeInfo = oneinchTradeStruct.gasFeeInfo;
+        this.gasFeeInfo = oneinchTradeStruct.gasFeeInfo || null;
         this.slippageTolerance = oneinchTradeStruct.slippageTolerance;
         this.disableMultihops = oneinchTradeStruct.disableMultihops;
         this.path = oneinchTradeStruct.path;
@@ -93,35 +106,20 @@ export class OneinchTrade extends InstantTrade {
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
         await this.checkWalletState();
 
-        const swapTradeParams: OneinchSwapRequest = {
-            params: {
-                fromTokenAddress: this.from.address,
-                toTokenAddress: this.to.address,
-                amount: this.from.stringWeiAmount,
-                slippage: this.slippageTolerance.toString(),
-                fromAddress: this.walletAddress,
-                mainRouteParts: this.disableMultihops ? '1' : undefined
-            }
-        };
-
         try {
-            const oneInchTrade = await this.httpClient.get<OneinchSwapResponse>(
-                `${this.apiBaseUrl}/swap`,
-                swapTradeParams
-            );
-
-            const trxOptions = {
+            const trade = await this.getSwapTrade();
+            const transactionOptions = {
                 onTransactionHash: options.onConfirm,
-                data: oneInchTrade.tx.data,
-                gas: oneInchTrade.tx.gas.toString(),
+                data: trade.tx.data,
+                gas: trade.tx.gas.toString(),
                 inWei: this.from.isNative || undefined,
                 ...(this.gasFeeInfo?.gasPrice && { gasPrice: this.gasFeeInfo.gasPrice })
             };
 
             return this.web3Private.trySendTransaction(
-                oneInchTrade.tx.to,
+                trade.tx.to,
                 this.from.isNative ? this.from.stringWeiAmount : '0',
-                trxOptions
+                transactionOptions
             );
         } catch (err) {
             this.specifyError(err);
@@ -131,26 +129,18 @@ export class OneinchTrade extends InstantTrade {
 
     public async encode(): Promise<TransactionConfig> {
         try {
-            const swapTradeParams: OneinchSwapRequest = {
-                params: {
-                    fromTokenAddress: this.from.address,
-                    toTokenAddress: this.to.address,
-                    amount: this.from.stringWeiAmount,
-                    slippage: this.slippageTolerance.toString(),
-                    fromAddress: this.walletAddress,
-                    mainRouteParts: this.disableMultihops ? '1' : undefined
-                }
-            };
-
-            const oneInchTrade = await this.httpClient.get<OneinchSwapResponse>(
-                `${this.apiBaseUrl}/swap`,
-                swapTradeParams
-            );
-            return oneInchTrade.tx;
+            return (await this.getSwapTrade()).tx;
         } catch (err) {
             this.specifyError(err);
             throw new RubicSdkError(err.message || err.toString());
         }
+    }
+
+    private getSwapTrade(): Promise<OneinchSwapResponse> {
+        return this.httpClient.get<OneinchSwapResponse>(
+            `${this.apiBaseUrl}/swap`,
+            this.swapTradeParams
+        );
     }
 
     private specifyError(err: {
@@ -170,7 +160,7 @@ export class OneinchTrade extends InstantTrade {
                 throw new InsufficientFundsOneinchError();
             }
             if (err.error.description?.includes('cannot estimate')) {
-                throw new TokenWithFeeError();
+                throw new LowSlippageError();
             }
         }
     }

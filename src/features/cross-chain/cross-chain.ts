@@ -23,14 +23,14 @@ import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { GasData } from '@common/models/GasData';
 import { NotSupportedBlockchain } from '@common/errors/swap/NotSupportedBlockchain';
 import { notNull } from '@common/utils/object';
-import { UniSwapV2Trade } from '@features/swap/trades/ethereum/uni-swap-v2/uni-swap-v2-trade';
+import { UniswapV2AbstractTrade } from '@features/swap/trades/common/uniswap-v2/uniswap-v2-abstract-trade';
 
 interface CalculatedTrade {
     toAmount: BigNumber;
 }
 
 interface ItCalculatedTrade extends CalculatedTrade {
-    instantTrade: UniSwapV2Trade;
+    instantTrade: UniswapV2AbstractTrade;
 }
 
 interface DirectCalculatedTrade extends CalculatedTrade {
@@ -60,7 +60,7 @@ export class CrossChain {
         this.getWeb3Public = Injector.web3PublicService.getWeb3Public;
     }
 
-    public async calculateTrade(
+    public async calculate(
         fromToken: Token,
         toToken: Token,
         fromAmount: BigNumber,

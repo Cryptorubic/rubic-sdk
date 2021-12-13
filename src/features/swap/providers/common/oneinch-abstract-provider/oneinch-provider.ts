@@ -48,12 +48,11 @@ export abstract class OneinchProvider extends InstantTradeProvider {
         const oneinchTokensResponse: OneinchTokensResponse = await this.httpClient.get(
             `${this.apiBaseUrl}/tokens`
         );
-        const supportedTokensByBlockchain = Object.keys(oneinchTokensResponse.tokens).map(
-            tokenAddress => tokenAddress.toLowerCase()
+        this.supportedTokens = Object.keys(oneinchTokensResponse.tokens).map(tokenAddress =>
+            tokenAddress.toLowerCase()
         );
-        this.supportedTokens = supportedTokensByBlockchain;
 
-        return supportedTokensByBlockchain;
+        return this.supportedTokens;
     }
 
     private async loadContractAddress(): Promise<string> {
@@ -95,7 +94,6 @@ export abstract class OneinchProvider extends InstantTradeProvider {
                 ...toTokenClone.asStruct,
                 tokenAmount: toTokenAmount
             }),
-            gasFeeInfo: null,
             slippageTolerance: fullOptions.slippageTolerance,
             disableMultihops: fullOptions.disableMultihops,
             path
