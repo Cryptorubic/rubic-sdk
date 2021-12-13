@@ -15,6 +15,7 @@ import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { Token } from '@core/blockchain/tokens/token';
 import { TransactionConfig } from 'web3-core';
 import { LowSlippageError } from '@common/errors/swap/low-slippage.error';
+import { EncodeFromAddressTransactionOptions } from '@features/swap/models/encode-transaction-options';
 
 type OneinchTradeStruct = {
     contractAddress: string;
@@ -57,19 +58,6 @@ export class OneinchTrade extends InstantTrade {
     @Pure
     private get apiBaseUrl(): string {
         return getOneinchApiBaseUrl(this.from.blockchain);
-    }
-
-    private get swapTradeParams(): OneinchSwapRequest {
-        return {
-            params: {
-                fromTokenAddress: this.from.address,
-                toTokenAddress: this.to.address,
-                amount: this.from.stringWeiAmount,
-                slippage: (this.slippageTolerance * 100).toString(),
-                fromAddress: this.walletAddress,
-                mainRouteParts: this.disableMultihops ? '1' : undefined
-            }
-        };
     }
 
     constructor(oneinchTradeStruct: OneinchTradeStruct) {
@@ -127,20 +115,41 @@ export class OneinchTrade extends InstantTrade {
         }
     }
 
-    public async encode(): Promise<TransactionConfig> {
+    public async encode(options: EncodeFromAddressTransactionOptions): Promise<TransactionConfig> {
         try {
-            return (await this.getSwapTrade()).tx;
+            const transactionConfig = (await this.getSwapTrade()).tx;
+            const gas = options.gasLimit || transactionConfig.gas;
+            const gasPrice = options.gasPrice || transactionConfig.gasPrice;
+
+            return {
+                ...transactionConfig,
+                gas,
+                gasPrice
+            };
         } catch (err) {
             this.specifyError(err);
             throw new RubicSdkError(err.message || err.toString());
         }
     }
 
-    private getSwapTrade(): Promise<OneinchSwapResponse> {
+    private getSwapTrade(fromAddress?: string): Promise<OneinchSwapResponse> {
         return this.httpClient.get<OneinchSwapResponse>(
             `${this.apiBaseUrl}/swap`,
-            this.swapTradeParams
+            this.getSwapTradeParams(fromAddress)
         );
+    }
+
+    private getSwapTradeParams(fromAddress?: string): OneinchSwapRequest {
+        return {
+            params: {
+                fromTokenAddress: this.from.address,
+                toTokenAddress: this.to.address,
+                amount: this.from.stringWeiAmount,
+                slippage: (this.slippageTolerance * 100).toString(),
+                fromAddress: fromAddress || this.walletAddress,
+                mainRouteParts: this.disableMultihops ? '1' : undefined
+            }
+        };
     }
 
     private specifyError(err: {

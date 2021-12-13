@@ -1,6 +1,6 @@
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
-import { EncodableSwapTransactionOptions } from '@features/swap/models/encodable-swap-transaction-options';
+import { EncodeTransactionOptions } from '@features/swap/models/encode-transaction-options';
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { TransactionConfig } from 'web3-core';
@@ -111,7 +111,7 @@ export class Web3Pure {
         method: string,
         parameters: unknown[] = [],
         value?: string,
-        options: EncodableSwapTransactionOptions = {}
+        options: EncodeTransactionOptions = {}
     ): TransactionConfig {
         const contract = new this.web3.eth.Contract(contractAbi);
         const data = contract.methods[method](...parameters).encodeABI();

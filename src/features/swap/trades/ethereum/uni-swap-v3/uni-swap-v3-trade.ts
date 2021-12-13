@@ -20,7 +20,7 @@ import {
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { Injector } from '@core/sdk/injector';
 import { TransactionConfig } from 'web3-core';
-import { EncodableSwapTransactionOptions } from '@features/swap/models/encodable-swap-transaction-options';
+import { EncodeTransactionOptions } from '@features/swap/models/encode-transaction-options';
 import { Pure } from '@common/decorators/pure.decorator';
 import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { Token } from '@core/blockchain/tokens/token';
@@ -186,7 +186,7 @@ export class UniSwapV3Trade extends InstantTrade {
         );
     }
 
-    public async encode(options: EncodableSwapTransactionOptions = {}): Promise<TransactionConfig> {
+    public async encode(options: EncodeTransactionOptions = {}): Promise<TransactionConfig> {
         const { methodName, methodArguments } = this.getSwapRouterMethodData();
         const gasInfo = {
             gasLimit: options.gasLimit || this.gasFeeInfo?.gasLimit?.toFixed(0),

@@ -4,7 +4,7 @@ import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
 import { BasicTransactionOptions } from '@core/blockchain/models/basic-transaction-options';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Injector } from '@core/sdk/injector';
-import { EncodableSwapTransactionOptions } from '@features/swap/models/encodable-swap-transaction-options';
+import { EncodeTransactionOptions } from '@features/swap/models/encode-transaction-options';
 import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import { TransactionConfig } from 'web3-core';
@@ -88,7 +88,7 @@ export abstract class InstantTrade {
 
     public abstract swap(options: SwapTransactionOptions): Promise<TransactionReceipt>;
 
-    public abstract encode(options: EncodableSwapTransactionOptions): Promise<TransactionConfig>;
+    public abstract encode(options: EncodeTransactionOptions): Promise<TransactionConfig>;
 
     protected async checkWalletState(): Promise<void> {
         this.checkWalletConnected();
