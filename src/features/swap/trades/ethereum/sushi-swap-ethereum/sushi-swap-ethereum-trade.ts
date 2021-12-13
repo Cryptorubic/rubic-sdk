@@ -5,7 +5,7 @@ import {
 import { SUSHI_SWAP_ETHEREUM_CONTRACT_ADDRESS } from '@features/swap/trades/ethereum/sushi-swap-ethereum/constants';
 
 export class SushiSwapEthereumTrade extends UniswapV2AbstractTrade {
-    protected contractAddress = SUSHI_SWAP_ETHEREUM_CONTRACT_ADDRESS;
+    protected readonly contractAddress = SUSHI_SWAP_ETHEREUM_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);
