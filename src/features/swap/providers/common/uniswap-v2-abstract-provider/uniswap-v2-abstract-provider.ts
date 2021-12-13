@@ -1,9 +1,5 @@
-import { AbstractConstructorParameters } from '@common/utils/types/abstract-constructor-parameters';
-import { Constructor } from '@common/utils/types/constructor';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { Injector } from '@core/sdk/injector';
 import { GasPriceInfo } from '@features/swap/models/gas-price-info';
 import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
 import { UniswapV2ProviderConfiguration } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/uniswap-v2-provider-configuration';
@@ -34,15 +30,12 @@ export abstract class UniswapV2AbstractProvider<
 
     private readonly GAS_MARGIN = 1.2;
 
-    private readonly web3PublicService = Injector.web3PublicService;
-
-    private readonly coingeckoApi = Injector.coingeckoApi;
-
     public async calculate(
         from: PriceTokenAmount,
-        to: PriceToken
+        to: PriceToken,
+        options?: Partial<SwapCalculationOptions>
     ): Promise<UniswapV2AbstractTrade> {
-        return this.calculateDifficultTrade(from, to, 'input');
+        return this.calculateDifficultTrade(from, to, 'input', options);
     }
 
     public async calculateDifficultTrade(
@@ -95,18 +88,6 @@ export abstract class UniswapV2AbstractProvider<
     ): Promise<UniswapCalculatedInfo> {
         const pathFactory = new PathFactory(this, { from, to, exact, options });
         return pathFactory.getAmountAndPath(gasPriceInUsd);
-    }
-
-    private async getGasPriceInfo(blockchain: BLOCKCHAIN_NAME): Promise<GasPriceInfo> {
-        const gasPrice = await this.web3PublicService.getWeb3Public(blockchain).getGasPrice();
-        const gasPriceInEth = Web3Pure.fromWei(gasPrice);
-        const nativeCoinPrice = await this.coingeckoApi.getNativeCoinPrice(blockchain);
-        const gasPriceInUsd = gasPriceInEth.multipliedBy(nativeCoinPrice);
-        return {
-            gasPrice: new BigNumber(gasPrice),
-            gasPriceInEth,
-            gasPriceInUsd
-        };
     }
 
     private getFeeInfo(

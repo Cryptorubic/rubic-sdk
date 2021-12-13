@@ -106,7 +106,7 @@ export class OneinchTrade extends InstantTrade {
                 ...(this.gasFeeInfo?.gasPrice && { gasPrice: this.gasFeeInfo.gasPrice })
             };
 
-            return await this.web3Private.trySendTransaction(
+            return this.web3Private.trySendTransaction(
                 oneInchTrade.tx.to,
                 this.from.isNative ? this.from.stringWeiAmount : '0',
                 trxOptions

@@ -18,11 +18,12 @@ import { UniSwapV3Trade } from '@features/swap/trades/ethereum/uni-swap-v3/uni-s
 import { GasPriceInfo } from '@features/swap/models/gas-price-info';
 import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
 import { getGasPriceInfo } from '@features/swap/providers/common/utils/gas-price';
+import { InstantTradeProvider } from '@features/swap/providers/instant-trade-provider';
 
 const RUBIC_OPTIMIZATION_DISABLED = true;
 
-export class UniSwapV3Provider {
-    private readonly blockchain = BLOCKCHAIN_NAME.ETHEREUM;
+export class UniSwapV3Provider extends InstantTradeProvider {
+    public readonly blockchain = BLOCKCHAIN_NAME.ETHEREUM;
 
     protected readonly defaultOptions: SwapCalculationOptions = {
         gasCalculation: 'calculate',
@@ -41,9 +42,7 @@ export class UniSwapV3Provider {
 
     private liquidityPoolsController = new LiquidityPoolsController(this.web3Public);
 
-    constructor() {}
-
-    public async calculateTrade(
+    public async calculate(
         from: PriceTokenAmount,
         toToken: PriceToken,
         options?: Partial<SwapCalculationOptions>
