@@ -5,7 +5,7 @@ import {
 import { SUSHI_SWAP_POLYGON_CONTRACT_ADDRESS } from '@features/swap/trades/polygon/sushi-swap-polygon/constants';
 
 export class SushiSwapPolygonTrade extends UniswapV2AbstractTrade {
-    protected contractAddress = SUSHI_SWAP_POLYGON_CONTRACT_ADDRESS;
+    protected readonly contractAddress = SUSHI_SWAP_POLYGON_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);

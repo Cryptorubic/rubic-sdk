@@ -3,10 +3,10 @@ import { UniSwapV3Route } from '@features/swap/providers/ethereum/uni-swap-v3/mo
 
 export interface UniSwapV3CalculatedInfo {
     route: UniSwapV3Route;
-    gasLimit?: string;
+    estimatedGas?: BigNumber;
 }
 
 export interface UniSwapV3CalculatedInfoWithProfit extends UniSwapV3CalculatedInfo {
-    gasLimit: string;
+    estimatedGas: BigNumber;
     profit: BigNumber;
 }

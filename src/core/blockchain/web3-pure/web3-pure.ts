@@ -9,6 +9,8 @@ import { toChecksumAddress, isAddress, toWei, fromWei, AbiItem } from 'web3-util
 export class Web3Pure {
     private static web3 = new Web3();
 
+    public static readonly ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
     /**
      * @description gets address of native coin {@link NATIVE_TOKEN_ADDRESS}
      */
@@ -16,16 +18,20 @@ export class Web3Pure {
         return NATIVE_TOKEN_ADDRESS;
     }
 
+    public static isZeroAddress(address: string) {
+        return address === this.ZERO_ADDRESS;
+    }
+
     /**
-     * @description increases the gas limit value by the specified percentage and rounds to the nearest integer
-     * @param amount gas limit value to increase
-     * @param percent the percentage by which the gas limit will be increased
+     * Increases the gas limit value by the specified percentage and rounds to the nearest integer.
+     * @param gasLimit Gas limit value to increase.
+     * @param multiplier The multiplier by which the gas limit will be increased.
      */
     static calculateGasMargin(
-        amount: BigNumber | string | number | undefined,
-        percent: number
-    ): string {
-        return new BigNumber(amount || '0').multipliedBy(percent).toFixed(0);
+        gasLimit: BigNumber | string | number | undefined,
+        multiplier: number
+    ): BigNumber {
+        return new BigNumber(gasLimit || '0').multipliedBy(multiplier);
     }
 
     /**

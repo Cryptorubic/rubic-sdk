@@ -13,7 +13,6 @@ import {
     factoryContractAbi,
     factoryContractAddress
 } from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/constants/factory-contract-data';
-import { EMPTY_ADDRESS } from '@core/blockchain/web3-public/constants/EMPTY_ADDRESS';
 import { notNull } from '@common/utils/object';
 import { UniSwapV3Route } from '@features/swap/providers/ethereum/uni-swap-v3/models/uni-swap-v3-route';
 import { Token } from '@core/blockchain/tokens/token';
@@ -22,7 +21,12 @@ import {
     quoterContractAbi,
     quoterContractAddress
 } from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/constants/quoter-contract-data';
-import { getRouterTokensAndLiquidityPools } from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/constants/router-liqudity-pools';
+import {
+    routerLiquidityPools,
+    routerTokens
+} from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/constants/router-liqudity-pools';
+import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
@@ -111,17 +115,30 @@ export class LiquidityPoolsController {
         routerTokens: Token[];
         routerLiquidityPools: LiquidityPool[];
     }> {
-        if (this.routerTokens && this.routerLiquidityPools) {
-            return {
-                routerTokens: this.routerTokens,
-                routerLiquidityPools: this.routerLiquidityPools
-            };
+        if (!this.routerTokens || !this.routerLiquidityPools) {
+            const tokens: Token[] = await Token.createTokens(
+                Object.values(routerTokens),
+                BLOCKCHAIN_NAME.ETHEREUM
+            );
+            const liquidityPools: LiquidityPool[] = routerLiquidityPools.map(liquidityPool => {
+                const tokenA = tokens.find(token => token.symbol === liquidityPool.tokenSymbolA)!;
+                const tokenB = tokens.find(token => token.symbol === liquidityPool.tokenSymbolB)!;
+                return new LiquidityPool(
+                    liquidityPool.poolAddress,
+                    tokenA,
+                    tokenB,
+                    liquidityPool.fee
+                );
+            });
+
+            this.routerTokens = tokens;
+            this.routerLiquidityPools = liquidityPools;
         }
 
-        const routerParams = await getRouterTokensAndLiquidityPools();
-        this.routerTokens = routerParams.routerTokens;
-        this.routerLiquidityPools = routerParams.routerLiquidityPools;
-        return routerParams;
+        return {
+            routerTokens: this.routerTokens,
+            routerLiquidityPools: this.routerLiquidityPools
+        };
     }
 
     /**
@@ -138,8 +155,8 @@ export class LiquidityPoolsController {
         const { routerTokens, routerLiquidityPools } =
             await this.getRouterTokensAndLiquidityPools();
 
-        let getPoolMethodArguments: { tokenA: Token; tokenB: Token; fee: FeeAmount }[] = [];
-        getPoolMethodArguments.push(
+        let getPoolsMethodArguments: { tokenA: Token; tokenB: Token; fee: FeeAmount }[] = [];
+        getPoolsMethodArguments.push(
             ...Object.values(routerTokens)
                 .filter(
                     routerToken =>
@@ -156,14 +173,14 @@ export class LiquidityPoolsController {
                 )
                 .flat()
         );
-        getPoolMethodArguments.push(
+        getPoolsMethodArguments.push(
             ...this.feeAmounts.map(fee => ({
                 tokenA: firstToken,
                 tokenB: secondToken,
                 fee
             }))
         );
-        getPoolMethodArguments = getPoolMethodArguments.filter(
+        getPoolsMethodArguments = getPoolsMethodArguments.filter(
             methodArguments =>
                 !routerLiquidityPools.find(
                     pool =>
@@ -175,28 +192,26 @@ export class LiquidityPoolsController {
         );
 
         const poolsAddresses = (
-            await this.web3Public.multicallContractMethods<{ 0: string }>(
+            await this.web3Public.multicallContractMethod<{ 0: string }>(
                 factoryContractAddress,
                 factoryContractAbi,
-                getPoolMethodArguments.map(methodArguments => ({
-                    methodName: 'getPool',
-                    methodArguments: [
-                        methodArguments.tokenA.address,
-                        methodArguments.tokenB.address,
-                        methodArguments.fee
-                    ]
-                }))
+                'getPool',
+                getPoolsMethodArguments.map(methodArguments => [
+                    methodArguments.tokenA.address,
+                    methodArguments.tokenB.address,
+                    methodArguments.fee
+                ])
             )
         ).map(result => result.output![0]);
 
         return poolsAddresses
             .map((poolAddress, index) => {
-                if (poolAddress !== EMPTY_ADDRESS) {
+                if (Web3Pure.isZeroAddress(poolAddress)) {
                     return new LiquidityPool(
                         poolAddress,
-                        getPoolMethodArguments[index].tokenA,
-                        getPoolMethodArguments[index].tokenB,
-                        getPoolMethodArguments[index].fee
+                        getPoolsMethodArguments[index].tokenA,
+                        getPoolsMethodArguments[index].tokenB,
+                        getPoolsMethodArguments[index].fee
                     );
                 }
                 return null;

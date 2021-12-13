@@ -21,12 +21,10 @@ import { Method } from 'web3-core-method';
 import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
 import { AbiItem } from 'web3-utils';
 import { BlockTransactionString } from 'web3-eth';
-import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { InsufficientFundsError } from '@common/errors/swap/insufficient-funds-error';
 import { HttpClient } from '@common/models/http-client';
 import { DefaultHttpClient } from '@common/http/default-http-client';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
-import { Token } from '@core/blockchain/tokens/token';
 
 type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 
@@ -152,15 +150,20 @@ export class Web3Public {
         methodArguments: unknown[],
         fromAddress: string,
         value?: string | BigNumber
-    ): Promise<string> {
+    ): Promise<BigNumber | null> {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
 
-        const gasLimit = await contract.methods[methodName](...methodArguments).estimateGas({
-            from: fromAddress,
-            gas: 10000000,
-            ...(value && { value })
-        });
-        return new BigNumber(gasLimit).toFixed(0);
+        try {
+            const gasLimit = await contract.methods[methodName](...methodArguments).estimateGas({
+                from: fromAddress,
+                gas: 10000000,
+                ...(value && { value })
+            });
+            return new BigNumber(gasLimit);
+        } catch (err) {
+            console.debug(err);
+            return null;
+        }
     }
 
     /**
@@ -277,12 +280,14 @@ export class Web3Public {
         options: {
             methodArguments?: unknown[];
             from?: string;
+            value?: string;
         } = { methodArguments: [] }
     ): Promise<T> {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
 
         return contract.methods[methodName](...options.methodArguments!!).call({
-            ...(options.from && { from: options.from })
+            ...(options.from && { from: options.from }),
+            ...(options.value && { value: options.value })
         });
     }
 
@@ -327,7 +332,30 @@ export class Web3Public {
     }
 
     /**
-     * Uses multicall to make many methods calls in one contract.
+     * Uses multicall to make several calls of one method in one contract.
+     * @param contractAddress Target contract address.
+     * @param contractAbi Target contract abi.
+     * @param methodName target method name
+     * @param methodCallsArguments list method calls parameters arrays
+     */
+    public async multicallContractMethod<Output>(
+        contractAddress: string,
+        contractAbi: AbiItem[],
+        methodName: string,
+        methodCallsArguments: unknown[][]
+    ): Promise<ContractMulticallResponse<Output>[]> {
+        return this.multicallContractMethods<Output>(
+            contractAddress,
+            contractAbi,
+            methodCallsArguments.map(methodArguments => ({
+                methodName,
+                methodArguments
+            }))
+        );
+    }
+
+    /**
+     * Uses multicall to make several methods calls in one contract.
      * @param contractAddress Target contract address.
      * @param contractAbi Target contract abi.
      * @param methodsData Methods data, containing methods' names and arguments.
@@ -337,35 +365,14 @@ export class Web3Public {
         contractAbi: AbiItem[],
         methodsData: MethodData[]
     ): Promise<ContractMulticallResponse<Output>[]> {
-        const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
-        const calls: Call[] = methodsData.map(({ methodName, methodArguments }) => ({
-            callData: contract.methods[methodName](...methodArguments).encodeABI(),
-            target: contractAddress
-        }));
-
-        const outputs = await this.multicall(calls);
-
-        return outputs.map((output, index) => {
-            const methodOutputAbi = contractAbi.find(
-                funcSignature => funcSignature.name === methodsData[index].methodName
-            )?.outputs;
-
-            if (!methodOutputAbi) {
-                throw new RubicSdkError(
-                    `Contract method ${methodsData[index].methodName} does not exist.`
-                );
-            }
-
-            return {
-                success: output.success,
-                output: output.success
-                    ? (this.web3.eth.abi.decodeParameters(
-                          methodOutputAbi,
-                          output.returnData
-                      ) as Output)
-                    : null
-            };
-        });
+        return (
+            await this.multicallContractsMethods<Output>(contractAbi, [
+                {
+                    contractAddress,
+                    methodsData
+                }
+            ])
+        )[0];
     }
 
     /**
@@ -379,12 +386,7 @@ export class Web3Public {
             contractAddress: string;
             methodsData: MethodData[];
         }[]
-    ): Promise<
-        {
-            success: boolean;
-            output: Output | null;
-        }[][]
-    > {
+    ): Promise<ContractMulticallResponse<Output>[][]> {
         const calls: Call[][] = contractsData.map(({ contractAddress, methodsData }) => {
             const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
             return methodsData.map(({ methodName, methodArguments }) => ({
@@ -468,7 +470,7 @@ export class Web3Public {
      */
     @PConditionalCache
     public async callForTokensInfo(
-        tokenAddresses: string[]
+        tokenAddresses: string[] | ReadonlyArray<string>
     ): Promise<Record<SupportedTokenField, string | undefined>[]> {
         const tokenFields = ['decimals', 'symbol', 'name'] as const;
         const contractsData = tokenAddresses.map(contractAddress => ({
@@ -504,26 +506,6 @@ export class Web3Public {
         // see https://github.com/microsoft/TypeScript/issues/4881
         // @ts-ignore
         return conditionalReturns;
-    }
-
-    /**
-     * Gets ERC-20 tokens info by addresses and returns tokens.
-     * @param tokenAddresses Addresses of tokens.
-     */
-    public async callForTokens(tokenAddresses: string[]): Promise<Token[]> {
-        const tokensInfo = await this.callForTokensInfo(tokenAddresses);
-        return tokensInfo.map((tokenInfo, index) => {
-            if (!tokenInfo.name || !tokenInfo.symbol || !tokenInfo.decimals) {
-                throw new RubicSdkError('Cannot retrieve tokens info');
-            }
-            return new Token({
-                blockchain: this.blockchainName,
-                address: tokenAddresses[index],
-                name: tokenInfo.name,
-                symbol: tokenInfo.symbol,
-                decimals: parseInt(tokenInfo.decimals)
-            });
-        });
     }
 
     /**

@@ -6,7 +6,6 @@ import { Injector } from '@core/sdk/injector';
 import { LiquidityPoolsController } from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/liquidity-pools-controller';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { SwapOptions } from '@features/swap/models/swap-options';
 import { createTokenWethAbleProxy } from '@features/swap/providers/common/utils/weth';
 import BigNumber from 'bignumber.js';
 import {
@@ -17,6 +16,7 @@ import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liq
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { UniSwapV3Trade } from '@features/swap/trades/ethereum/uni-swap-v3/uni-swap-v3-trade';
 import { GasPriceInfo } from '@features/swap/models/gas-price-info';
+import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
 import { getGasPriceInfo } from '@features/swap/providers/common/utils/gas-price';
 
 const RUBIC_OPTIMIZATION_DISABLED = true;
@@ -24,9 +24,13 @@ const RUBIC_OPTIMIZATION_DISABLED = true;
 export class UniSwapV3Provider {
     private readonly blockchain = BLOCKCHAIN_NAME.ETHEREUM;
 
-    /**
-     * Amount by which estimated gas should be increased (1.2 = 120%).
-     */
+    protected readonly defaultOptions: SwapCalculationOptions = {
+        gasCalculation: 'calculate',
+        disableMultihops: false,
+        deadlineMinutes: 20,
+        slippageTolerance: 0.05
+    };
+
     private readonly GAS_MARGIN = 1.2;
 
     private readonly maxTransitPools = 1;
@@ -42,51 +46,47 @@ export class UniSwapV3Provider {
     public async calculateTrade(
         from: PriceTokenAmount,
         toToken: PriceToken,
-        options: SwapOptions = {
-            gasCalculation: 'calculate',
-            disableMultihops: false,
-            deadline: 1200000, // 20 min
-            slippageTolerance: 0.05
-        }
+        options?: Partial<SwapCalculationOptions>
     ): Promise<UniSwapV3Trade> {
+        const fullOptions: SwapCalculationOptions = { ...this.defaultOptions, ...options };
+
         const fromClone = createTokenWethAbleProxy(from, this.wethAddress);
         const toClone = createTokenWethAbleProxy(toToken, this.wethAddress);
 
         let gasPriceInfo: GasPriceInfo | undefined;
-        if (options.gasCalculation !== 'disabled') {
+        if (fullOptions.gasCalculation !== 'disabled') {
             gasPriceInfo = await getGasPriceInfo(this.blockchain);
         }
 
-        const { route, gasLimit } = await this.getRoute(
+        const { route, estimatedGas } = await this.getRoute(
             fromClone,
             toClone,
-            options,
+            fullOptions,
             gasPriceInfo?.gasPriceInUsd
         );
 
-        const trade = {
+        const tradeStruct = {
             from,
             to: new PriceTokenAmount({
                 ...toToken.asStruct,
                 weiAmount: route.outputAbsoluteAmount
             }),
-            gasFeeInfo: null,
-            slippageTolerance: options.slippageTolerance,
-            deadlineMinutes: options.deadline,
+            slippageTolerance: fullOptions.slippageTolerance,
+            deadlineMinutes: fullOptions.deadlineMinutes,
             route
         };
-        if (options.gasCalculation === 'disabled') {
-            return new UniSwapV3Trade(trade);
+        if (fullOptions.gasCalculation === 'disabled') {
+            return new UniSwapV3Trade(tradeStruct);
         }
 
-        const increasedGas = Web3Pure.calculateGasMargin(gasLimit, this.GAS_MARGIN);
-        const gasFeeInEth = gasPriceInfo!.gasPriceInEth.multipliedBy(increasedGas);
-        const gasFeeInUsd = gasPriceInfo!.gasPriceInUsd.multipliedBy(increasedGas);
+        const gasLimit = Web3Pure.calculateGasMargin(estimatedGas, this.GAS_MARGIN);
+        const gasFeeInEth = gasPriceInfo!.gasPriceInEth.multipliedBy(gasLimit);
+        const gasFeeInUsd = gasPriceInfo!.gasPriceInUsd.multipliedBy(gasLimit);
 
         return new UniSwapV3Trade({
-            ...trade,
+            ...tradeStruct,
             gasFeeInfo: {
-                gasLimit: increasedGas,
+                gasLimit,
                 gasPrice: gasPriceInfo!.gasPrice,
                 gasFeeInEth,
                 gasFeeInUsd
@@ -104,7 +104,7 @@ export class UniSwapV3Provider {
     private async getRoute(
         from: PriceTokenAmount,
         toToken: PriceToken,
-        options: SwapOptions,
+        options: SwapCalculationOptions,
         gasPriceInUsd?: BigNumber
     ): Promise<UniSwapV3CalculatedInfo> {
         const routes = (
@@ -130,24 +130,23 @@ export class UniSwapV3Provider {
             options.gasCalculation === 'rubicOptimisation' &&
             toToken.price
         ) {
-            const gasLimits = await UniSwapV3Trade.calculateGasLimitsForRoutes(
+            const estimatedGasLimits = await UniSwapV3Trade.estimateGasLimitForRoutes(
                 from,
                 toToken,
-                options.slippageTolerance,
-                options.deadline,
+                options,
                 routes
             );
 
             const calculatedProfits: UniSwapV3CalculatedInfoWithProfit[] = routes.map(
                 (route, index) => {
-                    const gasLimit = gasLimits[index];
-                    const gasFeeInUsd = gasPriceInUsd!.multipliedBy(gasLimit);
+                    const estimatedGas = estimatedGasLimits[index];
+                    const gasFeeInUsd = gasPriceInUsd!.multipliedBy(estimatedGas);
                     const profit = Web3Pure.fromWei(route.outputAbsoluteAmount, toToken.decimals)
                         .multipliedBy(toToken.price)
                         .minus(gasFeeInUsd);
                     return {
                         route,
-                        gasLimit,
+                        estimatedGas,
                         profit
                     };
                 }
@@ -157,16 +156,15 @@ export class UniSwapV3Provider {
         }
 
         const route = routes[0];
-        const gasLimit = await UniSwapV3Trade.calculateGasLimitForRoute(
+        const estimatedGas = await UniSwapV3Trade.estimateGasLimitForRoute(
             from,
             toToken,
-            options.slippageTolerance,
-            options.deadline,
+            options,
             route
         );
         return {
             route,
-            gasLimit
+            estimatedGas
         };
     }
 }
