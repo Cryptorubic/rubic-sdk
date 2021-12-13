@@ -54,18 +54,17 @@ export class UniSwapV3Trade extends InstantTrade {
         const walletAddress = Injector.web3Private.address;
         if (walletAddress) {
             const web3Public = Injector.web3PublicService.getWeb3Public(from.blockchain);
-            try {
-                gasLimit = new BigNumber(
-                    await web3Public.getEstimatedGas(
-                        swapRouterContractAbi,
-                        swapRouterContractAddress,
-                        estimateGasParams.callData.contractMethod,
-                        estimateGasParams.callData.params,
-                        walletAddress,
-                        estimateGasParams.callData.value
-                    )
-                );
-            } catch (_err) {}
+            const estimatedGas = await web3Public.getEstimatedGas(
+                swapRouterContractAbi,
+                swapRouterContractAddress,
+                estimateGasParams.callData.contractMethod,
+                estimateGasParams.callData.params,
+                walletAddress,
+                estimateGasParams.callData.value
+            );
+            if (estimatedGas?.isFinite()) {
+                gasLimit = estimatedGas;
+            }
         }
 
         return gasLimit;
@@ -148,11 +147,11 @@ export class UniSwapV3Trade extends InstantTrade {
                 : initialPool.token1
         ];
         return path.concat(
-            ...this.route.poolsPath.map(pool => {
-                return !compareAddresses(pool.token0.address, path[path.length - 1].address)
+            ...this.route.poolsPath.map(pool =>
+                !compareAddresses(pool.token0.address, path[path.length - 1].address)
                     ? pool.token0
-                    : pool.token1;
-            })
+                    : pool.token1
+            )
         );
     }
 

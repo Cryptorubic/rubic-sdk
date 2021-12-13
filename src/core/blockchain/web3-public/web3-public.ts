@@ -150,15 +150,20 @@ export class Web3Public {
         methodArguments: unknown[],
         fromAddress: string,
         value?: string | BigNumber
-    ): Promise<string> {
+    ): Promise<BigNumber | null> {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
 
-        const gasLimit = await contract.methods[methodName](...methodArguments).estimateGas({
-            from: fromAddress,
-            gas: 10000000,
-            ...(value && { value })
-        });
-        return new BigNumber(gasLimit).toFixed(0);
+        try {
+            const gasLimit = await contract.methods[methodName](...methodArguments).estimateGas({
+                from: fromAddress,
+                gas: 10000000,
+                ...(value && { value })
+            });
+            return new BigNumber(gasLimit);
+        } catch (err) {
+            console.debug(err);
+            return null;
+        }
     }
 
     /**

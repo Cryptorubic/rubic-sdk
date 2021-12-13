@@ -58,6 +58,10 @@ export class CrossChainTrade {
                 Injector.gasPriceApi.getGasPrice(fromTrade.blockchain)
             ]);
 
+            if (!gasLimit?.isFinite()) {
+                return null;
+            }
+
             return {
                 gasLimit,
                 gasPrice
