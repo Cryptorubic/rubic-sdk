@@ -5,7 +5,6 @@ import {
     HEALTHCHECK,
     isBlockchainHealthcheckAvailable
 } from '@core/blockchain/constants/healthcheck';
-import { MethodData } from '@core/blockchain/constants/method-data';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { MULTICALL_ABI } from '@core/blockchain/web3-public/constants/multicall-abi';
 import { MULTICALL_ADDRESSES } from '@core/blockchain/web3-public/constants/multicall-addresses';
@@ -22,11 +21,10 @@ import { Method } from 'web3-core-method';
 import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
 import { AbiItem } from 'web3-utils';
 import { BlockTransactionString } from 'web3-eth';
-import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { InsufficientFundsError } from '@common/errors/swap/insufficient-funds-error';
-
 import { HttpClient } from '@common/models/http-client';
 import { DefaultHttpClient } from '@common/http/default-http-client';
+import { MethodData } from '@core/blockchain/web3-public/models/method-data';
 
 type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 
@@ -152,15 +150,20 @@ export class Web3Public {
         methodArguments: unknown[],
         fromAddress: string,
         value?: string | BigNumber
-    ): Promise<string> {
+    ): Promise<BigNumber | null> {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
 
-        const gasLimit = await contract.methods[methodName](...methodArguments).estimateGas({
-            from: fromAddress,
-            gas: 10000000,
-            ...(value && { value })
-        });
-        return new BigNumber(gasLimit).toFixed(0);
+        try {
+            const gasLimit = await contract.methods[methodName](...methodArguments).estimateGas({
+                from: fromAddress,
+                gas: 10000000,
+                ...(value && { value })
+            });
+            return new BigNumber(gasLimit);
+        } catch (err) {
+            console.debug(err);
+            return null;
+        }
     }
 
     /**
@@ -329,9 +332,9 @@ export class Web3Public {
     }
 
     /**
-     * @description use multicall to make many calls in the single rpc request
-     * @param contractAddress target contract address
-     * @param contractAbi target contract abi
+     * Uses multicall to make several calls of one method in one contract.
+     * @param contractAddress Target contract address.
+     * @param contractAbi Target contract abi.
      * @param methodName target method name
      * @param methodCallsArguments list method calls parameters arrays
      */
@@ -341,28 +344,35 @@ export class Web3Public {
         methodName: string,
         methodCallsArguments: unknown[][]
     ): Promise<ContractMulticallResponse<Output>[]> {
-        const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
-        const calls: Call[] = methodCallsArguments.map(callArguments => ({
-            callData: contract.methods[methodName](...callArguments).encodeABI(),
-            target: contractAddress
-        }));
+        return this.multicallContractMethods<Output>(
+            contractAddress,
+            contractAbi,
+            methodCallsArguments.map(methodArguments => ({
+                methodName,
+                methodArguments
+            }))
+        );
+    }
 
-        const outputs = await this.multicall(calls);
-
-        const methodOutputAbi = contractAbi.find(
-            funcSignature => funcSignature.name === methodName
-        )?.outputs;
-
-        if (!methodOutputAbi) {
-            throw new RubicSdkError(`Contract method ${methodName} does not exist.`);
-        }
-
-        return outputs.map(output => ({
-            success: output.success,
-            output: output.success
-                ? (this.web3.eth.abi.decodeParameters(methodOutputAbi, output.returnData) as Output)
-                : null
-        }));
+    /**
+     * Uses multicall to make several methods calls in one contract.
+     * @param contractAddress Target contract address.
+     * @param contractAbi Target contract abi.
+     * @param methodsData Methods data, containing methods' names and arguments.
+     */
+    public async multicallContractMethods<Output>(
+        contractAddress: string,
+        contractAbi: AbiItem[],
+        methodsData: MethodData[]
+    ): Promise<ContractMulticallResponse<Output>[]> {
+        return (
+            await this.multicallContractsMethods<Output>(contractAbi, [
+                {
+                    contractAddress,
+                    methodsData
+                }
+            ])
+        )[0];
     }
 
     /**
@@ -376,12 +386,7 @@ export class Web3Public {
             contractAddress: string;
             methodsData: MethodData[];
         }[]
-    ): Promise<
-        {
-            success: boolean;
-            output: Output | null;
-        }[][]
-    > {
+    ): Promise<ContractMulticallResponse<Output>[][]> {
         const calls: Call[][] = contractsData.map(({ contractAddress, methodsData }) => {
             const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
             return methodsData.map(({ methodName, methodArguments }) => ({
@@ -485,7 +490,7 @@ export class Web3Public {
                     ? (field.output as string)
                     : undefined;
                 if (!field.success) {
-                    notSave = false;
+                    notSave = true;
                 }
             });
             return token;
@@ -534,7 +539,7 @@ export class Web3Public {
                     to: contractAddress,
                     data,
                     ...(callsData[index].value && {
-                        value: `0x${callsData[index].value!!.toString(16)}`
+                        value: `0x${parseInt(callsData[index].value!).toString(16)}`
                     })
                 }
             }));

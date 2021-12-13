@@ -3,6 +3,7 @@ import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/c
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { ContractTrade } from '@features/cross-chain/models/ContractTrade/ContractTrade';
 import BigNumber from 'bignumber.js';
+import { Token } from '@core/blockchain/tokens/token';
 
 export class DirectContractTrade extends ContractTrade {
     public get fromToken(): PriceTokenAmount {
@@ -25,8 +26,8 @@ export class DirectContractTrade extends ContractTrade {
         return this.toAmount;
     }
 
-    public get path(): string[] {
-        return [this.token.address];
+    public get path(): ReadonlyArray<Token> {
+        return [this.token];
     }
 
     constructor(

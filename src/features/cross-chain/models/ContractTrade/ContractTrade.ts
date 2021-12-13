@@ -2,6 +2,7 @@ import { SupportedCrossChainBlockchain } from '@features/cross-chain/constants/S
 import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
+import { Token } from '@core/blockchain/tokens/token';
 
 export abstract class ContractTrade {
     public abstract get fromToken(): PriceTokenAmount;
@@ -14,7 +15,7 @@ export abstract class ContractTrade {
 
     public abstract get toAmountMin(): BigNumber;
 
-    public abstract get path(): string[];
+    public abstract get path(): ReadonlyArray<Token>;
 
     protected constructor(
         public readonly blockchain: SupportedCrossChainBlockchain,

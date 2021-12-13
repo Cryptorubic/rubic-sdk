@@ -1,8 +1,8 @@
 import BigNumber from 'bignumber.js';
 
-export interface FeeInfo {
+export interface GasFeeInfo {
     readonly gasLimit?: BigNumber;
     readonly gasPrice?: BigNumber;
-    readonly gasFeeInUsd?: BigNumber;
     readonly gasFeeInEth?: BigNumber;
+    readonly gasFeeInUsd?: BigNumber;
 }

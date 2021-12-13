@@ -8,8 +8,8 @@ import { Web3Private } from '@core/blockchain/web3-private/web3-private';
 import { ContractMulticallResponse } from '@core/blockchain/web3-public/models/contract-multicall-response';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
+import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { Injector } from '@core/sdk/injector';
-import { FeeInfo } from '@features/swap/models/fee-info';
 import { EstimatedGasCallData } from '@features/swap/trades/common/uniswap-v2/models/estimated-gas-call-data';
 import { UniswapEncodableSwapTransactionOptions } from '@features/swap/trades/common/uniswap-v2/models/uniswap-encodable-swap-transaction-options';
 import { InstantTrade } from '@features/swap/trades/instant-trade';
@@ -28,6 +28,7 @@ import BigNumber from 'bignumber.js';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
+import { deadlineMinutesTimestamp } from '@common/utils/blockchain';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount;
@@ -36,7 +37,7 @@ export type UniswapV2TradeStruct = {
     path: ReadonlyArray<Token> | Token[];
     deadlineMinutes: number;
     slippageTolerance: number;
-    gasInfo?: FeeInfo;
+    gasFeeInfo?: GasFeeInfo | null;
 };
 
 export abstract class UniswapV2AbstractTrade extends InstantTrade {
@@ -52,10 +53,11 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         routesMethodArguments: [string, string[]][]
     ): Promise<ContractMulticallResponse<{ amounts: string[] }>[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
+        const methodName = exact === 'input' ? 'getAmountsOut' : 'getAmountsIn';
         return web3Public.multicallContractMethod<{ amounts: string[] }>(
             this.getContractAddress(),
             this.contractAbi,
-            exact === 'input' ? 'getAmountsOut' : 'getAmountsIn',
+            methodName,
             routesMethodArguments
         );
     }
@@ -68,15 +70,11 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     public readonly to: PriceTokenAmount;
 
-    public feeInfo: FeeInfo | null;
+    public gasFeeInfo: GasFeeInfo | null;
 
     public readonly path: ReadonlyArray<Token>;
 
     public readonly exact: 'input' | 'output';
-
-    private readonly web3Private = Injector.web3Private;
-
-    private readonly web3Public: Web3Public;
 
     public set settings(value: { deadlineMinutes?: number; slippageTolerance?: number }) {
         this.deadlineMinutes = value.deadlineMinutes || this.deadlineMinutes;
@@ -84,7 +82,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     }
 
     private get deadlineMinutesTimestamp(): number {
-        return Math.floor(Date.now() / 1000 + 60 * this.deadlineMinutes);
+        return deadlineMinutesTimestamp(this.deadlineMinutes);
     }
 
     private get nativeValueToSend(): string | undefined {
@@ -129,19 +127,19 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     }
 
     protected constructor(tradeStruct: UniswapV2TradeStruct) {
-        super();
+        super(tradeStruct.from.blockchain);
+
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
-        this.feeInfo = tradeStruct.gasInfo || null;
+        this.gasFeeInfo = tradeStruct.gasFeeInfo || null;
         this.path = tradeStruct.path;
         this.deadlineMinutes = tradeStruct.deadlineMinutes;
         this.exact = tradeStruct.exact;
         this.slippageTolerance = tradeStruct.slippageTolerance;
-        this.web3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
-        await this.checkSettings();
+        await this.checkWalletState();
 
         return this.createAnyToAnyTrade(options);
     }
@@ -158,19 +156,19 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         if (options?.gasLimit) {
             return options.gasLimit;
         }
-        if (this.feeInfo?.gasLimit?.isFinite()) {
-            return this.feeInfo.gasLimit.toFixed(0);
+        if (this.gasFeeInfo?.gasLimit?.isFinite()) {
+            return this.gasFeeInfo.gasLimit.toFixed(0);
         }
 
         const transitTokensNumber = this.path.length - 2;
         let methodName: keyof DefaultEstimatedGas = 'tokensToTokens';
-
         if (this.from.isNative) {
             methodName = 'ethToTokens';
         }
         if (this.to.isNative) {
             methodName = 'tokensToEth';
         }
+
         return (<typeof UniswapV2AbstractTrade>this.constructor).defaultEstimatedGasInfo[
             methodName
         ][transitTokensNumber].toFixed(0);
@@ -180,8 +178,8 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         if (options.gasPrice) {
             return options.gasPrice;
         }
-        if (this.feeInfo?.gasPrice?.isFinite()) {
-            return this.feeInfo.gasPrice.toFixed(0);
+        if (this.gasFeeInfo?.gasPrice?.isFinite()) {
+            return this.gasFeeInfo.gasPrice.toFixed(0);
         }
         return null;
     }
