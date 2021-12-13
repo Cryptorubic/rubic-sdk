@@ -11,7 +11,6 @@ import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { Injector } from '@core/sdk/injector';
 import { EstimatedGasCallData } from '@features/swap/trades/common/uniswap-v2/models/estimated-gas-call-data';
-import { UniswapEncodableSwapTransactionOptions } from '@features/swap/trades/common/uniswap-v2/models/uniswap-encodable-swap-transaction-options';
 import { InstantTrade } from '@features/swap/trades/instant-trade';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import { defaultEstimatedGas } from '@features/swap/providers/common/uniswap-v2-abstract-provider/constants/default-estimated-gas';
@@ -29,6 +28,7 @@ import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
 import { deadlineMinutesTimestamp } from '@common/utils/blockchain';
+import { EncodeFromAddressTransactionOptions } from '@features/swap/models/encode-transaction-options';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount;
@@ -144,7 +144,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         return this.createAnyToAnyTrade(options);
     }
 
-    public encode(options: UniswapEncodableSwapTransactionOptions): TransactionConfig {
+    public encode(options: EncodeFromAddressTransactionOptions): Promise<TransactionConfig> {
         return this.encodeAnyToAnyTrade(options);
     }
 
@@ -199,36 +199,49 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     private async createAnyToAnyTrade(
         options: SwapTransactionOptions
     ): Promise<TransactionReceipt> {
-        const regularParameters = this.getSwapParameters(this.regularSwapMethod, options);
-        const supportedFeeParameters = this.getSwapParameters(this.supportedFeeSwapMethod, options);
+        const methodName = await this.getMethodName(options);
+        const swapParameters = this.getSwapParametersByMethod(methodName, options);
+
+        return this.web3Private.executeContractMethod(...swapParameters);
+    }
+
+    private async getMethodName(
+        options: SwapTransactionOptions,
+        fromAddress?: string
+    ): Promise<string> {
+        const regularParameters = this.getSwapParametersByMethod(this.regularSwapMethod, options);
+        const supportedFeeParameters = this.getSwapParametersByMethod(
+            this.supportedFeeSwapMethod,
+            options
+        );
 
         const regularMethodResult = await tryExecuteAsync(
             this.web3Public.callContractMethod,
-            this.convertSwapParametersToCallParameters(regularParameters)
+            this.convertSwapParametersToCallParameters(regularParameters, fromAddress)
         );
 
         const feeMethodResult = await tryExecuteAsync(
             this.web3Public.callContractMethod,
-            this.convertSwapParametersToCallParameters(supportedFeeParameters)
+            this.convertSwapParametersToCallParameters(supportedFeeParameters, fromAddress)
         );
 
         if (regularMethodResult.success) {
             if (feeMethodResult.success) {
-                return this.web3Private.executeContractMethod(...regularParameters);
+                return this.regularSwapMethod;
             }
             throw new LowSlippageDeflationaryTokenError();
         }
 
         if (feeMethodResult.success) {
-            return this.web3Private.executeContractMethod(...supportedFeeParameters);
+            return this.supportedFeeSwapMethod;
         }
 
         throw new LowSlippageError();
     }
 
-    private getSwapParameters(
+    private getSwapParametersByMethod(
         method: string,
-        options: SwapTransactionOptions & { value?: string }
+        options: SwapTransactionOptions
     ): Parameters<InstanceType<typeof Web3Private>['executeContractMethod']> {
         const gasPrice = this.getGasPrice(options);
         const gas = this.getGasLimit(options);
@@ -249,29 +262,29 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     }
 
     private convertSwapParametersToCallParameters(
-        parameters: Parameters<InstanceType<typeof Web3Private>['executeContractMethod']>
+        parameters: Parameters<InstanceType<typeof Web3Private>['executeContractMethod']>,
+        fromAddress?: string
     ): Parameters<InstanceType<typeof Web3Public>['callContractMethod']> {
         return parameters.slice(0, 2).concat([
             {
                 methodArguments: parameters[3],
-                from: this.web3Private.address,
+                from: fromAddress || this.web3Private.address,
                 ...(parameters[4]?.value && { value: parameters[4]?.value })
             }
         ]) as Parameters<InstanceType<typeof Web3Public>['callContractMethod']>;
     }
 
-    private encodeAnyToAnyTrade(
-        options: UniswapEncodableSwapTransactionOptions
-    ): TransactionConfig {
+    private async encodeAnyToAnyTrade(
+        options: EncodeFromAddressTransactionOptions
+    ): Promise<TransactionConfig> {
         const gasPrice = this.getGasPrice(options);
         const gasLimit = this.getGasLimit(options);
+        const methodName = await this.getMethodName(options, options.fromAddress);
 
         return Web3Pure.encodeMethodCall(
             this.contractAddress,
             (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
-            options?.useDeflationaryTokenMethod
-                ? this.supportedFeeSwapMethod
-                : this.regularSwapMethod,
+            methodName,
             this.callParameters,
             this.nativeValueToSend,
             { gasLimit, gasPrice }

@@ -1,7 +1,10 @@
 import { Token } from '@core/blockchain/tokens/token';
 
-export function createTokenWethAbleProxy<T extends Token>(token: T, wethAddress: string): T {
-    const wethAbleAddress = token.isNative ? wethAddress : token.address;
+export function createTokenNativeAddressProxy<T extends Token>(
+    token: T,
+    wrappedNativeAddress: string
+): T {
+    const wethAbleAddress = token.isNative ? wrappedNativeAddress : token.address;
     return new Proxy<T>(token, {
         get: (target, key) => {
             if (!(key in target)) {

@@ -1,8 +1,8 @@
 import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
 import {
-    SupportedCrossChainBlockchain,
-    supportedCrossChainBlockchain
-} from '@features/cross-chain/constants/SupportedCrossChainBlockchain';
+    CrossChainSupportedBlockchain,
+    crossChainSupportedBlockchains
+} from '@features/cross-chain/constants/CrossChainSupportedBlockchains';
 import { crossChainContracts } from '@features/cross-chain/constants/crossChainContracts';
 import { Token } from '@core/blockchain/tokens/token';
 import BigNumber from 'bignumber.js';
@@ -22,15 +22,15 @@ import { MinMaxAmounts } from '@features/cross-chain/models/MinMaxAmounts';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { GasData } from '@common/models/GasData';
 import { NotSupportedBlockchain } from '@common/errors/swap/NotSupportedBlockchain';
-import { Uniswapv2InstantTrade } from '@features/swap/trades/instant-trade';
 import { notNull } from '@common/utils/object';
+import { UniswapV2AbstractTrade } from '@features/swap/trades/common/uniswap-v2/uniswap-v2-abstract-trade';
 
 interface CalculatedTrade {
     toAmount: BigNumber;
 }
 
 interface ItCalculatedTrade extends CalculatedTrade {
-    instantTrade: Uniswapv2InstantTrade;
+    instantTrade: UniswapV2AbstractTrade;
 }
 
 interface DirectCalculatedTrade extends CalculatedTrade {
@@ -45,13 +45,13 @@ interface CalculatedContractTrade {
 export class CrossChain {
     public static isSupportedBlockchain(
         blockchain: BLOCKCHAIN_NAME
-    ): blockchain is SupportedCrossChainBlockchain {
-        return supportedCrossChainBlockchain.some(
+    ): blockchain is CrossChainSupportedBlockchain {
+        return crossChainSupportedBlockchains.some(
             supportedBlockchain => supportedBlockchain === blockchain
         );
     }
 
-    private readonly contracts: Record<SupportedCrossChainBlockchain, CrossChainContract[]>;
+    private readonly contracts: Record<CrossChainSupportedBlockchain, CrossChainContract[]>;
 
     private readonly getWeb3Public: (blockchain: BLOCKCHAIN_NAME) => Web3Public;
 
@@ -60,7 +60,7 @@ export class CrossChain {
         this.getWeb3Public = Injector.web3PublicService.getWeb3Public;
     }
 
-    public async calculateTrade(
+    public async calculate(
         fromToken: Token,
         toToken: Token,
         fromAmount: BigNumber,
@@ -111,7 +111,7 @@ export class CrossChain {
     }
 
     private async calculateBestFormTrade(
-        blockchain: SupportedCrossChainBlockchain,
+        blockchain: CrossChainSupportedBlockchain,
         fromToken: Token,
         fromAmount: BigNumber,
         slippageTolerance: number
@@ -151,7 +151,7 @@ export class CrossChain {
     }
 
     private async calculateBestToTrade(
-        blockchain: SupportedCrossChainBlockchain,
+        blockchain: CrossChainSupportedBlockchain,
         fromAmount: BigNumber,
         toToken: Token,
         slippage: number
@@ -170,7 +170,7 @@ export class CrossChain {
     }
 
     private async getBestContractTrade(
-        blockchain: SupportedCrossChainBlockchain,
+        blockchain: CrossChainSupportedBlockchain,
         slippageTolerance: number,
         promises: Promise<CalculatedContractTrade>[]
     ): Promise<ContractTrade> {

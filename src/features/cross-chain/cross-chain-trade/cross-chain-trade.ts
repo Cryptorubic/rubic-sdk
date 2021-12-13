@@ -181,7 +181,7 @@ export class CrossChainTrade {
     }
 
     private checkBlockchainCorrect(): never | void {
-        if (this.web3Private.blockchainName !== this.from.blockchain) {
+        if (this.web3Private.blockchainName !== this.fromTrade.blockchain) {
             throw new WrongNetworkError();
         }
     }

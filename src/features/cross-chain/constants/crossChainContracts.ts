@@ -1,15 +1,15 @@
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
-import { UniSwapV2Provider } from '@features/swap/providers/blockchains/ethereum/uni-swap-v2/uni-swap-v2-provider';
-import { PancakeSwapProvider } from '@features/swap/providers/blockchains/bsc/pancake-swap/pancake-swap-provider';
-import { QuickSwapProvider } from '@features/swap/providers/blockchains/polygon/quick-swap/quick-swap-provider';
-import { PangolinAvalancheProvider } from '@features/swap/providers/blockchains/avalanche/pangolin/pangolin-avalanche-provider';
-import { JoeAvalancheProvider } from '@features/swap/providers/blockchains/avalanche/joe/joe-avalanche-provider';
-import { SolarbeamMoonriverProvider } from '@features/swap/providers/blockchains/moonriver/solarbeam/solarbeam-moonriver-provider';
-import { SpookySwapFantomProvider } from '@features/swap/providers/blockchains/fantom/spooky-swap/spooky-swap-fantom-provider';
-import { SupportedCrossChainBlockchain } from '@features/cross-chain/constants/SupportedCrossChainBlockchain';
+import { PancakeSwapProvider } from '@features/swap/providers/bsc/pancake-swap/pancake-swap-provider';
+import { UniSwapV2Provider } from '@features/swap/providers/ethereum/uni-swap-v2/uni-swap-v2-provider';
+import { QuickSwapProvider } from '@features/swap/providers/polygon/quick-swap/quick-swap-provider';
+import { CrossChainSupportedBlockchain } from '@features/cross-chain/constants/CrossChainSupportedBlockchains';
+import { SpookySwapProvider } from '@features/swap/providers/fantom/spooky-swap/spooky-swap-provider';
+import { JoeProvider } from '@features/swap/providers/avalanche/joe/joe-provider';
+import { SolarbeamProvider } from '@features/swap/providers/moonriver/solarbeam/solarbeam-provider';
+import { PangolinProvider } from '@features/swap/providers/avalanche/pangolin/pangolin-provider';
 
-export const crossChainContracts: Record<SupportedCrossChainBlockchain, CrossChainContract[]> = {
+export const crossChainContracts: Record<CrossChainSupportedBlockchain, CrossChainContract[]> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: [
         new CrossChainContract(
             BLOCKCHAIN_NAME.ETHEREUM,
@@ -35,26 +35,26 @@ export const crossChainContracts: Record<SupportedCrossChainBlockchain, CrossCha
         new CrossChainContract(
             BLOCKCHAIN_NAME.AVALANCHE,
             '0x3df5f6165fe8429744F9488a9C18259E9a93B4C0',
-            new PangolinAvalancheProvider()
+            new PangolinProvider()
         ),
         new CrossChainContract(
             BLOCKCHAIN_NAME.AVALANCHE,
             '0x9375e3B9623610919750257C3A8667A62533bc93',
-            new JoeAvalancheProvider()
+            new JoeProvider()
         )
     ],
     [BLOCKCHAIN_NAME.MOONRIVER]: [
         new CrossChainContract(
             BLOCKCHAIN_NAME.MOONRIVER,
             '0x3645Dca27D9f5Cf5ee0d6f52EE53ae366e4ceAc2',
-            new SolarbeamMoonriverProvider()
+            new SolarbeamProvider()
         )
     ],
     [BLOCKCHAIN_NAME.FANTOM]: [
         new CrossChainContract(
             BLOCKCHAIN_NAME.FANTOM,
             '0xeDfA29ca1BdbFaCBBDc6AAda385c983020015177',
-            new SpookySwapFantomProvider()
+            new SpookySwapProvider()
         )
     ]
 };

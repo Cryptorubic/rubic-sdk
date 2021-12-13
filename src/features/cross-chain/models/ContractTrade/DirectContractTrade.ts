@@ -1,4 +1,4 @@
-import { SupportedCrossChainBlockchain } from '@features/cross-chain/constants/SupportedCrossChainBlockchain';
+import { CrossChainSupportedBlockchain } from '@features/cross-chain/constants/CrossChainSupportedBlockchains';
 import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { ContractTrade } from '@features/cross-chain/models/ContractTrade/ContractTrade';
@@ -31,7 +31,7 @@ export class DirectContractTrade extends ContractTrade {
     }
 
     constructor(
-        public readonly blockchain: SupportedCrossChainBlockchain,
+        public readonly blockchain: CrossChainSupportedBlockchain,
         public readonly contract: CrossChainContract,
         private readonly token: PriceTokenAmount
     ) {

@@ -1,4 +1,4 @@
-import { SupportedCrossChainBlockchain } from '@features/cross-chain/constants/SupportedCrossChainBlockchain';
+import { CrossChainSupportedBlockchain } from '@features/cross-chain/constants/CrossChainSupportedBlockchains';
 import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
 import { ContractTrade } from '@features/cross-chain/models/ContractTrade/ContractTrade';
 import BigNumber from 'bignumber.js';
@@ -34,7 +34,7 @@ export class ItContractTrade extends ContractTrade {
     }
 
     constructor(
-        public readonly blockchain: SupportedCrossChainBlockchain,
+        public readonly blockchain: CrossChainSupportedBlockchain,
         public readonly contract: CrossChainContract,
         public readonly slippageTolerance: number,
         private readonly instantTrade: UniswapV2AbstractTrade
