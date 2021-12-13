@@ -186,7 +186,7 @@ export class UniSwapV3Trade extends InstantTrade {
         );
     }
 
-    public encode(options: EncodableSwapTransactionOptions = {}): TransactionConfig {
+    public async encode(options: EncodableSwapTransactionOptions = {}): Promise<TransactionConfig> {
         const { methodName, methodArguments } = this.getSwapRouterMethodData();
         const gasInfo = {
             gasLimit: options.gasLimit || this.gasFeeInfo?.gasLimit?.toFixed(0),

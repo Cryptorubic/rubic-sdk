@@ -144,7 +144,9 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         return this.createAnyToAnyTrade(options);
     }
 
-    public encode(options: UniswapEncodableSwapTransactionOptions): TransactionConfig {
+    public async encode(
+        options: UniswapEncodableSwapTransactionOptions
+    ): Promise<TransactionConfig> {
         return this.encodeAnyToAnyTrade(options);
     }
 

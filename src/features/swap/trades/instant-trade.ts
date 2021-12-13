@@ -88,7 +88,7 @@ export abstract class InstantTrade {
 
     public abstract swap(options: SwapTransactionOptions): Promise<TransactionReceipt>;
 
-    public abstract encode(options: EncodableSwapTransactionOptions): TransactionConfig;
+    public abstract encode(options: EncodableSwapTransactionOptions): Promise<TransactionConfig>;
 
     protected async checkWalletState(): Promise<void> {
         this.checkWalletConnected();

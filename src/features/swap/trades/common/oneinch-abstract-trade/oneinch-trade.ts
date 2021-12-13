@@ -14,6 +14,7 @@ import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-o
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { Token } from '@core/blockchain/tokens/token';
+import { TransactionConfig } from 'web3-core';
 
 type OneinchTradeStruct = {
     contractAddress: string;
@@ -111,6 +112,30 @@ export class OneinchTrade extends InstantTrade {
                 this.from.isNative ? this.from.stringWeiAmount : '0',
                 trxOptions
             );
+        } catch (err) {
+            this.specifyError(err);
+            throw new RubicSdkError(err.message || err.toString());
+        }
+    }
+
+    public async encode(): Promise<TransactionConfig> {
+        try {
+            const swapTradeParams: OneinchSwapRequest = {
+                params: {
+                    fromTokenAddress: this.from.address,
+                    toTokenAddress: this.to.address,
+                    amount: this.from.stringWeiAmount,
+                    slippage: this.slippageTolerance.toString(),
+                    fromAddress: this.walletAddress,
+                    mainRouteParts: this.disableMultihops ? '1' : undefined
+                }
+            };
+
+            const oneInchTrade = await this.httpClient.get<OneinchSwapResponse>(
+                `${this.apiBaseUrl}/swap`,
+                swapTradeParams
+            );
+            return oneInchTrade.tx;
         } catch (err) {
             this.specifyError(err);
             throw new RubicSdkError(err.message || err.toString());
