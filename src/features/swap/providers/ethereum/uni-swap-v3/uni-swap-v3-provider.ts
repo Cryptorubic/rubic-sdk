@@ -2,11 +2,10 @@
  * Shows whether Eth is used as from or to token.
  */
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
-import { Injector } from '@core/sdk/injector';
 import { LiquidityPoolsController } from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/liquidity-pools-controller';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { createTokenWethAbleProxy } from '@features/swap/providers/common/utils/weth';
+import { createTokenAddressProxy } from '@features/swap/providers/common/utils/token-address-proxy';
 import BigNumber from 'bignumber.js';
 import {
     UniSwapV3CalculatedInfo,
@@ -38,8 +37,6 @@ export class UniSwapV3Provider extends InstantTradeProvider {
 
     private wethAddress = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 
-    private web3Public = Injector.web3PublicService.getWeb3Public(this.blockchain);
-
     private liquidityPoolsController = new LiquidityPoolsController(this.web3Public);
 
     public async calculate(
@@ -49,8 +46,8 @@ export class UniSwapV3Provider extends InstantTradeProvider {
     ): Promise<UniSwapV3Trade> {
         const fullOptions: SwapCalculationOptions = { ...this.defaultOptions, ...options };
 
-        const fromClone = createTokenWethAbleProxy(from, this.wethAddress);
-        const toClone = createTokenWethAbleProxy(toToken, this.wethAddress);
+        const fromClone = createTokenAddressProxy(from, this.wethAddress);
+        const toClone = createTokenAddressProxy(toToken, this.wethAddress);
 
         let gasPriceInfo: GasPriceInfo | undefined;
         if (fullOptions.gasCalculation !== 'disabled') {

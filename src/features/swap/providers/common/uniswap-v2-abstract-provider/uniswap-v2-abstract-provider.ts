@@ -10,7 +10,7 @@ import { UniswapV2AbstractTrade } from '@features/swap/trades/common/uniswap-v2/
 import BigNumber from 'bignumber.js';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { UniswapCalculatedInfo } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/uniswap-calculated-info';
-import { createTokenWethAbleProxy } from '@features/swap/providers/common/utils/weth';
+import { createTokenAddressProxy } from '@features/swap/providers/common/utils/token-address-proxy';
 import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { getGasPriceInfo } from '@features/swap/providers/common/utils/gas-price';
 
@@ -46,8 +46,8 @@ export abstract class UniswapV2AbstractProvider<
     ): Promise<UniswapV2AbstractTrade> {
         const fullOptions: SwapCalculationOptions = { ...this.defaultOptions, ...options };
 
-        const fromProxy = createTokenWethAbleProxy(from, this.providerSettings.wethAddress);
-        const toProxy = createTokenWethAbleProxy(to, this.providerSettings.wethAddress);
+        const fromProxy = createTokenAddressProxy(from, this.providerSettings.wethAddress);
+        const toProxy = createTokenAddressProxy(to, this.providerSettings.wethAddress);
 
         let gasPriceInfo: Partial<GasPriceInfo> = {};
         if (fullOptions.gasCalculation !== 'disabled') {

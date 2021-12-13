@@ -16,6 +16,7 @@ import { getOneinchApiBaseUrl } from '@features/swap/utils/oneinch';
 import { InstantTradeProvider } from '@features/swap/providers/instant-trade-provider';
 import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
 import { Pure } from '@common/decorators/pure.decorator';
+import { createTokenAddressProxy } from '@features/swap/providers/common/utils/token-address-proxy';
 
 type OneinchSwapCalculationOptions = Omit<SwapCalculationOptions, 'deadlineMinutes'>;
 
@@ -37,21 +38,6 @@ export abstract class OneinchProvider extends InstantTradeProvider {
     @Pure
     private get apiBaseUrl(): string {
         return getOneinchApiBaseUrl(this.blockchain);
-    }
-
-    private createNativeTokenProxy<T extends Token>(token: T): T {
-        const tokenAddress = token.isNative ? oneinchApiParams.nativeAddress : token.address;
-        return new Proxy<T>(token, {
-            get: (target, key) => {
-                if (!(key in target)) {
-                    return undefined;
-                }
-                if (key === 'address') {
-                    return tokenAddress;
-                }
-                return target[key as keyof T];
-            }
-        });
     }
 
     private async getSupportedTokensByBlockchain(): Promise<string[]> {
@@ -84,8 +70,8 @@ export abstract class OneinchProvider extends InstantTradeProvider {
     ): Promise<OneinchTrade> {
         const fullOptions = { ...this.defaultOptions, ...options };
 
-        const fromClone = this.createNativeTokenProxy(from);
-        const toTokenClone = this.createNativeTokenProxy(toToken);
+        const fromClone = createTokenAddressProxy(from, oneinchApiParams.nativeAddress);
+        const toTokenClone = createTokenAddressProxy(toToken, oneinchApiParams.nativeAddress);
 
         const supportedTokensAddresses = await this.getSupportedTokensByBlockchain();
         if (
