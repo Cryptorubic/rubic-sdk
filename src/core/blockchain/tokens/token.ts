@@ -31,7 +31,7 @@ export class Token {
     }
 
     public static async createTokens(
-        tokensAddresses: string[],
+        tokensAddresses: string[] | ReadonlyArray<string>,
         blockchain: BLOCKCHAIN_NAME
     ): Promise<Token[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
@@ -54,6 +54,10 @@ export class Token {
                 decimals: parseInt(tokenInfo.decimals)
             });
         });
+    }
+
+    public static tokensToAddresses(tokens: Token[]): string[] {
+        return tokens.map(token => token.address);
     }
 
     public readonly blockchain: BLOCKCHAIN_NAME;

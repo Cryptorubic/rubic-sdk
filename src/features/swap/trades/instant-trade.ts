@@ -13,6 +13,17 @@ import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 
 export abstract class InstantTrade {
+    public static getContractAddress(): string {
+        if (!(this as unknown as { contractAddress: string })?.contractAddress) {
+            throw new RubicSdkError('Trying to read abstract class field');
+        }
+
+        // see  https://github.com/microsoft/TypeScript/issues/34516
+        // @ts-ignore
+        const instance = new this();
+        return instance.contractAddress;
+    }
+
     public abstract readonly from: PriceTokenAmount;
 
     public abstract readonly to: PriceTokenAmount;
@@ -21,7 +32,7 @@ export abstract class InstantTrade {
 
     public abstract readonly slippageTolerance: number;
 
-    protected abstract readonly contractAddress: string;
+    protected abstract contractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
     protected readonly web3Private = Injector.web3Private;
 

@@ -5,7 +5,7 @@ import {
 import { SUSHI_SWAP_FANTOM_CONTRACT_ADDRESS } from '@features/swap/trades/fantom/sushi-swap-fantom/constants';
 
 export class SushiSwapFantomTrade extends UniswapV2AbstractTrade {
-    protected contractAddress = SUSHI_SWAP_FANTOM_CONTRACT_ADDRESS;
+    protected readonly contractAddress = SUSHI_SWAP_FANTOM_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);

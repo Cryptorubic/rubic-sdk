@@ -7,11 +7,11 @@ import {
 } from '@features/swap/trades/common/uniswap-v2/uniswap-v2-abstract-trade';
 
 export class JoeTrade extends UniswapV2AbstractTrade {
+    public static readonly contractAbi = AVAX_ABI;
+
+    public static readonly swapMethods = AVALANCHE_SWAP_METHOD;
+
     protected contractAddress = JOE_CONTRACT_ADDRESS;
-
-    protected contractAbi = AVAX_ABI;
-
-    protected readonly swapMethods = AVALANCHE_SWAP_METHOD;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);

@@ -7,11 +7,11 @@ import {
 } from '@features/swap/trades/common/uniswap-v2/uniswap-v2-abstract-trade';
 
 export class PangolinTrade extends UniswapV2AbstractTrade {
-    protected contractAddress = PANGOLIN_CONTRACT_ADDRESS;
+    public static readonly contractAbi = AVAX_ABI;
 
-    protected contractAbi = AVAX_ABI;
+    public static readonly swapMethods = AVALANCHE_SWAP_METHOD;
 
-    protected readonly swapMethods = AVALANCHE_SWAP_METHOD;
+    protected readonly contractAddress = PANGOLIN_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);

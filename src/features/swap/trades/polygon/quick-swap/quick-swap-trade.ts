@@ -5,7 +5,7 @@ import {
 import { QUICK_SWAP_CONTRACT_ADDRESS } from '@features/swap/trades/polygon/quick-swap/constants';
 
 export class QuickSwapTrade extends UniswapV2AbstractTrade {
-    protected contractAddress = QUICK_SWAP_CONTRACT_ADDRESS;
+    protected readonly contractAddress = QUICK_SWAP_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);
