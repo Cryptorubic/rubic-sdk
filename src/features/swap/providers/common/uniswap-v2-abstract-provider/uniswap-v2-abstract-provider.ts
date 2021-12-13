@@ -8,11 +8,8 @@ import { PathFactory } from '@features/swap/providers/common/uniswap-v2-abstract
 import { InstantTradeProvider } from '@features/swap/providers/instant-trade-provider';
 import { UniswapV2AbstractTrade } from '@features/swap/trades/common/uniswap-v2/uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
-import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { UniswapCalculatedInfo } from '@features/swap/providers/common/uniswap-v2-abstract-provider/models/uniswap-calculated-info';
-import { createTokenAddressProxy } from '@features/swap/providers/common/utils/token-address-proxy';
-import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
-import { getGasPriceInfo } from '@features/swap/providers/common/utils/gas-price';
+import { createTokenNativeAddressProxy } from '@features/swap/providers/common/utils/token-native-address-proxy';
 
 export abstract class UniswapV2AbstractProvider<
     T extends UniswapV2AbstractTrade
@@ -28,7 +25,7 @@ export abstract class UniswapV2AbstractProvider<
         slippageTolerance: 0.05
     };
 
-    private readonly GAS_MARGIN = 1.2;
+    protected readonly gasMargin = 1.2;
 
     public async calculate(
         from: PriceTokenAmount,
@@ -46,12 +43,12 @@ export abstract class UniswapV2AbstractProvider<
     ): Promise<UniswapV2AbstractTrade> {
         const fullOptions: SwapCalculationOptions = { ...this.defaultOptions, ...options };
 
-        const fromProxy = createTokenAddressProxy(from, this.providerSettings.wethAddress);
-        const toProxy = createTokenAddressProxy(to, this.providerSettings.wethAddress);
+        const fromProxy = createTokenNativeAddressProxy(from, this.providerSettings.wethAddress);
+        const toProxy = createTokenNativeAddressProxy(to, this.providerSettings.wethAddress);
 
-        let gasPriceInfo: Partial<GasPriceInfo> = {};
+        let gasPriceInfo: GasPriceInfo | undefined;
         if (fullOptions.gasCalculation !== 'disabled') {
-            gasPriceInfo = await getGasPriceInfo(from.blockchain);
+            gasPriceInfo = await this.getGasPriceInfo();
         }
 
         const { route, estimatedGas } = await this.getAmountAndPath(
@@ -59,7 +56,7 @@ export abstract class UniswapV2AbstractProvider<
             toProxy,
             exact,
             fullOptions,
-            gasPriceInfo.gasPriceInUsd
+            gasPriceInfo?.gasPriceInUsd
         );
 
         const instantTrade: UniswapV2AbstractTrade = new this.InstantTradeClass({
@@ -75,7 +72,7 @@ export abstract class UniswapV2AbstractProvider<
             return instantTrade;
         }
 
-        instantTrade.gasFeeInfo = this.getFeeInfo(estimatedGas, gasPriceInfo);
+        instantTrade.gasFeeInfo = this.getGasFeeInfo(estimatedGas, gasPriceInfo!);
         return instantTrade;
     }
 
@@ -88,27 +85,5 @@ export abstract class UniswapV2AbstractProvider<
     ): Promise<UniswapCalculatedInfo> {
         const pathFactory = new PathFactory(this, { from, to, exact, options });
         return pathFactory.getAmountAndPath(gasPriceInUsd);
-    }
-
-    private getFeeInfo(
-        estimatedGas: BigNumber | undefined,
-        gasInfo: Partial<GasPriceInfo>
-    ): GasFeeInfo {
-        const gasLimit = estimatedGas
-            ? Web3Pure.calculateGasMargin(estimatedGas, this.GAS_MARGIN)
-            : undefined;
-
-        if (!gasLimit) {
-            return { gasPrice: gasInfo.gasPrice };
-        }
-        const gasFeeInEth = gasInfo.gasPriceInEth?.multipliedBy(gasLimit);
-        const gasFeeInUsd = gasInfo.gasPriceInUsd?.multipliedBy(gasLimit);
-
-        return {
-            gasLimit,
-            gasPrice: gasInfo.gasPrice,
-            gasFeeInEth,
-            gasFeeInUsd
-        };
     }
 }

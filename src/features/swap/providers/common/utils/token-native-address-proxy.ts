@@ -1,6 +1,6 @@
 import { Token } from '@core/blockchain/tokens/token';
 
-export function createTokenAddressProxy<T extends Token>(
+export function createTokenNativeAddressProxy<T extends Token>(
     token: T,
     wrappedNativeAddress: string
 ): T {

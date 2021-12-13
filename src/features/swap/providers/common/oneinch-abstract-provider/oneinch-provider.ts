@@ -8,7 +8,6 @@ import { OneinchQuoteRequest } from '@features/swap/providers/common/oneinch-abs
 import { OneinchQuoteResponse } from '@features/swap/providers/common/oneinch-abstract-provider/models/OneinchQuoteResponse';
 import { OneinchSwapResponse } from '@features/swap/providers/common/oneinch-abstract-provider/models/OneinchSwapResponse';
 import { OneinchSwapRequest } from '@features/swap/models/one-inch/OneinchSwapRequest';
-import { getGasPriceInfo } from '@features/swap/providers/common/utils/gas-price';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { oneinchApiParams } from '@features/swap/constants/oneinch/oneinch-api-params';
 import { OneinchTrade } from '@features/swap/trades/common/oneinch-abstract-trade/oneinch-trade';
@@ -16,7 +15,7 @@ import { getOneinchApiBaseUrl } from '@features/swap/utils/oneinch';
 import { InstantTradeProvider } from '@features/swap/providers/instant-trade-provider';
 import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
 import { Pure } from '@common/decorators/pure.decorator';
-import { createTokenAddressProxy } from '@features/swap/providers/common/utils/token-address-proxy';
+import { createTokenNativeAddressProxy } from '@features/swap/providers/common/utils/token-native-address-proxy';
 
 type OneinchSwapCalculationOptions = Omit<SwapCalculationOptions, 'deadlineMinutes'>;
 
@@ -69,8 +68,8 @@ export abstract class OneinchProvider extends InstantTradeProvider {
     ): Promise<OneinchTrade> {
         const fullOptions = { ...this.defaultOptions, ...options };
 
-        const fromClone = createTokenAddressProxy(from, oneinchApiParams.nativeAddress);
-        const toTokenClone = createTokenAddressProxy(toToken, oneinchApiParams.nativeAddress);
+        const fromClone = createTokenNativeAddressProxy(from, oneinchApiParams.nativeAddress);
+        const toTokenClone = createTokenNativeAddressProxy(toToken, oneinchApiParams.nativeAddress);
 
         const supportedTokensAddresses = await this.getSupportedTokensByBlockchain();
         if (
@@ -102,18 +101,11 @@ export abstract class OneinchProvider extends InstantTradeProvider {
             return new OneinchTrade(oneinchTradeStruct);
         }
 
-        const gasPriceInfo = await getGasPriceInfo(from.blockchain);
-        const gasFeeInEth = gasPriceInfo.gasPriceInEth.multipliedBy(estimatedGas);
-        const gasFeeInUsd = gasPriceInfo.gasPriceInUsd.multipliedBy(estimatedGas);
-
+        const gasPriceInfo = await this.getGasPriceInfo();
+        const gasFeeInfo = this.getGasFeeInfo(estimatedGas, gasPriceInfo);
         return new OneinchTrade({
             ...oneinchTradeStruct,
-            gasFeeInfo: {
-                gasLimit: estimatedGas,
-                gasPrice: gasPriceInfo.gasPrice,
-                gasFeeInUsd,
-                gasFeeInEth
-            }
+            gasFeeInfo
         });
     }
 

@@ -5,7 +5,7 @@ import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { LiquidityPoolsController } from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/liquidity-pools-controller';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { createTokenAddressProxy } from '@features/swap/providers/common/utils/token-address-proxy';
+import { createTokenNativeAddressProxy } from '@features/swap/providers/common/utils/token-native-address-proxy';
 import BigNumber from 'bignumber.js';
 import {
     UniSwapV3CalculatedInfo,
@@ -16,7 +16,6 @@ import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { UniSwapV3Trade } from '@features/swap/trades/ethereum/uni-swap-v3/uni-swap-v3-trade';
 import { GasPriceInfo } from '@features/swap/models/gas-price-info';
 import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
-import { getGasPriceInfo } from '@features/swap/providers/common/utils/gas-price';
 import { InstantTradeProvider } from '@features/swap/providers/instant-trade-provider';
 
 const RUBIC_OPTIMIZATION_DISABLED = true;
@@ -31,7 +30,7 @@ export class UniSwapV3Provider extends InstantTradeProvider {
         slippageTolerance: 0.05
     };
 
-    private readonly GAS_MARGIN = 1.2;
+    protected readonly gasMargin = 1.2;
 
     private readonly maxTransitPools = 1;
 
@@ -46,12 +45,12 @@ export class UniSwapV3Provider extends InstantTradeProvider {
     ): Promise<UniSwapV3Trade> {
         const fullOptions: SwapCalculationOptions = { ...this.defaultOptions, ...options };
 
-        const fromClone = createTokenAddressProxy(from, this.wethAddress);
-        const toClone = createTokenAddressProxy(toToken, this.wethAddress);
+        const fromClone = createTokenNativeAddressProxy(from, this.wethAddress);
+        const toClone = createTokenNativeAddressProxy(toToken, this.wethAddress);
 
         let gasPriceInfo: GasPriceInfo | undefined;
         if (fullOptions.gasCalculation !== 'disabled') {
-            gasPriceInfo = await getGasPriceInfo(this.blockchain);
+            gasPriceInfo = await this.getGasPriceInfo();
         }
 
         const { route, estimatedGas } = await this.getRoute(
@@ -75,18 +74,10 @@ export class UniSwapV3Provider extends InstantTradeProvider {
             return new UniSwapV3Trade(tradeStruct);
         }
 
-        const gasLimit = Web3Pure.calculateGasMargin(estimatedGas, this.GAS_MARGIN);
-        const gasFeeInEth = gasPriceInfo!.gasPriceInEth.multipliedBy(gasLimit);
-        const gasFeeInUsd = gasPriceInfo!.gasPriceInUsd.multipliedBy(gasLimit);
-
+        const gasFeeInfo = this.getGasFeeInfo(estimatedGas, gasPriceInfo!);
         return new UniSwapV3Trade({
             ...tradeStruct,
-            gasFeeInfo: {
-                gasLimit,
-                gasPrice: gasPriceInfo!.gasPrice,
-                gasFeeInEth,
-                gasFeeInUsd
-            }
+            gasFeeInfo
         });
     }
 
