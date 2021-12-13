@@ -137,23 +137,7 @@ export abstract class OneinchProvider extends InstantTradeProvider {
         let estimatedGas: BigNumber;
         let toTokenAmount: string;
         try {
-            if (!this.walletAddress) {
-                throw new Error('User has not connected');
-            }
-
-            if (!from.isNative) {
-                const response = await this.httpClient.get<{
-                    allowance: string;
-                }>(`${this.apiBaseUrl}/approve/allowance`, {
-                    params: {
-                        tokenAddress: from.address,
-                        walletAddress: this.walletAddress
-                    }
-                });
-                if (new BigNumber(from.weiAmount).gt(response.allowance)) {
-                    throw new Error('User have no allowance');
-                }
-            }
+            await OneinchTrade.checkIfNeedApproveAndThrowError(from);
 
             const swapTradeParams: OneinchSwapRequest = {
                 params: {

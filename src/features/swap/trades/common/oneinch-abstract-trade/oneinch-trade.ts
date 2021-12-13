@@ -27,6 +27,17 @@ type OneinchTradeStruct = {
 };
 
 export class OneinchTrade extends InstantTrade {
+    public static async checkIfNeedApproveAndThrowError(
+        from: PriceTokenAmount
+    ): Promise<void | never> {
+        const needApprove = await new OneinchTrade({
+            from
+        } as OneinchTradeStruct).needApprove();
+        if (needApprove) {
+            throw new Error('need approve');
+        }
+    }
+
     private readonly httpClient = Injector.httpClient;
 
     protected readonly contractAddress: string;
