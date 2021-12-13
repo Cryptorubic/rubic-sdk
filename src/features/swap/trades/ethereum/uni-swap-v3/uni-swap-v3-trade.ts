@@ -11,7 +11,6 @@ import { TransactionReceipt } from 'web3-eth';
 import { compareAddresses, deadlineMinutesTimestamp } from '@common/utils/blockchain';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
 import { LiquidityPoolsController } from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/liquidity-pools-controller';
-import { EMPTY_ADDRESS } from '@core/blockchain/web3-public/constants/EMPTY_ADDRESS';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { BatchCall } from '@core/blockchain/web3-public/models/batch-call';
 import {
@@ -55,17 +54,18 @@ export class UniSwapV3Trade extends InstantTrade {
         const walletAddress = Injector.web3Private.address;
         if (walletAddress) {
             const web3Public = Injector.web3PublicService.getWeb3Public(from.blockchain);
-            gasLimit = await web3Public
-                .getEstimatedGas(
-                    swapRouterContractAbi,
-                    swapRouterContractAddress,
-                    estimateGasParams.callData.contractMethod,
-                    estimateGasParams.callData.params,
-                    walletAddress,
-                    estimateGasParams.callData.value
-                )
-                .then(estimateGas => new BigNumber(estimateGas))
-                .catch(() => estimateGasParams.defaultGasLimit);
+            try {
+                gasLimit = new BigNumber(
+                    await web3Public.getEstimatedGas(
+                        swapRouterContractAbi,
+                        swapRouterContractAddress,
+                        estimateGasParams.callData.contractMethod,
+                        estimateGasParams.callData.params,
+                        walletAddress,
+                        estimateGasParams.callData.value
+                    )
+                );
+            } catch (_err) {}
         }
 
         return gasLimit;
@@ -147,14 +147,13 @@ export class UniSwapV3Trade extends InstantTrade {
                 ? initialPool.token0
                 : initialPool.token1
         ];
-        path.push(
+        return path.concat(
             ...this.route.poolsPath.map(pool => {
                 return !compareAddresses(pool.token0.address, path[path.length - 1].address)
                     ? pool.token0
                     : pool.token1;
             })
         );
-        return path;
     }
 
     constructor(tradeStruct: UniswapV3TradeStruct) {
@@ -215,7 +214,7 @@ export class UniSwapV3Trade extends InstantTrade {
         }
 
         const { methodName: exactInputMethodName, methodArguments: exactInputMethodArguments } =
-            this.getSwapRouterExactInputMethodData(EMPTY_ADDRESS);
+            this.getSwapRouterExactInputMethodData(Web3Pure.ZERO_ADDRESS);
         const exactInputMethodEncoded = Web3Pure.encodeFunctionCall(
             swapRouterContractAbi,
             exactInputMethodName,

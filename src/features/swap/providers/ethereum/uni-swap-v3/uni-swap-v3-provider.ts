@@ -68,7 +68,7 @@ export class UniSwapV3Provider {
             gasPriceInfo?.gasPriceInUsd
         );
 
-        const trade = {
+        const tradeStruct = {
             from,
             to: new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -79,7 +79,7 @@ export class UniSwapV3Provider {
             route
         };
         if (fullOptions.gasCalculation === 'disabled') {
-            return new UniSwapV3Trade(trade);
+            return new UniSwapV3Trade(tradeStruct);
         }
 
         const gasLimit = Web3Pure.calculateGasMargin(estimatedGas, this.GAS_MARGIN);
@@ -87,7 +87,7 @@ export class UniSwapV3Provider {
         const gasFeeInUsd = gasPriceInfo!.gasPriceInUsd.multipliedBy(gasLimit);
 
         return new UniSwapV3Trade({
-            ...trade,
+            ...tradeStruct,
             gasFeeInfo: {
                 gasLimit,
                 gasPrice: gasPriceInfo!.gasPrice,

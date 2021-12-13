@@ -9,11 +9,17 @@ import { toChecksumAddress, isAddress, toWei, fromWei, AbiItem } from 'web3-util
 export class Web3Pure {
     private static web3 = new Web3();
 
+    public static readonly ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
     /**
      * @description gets address of native coin {@link NATIVE_TOKEN_ADDRESS}
      */
     static get nativeTokenAddress(): string {
         return NATIVE_TOKEN_ADDRESS;
+    }
+
+    public static isZeroAddress(address: string) {
+        return address === this.ZERO_ADDRESS;
     }
 
     /**
