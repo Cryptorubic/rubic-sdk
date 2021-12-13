@@ -27,7 +27,7 @@ export class UniSwapV3Provider extends InstantTradeProvider {
         gasCalculation: 'calculate',
         disableMultihops: false,
         deadlineMinutes: 20,
-        slippageTolerance: 0.05
+        slippageTolerance: 0.02
     };
 
     protected readonly gasMargin = 1.2;
