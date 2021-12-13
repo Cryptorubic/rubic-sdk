@@ -28,6 +28,8 @@ export abstract class OneinchProvider extends InstantTradeProvider {
         slippageTolerance: 0.02
     };
 
+    protected readonly gasMargin = 1;
+
     private supportedTokens: string[] = [];
 
     private get walletAddress(): string {

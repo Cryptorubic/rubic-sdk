@@ -13,7 +13,7 @@ import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 export abstract class InstantTradeProvider {
     public abstract readonly blockchain: BLOCKCHAIN_NAME;
 
-    protected gasMargin = 1.0;
+    protected abstract gasMargin: number;
 
     protected get web3Public(): Web3Public {
         return Injector.web3PublicService.getWeb3Public(this.blockchain);
