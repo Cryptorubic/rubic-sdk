@@ -17,15 +17,15 @@ export class Web3Pure {
     }
 
     /**
-     * @description increases the gas limit value by the specified percentage and rounds to the nearest integer
-     * @param amount gas limit value to increase
-     * @param multiplier the multiplier by which the gas limit will be increased
+     * Increases the gas limit value by the specified percentage and rounds to the nearest integer.
+     * @param gasLimit Gas limit value to increase.
+     * @param multiplier The multiplier by which the gas limit will be increased.
      */
     static calculateGasMargin(
-        amount: BigNumber | string | number | undefined,
+        gasLimit: BigNumber | string | number | undefined,
         multiplier: number
-    ): string {
-        return new BigNumber(amount || '0').multipliedBy(multiplier).toFixed(0);
+    ): BigNumber {
+        return new BigNumber(gasLimit || '0').multipliedBy(multiplier);
     }
 
     /**

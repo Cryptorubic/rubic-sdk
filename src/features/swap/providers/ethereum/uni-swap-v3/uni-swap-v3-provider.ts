@@ -61,7 +61,7 @@ export class UniSwapV3Provider {
             gasPriceInfo = await this.getGasPriceInfo();
         }
 
-        const { route, gasLimit } = await this.getRoute(
+        const { route, estimatedGas } = await this.getRoute(
             fromClone,
             toClone,
             fullOptions,
@@ -82,14 +82,14 @@ export class UniSwapV3Provider {
             return new UniSwapV3Trade(trade);
         }
 
-        const increasedGas = Web3Pure.calculateGasMargin(gasLimit, this.GAS_MARGIN);
-        const gasFeeInEth = gasPriceInfo!.gasPriceInEth.multipliedBy(increasedGas);
-        const gasFeeInUsd = gasPriceInfo!.gasPriceInUsd.multipliedBy(increasedGas);
+        const gasLimit = Web3Pure.calculateGasMargin(estimatedGas, this.GAS_MARGIN);
+        const gasFeeInEth = gasPriceInfo!.gasPriceInEth.multipliedBy(gasLimit);
+        const gasFeeInUsd = gasPriceInfo!.gasPriceInUsd.multipliedBy(gasLimit);
 
         return new UniSwapV3Trade({
             ...trade,
             gasFeeInfo: {
-                gasLimit: new BigNumber(increasedGas),
+                gasLimit,
                 gasPrice: gasPriceInfo!.gasPrice,
                 gasFeeInEth,
                 gasFeeInUsd
@@ -147,7 +147,7 @@ export class UniSwapV3Provider {
             options.gasCalculation === 'rubicOptimisation' &&
             toToken.price
         ) {
-            const gasLimits = await UniSwapV3Trade.calculateGasLimitsForRoutes(
+            const estimatedGasLimits = await UniSwapV3Trade.estimateGasLimitForRoutes(
                 from,
                 toToken,
                 options,
@@ -156,14 +156,14 @@ export class UniSwapV3Provider {
 
             const calculatedProfits: UniSwapV3CalculatedInfoWithProfit[] = routes.map(
                 (route, index) => {
-                    const gasLimit = gasLimits[index];
-                    const gasFeeInUsd = gasPriceInUsd!.multipliedBy(gasLimit);
+                    const estimatedGas = estimatedGasLimits[index];
+                    const gasFeeInUsd = gasPriceInUsd!.multipliedBy(estimatedGas);
                     const profit = Web3Pure.fromWei(route.outputAbsoluteAmount, toToken.decimals)
                         .multipliedBy(toToken.price)
                         .minus(gasFeeInUsd);
                     return {
                         route,
-                        gasLimit,
+                        estimatedGas,
                         profit
                     };
                 }
@@ -173,7 +173,7 @@ export class UniSwapV3Provider {
         }
 
         const route = routes[0];
-        const gasLimit = await UniSwapV3Trade.calculateGasLimitForRoute(
+        const estimatedGas = await UniSwapV3Trade.estimateGasLimitForRoute(
             from,
             toToken,
             options,
@@ -181,7 +181,7 @@ export class UniSwapV3Provider {
         );
         return {
             route,
-            gasLimit
+            estimatedGas
         };
     }
 }

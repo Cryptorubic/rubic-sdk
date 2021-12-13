@@ -1,5 +1,4 @@
 import { LiquidityPool } from '@features/swap/providers/ethereum/uni-swap-v3/utils/liquidity-pool-controller/models/liquidity-pool';
-import { Injector } from '@core/sdk/injector';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { Token } from '@core/blockchain/tokens/token';
 
@@ -22,9 +21,10 @@ export async function getRouterTokensAndLiquidityPools(): Promise<{
     routerTokens: Token[];
     routerLiquidityPools: LiquidityPool[];
 }> {
-    const routerTokens: Token[] = await Injector.web3PublicService
-        .getWeb3Public(BLOCKCHAIN_NAME.ETHEREUM)
-        .callForTokens(Object.values(routerTokensAddresses));
+    const routerTokens: Token[] = await Token.createTokens(
+        Object.values(routerTokensAddresses),
+        BLOCKCHAIN_NAME.ETHEREUM
+    );
 
     const routerTokensBySymbol = (Object.keys(routerTokensAddresses) as TokenSymbol[]).reduce(
         (acc, symbol, index) => ({

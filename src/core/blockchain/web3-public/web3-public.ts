@@ -26,7 +26,6 @@ import { InsufficientFundsError } from '@common/errors/swap/insufficient-funds-e
 import { HttpClient } from '@common/models/http-client';
 import { DefaultHttpClient } from '@common/http/default-http-client';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
-import { Token } from '@core/blockchain/tokens/token';
 
 type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 
@@ -506,26 +505,6 @@ export class Web3Public {
         // see https://github.com/microsoft/TypeScript/issues/4881
         // @ts-ignore
         return conditionalReturns;
-    }
-
-    /**
-     * Gets ERC-20 tokens info by addresses and returns tokens.
-     * @param tokenAddresses Addresses of tokens.
-     */
-    public async callForTokens(tokenAddresses: string[]): Promise<Token[]> {
-        const tokensInfo = await this.callForTokensInfo(tokenAddresses);
-        return tokensInfo.map((tokenInfo, index) => {
-            if (!tokenInfo.name || !tokenInfo.symbol || !tokenInfo.decimals) {
-                throw new RubicSdkError('Cannot retrieve tokens info');
-            }
-            return new Token({
-                blockchain: this.blockchainName,
-                address: tokenAddresses[index],
-                name: tokenInfo.name,
-                symbol: tokenInfo.symbol,
-                decimals: parseInt(tokenInfo.decimals)
-            });
-        });
     }
 
     /**

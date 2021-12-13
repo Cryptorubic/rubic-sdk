@@ -26,6 +26,7 @@ import { Pure } from '@common/decorators/pure.decorator';
 import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { Token } from '@core/blockchain/tokens/token';
 import { SwapOptions } from '@features/swap/models/swap-options';
+import BigNumber from 'bignumber.js';
 
 type UniswapV3TradeStruct = {
     from: PriceTokenAmount;
@@ -37,12 +38,12 @@ type UniswapV3TradeStruct = {
 };
 
 export class UniSwapV3Trade extends InstantTrade {
-    public static async calculateGasLimitForRoute(
+    public static async estimateGasLimitForRoute(
         from: PriceTokenAmount,
         toToken: PriceToken,
         options: SwapOptions,
         route: UniSwapV3Route
-    ): Promise<string> {
+    ): Promise<BigNumber> {
         const estimateGasParams = UniSwapV3Trade.getEstimateGasParams(
             from,
             toToken,
@@ -63,18 +64,19 @@ export class UniSwapV3Trade extends InstantTrade {
                     walletAddress,
                     estimateGasParams.callData.value
                 )
+                .then(estimateGas => new BigNumber(estimateGas))
                 .catch(() => estimateGasParams.defaultGasLimit);
         }
 
         return gasLimit;
     }
 
-    public static async calculateGasLimitsForRoutes(
+    public static async estimateGasLimitForRoutes(
         from: PriceTokenAmount,
         toToken: PriceToken,
         options: SwapOptions,
         routes: UniSwapV3Route[]
-    ): Promise<string[]> {
+    ): Promise<BigNumber[]> {
         const routesEstimateGasParams = routes.map(route =>
             UniSwapV3Trade.getEstimateGasParams(from, toToken, options, route)
         );
@@ -93,7 +95,7 @@ export class UniSwapV3Trade extends InstantTrade {
             );
             estimatedGasLimits.forEach((elem, index) => {
                 if (elem?.isFinite()) {
-                    gasLimits[index] = elem.toFixed(0);
+                    gasLimits[index] = elem;
                 }
             });
         }
@@ -276,10 +278,10 @@ export class UniSwapV3Trade extends InstantTrade {
     /**
      * Returns encoded data of estimated gas function and default estimated gas.
      */
-    private getEstimateGasParams(): { callData: BatchCall; defaultGasLimit: string } {
-        const defaultEstimateGas = swapEstimatedGas[this.route.poolsPath.length - 1]
-            .plus(this.from.isNative ? WethToEthEstimatedGas : 0)
-            .toFixed(0);
+    private getEstimateGasParams(): { callData: BatchCall; defaultGasLimit: BigNumber } {
+        const defaultEstimateGas = swapEstimatedGas[this.route.poolsPath.length - 1].plus(
+            this.from.isNative ? WethToEthEstimatedGas : 0
+        );
 
         const { methodName, methodArguments } = this.getSwapRouterMethodData();
 

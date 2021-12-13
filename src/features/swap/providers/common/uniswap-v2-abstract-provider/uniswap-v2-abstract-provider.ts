@@ -121,7 +121,7 @@ export abstract class UniswapV2AbstractProvider<
         const gasFeeInUsd = gasInfo.gasPriceInUsd?.multipliedBy(gasLimit);
 
         return {
-            gasLimit: new BigNumber(gasLimit),
+            gasLimit,
             gasPrice: gasInfo.gasPrice,
             gasFeeInEth,
             gasFeeInUsd
