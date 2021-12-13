@@ -4,7 +4,7 @@ import { Pure } from '@common/decorators/pure.decorator';
 import { getOneinchApiBaseUrl } from '@features/swap/utils/oneinch';
 import BigNumber from 'bignumber.js';
 import { TransactionReceipt } from 'web3-eth';
-import { OneinchSwapRequest } from '@features/swap/models/one-inch/OneinchSwapRequest';
+import { OneinchSwapRequest } from '@features/swap/models/oneinch/OneinchSwapRequest';
 import { OneinchSwapResponse } from '@features/swap/providers/common/oneinch-abstract-provider/models/OneinchSwapResponse';
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import InsufficientFundsOneinchError from '@common/errors/swap/InsufficientFundsOneinchError';

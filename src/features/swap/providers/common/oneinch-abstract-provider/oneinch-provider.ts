@@ -7,7 +7,7 @@ import BigNumber from 'bignumber.js';
 import { OneinchQuoteRequest } from '@features/swap/providers/common/oneinch-abstract-provider/models/OneinchQuoteRequest';
 import { OneinchQuoteResponse } from '@features/swap/providers/common/oneinch-abstract-provider/models/OneinchQuoteResponse';
 import { OneinchSwapResponse } from '@features/swap/providers/common/oneinch-abstract-provider/models/OneinchSwapResponse';
-import { OneinchSwapRequest } from '@features/swap/models/one-inch/OneinchSwapRequest';
+import { OneinchSwapRequest } from '@features/swap/models/oneinch/OneinchSwapRequest';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { oneinchApiParams } from '@features/swap/constants/oneinch/oneinch-api-params';
 import { OneinchTrade } from '@features/swap/trades/common/oneinch-abstract-trade/oneinch-trade';

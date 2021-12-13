@@ -1,5 +1,3 @@
 export interface OneinchTokensResponse {
-    tokens: {
-        [key in string]: unknown;
-    };
+    tokens: Record<string, unknown>;
 }
