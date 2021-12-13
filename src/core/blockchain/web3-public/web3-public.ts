@@ -327,7 +327,7 @@ export class Web3Public {
     }
 
     /**
-     * Uses multicall to make many methods calls in one contract.
+     * Uses multicall to make several calls of one method in one contract.
      * @param contractAddress Target contract address.
      * @param contractAbi Target contract abi.
      * @param methodName target method name
@@ -350,7 +350,7 @@ export class Web3Public {
     }
 
     /**
-     * Uses multicall to make many methods calls in one contract.
+     * Uses multicall to make several methods calls in one contract.
      * @param contractAddress Target contract address.
      * @param contractAbi Target contract abi.
      * @param methodsData Methods data, containing methods' names and arguments.
