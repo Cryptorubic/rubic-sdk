@@ -23,7 +23,7 @@ import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { GasData } from '@common/models/GasData';
 import { NotSupportedBlockchain } from '@common/errors/swap/NotSupportedBlockchain';
 import { notNull } from '@common/utils/object';
-import { UniswapV2AbstractTrade } from '@features/swap/trades/common/uniswap-v2/uniswap-v2-abstract-trade';
+import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 
 interface CalculatedTrade {
     toAmount: BigNumber;

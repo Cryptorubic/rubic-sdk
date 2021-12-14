@@ -4,7 +4,3 @@ export interface SwapTransactionOptions {
     gasPrice?: string | null;
     gasLimit?: string | null;
 }
-
-export interface SwapTransactionOptionsWithGasLimit extends SwapTransactionOptions {
-    gasLimit: string;
-}

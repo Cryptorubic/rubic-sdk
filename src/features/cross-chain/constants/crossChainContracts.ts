@@ -1,13 +1,13 @@
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
-import { PancakeSwapProvider } from '@features/swap/providers/bsc/pancake-swap/pancake-swap-provider';
-import { UniSwapV2Provider } from '@features/swap/providers/ethereum/uni-swap-v2/uni-swap-v2-provider';
-import { QuickSwapProvider } from '@features/swap/providers/polygon/quick-swap/quick-swap-provider';
+import { PancakeSwapProvider } from '@features/swap/dexes/bsc/pancake-swap/pancake-swap-provider';
+import { UniSwapV2Provider } from '@features/swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
+import { QuickSwapProvider } from '@features/swap/dexes/polygon/quick-swap/quick-swap-provider';
 import { CrossChainSupportedBlockchain } from '@features/cross-chain/constants/CrossChainSupportedBlockchains';
-import { SpookySwapProvider } from '@features/swap/providers/fantom/spooky-swap/spooky-swap-provider';
-import { JoeProvider } from '@features/swap/providers/avalanche/joe/joe-provider';
-import { SolarbeamProvider } from '@features/swap/providers/moonriver/solarbeam/solarbeam-provider';
-import { PangolinProvider } from '@features/swap/providers/avalanche/pangolin/pangolin-provider';
+import { SpookySwapProvider } from '@features/swap/dexes/fantom/spooky-swap/spooky-swap-provider';
+import { JoeProvider } from '@features/swap/dexes/avalanche/joe/joe-provider';
+import { SolarbeamProvider } from '@features/swap/dexes/moonriver/solarbeam/solarbeam-provider';
+import { PangolinProvider } from '@features/swap/dexes/avalanche/pangolin/pangolin-provider';
 
 export const crossChainContracts: Record<CrossChainSupportedBlockchain, CrossChainContract[]> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: [

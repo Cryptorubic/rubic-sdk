@@ -6,10 +6,10 @@ import { Web3PublicService } from '@core/blockchain/web3-public/web3-public-serv
 import { Injector } from '@core/sdk/injector';
 import { Configuration } from '@core/sdk/models/configuration';
 import { CrossChain } from '@features/crosschain/cross-chain';
-import { InstantTrades } from '@features/swap/instant-trades';
+import { InstantTradesManager } from '@features/swap/instant-trades';
 
 export class SDK {
-    public readonly instantTrades: InstantTrades;
+    public readonly instantTrades: InstantTradesManager;
 
     public readonly crossChain: CrossChain;
 
@@ -43,7 +43,7 @@ export class SDK {
     }
 
     private constructor() {
-        this.instantTrades = new InstantTrades();
+        this.instantTrades = new InstantTradesManager();
         this.crossChain = new CrossChain();
     }
 }

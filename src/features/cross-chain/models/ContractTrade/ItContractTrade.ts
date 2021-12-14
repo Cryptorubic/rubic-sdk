@@ -4,7 +4,7 @@ import { ContractTrade } from '@features/cross-chain/models/ContractTrade/Contra
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Pure } from '@common/decorators/pure.decorator';
-import { UniswapV2AbstractTrade } from '@features/swap/trades/common/uniswap-v2/uniswap-v2-abstract-trade';
+import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { Token } from '@core/blockchain/tokens/token';
 
 export class ItContractTrade extends ContractTrade {
