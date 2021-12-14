@@ -21,7 +21,7 @@ export interface PathFactoryStruct {
     readonly from: PriceTokenAmount;
     readonly to: PriceToken;
     readonly exact: 'input' | 'output';
-    readonly options: SwapCalculationOptions;
+    readonly options: Required<SwapCalculationOptions>;
 }
 
 export interface UniswapV2AbstractProviderStruct<T extends UniswapV2AbstractTrade> {
@@ -40,7 +40,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
     private readonly exact: 'input' | 'output';
 
-    private readonly options: SwapCalculationOptions;
+    private readonly options: Required<SwapCalculationOptions>;
 
     private readonly InstantTradeClass: UniswapV2TradeClass<T>;
 

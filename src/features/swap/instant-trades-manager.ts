@@ -1,5 +1,5 @@
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
-import { notNull } from '@common/utils/object';
+import { combineOptions, notNull } from '@common/utils/object';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
@@ -127,11 +127,10 @@ export class InstantTradesManager {
     private getFullOptions(
         options?: SwapManagerCalculationOptions
     ): RequiredSwapManagerCalculationOptions {
-        return {
+        return combineOptions(options, {
             timeout: InstantTradesManager.defaultCalculationTimeout,
-            disabledProviders: [],
-            ...options
-        };
+            disabledProviders: [] as TradeType[]
+        });
     }
 
     private async calculateTradeFromTokens(
