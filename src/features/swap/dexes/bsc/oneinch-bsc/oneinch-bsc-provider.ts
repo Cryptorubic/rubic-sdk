@@ -1,6 +1,6 @@
-import { OneinchProvider } from '@features/swap/dexes/common/oneinch-abstract/oneinch-provider';
+import { OneinchAbstractProvider } from '@features/swap/dexes/common/oneinch-common/oneinch-abstract-provider';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 
-export class OneinchBscProvider extends OneinchProvider {
+export class OneinchBscProvider extends OneinchAbstractProvider {
     public readonly blockchain = BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN;
 }

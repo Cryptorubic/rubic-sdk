@@ -1,6 +1,6 @@
-import { OneinchSwapRequest } from '@features/swap/dexes/common/oneinch-abstract/models/oneinch-swap-request';
-import { OneinchSwapResponse } from '@features/swap/dexes/common/oneinch-abstract/models/oneinch-swap-response';
-import { getOneinchApiBaseUrl } from '@features/swap/dexes/common/oneinch-abstract/utils';
+import { OneinchSwapRequest } from '@features/swap/dexes/common/oneinch-common/models/oneinch-swap-request';
+import { OneinchSwapResponse } from '@features/swap/dexes/common/oneinch-common/models/oneinch-swap-response';
+import { getOneinchApiBaseUrl } from '@features/swap/dexes/common/oneinch-common/utils';
 import { InstantTrade } from '@features/swap/instant-trade';
 import { Injector } from '@core/sdk/injector';
 import { Pure } from '@common/decorators/pure.decorator';
