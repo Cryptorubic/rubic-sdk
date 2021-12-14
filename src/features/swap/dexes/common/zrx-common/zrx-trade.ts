@@ -21,6 +21,9 @@ export class ZrxTrade extends InstantTrade {
 
     public readonly to: PriceTokenAmount;
 
+    /**
+     * In Zrx you can't change slippage after calculation is done.
+     */
     public readonly slippageTolerance: number;
 
     public gasFeeInfo: GasFeeInfo | null;
