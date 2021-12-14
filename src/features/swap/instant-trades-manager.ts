@@ -32,6 +32,7 @@ import { TypedTradeProviders } from '@features/swap/models/typed-trade-provider'
 import BigNumber from 'bignumber.js';
 import pTimeout from 'p-timeout';
 import { MarkRequired } from 'ts-essentials';
+import { ZrxEthereumProvider } from '@features/swap/dexes/ethereum/zrx-ethereum/zrx-ethereum-provider';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCalculationOptions,
@@ -70,7 +71,7 @@ export class InstantTradesManager {
     } as const;
 
     private zrxTradeProviders = {
-        [TRADE_TYPE.ZRX_ETHEREUM]: null as unknown as InstantTradeProvider
+        [TRADE_TYPE.ZRX_ETHEREUM]: new ZrxEthereumProvider()
     } as const;
 
     private tradeProviders: TypedTradeProviders = {
