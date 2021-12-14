@@ -1,3 +1,4 @@
+import { deadlineMinutesTimestamp } from '@common/utils/options';
 import { InstantTrade } from '@features/swap/instant-trade';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { UniSwapV3Route } from '@features/swap/dexes/ethereum/uni-swap-v3/models/uni-swap-v3-route';
@@ -8,7 +9,7 @@ import {
 } from '@features/swap/dexes/ethereum/uni-swap-v3/constants/swap-router-contract-data';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import { TransactionReceipt } from 'web3-eth';
-import { compareAddresses, deadlineMinutesTimestamp } from '@common/utils/blockchain';
+import { compareAddresses } from '@common/utils/blockchain';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
 import { LiquidityPoolsController } from '@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/liquidity-pools-controller';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';

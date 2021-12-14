@@ -27,8 +27,8 @@ import BigNumber from 'bignumber.js';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
-import { deadlineMinutesTimestamp } from '@common/utils/blockchain';
 import { EncodeFromAddressTransactionOptions } from '@features/swap/models/encode-transaction-options';
+import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount;

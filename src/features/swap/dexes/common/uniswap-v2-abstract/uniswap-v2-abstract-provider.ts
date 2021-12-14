@@ -1,4 +1,4 @@
-import { combineOptions } from '@common/utils/object';
+import { combineOptions } from '@common/utils/options';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { GasPriceInfo } from '@features/swap/models/gas-price-info';

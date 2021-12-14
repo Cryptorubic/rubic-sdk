@@ -1,4 +1,4 @@
-import { combineOptions } from '@common/utils/object';
+import { combineOptions } from '@common/utils/options';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Token } from '@core/blockchain/tokens/token';
 import { Injector } from '@core/sdk/injector';
@@ -68,7 +68,7 @@ export abstract class OneinchProvider extends InstantTradeProvider {
     public async calculate(
         from: PriceTokenAmount,
         toToken: PriceToken,
-        options?: Partial<OneinchSwapCalculationOptions>
+        options?: OneinchSwapCalculationOptions
     ): Promise<OneinchTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 

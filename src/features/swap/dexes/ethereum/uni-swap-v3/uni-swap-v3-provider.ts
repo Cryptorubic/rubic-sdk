@@ -1,7 +1,7 @@
 /**
  * Shows whether Eth is used as from or to token.
  */
-import { combineOptions } from '@common/utils/object';
+import { combineOptions } from '@common/utils/options';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { LiquidityPoolsController } from '@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/liquidity-pools-controller';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
@@ -42,7 +42,7 @@ export class UniSwapV3Provider extends InstantTradeProvider {
     public async calculate(
         from: PriceTokenAmount,
         toToken: PriceToken,
-        options?: Partial<SwapCalculationOptions>
+        options?: SwapCalculationOptions
     ): Promise<UniSwapV3Trade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 

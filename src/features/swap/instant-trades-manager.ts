@@ -1,5 +1,6 @@
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
-import { combineOptions, notNull } from '@common/utils/object';
+import { notNull } from '@common/utils/object';
+import { combineOptions } from '@common/utils/options';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
