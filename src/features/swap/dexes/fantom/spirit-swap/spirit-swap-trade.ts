@@ -3,8 +3,11 @@ import {
     UniswapV2TradeStruct
 } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { SPIRIT_SWAP_CONTRACT_ADDRESS } from '@features/swap/dexes/fantom/spirit-swap/constants';
+import { TRADE_TYPE } from '@features/swap/models/trade-type';
 
 export class SpiritSwapTrade extends UniswapV2AbstractTrade {
+    public readonly tradeType = TRADE_TYPE.SPIRIT_SWAP;
+
     protected readonly contractAddress = SPIRIT_SWAP_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {

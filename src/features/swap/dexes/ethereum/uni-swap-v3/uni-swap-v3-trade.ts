@@ -7,6 +7,7 @@ import {
     swapRouterContractAddress
 } from '@features/swap/dexes/ethereum/uni-swap-v3/constants/swap-router-contract-data';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
+import { TRADE_TYPE } from '@features/swap/models/trade-type';
 import { TransactionReceipt } from 'web3-eth';
 import { compareAddresses, deadlineMinutesTimestamp } from '@common/utils/blockchain';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
@@ -120,17 +121,19 @@ export class UniSwapV3Trade extends InstantTrade {
         }).getEstimateGasParams();
     }
 
-    protected readonly contractAddress = swapRouterContractAddress;
-
     public readonly from: PriceTokenAmount;
 
     public readonly to: PriceTokenAmount;
 
     public readonly gasFeeInfo: GasFeeInfo | null;
 
+    public readonly tradeType = TRADE_TYPE.UNISWAP_V3;
+
     public slippageTolerance: number;
 
     public deadlineMinutes: number;
+
+    protected readonly contractAddress = swapRouterContractAddress;
 
     private readonly route: UniSwapV3Route;
 
