@@ -7,16 +7,20 @@ import { Token } from '@core/blockchain/tokens/token';
 import { JoeProvider } from '@features/swap/dexes/avalanche/joe/joe-provider';
 import { PangolinProvider } from '@features/swap/dexes/avalanche/pangolin/pangolin-provider';
 import { SushiSwapAvalancheProvider } from '@features/swap/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
+import { OneinchBscProvider } from '@features/swap/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
 import { PancakeSwapProvider } from '@features/swap/dexes/bsc/pancake-swap/pancake-swap-provider';
 import { SushiSwapBscProvider } from '@features/swap/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
+import { OneinchEthereumProvider } from '@features/swap/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
 import { SushiSwapEthereumProvider } from '@features/swap/dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider';
 import { UniSwapV2Provider } from '@features/swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
+import { UniSwapV3Provider } from '@features/swap/dexes/ethereum/uni-swap-v3/uni-swap-v3-provider';
 import { SpiritSwapProvider } from '@features/swap/dexes/fantom/spirit-swap/spirit-swap-provider';
 import { SpookySwapProvider } from '@features/swap/dexes/fantom/spooky-swap/spooky-swap-provider';
 import { SushiSwapFantomProvider } from '@features/swap/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-provider';
 import { SushiSwapHarmonyProvider } from '@features/swap/dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-provider';
 import { SolarbeamProvider } from '@features/swap/dexes/moonriver/solarbeam/solarbeam-provider';
 import { SushiSwapMoonriverProvider } from '@features/swap/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
+import { OneinchPolygonProvider } from '@features/swap/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
 import { QuickSwapProvider } from '@features/swap/dexes/polygon/quick-swap/quick-swap-provider';
 import { SushiSwapPolygonProvider } from '@features/swap/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
 import { InstantTradeProvider } from '@features/swap/instant-trade-provider';
@@ -36,7 +40,7 @@ type RequiredSwapManagerCalculationOptions = MarkRequired<
 export class InstantTradesManager {
     public static readonly defaultCalculationTimeout = 3000;
 
-    private uniswapV2TradeProviders = {
+    private readonly uniswapV2TradeProviders = {
         [TRADE_TYPE.UNISWAP_V2]: new UniSwapV2Provider(),
         [TRADE_TYPE.SUSHI_SWAP_ETHEREUM]: new SushiSwapEthereumProvider(),
         [TRADE_TYPE.PANCAKE_SWAP]: new PancakeSwapProvider(),
@@ -54,14 +58,14 @@ export class InstantTradesManager {
         [TRADE_TYPE.SUSHI_SWAP_MOONRIVER]: new SushiSwapMoonriverProvider()
     } as const;
 
-    private uniswapV3TradeProviders = {
-        [TRADE_TYPE.UNISWAP_V3]: null as unknown as InstantTradeProvider
+    private readonly uniswapV3TradeProviders = {
+        [TRADE_TYPE.UNISWAP_V3]: new UniSwapV3Provider()
     } as const;
 
     private oneInchTradeProviders = {
-        [TRADE_TYPE.ONE_INCH_ETHEREUM]: null as unknown as InstantTradeProvider,
-        [TRADE_TYPE.ONE_INCH_BSC]: null as unknown as InstantTradeProvider,
-        [TRADE_TYPE.ONE_INCH_POLYGON]: null as unknown as InstantTradeProvider
+        [TRADE_TYPE.ONE_INCH_ETHEREUM]: new OneinchEthereumProvider(),
+        [TRADE_TYPE.ONE_INCH_BSC]: new OneinchBscProvider(),
+        [TRADE_TYPE.ONE_INCH_POLYGON]: new OneinchPolygonProvider()
     } as const;
 
     private zrxTradeProviders = {
