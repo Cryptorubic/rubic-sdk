@@ -73,9 +73,9 @@ export const blockchains: ReadonlyArray<Blockchain> = [
     // Testnets
     {
         id: 42,
-        name: BLOCKCHAIN_NAME.ETHEREUM_TESTNET,
+        name: BLOCKCHAIN_NAME.KOVAN,
         nativeCoin: new Token({
-            blockchain: BLOCKCHAIN_NAME.ETHEREUM_TESTNET,
+            blockchain: BLOCKCHAIN_NAME.KOVAN,
             address: NATIVE_TOKEN_ADDRESS,
             name: 'Ethereum',
             symbol: 'ETH',

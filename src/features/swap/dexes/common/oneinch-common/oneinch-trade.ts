@@ -1,4 +1,3 @@
-import { OneinchSwapRequest } from '@features/swap/dexes/common/oneinch-common/models/oneinch-swap-request';
 import { OneinchSwapResponse } from '@features/swap/dexes/common/oneinch-common/models/oneinch-swap-response';
 import { getOneinchApiBaseUrl } from '@features/swap/dexes/common/oneinch-common/utils';
 import { InstantTrade } from '@features/swap/instant-trade';
@@ -16,6 +15,7 @@ import { Token } from '@core/blockchain/tokens/token';
 import { TransactionConfig } from 'web3-core';
 import { LowSlippageError } from '@common/errors/swap/low-slippage.error';
 import { EncodeFromAddressTransactionOptions } from '@features/swap/models/encode-transaction-options';
+import { OptionsGasParams, TransactionGasParams } from '@features/swap/models/gas-params';
 
 type OneinchTradeStruct = {
     contractAddress: string;
@@ -95,17 +95,18 @@ export class OneinchTrade extends InstantTrade {
         await this.checkWalletState();
 
         try {
-            const trade = await this.getSwapTrade();
+            const apiTradeData = await this.getTradeData();
+            const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, apiTradeData);
+
             const transactionOptions = {
                 onTransactionHash: options.onConfirm,
-                data: trade.tx.data,
-                gas: trade.tx.gas.toString(),
-                inWei: this.from.isNative || undefined,
-                ...(this.gasFeeInfo?.gasPrice && { gasPrice: this.gasFeeInfo.gasPrice })
+                data: apiTradeData.tx.data,
+                gas,
+                gasPrice
             };
 
             return this.web3Private.trySendTransaction(
-                trade.tx.to,
+                apiTradeData.tx.to,
                 this.from.isNative ? this.from.stringWeiAmount : '0',
                 transactionOptions
             );
@@ -117,12 +118,11 @@ export class OneinchTrade extends InstantTrade {
 
     public async encode(options: EncodeFromAddressTransactionOptions): Promise<TransactionConfig> {
         try {
-            const transactionConfig = (await this.getSwapTrade()).tx;
-            const gas = options.gasLimit || transactionConfig.gas;
-            const gasPrice = options.gasPrice || transactionConfig.gasPrice;
+            const apiTradeData = await this.getTradeData(options.fromAddress);
+            const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, apiTradeData);
 
             return {
-                ...transactionConfig,
+                ...apiTradeData.tx,
                 gas,
                 gasPrice
             };
@@ -132,24 +132,29 @@ export class OneinchTrade extends InstantTrade {
         }
     }
 
-    private getSwapTrade(fromAddress?: string): Promise<OneinchSwapResponse> {
-        return this.httpClient.get<OneinchSwapResponse>(
-            `${this.apiBaseUrl}/swap`,
-            this.getSwapTradeParams(fromAddress)
-        );
-    }
-
-    private getSwapTradeParams(fromAddress?: string): OneinchSwapRequest {
-        return {
+    private getTradeData(fromAddress?: string): Promise<OneinchSwapResponse> {
+        const swapRequest = {
             params: {
                 fromTokenAddress: this.from.address,
                 toTokenAddress: this.to.address,
                 amount: this.from.stringWeiAmount,
                 slippage: (this.slippageTolerance * 100).toString(),
                 fromAddress: fromAddress || this.walletAddress,
-                mainRouteParts: this.disableMultihops ? '1' : undefined
+                ...(this.disableMultihops && { mainRouteParts: '1' })
             }
         };
+
+        return this.httpClient.get<OneinchSwapResponse>(`${this.apiBaseUrl}/swap`, swapRequest);
+    }
+
+    private getGasParamsFromApiTradeData(
+        options: OptionsGasParams,
+        apiTradeData: OneinchSwapResponse
+    ): TransactionGasParams {
+        return this.getGasParams({
+            gasLimit: options.gasLimit || apiTradeData.tx.gas.toString(),
+            gasPrice: options.gasPrice || apiTradeData.tx.gasPrice
+        });
     }
 
     private specifyError(err: {
