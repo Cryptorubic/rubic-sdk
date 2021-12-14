@@ -42,7 +42,7 @@ interface CalculatedContractTrade {
     trade: ItCalculatedTrade | DirectCalculatedTrade;
 }
 
-export class CrossChain {
+export class CrossChainManager {
     public static isSupportedBlockchain(
         blockchain: BLOCKCHAIN_NAME
     ): blockchain is CrossChainSupportedBlockchain {
@@ -68,10 +68,10 @@ export class CrossChain {
     ): Promise<CrossChainTrade> {
         const fromBlockchain = fromToken.blockchain;
         const toBlockchain = toToken.blockchain;
-        if (!CrossChain.isSupportedBlockchain(fromBlockchain)) {
+        if (!CrossChainManager.isSupportedBlockchain(fromBlockchain)) {
             throw new NotSupportedBlockchain();
         }
-        if (!CrossChain.isSupportedBlockchain(toBlockchain)) {
+        if (!CrossChainManager.isSupportedBlockchain(toBlockchain)) {
             throw new NotSupportedBlockchain();
         }
 

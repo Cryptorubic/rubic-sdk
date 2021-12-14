@@ -1,3 +1,4 @@
+import { combineOptions } from '@common/utils/options';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Token } from '@core/blockchain/tokens/token';
 import { Injector } from '@core/sdk/injector';
@@ -23,7 +24,7 @@ type OneinchSwapCalculationOptions = Omit<SwapCalculationOptions, 'deadlineMinut
 export abstract class OneinchProvider extends InstantTradeProvider {
     private readonly httpClient = Injector.httpClient;
 
-    private readonly defaultOptions: OneinchSwapCalculationOptions = {
+    private readonly defaultOptions: Required<OneinchSwapCalculationOptions> = {
         gasCalculation: 'calculate',
         disableMultihops: false,
         slippageTolerance: 0.02
@@ -67,9 +68,9 @@ export abstract class OneinchProvider extends InstantTradeProvider {
     public async calculate(
         from: PriceTokenAmount,
         toToken: PriceToken,
-        options?: Partial<OneinchSwapCalculationOptions>
+        options?: OneinchSwapCalculationOptions
     ): Promise<OneinchTrade> {
-        const fullOptions = { ...this.defaultOptions, ...options };
+        const fullOptions = combineOptions(options, this.defaultOptions);
 
         const fromClone = createTokenNativeAddressProxy(from, oneinchApiParams.nativeAddress);
         const toTokenClone = createTokenNativeAddressProxy(toToken, oneinchApiParams.nativeAddress);
@@ -115,7 +116,7 @@ export abstract class OneinchProvider extends InstantTradeProvider {
     private async getTradeInfo(
         from: PriceTokenAmount,
         toToken: Token,
-        options: OneinchSwapCalculationOptions
+        options: Required<OneinchSwapCalculationOptions>
     ): Promise<{ toTokenAmount: BigNumber; estimatedGas: BigNumber; path: Token[] }> {
         const quoteTradeParams: OneinchQuoteRequest = {
             params: {
