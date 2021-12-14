@@ -5,13 +5,13 @@ import { Web3PrivateFactory } from '@core/blockchain/web3-private/web3-private-f
 import { Web3PublicService } from '@core/blockchain/web3-public/web3-public-service';
 import { Injector } from '@core/sdk/injector';
 import { Configuration } from '@core/sdk/models/configuration';
-import { CrossChain } from '@features/crosschain/cross-chain';
-import { InstantTradesManager } from '@features/swap/instant-trades';
+import { CrossChainManager } from '@features/cross-chain/cross-chain-manager';
+import { InstantTradesManager } from '@features/swap/instant-trades-manager';
 
 export class SDK {
     public readonly instantTrades: InstantTradesManager;
 
-    public readonly crossChain: CrossChain;
+    public readonly crossChain: CrossChainManager;
 
     public static async createSDK(configuration: Configuration): Promise<SDK> {
         const [web3PublicService, web3Private, httpClient] = await Promise.all([
@@ -44,6 +44,6 @@ export class SDK {
 
     private constructor() {
         this.instantTrades = new InstantTradesManager();
-        this.crossChain = new CrossChain();
+        this.crossChain = new CrossChainManager();
     }
 }
