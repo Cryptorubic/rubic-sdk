@@ -1,6 +1,7 @@
 /**
  * Shows whether Eth is used as from or to token.
  */
+import { combineOptions } from '@common/utils/options';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { LiquidityPoolsController } from '@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/liquidity-pools-controller';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
@@ -23,7 +24,7 @@ const RUBIC_OPTIMIZATION_DISABLED = true;
 export class UniSwapV3Provider extends InstantTradeProvider {
     public readonly blockchain = BLOCKCHAIN_NAME.ETHEREUM;
 
-    protected readonly defaultOptions: SwapCalculationOptions = {
+    protected readonly defaultOptions: Required<SwapCalculationOptions> = {
         gasCalculation: 'calculate',
         disableMultihops: false,
         deadlineMinutes: 20,
@@ -41,9 +42,9 @@ export class UniSwapV3Provider extends InstantTradeProvider {
     public async calculate(
         from: PriceTokenAmount,
         toToken: PriceToken,
-        options?: Partial<SwapCalculationOptions>
+        options?: SwapCalculationOptions
     ): Promise<UniSwapV3Trade> {
-        const fullOptions: SwapCalculationOptions = { ...this.defaultOptions, ...options };
+        const fullOptions = combineOptions(options, this.defaultOptions);
 
         const fromClone = createTokenNativeAddressProxy(from, this.wethAddress);
         const toClone = createTokenNativeAddressProxy(toToken, this.wethAddress);
@@ -91,7 +92,7 @@ export class UniSwapV3Provider extends InstantTradeProvider {
     private async getRoute(
         from: PriceTokenAmount,
         toToken: PriceToken,
-        options: SwapCalculationOptions,
+        options: Required<SwapCalculationOptions>,
         gasPriceInUsd?: BigNumber
     ): Promise<UniSwapV3CalculatedInfo> {
         const routes = (
