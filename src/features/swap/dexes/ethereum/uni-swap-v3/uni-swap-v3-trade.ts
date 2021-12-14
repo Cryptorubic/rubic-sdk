@@ -7,7 +7,6 @@ import {
     swapRouterContractAddress
 } from '@features/swap/dexes/ethereum/uni-swap-v3/constants/swap-router-contract-data';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
-import { TRADE_TYPE } from '@features/swap/models/trade-type';
 import { TransactionReceipt } from 'web3-eth';
 import { compareAddresses, deadlineMinutesTimestamp } from '@common/utils/blockchain';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
@@ -41,7 +40,7 @@ export class UniSwapV3Trade extends InstantTrade {
     public static async estimateGasLimitForRoute(
         from: PriceTokenAmount,
         toToken: PriceToken,
-        options: SwapOptions,
+        options: Required<SwapOptions>,
         route: UniSwapV3Route
     ): Promise<BigNumber> {
         const estimateGasParams = UniSwapV3Trade.getEstimateGasParams(
@@ -74,7 +73,7 @@ export class UniSwapV3Trade extends InstantTrade {
     public static async estimateGasLimitForRoutes(
         from: PriceTokenAmount,
         toToken: PriceToken,
-        options: SwapOptions,
+        options: Required<SwapOptions>,
         routes: UniSwapV3Route[]
     ): Promise<BigNumber[]> {
         const routesEstimateGasParams = routes.map(route =>
@@ -106,7 +105,7 @@ export class UniSwapV3Trade extends InstantTrade {
     private static getEstimateGasParams(
         from: PriceTokenAmount,
         toToken: PriceToken,
-        options: SwapOptions,
+        options: Required<SwapOptions>,
         route: UniSwapV3Route
     ) {
         return new UniSwapV3Trade({
@@ -126,8 +125,6 @@ export class UniSwapV3Trade extends InstantTrade {
     public readonly to: PriceTokenAmount;
 
     public readonly gasFeeInfo: GasFeeInfo | null;
-
-    public readonly tradeType = TRADE_TYPE.UNISWAP_V3;
 
     public slippageTolerance: number;
 

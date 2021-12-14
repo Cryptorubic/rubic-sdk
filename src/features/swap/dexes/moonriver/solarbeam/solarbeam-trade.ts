@@ -9,7 +9,6 @@ import {
     SOLARBEAM_CONTRACT_ABI,
     SOLARBEAM_CONTRACT_ADDRESS
 } from '@features/swap/dexes/moonriver/solarbeam/constants';
-import { TRADE_TYPE } from '@features/swap/models/trade-type';
 
 export class SolarbeamTrade extends UniswapV2AbstractTrade {
     public static readonly contractAbi = SOLARBEAM_CONTRACT_ABI;
@@ -29,8 +28,6 @@ export class SolarbeamTrade extends UniswapV2AbstractTrade {
     }
 
     private static readonly feeParameter = '25';
-
-    public readonly tradeType = TRADE_TYPE.SOLAR_BEAM;
 
     protected readonly contractAddress = SOLARBEAM_CONTRACT_ADDRESS;
 

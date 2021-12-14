@@ -44,7 +44,7 @@ export class UniSwapV3Provider extends InstantTradeProvider {
         toToken: PriceToken,
         options?: Partial<SwapCalculationOptions>
     ): Promise<UniSwapV3Trade> {
-        const fullOptions: SwapCalculationOptions = combineOptions(options, this.defaultOptions);
+        const fullOptions = combineOptions(options, this.defaultOptions);
 
         const fromClone = createTokenNativeAddressProxy(from, this.wethAddress);
         const toClone = createTokenNativeAddressProxy(toToken, this.wethAddress);
@@ -92,7 +92,7 @@ export class UniSwapV3Provider extends InstantTradeProvider {
     private async getRoute(
         from: PriceTokenAmount,
         toToken: PriceToken,
-        options: SwapCalculationOptions,
+        options: Required<SwapCalculationOptions>,
         gasPriceInUsd?: BigNumber
     ): Promise<UniSwapV3CalculatedInfo> {
         const routes = (

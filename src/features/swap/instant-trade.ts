@@ -47,8 +47,6 @@ export abstract class InstantTrade {
 
     public abstract readonly slippageTolerance: number;
 
-    public abstract readonly tradeType: TradeType;
-
     protected abstract contractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
     protected readonly web3Private = Injector.web3Private;
@@ -113,7 +111,7 @@ export abstract class InstantTrade {
         await this.web3Public.checkBalance(this.from, this.from.tokenAmount, this.walletAddress);
     }
 
-    private checkWalletConnected(): never | void {
+    protected checkWalletConnected(): never | void {
         if (!this.walletAddress) {
             throw new WalletNotConnectedError();
         }
