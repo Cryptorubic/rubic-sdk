@@ -16,10 +16,12 @@ import { UniswapV2ProviderConfiguration } from '@features/swap/dexes/common/unis
 import { UniswapV2TradeClass } from '@features/swap/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-class';
 import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
+import { Pure } from '@common/decorators/pure.decorator';
 
 export interface PathFactoryStruct {
-    readonly from: PriceTokenAmount;
+    readonly from: PriceToken;
     readonly to: PriceToken;
+    readonly amount: BigNumber;
     readonly exact: 'input' | 'output';
     readonly options: Required<SwapCalculationOptions>;
 }
@@ -34,9 +36,11 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
     private readonly web3Private = Injector.web3Private;
 
-    private readonly from: PriceTokenAmount;
+    private readonly from: PriceToken;
 
     private readonly to: PriceToken;
+
+    private readonly amount: BigNumber;
 
     private readonly exact: 'input' | 'output';
 
@@ -52,6 +56,12 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         return this.web3Private.address;
     }
 
+    @Pure
+    private get stringWeiAmount(): string {
+        const token = this.exact === 'input' ? this.from : this.to;
+        return Web3Pure.toWei(this.amount, token.decimals);
+    }
+
     constructor(
         uniswapProviderStruct: UniswapV2AbstractProviderStruct<T>,
         pathFactoryStruct: PathFactoryStruct
@@ -62,6 +72,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
         this.from = pathFactoryStruct.from;
         this.to = pathFactoryStruct.to;
+        this.amount = pathFactoryStruct.amount;
         this.exact = pathFactoryStruct.exact;
         this.options = pathFactoryStruct.options;
         this.InstantTradeClass = uniswapProviderStruct.InstantTradeClass;
@@ -82,7 +93,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             throw new InsufficientLiquidityError();
         }
 
-        if (this.options.gasCalculation === 'disabled') {
+        if (this.options.gasCalculation === 'disabled' || this.exact === 'output') {
             return {
                 route: routes[0]
             };
@@ -90,11 +101,13 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
         const gasRequests = routes.map(route => {
             const trade: UniswapV2AbstractTrade = new this.InstantTradeClass({
-                from: this.from,
+                from: new PriceTokenAmount({
+                    ...this.from.asStruct,
+                    tokenAmount: this.amount
+                }),
                 to: new PriceTokenAmount({
-                    ...this.to,
-                    weiAmount: route.outputAbsoluteAmount,
-                    price: new BigNumber(0)
+                    ...this.to.asStruct,
+                    weiAmount: route.outputAbsoluteAmount
                 }),
                 path: route.path,
                 exact: this.exact,
@@ -175,7 +188,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
                 const finalPath = path.concat(this.to);
                 routesPaths.push(finalPath);
                 routesMethodArguments.push([
-                    this.from.stringWeiAmount,
+                    this.stringWeiAmount,
                     Token.tokensToAddresses(finalPath)
                 ]);
                 return;

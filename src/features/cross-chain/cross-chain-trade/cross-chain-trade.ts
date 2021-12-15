@@ -5,7 +5,7 @@ import { Injector } from '@core/sdk/injector';
 import { Web3Private } from '@core/blockchain/web3-private/web3-private';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { CrossChainContractMethodData } from '@features/cross-chain/cross-chain-trade/models/CrossChainContractMethodData';
-import { GasData } from '@common/models/GasData';
+import { GasData } from '@features/cross-chain/models/gas-data';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { crossChainContractAbi } from '@features/cross-chain/constants/crossChainContractAbi';
 import { MinMaxAmountsErrors } from '@features/cross-chain/cross-chain-trade/models/MinMaxAmountsErrors';
@@ -55,7 +55,7 @@ export class CrossChainTrade {
                     walletAddress,
                     value
                 ),
-                Injector.gasPriceApi.getGasPrice(fromTrade.blockchain)
+                new BigNumber(await Injector.gasPriceApi.getGasPrice(fromTrade.blockchain))
             ]);
 
             if (!gasLimit?.isFinite()) {

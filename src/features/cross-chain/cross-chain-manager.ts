@@ -6,7 +6,7 @@ import {
 import { crossChainContracts } from '@features/cross-chain/constants/crossChainContracts';
 import { Token } from '@core/blockchain/tokens/token';
 import BigNumber from 'bignumber.js';
-import { CrossChainOptions } from '@features/cross-chain/models/CrossChainOptions';
+import { CrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { compareAddresses } from '@common/utils/blockchain';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
@@ -18,11 +18,14 @@ import { CrossChainTrade } from '@features/cross-chain/cross-chain-trade/cross-c
 import { Injector } from '@core/sdk/injector';
 import { MinMaxAmountsErrors } from '@features/cross-chain/cross-chain-trade/models/MinMaxAmountsErrors';
 import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity-error';
-import { MinMaxAmounts } from '@features/cross-chain/models/MinMaxAmounts';
+import { MinMaxAmounts } from '@features/cross-chain/models/min-max-amounts';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
-import { GasData } from '@common/models/GasData';
+import { GasData } from '@features/cross-chain/models/gas-data';
 import { NotSupportedBlockchain } from '@common/errors/swap/NotSupportedBlockchain';
 import { notNull } from '@common/utils/object';
+import { PriceToken } from '@core/blockchain/tokens/price-token';
+import { RubicSdkError } from '@common/errors/rubic-sdk-error';
+import { combineOptions } from '@common/utils/options';
 import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 
 interface CalculatedTrade {
@@ -60,13 +63,57 @@ export class CrossChainManager {
         this.getWeb3Public = Injector.web3PublicService.getWeb3Public;
     }
 
-    public async calculate(
-        fromToken: Token,
-        toToken: Token,
-        fromAmount: BigNumber,
+    public async calculateTrade(
+        fromToken:
+            | Token
+            | {
+                  address: string;
+                  blockchain: BLOCKCHAIN_NAME;
+              },
+        fromAmount: string,
+        toToken: Token | string,
+        options?: CrossChainOptions
+    ) {
+        const fromPriceTokenPromise =
+            fromToken instanceof Token
+                ? PriceToken.createFromToken(fromToken)
+                : PriceToken.createToken(fromToken);
+
+        const toPriceTokenPromise =
+            toToken instanceof Token
+                ? PriceToken.createFromToken(toToken)
+                : PriceToken.createToken({ address: toToken, blockchain: fromToken.blockchain });
+
+        const [fromPriceToken, toPriceToken] = await Promise.all([
+            fromPriceTokenPromise,
+            toPriceTokenPromise
+        ]);
+
+        if (fromPriceToken.blockchain === toPriceToken.blockchain) {
+            throw new RubicSdkError('Blockchains of from and to tokens must be different.');
+        }
+
+        const from = new PriceTokenAmount({
+            ...fromPriceToken.asStruct,
+            tokenAmount: new BigNumber(fromAmount)
+        });
+
+        return this.calculateTradeFromTokens(from, toPriceToken, this.getFullOptions(options));
+    }
+
+    private getFullOptions(options?: CrossChainOptions): Required<CrossChainOptions> {
+        return combineOptions(options, {
+            fromSlippageTolerance: 0.02,
+            toSlippageTolerance: 0.02
+        });
+    }
+
+    public async calculateTradeFromTokens(
+        from: PriceTokenAmount,
+        toToken: PriceToken,
         options: CrossChainOptions
     ): Promise<CrossChainTrade> {
-        const fromBlockchain = fromToken.blockchain;
+        const fromBlockchain = from.blockchain;
         const toBlockchain = toToken.blockchain;
         if (!CrossChainManager.isSupportedBlockchain(fromBlockchain)) {
             throw new NotSupportedBlockchain();
@@ -76,10 +123,9 @@ export class CrossChainManager {
         }
 
         const { fromSlippageTolerance } = options;
-        const fromTrade = await this.calculateBestFormTrade(
+        const fromTrade = await this.calculateBestFromTrade(
             fromBlockchain,
-            fromToken,
-            fromAmount,
+            from,
             fromSlippageTolerance
         );
 
@@ -110,18 +156,23 @@ export class CrossChainManager {
         });
     }
 
-    private async calculateBestFormTrade(
+    private async calculateBestFromTrade(
         blockchain: CrossChainSupportedBlockchain,
-        fromToken: Token,
-        fromAmount: BigNumber,
+        from: PriceTokenAmount,
         slippageTolerance: number
     ): Promise<ContractTrade> {
         const promises: Promise<CalculatedContractTrade>[] = this.contracts[blockchain].map(
             async contract => {
                 const toToken = await contract.getTransitToken();
+                const toPriceToken = new PriceToken({ ...toToken, price: new BigNumber(NaN) });
                 return {
                     contract,
-                    trade: await this.getCalculatedTrade(contract, fromToken, toToken, fromAmount)
+                    trade: await this.getCalculatedTrade(
+                        contract,
+                        from,
+                        toPriceToken,
+                        slippageTolerance
+                    )
                 };
             }
         );
@@ -153,20 +204,25 @@ export class CrossChainManager {
     private async calculateBestToTrade(
         blockchain: CrossChainSupportedBlockchain,
         fromAmount: BigNumber,
-        toToken: Token,
-        slippage: number
+        toToken: PriceToken,
+        slippageTolerance: number
     ): Promise<ContractTrade> {
         const promises: Promise<CalculatedContractTrade>[] = this.contracts[blockchain].map(
             async contract => {
                 const fromToken = await contract.getTransitToken();
+                const from = new PriceTokenAmount({
+                    ...fromToken,
+                    tokenAmount: fromAmount,
+                    price: new BigNumber(NaN)
+                });
                 return {
                     contract,
-                    trade: await this.getCalculatedTrade(contract, fromToken, toToken, fromAmount)
+                    trade: await this.getCalculatedTrade(contract, from, toToken, slippageTolerance)
                 };
             }
         );
 
-        return this.getBestContractTrade(blockchain, slippage, promises);
+        return this.getBestContractTrade(blockchain, slippageTolerance, promises);
     }
 
     private async getBestContractTrade(
@@ -210,34 +266,24 @@ export class CrossChainManager {
 
     private async getCalculatedTrade(
         contract: CrossChainContract,
-        fromToken: Token,
-        toToken: Token,
-        fromAmount: BigNumber
+        from: PriceTokenAmount,
+        toToken: PriceToken,
+        slippageTolerance: number
     ): Promise<ItCalculatedTrade | DirectCalculatedTrade> {
-        if (!compareAddresses(fromToken.address, toToken.address)) {
-            const instantTrade = await contract.uniswapV2Provider.calculateTrade(
-                fromToken,
-                fromAmount,
-                toToken,
-                'output',
-                {
-                    shouldCalculateGas: false,
-                    rubicOptimisation: true
-                }
-            );
+        if (!compareAddresses(from.address, toToken.address)) {
+            const instantTrade = await contract.uniswapV2Provider.calculate(from, toToken, {
+                gasCalculation: 'disabled',
+                slippageTolerance
+            });
             return {
                 toAmount: instantTrade.to.tokenAmount,
                 instantTrade
             };
         }
 
-        const token = await PriceTokenAmount.createFromToken({
-            ...fromToken,
-            tokenAmount: fromAmount
-        });
         return {
-            toAmount: fromAmount,
-            token
+            toAmount: from.tokenAmount,
+            token: from
         };
     }
 
@@ -305,18 +351,22 @@ export class CrossChainManager {
         transitTokenAmount: BigNumber
     ): Promise<BigNumber> {
         const transitToken = await fromTrade.contract.getTransitToken();
-        if (compareAddresses(fromTrade.fromToken.address, transitToken.address)) {
+        if (
+            compareAddresses(fromTrade.fromToken.address, transitToken.address) ||
+            transitTokenAmount.eq(0)
+        ) {
             return transitTokenAmount;
         }
 
-        const amountAbsolute = transitTokenAmount.gt(0)
-            ? await fromTrade.contract.uniswapV2Provider.getFromAmount(
-                  fromTrade.fromToken,
-                  transitToken,
-                  transitTokenAmount
-              )
-            : 0;
-        return Web3Pure.fromWei(amountAbsolute, fromTrade.fromToken.decimals);
+        const instantTrade = await fromTrade.contract.uniswapV2Provider.calculateExactOutput(
+            fromTrade.fromToken,
+            new PriceTokenAmount({
+                ...transitToken,
+                tokenAmount: transitTokenAmount,
+                price: new BigNumber(NaN)
+            })
+        );
+        return instantTrade.from.tokenAmount;
     }
 
     private async getCryptoFeeTokenAndGasData(
