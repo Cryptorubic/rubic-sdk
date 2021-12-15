@@ -27,6 +27,7 @@ import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { combineOptions } from '@common/utils/options';
 import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { getPriceTokensFromInputTokens } from '@common/utils/tokens';
 
 interface CalculatedTrade {
     toAmount: BigNumber;
@@ -74,31 +75,13 @@ export class CrossChainManager {
         toToken: Token | string,
         options?: CrossChainOptions
     ) {
-        const fromPriceTokenPromise =
-            fromToken instanceof Token
-                ? PriceToken.createFromToken(fromToken)
-                : PriceToken.createToken(fromToken);
-
-        const toPriceTokenPromise =
-            toToken instanceof Token
-                ? PriceToken.createFromToken(toToken)
-                : PriceToken.createToken({ address: toToken, blockchain: fromToken.blockchain });
-
-        const [fromPriceToken, toPriceToken] = await Promise.all([
-            fromPriceTokenPromise,
-            toPriceTokenPromise
-        ]);
-
-        if (fromPriceToken.blockchain === toPriceToken.blockchain) {
+        if (toToken instanceof Token && fromToken.blockchain === toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be different.');
         }
 
-        const from = new PriceTokenAmount({
-            ...fromPriceToken.asStruct,
-            tokenAmount: new BigNumber(fromAmount)
-        });
+        const { from, to } = await getPriceTokensFromInputTokens(fromToken, fromAmount, toToken);
 
-        return this.calculateTradeFromTokens(from, toPriceToken, this.getFullOptions(options));
+        return this.calculateTradeFromTokens(from, to, this.getFullOptions(options));
     }
 
     private getFullOptions(options?: CrossChainOptions): Required<CrossChainOptions> {
