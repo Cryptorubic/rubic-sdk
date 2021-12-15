@@ -2,18 +2,18 @@ import { combineOptions } from '@common/utils/options';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Token } from '@core/blockchain/tokens/token';
 import { Injector } from '@core/sdk/injector';
-import { oneinchApiParams } from '@features/swap/dexes/common/oneinch-abstract/constants';
+import { oneinchApiParams } from '@features/swap/dexes/common/oneinch-common/constants';
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
-import { OneinchQuoteRequest } from '@features/swap/dexes/common/oneinch-abstract/models/oneinch-quote-request';
-import { OneinchQuoteResponse } from '@features/swap/dexes/common/oneinch-abstract/models/oneinch-quote-response';
-import { OneinchSwapRequest } from '@features/swap/dexes/common/oneinch-abstract/models/oneinch-swap-request';
-import { OneinchSwapResponse } from '@features/swap/dexes/common/oneinch-abstract/models/oneinch-swap-response';
-import { OneinchTokensResponse } from '@features/swap/dexes/common/oneinch-abstract/models/oneinch-tokens-response';
-import { getOneinchApiBaseUrl } from '@features/swap/dexes/common/oneinch-abstract/utils';
+import { OneinchQuoteRequest } from '@features/swap/dexes/common/oneinch-common/models/oneinch-quote-request';
+import { OneinchQuoteResponse } from '@features/swap/dexes/common/oneinch-common/models/oneinch-quote-response';
+import { OneinchSwapRequest } from '@features/swap/dexes/common/oneinch-common/models/oneinch-swap-request';
+import { OneinchSwapResponse } from '@features/swap/dexes/common/oneinch-common/models/oneinch-swap-response';
+import { OneinchTokensResponse } from '@features/swap/dexes/common/oneinch-common/models/oneinch-tokens-response';
+import { getOneinchApiBaseUrl } from '@features/swap/dexes/common/oneinch-common/utils';
 import BigNumber from 'bignumber.js';
 
 import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { OneinchTrade } from '@features/swap/dexes/common/oneinch-abstract/oneinch-trade';
+import { OneinchTrade } from '@features/swap/dexes/common/oneinch-common/oneinch-trade';
 import { InstantTradeProvider } from '@features/swap/instant-trade-provider';
 import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
 import { Pure } from '@common/decorators/pure.decorator';
@@ -21,7 +21,7 @@ import { createTokenNativeAddressProxy } from '@features/swap/dexes/common/utils
 
 type OneinchSwapCalculationOptions = Omit<SwapCalculationOptions, 'deadlineMinutes'>;
 
-export abstract class OneinchProvider extends InstantTradeProvider {
+export abstract class OneinchAbstractProvider extends InstantTradeProvider {
     private readonly httpClient = Injector.httpClient;
 
     private readonly defaultOptions: Required<OneinchSwapCalculationOptions> = {

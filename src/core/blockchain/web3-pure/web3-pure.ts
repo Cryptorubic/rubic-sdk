@@ -1,10 +1,10 @@
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
-import { EncodeTransactionOptions } from '@features/swap/models/encode-transaction-options';
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { TransactionConfig } from 'web3-core';
 import { toChecksumAddress, isAddress, toWei, fromWei, AbiItem } from 'web3-utils';
+import { TransactionGasParams } from '@features/swap/models/gas-params';
 
 export class Web3Pure {
     private static web3 = new Web3();
@@ -111,16 +111,16 @@ export class Web3Pure {
         method: string,
         parameters: unknown[] = [],
         value?: string,
-        options: EncodeTransactionOptions = {}
+        options: TransactionGasParams = {}
     ): TransactionConfig {
         const contract = new this.web3.eth.Contract(contractAbi);
         const data = contract.methods[method](...parameters).encodeABI();
         return {
             to: contractAddress,
             data,
-            ...((value as unknown as object) && { value }),
-            ...(options.gasLimit && { gas: options.gasLimit! }),
-            ...(options.gasPrice && { gasPrice: options.gasLimit! })
+            value,
+            gas: options.gas,
+            gasPrice: options.gasPrice
         };
     }
 

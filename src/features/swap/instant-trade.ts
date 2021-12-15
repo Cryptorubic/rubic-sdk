@@ -12,6 +12,7 @@ import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { OptionsGasParams, TransactionGasParams } from '@features/swap/models/gas-params';
 import { TradeType } from '@features/swap/models/trade-type';
 
 export abstract class InstantTrade {
@@ -121,5 +122,35 @@ export abstract class InstantTrade {
         if (this.web3Private.blockchainName !== this.from.blockchain) {
             throw new WrongNetworkError();
         }
+    }
+
+    protected getGasLimit(options?: { gasLimit?: string | null }): string | undefined {
+        if (options?.gasLimit) {
+            return options.gasLimit;
+        }
+        if (this.gasFeeInfo?.gasLimit?.isFinite()) {
+            return this.gasFeeInfo.gasLimit.toFixed(0);
+        }
+        return undefined;
+    }
+
+    protected getGasPrice(options?: { gasPrice?: string | null }): string | undefined {
+        if (options?.gasPrice) {
+            return options.gasPrice;
+        }
+        if (this.gasFeeInfo?.gasPrice?.isFinite()) {
+            return this.gasFeeInfo.gasPrice.toFixed(0);
+        }
+        return undefined;
+    }
+
+    protected getGasParams(options: OptionsGasParams): TransactionGasParams {
+        const gas = this.getGasLimit({
+            gasLimit: options.gasLimit
+        });
+        const gasPrice = this.getGasPrice({
+            gasPrice: options.gasPrice
+        });
+        return { gas, gasPrice };
     }
 }

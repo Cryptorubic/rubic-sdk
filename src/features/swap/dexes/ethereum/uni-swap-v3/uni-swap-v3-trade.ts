@@ -171,8 +171,8 @@ export class UniSwapV3Trade extends InstantTrade {
         await this.checkWalletState();
 
         const { methodName, methodArguments } = this.getSwapRouterMethodData();
-        const gasLimit = options.gasLimit || this.gasFeeInfo?.gasLimit;
-        const gasPrice = options.gasPrice || this.gasFeeInfo?.gasPrice;
+        const { gas, gasPrice } = this.getGasParams(options);
+
         return this.web3Private.tryExecuteContractMethod(
             swapRouterContractAddress,
             swapRouterContractAbi,
@@ -181,7 +181,7 @@ export class UniSwapV3Trade extends InstantTrade {
             {
                 value: this.from.isNative ? this.from.stringWeiAmount : undefined,
                 onTransactionHash: options.onConfirm,
-                gas: gasLimit,
+                gas,
                 gasPrice
             }
         );
@@ -189,17 +189,15 @@ export class UniSwapV3Trade extends InstantTrade {
 
     public async encode(options: EncodeTransactionOptions = {}): Promise<TransactionConfig> {
         const { methodName, methodArguments } = this.getSwapRouterMethodData();
-        const gasInfo = {
-            gasLimit: options.gasLimit || this.gasFeeInfo?.gasLimit?.toFixed(0),
-            gasPrice: options.gasPrice || this.gasFeeInfo?.gasPrice?.toFixed(0)
-        };
+        const gasParams = this.getGasParams(options);
+
         return Web3Pure.encodeMethodCall(
             swapRouterContractAddress,
             swapRouterContractAbi,
             methodName,
             methodArguments,
             this.from.isNative ? this.from.stringWeiAmount : undefined,
-            gasInfo
+            gasParams
         );
     }
 

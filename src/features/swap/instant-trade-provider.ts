@@ -13,7 +13,7 @@ import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 export abstract class InstantTradeProvider {
     public abstract readonly blockchain: BLOCKCHAIN_NAME;
 
-    protected abstract gasMargin: number;
+    protected abstract readonly gasMargin: number;
 
     protected get web3Public(): Web3Public {
         return Injector.web3PublicService.getWeb3Public(this.blockchain);
@@ -40,7 +40,7 @@ export abstract class InstantTradeProvider {
     }
 
     protected getGasFeeInfo(
-        estimatedGas: BigNumber | undefined,
+        estimatedGas: BigNumber | string | number | undefined,
         gasPriceInfo: GasPriceInfo
     ): GasFeeInfo {
         const gasLimit = estimatedGas
