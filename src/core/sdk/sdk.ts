@@ -13,6 +13,14 @@ export class SDK {
 
     public readonly crossChain: CrossChainManager;
 
+    public readonly web3PublicService = Injector.web3PublicService;
+
+    public readonly web3Private = Injector.web3Private;
+
+    public readonly gasPriceApi = Injector.gasPriceApi;
+
+    public readonly cryptoPriceApi = Injector.coingeckoApi;
+
     public static async createSDK(configuration: Configuration): Promise<SDK> {
         const [web3PublicService, web3Private, httpClient] = await Promise.all([
             SDK.createWeb3PublicService(configuration),

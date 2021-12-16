@@ -45,6 +45,10 @@ var cross_chain_manager_1 = require("@features/cross-chain/cross-chain-manager")
 var instant_trades_manager_1 = require("@features/swap/instant-trades-manager");
 var SDK = /** @class */ (function () {
     function SDK() {
+        this.web3PublicService = injector_1.Injector.web3PublicService;
+        this.web3Private = injector_1.Injector.web3Private;
+        this.gasPriceApi = injector_1.Injector.gasPriceApi;
+        this.cryptoPriceApi = injector_1.Injector.coingeckoApi;
         this.instantTrades = new instant_trades_manager_1.InstantTradesManager();
         this.crossChain = new cross_chain_manager_1.CrossChainManager();
     }

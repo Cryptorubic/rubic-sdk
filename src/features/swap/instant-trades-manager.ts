@@ -81,14 +81,15 @@ export class InstantTradesManager {
         ...this.zrxTradeProviders
     };
 
-    private blockchainTradeProviders: Record<BLOCKCHAIN_NAME, Partial<TypedTradeProviders>> =
-        Object.entries(this.tradeProviders).reduce(
-            (acc, [type, provider]) => ({
-                ...acc,
-                [provider.blockchain]: { ...acc[provider.blockchain], [type]: provider }
-            }),
-            {} as Record<BLOCKCHAIN_NAME, Partial<TypedTradeProviders>>
-        );
+    public readonly blockchainTradeProviders: Readonly<
+        Record<BLOCKCHAIN_NAME, Partial<TypedTradeProviders>>
+    > = Object.entries(this.tradeProviders).reduce(
+        (acc, [type, provider]) => ({
+            ...acc,
+            [provider.blockchain]: { ...acc[provider.blockchain], [type]: provider }
+        }),
+        {} as Record<BLOCKCHAIN_NAME, Partial<TypedTradeProviders>>
+    );
 
     public async calculateTrade(
         fromToken:
