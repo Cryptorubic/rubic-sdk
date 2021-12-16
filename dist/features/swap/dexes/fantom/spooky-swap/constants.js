@@ -12,7 +12,7 @@ var __assign = (this && this.__assign) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SPOOKY_SWAP_PROVIDER_CONFIGURATION = exports.SPOOKY_SWAP_CONTRACT_ADDRESS = void 0;
-var default_constants_1 = require("@features/swap/dexes/fantom/default-constants");
+var default_constants_1 = require("../default-constants");
 exports.SPOOKY_SWAP_CONTRACT_ADDRESS = '0xF491e7B69E4244ad4002BC14e878a34207E38c29';
 var routingProvidersAddresses = [
     '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83',

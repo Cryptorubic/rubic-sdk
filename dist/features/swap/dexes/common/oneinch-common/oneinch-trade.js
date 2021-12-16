@@ -72,15 +72,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OneinchTrade = void 0;
-var utils_1 = require("@features/swap/dexes/common/oneinch-common/utils");
-var instant_trade_1 = require("@features/swap/instant-trade");
-var injector_1 = require("@core/sdk/injector");
-var pure_decorator_1 = require("@common/decorators/pure.decorator");
+var utils_1 = require("./utils");
+var instant_trade_1 = require("../../../instant-trade");
+var injector_1 = require("../../../../../core/sdk/injector");
+var pure_decorator_1 = require("../../../../../common/decorators/pure.decorator");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
-var InsufficientFundsOneinchError_1 = __importDefault(require("@common/errors/swap/InsufficientFundsOneinchError"));
-var blockchains_1 = require("@core/blockchain/constants/blockchains");
-var low_slippage_error_1 = require("@common/errors/swap/low-slippage.error");
+var rubic_sdk_error_1 = require("../../../../../common/errors/rubic-sdk-error");
+var InsufficientFundsOneinchError_1 = __importDefault(require("../../../../../common/errors/swap/InsufficientFundsOneinchError"));
+var blockchains_1 = require("../../../../../core/blockchain/constants/blockchains");
+var low_slippage_error_1 = require("../../../../../common/errors/swap/low-slippage.error");
 var OneinchTrade = /** @class */ (function (_super) {
     __extends(OneinchTrade, _super);
     function OneinchTrade(oneinchTradeStruct) {
@@ -130,7 +130,7 @@ var OneinchTrade = /** @class */ (function (_super) {
                         if (this.from.isNative) {
                             return [2 /*return*/, false];
                         }
-                        return [4 /*yield*/, this.httpClient.get(this.apiBaseUrl + "/approve/allowance", {
+                        return [4 /*yield*/, this.httpClient.get("".concat(this.apiBaseUrl, "/approve/allowance"), {
                                 params: {
                                     tokenAddress: this.from.address,
                                     walletAddress: this.walletAddress
@@ -201,7 +201,7 @@ var OneinchTrade = /** @class */ (function (_super) {
         var swapRequest = {
             params: __assign({ fromTokenAddress: this.from.address, toTokenAddress: this.to.address, amount: this.from.stringWeiAmount, slippage: (this.slippageTolerance * 100).toString(), fromAddress: fromAddress || this.walletAddress }, (this.disableMultihops && { mainRouteParts: '1' }))
         };
-        return this.httpClient.get(this.apiBaseUrl + "/swap", swapRequest);
+        return this.httpClient.get("".concat(this.apiBaseUrl, "/swap"), swapRequest);
     };
     OneinchTrade.prototype.getGasParamsFromApiTradeData = function (options, apiTradeData) {
         return this.getGasParams({
@@ -216,7 +216,7 @@ var OneinchTrade = /** @class */ (function (_super) {
             if ((_a = err.error.message) === null || _a === void 0 ? void 0 : _a.includes('cannot estimate')) {
                 var nativeToken = blockchains_1.blockchains.find(function (el) { return el.name === _this.from.blockchain; })
                     .nativeCoin.symbol;
-                var message = "1inch sets increased costs on gas fee. For transaction enter less " + nativeToken + " amount or top up your " + nativeToken + " balance.";
+                var message = "1inch sets increased costs on gas fee. For transaction enter less ".concat(nativeToken, " amount or top up your ").concat(nativeToken, " balance.");
                 throw new rubic_sdk_error_1.RubicSdkError(message);
             }
             if ((_b = err.error.message) === null || _b === void 0 ? void 0 : _b.includes('insufficient funds for transfer')) {

@@ -57,20 +57,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CrossChainTrade = void 0;
-var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
-var CROSS_CHAIN_ROUTING_SWAP_METHOD_1 = require("@features/cross-chain/cross-chain-trade/models/CROSS_CHAIN_ROUTING_SWAP_METHOD");
-var injector_1 = require("@core/sdk/injector");
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
-var crossChainContractAbi_1 = require("@features/cross-chain/constants/crossChainContractAbi");
-var CrossChainIsUnavailableWarning_1 = require("@common/errors/cross-chain/CrossChainIsUnavailableWarning");
-var MaxGasPriceOverflowError_1 = require("@common/errors/cross-chain/MaxGasPriceOverflowError");
-var FailedToCheckForTransactionReceiptError_1 = require("@common/errors/swap/FailedToCheckForTransactionReceiptError");
-var InsufficientFundsGasPriceValueError_1 = require("@common/errors/cross-chain/InsufficientFundsGasPriceValueError");
+var web3_pure_1 = require("../../../core/blockchain/web3-pure/web3-pure");
+var CROSS_CHAIN_ROUTING_SWAP_METHOD_1 = require("./models/CROSS_CHAIN_ROUTING_SWAP_METHOD");
+var injector_1 = require("../../../core/sdk/injector");
+var BLOCKCHAIN_NAME_1 = require("../../../core/blockchain/models/BLOCKCHAIN_NAME");
+var crossChainContractAbi_1 = require("../constants/crossChainContractAbi");
+var CrossChainIsUnavailableWarning_1 = require("../../../common/errors/cross-chain/CrossChainIsUnavailableWarning");
+var MaxGasPriceOverflowError_1 = require("../../../common/errors/cross-chain/MaxGasPriceOverflowError");
+var FailedToCheckForTransactionReceiptError_1 = require("../../../common/errors/swap/FailedToCheckForTransactionReceiptError");
+var InsufficientFundsGasPriceValueError_1 = require("../../../common/errors/cross-chain/InsufficientFundsGasPriceValueError");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var UnnecessaryApprove_1 = require("@common/errors/swap/UnnecessaryApprove");
-var pure_decorator_1 = require("@common/decorators/pure.decorator");
-var wallet_not_connected_error_1 = require("@common/errors/swap/wallet-not-connected.error");
-var wrong_network_error_1 = require("@common/errors/swap/wrong-network.error");
+var UnnecessaryApprove_1 = require("../../../common/errors/swap/UnnecessaryApprove");
+var pure_decorator_1 = require("../../../common/decorators/pure.decorator");
+var wallet_not_connected_error_1 = require("../../../common/errors/swap/wallet-not-connected.error");
+var wrong_network_error_1 = require("../../../common/errors/swap/wrong-network.error");
 var CrossChainTrade = /** @class */ (function () {
     function CrossChainTrade(crossChainTrade) {
         this.fromTrade = crossChainTrade.fromTrade;
@@ -276,10 +276,10 @@ var CrossChainTrade = /** @class */ (function () {
                     case 1:
                         _a.sent();
                         if (this.minMaxAmountsErrors.minAmount) {
-                            throw new Error("Minimum amount is " + this.minMaxAmountsErrors.minAmount);
+                            throw new Error("Minimum amount is ".concat(this.minMaxAmountsErrors.minAmount));
                         }
                         if (this.minMaxAmountsErrors.maxAmount) {
-                            throw new Error("Maximum amount is " + this.minMaxAmountsErrors.maxAmount);
+                            throw new Error("Maximum amount is ".concat(this.minMaxAmountsErrors.maxAmount));
                         }
                         return [2 /*return*/];
                 }

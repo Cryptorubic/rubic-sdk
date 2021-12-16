@@ -1,9 +1,9 @@
-import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
-import { UniswapCalculatedInfo } from '@features/swap/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
-import { UniswapV2ProviderConfiguration } from '@features/swap/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
-import { UniswapV2TradeClass } from '@features/swap/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-class';
-import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { PriceToken } from '../../../../../core/blockchain/tokens/price-token';
+import { SwapCalculationOptions } from '../../../models/swap-calculation-options';
+import { UniswapCalculatedInfo } from './models/uniswap-calculated-info';
+import { UniswapV2ProviderConfiguration } from './models/uniswap-v2-provider-configuration';
+import { UniswapV2TradeClass } from './models/uniswap-v2-trade-class';
+import { UniswapV2AbstractTrade } from './uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
 export interface PathFactoryStruct {
     readonly from: PriceToken;

@@ -1,13 +1,13 @@
-import { BasicTransactionOptions } from '@core/blockchain/models/basic-transaction-options';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { EncodeTransactionOptions } from '@features/swap/models/encode-transaction-options';
-import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
-import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
+import { BasicTransactionOptions } from '../../core/blockchain/models/basic-transaction-options';
+import { PriceTokenAmount } from '../../core/blockchain/tokens/price-token-amount';
+import { EncodeTransactionOptions } from './models/encode-transaction-options';
+import { GasFeeInfo } from './models/gas-fee-info';
+import { SwapTransactionOptions } from './models/swap-transaction-options';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
-import { Web3Public } from '@core/blockchain/web3-public/web3-public';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
-import { OptionsGasParams, TransactionGasParams } from '@features/swap/models/gas-params';
+import { Web3Public } from '../../core/blockchain/web3-public/web3-public';
+import { BLOCKCHAIN_NAME } from '../../core/blockchain/models/BLOCKCHAIN_NAME';
+import { OptionsGasParams, TransactionGasParams } from './models/gas-params';
 export declare abstract class InstantTrade {
     static getContractAddress(): string;
     static getTradeType(): string;

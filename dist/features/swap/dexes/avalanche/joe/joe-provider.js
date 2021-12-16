@@ -16,10 +16,10 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JoeProvider = void 0;
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
-var constants_1 = require("@features/swap/dexes/avalanche/joe/constants");
-var uniswap_v2_abstract_provider_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider");
-var joe_trade_1 = require("@features/swap/dexes/avalanche/joe/joe-trade");
+var BLOCKCHAIN_NAME_1 = require("../../../../../core/blockchain/models/BLOCKCHAIN_NAME");
+var constants_1 = require("./constants");
+var uniswap_v2_abstract_provider_1 = require("../../common/uniswap-v2-abstract/uniswap-v2-abstract-provider");
+var joe_trade_1 = require("./joe-trade");
 var JoeProvider = /** @class */ (function (_super) {
     __extends(JoeProvider, _super);
     function JoeProvider() {

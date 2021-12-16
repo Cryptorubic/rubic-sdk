@@ -1,6 +1,6 @@
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
-import { ContractMulticallResponse } from '@core/blockchain/web3-public/models/contract-multicall-response';
-import { UniswapV2AbstractTrade, UniswapV2TradeStruct } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { BLOCKCHAIN_NAME } from '../../../../../core/blockchain/models/BLOCKCHAIN_NAME';
+import { ContractMulticallResponse } from '../../../../../core/blockchain/web3-public/models/contract-multicall-response';
+import { UniswapV2AbstractTrade, UniswapV2TradeStruct } from '../../common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 export declare class SolarbeamTrade extends UniswapV2AbstractTrade {
     static readonly contractAbi: import("web3-utils").AbiItem[];
     static callForRoutes(blockchain: BLOCKCHAIN_NAME, exact: 'input' | 'output', routesMethodArguments: [string, string[]][]): Promise<ContractMulticallResponse<{

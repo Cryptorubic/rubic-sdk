@@ -63,11 +63,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UniswapV2AbstractProvider = void 0;
-var options_1 = require("@common/utils/options");
-var price_token_amount_1 = require("@core/blockchain/tokens/price-token-amount");
-var path_factory_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/path-factory");
-var instant_trade_provider_1 = require("@features/swap/instant-trade-provider");
-var token_native_address_proxy_1 = require("@features/swap/dexes/common/utils/token-native-address-proxy");
+var options_1 = require("../../../../../common/utils/options");
+var price_token_amount_1 = require("../../../../../core/blockchain/tokens/price-token-amount");
+var path_factory_1 = require("./path-factory");
+var instant_trade_provider_1 = require("../../../instant-trade-provider");
+var token_native_address_proxy_1 = require("../utils/token-native-address-proxy");
 var UniswapV2AbstractProvider = /** @class */ (function (_super) {
     __extends(UniswapV2AbstractProvider, _super);
     function UniswapV2AbstractProvider() {

@@ -1,9 +1,9 @@
-import { TransactionOptions } from '@core/blockchain/models/transaction-options';
-import { Web3Error } from '@core/blockchain/models/web3-error';
+import { TransactionOptions } from '../models/transaction-options';
+import { Web3Error } from '../models/web3-error';
 import BigNumber from 'bignumber.js';
 import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
-import { WalletConnectionConfiguration } from '@core/blockchain/models/wallet-connection-configuration';
+import { WalletConnectionConfiguration } from '../models/wallet-connection-configuration';
 /**
  * Class containing methods for executing the functions of contracts and sending transactions in order to change the state of the blockchain.
  * To get information from the blockchain use {@link Web3Public}.

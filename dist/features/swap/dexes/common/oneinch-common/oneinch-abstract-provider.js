@@ -81,18 +81,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OneinchAbstractProvider = void 0;
-var options_1 = require("@common/utils/options");
-var price_token_amount_1 = require("@core/blockchain/tokens/price-token-amount");
-var token_1 = require("@core/blockchain/tokens/token");
-var injector_1 = require("@core/sdk/injector");
-var constants_1 = require("@features/swap/dexes/common/oneinch-common/constants");
-var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
-var utils_1 = require("@features/swap/dexes/common/oneinch-common/utils");
+var options_1 = require("../../../../../common/utils/options");
+var price_token_amount_1 = require("../../../../../core/blockchain/tokens/price-token-amount");
+var token_1 = require("../../../../../core/blockchain/tokens/token");
+var injector_1 = require("../../../../../core/sdk/injector");
+var constants_1 = require("./constants");
+var rubic_sdk_error_1 = require("../../../../../common/errors/rubic-sdk-error");
+var utils_1 = require("./utils");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var oneinch_trade_1 = require("@features/swap/dexes/common/oneinch-common/oneinch-trade");
-var instant_trade_provider_1 = require("@features/swap/instant-trade-provider");
-var pure_decorator_1 = require("@common/decorators/pure.decorator");
-var token_native_address_proxy_1 = require("@features/swap/dexes/common/utils/token-native-address-proxy");
+var oneinch_trade_1 = require("./oneinch-trade");
+var instant_trade_provider_1 = require("../../../instant-trade-provider");
+var pure_decorator_1 = require("../../../../../common/decorators/pure.decorator");
+var token_native_address_proxy_1 = require("../utils/token-native-address-proxy");
 var OneinchAbstractProvider = /** @class */ (function (_super) {
     __extends(OneinchAbstractProvider, _super);
     function OneinchAbstractProvider() {
@@ -130,7 +130,7 @@ var OneinchAbstractProvider = /** @class */ (function (_super) {
                         if (this.supportedTokens.length) {
                             return [2 /*return*/, this.supportedTokens];
                         }
-                        return [4 /*yield*/, this.httpClient.get(this.apiBaseUrl + "/tokens")];
+                        return [4 /*yield*/, this.httpClient.get("".concat(this.apiBaseUrl, "/tokens"))];
                     case 1:
                         oneinchTokensResponse = _a.sent();
                         this.supportedTokens = Object.keys(oneinchTokensResponse.tokens).map(function (tokenAddress) {
@@ -146,7 +146,7 @@ var OneinchAbstractProvider = /** @class */ (function (_super) {
             var response;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.httpClient.get(this.apiBaseUrl + "/approve/spender")];
+                    case 0: return [4 /*yield*/, this.httpClient.get("".concat(this.apiBaseUrl, "/approve/spender"))];
                     case 1:
                         response = _a.sent();
                         return [2 /*return*/, response.address];
@@ -221,7 +221,7 @@ var OneinchAbstractProvider = /** @class */ (function (_super) {
                         swapTradeParams = {
                             params: __assign(__assign({}, quoteTradeParams.params), { slippage: (options.slippageTolerance * 100).toString(), fromAddress: this.walletAddress })
                         };
-                        return [4 /*yield*/, this.httpClient.get(this.apiBaseUrl + "/swap", swapTradeParams)];
+                        return [4 /*yield*/, this.httpClient.get("".concat(this.apiBaseUrl, "/swap"), swapTradeParams)];
                     case 3:
                         oneInchTrade = _a.sent();
                         estimatedGas = new bignumber_js_1.default(oneInchTrade.tx.gas);
@@ -229,7 +229,7 @@ var OneinchAbstractProvider = /** @class */ (function (_super) {
                         return [3 /*break*/, 6];
                     case 4:
                         _err_1 = _a.sent();
-                        return [4 /*yield*/, this.httpClient.get(this.apiBaseUrl + "/quote", quoteTradeParams)];
+                        return [4 /*yield*/, this.httpClient.get("".concat(this.apiBaseUrl, "/quote"), quoteTradeParams)];
                     case 5:
                         oneInchTrade = _a.sent();
                         if (oneInchTrade.hasOwnProperty('errors') || !oneInchTrade.toTokenAmount) {

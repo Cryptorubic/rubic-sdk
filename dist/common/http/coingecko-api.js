@@ -65,12 +65,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CoingeckoApi = void 0;
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
+var BLOCKCHAIN_NAME_1 = require("../../core/blockchain/models/BLOCKCHAIN_NAME");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
 var p_timeout_1 = __importStar(require("p-timeout"));
 var ts_cacheable_1 = require("ts-cacheable");
-var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
-var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
+var rubic_sdk_error_1 = require("../errors/rubic-sdk-error");
+var web3_pure_1 = require("../../core/blockchain/web3-pure/web3-pure");
 var supportedBlockchains = [
     BLOCKCHAIN_NAME_1.BLOCKCHAIN_NAME.ETHEREUM,
     BLOCKCHAIN_NAME_1.BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
@@ -118,13 +118,13 @@ var CoingeckoApi = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         if (!CoingeckoApi.isSupportedBlockchain(blockchain)) {
-                            throw new rubic_sdk_error_1.RubicSdkError("Blockchain " + blockchain + " is not supported by coingecko-api");
+                            throw new rubic_sdk_error_1.RubicSdkError("Blockchain ".concat(blockchain, " is not supported by coingecko-api"));
                         }
                         coingeckoId = this.nativeCoinsCoingeckoIds[blockchain];
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, (0, p_timeout_1.default)(this.httpClient.get(API_BASE_URL + "simple/price", {
+                        return [4 /*yield*/, (0, p_timeout_1.default)(this.httpClient.get("".concat(API_BASE_URL, "simple/price"), {
                                 params: { ids: coingeckoId, vs_currencies: 'usd' }
                             }), 3000)];
                     case 2:
@@ -157,13 +157,13 @@ var CoingeckoApi = /** @class */ (function () {
                     case 0:
                         blockchain = token.blockchain;
                         if (!CoingeckoApi.isSupportedBlockchain(blockchain)) {
-                            throw new rubic_sdk_error_1.RubicSdkError("Blockchain " + blockchain + " is not supported by coingecko-api");
+                            throw new rubic_sdk_error_1.RubicSdkError("Blockchain ".concat(blockchain, " is not supported by coingecko-api"));
                         }
                         blockchainId = this.tokenBlockchainId[blockchain];
                         _c.label = 1;
                     case 1:
                         _c.trys.push([1, 3, , 4]);
-                        return [4 /*yield*/, (0, p_timeout_1.default)(this.httpClient.get(API_BASE_URL + "coins/" + blockchainId + "/contract/" + token.address.toLowerCase()), 3000)];
+                        return [4 /*yield*/, (0, p_timeout_1.default)(this.httpClient.get("".concat(API_BASE_URL, "coins/").concat(blockchainId, "/contract/").concat(token.address.toLowerCase())), 3000)];
                     case 2:
                         response = _c.sent();
                         return [2 /*return*/, new bignumber_js_1.default(((_b = (_a = response === null || response === void 0 ? void 0 : response.market_data) === null || _a === void 0 ? void 0 : _a.current_price) === null || _b === void 0 ? void 0 : _b.usd) || NaN)];

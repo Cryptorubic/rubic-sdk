@@ -63,8 +63,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PriceToken = void 0;
-var token_1 = require("@core/blockchain/tokens/token");
-var injector_1 = require("@core/sdk/injector");
+var token_1 = require("./token");
+var injector_1 = require("../../sdk/injector");
 var PriceToken = /** @class */ (function (_super) {
     __extends(PriceToken, _super);
     function PriceToken(tokenStruct) {

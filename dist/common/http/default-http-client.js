@@ -26,7 +26,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DefaultHttpClient = void 0;
-var cache_decorator_1 = require("@common/decorators/cache.decorator");
+var cache_decorator_1 = require("../decorators/cache.decorator");
 var DefaultHttpClient = /** @class */ (function () {
     function DefaultHttpClient() {
     }

@@ -16,8 +16,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PancakeSwapTrade = void 0;
-var constants_1 = require("@features/swap/dexes/bsc/pancake-swap/constants");
-var uniswap_v2_abstract_trade_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade");
+var constants_1 = require("./constants");
+var uniswap_v2_abstract_trade_1 = require("../../common/uniswap-v2-abstract/uniswap-v2-abstract-trade");
 var PancakeSwapTrade = /** @class */ (function (_super) {
     __extends(PancakeSwapTrade, _super);
     function PancakeSwapTrade(tradeStruct) {

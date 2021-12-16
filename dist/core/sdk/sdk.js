@@ -37,12 +37,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SDK = void 0;
-var default_http_client_1 = require("@common/http/default-http-client");
-var web3_private_factory_1 = require("@core/blockchain/web3-private/web3-private-factory");
-var web3_public_service_1 = require("@core/blockchain/web3-public/web3-public-service");
-var injector_1 = require("@core/sdk/injector");
-var cross_chain_manager_1 = require("@features/cross-chain/cross-chain-manager");
-var instant_trades_manager_1 = require("@features/swap/instant-trades-manager");
+var default_http_client_1 = require("../../common/http/default-http-client");
+var web3_private_factory_1 = require("../blockchain/web3-private/web3-private-factory");
+var web3_public_service_1 = require("../blockchain/web3-public/web3-public-service");
+var injector_1 = require("./injector");
+var cross_chain_manager_1 = require("../../features/cross-chain/cross-chain-manager");
+var instant_trades_manager_1 = require("../../features/swap/instant-trades-manager");
 var SDK = /** @class */ (function () {
     function SDK() {
         this.web3PublicService = injector_1.Injector.web3PublicService;

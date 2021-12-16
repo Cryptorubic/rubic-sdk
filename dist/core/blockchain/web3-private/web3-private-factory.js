@@ -40,11 +40,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Web3PrivateFactory = void 0;
-var wrong_chain_id_error_1 = require("@common/errors/provider/wrong-chain-id.error");
-var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
-var blockchains_info_1 = require("@core/blockchain/blockchains-info");
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
-var web3_private_1 = require("@core/blockchain/web3-private/web3-private");
+var wrong_chain_id_error_1 = require("../../../common/errors/provider/wrong-chain-id.error");
+var rubic_sdk_error_1 = require("../../../common/errors/rubic-sdk-error");
+var blockchains_info_1 = require("../blockchains-info");
+var BLOCKCHAIN_NAME_1 = require("../models/BLOCKCHAIN_NAME");
+var web3_private_1 = require("./web3-private");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
 var web3_1 = __importDefault(require("web3"));
 var Web3PrivateFactory = /** @class */ (function () {

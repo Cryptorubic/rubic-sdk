@@ -16,7 +16,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DirectContractTrade = void 0;
-var ContractTrade_1 = require("@features/cross-chain/models/ContractTrade/ContractTrade");
+var ContractTrade_1 = require("./ContractTrade");
 var DirectContractTrade = /** @class */ (function (_super) {
     __extends(DirectContractTrade, _super);
     function DirectContractTrade(blockchain, contract, token) {

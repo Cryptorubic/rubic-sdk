@@ -72,15 +72,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZrxAbstractProvider = void 0;
-var instant_trade_provider_1 = require("@features/swap/instant-trade-provider");
-var price_token_amount_1 = require("@core/blockchain/tokens/price-token-amount");
-var token_native_address_proxy_1 = require("@features/swap/dexes/common/utils/token-native-address-proxy");
-var constants_1 = require("@features/swap/dexes/common/zrx-common/constants");
-var injector_1 = require("@core/sdk/injector");
-var pure_decorator_1 = require("@common/decorators/pure.decorator");
-var utils_1 = require("@features/swap/dexes/common/zrx-common/utils");
+var instant_trade_provider_1 = require("../../../instant-trade-provider");
+var price_token_amount_1 = require("../../../../../core/blockchain/tokens/price-token-amount");
+var token_native_address_proxy_1 = require("../utils/token-native-address-proxy");
+var constants_1 = require("./constants");
+var injector_1 = require("../../../../../core/sdk/injector");
+var pure_decorator_1 = require("../../../../../common/decorators/pure.decorator");
+var utils_1 = require("./utils");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var zrx_trade_1 = require("@features/swap/dexes/common/zrx-common/zrx-trade");
+var zrx_trade_1 = require("./zrx-trade");
 var ZrxAbstractProvider = /** @class */ (function (_super) {
     __extends(ZrxAbstractProvider, _super);
     function ZrxAbstractProvider() {
@@ -145,7 +145,7 @@ var ZrxAbstractProvider = /** @class */ (function (_super) {
      * Fetches zrx data from api.
      */
     ZrxAbstractProvider.prototype.getTradeData = function (params) {
-        return injector_1.Injector.httpClient.get(this.apiBaseUrl + "swap/v1/quote", params);
+        return injector_1.Injector.httpClient.get("".concat(this.apiBaseUrl, "swap/v1/quote"), params);
     };
     __decorate([
         pure_decorator_1.Pure

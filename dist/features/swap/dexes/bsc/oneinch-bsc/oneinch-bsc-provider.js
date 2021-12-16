@@ -16,8 +16,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OneinchBscProvider = void 0;
-var oneinch_abstract_provider_1 = require("@features/swap/dexes/common/oneinch-common/oneinch-abstract-provider");
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
+var oneinch_abstract_provider_1 = require("../../common/oneinch-common/oneinch-abstract-provider");
+var BLOCKCHAIN_NAME_1 = require("../../../../../core/blockchain/models/BLOCKCHAIN_NAME");
 var OneinchBscProvider = /** @class */ (function (_super) {
     __extends(OneinchBscProvider, _super);
     function OneinchBscProvider() {

@@ -2,15 +2,15 @@
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.crossChainContracts = void 0;
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
-var cross_chain_contract_1 = require("@features/cross-chain/cross-chain-contract/cross-chain-contract");
-var pancake_swap_provider_1 = require("@features/swap/dexes/bsc/pancake-swap/pancake-swap-provider");
-var uni_swap_v2_provider_1 = require("@features/swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider");
-var quick_swap_provider_1 = require("@features/swap/dexes/polygon/quick-swap/quick-swap-provider");
-var spooky_swap_provider_1 = require("@features/swap/dexes/fantom/spooky-swap/spooky-swap-provider");
-var joe_provider_1 = require("@features/swap/dexes/avalanche/joe/joe-provider");
-var solarbeam_provider_1 = require("@features/swap/dexes/moonriver/solarbeam/solarbeam-provider");
-var pangolin_provider_1 = require("@features/swap/dexes/avalanche/pangolin/pangolin-provider");
+var BLOCKCHAIN_NAME_1 = require("../../../core/blockchain/models/BLOCKCHAIN_NAME");
+var cross_chain_contract_1 = require("../cross-chain-contract/cross-chain-contract");
+var pancake_swap_provider_1 = require("../../swap/dexes/bsc/pancake-swap/pancake-swap-provider");
+var uni_swap_v2_provider_1 = require("../../swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider");
+var quick_swap_provider_1 = require("../../swap/dexes/polygon/quick-swap/quick-swap-provider");
+var spooky_swap_provider_1 = require("../../swap/dexes/fantom/spooky-swap/spooky-swap-provider");
+var joe_provider_1 = require("../../swap/dexes/avalanche/joe/joe-provider");
+var solarbeam_provider_1 = require("../../swap/dexes/moonriver/solarbeam/solarbeam-provider");
+var pangolin_provider_1 = require("../../swap/dexes/avalanche/pangolin/pangolin-provider");
 exports.crossChainContracts = (_a = {},
     _a[BLOCKCHAIN_NAME_1.BLOCKCHAIN_NAME.ETHEREUM] = [
         new cross_chain_contract_1.CrossChainContract(BLOCKCHAIN_NAME_1.BLOCKCHAIN_NAME.ETHEREUM, '0xb9a94be803eC1197A234406eF5c0113f503d3178', new uni_swap_v2_provider_1.UniSwapV2Provider())

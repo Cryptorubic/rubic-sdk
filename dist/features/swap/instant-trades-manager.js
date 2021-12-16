@@ -62,33 +62,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InstantTradesManager = void 0;
-var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
-var object_1 = require("@common/utils/object");
-var options_1 = require("@common/utils/options");
-var token_1 = require("@core/blockchain/tokens/token");
-var joe_provider_1 = require("@features/swap/dexes/avalanche/joe/joe-provider");
-var pangolin_provider_1 = require("@features/swap/dexes/avalanche/pangolin/pangolin-provider");
-var sushi_swap_avalanche_provider_1 = require("@features/swap/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider");
-var oneinch_bsc_provider_1 = require("@features/swap/dexes/bsc/oneinch-bsc/oneinch-bsc-provider");
-var pancake_swap_provider_1 = require("@features/swap/dexes/bsc/pancake-swap/pancake-swap-provider");
-var sushi_swap_bsc_provider_1 = require("@features/swap/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider");
-var oneinch_ethereum_provider_1 = require("@features/swap/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider");
-var sushi_swap_ethereum_provider_1 = require("@features/swap/dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider");
-var uni_swap_v2_provider_1 = require("@features/swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider");
-var uni_swap_v3_provider_1 = require("@features/swap/dexes/ethereum/uni-swap-v3/uni-swap-v3-provider");
-var spirit_swap_provider_1 = require("@features/swap/dexes/fantom/spirit-swap/spirit-swap-provider");
-var spooky_swap_provider_1 = require("@features/swap/dexes/fantom/spooky-swap/spooky-swap-provider");
-var sushi_swap_fantom_provider_1 = require("@features/swap/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-provider");
-var sushi_swap_harmony_provider_1 = require("@features/swap/dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-provider");
-var solarbeam_provider_1 = require("@features/swap/dexes/moonriver/solarbeam/solarbeam-provider");
-var sushi_swap_moonriver_provider_1 = require("@features/swap/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider");
-var oneinch_polygon_provider_1 = require("@features/swap/dexes/polygon/oneinch-polygon/oneinch-polygon-provider");
-var quick_swap_provider_1 = require("@features/swap/dexes/polygon/quick-swap/quick-swap-provider");
-var sushi_swap_polygon_provider_1 = require("@features/swap/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider");
-var trade_type_1 = require("@features/swap/models/trade-type");
+var rubic_sdk_error_1 = require("../../common/errors/rubic-sdk-error");
+var object_1 = require("../../common/utils/object");
+var options_1 = require("../../common/utils/options");
+var token_1 = require("../../core/blockchain/tokens/token");
+var joe_provider_1 = require("./dexes/avalanche/joe/joe-provider");
+var pangolin_provider_1 = require("./dexes/avalanche/pangolin/pangolin-provider");
+var sushi_swap_avalanche_provider_1 = require("./dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider");
+var oneinch_bsc_provider_1 = require("./dexes/bsc/oneinch-bsc/oneinch-bsc-provider");
+var pancake_swap_provider_1 = require("./dexes/bsc/pancake-swap/pancake-swap-provider");
+var sushi_swap_bsc_provider_1 = require("./dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider");
+var oneinch_ethereum_provider_1 = require("./dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider");
+var sushi_swap_ethereum_provider_1 = require("./dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider");
+var uni_swap_v2_provider_1 = require("./dexes/ethereum/uni-swap-v2/uni-swap-v2-provider");
+var uni_swap_v3_provider_1 = require("./dexes/ethereum/uni-swap-v3/uni-swap-v3-provider");
+var spirit_swap_provider_1 = require("./dexes/fantom/spirit-swap/spirit-swap-provider");
+var spooky_swap_provider_1 = require("./dexes/fantom/spooky-swap/spooky-swap-provider");
+var sushi_swap_fantom_provider_1 = require("./dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-provider");
+var sushi_swap_harmony_provider_1 = require("./dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-provider");
+var solarbeam_provider_1 = require("./dexes/moonriver/solarbeam/solarbeam-provider");
+var sushi_swap_moonriver_provider_1 = require("./dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider");
+var oneinch_polygon_provider_1 = require("./dexes/polygon/oneinch-polygon/oneinch-polygon-provider");
+var quick_swap_provider_1 = require("./dexes/polygon/quick-swap/quick-swap-provider");
+var sushi_swap_polygon_provider_1 = require("./dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider");
+var trade_type_1 = require("./models/trade-type");
 var p_timeout_1 = __importDefault(require("p-timeout"));
-var zrx_ethereum_provider_1 = require("@features/swap/dexes/ethereum/zrx-ethereum/zrx-ethereum-provider");
-var tokens_1 = require("@common/utils/tokens");
+var zrx_ethereum_provider_1 = require("./dexes/ethereum/zrx-ethereum/zrx-ethereum-provider");
+var tokens_1 = require("../../common/utils/tokens");
 var InstantTradesManager = /** @class */ (function () {
     function InstantTradesManager() {
         var _a, _b, _c, _d;
@@ -163,7 +163,7 @@ var InstantTradesManager = /** @class */ (function () {
                             return !disabledProviders.includes(type);
                         });
                         if (!providers.length) {
-                            throw new rubic_sdk_error_1.RubicSdkError("There are no providers for " + from.blockchain + " blockchain");
+                            throw new rubic_sdk_error_1.RubicSdkError("There are no providers for ".concat(from.blockchain, " blockchain"));
                         }
                         calculationPromises = providers.map(function (_a) {
                             var type = _a[0], provider = _a[1];
@@ -182,7 +182,7 @@ var InstantTradesManager = /** @class */ (function () {
                                                 }];
                                         case 2:
                                             e_1 = _b.sent();
-                                            console.debug("[RUBIC_SDK] Trade calculation error occurred for " + type + " trade provider.", e_1);
+                                            console.debug("[RUBIC_SDK] Trade calculation error occurred for ".concat(type, " trade provider."), e_1);
                                             return [2 /*return*/, null];
                                         case 3: return [2 /*return*/];
                                     }

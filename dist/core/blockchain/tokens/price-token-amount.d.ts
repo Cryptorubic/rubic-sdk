@@ -1,7 +1,7 @@
-import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
-import { PriceToken } from '@core/blockchain/tokens/price-token';
+import { TokenBaseStruct } from '../models/token-base-struct';
+import { PriceToken } from './price-token';
 import BigNumber from 'bignumber.js';
-import { TokenStruct } from '@core/blockchain/tokens/token';
+import { TokenStruct } from './token';
 declare type PriceTokenAmountStruct = ConstructorParameters<typeof PriceToken>[number] & ({
     weiAmount: BigNumber;
 } | {

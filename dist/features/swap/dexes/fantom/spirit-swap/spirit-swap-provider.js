@@ -16,10 +16,10 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SpiritSwapProvider = void 0;
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
-var uniswap_v2_abstract_provider_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider");
-var constants_1 = require("@features/swap/dexes/fantom/spooky-swap/constants");
-var spirit_swap_trade_1 = require("@features/swap/dexes/fantom/spirit-swap/spirit-swap-trade");
+var BLOCKCHAIN_NAME_1 = require("../../../../../core/blockchain/models/BLOCKCHAIN_NAME");
+var uniswap_v2_abstract_provider_1 = require("../../common/uniswap-v2-abstract/uniswap-v2-abstract-provider");
+var constants_1 = require("../spooky-swap/constants");
+var spirit_swap_trade_1 = require("./spirit-swap-trade");
 var SpiritSwapProvider = /** @class */ (function (_super) {
     __extends(SpiritSwapProvider, _super);
     function SpiritSwapProvider() {

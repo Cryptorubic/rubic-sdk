@@ -57,14 +57,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PathFactory = void 0;
-var insufficient_liquidity_error_1 = require("@common/errors/swap/insufficient-liquidity-error");
-var object_1 = require("@common/utils/object");
-var price_token_amount_1 = require("@core/blockchain/tokens/price-token-amount");
-var token_1 = require("@core/blockchain/tokens/token");
-var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
-var injector_1 = require("@core/sdk/injector");
+var insufficient_liquidity_error_1 = require("../../../../../common/errors/swap/insufficient-liquidity-error");
+var object_1 = require("../../../../../common/utils/object");
+var price_token_amount_1 = require("../../../../../core/blockchain/tokens/price-token-amount");
+var token_1 = require("../../../../../core/blockchain/tokens/token");
+var web3_pure_1 = require("../../../../../core/blockchain/web3-pure/web3-pure");
+var injector_1 = require("../../../../../core/sdk/injector");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var pure_decorator_1 = require("@common/decorators/pure.decorator");
+var pure_decorator_1 = require("../../../../../common/decorators/pure.decorator");
 var PathFactory = /** @class */ (function () {
     function PathFactory(uniswapProviderStruct, pathFactoryStruct) {
         this.web3Private = injector_1.Injector.web3Private;

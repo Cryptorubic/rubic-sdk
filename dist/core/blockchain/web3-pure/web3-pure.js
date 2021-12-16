@@ -4,8 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Web3Pure = void 0;
-var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
-var native_token_address_1 = require("@core/blockchain/constants/native-token-address");
+var rubic_sdk_error_1 = require("../../../common/errors/rubic-sdk-error");
+var native_token_address_1 = require("../constants/native-token-address");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
 var web3_1 = __importDefault(require("web3"));
 var web3_utils_1 = require("web3-utils");
@@ -60,7 +60,7 @@ var Web3Pure = /** @class */ (function () {
             console.error('Wrong address format');
             throw new rubic_sdk_error_1.RubicSdkError('Wrong address format');
         }
-        return "0x" + address.slice(2).padStart(64, '0');
+        return "0x".concat(address.slice(2).padStart(64, '0'));
     };
     /**
      * @description convert address to checksum format

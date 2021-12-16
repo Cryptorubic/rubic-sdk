@@ -1,8 +1,8 @@
-import { ContractTrade } from '@features/cross-chain/models/ContractTrade/ContractTrade';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { GasData } from '@features/cross-chain/models/gas-data';
-import { MinMaxAmountsErrors } from '@features/cross-chain/cross-chain-trade/models/MinMaxAmountsErrors';
-import { TransactionOptions } from '@core/blockchain/models/transaction-options';
+import { ContractTrade } from '../models/ContractTrade/ContractTrade';
+import { PriceTokenAmount } from '../../../core/blockchain/tokens/price-token-amount';
+import { GasData } from '../models/gas-data';
+import { MinMaxAmountsErrors } from './models/MinMaxAmountsErrors';
+import { TransactionOptions } from '../../../core/blockchain/models/transaction-options';
 import BigNumber from 'bignumber.js';
 import { TransactionReceipt } from 'web3-eth';
 export declare class CrossChainTrade {

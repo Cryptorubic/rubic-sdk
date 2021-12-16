@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LiquidityPool = void 0;
-var blockchain_1 = require("@common/utils/blockchain");
+var blockchain_1 = require("../../../../../../../../common/utils/blockchain");
 /**
  * Represents liquidity pool in uni v3.
  */

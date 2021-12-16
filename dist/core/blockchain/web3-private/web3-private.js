@@ -51,13 +51,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Web3Private = void 0;
-var erc_20_abi_1 = require("@core/blockchain/constants/erc-20-abi");
+var erc_20_abi_1 = require("../constants/erc-20-abi");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var low_gas_error_1 = require("@common/errors/low-gas-error");
-var user_reject_error_1 = require("@common/errors/user-reject-error");
-var transaction_reverted_error_1 = require("@common/errors/transaction-reverted-error");
-var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
-var FailedToCheckForTransactionReceiptError_1 = require("@common/errors/swap/FailedToCheckForTransactionReceiptError");
+var low_gas_error_1 = require("../../../common/errors/low-gas-error");
+var user_reject_error_1 = require("../../../common/errors/user-reject-error");
+var transaction_reverted_error_1 = require("../../../common/errors/transaction-reverted-error");
+var rubic_sdk_error_1 = require("../../../common/errors/rubic-sdk-error");
+var FailedToCheckForTransactionReceiptError_1 = require("../../../common/errors/swap/FailedToCheckForTransactionReceiptError");
 /**
  * Class containing methods for executing the functions of contracts and sending transactions in order to change the state of the blockchain.
  * To get information from the blockchain use {@link Web3Public}.
@@ -98,7 +98,7 @@ var Web3Private = /** @class */ (function () {
     Web3Private.stringifyAmount = function (amount) {
         var bnAmount = new bignumber_js_1.default(amount);
         if (!bnAmount.isInteger()) {
-            throw new rubic_sdk_error_1.RubicSdkError("Value " + amount + " is not integer");
+            throw new rubic_sdk_error_1.RubicSdkError("Value ".concat(amount, " is not integer"));
         }
         return bnAmount.toFixed(0);
     };
@@ -153,7 +153,7 @@ var Web3Private = /** @class */ (function () {
                             .on('transactionHash', options.onTransactionHash || (function () { }))
                             .on('receipt', resolve)
                             .on('error', function (err) {
-                            console.error("Tokens transfer error. " + err);
+                            console.error("Tokens transfer error. ".concat(err));
                             reject(Web3Private.parseError(err));
                         });
                     })];
@@ -184,7 +184,7 @@ var Web3Private = /** @class */ (function () {
                         })))
                             .on('transactionHash', function (hash) { return resolve(hash); })
                             .on('error', function (err) {
-                            console.error("Tokens transfer error. " + err);
+                            console.error("Tokens transfer error. ".concat(err));
                             reject(Web3Private.parseError(err));
                         });
                     })];
@@ -222,7 +222,7 @@ var Web3Private = /** @class */ (function () {
                     case 2: return [2 /*return*/, _a.sent()];
                     case 3:
                         err_1 = _a.sent();
-                        console.error("Tokens transfer error. " + err_1);
+                        console.error("Tokens transfer error. ".concat(err_1));
                         throw Web3Private.parseError(err_1);
                     case 4: return [2 /*return*/];
                 }
@@ -256,7 +256,7 @@ var Web3Private = /** @class */ (function () {
                             .on('transactionHash', options.onTransactionHash || (function () { }))
                             .on('receipt', function (receipt) { return resolve(receipt); })
                             .on('error', function (err) {
-                            console.error("Tokens transfer error. " + err);
+                            console.error("Tokens transfer error. ".concat(err));
                             reject(Web3Private.parseError(err));
                         });
                     })];
@@ -283,7 +283,7 @@ var Web3Private = /** @class */ (function () {
                         })), (options.data && { data: options.data })))
                             .on('transactionHash', function (hash) { return resolve(hash); })
                             .on('error', function (err) {
-                            console.error("Tokens transfer error. " + err);
+                            console.error("Tokens transfer error. ".concat(err));
                             reject(Web3Private.parseError(err));
                         });
                     })];
@@ -321,7 +321,7 @@ var Web3Private = /** @class */ (function () {
                             .on('transactionHash', options.onTransactionHash || (function () { }))
                             .on('receipt', resolve)
                             .on('error', function (err) {
-                            console.error("Tokens approve error. " + err);
+                            console.error("Tokens approve error. ".concat(err));
                             reject(Web3Private.parseError(err));
                         });
                     })];
@@ -398,7 +398,7 @@ var Web3Private = /** @class */ (function () {
                             .on('transactionHash', options.onTransactionHash || (function () { }))
                             .on('receipt', resolve)
                             .on('error', function (err) {
-                            console.error("Method execution error. " + err);
+                            console.error("Method execution error. ".concat(err));
                             reject(Web3Private.parseError(err));
                         });
                     })];
@@ -427,7 +427,7 @@ var Web3Private = /** @class */ (function () {
             })))
                 .on('transactionHash', resolve)
                 .on('error', function (err) {
-                console.error("Tokens approve error. " + err);
+                console.error("Tokens approve error. ".concat(err));
                 reject(Web3Private.parseError(err));
             });
         });
