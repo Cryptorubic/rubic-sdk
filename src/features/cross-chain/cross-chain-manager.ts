@@ -347,7 +347,10 @@ export class CrossChainManager {
                 ...transitToken,
                 tokenAmount: transitTokenAmount,
                 price: new BigNumber(NaN)
-            })
+            }),
+            {
+                gasCalculation: 'disabled'
+            }
         );
         return instantTrade.from.tokenAmount;
     }
