@@ -29,10 +29,10 @@ import { SwapManagerCalculationOptions } from '@features/swap/models/swap-manage
 import { TRADE_TYPE, TradeType } from '@features/swap/models/trade-type';
 import { TypedTrade } from '@features/swap/models/typed-trade';
 import { TypedTradeProviders } from '@features/swap/models/typed-trade-provider';
-import BigNumber from 'bignumber.js';
 import pTimeout from 'p-timeout';
 import { MarkRequired } from 'ts-essentials';
 import { ZrxEthereumProvider } from '@features/swap/dexes/ethereum/zrx-ethereum/zrx-ethereum-provider';
+import { getPriceTokensFromInputTokens } from '@common/utils/tokens';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCalculationOptions,
@@ -91,43 +91,23 @@ export class InstantTradesManager {
         );
 
     public async calculateTrade(
-        from:
+        fromToken:
             | Token
             | {
                   address: string;
                   blockchain: BLOCKCHAIN_NAME;
               },
         fromAmount: string,
-        to: Token | string,
+        toToken: Token | string,
         options?: SwapManagerCalculationOptions
     ) {
-        const fromPriceTokenPromise =
-            from instanceof Token ? PriceToken.createFromToken(from) : PriceToken.createToken(from);
-
-        const toPriceTokenPromise =
-            to instanceof Token
-                ? PriceToken.createFromToken(to)
-                : PriceToken.createToken({ address: to, blockchain: from.blockchain });
-
-        const [fromPriceToken, toPriceToken] = await Promise.all([
-            fromPriceTokenPromise,
-            toPriceTokenPromise
-        ]);
-
-        if (fromPriceToken.blockchain !== toPriceToken.blockchain) {
+        if (toToken instanceof Token && fromToken.blockchain !== toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be same.');
         }
 
-        const fromPriceTokenAmount = new PriceTokenAmount({
-            ...fromPriceToken.asStruct,
-            tokenAmount: new BigNumber(fromAmount)
-        });
+        const { from, to } = await getPriceTokensFromInputTokens(fromToken, fromAmount, toToken);
 
-        return this.calculateTradeFromTokens(
-            fromPriceTokenAmount,
-            toPriceToken,
-            this.getFullOptions(options)
-        );
+        return this.calculateTradeFromTokens(from, to, this.getFullOptions(options));
     }
 
     private getFullOptions(

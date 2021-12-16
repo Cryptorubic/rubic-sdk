@@ -16,10 +16,12 @@ import { UniswapV2ProviderConfiguration } from '@features/swap/dexes/common/unis
 import { UniswapV2TradeClass } from '@features/swap/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-class';
 import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
+import { Pure } from '@common/decorators/pure.decorator';
 
 export interface PathFactoryStruct {
-    readonly from: PriceTokenAmount;
+    readonly from: PriceToken;
     readonly to: PriceToken;
+    readonly weiAmount: BigNumber;
     readonly exact: 'input' | 'output';
     readonly options: Required<SwapCalculationOptions>;
 }
@@ -34,9 +36,11 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
     private readonly web3Private = Injector.web3Private;
 
-    private readonly from: PriceTokenAmount;
+    private readonly from: PriceToken;
 
     private readonly to: PriceToken;
+
+    private readonly weiAmount: BigNumber;
 
     private readonly exact: 'input' | 'output';
 
@@ -52,6 +56,11 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         return this.web3Private.address;
     }
 
+    @Pure
+    private get stringWeiAmount(): string {
+        return this.weiAmount.toFixed(0);
+    }
+
     constructor(
         uniswapProviderStruct: UniswapV2AbstractProviderStruct<T>,
         pathFactoryStruct: PathFactoryStruct
@@ -62,6 +71,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
         this.from = pathFactoryStruct.from;
         this.to = pathFactoryStruct.to;
+        this.weiAmount = pathFactoryStruct.weiAmount;
         this.exact = pathFactoryStruct.exact;
         this.options = pathFactoryStruct.options;
         this.InstantTradeClass = uniswapProviderStruct.InstantTradeClass;
@@ -76,7 +86,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         gasPriceInUsd: BigNumber | undefined
     ): Promise<UniswapCalculatedInfo> {
         const routes = (await this.getAllRoutes()).sort((a, b) =>
-            b.outputAbsoluteAmount.gt(a.outputAbsoluteAmount) ? 1 : -1
+            b.outputAbsoluteAmount.comparedTo(a.outputAbsoluteAmount)
         );
         if (routes.length === 0) {
             throw new InsufficientLiquidityError();
@@ -89,12 +99,17 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         }
 
         const gasRequests = routes.map(route => {
+            const fromAmount = this.exact === 'input' ? this.weiAmount : route.outputAbsoluteAmount;
+            const toAmount = this.exact === 'output' ? this.weiAmount : route.outputAbsoluteAmount;
+
             const trade: UniswapV2AbstractTrade = new this.InstantTradeClass({
-                from: this.from,
+                from: new PriceTokenAmount({
+                    ...this.from.asStruct,
+                    weiAmount: fromAmount
+                }),
                 to: new PriceTokenAmount({
-                    ...this.to,
-                    weiAmount: route.outputAbsoluteAmount,
-                    price: new BigNumber(0)
+                    ...this.to.asStruct,
+                    weiAmount: toAmount
                 }),
                 path: route.path,
                 exact: this.exact,
@@ -105,35 +120,42 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             return trade.getEstimatedGasCallData();
         });
 
-        const gasLimits = gasRequests.map(item => item.defaultGasLimit);
-
-        if (this.walletAddress) {
-            const estimatedGasLimits = await this.web3Public.batchEstimatedGas(
-                this.InstantTradeClass.contractAbi,
-                this.InstantTradeClass.getContractAddress(),
-                this.walletAddress,
-                gasRequests.map(item => item.callData)
-            );
-            estimatedGasLimits.forEach((elem, index) => {
-                if (elem?.isFinite()) {
-                    gasLimits[index] = elem;
-                }
-            });
-        }
-
         if (
             this.options.gasCalculation === 'rubicOptimisation' &&
             this.to.price?.isFinite() &&
             gasPriceInUsd
         ) {
+            const gasLimits = gasRequests.map(item => item.defaultGasLimit);
+
+            if (this.walletAddress) {
+                const estimatedGasLimits = await this.web3Public.batchEstimatedGas(
+                    this.InstantTradeClass.contractAbi,
+                    this.InstantTradeClass.getContractAddress(),
+                    this.walletAddress,
+                    gasRequests.map(item => item.callData)
+                );
+                estimatedGasLimits.forEach((elem, index) => {
+                    if (elem?.isFinite()) {
+                        gasLimits[index] = elem;
+                    }
+                });
+            }
+
             const routesWithProfit: UniswapCalculatedInfoWithProfit[] = routes.map(
                 (route, index) => {
                     const estimatedGas = gasLimits[index];
                     const gasFeeInUsd = estimatedGas.multipliedBy(gasPriceInUsd);
-                    const profit = Web3Pure.fromWei(route.outputAbsoluteAmount, this.to.decimals)
-                        .multipliedBy(this.to.price)
-                        .multipliedBy(this.exact === 'input' ? 1 : -1)
-                        .minus(gasFeeInUsd);
+                    let profit: BigNumber;
+                    if (this.exact === 'input') {
+                        profit = Web3Pure.fromWei(route.outputAbsoluteAmount, this.to.decimals)
+                            .multipliedBy(this.to.price)
+                            .minus(gasFeeInUsd);
+                    } else {
+                        profit = Web3Pure.fromWei(route.outputAbsoluteAmount, this.from.decimals)
+                            .multipliedBy(this.from.price)
+                            .multipliedBy(-1)
+                            .minus(gasFeeInUsd);
+                    }
 
                     return {
                         route,
@@ -144,15 +166,32 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             );
 
             const sortedByProfitRoutes = routesWithProfit.sort((a, b) =>
-                b.profit.minus(a.profit).gt(0) ? 1 : -1
+                b.profit.comparedTo(a.profit)
             );
 
             return sortedByProfitRoutes[0];
         }
 
+        let gasLimit = gasRequests[0].defaultGasLimit;
+
+        if (this.walletAddress) {
+            const { callData } = gasRequests[0];
+            const estimatedGas = await this.web3Public.getEstimatedGas(
+                this.InstantTradeClass.contractAbi,
+                this.InstantTradeClass.getContractAddress(),
+                callData.contractMethod,
+                callData.params,
+                this.walletAddress,
+                callData.value
+            );
+            if (estimatedGas?.isFinite()) {
+                gasLimit = estimatedGas;
+            }
+        }
+
         return {
             route: routes[0],
-            estimatedGas: gasLimits[0]
+            estimatedGas: gasLimit
         };
     }
 
@@ -175,7 +214,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
                 const finalPath = path.concat(this.to);
                 routesPaths.push(finalPath);
                 routesMethodArguments.push([
-                    this.from.stringWeiAmount,
+                    this.stringWeiAmount,
                     Token.tokensToAddresses(finalPath)
                 ]);
                 return;

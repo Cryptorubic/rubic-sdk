@@ -94,12 +94,12 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     private get callParameters() {
         const { amountIn, amountOut } = this.getAmountInAndAmountOut();
+        const amountParameters = this.from.isNative ? [amountOut] : [amountIn, amountOut];
 
         return [
-            amountIn,
-            amountOut,
+            ...amountParameters,
             this.path.map(t => t.address),
-            this.to.address,
+            this.walletAddress,
             this.deadlineMinutesTimestamp
         ];
     }
