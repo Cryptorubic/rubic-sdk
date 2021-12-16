@@ -8,7 +8,7 @@
     "dist"
   ],
   "scripts": {
-    "build": " webpack",
+    "build": " webpack && tscpaths -p ./tsconfig.json -s ./src -o ./dist",
     "compile": "tsc && tscpaths -p ./tsconfig.json -s ./src -o ./dist"
   },
   "dependencies": {
