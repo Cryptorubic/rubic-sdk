@@ -1,3 +1,1 @@
-import { SDK } from './core/sdk/sdk';
-
-export default SDK;
+export { SDK } from './core/sdk/sdk';
