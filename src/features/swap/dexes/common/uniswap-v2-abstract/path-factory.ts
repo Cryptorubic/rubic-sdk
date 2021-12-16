@@ -21,7 +21,7 @@ import { Pure } from '@common/decorators/pure.decorator';
 export interface PathFactoryStruct {
     readonly from: PriceToken;
     readonly to: PriceToken;
-    readonly amount: BigNumber;
+    readonly weiAmount: BigNumber;
     readonly exact: 'input' | 'output';
     readonly options: Required<SwapCalculationOptions>;
 }
@@ -40,7 +40,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
     private readonly to: PriceToken;
 
-    private readonly amount: BigNumber;
+    private readonly weiAmount: BigNumber;
 
     private readonly exact: 'input' | 'output';
 
@@ -58,8 +58,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
     @Pure
     private get stringWeiAmount(): string {
-        const token = this.exact === 'input' ? this.from : this.to;
-        return Web3Pure.toWei(this.amount, token.decimals);
+        return this.weiAmount.toFixed(0);
     }
 
     constructor(
@@ -72,7 +71,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
         this.from = pathFactoryStruct.from;
         this.to = pathFactoryStruct.to;
-        this.amount = pathFactoryStruct.amount;
+        this.weiAmount = pathFactoryStruct.weiAmount;
         this.exact = pathFactoryStruct.exact;
         this.options = pathFactoryStruct.options;
         this.InstantTradeClass = uniswapProviderStruct.InstantTradeClass;
@@ -87,7 +86,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         gasPriceInUsd: BigNumber | undefined
     ): Promise<UniswapCalculatedInfo> {
         const routes = (await this.getAllRoutes()).sort((a, b) =>
-            b.outputAbsoluteAmount.gt(a.outputAbsoluteAmount) ? 1 : -1
+            b.outputAbsoluteAmount.comparedTo(a.outputAbsoluteAmount)
         );
         if (routes.length === 0) {
             throw new InsufficientLiquidityError();
@@ -103,7 +102,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             const trade: UniswapV2AbstractTrade = new this.InstantTradeClass({
                 from: new PriceTokenAmount({
                     ...this.from.asStruct,
-                    tokenAmount: this.amount
+                    weiAmount: this.weiAmount
                 }),
                 to: new PriceTokenAmount({
                     ...this.to.asStruct,
@@ -145,7 +144,6 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
                     const gasFeeInUsd = estimatedGas.multipliedBy(gasPriceInUsd);
                     const profit = Web3Pure.fromWei(route.outputAbsoluteAmount, this.to.decimals)
                         .multipliedBy(this.to.price)
-                        .multipliedBy(this.exact === 'input' ? 1 : -1)
                         .minus(gasFeeInUsd);
 
                     return {
@@ -157,7 +155,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             );
 
             const sortedByProfitRoutes = routesWithProfit.sort((a, b) =>
-                b.profit.minus(a.profit).gt(0) ? 1 : -1
+                b.profit.comparedTo(a.profit)
             );
 
             return sortedByProfitRoutes[0];

@@ -11,7 +11,6 @@ import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-a
 import BigNumber from 'bignumber.js';
 import { UniswapCalculatedInfo } from '@features/swap/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
 import { createTokenNativeAddressProxy } from '@features/swap/dexes/common/utils/token-native-address-proxy';
-import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 
 export abstract class UniswapV2AbstractProvider<
     T extends UniswapV2AbstractTrade = UniswapV2AbstractTrade
@@ -34,7 +33,7 @@ export abstract class UniswapV2AbstractProvider<
         to: PriceToken,
         options?: SwapCalculationOptions
     ): Promise<UniswapV2AbstractTrade> {
-        return this.calculateDifficultTrade(from, to, from.tokenAmount, 'input', options);
+        return this.calculateDifficultTrade(from, to, from.weiAmount, 'input', options);
     }
 
     public async calculateExactOutput(
@@ -42,13 +41,13 @@ export abstract class UniswapV2AbstractProvider<
         to: PriceTokenAmount,
         options?: SwapCalculationOptions
     ): Promise<UniswapV2AbstractTrade> {
-        return this.calculateDifficultTrade(from, to, to.tokenAmount, 'output', options);
+        return this.calculateDifficultTrade(from, to, to.weiAmount, 'output', options);
     }
 
     public async calculateDifficultTrade(
         from: PriceToken,
         to: PriceToken,
-        amount: BigNumber,
+        weiAmount: BigNumber,
         exact: 'input' | 'output',
         options?: SwapCalculationOptions
     ): Promise<UniswapV2AbstractTrade> {
@@ -68,15 +67,14 @@ export abstract class UniswapV2AbstractProvider<
         const { route, estimatedGas } = await this.getAmountAndPath(
             fromProxy,
             toProxy,
-            amount,
+            weiAmount,
             exact,
             fullOptions,
             gasPriceInfo?.gasPriceInUsd
         );
 
-        const amountAbsolute = new BigNumber(Web3Pure.toWei(amount));
-        const fromAmount = exact === 'input' ? amountAbsolute : route.outputAbsoluteAmount;
-        const toAmount = exact === 'output' ? amountAbsolute : route.outputAbsoluteAmount;
+        const fromAmount = exact === 'input' ? weiAmount : route.outputAbsoluteAmount;
+        const toAmount = exact === 'output' ? weiAmount : route.outputAbsoluteAmount;
 
         const instantTrade: UniswapV2AbstractTrade = new this.InstantTradeClass({
             from: new PriceTokenAmount({ ...to.asStruct, weiAmount: fromAmount }),
@@ -98,12 +96,12 @@ export abstract class UniswapV2AbstractProvider<
     private async getAmountAndPath(
         from: PriceToken,
         to: PriceToken,
-        amount: BigNumber,
+        weiAmount: BigNumber,
         exact: 'input' | 'output',
         options: Required<SwapCalculationOptions>,
         gasPriceInUsd: BigNumber | undefined
     ): Promise<UniswapCalculatedInfo> {
-        const pathFactory = new PathFactory(this, { from, to, amount, exact, options });
+        const pathFactory = new PathFactory(this, { from, to, weiAmount, exact, options });
         return pathFactory.getAmountAndPath(gasPriceInUsd);
     }
 }
