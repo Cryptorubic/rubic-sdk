@@ -9,3 +9,4 @@
 /test/env.js
 /.env.relayer
 /e2e/env.js
+/dist-tests/

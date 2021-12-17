@@ -11,7 +11,7 @@ export class Web3PublicService {
     private static readonly healthCheckDefaultTimeout: 4_000;
 
     public static async createWeb3PublicService(
-        rpcList: Record<BLOCKCHAIN_NAME, RpcProvider>
+        rpcList: Partial<Record<BLOCKCHAIN_NAME, RpcProvider>>
     ): Promise<Web3PublicService> {
         const web3PublicService = new Web3PublicService(rpcList);
         await web3PublicService.createAndCheckWeb3Public();
@@ -20,7 +20,7 @@ export class Web3PublicService {
 
     private web3PublicStorage: Partial<Record<BLOCKCHAIN_NAME, Web3Public>> = {};
 
-    constructor(private rpcList: Record<BLOCKCHAIN_NAME, RpcProvider>) {}
+    constructor(private rpcList: Partial<Record<BLOCKCHAIN_NAME, RpcProvider>>) {}
 
     public getWeb3Public(blockchainName: BLOCKCHAIN_NAME): Web3Public {
         const web3Public = this.web3PublicStorage[blockchainName];

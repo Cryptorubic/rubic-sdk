@@ -5,7 +5,7 @@ import { provider } from 'web3-core';
 
 export interface Configuration {
     readonly walletProvider?: WalletProvider;
-    readonly rpcProviders: Record<BLOCKCHAIN_NAME, RpcProvider>;
+    readonly rpcProviders: Partial<Record<BLOCKCHAIN_NAME, RpcProvider>>;
     readonly httpClient?: HttpClient;
 }
 
