@@ -1,5 +1,4 @@
 const path = require('path');
-const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 module.exports = {
     entry: './src/index.ts',
@@ -21,18 +20,18 @@ module.exports = {
             "src": path.resolve(__dirname, 'src'),
         },
         fallback: {
-            "fs": require.resolve('browserify-fs'),
-            "constants": require.resolve('constants-browserify'),
-            "querystring": require.resolve('querystring'),
-            "url": require.resolve('url'),
-            "path": require.resolve('path-browserify'),
-            "os": require.resolve('os-browserify/browser'),
-            "http": require.resolve("stream-http"),
-            "https": require.resolve("https-browserify"),
-            "zlib": require.resolve("browserify-zlib"),
-            "stream": require.resolve("stream-browserify"),
-            "crypto": require.resolve('crypto-browserify'),
-            "got": require.resolve('got'),
+            "fs": false,
+            "constants": false,
+            "querystring": false,
+            "url": false,
+            "path": false,
+            "os": false,
+            "http": false,
+            "https": false,
+            "zlib": false,
+            "stream": false,
+            "crypto": false,
+            "got": false,
             "async_hooks": false,
             "electron": false,
             "child_process": false,

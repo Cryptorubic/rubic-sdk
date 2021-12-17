@@ -3,8 +3,8 @@ import { TransactionConfig } from 'web3-core';
 import { AbiItem } from 'web3-utils';
 import { TransactionGasParams } from '../../../features/swap/models/gas-params';
 export declare class Web3Pure {
-    private static web3;
     static readonly ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+    private static web3Eth;
     /**
      * @description gets address of native coin {@link NATIVE_TOKEN_ADDRESS}
      */

@@ -8,33 +8,23 @@
     "dist"
   ],
   "scripts": {
-    "build": " webpack && tscpaths -p ./tsconfig.json -s ./src -o ./dist",
-    "compile": "tsc && tscpaths -p ./tsconfig.json -s ./src -o ./dist"
+    "build": "webpack --profile --json > ./dist/stats.json && tscpaths -p ./tsconfig.json -s ./src -o ./dist",
+    "compile": "tsc && tscpaths -p ./tsconfig.json -s ./src -o ./dist",
+    "analyze": "webpack --profile --json > stats.json &&  webpack-bundle-analyzer stats.json"
   },
   "dependencies": {
     "assert": "^2.0.0",
     "axios": "^0.22.0",
     "bignumber.js": "^9.0.1",
-    "browserify-fs": "^1.0.0",
-    "browserify-zlib": "^0.2.0",
-    "constants-browserify": "^1.0.0",
-    "crypto-browserify": "^3.12.0",
-    "got": "^12.0.0",
-    "https-browserify": "^1.0.0",
-    "os-browserify": "^0.3.0",
     "p-timeout": "^5.0.2",
-    "path-browserify": "^1.0.1",
-    "querystring": "^0.2.1",
     "rxjs": "^7.4.0",
-    "stream-browserify": "^3.0.0",
-    "stream-http": "^3.2.0",
-    "url": "^0.11.0",
     "web3": "^1.5.2"
   },
   "devDependencies": {
     "@types/jest": "^26.0.23",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
+    "compression-webpack-plugin": "^9.2.0",
     "eslint": "^7.25.0",
     "eslint-config-airbnb-typescript": "^12.3.1",
     "eslint-config-prettier": "^8.3.0",

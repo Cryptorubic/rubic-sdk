@@ -1,15 +1,15 @@
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
 import BigNumber from 'bignumber.js';
-import Web3 from 'web3';
+import { Eth } from 'web3-eth';
 import { TransactionConfig } from 'web3-core';
 import { toChecksumAddress, isAddress, toWei, fromWei, AbiItem } from 'web3-utils';
 import { TransactionGasParams } from '@features/swap/models/gas-params';
 
 export class Web3Pure {
-    private static web3 = new Web3();
-
     public static readonly ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
+    private static web3Eth = new Eth();
 
     /**
      * @description gets address of native coin {@link NATIVE_TOKEN_ADDRESS}
@@ -113,7 +113,7 @@ export class Web3Pure {
         value?: string,
         options: TransactionGasParams = {}
     ): TransactionConfig {
-        const contract = new this.web3.eth.Contract(contractAbi);
+        const contract = new this.web3Eth.Contract(contractAbi);
         const data = contract.methods[method](...parameters).encodeABI();
         return {
             to: contractAddress,
@@ -140,9 +140,6 @@ export class Web3Pure {
         if (methodSignature === undefined) {
             throw Error('No such method in abi');
         }
-        return Web3Pure.web3.eth.abi.encodeFunctionCall(
-            methodSignature,
-            methodArguments as string[]
-        );
+        return this.web3Eth.abi.encodeFunctionCall(methodSignature, methodArguments as string[]);
     }
 }
