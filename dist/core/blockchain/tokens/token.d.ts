@@ -1,5 +1,5 @@
-import { BLOCKCHAIN_NAME } from '../models/BLOCKCHAIN_NAME';
-import { TokenBaseStruct } from '../models/token-base-struct';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
 export declare type TokenStruct = {
     blockchain: BLOCKCHAIN_NAME;
     address: string;

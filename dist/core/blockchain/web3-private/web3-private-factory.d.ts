@@ -1,5 +1,5 @@
-import { Web3Private } from './web3-private';
-import { WalletProvider } from '../../sdk/models/configuration';
+import { Web3Private } from '@core/blockchain/web3-private/web3-private';
+import { WalletProvider } from '@core/sdk/models/configuration';
 import Web3 from 'web3';
 import { provider } from 'web3-core';
 export declare class Web3PrivateFactory {

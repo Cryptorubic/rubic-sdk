@@ -16,10 +16,10 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PangolinTrade = void 0;
-var constants_1 = require("./constants");
-var avax_abi_1 = require("../avax-abi");
-var swap_methods_1 = require("../swap-methods");
-var uniswap_v2_abstract_trade_1 = require("../../common/uniswap-v2-abstract/uniswap-v2-abstract-trade");
+var constants_1 = require("@features/swap/dexes/avalanche/pangolin/constants");
+var avax_abi_1 = require("@features/swap/dexes/avalanche/avax-abi");
+var swap_methods_1 = require("@features/swap/dexes/avalanche/swap-methods");
+var uniswap_v2_abstract_trade_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade");
 var PangolinTrade = /** @class */ (function (_super) {
     __extends(PangolinTrade, _super);
     function PangolinTrade(tradeStruct) {

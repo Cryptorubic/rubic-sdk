@@ -1,5 +1,5 @@
-import { HttpClient } from '../models/http-client';
-import { BLOCKCHAIN_NAME } from '../../core/blockchain/models/BLOCKCHAIN_NAME';
+import { HttpClient } from '@common/models/http-client';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import BigNumber from 'bignumber.js';
 export declare class CoingeckoApi {
     private readonly httpClient;

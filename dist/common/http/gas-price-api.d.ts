@@ -1,6 +1,6 @@
-import { BLOCKCHAIN_NAME } from '../../core/blockchain/models/BLOCKCHAIN_NAME';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import BigNumber from 'bignumber.js';
-import { HttpClient } from '../models/http-client';
+import { HttpClient } from '@common/models/http-client';
 export declare class GasPriceApi {
     private readonly httpClient;
     /**

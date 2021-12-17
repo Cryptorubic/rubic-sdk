@@ -1,6 +1,6 @@
-import { BLOCKCHAIN_NAME } from '../models/BLOCKCHAIN_NAME';
-import { Web3Public } from './web3-public';
-import { RpcProvider } from '../../sdk/models/configuration';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { Web3Public } from '@core/blockchain/web3-public/web3-public';
+import { RpcProvider } from '@core/sdk/models/configuration';
 export declare class Web3PublicService {
     private rpcList;
     private static readonly mainRpcDefaultTimeout;

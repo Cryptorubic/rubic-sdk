@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BlockchainsInfo = void 0;
-var blockchains_1 = require("./constants/blockchains");
+var blockchains_1 = require("@core/blockchain/constants/blockchains");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
 var BlockchainsInfo = /** @class */ (function () {
     function BlockchainsInfo() {

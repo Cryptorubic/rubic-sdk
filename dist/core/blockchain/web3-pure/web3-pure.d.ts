@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { TransactionConfig } from 'web3-core';
 import { AbiItem } from 'web3-utils';
-import { TransactionGasParams } from '../../../features/swap/models/gas-params';
+import { TransactionGasParams } from '@features/swap/models/gas-params';
 export declare class Web3Pure {
     static readonly ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
     private static web3Eth;

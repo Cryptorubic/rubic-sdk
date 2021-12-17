@@ -81,18 +81,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OneinchAbstractProvider = void 0;
-var options_1 = require("../../../../../common/utils/options");
-var price_token_amount_1 = require("../../../../../core/blockchain/tokens/price-token-amount");
-var token_1 = require("../../../../../core/blockchain/tokens/token");
-var injector_1 = require("../../../../../core/sdk/injector");
-var constants_1 = require("./constants");
-var rubic_sdk_error_1 = require("../../../../../common/errors/rubic-sdk-error");
-var utils_1 = require("./utils");
+var options_1 = require("@common/utils/options");
+var price_token_amount_1 = require("@core/blockchain/tokens/price-token-amount");
+var token_1 = require("@core/blockchain/tokens/token");
+var injector_1 = require("@core/sdk/injector");
+var constants_1 = require("@features/swap/dexes/common/oneinch-common/constants");
+var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
+var utils_1 = require("@features/swap/dexes/common/oneinch-common/utils");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var oneinch_trade_1 = require("./oneinch-trade");
-var instant_trade_provider_1 = require("../../../instant-trade-provider");
-var pure_decorator_1 = require("../../../../../common/decorators/pure.decorator");
-var token_native_address_proxy_1 = require("../utils/token-native-address-proxy");
+var oneinch_trade_1 = require("@features/swap/dexes/common/oneinch-common/oneinch-trade");
+var instant_trade_provider_1 = require("@features/swap/instant-trade-provider");
+var pure_decorator_1 = require("@common/decorators/pure.decorator");
+var token_native_address_proxy_1 = require("@features/swap/dexes/common/utils/token-native-address-proxy");
 var OneinchAbstractProvider = /** @class */ (function (_super) {
     __extends(OneinchAbstractProvider, _super);
     function OneinchAbstractProvider() {

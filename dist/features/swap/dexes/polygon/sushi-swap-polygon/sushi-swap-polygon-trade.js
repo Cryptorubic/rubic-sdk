@@ -16,8 +16,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SushiSwapPolygonTrade = void 0;
-var uniswap_v2_abstract_trade_1 = require("../../common/uniswap-v2-abstract/uniswap-v2-abstract-trade");
-var constants_1 = require("./constants");
+var uniswap_v2_abstract_trade_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade");
+var constants_1 = require("@features/swap/dexes/polygon/sushi-swap-polygon/constants");
 var SushiSwapPolygonTrade = /** @class */ (function (_super) {
     __extends(SushiSwapPolygonTrade, _super);
     function SushiSwapPolygonTrade(tradeStruct) {

@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { UniswapRoute } from './uniswap-route';
+import { UniswapRoute } from '@features/swap/dexes/common/uniswap-v2-abstract/models/uniswap-route';
 export interface UniswapCalculatedInfo {
     route: UniswapRoute;
     estimatedGas?: BigNumber;

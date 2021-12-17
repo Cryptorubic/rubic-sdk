@@ -1,10 +1,10 @@
-import { CrossChainSupportedBlockchain } from './constants/CrossChainSupportedBlockchains';
-import { Token } from '../../core/blockchain/tokens/token';
-import { CrossChainOptions } from './models/cross-chain-options';
-import { BLOCKCHAIN_NAME } from '../../core/blockchain/models/BLOCKCHAIN_NAME';
-import { PriceTokenAmount } from '../../core/blockchain/tokens/price-token-amount';
-import { CrossChainTrade } from './cross-chain-trade/cross-chain-trade';
-import { PriceToken } from '../../core/blockchain/tokens/price-token';
+import { CrossChainSupportedBlockchain } from '@features/cross-chain/constants/CrossChainSupportedBlockchains';
+import { Token } from '@core/blockchain/tokens/token';
+import { CrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
+import { CrossChainTrade } from '@features/cross-chain/cross-chain-trade/cross-chain-trade';
+import { PriceToken } from '@core/blockchain/tokens/price-token';
 export declare class CrossChainManager {
     static isSupportedBlockchain(blockchain: BLOCKCHAIN_NAME): blockchain is CrossChainSupportedBlockchain;
     private readonly contracts;

@@ -54,12 +54,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InstantTrade = void 0;
-var cache_decorator_1 = require("../../common/decorators/cache.decorator");
-var rubic_sdk_error_1 = require("../../common/errors/rubic-sdk-error");
-var wallet_not_connected_error_1 = require("../../common/errors/swap/wallet-not-connected.error");
-var wrong_network_error_1 = require("../../common/errors/swap/wrong-network.error");
-var price_token_amount_1 = require("../../core/blockchain/tokens/price-token-amount");
-var injector_1 = require("../../core/sdk/injector");
+var cache_decorator_1 = require("@common/decorators/cache.decorator");
+var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
+var wallet_not_connected_error_1 = require("@common/errors/swap/wallet-not-connected.error");
+var wrong_network_error_1 = require("@common/errors/swap/wrong-network.error");
+var price_token_amount_1 = require("@core/blockchain/tokens/price-token-amount");
+var injector_1 = require("@core/sdk/injector");
 var InstantTrade = /** @class */ (function () {
     function InstantTrade(blockchain) {
         this.web3Private = injector_1.Injector.web3Private;

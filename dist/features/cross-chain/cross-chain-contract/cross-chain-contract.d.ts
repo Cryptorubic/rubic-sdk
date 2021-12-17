@@ -1,8 +1,8 @@
-import { BLOCKCHAIN_NAME } from '../../../core/blockchain/models/BLOCKCHAIN_NAME';
-import { Token } from '../../../core/blockchain/tokens/token';
-import { PriceTokenAmount } from '../../../core/blockchain/tokens/price-token-amount';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { Token } from '@core/blockchain/tokens/token';
+import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import BigNumber from 'bignumber.js';
-import { UniswapV2AbstractProvider } from '../../swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
+import { UniswapV2AbstractProvider } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
 export declare class CrossChainContract {
     private readonly blockchain;
     readonly address: string;

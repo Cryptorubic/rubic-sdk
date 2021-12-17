@@ -66,9 +66,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PriceTokenAmount = void 0;
-var price_token_1 = require("./price-token");
+var price_token_1 = require("@core/blockchain/tokens/price-token");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var web3_pure_1 = require("../web3-pure/web3-pure");
+var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
 var PriceTokenAmount = /** @class */ (function (_super) {
     __extends(PriceTokenAmount, _super);
     function PriceTokenAmount(tokenStruct) {

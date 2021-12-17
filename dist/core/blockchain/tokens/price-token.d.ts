@@ -1,5 +1,5 @@
-import { TokenBaseStruct } from '../models/token-base-struct';
-import { Token, TokenStruct } from './token';
+import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
+import { Token, TokenStruct } from '@core/blockchain/tokens/token';
 import BigNumber from 'bignumber.js';
 declare type PriceTokenStruct = ConstructorParameters<typeof Token>[number] & {
     price: BigNumber;

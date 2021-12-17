@@ -1,8 +1,8 @@
-import { PriceTokenAmount } from '../../../../../core/blockchain/tokens/price-token-amount';
-import { PriceToken } from '../../../../../core/blockchain/tokens/price-token';
-import { OneinchTrade } from './oneinch-trade';
-import { InstantTradeProvider } from '../../../instant-trade-provider';
-import { SwapCalculationOptions } from '../../../models/swap-calculation-options';
+import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
+import { PriceToken } from '@core/blockchain/tokens/price-token';
+import { OneinchTrade } from '@features/swap/dexes/common/oneinch-common/oneinch-trade';
+import { InstantTradeProvider } from '@features/swap/instant-trade-provider';
+import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
 declare type OneinchSwapCalculationOptions = Omit<SwapCalculationOptions, 'deadlineMinutes'>;
 export declare abstract class OneinchAbstractProvider extends InstantTradeProvider {
     private readonly httpClient;

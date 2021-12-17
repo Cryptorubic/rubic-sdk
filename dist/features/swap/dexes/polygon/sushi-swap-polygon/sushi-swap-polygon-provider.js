@@ -16,10 +16,10 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SushiSwapPolygonProvider = void 0;
-var BLOCKCHAIN_NAME_1 = require("../../../../../core/blockchain/models/BLOCKCHAIN_NAME");
-var uniswap_v2_abstract_provider_1 = require("../../common/uniswap-v2-abstract/uniswap-v2-abstract-provider");
-var constants_1 = require("./constants");
-var sushi_swap_polygon_trade_1 = require("./sushi-swap-polygon-trade");
+var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
+var uniswap_v2_abstract_provider_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider");
+var constants_1 = require("@features/swap/dexes/polygon/sushi-swap-polygon/constants");
+var sushi_swap_polygon_trade_1 = require("@features/swap/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-trade");
 var SushiSwapPolygonProvider = /** @class */ (function (_super) {
     __extends(SushiSwapPolygonProvider, _super);
     function SushiSwapPolygonProvider() {

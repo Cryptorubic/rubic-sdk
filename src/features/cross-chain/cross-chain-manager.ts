@@ -1,9 +1,9 @@
+import { getCrossChainContract } from '@features/cross-chain/constants/crossChainContracts';
 import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
 import {
     CrossChainSupportedBlockchain,
     crossChainSupportedBlockchains
 } from '@features/cross-chain/constants/CrossChainSupportedBlockchains';
-import { crossChainContracts } from '@features/cross-chain/constants/crossChainContracts';
 import { Token } from '@core/blockchain/tokens/token';
 import BigNumber from 'bignumber.js';
 import { CrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
@@ -55,12 +55,12 @@ export class CrossChainManager {
         );
     }
 
-    private readonly contracts: Record<CrossChainSupportedBlockchain, CrossChainContract[]>;
+    private readonly contracts: (blockchain: CrossChainSupportedBlockchain) => CrossChainContract[];
 
     private readonly getWeb3Public: (blockchain: BLOCKCHAIN_NAME) => Web3Public;
 
     constructor() {
-        this.contracts = crossChainContracts;
+        this.contracts = getCrossChainContract;
         this.getWeb3Public = Injector.web3PublicService.getWeb3Public;
     }
 
@@ -144,7 +144,7 @@ export class CrossChainManager {
         from: PriceTokenAmount,
         slippageTolerance: number
     ): Promise<ContractTrade> {
-        const promises: Promise<CalculatedContractTrade>[] = this.contracts[blockchain].map(
+        const promises: Promise<CalculatedContractTrade>[] = this.contracts(blockchain).map(
             async contract => {
                 const toToken = await contract.getTransitToken();
                 const toPriceToken = new PriceToken({ ...toToken, price: new BigNumber(NaN) });
@@ -190,7 +190,7 @@ export class CrossChainManager {
         toToken: PriceToken,
         slippageTolerance: number
     ): Promise<ContractTrade> {
-        const promises: Promise<CalculatedContractTrade>[] = this.contracts[blockchain].map(
+        const promises: Promise<CalculatedContractTrade>[] = this.contracts(blockchain).map(
             async contract => {
                 const fromToken = await contract.getTransitToken();
                 const from = new PriceTokenAmount({

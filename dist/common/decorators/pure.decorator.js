@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Pure = void 0;
-var rubic_sdk_error_1 = require("../errors/rubic-sdk-error");
+var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
 function Pure(_target, propertyKey, _a) {
     var get = _a.get, enumerable = _a.enumerable;
     if (!get) {

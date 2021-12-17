@@ -1,10 +1,10 @@
-import { CrossChainSupportedBlockchain } from '../../constants/CrossChainSupportedBlockchains';
-import { CrossChainContract } from '../../cross-chain-contract/cross-chain-contract';
-import { ContractTrade } from './ContractTrade';
+import { CrossChainSupportedBlockchain } from '@features/cross-chain/constants/CrossChainSupportedBlockchains';
+import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
+import { ContractTrade } from '@features/cross-chain/models/ContractTrade/ContractTrade';
 import BigNumber from 'bignumber.js';
-import { PriceTokenAmount } from '../../../../core/blockchain/tokens/price-token-amount';
-import { UniswapV2AbstractTrade } from '../../../swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
-import { Token } from '../../../../core/blockchain/tokens/token';
+import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
+import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { Token } from '@core/blockchain/tokens/token';
 export declare class ItContractTrade extends ContractTrade {
     readonly blockchain: CrossChainSupportedBlockchain;
     readonly contract: CrossChainContract;

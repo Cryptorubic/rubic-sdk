@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blockchains = void 0;
-var native_token_address_1 = require("./native-token-address");
-var BLOCKCHAIN_NAME_1 = require("../models/BLOCKCHAIN_NAME");
-var token_1 = require("../tokens/token");
+var native_token_address_1 = require("@core/blockchain/constants/native-token-address");
+var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
+var token_1 = require("@core/blockchain/tokens/token");
 exports.blockchains = [
     {
         id: 1,

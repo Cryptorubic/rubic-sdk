@@ -75,17 +75,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UniswapV2AbstractTrade = void 0;
-var low_slippage_deflationary_token_error_1 = require("../../../../../common/errors/swap/low-slippage-deflationary-token.error");
-var low_slippage_error_1 = require("../../../../../common/errors/swap/low-slippage.error");
-var functions_1 = require("../../../../../common/utils/functions");
-var web3_pure_1 = require("../../../../../core/blockchain/web3-pure/web3-pure");
-var injector_1 = require("../../../../../core/sdk/injector");
-var instant_trade_1 = require("../../../instant-trade");
-var default_estimated_gas_1 = require("./constants/default-estimated-gas");
-var SWAP_METHOD_1 = require("./constants/SWAP_METHOD");
-var uniswap_v2_abi_1 = require("./constants/uniswap-v2-abi");
+var low_slippage_deflationary_token_error_1 = require("@common/errors/swap/low-slippage-deflationary-token.error");
+var low_slippage_error_1 = require("@common/errors/swap/low-slippage.error");
+var functions_1 = require("@common/utils/functions");
+var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
+var injector_1 = require("@core/sdk/injector");
+var instant_trade_1 = require("@features/swap/instant-trade");
+var default_estimated_gas_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/constants/default-estimated-gas");
+var SWAP_METHOD_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/constants/SWAP_METHOD");
+var uniswap_v2_abi_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var options_1 = require("../../../../../common/utils/options");
+var options_1 = require("src/common/utils/options");
 var UniswapV2AbstractTrade = /** @class */ (function (_super) {
     __extends(UniswapV2AbstractTrade, _super);
     function UniswapV2AbstractTrade(tradeStruct) {

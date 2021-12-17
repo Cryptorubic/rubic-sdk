@@ -1,8 +1,8 @@
-import { Web3Private } from '../blockchain/web3-private/web3-private';
-import { Web3PublicService } from '../blockchain/web3-public/web3-public-service';
-import { Configuration } from './models/configuration';
-import { CrossChainManager } from '../../features/cross-chain/cross-chain-manager';
-import { InstantTradesManager } from '../../features/swap/instant-trades-manager';
+import { Web3Private } from '@core/blockchain/web3-private/web3-private';
+import { Web3PublicService } from '@core/blockchain/web3-public/web3-public-service';
+import { Configuration } from '@core/sdk/models/configuration';
+import { CrossChainManager } from '@features/cross-chain/cross-chain-manager';
+import { InstantTradesManager } from '@features/swap/instant-trades-manager';
 export declare class SDK {
     readonly instantTrades: InstantTradesManager;
     readonly crossChain: CrossChainManager;

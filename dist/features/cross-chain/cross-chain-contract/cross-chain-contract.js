@@ -57,13 +57,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CrossChainContract = void 0;
-var injector_1 = require("../../../core/sdk/injector");
-var cache_decorator_1 = require("../../../common/decorators/cache.decorator");
-var token_1 = require("../../../core/blockchain/tokens/token");
-var price_token_amount_1 = require("../../../core/blockchain/tokens/price-token-amount");
+var injector_1 = require("@core/sdk/injector");
+var cache_decorator_1 = require("@common/decorators/cache.decorator");
+var token_1 = require("@core/blockchain/tokens/token");
+var price_token_amount_1 = require("@core/blockchain/tokens/price-token-amount");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var blockchains_info_1 = require("../../../core/blockchain/blockchains-info");
-var crossChainContractAbi_1 = require("../constants/crossChainContractAbi");
+var blockchains_info_1 = require("@core/blockchain/blockchains-info");
+var crossChainContractAbi_1 = require("@features/cross-chain/constants/crossChainContractAbi");
 var CrossChainContract = /** @class */ (function () {
     function CrossChainContract(blockchain, address, uniswapV2Provider) {
         this.blockchain = blockchain;

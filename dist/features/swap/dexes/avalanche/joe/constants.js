@@ -12,7 +12,7 @@ var __assign = (this && this.__assign) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JOE_PROVIDER_CONFIGURATION = exports.JOE_CONTRACT_ADDRESS = void 0;
-var default_constants_1 = require("../default-constants");
+var default_constants_1 = require("@features/swap/dexes/avalanche/default-constants");
 exports.JOE_CONTRACT_ADDRESS = '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7';
 var routingProvidersAddresses = [
     '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',

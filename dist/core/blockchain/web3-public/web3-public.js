@@ -76,17 +76,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Web3Public = void 0;
-var cache_decorator_1 = require("../../../common/decorators/cache.decorator");
-var healthcheck_error_1 = require("../../../common/errors/healthcheck.error");
-var erc_20_abi_1 = require("../constants/erc-20-abi");
-var healthcheck_1 = require("../constants/healthcheck");
-var multicall_abi_1 = require("./constants/multicall-abi");
-var multicall_addresses_1 = require("./constants/multicall-addresses");
-var web3_pure_1 = require("../web3-pure/web3-pure");
+var cache_decorator_1 = require("@common/decorators/cache.decorator");
+var healthcheck_error_1 = require("@common/errors/healthcheck.error");
+var erc_20_abi_1 = require("@core/blockchain/constants/erc-20-abi");
+var healthcheck_1 = require("@core/blockchain/constants/healthcheck");
+var multicall_abi_1 = require("@core/blockchain/web3-public/constants/multicall-abi");
+var multicall_addresses_1 = require("@core/blockchain/web3-public/constants/multicall-addresses");
+var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
 var p_timeout_1 = __importStar(require("p-timeout"));
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var insufficient_funds_error_1 = require("../../../common/errors/swap/insufficient-funds-error");
-var default_http_client_1 = require("../../../common/http/default-http-client");
+var insufficient_funds_error_1 = require("@common/errors/swap/insufficient-funds-error");
+var default_http_client_1 = require("@common/http/default-http-client");
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
  * To send transaction or execute contract method use {@link Web3Private}.

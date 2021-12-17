@@ -1,10 +1,10 @@
-import { PriceToken } from '../../../../../core/blockchain/tokens/price-token';
-import { PriceTokenAmount } from '../../../../../core/blockchain/tokens/price-token-amount';
-import { SwapCalculationOptions } from '../../../models/swap-calculation-options';
-import { UniswapV2ProviderConfiguration } from './models/uniswap-v2-provider-configuration';
-import { UniswapV2TradeClass } from './models/uniswap-v2-trade-class';
-import { InstantTradeProvider } from '../../../instant-trade-provider';
-import { UniswapV2AbstractTrade } from './uniswap-v2-abstract-trade';
+import { PriceToken } from '@core/blockchain/tokens/price-token';
+import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
+import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
+import { UniswapV2ProviderConfiguration } from '@features/swap/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { UniswapV2TradeClass } from '@features/swap/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-class';
+import { InstantTradeProvider } from '@features/swap/instant-trade-provider';
+import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
 export declare abstract class UniswapV2AbstractProvider<T extends UniswapV2AbstractTrade = UniswapV2AbstractTrade> extends InstantTradeProvider {
     abstract readonly InstantTradeClass: UniswapV2TradeClass<T>;

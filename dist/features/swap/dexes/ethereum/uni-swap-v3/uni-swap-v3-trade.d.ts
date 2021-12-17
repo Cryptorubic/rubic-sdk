@@ -1,14 +1,14 @@
-import { InstantTrade } from '../../../instant-trade';
-import { PriceTokenAmount } from '../../../../../core/blockchain/tokens/price-token-amount';
-import { UniSwapV3Route } from './models/uni-swap-v3-route';
-import { SwapTransactionOptions } from '../../../models/swap-transaction-options';
+import { InstantTrade } from '@features/swap/instant-trade';
+import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
+import { UniSwapV3Route } from '@features/swap/dexes/ethereum/uni-swap-v3/models/uni-swap-v3-route';
+import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import { TransactionReceipt } from 'web3-eth';
-import { PriceToken } from '../../../../../core/blockchain/tokens/price-token';
+import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { TransactionConfig } from 'web3-core';
-import { EncodeTransactionOptions } from '../../../models/encode-transaction-options';
-import { GasFeeInfo } from '../../../models/gas-fee-info';
-import { Token } from '../../../../../core/blockchain/tokens/token';
-import { SwapOptions } from '../../../models/swap-options';
+import { EncodeTransactionOptions } from '@features/swap/models/encode-transaction-options';
+import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
+import { Token } from '@core/blockchain/tokens/token';
+import { SwapOptions } from '@features/swap/models/swap-options';
 import BigNumber from 'bignumber.js';
 declare type UniswapV3TradeStruct = {
     from: PriceTokenAmount;

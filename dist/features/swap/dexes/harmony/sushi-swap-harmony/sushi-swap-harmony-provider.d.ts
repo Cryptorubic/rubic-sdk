@@ -1,6 +1,6 @@
-import { BLOCKCHAIN_NAME } from '../../../../../core/blockchain/models/BLOCKCHAIN_NAME';
-import { UniswapV2AbstractProvider } from '../../common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
-import { SushiSwapHarmonyTrade } from './sushi-swap-harmony-trade';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { UniswapV2AbstractProvider } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
+import { SushiSwapHarmonyTrade } from '@features/swap/dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-trade';
 export declare class SushiSwapHarmonyProvider extends UniswapV2AbstractProvider<SushiSwapHarmonyTrade> {
     readonly blockchain = BLOCKCHAIN_NAME.HARMONY;
     readonly InstantTradeClass: typeof SushiSwapHarmonyTrade;

@@ -15,7 +15,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var rubic_sdk_error_1 = require("../rubic-sdk-error");
+var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
 var InsufficientFundsOneinchError = /** @class */ (function (_super) {
     __extends(InsufficientFundsOneinchError, _super);
     function InsufficientFundsOneinchError() {

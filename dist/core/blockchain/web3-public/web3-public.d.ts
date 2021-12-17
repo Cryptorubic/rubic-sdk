@@ -1,14 +1,14 @@
-import { BLOCKCHAIN_NAME } from '../models/BLOCKCHAIN_NAME';
-import { BatchCall } from './models/batch-call';
-import { ContractMulticallResponse } from './models/contract-multicall-response';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BatchCall } from '@core/blockchain/web3-public/models/batch-call';
+import { ContractMulticallResponse } from '@core/blockchain/web3-public/models/contract-multicall-response';
 import Web3 from 'web3';
 import BigNumber from 'bignumber.js';
 import { Method } from 'web3-core-method';
 import { Transaction, provider as Provider, BlockNumber } from 'web3-core';
 import { AbiItem } from 'web3-utils';
 import { BlockTransactionString } from 'web3-eth';
-import { HttpClient } from '../../../common/models/http-client';
-import { MethodData } from './models/method-data';
+import { HttpClient } from '@common/models/http-client';
+import { MethodData } from '@core/blockchain/web3-public/models/method-data';
 declare type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.

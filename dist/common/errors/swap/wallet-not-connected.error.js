@@ -16,7 +16,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WalletNotConnectedError = void 0;
-var rubic_sdk_error_1 = require("../rubic-sdk-error");
+var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
 var WalletNotConnectedError = /** @class */ (function (_super) {
     __extends(WalletNotConnectedError, _super);
     function WalletNotConnectedError() {

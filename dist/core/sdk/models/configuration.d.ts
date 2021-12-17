@@ -1,5 +1,5 @@
-import { HttpClient } from '../../../common/models/http-client';
-import { BLOCKCHAIN_NAME } from '../../blockchain/models/BLOCKCHAIN_NAME';
+import { HttpClient } from '@common/models/http-client';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import Web3 from 'web3';
 import { provider } from 'web3-core';
 export interface Configuration {

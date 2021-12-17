@@ -1,4 +1,4 @@
-import { Token } from '../../../../../../../../core/blockchain/tokens/token';
+import { Token } from '@core/blockchain/tokens/token';
 export declare type FeeAmount = 500 | 3000 | 10000;
 /**
  * Represents liquidity pool in uni v3.

@@ -37,12 +37,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SDK = void 0;
-var default_http_client_1 = require("../../common/http/default-http-client");
-var web3_private_factory_1 = require("../blockchain/web3-private/web3-private-factory");
-var web3_public_service_1 = require("../blockchain/web3-public/web3-public-service");
-var injector_1 = require("./injector");
-var cross_chain_manager_1 = require("../../features/cross-chain/cross-chain-manager");
-var instant_trades_manager_1 = require("../../features/swap/instant-trades-manager");
+var default_http_client_1 = require("@common/http/default-http-client");
+var web3_private_factory_1 = require("@core/blockchain/web3-private/web3-private-factory");
+var web3_public_service_1 = require("@core/blockchain/web3-public/web3-public-service");
+var injector_1 = require("@core/sdk/injector");
+var cross_chain_manager_1 = require("@features/cross-chain/cross-chain-manager");
+var instant_trades_manager_1 = require("@features/swap/instant-trades-manager");
 var SDK = /** @class */ (function () {
     function SDK() {
         this.web3PublicService = injector_1.Injector.web3PublicService;
@@ -54,14 +54,17 @@ var SDK = /** @class */ (function () {
     }
     SDK.createSDK = function (configuration) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, web3PublicService, web3Private, httpClient;
+            var web3PrPromise, _a, web3PublicService, web3Private, httpClient;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4 /*yield*/, Promise.all([
-                            SDK.createWeb3PublicService(configuration),
-                            SDK.createWeb3Private(configuration),
-                            SDK.createHttpClient(configuration)
-                        ])];
+                    case 0:
+                        web3PrPromise = SDK.createWeb3Private(configuration);
+                        console.log(web3PrPromise);
+                        return [4 /*yield*/, Promise.all([
+                                SDK.createWeb3PublicService(configuration),
+                                web3PrPromise,
+                                SDK.createHttpClient(configuration)
+                            ])];
                     case 1:
                         _a = _b.sent(), web3PublicService = _a[0], web3Private = _a[1], httpClient = _a[2];
                         injector_1.Injector.createInjector(web3PublicService, web3Private, httpClient);

@@ -1,10 +1,10 @@
-import { InstantTrade } from '../../../instant-trade';
-import { SwapTransactionOptions } from '../../../models/swap-transaction-options';
+import { InstantTrade } from '@features/swap/instant-trade';
+import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import { TransactionReceipt } from 'web3-eth';
-import { ZrxQuoteResponse } from './models/zrx-types';
-import { PriceTokenAmount } from '../../../../../core/blockchain/tokens/price-token-amount';
-import { GasFeeInfo } from '../../../models/gas-fee-info';
-import { EncodeTransactionOptions } from '../../../models/encode-transaction-options';
+import { ZrxQuoteResponse } from '@features/swap/dexes/common/zrx-common/models/zrx-types';
+import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
+import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
+import { EncodeTransactionOptions } from '@features/swap/models/encode-transaction-options';
 import { TransactionConfig } from 'web3-core';
 interface ZrxTradeStruct {
     from: PriceTokenAmount;

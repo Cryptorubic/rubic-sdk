@@ -22,8 +22,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ItContractTrade = void 0;
-var ContractTrade_1 = require("./ContractTrade");
-var pure_decorator_1 = require("../../../../common/decorators/pure.decorator");
+var ContractTrade_1 = require("@features/cross-chain/models/ContractTrade/ContractTrade");
+var pure_decorator_1 = require("@common/decorators/pure.decorator");
 var ItContractTrade = /** @class */ (function (_super) {
     __extends(ItContractTrade, _super);
     function ItContractTrade(blockchain, contract, slippageTolerance, instantTrade) {

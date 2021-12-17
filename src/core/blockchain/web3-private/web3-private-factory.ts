@@ -29,20 +29,21 @@ export class Web3PrivateFactory {
         return web3PrivateFactory.createWeb3Private();
     }
 
-    private static createWeb3PrivateEmptyProxy(): Web3Private {
-        const web3Private = new Web3Private({
-            web3: new Web3(),
-            address: '',
-            blockchainName: BLOCKCHAIN_NAME.ETHEREUM
-        });
-
-        return new Proxy(web3Private, {
-            get() {
-                throw new RubicSdkError(
-                    'Cant call web3Private method because walletProvider was not configurated. Try to pass walletProvider to sdk configuration'
-                );
-            }
-        });
+    private static createWeb3PrivateEmptyProxy(): Promise<Web3Private> {
+        return Promise.resolve(
+            new Proxy({} as Web3Private, {
+                get(_, prop) {
+                    // Promise resolving procedure checks if `then` property exists in resolved object
+                    // https://promisesaplus.com/
+                    if (prop === 'then') {
+                        return;
+                    }
+                    throw new RubicSdkError(
+                        'Cant call web3Private method because walletProvider was not configurated. Try to pass walletProvider to sdk configuration'
+                    );
+                }
+            })
+        );
     }
 
     constructor(

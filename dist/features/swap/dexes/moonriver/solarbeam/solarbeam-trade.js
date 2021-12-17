@@ -16,9 +16,9 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SolarbeamTrade = void 0;
-var injector_1 = require("../../../../../core/sdk/injector");
-var uniswap_v2_abstract_trade_1 = require("../../common/uniswap-v2-abstract/uniswap-v2-abstract-trade");
-var constants_1 = require("./constants");
+var injector_1 = require("@core/sdk/injector");
+var uniswap_v2_abstract_trade_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade");
+var constants_1 = require("@features/swap/dexes/moonriver/solarbeam/constants");
 var SolarbeamTrade = /** @class */ (function (_super) {
     __extends(SolarbeamTrade, _super);
     function SolarbeamTrade(tradeStruct) {

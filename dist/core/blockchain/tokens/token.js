@@ -48,10 +48,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Token = void 0;
-var rubic_sdk_error_1 = require("../../../common/errors/rubic-sdk-error");
-var web3_pure_1 = require("../web3-pure/web3-pure");
-var injector_1 = require("../../sdk/injector");
-var blockchain_1 = require("../../../common/utils/blockchain");
+var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
+var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
+var injector_1 = require("@core/sdk/injector");
+var blockchain_1 = require("@common/utils/blockchain");
 var Token = /** @class */ (function () {
     function Token(tokenStruct) {
         this.blockchain = tokenStruct.blockchain;

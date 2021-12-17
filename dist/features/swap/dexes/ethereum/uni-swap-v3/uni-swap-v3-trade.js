@@ -69,17 +69,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UniSwapV3Trade = void 0;
-var options_1 = require("../../../../../common/utils/options");
-var instant_trade_1 = require("../../../instant-trade");
-var price_token_amount_1 = require("../../../../../core/blockchain/tokens/price-token-amount");
-var BLOCKCHAIN_NAME_1 = require("../../../../../core/blockchain/models/BLOCKCHAIN_NAME");
-var swap_router_contract_data_1 = require("./constants/swap-router-contract-data");
-var blockchain_1 = require("../../../../../common/utils/blockchain");
-var liquidity_pools_controller_1 = require("./utils/liquidity-pool-controller/liquidity-pools-controller");
-var web3_pure_1 = require("../../../../../core/blockchain/web3-pure/web3-pure");
-var estimated_gas_1 = require("./constants/estimated-gas");
-var injector_1 = require("../../../../../core/sdk/injector");
-var pure_decorator_1 = require("../../../../../common/decorators/pure.decorator");
+var options_1 = require("@common/utils/options");
+var instant_trade_1 = require("@features/swap/instant-trade");
+var price_token_amount_1 = require("@core/blockchain/tokens/price-token-amount");
+var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
+var swap_router_contract_data_1 = require("@features/swap/dexes/ethereum/uni-swap-v3/constants/swap-router-contract-data");
+var blockchain_1 = require("@common/utils/blockchain");
+var liquidity_pools_controller_1 = require("@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/liquidity-pools-controller");
+var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
+var estimated_gas_1 = require("@features/swap/dexes/ethereum/uni-swap-v3/constants/estimated-gas");
+var injector_1 = require("@core/sdk/injector");
+var pure_decorator_1 = require("@common/decorators/pure.decorator");
 var UniSwapV3Trade = /** @class */ (function (_super) {
     __extends(UniSwapV3Trade, _super);
     function UniSwapV3Trade(tradeStruct) {

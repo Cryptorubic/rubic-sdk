@@ -40,8 +40,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InstantTradeProvider = void 0;
-var injector_1 = require("../../core/sdk/injector");
-var web3_pure_1 = require("../../core/blockchain/web3-pure/web3-pure");
+var injector_1 = require("@core/sdk/injector");
+var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
 var InstantTradeProvider = /** @class */ (function () {
     function InstantTradeProvider() {

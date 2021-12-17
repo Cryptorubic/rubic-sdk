@@ -51,13 +51,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Web3Private = void 0;
-var erc_20_abi_1 = require("../constants/erc-20-abi");
+var erc_20_abi_1 = require("@core/blockchain/constants/erc-20-abi");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var low_gas_error_1 = require("../../../common/errors/low-gas-error");
-var user_reject_error_1 = require("../../../common/errors/user-reject-error");
-var transaction_reverted_error_1 = require("../../../common/errors/transaction-reverted-error");
-var rubic_sdk_error_1 = require("../../../common/errors/rubic-sdk-error");
-var FailedToCheckForTransactionReceiptError_1 = require("../../../common/errors/swap/FailedToCheckForTransactionReceiptError");
+var low_gas_error_1 = require("@common/errors/low-gas-error");
+var user_reject_error_1 = require("@common/errors/user-reject-error");
+var transaction_reverted_error_1 = require("@common/errors/transaction-reverted-error");
+var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
+var FailedToCheckForTransactionReceiptError_1 = require("@common/errors/swap/FailedToCheckForTransactionReceiptError");
 /**
  * Class containing methods for executing the functions of contracts and sending transactions in order to change the state of the blockchain.
  * To get information from the blockchain use {@link Web3Public}.

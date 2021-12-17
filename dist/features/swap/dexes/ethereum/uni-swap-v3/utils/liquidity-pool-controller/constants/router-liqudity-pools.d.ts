@@ -1,4 +1,4 @@
-import { FeeAmount } from '../models/liquidity-pool';
+import { FeeAmount } from '@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/models/liquidity-pool';
 /**
  * Most popular tokens in uni v3 to use in a route.
  */

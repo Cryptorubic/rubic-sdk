@@ -16,7 +16,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UnnecessaryApprove = void 0;
-var rubic_sdk_error_1 = require("../rubic-sdk-error");
+var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
 var UnnecessaryApprove = /** @class */ (function (_super) {
     __extends(UnnecessaryApprove, _super);
     function UnnecessaryApprove() {

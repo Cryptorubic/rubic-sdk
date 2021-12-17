@@ -16,8 +16,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SushiSwapMoonriverTrade = void 0;
-var uniswap_v2_abstract_trade_1 = require("../../common/uniswap-v2-abstract/uniswap-v2-abstract-trade");
-var constants_1 = require("./constants");
+var uniswap_v2_abstract_trade_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade");
+var constants_1 = require("@features/swap/dexes/moonriver/sushi-swap-moonriver/constants");
 var SushiSwapMoonriverTrade = /** @class */ (function (_super) {
     __extends(SushiSwapMoonriverTrade, _super);
     function SushiSwapMoonriverTrade(tradeStruct) {
