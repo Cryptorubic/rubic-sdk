@@ -15,7 +15,7 @@ module.exports = {
     }
   },
   moduleNameMapper: {
-    '^src/(.*)$': '<root-dir>/.././src/$1',
+    '^src/(.*)$': '<root-dir>/../../src/$1',
     '@core/(.*)$': '<root-dir>/../../src/core/$1',
     '@common/(.*)$': '<root-dir>/../../src/common/$1',
     '@features/(.*)$': '<root-dir>/../../src/features/$1'
