@@ -1,7 +1,7 @@
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
 import BigNumber from 'bignumber.js';
-import { Eth } from 'web3-eth';
+import Web3 from 'web3';
 import { TransactionConfig } from 'web3-core';
 import { toChecksumAddress, isAddress, toWei, fromWei, AbiItem } from 'web3-utils';
 import { TransactionGasParams } from '@features/swap/models/gas-params';
@@ -9,7 +9,7 @@ import { TransactionGasParams } from '@features/swap/models/gas-params';
 export class Web3Pure {
     public static readonly ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-    private static web3Eth = new Eth();
+    private static web3Eth = new Web3().eth;
 
     /**
      * @description gets address of native coin {@link NATIVE_TOKEN_ADDRESS}
