@@ -1,3 +1,5 @@
+import { Cache } from '@common/decorators/cache.decorator';
+import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { LowSlippageDeflationaryTokenError } from '@common/errors/swap/low-slippage-deflationary-token.error';
 import { LowSlippageError } from '@common/errors/swap/low-slippage.error';
 import { tryExecuteAsync } from '@common/utils/functions';
@@ -5,12 +7,12 @@ import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Token } from '@core/blockchain/tokens/token';
 import { Web3Private } from '@core/blockchain/web3-private/web3-private';
+import { BatchCall } from '@core/blockchain/web3-public/models/batch-call';
 import { ContractMulticallResponse } from '@core/blockchain/web3-public/models/contract-multicall-response';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { Injector } from '@core/sdk/injector';
-import { EstimatedGasCallData } from '@features/swap/dexes/common/uniswap-v2-abstract/models/estimated-gas-call-data';
 import { InstantTrade } from '@features/swap/instant-trade';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import { defaultEstimatedGas } from '@features/swap/dexes/common/uniswap-v2-abstract/constants/default-estimated-gas';
@@ -41,6 +43,22 @@ export type UniswapV2TradeStruct = {
 };
 
 export abstract class UniswapV2AbstractTrade extends InstantTrade {
+    @Cache
+    public static getContractAddress(blockchain: BLOCKCHAIN_NAME): string {
+        try {
+            // see  https://github.com/microsoft/TypeScript/issues/34516
+            // @ts-ignore
+            const instance = new this({ from: { blockchain } });
+            if (!instance.contractAddress) {
+                throw new RubicSdkError('Trying to read abstract class field');
+            }
+            return instance.contractAddress;
+        } catch (e) {
+            console.debug(e);
+            throw new RubicSdkError('Trying to read abstract class field');
+        }
+    }
+
     public static readonly contractAbi: AbiItem[] = defaultUniswapV2Abi;
 
     public static readonly swapMethods: ExactInputOutputSwapMethodsList = SWAP_METHOD;
@@ -55,7 +73,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
         const methodName = exact === 'input' ? 'getAmountsOut' : 'getAmountsIn';
         return web3Public.multicallContractMethod<{ amounts: string[] }>(
-            this.getContractAddress(),
+            this.getContractAddress(blockchain),
             this.contractAbi,
             methodName,
             routesMethodArguments
@@ -253,20 +271,20 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         ]) as Parameters<InstanceType<typeof Web3Public>['callContractMethod']>;
     }
 
-    public getEstimatedGasCallData(): EstimatedGasCallData {
+    public getEstimatedGasCallData(): BatchCall {
         return this.estimateGasForAnyToAnyTrade();
     }
 
-    private estimateGasForAnyToAnyTrade(): EstimatedGasCallData {
-        const defaultGasLimit = new BigNumber(this.getGasLimit());
+    public getDefaultEstimatedGas(): BigNumber {
+        return new BigNumber(this.getGasLimit());
+    }
+
+    private estimateGasForAnyToAnyTrade(): BatchCall {
         const value = this.nativeValueToSend;
         return {
-            defaultGasLimit,
-            callData: {
-                contractMethod: this.regularSwapMethod,
-                params: this.callParameters,
-                ...(value && { value })
-            }
+            contractMethod: this.regularSwapMethod,
+            params: this.callParameters,
+            ...(value && { value })
         };
     }
 

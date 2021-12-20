@@ -3,6 +3,7 @@ import { notNull } from '@common/utils/object';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Token } from '@core/blockchain/tokens/token';
+import { BatchCall } from '@core/blockchain/web3-public/models/batch-call';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@core/sdk/injector';
@@ -98,41 +99,19 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             };
         }
 
-        const gasRequests = routes.map(route => {
-            const fromAmount = this.exact === 'input' ? this.weiAmount : route.outputAbsoluteAmount;
-            const toAmount = this.exact === 'output' ? this.weiAmount : route.outputAbsoluteAmount;
-
-            const trade: UniswapV2AbstractTrade = new this.InstantTradeClass({
-                from: new PriceTokenAmount({
-                    ...this.from.asStruct,
-                    weiAmount: fromAmount
-                }),
-                to: new PriceTokenAmount({
-                    ...this.to.asStruct,
-                    weiAmount: toAmount
-                }),
-                path: route.path,
-                exact: this.exact,
-                deadlineMinutes: this.options.deadlineMinutes,
-                slippageTolerance: this.options.slippageTolerance
-            });
-
-            return trade.getEstimatedGasCallData();
-        });
-
         if (
             this.options.gasCalculation === 'rubicOptimisation' &&
             this.to.price?.isFinite() &&
             gasPriceInUsd
         ) {
-            const gasLimits = gasRequests.map(item => item.defaultGasLimit);
+            const gasLimits = this.getDefaultGases(routes);
 
             if (this.walletAddress) {
                 const estimatedGasLimits = await this.web3Public.batchEstimatedGas(
                     this.InstantTradeClass.contractAbi,
-                    this.InstantTradeClass.getContractAddress(),
+                    this.InstantTradeClass.getContractAddress(this.from.blockchain),
                     this.walletAddress,
-                    gasRequests.map(item => item.callData)
+                    this.getGasRequests(routes)
                 );
                 estimatedGasLimits.forEach((elem, index) => {
                     if (elem?.isFinite()) {
@@ -172,13 +151,13 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             return sortedByProfitRoutes[0];
         }
 
-        let gasLimit = gasRequests[0].defaultGasLimit;
+        let gasLimit = this.getDefaultGases(routes.slice(0, 1))[0];
 
         if (this.walletAddress) {
-            const { callData } = gasRequests[0];
+            const callData = this.getGasRequests(routes.slice(0, 1))[0];
             const estimatedGas = await this.web3Public.getEstimatedGas(
                 this.InstantTradeClass.contractAbi,
-                this.InstantTradeClass.getContractAddress(),
+                this.InstantTradeClass.getContractAddress(this.from.blockchain),
                 callData.contractMethod,
                 callData.params,
                 this.walletAddress,
@@ -193,6 +172,36 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             route: routes[0],
             estimatedGas: gasLimit
         };
+    }
+
+    private getGasRequests(routes: UniswapRoute[]): BatchCall[] {
+        return this.getTradesByRoutes(routes).map(trade => trade.getEstimatedGasCallData());
+    }
+
+    private getDefaultGases(routes: UniswapRoute[]): BigNumber[] {
+        return this.getTradesByRoutes(routes).map(trade => trade.getDefaultEstimatedGas());
+    }
+
+    private getTradesByRoutes(routes: UniswapRoute[]): UniswapV2AbstractTrade[] {
+        return routes.map(route => {
+            const fromAmount = this.exact === 'input' ? this.weiAmount : route.outputAbsoluteAmount;
+            const toAmount = this.exact === 'output' ? this.weiAmount : route.outputAbsoluteAmount;
+
+            return new this.InstantTradeClass({
+                from: new PriceTokenAmount({
+                    ...this.from.asStruct,
+                    weiAmount: fromAmount
+                }),
+                to: new PriceTokenAmount({
+                    ...this.to.asStruct,
+                    weiAmount: toAmount
+                }),
+                path: route.path,
+                exact: this.exact,
+                deadlineMinutes: this.options.deadlineMinutes,
+                slippageTolerance: this.options.slippageTolerance
+            });
+        });
     }
 
     private async getAllRoutes(): Promise<UniswapRoute[]> {

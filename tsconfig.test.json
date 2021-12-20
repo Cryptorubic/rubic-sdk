@@ -13,7 +13,7 @@
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es5",
+    "target": "ESNext",
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,

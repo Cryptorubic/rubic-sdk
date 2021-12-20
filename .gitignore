@@ -10,3 +10,4 @@
 /.env.relayer
 /e2e/env.js
 /dist-tests/
+/__tests__/env.js

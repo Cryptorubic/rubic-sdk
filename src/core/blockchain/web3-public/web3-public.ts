@@ -5,6 +5,7 @@ import {
     HEALTHCHECK,
     isBlockchainHealthcheckAvailable
 } from '@core/blockchain/constants/healthcheck';
+import { nativeTokensList } from '@core/blockchain/constants/native-tokens';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { MULTICALL_ABI } from '@core/blockchain/web3-public/constants/multicall-abi';
 import { MULTICALL_ADDRESSES } from '@core/blockchain/web3-public/constants/multicall-addresses';
@@ -454,6 +455,10 @@ export class Web3Public {
         tokenAddress: string,
         tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
     ): Promise<Partial<Record<SupportedTokenField, string>>> {
+        if (Web3Pure.isNativeAddress(tokenAddress)) {
+            const nativeToken = nativeTokensList[this.blockchainName];
+            return { ...nativeToken, decimals: nativeToken.decimals.toString() };
+        }
         const tokenFieldsPromises = tokenFields.map(method =>
             this.callContractMethod(tokenAddress, ERC20_TOKEN_ABI, method)
         );

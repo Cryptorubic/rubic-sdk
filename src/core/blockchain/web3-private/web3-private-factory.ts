@@ -38,6 +38,11 @@ export class Web3PrivateFactory {
                     if (prop === 'then') {
                         return;
                     }
+
+                    if (prop === 'address') {
+                        return;
+                    }
+
                     throw new RubicSdkError(
                         'Cant call web3Private method because walletProvider was not configurated. Try to pass walletProvider to sdk configuration'
                     );

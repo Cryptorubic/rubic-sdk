@@ -20,7 +20,7 @@ export class SolarbeamTrade extends UniswapV2AbstractTrade {
     ): Promise<ContractMulticallResponse<{ amounts: string[] }>[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
         return web3Public.multicallContractMethod<{ amounts: string[] }>(
-            this.getContractAddress(),
+            this.getContractAddress(blockchain),
             this.contractAbi,
             exact === 'input' ? 'getAmountsOut' : 'getAmountsIn',
             routesMethodArguments.map(args => args.concat(this.feeParameter))

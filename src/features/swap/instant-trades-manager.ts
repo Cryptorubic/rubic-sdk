@@ -98,15 +98,19 @@ export class InstantTradesManager {
                   address: string;
                   blockchain: BLOCKCHAIN_NAME;
               },
-        fromAmount: string,
+        fromAmount: string | number,
         toToken: Token | string,
         options?: SwapManagerCalculationOptions
-    ) {
+    ): Promise<TypedTrade[]> {
         if (toToken instanceof Token && fromToken.blockchain !== toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be same.');
         }
 
-        const { from, to } = await getPriceTokensFromInputTokens(fromToken, fromAmount, toToken);
+        const { from, to } = await getPriceTokensFromInputTokens(
+            fromToken,
+            fromAmount.toString(),
+            toToken
+        );
 
         return this.calculateTradeFromTokens(from, to, this.getFullOptions(options));
     }

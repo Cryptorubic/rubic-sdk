@@ -1,4 +1,3 @@
-import { Cache } from '@common/decorators/cache.decorator';
 import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { WalletNotConnectedError } from '@common/errors/swap/wallet-not-connected.error';
 import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
@@ -13,33 +12,8 @@ import { TransactionReceipt } from 'web3-eth';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { OptionsGasParams, TransactionGasParams } from '@features/swap/models/gas-params';
-import { TradeType } from '@features/swap/models/trade-type';
 
 export abstract class InstantTrade {
-    @Cache
-    public static getContractAddress(): string {
-        if (!(this as unknown as { contractAddress: string })?.contractAddress) {
-            throw new RubicSdkError('Trying to read abstract class field');
-        }
-
-        // see  https://github.com/microsoft/TypeScript/issues/34516
-        // @ts-ignore
-        const instance = new this();
-        return instance.contractAddress;
-    }
-
-    @Cache
-    public static getTradeType(): string {
-        if (!(this as unknown as { tradeType: TradeType })?.tradeType) {
-            throw new RubicSdkError('Trying to read abstract class field');
-        }
-
-        // see  https://github.com/microsoft/TypeScript/issues/34516
-        // @ts-ignore
-        const instance = new this();
-        return instance.tradeType;
-    }
-
     public abstract readonly from: PriceTokenAmount;
 
     public abstract readonly to: PriceTokenAmount;

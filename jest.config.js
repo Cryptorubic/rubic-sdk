@@ -3,6 +3,7 @@ module.exports = {
   roots: [
     "src", "__tests__"
   ],
+  setupFiles: ["./__tests__/env.js"],
   moduleDirectories: ['node_modules', 'src'],
   testEnvironment: 'node',
   transform: {
