@@ -25,6 +25,12 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -75,17 +81,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UniswapV2AbstractTrade = void 0;
-var low_slippage_deflationary_token_error_1 = require("@common/errors/swap/low-slippage-deflationary-token.error");
-var low_slippage_error_1 = require("@common/errors/swap/low-slippage.error");
-var functions_1 = require("@common/utils/functions");
-var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
-var injector_1 = require("@core/sdk/injector");
-var instant_trade_1 = require("@features/swap/instant-trade");
-var default_estimated_gas_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/constants/default-estimated-gas");
-var SWAP_METHOD_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/constants/SWAP_METHOD");
-var uniswap_v2_abi_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi");
+var cache_decorator_1 = require("../../../../../common/decorators/cache.decorator");
+var rubic_sdk_error_1 = require("../../../../../common/errors/rubic-sdk-error");
+var low_slippage_deflationary_token_error_1 = require("../../../../../common/errors/swap/low-slippage-deflationary-token.error");
+var low_slippage_error_1 = require("../../../../../common/errors/swap/low-slippage.error");
+var functions_1 = require("../../../../../common/utils/functions");
+var web3_pure_1 = require("../../../../../core/blockchain/web3-pure/web3-pure");
+var injector_1 = require("../../../../../core/sdk/injector");
+var instant_trade_1 = require("../../../instant-trade");
+var default_estimated_gas_1 = require("./constants/default-estimated-gas");
+var SWAP_METHOD_1 = require("./constants/SWAP_METHOD");
+var uniswap_v2_abi_1 = require("./constants/uniswap-v2-abi");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var options_1 = require("src/common/utils/options");
+var options_1 = require("../../../../../common/utils/options");
 var UniswapV2AbstractTrade = /** @class */ (function (_super) {
     __extends(UniswapV2AbstractTrade, _super);
     function UniswapV2AbstractTrade(tradeStruct) {
@@ -99,10 +107,25 @@ var UniswapV2AbstractTrade = /** @class */ (function (_super) {
         _this.slippageTolerance = tradeStruct.slippageTolerance;
         return _this;
     }
+    UniswapV2AbstractTrade.getContractAddress = function (blockchain) {
+        try {
+            // see  https://github.com/microsoft/TypeScript/issues/34516
+            // @ts-ignore
+            var instance = new this({ from: { blockchain: blockchain } });
+            if (!instance.contractAddress) {
+                throw new rubic_sdk_error_1.RubicSdkError('Trying to read abstract class field');
+            }
+            return instance.contractAddress;
+        }
+        catch (e) {
+            console.debug(e);
+            throw new rubic_sdk_error_1.RubicSdkError('Trying to read abstract class field');
+        }
+    };
     UniswapV2AbstractTrade.callForRoutes = function (blockchain, exact, routesMethodArguments) {
         var web3Public = injector_1.Injector.web3PublicService.getWeb3Public(blockchain);
         var methodName = exact === 'input' ? 'getAmountsOut' : 'getAmountsIn';
-        return web3Public.multicallContractMethod(this.getContractAddress(), this.contractAbi, methodName, routesMethodArguments);
+        return web3Public.multicallContractMethod(this.getContractAddress(blockchain), this.contractAbi, methodName, routesMethodArguments);
     };
     Object.defineProperty(UniswapV2AbstractTrade.prototype, "settings", {
         set: function (value) {
@@ -276,13 +299,12 @@ var UniswapV2AbstractTrade = /** @class */ (function (_super) {
     UniswapV2AbstractTrade.prototype.getEstimatedGasCallData = function () {
         return this.estimateGasForAnyToAnyTrade();
     };
+    UniswapV2AbstractTrade.prototype.getDefaultEstimatedGas = function () {
+        return new bignumber_js_1.default(this.getGasLimit());
+    };
     UniswapV2AbstractTrade.prototype.estimateGasForAnyToAnyTrade = function () {
-        var defaultGasLimit = new bignumber_js_1.default(this.getGasLimit());
         var value = this.nativeValueToSend;
-        return {
-            defaultGasLimit: defaultGasLimit,
-            callData: __assign({ contractMethod: this.regularSwapMethod, params: this.callParameters }, (value && { value: value }))
-        };
+        return __assign({ contractMethod: this.regularSwapMethod, params: this.callParameters }, (value && { value: value }));
     };
     UniswapV2AbstractTrade.prototype.getGasLimit = function (options) {
         var gasLimit = _super.prototype.getGasLimit.call(this, options);
@@ -302,6 +324,9 @@ var UniswapV2AbstractTrade = /** @class */ (function (_super) {
     UniswapV2AbstractTrade.contractAbi = uniswap_v2_abi_1.defaultUniswapV2Abi;
     UniswapV2AbstractTrade.swapMethods = SWAP_METHOD_1.SWAP_METHOD;
     UniswapV2AbstractTrade.defaultEstimatedGasInfo = default_estimated_gas_1.defaultEstimatedGas;
+    __decorate([
+        cache_decorator_1.Cache
+    ], UniswapV2AbstractTrade, "getContractAddress", null);
     return UniswapV2AbstractTrade;
 }(instant_trade_1.InstantTrade));
 exports.UniswapV2AbstractTrade = UniswapV2AbstractTrade;

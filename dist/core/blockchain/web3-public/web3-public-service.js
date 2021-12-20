@@ -68,8 +68,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Web3PublicService = void 0;
-var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
-var web3_public_1 = require("@core/blockchain/web3-public/web3-public");
+var rubic_sdk_error_1 = require("../../../common/errors/rubic-sdk-error");
+var web3_public_1 = require("./web3-public");
 var p_timeout_1 = __importStar(require("p-timeout"));
 var web3_1 = __importDefault(require("web3"));
 var Web3PublicService = /** @class */ (function () {

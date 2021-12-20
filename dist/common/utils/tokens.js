@@ -51,9 +51,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPriceTokensFromInputTokens = void 0;
-var token_1 = require("@core/blockchain/tokens/token");
-var price_token_1 = require("@core/blockchain/tokens/price-token");
-var price_token_amount_1 = require("@core/blockchain/tokens/price-token-amount");
+var token_1 = require("../../core/blockchain/tokens/token");
+var price_token_1 = require("../../core/blockchain/tokens/price-token");
+var price_token_amount_1 = require("../../core/blockchain/tokens/price-token-amount");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
 function getPriceTokensFromInputTokens(from, fromAmount, to) {
     return __awaiter(this, void 0, void 0, function () {

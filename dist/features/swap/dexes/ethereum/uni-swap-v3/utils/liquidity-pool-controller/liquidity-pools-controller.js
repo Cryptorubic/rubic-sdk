@@ -57,16 +57,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LiquidityPoolsController = void 0;
 var ts_cacheable_1 = require("ts-cacheable");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var liquidity_pool_1 = require("@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/models/liquidity-pool");
-var blockchain_1 = require("@common/utils/blockchain");
-var factory_contract_data_1 = require("@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/constants/factory-contract-data");
-var object_1 = require("@common/utils/object");
-var token_1 = require("@core/blockchain/tokens/token");
-var cache_decorator_1 = require("@common/decorators/cache.decorator");
-var quoter_contract_data_1 = require("@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/constants/quoter-contract-data");
-var router_liqudity_pools_1 = require("@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/constants/router-liqudity-pools");
-var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
+var liquidity_pool_1 = require("./models/liquidity-pool");
+var blockchain_1 = require("../../../../../../../common/utils/blockchain");
+var factory_contract_data_1 = require("./constants/factory-contract-data");
+var object_1 = require("../../../../../../../common/utils/object");
+var token_1 = require("../../../../../../../core/blockchain/tokens/token");
+var cache_decorator_1 = require("../../../../../../../common/decorators/cache.decorator");
+var quoter_contract_data_1 = require("./constants/quoter-contract-data");
+var router_liqudity_pools_1 = require("./constants/router-liqudity-pools");
+var web3_pure_1 = require("../../../../../../../core/blockchain/web3-pure/web3-pure");
+var BLOCKCHAIN_NAME_1 = require("../../../../../../../core/blockchain/models/BLOCKCHAIN_NAME");
 /**
  * Works with requests, related to Uniswap v3 liquidity pools.
  */

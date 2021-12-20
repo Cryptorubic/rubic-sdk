@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PConditionalCache = exports.PCache = exports.Cache = void 0;
-var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
+var rubic_sdk_error_1 = require("../errors/rubic-sdk-error");
 function generateKey() {
     var args = [];
     for (var _i = 0; _i < arguments.length; _i++) {

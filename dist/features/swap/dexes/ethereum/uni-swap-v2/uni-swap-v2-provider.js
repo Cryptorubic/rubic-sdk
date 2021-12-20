@@ -16,10 +16,10 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UniSwapV2Provider = void 0;
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
-var uniswap_v2_abstract_provider_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider");
-var constants_1 = require("@features/swap/dexes/ethereum/uni-swap-v2/constants");
-var uni_swap_v2_trade_1 = require("@features/swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-trade");
+var BLOCKCHAIN_NAME_1 = require("../../../../../core/blockchain/models/BLOCKCHAIN_NAME");
+var uniswap_v2_abstract_provider_1 = require("../../common/uniswap-v2-abstract/uniswap-v2-abstract-provider");
+var constants_1 = require("./constants");
+var uni_swap_v2_trade_1 = require("./uni-swap-v2-trade");
 var UniSwapV2Provider = /** @class */ (function (_super) {
     __extends(UniSwapV2Provider, _super);
     function UniSwapV2Provider() {

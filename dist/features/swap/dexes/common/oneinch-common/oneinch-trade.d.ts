@@ -1,11 +1,11 @@
-import { InstantTrade } from '@features/swap/instant-trade';
+import { InstantTrade } from '../../../instant-trade';
 import { TransactionReceipt } from 'web3-eth';
-import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
-import { Token } from '@core/blockchain/tokens/token';
+import { SwapTransactionOptions } from '../../../models/swap-transaction-options';
+import { PriceTokenAmount } from '../../../../../core/blockchain/tokens/price-token-amount';
+import { GasFeeInfo } from '../../../models/gas-fee-info';
+import { Token } from '../../../../../core/blockchain/tokens/token';
 import { TransactionConfig } from 'web3-core';
-import { EncodeFromAddressTransactionOptions } from '@features/swap/models/encode-transaction-options';
+import { EncodeFromAddressTransactionOptions } from '../../../models/encode-transaction-options';
 declare type OneinchTradeStruct = {
     contractAddress: string;
     from: PriceTokenAmount;

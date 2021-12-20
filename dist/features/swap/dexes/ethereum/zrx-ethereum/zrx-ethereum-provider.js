@@ -16,8 +16,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZrxEthereumProvider = void 0;
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
-var zrx_abstract_provider_1 = require("@features/swap/dexes/common/zrx-common/zrx-abstract-provider");
+var BLOCKCHAIN_NAME_1 = require("../../../../../core/blockchain/models/BLOCKCHAIN_NAME");
+var zrx_abstract_provider_1 = require("../../common/zrx-common/zrx-abstract-provider");
 var ZrxEthereumProvider = /** @class */ (function (_super) {
     __extends(ZrxEthereumProvider, _super);
     function ZrxEthereumProvider() {

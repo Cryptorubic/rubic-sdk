@@ -12,7 +12,7 @@ var __assign = (this && this.__assign) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SOLARBEAM_CONTRACT_ABI = exports.SOLARBEAM_PROVIDER_CONFIGURATION = exports.SOLARBEAM_CONTRACT_ADDRESS = void 0;
-var default_constants_1 = require("@features/swap/dexes/moonriver/default-constants");
+var default_constants_1 = require("../default-constants");
 exports.SOLARBEAM_CONTRACT_ADDRESS = '0xAA30eF758139ae4a7f798112902Bf6d65612045f';
 var routingProvidersAddresses = [
     '0x98878B06940aE243284CA214f92Bb71a2b032B8A',

@@ -16,10 +16,10 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PancakeSwapProvider = void 0;
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
-var constants_1 = require("@features/swap/dexes/bsc/pancake-swap/constants");
-var uniswap_v2_abstract_provider_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider");
-var pancake_swap_trade_1 = require("@features/swap/dexes/bsc/pancake-swap/pancake-swap-trade");
+var BLOCKCHAIN_NAME_1 = require("../../../../../core/blockchain/models/BLOCKCHAIN_NAME");
+var constants_1 = require("./constants");
+var uniswap_v2_abstract_provider_1 = require("../../common/uniswap-v2-abstract/uniswap-v2-abstract-provider");
+var pancake_swap_trade_1 = require("./pancake-swap-trade");
 var PancakeSwapProvider = /** @class */ (function (_super) {
     __extends(PancakeSwapProvider, _super);
     function PancakeSwapProvider() {

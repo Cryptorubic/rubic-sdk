@@ -10,12 +10,6 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -54,37 +48,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InstantTrade = void 0;
-var cache_decorator_1 = require("@common/decorators/cache.decorator");
-var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
-var wallet_not_connected_error_1 = require("@common/errors/swap/wallet-not-connected.error");
-var wrong_network_error_1 = require("@common/errors/swap/wrong-network.error");
-var price_token_amount_1 = require("@core/blockchain/tokens/price-token-amount");
-var injector_1 = require("@core/sdk/injector");
+var rubic_sdk_error_1 = require("../../common/errors/rubic-sdk-error");
+var wallet_not_connected_error_1 = require("../../common/errors/swap/wallet-not-connected.error");
+var wrong_network_error_1 = require("../../common/errors/swap/wrong-network.error");
+var price_token_amount_1 = require("../../core/blockchain/tokens/price-token-amount");
+var injector_1 = require("../../core/sdk/injector");
 var InstantTrade = /** @class */ (function () {
     function InstantTrade(blockchain) {
         this.web3Private = injector_1.Injector.web3Private;
         this.web3Public = injector_1.Injector.web3PublicService.getWeb3Public(blockchain);
     }
-    InstantTrade.getContractAddress = function () {
-        var _a;
-        if (!((_a = this) === null || _a === void 0 ? void 0 : _a.contractAddress)) {
-            throw new rubic_sdk_error_1.RubicSdkError('Trying to read abstract class field');
-        }
-        // see  https://github.com/microsoft/TypeScript/issues/34516
-        // @ts-ignore
-        var instance = new this();
-        return instance.contractAddress;
-    };
-    InstantTrade.getTradeType = function () {
-        var _a;
-        if (!((_a = this) === null || _a === void 0 ? void 0 : _a.tradeType)) {
-            throw new rubic_sdk_error_1.RubicSdkError('Trying to read abstract class field');
-        }
-        // see  https://github.com/microsoft/TypeScript/issues/34516
-        // @ts-ignore
-        var instance = new this();
-        return instance.tradeType;
-    };
     Object.defineProperty(InstantTrade.prototype, "walletAddress", {
         get: function () {
             return this.web3Private.address;
@@ -190,12 +163,6 @@ var InstantTrade = /** @class */ (function () {
         });
         return { gas: gas, gasPrice: gasPrice };
     };
-    __decorate([
-        cache_decorator_1.Cache
-    ], InstantTrade, "getContractAddress", null);
-    __decorate([
-        cache_decorator_1.Cache
-    ], InstantTrade, "getTradeType", null);
     return InstantTrade;
 }());
 exports.InstantTrade = InstantTrade;

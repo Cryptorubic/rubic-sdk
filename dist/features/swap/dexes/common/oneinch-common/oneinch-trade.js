@@ -72,15 +72,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OneinchTrade = void 0;
-var utils_1 = require("@features/swap/dexes/common/oneinch-common/utils");
-var instant_trade_1 = require("@features/swap/instant-trade");
-var injector_1 = require("@core/sdk/injector");
-var pure_decorator_1 = require("@common/decorators/pure.decorator");
+var utils_1 = require("./utils");
+var instant_trade_1 = require("../../../instant-trade");
+var injector_1 = require("../../../../../core/sdk/injector");
+var pure_decorator_1 = require("../../../../../common/decorators/pure.decorator");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
-var InsufficientFundsOneinchError_1 = __importDefault(require("@common/errors/swap/InsufficientFundsOneinchError"));
-var blockchains_1 = require("@core/blockchain/constants/blockchains");
-var low_slippage_error_1 = require("@common/errors/swap/low-slippage.error");
+var rubic_sdk_error_1 = require("../../../../../common/errors/rubic-sdk-error");
+var InsufficientFundsOneinchError_1 = __importDefault(require("../../../../../common/errors/swap/InsufficientFundsOneinchError"));
+var blockchains_1 = require("../../../../../core/blockchain/constants/blockchains");
+var low_slippage_error_1 = require("../../../../../common/errors/swap/low-slippage.error");
 var OneinchTrade = /** @class */ (function (_super) {
     __extends(OneinchTrade, _super);
     function OneinchTrade(oneinchTradeStruct) {

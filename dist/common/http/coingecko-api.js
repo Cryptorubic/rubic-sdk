@@ -65,12 +65,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CoingeckoApi = void 0;
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
+var BLOCKCHAIN_NAME_1 = require("../../core/blockchain/models/BLOCKCHAIN_NAME");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
 var p_timeout_1 = __importStar(require("p-timeout"));
 var ts_cacheable_1 = require("ts-cacheable");
-var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
-var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
+var rubic_sdk_error_1 = require("../errors/rubic-sdk-error");
+var web3_pure_1 = require("../../core/blockchain/web3-pure/web3-pure");
 var supportedBlockchains = [
     BLOCKCHAIN_NAME_1.BLOCKCHAIN_NAME.ETHEREUM,
     BLOCKCHAIN_NAME_1.BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
@@ -112,31 +112,35 @@ var CoingeckoApi = /** @class */ (function () {
      * @param blockchain Supported by {@link supportedBlockchains} blockchain.
      */
     CoingeckoApi.prototype.getNativeCoinPrice = function (blockchain) {
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function () {
             var coingeckoId, response, err_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
                         if (!CoingeckoApi.isSupportedBlockchain(blockchain)) {
                             throw new rubic_sdk_error_1.RubicSdkError("Blockchain ".concat(blockchain, " is not supported by coingecko-api"));
                         }
                         coingeckoId = this.nativeCoinsCoingeckoIds[blockchain];
-                        _a.label = 1;
+                        _c.label = 1;
                     case 1:
-                        _a.trys.push([1, 3, , 4]);
+                        _c.trys.push([1, 3, , 4]);
                         return [4 /*yield*/, (0, p_timeout_1.default)(this.httpClient.get("".concat(API_BASE_URL, "simple/price"), {
                                 params: { ids: coingeckoId, vs_currencies: 'usd' }
                             }), 3000)];
                     case 2:
-                        response = _a.sent();
+                        response = _c.sent();
                         return [2 /*return*/, new bignumber_js_1.default(response[coingeckoId].usd)];
                     case 3:
-                        err_1 = _a.sent();
+                        err_1 = _c.sent();
                         if (err_1 instanceof p_timeout_1.TimeoutError) {
-                            console.error('Coingecko cannot retrieve native coin price', err_1);
+                            console.debug('[RUBIC SDK]: Timeout Error. Coingecko cannot retrieve token price');
+                        }
+                        else if ((_b = (_a = err_1) === null || _a === void 0 ? void 0 : _a.message) === null || _b === void 0 ? void 0 : _b.includes('Request failed with status code 429')) {
+                            console.debug('[RUBIC SDK]: Too many requests. Coingecko cannot retrieve token price');
                         }
                         else {
-                            console.error(err_1);
+                            console.debug(err_1);
                         }
                         return [2 /*return*/, new bignumber_js_1.default(NaN)];
                     case 4: return [2 /*return*/];
@@ -149,31 +153,34 @@ var CoingeckoApi = /** @class */ (function () {
      * @param token Token to get price for.
      */
     CoingeckoApi.prototype.getErc20TokenPrice = function (token) {
-        var _a, _b;
+        var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function () {
             var blockchain, blockchainId, response, err_2;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            return __generator(this, function (_e) {
+                switch (_e.label) {
                     case 0:
                         blockchain = token.blockchain;
                         if (!CoingeckoApi.isSupportedBlockchain(blockchain)) {
                             throw new rubic_sdk_error_1.RubicSdkError("Blockchain ".concat(blockchain, " is not supported by coingecko-api"));
                         }
                         blockchainId = this.tokenBlockchainId[blockchain];
-                        _c.label = 1;
+                        _e.label = 1;
                     case 1:
-                        _c.trys.push([1, 3, , 4]);
+                        _e.trys.push([1, 3, , 4]);
                         return [4 /*yield*/, (0, p_timeout_1.default)(this.httpClient.get("".concat(API_BASE_URL, "coins/").concat(blockchainId, "/contract/").concat(token.address.toLowerCase())), 3000)];
                     case 2:
-                        response = _c.sent();
+                        response = _e.sent();
                         return [2 /*return*/, new bignumber_js_1.default(((_b = (_a = response === null || response === void 0 ? void 0 : response.market_data) === null || _a === void 0 ? void 0 : _a.current_price) === null || _b === void 0 ? void 0 : _b.usd) || NaN)];
                     case 3:
-                        err_2 = _c.sent();
+                        err_2 = _e.sent();
                         if (err_2 instanceof p_timeout_1.TimeoutError) {
-                            console.error('Coingecko cannot retrieve token price', err_2);
+                            console.debug('[RUBIC SDK]: Timeout Error. Coingecko cannot retrieve token price');
+                        }
+                        else if ((_d = (_c = err_2) === null || _c === void 0 ? void 0 : _c.message) === null || _d === void 0 ? void 0 : _d.includes('Request failed with status code 429')) {
+                            console.debug('[RUBIC SDK]: Too many requests. Coingecko cannot retrieve token price');
                         }
                         else {
-                            console.error(err_2);
+                            console.debug(err_2);
                         }
                         return [2 /*return*/, new bignumber_js_1.default(NaN)];
                     case 4: return [2 /*return*/];

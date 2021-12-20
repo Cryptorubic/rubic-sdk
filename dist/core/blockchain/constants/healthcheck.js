@@ -2,8 +2,8 @@
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isBlockchainHealthcheckAvailable = exports.healthcheckAvailableBlockchains = exports.HEALTHCHECK = void 0;
-var erc_20_abi_1 = require("@core/blockchain/constants/erc-20-abi");
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
+var erc_20_abi_1 = require("./erc-20-abi");
+var BLOCKCHAIN_NAME_1 = require("../models/BLOCKCHAIN_NAME");
 exports.HEALTHCHECK = (_a = {},
     _a[BLOCKCHAIN_NAME_1.BLOCKCHAIN_NAME.ETHEREUM] = {
         contractAddress: '0xdac17f958d2ee523a2206206994597c13d831ec7',

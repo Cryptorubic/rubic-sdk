@@ -1,9 +1,9 @@
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { UniSwapV3Trade } from '@features/swap/dexes/ethereum/uni-swap-v3/uni-swap-v3-trade';
-import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
-import { InstantTradeProvider } from '@features/swap/instant-trade-provider';
+import { BLOCKCHAIN_NAME } from '../../../../../core/blockchain/models/BLOCKCHAIN_NAME';
+import { PriceTokenAmount } from '../../../../../core/blockchain/tokens/price-token-amount';
+import { PriceToken } from '../../../../../core/blockchain/tokens/price-token';
+import { UniSwapV3Trade } from './uni-swap-v3-trade';
+import { SwapCalculationOptions } from '../../../models/swap-calculation-options';
+import { InstantTradeProvider } from '../../../instant-trade-provider';
 export declare class UniSwapV3Provider extends InstantTradeProvider {
     readonly blockchain = BLOCKCHAIN_NAME.ETHEREUM;
     protected readonly defaultOptions: Required<SwapCalculationOptions>;

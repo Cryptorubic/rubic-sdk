@@ -46,13 +46,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GasPriceApi = void 0;
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
-var injector_1 = require("@core/sdk/injector");
+var BLOCKCHAIN_NAME_1 = require("../../core/blockchain/models/BLOCKCHAIN_NAME");
+var injector_1 = require("../../core/sdk/injector");
 var ts_cacheable_1 = require("ts-cacheable");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
 var p_timeout_1 = __importDefault(require("p-timeout"));
-var rubic_sdk_error_1 = require("@common/errors/rubic-sdk-error");
-var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
+var rubic_sdk_error_1 = require("../errors/rubic-sdk-error");
+var web3_pure_1 = require("../../core/blockchain/web3-pure/web3-pure");
 var supportedBlockchains = [BLOCKCHAIN_NAME_1.BLOCKCHAIN_NAME.ETHEREUM, BLOCKCHAIN_NAME_1.BLOCKCHAIN_NAME.AVALANCHE];
 var GasPriceApi = /** @class */ (function () {
     function GasPriceApi(httpClient) {

@@ -76,17 +76,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Web3Public = void 0;
-var cache_decorator_1 = require("@common/decorators/cache.decorator");
-var healthcheck_error_1 = require("@common/errors/healthcheck.error");
-var erc_20_abi_1 = require("@core/blockchain/constants/erc-20-abi");
-var healthcheck_1 = require("@core/blockchain/constants/healthcheck");
-var multicall_abi_1 = require("@core/blockchain/web3-public/constants/multicall-abi");
-var multicall_addresses_1 = require("@core/blockchain/web3-public/constants/multicall-addresses");
-var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
+var cache_decorator_1 = require("../../../common/decorators/cache.decorator");
+var healthcheck_error_1 = require("../../../common/errors/healthcheck.error");
+var erc_20_abi_1 = require("../constants/erc-20-abi");
+var healthcheck_1 = require("../constants/healthcheck");
+var native_tokens_1 = require("../constants/native-tokens");
+var multicall_abi_1 = require("./constants/multicall-abi");
+var multicall_addresses_1 = require("./constants/multicall-addresses");
+var web3_pure_1 = require("../web3-pure/web3-pure");
 var p_timeout_1 = __importStar(require("p-timeout"));
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var insufficient_funds_error_1 = require("@common/errors/swap/insufficient-funds-error");
-var default_http_client_1 = require("@common/http/default-http-client");
+var insufficient_funds_error_1 = require("../../../common/errors/swap/insufficient-funds-error");
+var default_http_client_1 = require("../../../common/http/default-http-client");
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
  * To send transaction or execute contract method use {@link Web3Private}.
@@ -555,11 +556,15 @@ var Web3Public = /** @class */ (function () {
     Web3Public.prototype.callForTokenInfo = function (tokenAddress, tokenFields) {
         if (tokenFields === void 0) { tokenFields = ['decimals', 'symbol', 'name']; }
         return __awaiter(this, void 0, void 0, function () {
-            var tokenFieldsPromises, tokenFieldsResults;
+            var nativeToken, tokenFieldsPromises, tokenFieldsResults;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (web3_pure_1.Web3Pure.isNativeAddress(tokenAddress)) {
+                            nativeToken = native_tokens_1.nativeTokensList[this.blockchainName];
+                            return [2 /*return*/, __assign(__assign({}, nativeToken), { decimals: nativeToken.decimals.toString() })];
+                        }
                         tokenFieldsPromises = tokenFields.map(function (method) {
                             return _this.callContractMethod(tokenAddress, erc_20_abi_1.ERC20_TOKEN_ABI, method);
                         });
@@ -599,8 +604,9 @@ var Web3Public = /** @class */ (function () {
                         tokensInfo = results.map(function (contractCallResult) {
                             var token = {};
                             contractCallResult.forEach(function (field, index) {
+                                var _a;
                                 token[tokenFields[index]] = field.success
-                                    ? field.output
+                                    ? (_a = field.output) === null || _a === void 0 ? void 0 : _a[0]
                                     : undefined;
                                 if (!field.success) {
                                     notSave = true;

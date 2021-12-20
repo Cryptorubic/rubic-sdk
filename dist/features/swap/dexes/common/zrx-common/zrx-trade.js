@@ -52,7 +52,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZrxTrade = void 0;
-var instant_trade_1 = require("@features/swap/instant-trade");
+var instant_trade_1 = require("../../../instant-trade");
 var ZrxTrade = /** @class */ (function (_super) {
     __extends(ZrxTrade, _super);
     function ZrxTrade(tradeStruct) {

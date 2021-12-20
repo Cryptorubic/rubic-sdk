@@ -1,8 +1,8 @@
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { LiquidityPool } from '@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/models/liquidity-pool';
-import { Web3Public } from '@core/blockchain/web3-public/web3-public';
-import { UniSwapV3Route } from '@features/swap/dexes/ethereum/uni-swap-v3/models/uni-swap-v3-route';
+import { PriceTokenAmount } from '../../../../../../../core/blockchain/tokens/price-token-amount';
+import { PriceToken } from '../../../../../../../core/blockchain/tokens/price-token';
+import { LiquidityPool } from './models/liquidity-pool';
+import { Web3Public } from '../../../../../../../core/blockchain/web3-public/web3-public';
+import { UniSwapV3Route } from '../../models/uni-swap-v3-route';
 /**
  * Works with requests, related to Uniswap v3 liquidity pools.
  */

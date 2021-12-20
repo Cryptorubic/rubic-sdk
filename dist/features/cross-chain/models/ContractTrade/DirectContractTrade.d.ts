@@ -1,9 +1,9 @@
-import { CrossChainSupportedBlockchain } from '@features/cross-chain/constants/CrossChainSupportedBlockchains';
-import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { ContractTrade } from '@features/cross-chain/models/ContractTrade/ContractTrade';
+import { CrossChainSupportedBlockchain } from '../../constants/CrossChainSupportedBlockchains';
+import { CrossChainContract } from '../../cross-chain-contract/cross-chain-contract';
+import { PriceTokenAmount } from '../../../../core/blockchain/tokens/price-token-amount';
+import { ContractTrade } from './ContractTrade';
 import BigNumber from 'bignumber.js';
-import { Token } from '@core/blockchain/tokens/token';
+import { Token } from '../../../../core/blockchain/tokens/token';
 export declare class DirectContractTrade extends ContractTrade {
     readonly blockchain: CrossChainSupportedBlockchain;
     readonly contract: CrossChainContract;

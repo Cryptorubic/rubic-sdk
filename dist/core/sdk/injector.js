@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Injector = void 0;
-var coingecko_api_1 = require("@common/http/coingecko-api");
-var gas_price_api_1 = require("@common/http/gas-price-api");
+var coingecko_api_1 = require("../../common/http/coingecko-api");
+var gas_price_api_1 = require("../../common/http/gas-price-api");
 var Injector = /** @class */ (function () {
     function Injector(web3PublicService, web3Private, httpClient) {
         this.web3PublicService = web3PublicService;

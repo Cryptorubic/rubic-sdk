@@ -57,14 +57,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PathFactory = void 0;
-var insufficient_liquidity_error_1 = require("@common/errors/swap/insufficient-liquidity-error");
-var object_1 = require("@common/utils/object");
-var price_token_amount_1 = require("@core/blockchain/tokens/price-token-amount");
-var token_1 = require("@core/blockchain/tokens/token");
-var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
-var injector_1 = require("@core/sdk/injector");
+var insufficient_liquidity_error_1 = require("../../../../../common/errors/swap/insufficient-liquidity-error");
+var object_1 = require("../../../../../common/utils/object");
+var price_token_amount_1 = require("../../../../../core/blockchain/tokens/price-token-amount");
+var token_1 = require("../../../../../core/blockchain/tokens/token");
+var web3_pure_1 = require("../../../../../core/blockchain/web3-pure/web3-pure");
+var injector_1 = require("../../../../../core/sdk/injector");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
-var pure_decorator_1 = require("@common/decorators/pure.decorator");
+var pure_decorator_1 = require("../../../../../common/decorators/pure.decorator");
 var PathFactory = /** @class */ (function () {
     function PathFactory(uniswapProviderStruct, pathFactoryStruct) {
         this.web3Private = injector_1.Injector.web3Private;
@@ -98,7 +98,7 @@ var PathFactory = /** @class */ (function () {
     PathFactory.prototype.getAmountAndPath = function (gasPriceInUsd) {
         var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var routes, gasRequests, gasLimits_1, estimatedGasLimits, routesWithProfit, sortedByProfitRoutes, gasLimit, callData, estimatedGas;
+            var routes, gasLimits_1, estimatedGasLimits, routesWithProfit, sortedByProfitRoutes, gasLimit, callData, estimatedGas;
             var _this = this;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -115,25 +115,12 @@ var PathFactory = /** @class */ (function () {
                                     route: routes[0]
                                 }];
                         }
-                        gasRequests = routes.map(function (route) {
-                            var fromAmount = _this.exact === 'input' ? _this.weiAmount : route.outputAbsoluteAmount;
-                            var toAmount = _this.exact === 'output' ? _this.weiAmount : route.outputAbsoluteAmount;
-                            var trade = new _this.InstantTradeClass({
-                                from: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, _this.from.asStruct), { weiAmount: fromAmount })),
-                                to: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, _this.to.asStruct), { weiAmount: toAmount })),
-                                path: route.path,
-                                exact: _this.exact,
-                                deadlineMinutes: _this.options.deadlineMinutes,
-                                slippageTolerance: _this.options.slippageTolerance
-                            });
-                            return trade.getEstimatedGasCallData();
-                        });
                         if (!(this.options.gasCalculation === 'rubicOptimisation' &&
                             ((_a = this.to.price) === null || _a === void 0 ? void 0 : _a.isFinite()) &&
                             gasPriceInUsd)) return [3 /*break*/, 4];
-                        gasLimits_1 = gasRequests.map(function (item) { return item.defaultGasLimit; });
+                        gasLimits_1 = this.getDefaultGases(routes);
                         if (!this.walletAddress) return [3 /*break*/, 3];
-                        return [4 /*yield*/, this.web3Public.batchEstimatedGas(this.InstantTradeClass.contractAbi, this.InstantTradeClass.getContractAddress(), this.walletAddress, gasRequests.map(function (item) { return item.callData; }))];
+                        return [4 /*yield*/, this.web3Public.batchEstimatedGas(this.InstantTradeClass.contractAbi, this.InstantTradeClass.getContractAddress(this.from.blockchain), this.walletAddress, this.getGasRequests(routes))];
                     case 2:
                         estimatedGasLimits = _b.sent();
                         estimatedGasLimits.forEach(function (elem, index) {
@@ -169,10 +156,10 @@ var PathFactory = /** @class */ (function () {
                         });
                         return [2 /*return*/, sortedByProfitRoutes[0]];
                     case 4:
-                        gasLimit = gasRequests[0].defaultGasLimit;
+                        gasLimit = this.getDefaultGases(routes.slice(0, 1))[0];
                         if (!this.walletAddress) return [3 /*break*/, 6];
-                        callData = gasRequests[0].callData;
-                        return [4 /*yield*/, this.web3Public.getEstimatedGas(this.InstantTradeClass.contractAbi, this.InstantTradeClass.getContractAddress(), callData.contractMethod, callData.params, this.walletAddress, callData.value)];
+                        callData = this.getGasRequests(routes.slice(0, 1))[0];
+                        return [4 /*yield*/, this.web3Public.getEstimatedGas(this.InstantTradeClass.contractAbi, this.InstantTradeClass.getContractAddress(this.from.blockchain), callData.contractMethod, callData.params, this.walletAddress, callData.value)];
                     case 5:
                         estimatedGas = _b.sent();
                         if (estimatedGas === null || estimatedGas === void 0 ? void 0 : estimatedGas.isFinite()) {
@@ -184,6 +171,27 @@ var PathFactory = /** @class */ (function () {
                             estimatedGas: gasLimit
                         }];
                 }
+            });
+        });
+    };
+    PathFactory.prototype.getGasRequests = function (routes) {
+        return this.getTradesByRoutes(routes).map(function (trade) { return trade.getEstimatedGasCallData(); });
+    };
+    PathFactory.prototype.getDefaultGases = function (routes) {
+        return this.getTradesByRoutes(routes).map(function (trade) { return trade.getDefaultEstimatedGas(); });
+    };
+    PathFactory.prototype.getTradesByRoutes = function (routes) {
+        var _this = this;
+        return routes.map(function (route) {
+            var fromAmount = _this.exact === 'input' ? _this.weiAmount : route.outputAbsoluteAmount;
+            var toAmount = _this.exact === 'output' ? _this.weiAmount : route.outputAbsoluteAmount;
+            return new _this.InstantTradeClass({
+                from: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, _this.from.asStruct), { weiAmount: fromAmount })),
+                to: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, _this.to.asStruct), { weiAmount: toAmount })),
+                path: route.path,
+                exact: _this.exact,
+                deadlineMinutes: _this.options.deadlineMinutes,
+                slippageTolerance: _this.options.slippageTolerance
             });
         });
     };

@@ -16,10 +16,10 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SushiSwapHarmonyProvider = void 0;
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
-var uniswap_v2_abstract_provider_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider");
-var constants_1 = require("@features/swap/dexes/harmony/sushi-swap-harmony/constants");
-var sushi_swap_harmony_trade_1 = require("@features/swap/dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-trade");
+var BLOCKCHAIN_NAME_1 = require("../../../../../core/blockchain/models/BLOCKCHAIN_NAME");
+var uniswap_v2_abstract_provider_1 = require("../../common/uniswap-v2-abstract/uniswap-v2-abstract-provider");
+var constants_1 = require("./constants");
+var sushi_swap_harmony_trade_1 = require("./sushi-swap-harmony-trade");
 var SushiSwapHarmonyProvider = /** @class */ (function (_super) {
     __extends(SushiSwapHarmonyProvider, _super);
     function SushiSwapHarmonyProvider() {

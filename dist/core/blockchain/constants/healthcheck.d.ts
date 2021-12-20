@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BLOCKCHAIN_NAME } from '../models/BLOCKCHAIN_NAME';
 export declare const HEALTHCHECK: {
     ETH: {
         contractAddress: string;

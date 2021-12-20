@@ -16,10 +16,10 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.QuickSwapProvider = void 0;
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
-var uniswap_v2_abstract_provider_1 = require("@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider");
-var constants_1 = require("@features/swap/dexes/polygon/quick-swap/constants");
-var quick_swap_trade_1 = require("@features/swap/dexes/polygon/quick-swap/quick-swap-trade");
+var BLOCKCHAIN_NAME_1 = require("../../../../../core/blockchain/models/BLOCKCHAIN_NAME");
+var uniswap_v2_abstract_provider_1 = require("../../common/uniswap-v2-abstract/uniswap-v2-abstract-provider");
+var constants_1 = require("./constants");
+var quick_swap_trade_1 = require("./quick-swap-trade");
 var QuickSwapProvider = /** @class */ (function (_super) {
     __extends(QuickSwapProvider, _super);
     function QuickSwapProvider() {

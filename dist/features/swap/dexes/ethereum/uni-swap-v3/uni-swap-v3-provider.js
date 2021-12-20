@@ -66,15 +66,15 @@ exports.UniSwapV3Provider = void 0;
 /**
  * Shows whether Eth is used as from or to token.
  */
-var options_1 = require("@common/utils/options");
-var BLOCKCHAIN_NAME_1 = require("@core/blockchain/models/BLOCKCHAIN_NAME");
-var liquidity_pools_controller_1 = require("@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/liquidity-pools-controller");
-var price_token_amount_1 = require("@core/blockchain/tokens/price-token-amount");
-var token_native_address_proxy_1 = require("@features/swap/dexes/common/utils/token-native-address-proxy");
-var insufficient_liquidity_error_1 = require("@common/errors/swap/insufficient-liquidity-error");
-var web3_pure_1 = require("@core/blockchain/web3-pure/web3-pure");
-var uni_swap_v3_trade_1 = require("@features/swap/dexes/ethereum/uni-swap-v3/uni-swap-v3-trade");
-var instant_trade_provider_1 = require("@features/swap/instant-trade-provider");
+var options_1 = require("../../../../../common/utils/options");
+var BLOCKCHAIN_NAME_1 = require("../../../../../core/blockchain/models/BLOCKCHAIN_NAME");
+var liquidity_pools_controller_1 = require("./utils/liquidity-pool-controller/liquidity-pools-controller");
+var price_token_amount_1 = require("../../../../../core/blockchain/tokens/price-token-amount");
+var token_native_address_proxy_1 = require("../../common/utils/token-native-address-proxy");
+var insufficient_liquidity_error_1 = require("../../../../../common/errors/swap/insufficient-liquidity-error");
+var web3_pure_1 = require("../../../../../core/blockchain/web3-pure/web3-pure");
+var uni_swap_v3_trade_1 = require("./uni-swap-v3-trade");
+var instant_trade_provider_1 = require("../../../instant-trade-provider");
 var RUBIC_OPTIMIZATION_DISABLED = true;
 var UniSwapV3Provider = /** @class */ (function (_super) {
     __extends(UniSwapV3Provider, _super);
