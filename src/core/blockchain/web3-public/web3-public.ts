@@ -486,13 +486,16 @@ export class Web3Public {
             }))
         }));
 
-        const results = await this.multicallContractsMethods(ERC20_TOKEN_ABI, contractsData);
+        const results = await this.multicallContractsMethods<[string]>(
+            ERC20_TOKEN_ABI,
+            contractsData
+        );
         let notSave = false;
         const tokensInfo = results.map(contractCallResult => {
             const token = {} as Record<SupportedTokenField, string | undefined>;
             contractCallResult.forEach((field, index) => {
                 token[tokenFields[index] as SupportedTokenField] = field.success
-                    ? (field.output as string)
+                    ? field.output?.[0]
                     : undefined;
                 if (!field.success) {
                     notSave = true;

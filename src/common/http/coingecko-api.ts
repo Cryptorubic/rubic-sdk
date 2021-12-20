@@ -80,11 +80,15 @@ export class CoingeckoApi {
             );
 
             return new BigNumber(response[coingeckoId].usd);
-        } catch (err) {
+        } catch (err: unknown) {
             if (err instanceof TimeoutError) {
-                console.error('Coingecko cannot retrieve native coin price', err);
+                console.debug('[RUBIC SDK]: Timeout Error. Coingecko cannot retrieve token price');
+            } else if ((err as Error)?.message?.includes('Request failed with status code 429')) {
+                console.debug(
+                    '[RUBIC SDK]: Too many requests. Coingecko cannot retrieve token price'
+                );
             } else {
-                console.error(err);
+                console.debug(err);
             }
             return new BigNumber(NaN);
         }
@@ -118,11 +122,15 @@ export class CoingeckoApi {
             );
 
             return new BigNumber(response?.market_data?.current_price?.usd || NaN);
-        } catch (err) {
+        } catch (err: unknown) {
             if (err instanceof TimeoutError) {
-                console.error('Coingecko cannot retrieve token price', err);
+                console.debug('[RUBIC SDK]: Timeout Error. Coingecko cannot retrieve token price');
+            } else if ((err as Error)?.message?.includes('Request failed with status code 429')) {
+                console.debug(
+                    '[RUBIC SDK]: Too many requests. Coingecko cannot retrieve token price'
+                );
             } else {
-                console.error(err);
+                console.debug(err);
             }
             return new BigNumber(NaN);
         }
