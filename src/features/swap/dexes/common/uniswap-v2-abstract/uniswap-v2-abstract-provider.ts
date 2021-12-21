@@ -77,7 +77,7 @@ export abstract class UniswapV2AbstractProvider<
         const toAmount = exact === 'output' ? weiAmount : route.outputAbsoluteAmount;
 
         const instantTrade: UniswapV2AbstractTrade = new this.InstantTradeClass({
-            from: new PriceTokenAmount({ ...to.asStruct, weiAmount: fromAmount }),
+            from: new PriceTokenAmount({ ...from.asStruct, weiAmount: fromAmount }),
             to: new PriceTokenAmount({ ...to.asStruct, weiAmount: toAmount }),
             exact,
             path: route.path,

@@ -115,7 +115,7 @@ var UniswapV2AbstractProvider = /** @class */ (function (_super) {
                         fromAmount = exact === 'input' ? weiAmount : route.outputAbsoluteAmount;
                         toAmount = exact === 'output' ? weiAmount : route.outputAbsoluteAmount;
                         instantTrade = new this.InstantTradeClass({
-                            from: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, to.asStruct), { weiAmount: fromAmount })),
+                            from: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, from.asStruct), { weiAmount: fromAmount })),
                             to: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, to.asStruct), { weiAmount: toAmount })),
                             exact: exact,
                             path: route.path,
