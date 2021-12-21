@@ -56,7 +56,7 @@ export abstract class InstantTrade {
         return allowance.lt(this.from.weiAmount);
     }
 
-    public async approve(options: BasicTransactionOptions): Promise<TransactionReceipt> {
+    public async approve(options?: BasicTransactionOptions): Promise<TransactionReceipt> {
         const needApprove = await this.needApprove();
 
         if (!needApprove) {
@@ -76,9 +76,9 @@ export abstract class InstantTrade {
         );
     }
 
-    public abstract swap(options: SwapTransactionOptions): Promise<TransactionReceipt>;
+    public abstract swap(options?: SwapTransactionOptions): Promise<TransactionReceipt>;
 
-    public abstract encode(options: EncodeTransactionOptions): Promise<TransactionConfig>;
+    public abstract encode(options?: EncodeTransactionOptions): Promise<TransactionConfig>;
 
     protected async checkWalletState(): Promise<void> {
         this.checkWalletConnected();

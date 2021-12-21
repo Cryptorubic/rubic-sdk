@@ -97,20 +97,28 @@ var UniswapV2AbstractProvider = /** @class */ (function (_super) {
     };
     UniswapV2AbstractProvider.prototype.calculateDifficultTrade = function (from, to, weiAmount, exact, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var fullOptions, fromProxy, toProxy, gasPriceInfo, _a, route, estimatedGas, fromAmount, toAmount, instantTrade;
+            var fullOptions, fromProxy, toProxy, gasPriceInfo, e_1, _a, route, estimatedGas, fromAmount, toAmount, instantTrade;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
                         fullOptions = (0, options_1.combineOptions)(options, this.defaultOptions);
                         fromProxy = (0, token_native_address_proxy_1.createTokenNativeAddressProxy)(from, this.providerSettings.wethAddress);
                         toProxy = (0, token_native_address_proxy_1.createTokenNativeAddressProxy)(to, this.providerSettings.wethAddress);
-                        if (!(fullOptions.gasCalculation !== 'disabled')) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.getGasPriceInfo()];
+                        if (!(fullOptions.gasCalculation !== 'disabled')) return [3 /*break*/, 4];
+                        _b.label = 1;
                     case 1:
+                        _b.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, this.getGasPriceInfo()];
+                    case 2:
                         gasPriceInfo = _b.sent();
-                        _b.label = 2;
-                    case 2: return [4 /*yield*/, this.getAmountAndPath(fromProxy, toProxy, weiAmount, exact, fullOptions, gasPriceInfo === null || gasPriceInfo === void 0 ? void 0 : gasPriceInfo.gasPriceInUsd)];
+                        return [3 /*break*/, 4];
                     case 3:
+                        e_1 = _b.sent();
+                        console.debug(e_1);
+                        gasPriceInfo = undefined;
+                        return [3 /*break*/, 4];
+                    case 4: return [4 /*yield*/, this.getAmountAndPath(fromProxy, toProxy, weiAmount, exact, fullOptions, gasPriceInfo === null || gasPriceInfo === void 0 ? void 0 : gasPriceInfo.gasPriceInUsd)];
+                    case 5:
                         _a = _b.sent(), route = _a.route, estimatedGas = _a.estimatedGas;
                         fromAmount = exact === 'input' ? weiAmount : route.outputAbsoluteAmount;
                         toAmount = exact === 'output' ? weiAmount : route.outputAbsoluteAmount;

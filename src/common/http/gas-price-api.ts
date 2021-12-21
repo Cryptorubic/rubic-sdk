@@ -17,7 +17,7 @@ export class GasPriceApi {
      */
     private static readonly requestInterval = 15_000;
 
-    private static isSupportedBlockchain(
+    public static isSupportedBlockchain(
         blockchain: BLOCKCHAIN_NAME
     ): blockchain is SupportedBlockchain {
         return supportedBlockchains.some(supBlockchain => supBlockchain === blockchain);

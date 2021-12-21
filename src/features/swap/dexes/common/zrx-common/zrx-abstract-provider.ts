@@ -1,3 +1,4 @@
+import { GasPriceApi } from '@common/http/gas-price-api';
 import { InstantTradeProvider } from '@features/swap/instant-trade-provider';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
@@ -58,7 +59,10 @@ export abstract class ZrxAbstractProvider extends InstantTradeProvider {
             slippageTolerance: fullOptions.slippageTolerance,
             apiTradeData
         };
-        if (fullOptions.gasCalculation === 'disabled') {
+        if (
+            fullOptions.gasCalculation === 'disabled' ||
+            !GasPriceApi.isSupportedBlockchain(from.blockchain)
+        ) {
             return new ZrxTrade(tradeStruct);
         }
 
