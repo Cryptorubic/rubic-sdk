@@ -262,7 +262,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         parameters: Parameters<InstanceType<typeof Web3Private>['executeContractMethod']>,
         fromAddress?: string
     ): Parameters<InstanceType<typeof Web3Public>['callContractMethod']> {
-        return parameters.slice(0, 2).concat([
+        return parameters.slice(0, 3).concat([
             {
                 methodArguments: parameters[3],
                 from: fromAddress || this.web3Private.address,

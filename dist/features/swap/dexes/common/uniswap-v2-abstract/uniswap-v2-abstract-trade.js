@@ -292,7 +292,7 @@ var UniswapV2AbstractTrade = /** @class */ (function (_super) {
     };
     UniswapV2AbstractTrade.prototype.convertSwapParametersToCallParameters = function (parameters, fromAddress) {
         var _a, _b;
-        return parameters.slice(0, 2).concat([
+        return parameters.slice(0, 3).concat([
             __assign({ methodArguments: parameters[3], from: fromAddress || this.web3Private.address }, (((_a = parameters[4]) === null || _a === void 0 ? void 0 : _a.value) && { value: (_b = parameters[4]) === null || _b === void 0 ? void 0 : _b.value }))
         ]);
     };
