@@ -187,7 +187,7 @@ var UniSwapV3Trade = /** @class */ (function (_super) {
                         _c.sent();
                         _a = this.getSwapRouterMethodData(), methodName = _a.methodName, methodArguments = _a.methodArguments;
                         _b = this.getGasParams(options), gas = _b.gas, gasPrice = _b.gasPrice;
-                        return [2 /*return*/, this.web3Private.tryExecuteContractMethod(swap_router_contract_data_1.swapRouterContractAddress, swap_router_contract_data_1.swapRouterContractAbi, methodName, methodArguments, {
+                        return [2 /*return*/, injector_1.Injector.web3Private.tryExecuteContractMethod(swap_router_contract_data_1.swapRouterContractAddress, swap_router_contract_data_1.swapRouterContractAbi, methodName, methodArguments, {
                                 value: this.from.isNative ? this.from.stringWeiAmount : undefined,
                                 onTransactionHash: options.onConfirm,
                                 gas: gas,

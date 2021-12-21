@@ -18,7 +18,6 @@ export interface UniswapV2AbstractProviderStruct<T extends UniswapV2AbstractTrad
 }
 export declare class PathFactory<T extends UniswapV2AbstractTrade> {
     private readonly web3Public;
-    private readonly web3Private;
     private readonly from;
     private readonly to;
     private readonly weiAmount;

@@ -224,7 +224,7 @@ var UniswapV2AbstractTrade = /** @class */ (function (_super) {
                     case 1:
                         methodName = _b.sent();
                         swapParameters = this.getSwapParametersByMethod(methodName, options);
-                        return [2 /*return*/, (_a = this.web3Private).executeContractMethod.apply(_a, swapParameters)];
+                        return [2 /*return*/, (_a = injector_1.Injector.web3Private).executeContractMethod.apply(_a, swapParameters)];
                 }
             });
         });
@@ -293,7 +293,7 @@ var UniswapV2AbstractTrade = /** @class */ (function (_super) {
     UniswapV2AbstractTrade.prototype.convertSwapParametersToCallParameters = function (parameters, fromAddress) {
         var _a, _b;
         return parameters.slice(0, 3).concat([
-            __assign({ methodArguments: parameters[3], from: fromAddress || this.web3Private.address }, (((_a = parameters[4]) === null || _a === void 0 ? void 0 : _a.value) && { value: (_b = parameters[4]) === null || _b === void 0 ? void 0 : _b.value }))
+            __assign({ methodArguments: parameters[3], from: fromAddress || injector_1.Injector.web3Private.address }, (((_a = parameters[4]) === null || _a === void 0 ? void 0 : _a.value) && { value: (_b = parameters[4]) === null || _b === void 0 ? void 0 : _b.value }))
         ]);
     };
     UniswapV2AbstractTrade.prototype.getEstimatedGasCallData = function () {

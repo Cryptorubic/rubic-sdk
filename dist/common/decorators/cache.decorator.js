@@ -128,7 +128,7 @@ function PConditionalCache(_, __, descriptor) {
                             storage.delete(key);
                         }
                         else {
-                            storage.set(key, result);
+                            storage.set(key, result.value);
                         }
                         return [2 /*return*/, result.value];
                 }

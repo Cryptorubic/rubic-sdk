@@ -173,7 +173,7 @@ export class UniSwapV3Trade extends InstantTrade {
         const { methodName, methodArguments } = this.getSwapRouterMethodData();
         const { gas, gasPrice } = this.getGasParams(options);
 
-        return this.web3Private.tryExecuteContractMethod(
+        return Injector.web3Private.tryExecuteContractMethod(
             swapRouterContractAddress,
             swapRouterContractAbi,
             methodName,

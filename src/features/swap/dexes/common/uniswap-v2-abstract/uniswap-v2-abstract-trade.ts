@@ -180,7 +180,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         const methodName = await this.getMethodName(options);
         const swapParameters = this.getSwapParametersByMethod(methodName, options);
 
-        return this.web3Private.executeContractMethod(...swapParameters);
+        return Injector.web3Private.executeContractMethod(...swapParameters);
     }
 
     public encode(options: EncodeFromAddressTransactionOptions): Promise<TransactionConfig> {
@@ -265,7 +265,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         return parameters.slice(0, 3).concat([
             {
                 methodArguments: parameters[3],
-                from: fromAddress || this.web3Private.address,
+                from: fromAddress || Injector.web3Private.address,
                 ...(parameters[4]?.value && { value: parameters[4]?.value })
             }
         ]) as Parameters<InstanceType<typeof Web3Public>['callContractMethod']>;

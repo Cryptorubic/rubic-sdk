@@ -67,7 +67,6 @@ var bignumber_js_1 = __importDefault(require("bignumber.js"));
 var pure_decorator_1 = require("../../../../../common/decorators/pure.decorator");
 var PathFactory = /** @class */ (function () {
     function PathFactory(uniswapProviderStruct, pathFactoryStruct) {
-        this.web3Private = injector_1.Injector.web3Private;
         this.web3Public = injector_1.Injector.web3PublicService.getWeb3Public(pathFactoryStruct.from.blockchain);
         this.from = pathFactoryStruct.from;
         this.to = pathFactoryStruct.to;
@@ -83,7 +82,7 @@ var PathFactory = /** @class */ (function () {
     }
     Object.defineProperty(PathFactory.prototype, "walletAddress", {
         get: function () {
-            return this.web3Private.address;
+            return injector_1.Injector.web3Private.address;
         },
         enumerable: false,
         configurable: true

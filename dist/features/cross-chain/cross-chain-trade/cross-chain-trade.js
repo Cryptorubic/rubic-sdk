@@ -79,7 +79,6 @@ var CrossChainTrade = /** @class */ (function () {
         this.transitFeeToken = crossChainTrade.transitFeeToken;
         this.minMaxAmountsErrors = crossChainTrade.minMaxAmountsErrors;
         this.gasData = crossChainTrade.gasData;
-        this.web3Private = injector_1.Injector.web3Private;
         this.fromWeb3Public = injector_1.Injector.web3PublicService.getWeb3Public(this.fromTrade.blockchain);
         this.toWeb3Public = injector_1.Injector.web3PublicService.getWeb3Public(this.toTrade.blockchain);
     }
@@ -134,7 +133,7 @@ var CrossChainTrade = /** @class */ (function () {
     };
     Object.defineProperty(CrossChainTrade.prototype, "walletAddress", {
         get: function () {
-            return this.web3Private.address;
+            return injector_1.Injector.web3Private.address;
         },
         enumerable: false,
         configurable: true
@@ -200,7 +199,7 @@ var CrossChainTrade = /** @class */ (function () {
         }
         this.checkWalletConnected();
         this.checkBlockchainCorrect();
-        return this.web3Private.approveTokens(tokenAddress, this.fromTrade.contract.address, 'infinity', options);
+        return injector_1.Injector.web3Private.approveTokens(tokenAddress, this.fromTrade.contract.address, 'infinity', options);
     };
     CrossChainTrade.prototype.checkWalletConnected = function () {
         if (!this.walletAddress) {
@@ -208,7 +207,7 @@ var CrossChainTrade = /** @class */ (function () {
         }
     };
     CrossChainTrade.prototype.checkBlockchainCorrect = function () {
-        if (this.web3Private.blockchainName !== this.fromTrade.blockchain) {
+        if (injector_1.Injector.web3Private.blockchainName !== this.fromTrade.blockchain) {
             throw new wrong_network_error_1.WrongNetworkError();
         }
     };
@@ -351,7 +350,7 @@ var CrossChainTrade = /** @class */ (function () {
                             }
                             transactionHash = hash;
                         };
-                        return [4 /*yield*/, this.web3Private.tryExecuteContractMethod(contractAddress, crossChainContractAbi_1.crossChainContractAbi, methodName, methodArguments, __assign(__assign({}, options), { value: value, onTransactionHash: onTransactionHash }), function (err) {
+                        return [4 /*yield*/, injector_1.Injector.web3Private.tryExecuteContractMethod(contractAddress, crossChainContractAbi_1.crossChainContractAbi, methodName, methodArguments, __assign(__assign({}, options), { value: value, onTransactionHash: onTransactionHash }), function (err) {
                                 var _a;
                                 var includesErrCode = (_a = err === null || err === void 0 ? void 0 : err.message) === null || _a === void 0 ? void 0 : _a.includes('-32000');
                                 var allowedErrors = [

@@ -14,7 +14,6 @@ export declare abstract class InstantTrade {
     abstract readonly gasFeeInfo: GasFeeInfo | null;
     abstract readonly slippageTolerance: number;
     protected abstract contractAddress: string;
-    protected readonly web3Private: import("../../core/blockchain/web3-private/web3-private").Web3Private;
     protected readonly web3Public: Web3Public;
     protected get walletAddress(): string;
     get toTokenAmountMin(): PriceTokenAmount;

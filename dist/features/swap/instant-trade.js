@@ -55,12 +55,11 @@ var price_token_amount_1 = require("../../core/blockchain/tokens/price-token-amo
 var injector_1 = require("../../core/sdk/injector");
 var InstantTrade = /** @class */ (function () {
     function InstantTrade(blockchain) {
-        this.web3Private = injector_1.Injector.web3Private;
         this.web3Public = injector_1.Injector.web3PublicService.getWeb3Public(blockchain);
     }
     Object.defineProperty(InstantTrade.prototype, "walletAddress", {
         get: function () {
-            return this.web3Private.address;
+            return injector_1.Injector.web3Private.address;
         },
         enumerable: false,
         configurable: true
@@ -104,7 +103,7 @@ var InstantTrade = /** @class */ (function () {
                         }
                         this.checkWalletConnected();
                         this.checkBlockchainCorrect();
-                        return [2 /*return*/, this.web3Private.approveTokens(this.from.address, this.contractAddress, 'infinity', options)];
+                        return [2 /*return*/, injector_1.Injector.web3Private.approveTokens(this.from.address, this.contractAddress, 'infinity', options)];
                 }
             });
         });
@@ -130,7 +129,7 @@ var InstantTrade = /** @class */ (function () {
         }
     };
     InstantTrade.prototype.checkBlockchainCorrect = function () {
-        if (this.web3Private.blockchainName !== this.from.blockchain) {
+        if (injector_1.Injector.web3Private.blockchainName !== this.from.blockchain) {
             throw new wrong_network_error_1.WrongNetworkError();
         }
     };

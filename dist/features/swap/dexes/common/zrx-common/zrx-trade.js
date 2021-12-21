@@ -52,6 +52,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZrxTrade = void 0;
+var injector_1 = require("../../../../../core/sdk/injector");
 var instant_trade_1 = require("../../../instant-trade");
 var ZrxTrade = /** @class */ (function (_super) {
     __extends(ZrxTrade, _super);
@@ -75,7 +76,7 @@ var ZrxTrade = /** @class */ (function (_super) {
                     case 1:
                         _b.sent();
                         _a = this.getGasParamsFromApiTradeData(options, this.apiTradeData), gas = _a.gas, gasPrice = _a.gasPrice;
-                        return [2 /*return*/, this.web3Private.trySendTransaction(this.apiTradeData.to, this.apiTradeData.value, {
+                        return [2 /*return*/, injector_1.Injector.web3Private.trySendTransaction(this.apiTradeData.to, this.apiTradeData.value, {
                                 onTransactionHash: options.onConfirm,
                                 data: this.apiTradeData.data,
                                 gas: gas,

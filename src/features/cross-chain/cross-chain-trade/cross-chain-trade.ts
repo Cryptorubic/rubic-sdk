@@ -2,7 +2,6 @@ import { ContractTrade } from '@features/cross-chain/models/ContractTrade/Contra
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { CROSS_CHAIN_ROUTING_SWAP_METHOD } from '@features/cross-chain/cross-chain-trade/models/CROSS_CHAIN_ROUTING_SWAP_METHOD';
 import { Injector } from '@core/sdk/injector';
-import { Web3Private } from '@core/blockchain/web3-private/web3-private';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { CrossChainContractMethodData } from '@features/cross-chain/cross-chain-trade/models/CrossChainContractMethodData';
 import { GasData } from '@features/cross-chain/models/gas-data';
@@ -83,14 +82,12 @@ export class CrossChainTrade {
 
     private readonly gasData: GasData | null;
 
-    private readonly web3Private: Web3Private;
-
     private readonly fromWeb3Public: Web3Public;
 
     private readonly toWeb3Public: Web3Public;
 
     private get walletAddress(): string {
-        return this.web3Private.address;
+        return Injector.web3Private.address;
     }
 
     public get fromToken(): PriceTokenAmount {
@@ -138,7 +135,6 @@ export class CrossChainTrade {
         this.minMaxAmountsErrors = crossChainTrade.minMaxAmountsErrors;
         this.gasData = crossChainTrade.gasData;
 
-        this.web3Private = Injector.web3Private;
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.fromTrade.blockchain);
         this.toWeb3Public = Injector.web3PublicService.getWeb3Public(this.toTrade.blockchain);
     }
@@ -166,7 +162,7 @@ export class CrossChainTrade {
         this.checkWalletConnected();
         this.checkBlockchainCorrect();
 
-        return this.web3Private.approveTokens(
+        return Injector.web3Private.approveTokens(
             tokenAddress,
             this.fromTrade.contract.address,
             'infinity',
@@ -181,7 +177,7 @@ export class CrossChainTrade {
     }
 
     private checkBlockchainCorrect(): never | void {
-        if (this.web3Private.blockchainName !== this.fromTrade.blockchain) {
+        if (Injector.web3Private.blockchainName !== this.fromTrade.blockchain) {
             throw new WrongNetworkError();
         }
     }
@@ -307,7 +303,7 @@ export class CrossChainTrade {
                 transactionHash = hash;
             };
 
-            await this.web3Private.tryExecuteContractMethod(
+            await Injector.web3Private.tryExecuteContractMethod(
                 contractAddress,
                 crossChainContractAbi,
                 methodName,

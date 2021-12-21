@@ -166,7 +166,7 @@ var OneinchTrade = /** @class */ (function (_super) {
                             gas: gas,
                             gasPrice: gasPrice
                         };
-                        return [2 /*return*/, this.web3Private.trySendTransaction(apiTradeData.tx.to, this.from.isNative ? this.from.stringWeiAmount : '0', transactionOptions)];
+                        return [2 /*return*/, injector_1.Injector.web3Private.trySendTransaction(apiTradeData.tx.to, this.from.isNative ? this.from.stringWeiAmount : '0', transactionOptions)];
                     case 4:
                         err_1 = _b.sent();
                         this.specifyError(err_1);

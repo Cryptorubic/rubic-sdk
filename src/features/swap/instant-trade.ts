@@ -24,12 +24,10 @@ export abstract class InstantTrade {
 
     protected abstract contractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
-    protected readonly web3Private = Injector.web3Private;
-
     protected readonly web3Public: Web3Public;
 
     protected get walletAddress(): string {
-        return this.web3Private.address;
+        return Injector.web3Private.address;
     }
 
     public get toTokenAmountMin(): PriceTokenAmount {
@@ -68,7 +66,7 @@ export abstract class InstantTrade {
         this.checkWalletConnected();
         this.checkBlockchainCorrect();
 
-        return this.web3Private.approveTokens(
+        return Injector.web3Private.approveTokens(
             this.from.address,
             this.contractAddress,
             'infinity',
@@ -93,7 +91,7 @@ export abstract class InstantTrade {
     }
 
     private checkBlockchainCorrect(): never | void {
-        if (this.web3Private.blockchainName !== this.from.blockchain) {
+        if (Injector.web3Private.blockchainName !== this.from.blockchain) {
             throw new WrongNetworkError();
         }
     }

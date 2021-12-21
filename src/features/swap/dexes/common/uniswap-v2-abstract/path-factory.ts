@@ -35,8 +35,6 @@ export interface UniswapV2AbstractProviderStruct<T extends UniswapV2AbstractTrad
 export class PathFactory<T extends UniswapV2AbstractTrade> {
     private readonly web3Public: Web3Public;
 
-    private readonly web3Private = Injector.web3Private;
-
     private readonly from: PriceToken;
 
     private readonly to: PriceToken;
@@ -54,7 +52,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
     private readonly maxTransitTokens: number;
 
     private get walletAddress(): string | undefined {
-        return this.web3Private.address;
+        return Injector.web3Private.address;
     }
 
     @Pure

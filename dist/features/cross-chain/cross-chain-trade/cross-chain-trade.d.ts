@@ -13,7 +13,6 @@ export declare class CrossChainTrade {
     readonly transitFeeToken: PriceTokenAmount;
     private readonly minMaxAmountsErrors;
     private readonly gasData;
-    private readonly web3Private;
     private readonly fromWeb3Public;
     private readonly toWeb3Public;
     private get walletAddress();
