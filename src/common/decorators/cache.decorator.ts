@@ -81,7 +81,7 @@ export function PConditionalCache<T>(
         if (result.notSave) {
             storage.delete(key);
         } else {
-            storage.set(key, result);
+            storage.set(key, result.value);
         }
         return result.value;
     } as unknown as T;
