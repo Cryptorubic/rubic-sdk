@@ -81,6 +81,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OneinchAbstractProvider = void 0;
+var gas_price_api_1 = require("../../../../../common/http/gas-price-api");
 var options_1 = require("../../../../../common/utils/options");
 var price_token_amount_1 = require("../../../../../core/blockchain/tokens/price-token-amount");
 var token_1 = require("../../../../../core/blockchain/tokens/token");
@@ -186,7 +187,8 @@ var OneinchAbstractProvider = /** @class */ (function (_super) {
                             disableMultihops: fullOptions.disableMultihops,
                             path: path
                         };
-                        if (fullOptions.gasCalculation === 'disabled') {
+                        if (fullOptions.gasCalculation === 'disabled' ||
+                            !gas_price_api_1.GasPriceApi.isSupportedBlockchain(from.blockchain)) {
                             return [2 /*return*/, new oneinch_trade_1.OneinchTrade(oneinchTradeStruct)];
                         }
                         return [4 /*yield*/, this.getGasPriceInfo()];

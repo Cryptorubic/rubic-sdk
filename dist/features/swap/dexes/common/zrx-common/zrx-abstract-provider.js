@@ -72,6 +72,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZrxAbstractProvider = void 0;
+var gas_price_api_1 = require("../../../../../common/http/gas-price-api");
 var instant_trade_provider_1 = require("../../../instant-trade-provider");
 var price_token_amount_1 = require("../../../../../core/blockchain/tokens/price-token-amount");
 var token_native_address_proxy_1 = require("../utils/token-native-address-proxy");
@@ -127,7 +128,8 @@ var ZrxAbstractProvider = /** @class */ (function (_super) {
                             slippageTolerance: fullOptions.slippageTolerance,
                             apiTradeData: apiTradeData
                         };
-                        if (fullOptions.gasCalculation === 'disabled') {
+                        if (fullOptions.gasCalculation === 'disabled' ||
+                            !gas_price_api_1.GasPriceApi.isSupportedBlockchain(from.blockchain)) {
                             return [2 /*return*/, new zrx_trade_1.ZrxTrade(tradeStruct)];
                         }
                         return [4 /*yield*/, this.getGasPriceInfo()];

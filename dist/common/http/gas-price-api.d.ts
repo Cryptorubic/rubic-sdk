@@ -1,13 +1,15 @@
 import { BLOCKCHAIN_NAME } from '../../core/blockchain/models/BLOCKCHAIN_NAME';
 import BigNumber from 'bignumber.js';
 import { HttpClient } from '../models/http-client';
+declare const supportedBlockchains: readonly [BLOCKCHAIN_NAME.ETHEREUM, BLOCKCHAIN_NAME.AVALANCHE];
+declare type SupportedBlockchain = typeof supportedBlockchains[number];
 export declare class GasPriceApi {
     private readonly httpClient;
     /**
      * Gas price request interval in seconds.
      */
     private static readonly requestInterval;
-    private static isSupportedBlockchain;
+    static isSupportedBlockchain(blockchain: BLOCKCHAIN_NAME): blockchain is SupportedBlockchain;
     /**
      * Gas price functions for different networks.
      */
@@ -36,3 +38,4 @@ export declare class GasPriceApi {
      */
     private fetchAvalancheGas;
 }
+export {};
