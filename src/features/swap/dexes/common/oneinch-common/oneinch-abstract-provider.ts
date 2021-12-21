@@ -93,9 +93,9 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
 
         const oneinchTradeStruct = {
             contractAddress,
-            from: fromClone,
+            from,
             to: new PriceTokenAmount({
-                ...toTokenClone.asStruct,
+                ...toToken.asStruct,
                 weiAmount: toTokenAmountInWei
             }),
             slippageTolerance: fullOptions.slippageTolerance,

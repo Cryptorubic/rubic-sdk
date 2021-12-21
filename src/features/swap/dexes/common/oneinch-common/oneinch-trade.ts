@@ -1,5 +1,7 @@
+import { oneinchApiParams } from '@features/swap/dexes/common/oneinch-common/constants';
 import { OneinchSwapResponse } from '@features/swap/dexes/common/oneinch-common/models/oneinch-swap-response';
 import { getOneinchApiBaseUrl } from '@features/swap/dexes/common/oneinch-common/utils';
+import { createTokenNativeAddressProxy } from '@features/swap/dexes/common/utils/token-native-address-proxy';
 import { InstantTrade } from '@features/swap/instant-trade';
 import { Injector } from '@core/sdk/injector';
 import { Pure } from '@common/decorators/pure.decorator';
@@ -47,6 +49,10 @@ export class OneinchTrade extends InstantTrade {
 
     public readonly to: PriceTokenAmount;
 
+    private readonly nativeSupportedFrom: PriceTokenAmount;
+
+    public readonly nativeSupportedTo: PriceTokenAmount;
+
     public gasFeeInfo: GasFeeInfo | null;
 
     public slippageTolerance: number;
@@ -66,6 +72,14 @@ export class OneinchTrade extends InstantTrade {
         this.contractAddress = oneinchTradeStruct.contractAddress;
         this.from = oneinchTradeStruct.from;
         this.to = oneinchTradeStruct.to;
+        this.nativeSupportedFrom = createTokenNativeAddressProxy(
+            oneinchTradeStruct.from,
+            oneinchApiParams.nativeAddress
+        );
+        this.nativeSupportedTo = createTokenNativeAddressProxy(
+            oneinchTradeStruct.to,
+            oneinchApiParams.nativeAddress
+        );
         this.gasFeeInfo = oneinchTradeStruct.gasFeeInfo || null;
         this.slippageTolerance = oneinchTradeStruct.slippageTolerance;
         this.disableMultihops = oneinchTradeStruct.disableMultihops;
@@ -75,7 +89,7 @@ export class OneinchTrade extends InstantTrade {
     public async needApprove(): Promise<boolean> {
         this.checkWalletConnected();
 
-        if (this.from.isNative) {
+        if (this.nativeSupportedFrom.isNative) {
             return false;
         }
 
@@ -83,12 +97,12 @@ export class OneinchTrade extends InstantTrade {
             allowance: string;
         }>(`${this.apiBaseUrl}/approve/allowance`, {
             params: {
-                tokenAddress: this.from.address,
+                tokenAddress: this.nativeSupportedFrom.address,
                 walletAddress: this.walletAddress
             }
         });
         const allowance = new BigNumber(response.allowance);
-        return allowance.lt(this.from.weiAmount);
+        return allowance.lt(this.nativeSupportedFrom.weiAmount);
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
@@ -107,7 +121,7 @@ export class OneinchTrade extends InstantTrade {
 
             return Injector.web3Private.trySendTransaction(
                 apiTradeData.tx.to,
-                this.from.isNative ? this.from.stringWeiAmount : '0',
+                this.nativeSupportedFrom.isNative ? this.nativeSupportedFrom.stringWeiAmount : '0',
                 transactionOptions
             );
         } catch (err) {
@@ -135,9 +149,9 @@ export class OneinchTrade extends InstantTrade {
     private getTradeData(fromAddress?: string): Promise<OneinchSwapResponse> {
         const swapRequest = {
             params: {
-                fromTokenAddress: this.from.address,
+                fromTokenAddress: this.nativeSupportedFrom.address,
                 toTokenAddress: this.to.address,
-                amount: this.from.stringWeiAmount,
+                amount: this.nativeSupportedFrom.stringWeiAmount,
                 slippage: (this.slippageTolerance * 100).toString(),
                 fromAddress: fromAddress || this.walletAddress,
                 ...(this.disableMultihops && { mainRouteParts: '1' })
@@ -165,8 +179,9 @@ export class OneinchTrade extends InstantTrade {
     }): void | never {
         if (err.error) {
             if (err.error.message?.includes('cannot estimate')) {
-                const nativeToken = blockchains.find(el => el.name === this.from.blockchain)!
-                    .nativeCoin.symbol;
+                const nativeToken = blockchains.find(
+                    el => el.name === this.nativeSupportedFrom.blockchain
+                )!.nativeCoin.symbol;
                 const message = `1inch sets increased costs on gas fee. For transaction enter less ${nativeToken} amount or top up your ${nativeToken} balance.`;
                 throw new RubicSdkError(message);
             }

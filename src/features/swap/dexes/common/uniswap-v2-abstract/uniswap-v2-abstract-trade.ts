@@ -11,6 +11,7 @@ import { BatchCall } from '@core/blockchain/web3-public/models/batch-call';
 import { ContractMulticallResponse } from '@core/blockchain/web3-public/models/contract-multicall-response';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
+import { createTokenNativeAddressProxyInPathStartAndEnd } from '@features/swap/dexes/common/utils/token-native-address-proxy';
 import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { Injector } from '@core/sdk/injector';
 import { InstantTrade } from '@features/swap/instant-trade';
@@ -36,7 +37,7 @@ export type UniswapV2TradeStruct = {
     from: PriceTokenAmount;
     to: PriceTokenAmount;
     exact: 'input' | 'output';
-    path: ReadonlyArray<Token> | Token[];
+    nativeSupportedPath: ReadonlyArray<Token> | Token[];
     deadlineMinutes: number;
     slippageTolerance: number;
     gasFeeInfo?: GasFeeInfo | null;
@@ -48,7 +49,10 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         try {
             // see  https://github.com/microsoft/TypeScript/issues/34516
             // @ts-ignore
-            const instance = new this({ from: { blockchain } });
+            const instance = new this({
+                from: { blockchain },
+                nativeSupportedPath: [{ isNative: () => false }, { isNative: () => false }]
+            });
             if (!instance.contractAddress) {
                 throw new RubicSdkError('Trying to read abstract class field');
             }
@@ -92,6 +96,8 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     public readonly path: ReadonlyArray<Token>;
 
+    private readonly nativeSupportedPath: ReadonlyArray<Token>;
+
     public readonly exact: 'input' | 'output';
 
     public set settings(value: { deadlineMinutes?: number; slippageTolerance?: number }) {
@@ -116,7 +122,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
         return [
             ...amountParameters,
-            this.path.map(t => t.address),
+            this.nativeSupportedPath.map(t => t.address),
             this.walletAddress,
             this.deadlineMinutesTimestamp
         ];
@@ -150,10 +156,16 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
         this.gasFeeInfo = tradeStruct.gasFeeInfo || null;
-        this.path = tradeStruct.path;
         this.deadlineMinutes = tradeStruct.deadlineMinutes;
         this.exact = tradeStruct.exact;
         this.slippageTolerance = tradeStruct.slippageTolerance;
+
+        this.nativeSupportedPath = tradeStruct.nativeSupportedPath;
+
+        this.path = createTokenNativeAddressProxyInPathStartAndEnd(
+            this.nativeSupportedPath,
+            Web3Pure.nativeTokenAddress
+        );
     }
 
     private getAmountInAndAmountOut(): { amountIn: string; amountOut: string } {
@@ -294,7 +306,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             return gasLimit;
         }
 
-        const transitTokensNumber = this.path.length - 2;
+        const transitTokensNumber = this.nativeSupportedPath.length - 2;
         let methodName: keyof DefaultEstimatedGas = 'tokensToTokens';
         if (this.from.isNative) {
             methodName = 'ethToTokens';

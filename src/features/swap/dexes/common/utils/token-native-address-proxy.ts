@@ -17,3 +17,12 @@ export function createTokenNativeAddressProxy<T extends Token>(
         }
     });
 }
+
+export function createTokenNativeAddressProxyInPathStartAndEnd<T extends Token>(
+    path: T[] | ReadonlyArray<T>,
+    wrappedNativeAddress: string
+): ReadonlyArray<T> {
+    return [createTokenNativeAddressProxy(path[0], wrappedNativeAddress)]
+        .concat(path.slice(1, path.length - 1))
+        .concat(createTokenNativeAddressProxy(path[path.length - 1], wrappedNativeAddress));
+}

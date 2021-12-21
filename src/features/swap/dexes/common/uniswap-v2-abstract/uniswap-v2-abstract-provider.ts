@@ -84,7 +84,7 @@ export abstract class UniswapV2AbstractProvider<
             from: new PriceTokenAmount({ ...from.asStruct, weiAmount: fromAmount }),
             to: new PriceTokenAmount({ ...to.asStruct, weiAmount: toAmount }),
             exact,
-            path: route.path,
+            nativeSupportedPath: route.path,
             deadlineMinutes: fullOptions.deadlineMinutes,
             slippageTolerance: fullOptions.slippageTolerance
         });
