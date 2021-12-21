@@ -13,5 +13,5 @@ export declare abstract class InstantTradeProvider {
     protected get web3Public(): Web3Public;
     abstract calculate(from: PriceTokenAmount, to: PriceToken, options?: SwapCalculationOptions): Promise<InstantTrade>;
     protected getGasPriceInfo(): Promise<GasPriceInfo>;
-    protected getGasFeeInfo(estimatedGas: BigNumber | string | number | undefined, gasPriceInfo: GasPriceInfo): GasFeeInfo;
+    protected getGasFeeInfo(estimatedGas: BigNumber | string | number | undefined, gasPriceInfo: GasPriceInfo | undefined): GasFeeInfo;
 }

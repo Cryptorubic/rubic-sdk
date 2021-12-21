@@ -124,7 +124,7 @@ var ZrxAbstractProvider = /** @class */ (function (_super) {
                         apiTradeData = _a.sent();
                         tradeStruct = {
                             from: from,
-                            to: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, to.asStruct), { tokenAmount: new bignumber_js_1.default(apiTradeData.buyAmount) })),
+                            to: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, to.asStruct), { weiAmount: new bignumber_js_1.default(apiTradeData.buyAmount) })),
                             slippageTolerance: fullOptions.slippageTolerance,
                             apiTradeData: apiTradeData
                         };

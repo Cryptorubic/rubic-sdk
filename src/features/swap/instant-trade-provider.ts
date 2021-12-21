@@ -41,21 +41,21 @@ export abstract class InstantTradeProvider {
 
     protected getGasFeeInfo(
         estimatedGas: BigNumber | string | number | undefined,
-        gasPriceInfo: GasPriceInfo
+        gasPriceInfo: GasPriceInfo | undefined
     ): GasFeeInfo {
         const gasLimit = estimatedGas
             ? Web3Pure.calculateGasMargin(estimatedGas, this.gasMargin)
             : undefined;
 
         if (!gasLimit) {
-            return { gasPrice: gasPriceInfo.gasPrice };
+            return { gasPrice: gasPriceInfo?.gasPrice };
         }
-        const gasFeeInEth = gasPriceInfo.gasPriceInEth?.multipliedBy(gasLimit);
-        const gasFeeInUsd = gasPriceInfo.gasPriceInUsd?.multipliedBy(gasLimit);
+        const gasFeeInEth = gasPriceInfo?.gasPriceInEth?.multipliedBy(gasLimit);
+        const gasFeeInUsd = gasPriceInfo?.gasPriceInUsd?.multipliedBy(gasLimit);
 
         return {
             gasLimit,
-            gasPrice: gasPriceInfo.gasPrice,
+            gasPrice: gasPriceInfo?.gasPrice,
             gasFeeInEth,
             gasFeeInUsd
         };

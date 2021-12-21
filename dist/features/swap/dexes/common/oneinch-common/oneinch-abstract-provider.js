@@ -157,7 +157,7 @@ var OneinchAbstractProvider = /** @class */ (function (_super) {
     };
     OneinchAbstractProvider.prototype.calculate = function (from, toToken, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var fullOptions, fromClone, toTokenClone, supportedTokensAddresses, _a, contractAddress, _b, toTokenAmount, estimatedGas, path, oneinchTradeStruct, gasPriceInfo, gasFeeInfo;
+            var fullOptions, fromClone, toTokenClone, supportedTokensAddresses, _a, contractAddress, _b, toTokenAmountInWei, estimatedGas, path, oneinchTradeStruct, gasPriceInfo, gasFeeInfo;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -176,13 +176,13 @@ var OneinchAbstractProvider = /** @class */ (function (_super) {
                                 this.getTradeInfo(fromClone, toTokenClone, fullOptions)
                             ])];
                     case 2:
-                        _a = _c.sent(), contractAddress = _a[0], _b = _a[1], toTokenAmount = _b.toTokenAmount, estimatedGas = _b.estimatedGas, path = _b.path;
+                        _a = _c.sent(), contractAddress = _a[0], _b = _a[1], toTokenAmountInWei = _b.toTokenAmountInWei, estimatedGas = _b.estimatedGas, path = _b.path;
                         path[0] = from;
                         path[path.length - 1] = toToken;
                         oneinchTradeStruct = {
                             contractAddress: contractAddress,
                             from: fromClone,
-                            to: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, toTokenClone.asStruct), { tokenAmount: toTokenAmount })),
+                            to: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, toTokenClone.asStruct), { weiAmount: toTokenAmountInWei })),
                             slippageTolerance: fullOptions.slippageTolerance,
                             disableMultihops: fullOptions.disableMultihops,
                             path: path
@@ -243,7 +243,7 @@ var OneinchAbstractProvider = /** @class */ (function (_super) {
                     case 6: return [4 /*yield*/, this.extractPath(from, toToken, oneInchTrade)];
                     case 7:
                         path = _a.sent();
-                        return [2 /*return*/, { toTokenAmount: new bignumber_js_1.default(toTokenAmount), estimatedGas: estimatedGas, path: path }];
+                        return [2 /*return*/, { toTokenAmountInWei: new bignumber_js_1.default(toTokenAmount), estimatedGas: estimatedGas, path: path }];
                 }
             });
         });

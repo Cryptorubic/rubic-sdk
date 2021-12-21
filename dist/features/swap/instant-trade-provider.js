@@ -81,13 +81,13 @@ var InstantTradeProvider = /** @class */ (function () {
             ? web3_pure_1.Web3Pure.calculateGasMargin(estimatedGas, this.gasMargin)
             : undefined;
         if (!gasLimit) {
-            return { gasPrice: gasPriceInfo.gasPrice };
+            return { gasPrice: gasPriceInfo === null || gasPriceInfo === void 0 ? void 0 : gasPriceInfo.gasPrice };
         }
-        var gasFeeInEth = (_a = gasPriceInfo.gasPriceInEth) === null || _a === void 0 ? void 0 : _a.multipliedBy(gasLimit);
-        var gasFeeInUsd = (_b = gasPriceInfo.gasPriceInUsd) === null || _b === void 0 ? void 0 : _b.multipliedBy(gasLimit);
+        var gasFeeInEth = (_a = gasPriceInfo === null || gasPriceInfo === void 0 ? void 0 : gasPriceInfo.gasPriceInEth) === null || _a === void 0 ? void 0 : _a.multipliedBy(gasLimit);
+        var gasFeeInUsd = (_b = gasPriceInfo === null || gasPriceInfo === void 0 ? void 0 : gasPriceInfo.gasPriceInUsd) === null || _b === void 0 ? void 0 : _b.multipliedBy(gasLimit);
         return {
             gasLimit: gasLimit,
-            gasPrice: gasPriceInfo.gasPrice,
+            gasPrice: gasPriceInfo === null || gasPriceInfo === void 0 ? void 0 : gasPriceInfo.gasPrice,
             gasFeeInEth: gasFeeInEth,
             gasFeeInUsd: gasFeeInUsd
         };

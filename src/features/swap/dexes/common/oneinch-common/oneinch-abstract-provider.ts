@@ -84,7 +84,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
             throw new RubicSdkError("Oneinch doesn't support this tokens");
         }
 
-        const [contractAddress, { toTokenAmount, estimatedGas, path }] = await Promise.all([
+        const [contractAddress, { toTokenAmountInWei, estimatedGas, path }] = await Promise.all([
             this.loadContractAddress(),
             this.getTradeInfo(fromClone, toTokenClone, fullOptions)
         ]);
@@ -96,7 +96,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
             from: fromClone,
             to: new PriceTokenAmount({
                 ...toTokenClone.asStruct,
-                tokenAmount: toTokenAmount
+                weiAmount: toTokenAmountInWei
             }),
             slippageTolerance: fullOptions.slippageTolerance,
             disableMultihops: fullOptions.disableMultihops,
@@ -121,7 +121,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         from: PriceTokenAmount,
         toToken: Token,
         options: Required<OneinchSwapCalculationOptions>
-    ): Promise<{ toTokenAmount: BigNumber; estimatedGas: BigNumber; path: Token[] }> {
+    ): Promise<{ toTokenAmountInWei: BigNumber; estimatedGas: BigNumber; path: Token[] }> {
         const quoteTradeParams: OneinchQuoteRequest = {
             params: {
                 fromTokenAddress: from.address,
@@ -166,7 +166,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
 
         const path = await this.extractPath(from, toToken, oneInchTrade);
 
-        return { toTokenAmount: new BigNumber(toTokenAmount), estimatedGas, path };
+        return { toTokenAmountInWei: new BigNumber(toTokenAmount), estimatedGas, path };
     }
 
     /**

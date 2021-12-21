@@ -54,7 +54,7 @@ export abstract class ZrxAbstractProvider extends InstantTradeProvider {
             from,
             to: new PriceTokenAmount({
                 ...to.asStruct,
-                tokenAmount: new BigNumber(apiTradeData.buyAmount)
+                weiAmount: new BigNumber(apiTradeData.buyAmount)
             }),
             slippageTolerance: fullOptions.slippageTolerance,
             apiTradeData
