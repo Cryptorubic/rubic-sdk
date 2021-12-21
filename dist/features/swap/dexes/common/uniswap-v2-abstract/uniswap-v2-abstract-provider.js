@@ -120,7 +120,7 @@ var UniswapV2AbstractProvider = /** @class */ (function (_super) {
                             from: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, from.asStruct), { weiAmount: fromAmount })),
                             to: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, to.asStruct), { weiAmount: toAmount })),
                             exact: exact,
-                            path: route.path,
+                            nativeSupportedPath: route.path,
                             deadlineMinutes: fullOptions.deadlineMinutes,
                             slippageTolerance: fullOptions.slippageTolerance
                         });

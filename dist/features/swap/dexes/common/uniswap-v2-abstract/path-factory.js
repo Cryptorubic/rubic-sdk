@@ -187,7 +187,7 @@ var PathFactory = /** @class */ (function () {
             return new _this.InstantTradeClass({
                 from: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, _this.from.asStruct), { weiAmount: fromAmount })),
                 to: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, _this.to.asStruct), { weiAmount: toAmount })),
-                path: route.path,
+                nativeSupportedPath: route.path,
                 exact: _this.exact,
                 deadlineMinutes: _this.options.deadlineMinutes,
                 slippageTolerance: _this.options.slippageTolerance

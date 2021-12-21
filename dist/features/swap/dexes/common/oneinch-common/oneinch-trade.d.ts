@@ -21,6 +21,8 @@ export declare class OneinchTrade extends InstantTrade {
     protected readonly contractAddress: string;
     readonly from: PriceTokenAmount;
     readonly to: PriceTokenAmount;
+    private readonly nativeSupportedFrom;
+    readonly nativeSupportedTo: PriceTokenAmount;
     gasFeeInfo: GasFeeInfo | null;
     slippageTolerance: number;
     private readonly disableMultihops;

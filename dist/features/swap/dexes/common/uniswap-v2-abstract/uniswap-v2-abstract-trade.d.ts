@@ -17,7 +17,7 @@ export declare type UniswapV2TradeStruct = {
     from: PriceTokenAmount;
     to: PriceTokenAmount;
     exact: 'input' | 'output';
-    path: ReadonlyArray<Token> | Token[];
+    nativeSupportedPath: ReadonlyArray<Token> | Token[];
     deadlineMinutes: number;
     slippageTolerance: number;
     gasFeeInfo?: GasFeeInfo | null;
@@ -36,6 +36,7 @@ export declare abstract class UniswapV2AbstractTrade extends InstantTrade {
     readonly to: PriceTokenAmount;
     gasFeeInfo: GasFeeInfo | null;
     readonly path: ReadonlyArray<Token>;
+    private readonly nativeSupportedPath;
     readonly exact: 'input' | 'output';
     set settings(value: {
         deadlineMinutes?: number;

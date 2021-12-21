@@ -181,8 +181,8 @@ var OneinchAbstractProvider = /** @class */ (function (_super) {
                         path[path.length - 1] = toToken;
                         oneinchTradeStruct = {
                             contractAddress: contractAddress,
-                            from: fromClone,
-                            to: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, toTokenClone.asStruct), { weiAmount: toTokenAmountInWei })),
+                            from: from,
+                            to: new price_token_amount_1.PriceTokenAmount(__assign(__assign({}, toToken.asStruct), { weiAmount: toTokenAmountInWei })),
                             slippageTolerance: fullOptions.slippageTolerance,
                             disableMultihops: fullOptions.disableMultihops,
                             path: path

@@ -72,7 +72,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OneinchTrade = void 0;
+var constants_1 = require("./constants");
 var utils_1 = require("./utils");
+var token_native_address_proxy_1 = require("../utils/token-native-address-proxy");
 var instant_trade_1 = require("../../../instant-trade");
 var injector_1 = require("../../../../../core/sdk/injector");
 var pure_decorator_1 = require("../../../../../common/decorators/pure.decorator");
@@ -89,6 +91,8 @@ var OneinchTrade = /** @class */ (function (_super) {
         _this.contractAddress = oneinchTradeStruct.contractAddress;
         _this.from = oneinchTradeStruct.from;
         _this.to = oneinchTradeStruct.to;
+        _this.nativeSupportedFrom = (0, token_native_address_proxy_1.createTokenNativeAddressProxy)(oneinchTradeStruct.from, constants_1.oneinchApiParams.nativeAddress);
+        _this.nativeSupportedTo = (0, token_native_address_proxy_1.createTokenNativeAddressProxy)(oneinchTradeStruct.to, constants_1.oneinchApiParams.nativeAddress);
         _this.gasFeeInfo = oneinchTradeStruct.gasFeeInfo || null;
         _this.slippageTolerance = oneinchTradeStruct.slippageTolerance;
         _this.disableMultihops = oneinchTradeStruct.disableMultihops;
@@ -127,19 +131,19 @@ var OneinchTrade = /** @class */ (function (_super) {
                 switch (_a.label) {
                     case 0:
                         this.checkWalletConnected();
-                        if (this.from.isNative) {
+                        if (this.nativeSupportedFrom.isNative) {
                             return [2 /*return*/, false];
                         }
                         return [4 /*yield*/, this.httpClient.get("".concat(this.apiBaseUrl, "/approve/allowance"), {
                                 params: {
-                                    tokenAddress: this.from.address,
+                                    tokenAddress: this.nativeSupportedFrom.address,
                                     walletAddress: this.walletAddress
                                 }
                             })];
                     case 1:
                         response = _a.sent();
                         allowance = new bignumber_js_1.default(response.allowance);
-                        return [2 /*return*/, allowance.lt(this.from.weiAmount)];
+                        return [2 /*return*/, allowance.lt(this.nativeSupportedFrom.weiAmount)];
                 }
             });
         });
@@ -166,7 +170,7 @@ var OneinchTrade = /** @class */ (function (_super) {
                             gas: gas,
                             gasPrice: gasPrice
                         };
-                        return [2 /*return*/, injector_1.Injector.web3Private.trySendTransaction(apiTradeData.tx.to, this.from.isNative ? this.from.stringWeiAmount : '0', transactionOptions)];
+                        return [2 /*return*/, injector_1.Injector.web3Private.trySendTransaction(apiTradeData.tx.to, this.nativeSupportedFrom.isNative ? this.nativeSupportedFrom.stringWeiAmount : '0', transactionOptions)];
                     case 4:
                         err_1 = _b.sent();
                         this.specifyError(err_1);
@@ -199,7 +203,7 @@ var OneinchTrade = /** @class */ (function (_super) {
     };
     OneinchTrade.prototype.getTradeData = function (fromAddress) {
         var swapRequest = {
-            params: __assign({ fromTokenAddress: this.from.address, toTokenAddress: this.to.address, amount: this.from.stringWeiAmount, slippage: (this.slippageTolerance * 100).toString(), fromAddress: fromAddress || this.walletAddress }, (this.disableMultihops && { mainRouteParts: '1' }))
+            params: __assign({ fromTokenAddress: this.nativeSupportedFrom.address, toTokenAddress: this.to.address, amount: this.nativeSupportedFrom.stringWeiAmount, slippage: (this.slippageTolerance * 100).toString(), fromAddress: fromAddress || this.walletAddress }, (this.disableMultihops && { mainRouteParts: '1' }))
         };
         return this.httpClient.get("".concat(this.apiBaseUrl, "/swap"), swapRequest);
     };
@@ -214,8 +218,7 @@ var OneinchTrade = /** @class */ (function (_super) {
         var _a, _b, _c;
         if (err.error) {
             if ((_a = err.error.message) === null || _a === void 0 ? void 0 : _a.includes('cannot estimate')) {
-                var nativeToken = blockchains_1.blockchains.find(function (el) { return el.name === _this.from.blockchain; })
-                    .nativeCoin.symbol;
+                var nativeToken = blockchains_1.blockchains.find(function (el) { return el.name === _this.nativeSupportedFrom.blockchain; }).nativeCoin.symbol;
                 var message = "1inch sets increased costs on gas fee. For transaction enter less ".concat(nativeToken, " amount or top up your ").concat(nativeToken, " balance.");
                 throw new rubic_sdk_error_1.RubicSdkError(message);
             }

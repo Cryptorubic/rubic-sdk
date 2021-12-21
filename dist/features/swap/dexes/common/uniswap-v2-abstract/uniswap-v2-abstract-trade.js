@@ -87,6 +87,7 @@ var low_slippage_deflationary_token_error_1 = require("../../../../../common/err
 var low_slippage_error_1 = require("../../../../../common/errors/swap/low-slippage.error");
 var functions_1 = require("../../../../../common/utils/functions");
 var web3_pure_1 = require("../../../../../core/blockchain/web3-pure/web3-pure");
+var token_native_address_proxy_1 = require("../utils/token-native-address-proxy");
 var injector_1 = require("../../../../../core/sdk/injector");
 var instant_trade_1 = require("../../../instant-trade");
 var default_estimated_gas_1 = require("./constants/default-estimated-gas");
@@ -101,17 +102,21 @@ var UniswapV2AbstractTrade = /** @class */ (function (_super) {
         _this.from = tradeStruct.from;
         _this.to = tradeStruct.to;
         _this.gasFeeInfo = tradeStruct.gasFeeInfo || null;
-        _this.path = tradeStruct.path;
         _this.deadlineMinutes = tradeStruct.deadlineMinutes;
         _this.exact = tradeStruct.exact;
         _this.slippageTolerance = tradeStruct.slippageTolerance;
+        _this.nativeSupportedPath = tradeStruct.nativeSupportedPath;
+        _this.path = (0, token_native_address_proxy_1.createTokenNativeAddressProxyInPathStartAndEnd)(_this.nativeSupportedPath, web3_pure_1.Web3Pure.nativeTokenAddress);
         return _this;
     }
     UniswapV2AbstractTrade.getContractAddress = function (blockchain) {
         try {
             // see  https://github.com/microsoft/TypeScript/issues/34516
             // @ts-ignore
-            var instance = new this({ from: { blockchain: blockchain } });
+            var instance = new this({
+                from: { blockchain: blockchain },
+                nativeSupportedPath: [{ isNative: function () { return false; } }, { isNative: function () { return false; } }]
+            });
             if (!instance.contractAddress) {
                 throw new rubic_sdk_error_1.RubicSdkError('Trying to read abstract class field');
             }
@@ -157,7 +162,7 @@ var UniswapV2AbstractTrade = /** @class */ (function (_super) {
             var _a = this.getAmountInAndAmountOut(), amountIn = _a.amountIn, amountOut = _a.amountOut;
             var amountParameters = this.from.isNative ? [amountOut] : [amountIn, amountOut];
             return __spreadArray(__spreadArray([], amountParameters, true), [
-                this.path.map(function (t) { return t.address; }),
+                this.nativeSupportedPath.map(function (t) { return t.address; }),
                 this.walletAddress,
                 this.deadlineMinutesTimestamp
             ], false);
@@ -311,7 +316,7 @@ var UniswapV2AbstractTrade = /** @class */ (function (_super) {
         if (gasLimit) {
             return gasLimit;
         }
-        var transitTokensNumber = this.path.length - 2;
+        var transitTokensNumber = this.nativeSupportedPath.length - 2;
         var methodName = 'tokensToTokens';
         if (this.from.isNative) {
             methodName = 'ethToTokens';

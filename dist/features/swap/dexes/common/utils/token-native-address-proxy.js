@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createTokenNativeAddressProxy = void 0;
+exports.createTokenNativeAddressProxyInPathStartAndEnd = exports.createTokenNativeAddressProxy = void 0;
 function createTokenNativeAddressProxy(token, wrappedNativeAddress) {
     var wethAbleAddress = token.isNative ? wrappedNativeAddress : token.address;
     return new Proxy(token, {
@@ -16,4 +16,10 @@ function createTokenNativeAddressProxy(token, wrappedNativeAddress) {
     });
 }
 exports.createTokenNativeAddressProxy = createTokenNativeAddressProxy;
+function createTokenNativeAddressProxyInPathStartAndEnd(path, wrappedNativeAddress) {
+    return [createTokenNativeAddressProxy(path[0], wrappedNativeAddress)]
+        .concat(path.slice(1, path.length - 1))
+        .concat(createTokenNativeAddressProxy(path[path.length - 1], wrappedNativeAddress));
+}
+exports.createTokenNativeAddressProxyInPathStartAndEnd = createTokenNativeAddressProxyInPathStartAndEnd;
 //# sourceMappingURL=token-native-address-proxy.js.map
