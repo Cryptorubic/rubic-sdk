@@ -17,16 +17,21 @@ export function Cache<T>(
         throw new RubicSdkError('Descriptor value is undefined.');
     }
 
-    const storage = new Map<string, unknown>();
+    const storage = new WeakMap<Function, Map<string, unknown>>();
 
     descriptor.value = function method(this: Function, ...args: unknown[]): unknown {
+        if (!storage.has(this)) {
+            storage.set(this, new Map<string, unknown>());
+        }
+
+        const instanceStore = storage.get(this)!;
         const key = generateKey(args);
-        if (storage.has(key)) {
-            return storage.get(key);
+        if (instanceStore.has(key)) {
+            return instanceStore.get(key);
         }
 
         const result = (originalMethod as unknown as Function).apply(this, args);
-        storage.set(key, result);
+        instanceStore.set(key, result);
         return result;
     } as unknown as T;
 }
@@ -41,16 +46,21 @@ export function PCache<T>(
         throw new RubicSdkError('Descriptor value is undefined.');
     }
 
-    const storage = new Map<string, unknown>();
+    const storage = new WeakMap<Function, Map<string, unknown>>();
 
     descriptor.value = async function method(this: Function, ...args: unknown[]): Promise<unknown> {
+        if (!storage.has(this)) {
+            storage.set(this, new Map<string, unknown>());
+        }
+
         const key = generateKey(args);
-        if (storage.has(key)) {
-            return storage.get(key);
+        const instanceStore = storage.get(this)!;
+        if (instanceStore.has(key)) {
+            return instanceStore.get(key);
         }
 
         const result = await (originalMethod as unknown as Function).apply(this, args);
-        storage.set(key, result);
+        instanceStore.set(key, result);
         return result;
     } as unknown as T;
 }
@@ -69,19 +79,24 @@ export function PConditionalCache<T>(
         throw new RubicSdkError('Descriptor value is undefined.');
     }
 
-    const storage = new Map<string, unknown>();
+    const storage = new WeakMap<Function, Map<string, unknown>>();
 
     descriptor.value = async function method(this: Function, ...args: unknown[]): Promise<unknown> {
+        if (!storage.has(this)) {
+            storage.set(this, new Map<string, unknown>());
+        }
+
+        const instanceStore = storage.get(this)!;
         const key = generateKey(args);
-        if (storage.has(key)) {
-            return storage.get(key);
+        if (instanceStore.has(key)) {
+            return instanceStore.get(key);
         }
 
         const result = await (originalMethod as unknown as Function).apply(this, args);
         if (result.notSave) {
-            storage.delete(key);
+            instanceStore.delete(key);
         } else {
-            storage.set(key, result.value);
+            instanceStore.set(key, result.value);
         }
         return result.value;
     } as unknown as T;

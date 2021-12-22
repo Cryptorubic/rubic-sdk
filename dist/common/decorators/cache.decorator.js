@@ -50,18 +50,22 @@ function Cache(_, __, descriptor) {
     if (!originalMethod) {
         throw new rubic_sdk_error_1.RubicSdkError('Descriptor value is undefined.');
     }
-    var storage = new Map();
+    var storage = new WeakMap();
     descriptor.value = function method() {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
+        if (!storage.has(this)) {
+            storage.set(this, new Map());
+        }
+        var instanceStore = storage.get(this);
         var key = generateKey(args);
-        if (storage.has(key)) {
-            return storage.get(key);
+        if (instanceStore.has(key)) {
+            return instanceStore.get(key);
         }
         var result = originalMethod.apply(this, args);
-        storage.set(key, result);
+        instanceStore.set(key, result);
         return result;
     };
 }
@@ -71,25 +75,29 @@ function PCache(_, __, descriptor) {
     if (!originalMethod) {
         throw new rubic_sdk_error_1.RubicSdkError('Descriptor value is undefined.');
     }
-    var storage = new Map();
+    var storage = new WeakMap();
     descriptor.value = function method() {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
         return __awaiter(this, void 0, void 0, function () {
-            var key, result;
+            var key, instanceStore, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!storage.has(this)) {
+                            storage.set(this, new Map());
+                        }
                         key = generateKey(args);
-                        if (storage.has(key)) {
-                            return [2 /*return*/, storage.get(key)];
+                        instanceStore = storage.get(this);
+                        if (instanceStore.has(key)) {
+                            return [2 /*return*/, instanceStore.get(key)];
                         }
                         return [4 /*yield*/, originalMethod.apply(this, args)];
                     case 1:
                         result = _a.sent();
-                        storage.set(key, result);
+                        instanceStore.set(key, result);
                         return [2 /*return*/, result];
                 }
             });
@@ -106,29 +114,33 @@ function PConditionalCache(_, __, descriptor) {
     if (!originalMethod) {
         throw new rubic_sdk_error_1.RubicSdkError('Descriptor value is undefined.');
     }
-    var storage = new Map();
+    var storage = new WeakMap();
     descriptor.value = function method() {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
         return __awaiter(this, void 0, void 0, function () {
-            var key, result;
+            var instanceStore, key, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!storage.has(this)) {
+                            storage.set(this, new Map());
+                        }
+                        instanceStore = storage.get(this);
                         key = generateKey(args);
-                        if (storage.has(key)) {
-                            return [2 /*return*/, storage.get(key)];
+                        if (instanceStore.has(key)) {
+                            return [2 /*return*/, instanceStore.get(key)];
                         }
                         return [4 /*yield*/, originalMethod.apply(this, args)];
                     case 1:
                         result = _a.sent();
                         if (result.notSave) {
-                            storage.delete(key);
+                            instanceStore.delete(key);
                         }
                         else {
-                            storage.set(key, result.value);
+                            instanceStore.set(key, result.value);
                         }
                         return [2 /*return*/, result.value];
                 }
