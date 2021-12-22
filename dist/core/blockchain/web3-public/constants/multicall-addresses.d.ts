@@ -1,15 +1,2 @@
-export declare const MULTICALL_ADDRESSES: {
-    ETH: string;
-    BSC: string;
-    POLYGON: string;
-    HARMONY: string;
-    KOVAN: string;
-};
-export declare const MULTICALL_ADDRESSES_TESTNET: {
-    ETH: string;
-    KOVAN: string;
-    BSC: string;
-    BSC_TESTNET: string;
-    POLYGON: string;
-    POLYGON_TESTNET: string;
-};
+import { BLOCKCHAIN_NAME } from '../../models/BLOCKCHAIN_NAME';
+export declare const MULTICALL_ADDRESSES: Record<BLOCKCHAIN_NAME, string>;

@@ -34,7 +34,7 @@ type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
  * To send transaction or execute contract method use {@link Web3Private}.
  */
 export class Web3Public {
-    private multicallAddresses: Partial<Record<BLOCKCHAIN_NAME, string>> = MULTICALL_ADDRESSES;
+    private multicallAddresses: Record<BLOCKCHAIN_NAME, string> = MULTICALL_ADDRESSES;
 
     private readonly clearController: { clear: boolean } = { clear: false };
 
