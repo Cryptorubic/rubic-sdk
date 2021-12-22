@@ -75,6 +75,9 @@ var ZrxTrade = /** @class */ (function (_super) {
                     case 0: return [4 /*yield*/, this.checkWalletState()];
                     case 1:
                         _b.sent();
+                        return [4 /*yield*/, this.checkAllowanceAndApprove(options)];
+                    case 2:
+                        _b.sent();
                         _a = this.getGasParamsFromApiTradeData(options, this.apiTradeData), gas = _a.gas, gasPrice = _a.gasPrice;
                         return [2 /*return*/, injector_1.Injector.web3Private.trySendTransaction(this.apiTradeData.to, this.apiTradeData.value, {
                                 onTransactionHash: options.onConfirm,

@@ -108,6 +108,30 @@ var InstantTrade = /** @class */ (function () {
             });
         });
     };
+    InstantTrade.prototype.checkAllowanceAndApprove = function (options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var needApprove, txOptions;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.needApprove()];
+                    case 1:
+                        needApprove = _a.sent();
+                        if (!needApprove) {
+                            return [2 /*return*/];
+                        }
+                        txOptions = {
+                            onTransactionHash: options === null || options === void 0 ? void 0 : options.onApprove,
+                            gas: (options === null || options === void 0 ? void 0 : options.gasLimit) || undefined,
+                            gasPrice: (options === null || options === void 0 ? void 0 : options.gasPrice) || undefined
+                        };
+                        return [4 /*yield*/, injector_1.Injector.web3Private.approveTokens(this.from.address, this.contractAddress, 'infinity', txOptions)];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     InstantTrade.prototype.checkWalletState = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {

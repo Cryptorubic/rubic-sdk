@@ -214,6 +214,9 @@ var UniswapV2AbstractTrade = /** @class */ (function (_super) {
                     case 0: return [4 /*yield*/, this.checkWalletState()];
                     case 1:
                         _a.sent();
+                        return [4 /*yield*/, this.checkAllowanceAndApprove(options)];
+                    case 2:
+                        _a.sent();
                         return [2 /*return*/, this.createAnyToAnyTrade(options)];
                 }
             });

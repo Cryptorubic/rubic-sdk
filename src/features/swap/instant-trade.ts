@@ -2,6 +2,7 @@ import { RubicSdkError } from '@common/errors/rubic-sdk-error';
 import { WalletNotConnectedError } from '@common/errors/swap/wallet-not-connected.error';
 import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
 import { BasicTransactionOptions } from '@core/blockchain/models/basic-transaction-options';
+import { TransactionOptions } from '@core/blockchain/models/transaction-options';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Injector } from '@core/sdk/injector';
 import { EncodeTransactionOptions } from '@features/swap/models/encode-transaction-options';
@@ -71,6 +72,28 @@ export abstract class InstantTrade {
             this.contractAddress,
             'infinity',
             options
+        );
+    }
+
+    protected async checkAllowanceAndApprove(
+        options?: Omit<SwapTransactionOptions, 'onConfirm'>
+    ): Promise<void> {
+        const needApprove = await this.needApprove();
+        if (!needApprove) {
+            return;
+        }
+
+        const txOptions: TransactionOptions = {
+            onTransactionHash: options?.onApprove,
+            gas: options?.gasLimit || undefined,
+            gasPrice: options?.gasPrice || undefined
+        };
+
+        await Injector.web3Private.approveTokens(
+            this.from.address,
+            this.contractAddress,
+            'infinity',
+            txOptions
         );
     }
 

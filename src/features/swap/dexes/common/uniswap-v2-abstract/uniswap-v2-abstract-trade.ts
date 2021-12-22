@@ -183,6 +183,8 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
         await this.checkWalletState();
 
+        await this.checkAllowanceAndApprove(options);
+
         return this.createAnyToAnyTrade(options);
     }
 

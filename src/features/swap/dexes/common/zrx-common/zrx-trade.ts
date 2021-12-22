@@ -47,6 +47,8 @@ export class ZrxTrade extends InstantTrade {
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
         await this.checkWalletState();
 
+        await this.checkAllowanceAndApprove(options);
+
         const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, this.apiTradeData);
 
         return Injector.web3Private.trySendTransaction(

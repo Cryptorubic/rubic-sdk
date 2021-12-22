@@ -157,11 +157,14 @@ var OneinchTrade = /** @class */ (function (_super) {
                     case 0: return [4 /*yield*/, this.checkWalletState()];
                     case 1:
                         _b.sent();
-                        _b.label = 2;
+                        return [4 /*yield*/, this.checkAllowanceAndApprove(options)];
                     case 2:
-                        _b.trys.push([2, 4, , 5]);
-                        return [4 /*yield*/, this.getTradeData()];
+                        _b.sent();
+                        _b.label = 3;
                     case 3:
+                        _b.trys.push([3, 5, , 6]);
+                        return [4 /*yield*/, this.getTradeData()];
+                    case 4:
                         apiTradeData = _b.sent();
                         _a = this.getGasParamsFromApiTradeData(options, apiTradeData), gas = _a.gas, gasPrice = _a.gasPrice;
                         transactionOptions = {
@@ -171,11 +174,11 @@ var OneinchTrade = /** @class */ (function (_super) {
                             gasPrice: gasPrice
                         };
                         return [2 /*return*/, injector_1.Injector.web3Private.trySendTransaction(apiTradeData.tx.to, this.nativeSupportedFrom.isNative ? this.nativeSupportedFrom.stringWeiAmount : '0', transactionOptions)];
-                    case 4:
+                    case 5:
                         err_1 = _b.sent();
                         this.specifyError(err_1);
                         throw new rubic_sdk_error_1.RubicSdkError(err_1.message || err_1.toString());
-                    case 5: return [2 /*return*/];
+                    case 6: return [2 /*return*/];
                 }
             });
         });

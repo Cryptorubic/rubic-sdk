@@ -108,6 +108,8 @@ export class OneinchTrade extends InstantTrade {
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
         await this.checkWalletState();
 
+        await this.checkAllowanceAndApprove(options);
+
         try {
             const apiTradeData = await this.getTradeData();
             const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, apiTradeData);

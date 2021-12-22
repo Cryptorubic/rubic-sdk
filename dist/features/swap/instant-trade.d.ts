@@ -20,6 +20,7 @@ export declare abstract class InstantTrade {
     protected constructor(blockchain: BLOCKCHAIN_NAME);
     needApprove(): Promise<boolean>;
     approve(options?: BasicTransactionOptions): Promise<TransactionReceipt>;
+    protected checkAllowanceAndApprove(options?: Omit<SwapTransactionOptions, 'onConfirm'>): Promise<void>;
     abstract swap(options?: SwapTransactionOptions): Promise<TransactionReceipt>;
     abstract encode(options?: EncodeTransactionOptions): Promise<TransactionConfig>;
     protected checkWalletState(): Promise<void>;
