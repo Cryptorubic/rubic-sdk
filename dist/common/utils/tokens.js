@@ -62,9 +62,19 @@ function getPriceTokensFromInputTokens(from, fromAmount, to) {
             switch (_b.label) {
                 case 0:
                     fromPriceTokenPromise = from instanceof token_1.Token ? price_token_1.PriceToken.createFromToken(from) : price_token_1.PriceToken.createToken(from);
-                    toPriceTokenPromise = to instanceof token_1.Token
-                        ? price_token_1.PriceToken.createFromToken(to)
-                        : price_token_1.PriceToken.createToken({ address: to, blockchain: from.blockchain });
+                    switch (true) {
+                        case to instanceof token_1.Token:
+                            toPriceTokenPromise = price_token_1.PriceToken.createFromToken(to);
+                            break;
+                        case typeof to === 'object':
+                            toPriceTokenPromise = price_token_1.PriceToken.createToken(to);
+                            break;
+                        default:
+                            toPriceTokenPromise = price_token_1.PriceToken.createToken({
+                                address: to,
+                                blockchain: from.blockchain
+                            });
+                    }
                     return [4 /*yield*/, Promise.all([
                             fromPriceTokenPromise,
                             toPriceTokenPromise

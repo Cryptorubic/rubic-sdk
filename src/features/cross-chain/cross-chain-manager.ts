@@ -72,9 +72,14 @@ export class CrossChainManager {
                   blockchain: BLOCKCHAIN_NAME;
               },
         fromAmount: string,
-        toToken: Token | string,
+        toToken:
+            | Token
+            | {
+                  address: string;
+                  blockchain: BLOCKCHAIN_NAME;
+              },
         options?: CrossChainOptions
-    ) {
+    ): Promise<CrossChainTrade> {
         if (toToken instanceof Token && fromToken.blockchain === toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be different.');
         }

@@ -13,7 +13,10 @@ export declare class CrossChainManager {
     calculateTrade(fromToken: Token | {
         address: string;
         blockchain: BLOCKCHAIN_NAME;
-    }, fromAmount: string, toToken: Token | string, options?: CrossChainOptions): Promise<CrossChainTrade>;
+    }, fromAmount: string, toToken: Token | {
+        address: string;
+        blockchain: BLOCKCHAIN_NAME;
+    }, options?: CrossChainOptions): Promise<CrossChainTrade>;
     private getFullOptions;
     calculateTradeFromTokens(from: PriceTokenAmount, toToken: PriceToken, options: CrossChainOptions): Promise<CrossChainTrade>;
     private calculateBestFromTrade;
