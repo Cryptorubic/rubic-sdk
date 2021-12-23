@@ -9,6 +9,10 @@ function checkConfig() {
     if (!process.env.BSC_RPC) {
         throw new Error('Bsc rpc was not configured');
     }
+
+    if (!process.env.POLYGON_RPC) {
+        throw new Error('Polygon rpc was not configured');
+    }
 }
 
 checkConfig();
@@ -19,6 +23,9 @@ export const configuration: Configuration = {
         },
         [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: {
             mainRpc: process.env.BSC_RPC!!
+        },
+        [BLOCKCHAIN_NAME.POLYGON]: {
+            mainRpc: process.env.POLYGON_RPC!!
         }
     }
 };
