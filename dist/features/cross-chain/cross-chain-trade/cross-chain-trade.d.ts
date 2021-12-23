@@ -3,6 +3,7 @@ import { PriceTokenAmount } from '../../../core/blockchain/tokens/price-token-am
 import { GasData } from '../models/gas-data';
 import { MinMaxAmountsErrors } from './models/MinMaxAmountsErrors';
 import { TransactionOptions } from '../../../core/blockchain/models/transaction-options';
+import { SwapTransactionOptions } from '../../swap/models/swap-transaction-options';
 import BigNumber from 'bignumber.js';
 import { TransactionReceipt } from 'web3-eth';
 export declare class CrossChainTrade {
@@ -32,7 +33,8 @@ export declare class CrossChainTrade {
         gasData: GasData | null;
     });
     needApprove(): Promise<boolean>;
-    approve(tokenAddress: string, options: TransactionOptions): Promise<TransactionReceipt>;
+    approve(options: TransactionOptions): Promise<TransactionReceipt>;
+    protected checkAllowanceAndApprove(options?: Omit<SwapTransactionOptions, 'onConfirm'>): Promise<void>;
     private checkWalletConnected;
     private checkBlockchainCorrect;
     private checkContractsState;
@@ -41,6 +43,6 @@ export declare class CrossChainTrade {
     private checkUserBalance;
     private checkTradeErrors;
     private getContractMethodData;
-    swap(options?: TransactionOptions): Promise<string | never>;
+    swap(options?: SwapTransactionOptions): Promise<string | never>;
     private parseSwapErrors;
 }

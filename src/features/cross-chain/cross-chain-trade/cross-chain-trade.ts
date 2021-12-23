@@ -14,6 +14,7 @@ import { MaxGasPriceOverflowError } from '@common/errors/cross-chain/MaxGasPrice
 import { TransactionOptions } from '@core/blockchain/models/transaction-options';
 import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/FailedToCheckForTransactionReceiptError';
 import { InsufficientFundsGasPriceValueError } from '@common/errors/cross-chain/InsufficientFundsGasPriceValueError';
+import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import BigNumber from 'bignumber.js';
 import { TransactionReceipt } from 'web3-eth';
 import { UnnecessaryApprove } from '@common/errors/swap/UnnecessaryApprove';
@@ -154,7 +155,7 @@ export class CrossChainTrade {
         return this.fromTrade.fromToken.weiAmount.gt(allowance);
     }
 
-    public approve(tokenAddress: string, options: TransactionOptions): Promise<TransactionReceipt> {
+    public approve(options: TransactionOptions): Promise<TransactionReceipt> {
         if (!this.needApprove()) {
             throw new UnnecessaryApprove();
         }
@@ -163,10 +164,32 @@ export class CrossChainTrade {
         this.checkBlockchainCorrect();
 
         return Injector.web3Private.approveTokens(
-            tokenAddress,
+            this.fromTrade.fromToken.address,
             this.fromTrade.contract.address,
             'infinity',
             options
+        );
+    }
+
+    protected async checkAllowanceAndApprove(
+        options?: Omit<SwapTransactionOptions, 'onConfirm'>
+    ): Promise<void> {
+        const needApprove = await this.needApprove();
+        if (!needApprove) {
+            return;
+        }
+
+        const txOptions: TransactionOptions = {
+            onTransactionHash: options?.onApprove,
+            gas: options?.gasLimit || undefined,
+            gasPrice: options?.gasPrice || undefined
+        };
+
+        await Injector.web3Private.approveTokens(
+            this.fromTrade.fromToken.address,
+            this.fromTrade.contract.address,
+            'infinity',
+            txOptions
         );
     }
 
@@ -288,8 +311,10 @@ export class CrossChainTrade {
         };
     }
 
-    public async swap(options: TransactionOptions = {}): Promise<string | never> {
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        const { onConfirm, gasLimit, gasPrice } = options;
         await this.checkTradeErrors();
+        await this.checkAllowanceAndApprove(options);
 
         const { contractAddress, methodName, methodArguments, value } =
             await this.getContractMethodData();
@@ -297,8 +322,8 @@ export class CrossChainTrade {
         let transactionHash: string;
         try {
             const onTransactionHash = (hash: string) => {
-                if (options.onTransactionHash) {
-                    options.onTransactionHash(hash);
+                if (onConfirm) {
+                    onConfirm(hash);
                 }
                 transactionHash = hash;
             };
@@ -309,7 +334,8 @@ export class CrossChainTrade {
                 methodName,
                 methodArguments,
                 {
-                    ...options,
+                    gas: gasLimit || undefined,
+                    gasPrice: gasPrice || undefined,
                     value,
                     onTransactionHash
                 },

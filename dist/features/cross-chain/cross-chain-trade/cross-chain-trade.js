@@ -1,15 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -193,13 +182,37 @@ var CrossChainTrade = /** @class */ (function () {
             });
         });
     };
-    CrossChainTrade.prototype.approve = function (tokenAddress, options) {
+    CrossChainTrade.prototype.approve = function (options) {
         if (!this.needApprove()) {
             throw new UnnecessaryApprove_1.UnnecessaryApprove();
         }
         this.checkWalletConnected();
         this.checkBlockchainCorrect();
-        return injector_1.Injector.web3Private.approveTokens(tokenAddress, this.fromTrade.contract.address, 'infinity', options);
+        return injector_1.Injector.web3Private.approveTokens(this.fromTrade.fromToken.address, this.fromTrade.contract.address, 'infinity', options);
+    };
+    CrossChainTrade.prototype.checkAllowanceAndApprove = function (options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var needApprove, txOptions;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.needApprove()];
+                    case 1:
+                        needApprove = _a.sent();
+                        if (!needApprove) {
+                            return [2 /*return*/];
+                        }
+                        txOptions = {
+                            onTransactionHash: options === null || options === void 0 ? void 0 : options.onApprove,
+                            gas: (options === null || options === void 0 ? void 0 : options.gasLimit) || undefined,
+                            gasPrice: (options === null || options === void 0 ? void 0 : options.gasPrice) || undefined
+                        };
+                        return [4 /*yield*/, injector_1.Injector.web3Private.approveTokens(this.fromTrade.fromToken.address, this.fromTrade.contract.address, 'infinity', txOptions)];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     CrossChainTrade.prototype.checkWalletConnected = function () {
         if (!this.walletAddress) {
@@ -332,25 +345,35 @@ var CrossChainTrade = /** @class */ (function () {
     CrossChainTrade.prototype.swap = function (options) {
         if (options === void 0) { options = {}; }
         return __awaiter(this, void 0, void 0, function () {
-            var _a, contractAddress, methodName, methodArguments, value, transactionHash, onTransactionHash, err_1;
+            var onConfirm, gasLimit, gasPrice, _a, contractAddress, methodName, methodArguments, value, transactionHash, onTransactionHash, err_1;
             return __generator(this, function (_b) {
                 switch (_b.label) {
-                    case 0: return [4 /*yield*/, this.checkTradeErrors()];
+                    case 0:
+                        onConfirm = options.onConfirm, gasLimit = options.gasLimit, gasPrice = options.gasPrice;
+                        return [4 /*yield*/, this.checkTradeErrors()];
                     case 1:
                         _b.sent();
-                        return [4 /*yield*/, this.getContractMethodData()];
+                        return [4 /*yield*/, this.checkAllowanceAndApprove(options)];
                     case 2:
-                        _a = _b.sent(), contractAddress = _a.contractAddress, methodName = _a.methodName, methodArguments = _a.methodArguments, value = _a.value;
-                        _b.label = 3;
+                        _b.sent();
+                        return [4 /*yield*/, this.getContractMethodData()];
                     case 3:
-                        _b.trys.push([3, 5, , 6]);
+                        _a = _b.sent(), contractAddress = _a.contractAddress, methodName = _a.methodName, methodArguments = _a.methodArguments, value = _a.value;
+                        _b.label = 4;
+                    case 4:
+                        _b.trys.push([4, 6, , 7]);
                         onTransactionHash = function (hash) {
-                            if (options.onTransactionHash) {
-                                options.onTransactionHash(hash);
+                            if (onConfirm) {
+                                onConfirm(hash);
                             }
                             transactionHash = hash;
                         };
-                        return [4 /*yield*/, injector_1.Injector.web3Private.tryExecuteContractMethod(contractAddress, crossChainContractAbi_1.crossChainContractAbi, methodName, methodArguments, __assign(__assign({}, options), { value: value, onTransactionHash: onTransactionHash }), function (err) {
+                        return [4 /*yield*/, injector_1.Injector.web3Private.tryExecuteContractMethod(contractAddress, crossChainContractAbi_1.crossChainContractAbi, methodName, methodArguments, {
+                                gas: gasLimit || undefined,
+                                gasPrice: gasPrice || undefined,
+                                value: value,
+                                onTransactionHash: onTransactionHash
+                            }, function (err) {
                                 var _a;
                                 var includesErrCode = (_a = err === null || err === void 0 ? void 0 : err.message) === null || _a === void 0 ? void 0 : _a.includes('-32000');
                                 var allowedErrors = [
@@ -360,16 +383,16 @@ var CrossChainTrade = /** @class */ (function () {
                                 var includesPhrase = allowedErrors.some(function (error) { var _a; return (_a = err === null || err === void 0 ? void 0 : err.message) === null || _a === void 0 ? void 0 : _a.includes(error); });
                                 return includesErrCode && includesPhrase;
                             })];
-                    case 4:
+                    case 5:
                         _b.sent();
                         return [2 /*return*/, transactionHash];
-                    case 5:
+                    case 6:
                         err_1 = _b.sent();
                         if (err_1 instanceof FailedToCheckForTransactionReceiptError_1.FailedToCheckForTransactionReceiptError) {
                             return [2 /*return*/, transactionHash];
                         }
                         return [2 /*return*/, this.parseSwapErrors(err_1)];
-                    case 6: return [2 /*return*/];
+                    case 7: return [2 /*return*/];
                 }
             });
         });
