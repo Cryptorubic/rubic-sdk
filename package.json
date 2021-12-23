@@ -20,7 +20,7 @@
     "p-timeout": "^5.0.2",
     "rxjs": "^7.4.0",
     "ts-cacheable": "^1.0.5",
-    "web3": "^1.5.3"
+    "web3": "~1.5.3"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-0",
