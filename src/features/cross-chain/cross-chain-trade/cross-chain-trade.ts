@@ -91,13 +91,9 @@ export class CrossChainTrade {
         return Injector.web3Private.address;
     }
 
-    public get fromToken(): PriceTokenAmount {
-        return this.fromTrade.fromToken;
-    }
+    public readonly from: PriceTokenAmount;
 
-    public get toToken(): PriceTokenAmount {
-        return this.fromTrade.toToken;
-    }
+    public readonly to: PriceTokenAmount;
 
     public get estimatedGas(): BigNumber | null {
         if (!this.gasData) {
@@ -135,6 +131,9 @@ export class CrossChainTrade {
         this.transitFeeToken = crossChainTrade.transitFeeToken;
         this.minMaxAmountsErrors = crossChainTrade.minMaxAmountsErrors;
         this.gasData = crossChainTrade.gasData;
+
+        this.from = this.fromTrade.fromToken;
+        this.to = this.toTrade.fromToken;
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.fromTrade.blockchain);
         this.toWeb3Public = Injector.web3PublicService.getWeb3Public(this.toTrade.blockchain);

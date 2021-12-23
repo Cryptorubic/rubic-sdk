@@ -17,8 +17,8 @@ export declare class CrossChainTrade {
     private readonly fromWeb3Public;
     private readonly toWeb3Public;
     private get walletAddress();
-    get fromToken(): PriceTokenAmount;
-    get toToken(): PriceTokenAmount;
+    readonly from: PriceTokenAmount;
+    readonly to: PriceTokenAmount;
     get estimatedGas(): BigNumber | null;
     get priceImpactData(): {
         priceImpactFrom: number | null;

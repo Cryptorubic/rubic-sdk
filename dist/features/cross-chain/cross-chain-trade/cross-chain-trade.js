@@ -68,6 +68,8 @@ var CrossChainTrade = /** @class */ (function () {
         this.transitFeeToken = crossChainTrade.transitFeeToken;
         this.minMaxAmountsErrors = crossChainTrade.minMaxAmountsErrors;
         this.gasData = crossChainTrade.gasData;
+        this.from = this.fromTrade.fromToken;
+        this.to = this.toTrade.fromToken;
         this.fromWeb3Public = injector_1.Injector.web3PublicService.getWeb3Public(this.fromTrade.blockchain);
         this.toWeb3Public = injector_1.Injector.web3PublicService.getWeb3Public(this.toTrade.blockchain);
     }
@@ -123,20 +125,6 @@ var CrossChainTrade = /** @class */ (function () {
     Object.defineProperty(CrossChainTrade.prototype, "walletAddress", {
         get: function () {
             return injector_1.Injector.web3Private.address;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    Object.defineProperty(CrossChainTrade.prototype, "fromToken", {
-        get: function () {
-            return this.fromTrade.fromToken;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    Object.defineProperty(CrossChainTrade.prototype, "toToken", {
-        get: function () {
-            return this.fromTrade.toToken;
         },
         enumerable: false,
         configurable: true
