@@ -1,4 +1,6 @@
 const path = require('path');
+const webpack = require('webpack');
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
     entry: './src/index.ts',
@@ -11,6 +13,14 @@ module.exports = {
             }
         ]
     },
+    plugins: [
+        new webpack.IgnorePlugin({
+            checkResource(resource) {
+                // "@ethereumjs/common/genesisStates" consists ~800KB static files which are no more needed
+                return /(.*\/genesisStates\/.*\.json)/.test(resource)
+            },
+        }),
+    ],
     resolve: {
         extensions: ['.ts', '.js'],
         alias: {
@@ -18,24 +28,17 @@ module.exports = {
             "@features": path.resolve(__dirname, 'src/features'),
             "@core": path.resolve(__dirname, 'src/core'),
             "src": path.resolve(__dirname, 'src'),
+            // To avoid blotting up the `bn.js` library all over the packages
+            // use single library instance.
+            "bn.js": path.resolve(__dirname, 'node_modules/bn.js')
         },
         fallback: {
-            "fs": false,
-            "constants": false,
-            "querystring": false,
-            "url": false,
             "path": false,
             "os": false,
             "http": false,
             "https": false,
-            "zlib": false,
             "stream": false,
-            "crypto": false,
-            "got": false,
-            "async_hooks": false,
-            "electron": false,
-            "child_process": false,
-            "./package": false
+            "crypto": false
         }
     },
     output: {
@@ -43,6 +46,11 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
         clean: true
     },
-    devtool: 'inline-source-map',
+    optimization: {
+        minimizer: [new TerserPlugin({
+            extractComments: false
+        })],
+    },
+    devtool: false,
     mode: 'production'
 };

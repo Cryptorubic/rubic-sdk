@@ -2,14 +2,47 @@
   "name": "rubic-sdk",
   "version": "0.0.1",
   "description": "Simplify dApp creation",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "lib/index.js",
+  "types": "types/index.d.ts",
   "files": [
-    "dist"
+    "lib",
+    "types"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cryptorubic/rubic-sdk.git"
+  },
+  "keywords": [
+    "Ethereum",
+    "Rubic",
+    "Cross-chain",
+    "Multi-Chain",
+    "SDK",
+    "dApp",
+    "DEX",
+    "Polygon",
+    "Binance-Smart-Chain"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "author": "rubic.exchange",
+  "authors": [
+    {
+      "name": "Sergey Andreev",
+      "email": "andreev@mywish.io",
+      "homepage": "https://github.com/siandreev"
+    },
+    {
+      "name": "Andrey Ott",
+      "email": "ott@mywish.io",
+      "url": "https://github.com/ottebrut"
+    }
+  ],
+  "license": "GNU-3.0",
   "scripts": {
-    "build": "webpack --profile --json > ./dist/stats.json && tscpaths -p ./tsconfig.json -s ./src -o ./dist",
-    "compile": "tsc --project tsconfig.json && tscpaths -p ./tsconfig.json -s ./src -o ./dist",
+    "build": "webpack",
+    "compile": "./node_modules/rimraf/bin.js lib types && tsc --project tsconfig.json && tscpaths -p ./tsconfig.json -s ./src -o ./types",
     "test": "jest",
     "analyze": "webpack --profile --json > stats.json &&  webpack-bundle-analyzer stats.json"
   },
@@ -38,24 +71,17 @@
     "jest": "^27.1.1",
     "node-polyfill-webpack-plugin": "^1.1.4",
     "prettier": "^2.2.1",
+    "rimraf": "^3.0.2",
+    "terser-webpack-plugin": "^5.3.0",
     "ts-essentials": "^9.0.0",
     "ts-jest": "^27.1.2",
     "ts-loader": "^9.2.6",
+    "tsc-alias": "^1.5.0",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "tscpaths": "^0.0.9",
     "typescript": "^4.4.2",
     "webpack": "^5.65.0",
     "webpack-bundle-analyzer": "^4.5.0",
     "webpack-cli": "^4.9.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Cryptorubic/rubic-sdk.git"
-  },
-  "keywords": [],
-  "engines": {
-    "node": ">=16"
-  },
-  "author": "sergey-andreev",
-  "license": "GNU-3.0"
+  }
 }

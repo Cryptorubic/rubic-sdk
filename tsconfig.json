@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "declaration": true,
+    "declarationDir": "types",
     "lib": [
       "ES2015",
       "ES2016",
@@ -29,7 +30,7 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "useUnknownInCatchVariables": false,
-    "outDir": "dist",
+    "outDir": "lib",
     "baseUrl": ".",
     "paths": {
       "*": [
@@ -44,5 +45,5 @@
     "allowJs": true
   },
   "include": ["src"],
-  "exclude": ["__tests__" ,"node_modules", "dist"]
+  "exclude": ["__tests__" ,"node_modules", "lib", "types"]
 }

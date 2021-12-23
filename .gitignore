@@ -1,6 +1,5 @@
 .idea
 /node_modules/
-/build/
 /.env
 /yarn-error.log
 /.data/
@@ -11,3 +10,7 @@
 /e2e/env.js
 /dist-tests/
 /__tests__/env.js
+
+/lib/
+/types/
+/dist/
