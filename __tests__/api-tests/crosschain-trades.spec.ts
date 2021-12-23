@@ -19,7 +19,7 @@ describe('Cross chain trades module tests', () => {
         };
         const toToken = {
             address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-            blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN
+            blockchain: BLOCKCHAIN_NAME.ETHEREUM
         };
         const fromAmount = 1;
 
