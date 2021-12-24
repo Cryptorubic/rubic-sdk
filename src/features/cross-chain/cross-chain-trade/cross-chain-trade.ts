@@ -133,7 +133,7 @@ export class CrossChainTrade {
         this.gasData = crossChainTrade.gasData;
 
         this.from = this.fromTrade.fromToken;
-        this.to = this.toTrade.fromToken;
+        this.to = this.toTrade.toToken;
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.fromTrade.blockchain);
         this.toWeb3Public = Injector.web3PublicService.getWeb3Public(this.toTrade.blockchain);
