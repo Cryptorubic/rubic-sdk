@@ -1,5 +1,5 @@
 import { ConditionalResult, PCache, PConditionalCache } from '@common/decorators/cache.decorator';
-import { HealthcheckError } from '@common/errors/healthcheck.error';
+import { HealthcheckError } from '@common/errors/blockchain/healthcheck.error';
 import { ERC20_TOKEN_ABI } from '@core/blockchain/constants/erc-20-abi';
 import {
     HEALTHCHECK,
@@ -22,7 +22,7 @@ import { Method } from 'web3-core-method';
 import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
 import { AbiItem } from 'web3-utils';
 import { BlockTransactionString } from 'web3-eth';
-import { InsufficientFundsError } from '@common/errors/swap/insufficient-funds-error';
+import { InsufficientFundsError } from '@common/errors/swap/insufficient-funds.error';
 import { HttpClient } from '@common/models/http-client';
 import { DefaultHttpClient } from '@common/http/default-http-client';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';

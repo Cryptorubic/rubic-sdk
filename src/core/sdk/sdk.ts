@@ -7,6 +7,7 @@ import { Injector } from '@core/sdk/injector';
 import { Configuration } from '@core/sdk/models/configuration';
 import { CrossChainManager } from '@features/cross-chain/cross-chain-manager';
 import { InstantTradesManager } from '@features/swap/instant-trades-manager';
+import { TokensManager } from '@features/tokens/tokens-manager';
 
 export class SDK {
     public readonly instantTrades: InstantTradesManager;
@@ -20,6 +21,8 @@ export class SDK {
     public readonly gasPriceApi = Injector.gasPriceApi;
 
     public readonly cryptoPriceApi = Injector.coingeckoApi;
+
+    public readonly tokens = new TokensManager();
 
     public static async createSDK(configuration: Configuration): Promise<SDK> {
         const [web3PublicService, web3Private, httpClient] = await Promise.all([

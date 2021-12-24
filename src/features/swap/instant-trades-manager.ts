@@ -1,4 +1,4 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { notNull } from '@common/utils/object';
 import { combineOptions } from '@common/utils/options';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';

@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "declarationDir": "types",
     "lib": [
       "ES2015",
       "ES2016",

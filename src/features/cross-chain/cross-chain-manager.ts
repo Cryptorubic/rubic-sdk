@@ -1,9 +1,9 @@
-import { getCrossChainContract } from '@features/cross-chain/constants/crossChainContracts';
+import { getCrossChainContract } from '@features/cross-chain/constants/cross-chain-contracts';
 import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
 import {
     CrossChainSupportedBlockchain,
     crossChainSupportedBlockchains
-} from '@features/cross-chain/constants/CrossChainSupportedBlockchains';
+} from '@features/cross-chain/constants/cross-chain-supported-blockchains';
 import { Token } from '@core/blockchain/tokens/token';
 import BigNumber from 'bignumber.js';
 import { CrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
@@ -16,15 +16,15 @@ import { DirectContractTrade } from '@features/cross-chain/models/ContractTrade/
 import { ItContractTrade } from '@features/cross-chain/models/ContractTrade/ItContractTrade';
 import { CrossChainTrade } from '@features/cross-chain/cross-chain-trade/cross-chain-trade';
 import { Injector } from '@core/sdk/injector';
-import { MinMaxAmountsErrors } from '@features/cross-chain/cross-chain-trade/models/MinMaxAmountsErrors';
-import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity-error';
+import { MinMaxAmountsErrors } from '@features/cross-chain/cross-chain-trade/models/min-max-amounts-errors';
+import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity.error';
 import { MinMaxAmounts } from '@features/cross-chain/models/min-max-amounts';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { GasData } from '@features/cross-chain/models/gas-data';
-import { NotSupportedBlockchain } from '@common/errors/swap/NotSupportedBlockchain';
+import { NotSupportedBlockchain } from '@common/errors/swap/not-supported-blockchain';
 import { notNull } from '@common/utils/object';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { RubicSdkError } from '@common/errors/rubic-sdk-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { combineOptions } from '@common/utils/options';
 import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { getPriceTokensFromInputTokens } from '@common/utils/tokens';

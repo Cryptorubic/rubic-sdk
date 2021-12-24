@@ -1,4 +1,4 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';

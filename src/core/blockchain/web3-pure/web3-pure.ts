@@ -1,4 +1,4 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';

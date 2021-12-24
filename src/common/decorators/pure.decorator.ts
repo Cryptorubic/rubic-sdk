@@ -1,4 +1,4 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 
 export function Pure<T>(
     _target: Object,

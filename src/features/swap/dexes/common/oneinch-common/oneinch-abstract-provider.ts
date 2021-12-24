@@ -4,7 +4,7 @@ import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Token } from '@core/blockchain/tokens/token';
 import { Injector } from '@core/sdk/injector';
 import { oneinchApiParams } from '@features/swap/dexes/common/oneinch-common/constants';
-import { RubicSdkError } from '@common/errors/rubic-sdk-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { OneinchQuoteRequest } from '@features/swap/dexes/common/oneinch-common/models/oneinch-quote-request';
 import { OneinchQuoteResponse } from '@features/swap/dexes/common/oneinch-common/models/oneinch-quote-response';
 import { OneinchSwapRequest } from '@features/swap/dexes/common/oneinch-common/models/oneinch-swap-request';

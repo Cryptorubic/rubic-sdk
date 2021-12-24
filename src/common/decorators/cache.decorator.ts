@@ -1,4 +1,4 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 
 function generateKey(...args: unknown[]): string {
     return args.reduce(

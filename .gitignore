@@ -3,14 +3,6 @@
 /.env
 /yarn-error.log
 /.data/
-/test/enviroment.ts
 /coverage/
-/test/env.js
-/.env.relayer
-/e2e/env.js
-/dist-tests/
 /__tests__/env.js
-
 /lib/
-/types/
-/dist/

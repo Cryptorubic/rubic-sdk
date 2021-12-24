@@ -3,7 +3,7 @@ import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import BigNumber from 'bignumber.js';
 import pTimeout, { TimeoutError } from 'p-timeout';
 import { PCacheable } from 'ts-cacheable';
-import { RubicSdkError } from '@common/errors/rubic-sdk-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 
 const supportedBlockchains = [

@@ -12,7 +12,7 @@ import {
     UniSwapV3CalculatedInfo,
     UniSwapV3CalculatedInfoWithProfit
 } from '@features/swap/dexes/ethereum/uni-swap-v3/models/uni-swap-v3-calculated-info';
-import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity-error';
+import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity.error';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { UniSwapV3Trade } from '@features/swap/dexes/ethereum/uni-swap-v3/uni-swap-v3-trade';
 import { GasPriceInfo } from '@features/swap/models/gas-price-info';

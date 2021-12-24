@@ -3,7 +3,7 @@ import { Injector } from '@core/sdk/injector';
 import { PCacheable } from 'ts-cacheable';
 import BigNumber from 'bignumber.js';
 import pTimeout from 'p-timeout';
-import { RubicSdkError } from '@common/errors/rubic-sdk-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { HttpClient } from '@common/models/http-client';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 

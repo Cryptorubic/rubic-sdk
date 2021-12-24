@@ -3,7 +3,7 @@ import { Token, TokenStruct } from '@core/blockchain/tokens/token';
 import { Injector } from '@core/sdk/injector';
 import BigNumber from 'bignumber.js';
 
-type PriceTokenStruct = ConstructorParameters<typeof Token>[number] & { price: BigNumber };
+export type PriceTokenStruct = ConstructorParameters<typeof Token>[number] & { price: BigNumber };
 
 export class PriceToken extends Token {
     public static async createToken(tokenBaseStruct: TokenBaseStruct): Promise<PriceToken> {

@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 import { TokenStruct } from '@core/blockchain/tokens/token';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 
-type PriceTokenAmountStruct = ConstructorParameters<typeof PriceToken>[number] &
+export type PriceTokenAmountStruct = ConstructorParameters<typeof PriceToken>[number] &
     (
         | {
               weiAmount: BigNumber;
@@ -14,16 +14,17 @@ type PriceTokenAmountStruct = ConstructorParameters<typeof PriceToken>[number] &
           }
     );
 
-type TokenAmountBaseStruct = TokenBaseStruct & { weiAmount: BigNumber };
+export type PriceTokenAmountBaseStruct = TokenBaseStruct &
+    ({ weiAmount: BigNumber } | { tokenAmount: BigNumber });
 
 export class PriceTokenAmount extends PriceToken {
     public static async createToken(
-        tokenAmountBaseStruct: TokenAmountBaseStruct
+        tokenAmountBaseStruct: PriceTokenAmountBaseStruct
     ): Promise<PriceTokenAmount> {
         const token = await super.createToken(tokenAmountBaseStruct);
         return new PriceTokenAmount({
-            ...token.asStruct,
-            weiAmount: tokenAmountBaseStruct.weiAmount
+            ...tokenAmountBaseStruct,
+            ...token.asStruct
         });
     }
 

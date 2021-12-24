@@ -1,4 +1,4 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { WalletNotConnectedError } from '@common/errors/swap/wallet-not-connected.error';
 import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
 import { BasicTransactionOptions } from '@core/blockchain/models/basic-transaction-options';

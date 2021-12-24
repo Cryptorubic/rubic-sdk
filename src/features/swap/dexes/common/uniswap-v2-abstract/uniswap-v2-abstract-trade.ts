@@ -1,5 +1,5 @@
 import { Cache } from '@common/decorators/cache.decorator';
-import { RubicSdkError } from '@common/errors/rubic-sdk-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { LowSlippageDeflationaryTokenError } from '@common/errors/swap/low-slippage-deflationary-token.error';
 import { LowSlippageError } from '@common/errors/swap/low-slippage.error';
 import { tryExecuteAsync } from '@common/utils/functions';

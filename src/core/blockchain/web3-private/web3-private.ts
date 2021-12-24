@@ -1,16 +1,16 @@
 import { ERC20_TOKEN_ABI } from '@core/blockchain/constants/erc-20-abi';
 import { TransactionOptions } from '@core/blockchain/models/transaction-options';
-import { Web3Error } from '@core/blockchain/models/web3-error';
+import { Web3Error } from '@common/errors/blockchain/web3.error';
 import Web3 from 'web3';
 import BigNumber from 'bignumber.js';
 import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
-import { LowGasError } from '@common/errors/low-gas-error';
-import { UserRejectError } from '@common/errors/user-reject-error';
-import { TransactionRevertedError } from '@common/errors/transaction-reverted-error';
+import { LowGasError } from '@common/errors/blockchain/low-gas.error';
+import { UserRejectError } from '@common/errors/blockchain/user-reject.error';
+import { TransactionRevertedError } from '@common/errors/blockchain/transaction-reverted.error';
 import { WalletConnectionConfiguration } from '@core/blockchain/models/wallet-connection-configuration';
-import { RubicSdkError } from '@common/errors/rubic-sdk-error';
-import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/FailedToCheckForTransactionReceiptError';
+import { RubicSdkError } from '@common/errors/rubic-sdk.error';
+import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/failed-to-check-for-transaction-receipt.error';
 
 /**
  * Class containing methods for executing the functions of contracts and sending transactions in order to change the state of the blockchain.

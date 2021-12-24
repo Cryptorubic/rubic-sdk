@@ -42,7 +42,7 @@ module.exports = {
         }
     },
     output: {
-        filename: 'index.js',
+        filename: 'rubic-sdk.min.js',
         path: path.resolve(__dirname, 'dist'),
         clean: true
     },

@@ -1,4 +1,4 @@
-import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity-error';
+import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity.error';
 import { notNull } from '@common/utils/object';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';

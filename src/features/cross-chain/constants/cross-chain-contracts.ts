@@ -6,7 +6,7 @@ import { QuickSwapProvider } from '@features/swap/dexes/polygon/quick-swap/quick
 import {
     CrossChainSupportedBlockchain,
     crossChainSupportedBlockchains
-} from '@features/cross-chain/constants/CrossChainSupportedBlockchains';
+} from '@features/cross-chain/constants/cross-chain-supported-blockchains';
 import { SpookySwapProvider } from '@features/swap/dexes/fantom/spooky-swap/spooky-swap-provider';
 import { JoeProvider } from '@features/swap/dexes/avalanche/joe/joe-provider';
 import { SolarbeamProvider } from '@features/swap/dexes/moonriver/solarbeam/solarbeam-provider';

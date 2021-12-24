@@ -1,5 +1,5 @@
 import { WrongChainIdError } from '@common/errors/provider/wrong-chain-id.error';
-import { RubicSdkError } from '@common/errors/rubic-sdk-error';
+import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { BlockchainsInfo } from '@core/blockchain/blockchains-info';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { WalletConnectionConfiguration } from '@core/blockchain/models/wallet-connection-configuration';
