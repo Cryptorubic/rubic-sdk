@@ -1,8 +1,8 @@
-## Rubic SDK
+# Rubic SDK
 
 > ⚠️ **Danger:** Rubik SDK is at the alpha stage. Don't use it in production code. Use rubik sdk at your own risk. During the first quarter of 2022, a beta release is planned, in which many interfaces and types can be changed. For now, you can explore our solution and try it out in a test environment. [An example of using rubik sdk](https://github.com/Cryptorubic/rubic-sdk-usage)
 
-### Description
+## Description
 In dApps a lot of business logic is often concentrated on the frontend for interacting with the blockchain. This SDK is built on the basis of [Rubic](https://github.com/Cryptorubic/rubic-app) multichain DeFi frontend part. SDK is a library for interacting with various dexes, as well as Rubic cross-chain swaps. It also includes a number of utilities useful when working with Ethereum.
 
 ### Supported DEX-es
@@ -38,8 +38,8 @@ In dApps a lot of business logic is often concentrated on the frontend for inter
 ### Multi-chain swaps supported blockchains
 Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
 
-### Installation
-#### Installation with npm and webpack (React, ...)
+## Installation
+### Installation with npm and webpack (React, ...)
 1. `npm install rubic-sdk`
 
 
@@ -57,7 +57,7 @@ Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
        ```
     2. add `resolve.fallback`
        ```json
-       fallback: {
+       "fallback": {
          "fs": false,
          "constants": false,
          "querystring": false,
@@ -69,10 +69,10 @@ Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
          "zlib": false,
          "stream": require.resolve("stream-browserify"),
          "crypto": require.resolve("crypto-browserify")
-       },
+       }
        ```
 
-#### Installation with npm and Angular
+### Installation with npm and Angular
 1. `npm install rubic-sdk`
 
 
@@ -109,7 +109,7 @@ Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
    (window as AppWindow).Buffer = (window as any).Buffer || require('buffer').Buffer;
    ```
 
-### Get started
+## Get started
 
 1. Create configuration
     ```typescript
@@ -243,7 +243,7 @@ const token = await sdk.tokens.createPriceToken({
 console.log(token.price.toFormat(2)); // 1.00
 ```
 
-You can create PriceTokenAmount if you want to store amount of tokens in the same object, e.g. user balance, or from/to amount:
+You can create `PriceTokenAmount` if you want to store amount of tokens in the same object, e.g. user balance, or from/to amount:
 
 ```typescript
 import BigNumber from 'bignumber.js';
@@ -258,3 +258,8 @@ const token = await sdk.tokens.createPriceTokenAmount({
 console.log(token.tokenAmount.toNumber()); // 1
 console.log(token.stringWeiAmount); // 1000000
 ```
+
+
+## API
+
+// TODO: add full api description
