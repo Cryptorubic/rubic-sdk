@@ -1,0 +1,1 @@
+{"version":3,"file":"cross-chain-supported-blockchains.js","sourceRoot":"","sources":["../../../../src/features/cross-chain/constants/cross-chain-supported-blockchains.ts"],"names":[],"mappings":";;;AAAA,2EAA0E;AAE7D,QAAA,8BAA8B,GAAG;IAC1C,iCAAe,CAAC,QAAQ;IACxB,iCAAe,CAAC,mBAAmB;IACnC,iCAAe,CAAC,OAAO;IACvB,iCAAe,CAAC,SAAS;IACzB,iCAAe,CAAC,SAAS;IACzB,iCAAe,CAAC,MAAM;CAChB,CAAC"}

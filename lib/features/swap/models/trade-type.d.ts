@@ -1,0 +1,23 @@
+export declare const TRADE_TYPE: {
+    readonly UNISWAP_V2: "UNISWAP_V2";
+    readonly SUSHI_SWAP_ETHEREUM: "SUSHI_SWAP_ETHEREUM";
+    readonly PANCAKE_SWAP: "PANCAKE_SWAP";
+    readonly SUSHI_SWAP_BSC: "SUSHI_SWAP_BSC";
+    readonly QUICK_SWAP: "QUICK_SWAP";
+    readonly SUSHI_SWAP_POLYGON: "SUSHI_SWAP_POLYGON";
+    readonly JOE: "JOE";
+    readonly PANGOLIN: "PANGOLIN";
+    readonly SUSHI_SWAP_AVALANCHE: "SUSHI_SWAP_AVALANCHE";
+    readonly SPIRIT_SWAP: "SPIRIT_SWAP";
+    readonly SPOOKY_SWAP: "SPOOKY_SWAP";
+    readonly SUSHI_SWAP_FANTOM: "SUSHI_SWAP_FANTOM";
+    readonly SUSHI_SWAP_HARMONY: "SUSHI_SWAP_HARMONY";
+    readonly SOLAR_BEAM: "SOLAR_BEAM";
+    readonly SUSHI_SWAP_MOONRIVER: "SUSHI_SWAP_MOONRIVER";
+    readonly UNISWAP_V3: "UNISWAP_V3";
+    readonly ONE_INCH_ETHEREUM: "ONE_INCH_ETHEREUM";
+    readonly ONE_INCH_BSC: "ONE_INCH_BSC";
+    readonly ONE_INCH_POLYGON: "ONE_INCH_POLYGON";
+    readonly ZRX_ETHEREUM: "ZRX_ETHEREUM";
+};
+export declare type TradeType = keyof typeof TRADE_TYPE;
