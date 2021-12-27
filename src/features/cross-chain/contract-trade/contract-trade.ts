@@ -75,8 +75,11 @@ export abstract class ContractTrade {
     /**
      * Returns method's arguments to use in source network.
      */
-    public getMethodArguments(toContractTrade: ContractTrade, walletAddress: string): unknown[] {
-        const tokenInAmountAbsolute = this.fromToken.weiAmount;
+    public async getMethodArguments(
+        toContractTrade: ContractTrade,
+        walletAddress: string
+    ): Promise<unknown[]> {
+        const tokenInAmountAbsolute = this.fromToken.stringWeiAmount;
         const tokenOutAmountMinAbsolute = Web3Pure.toWei(
             toContractTrade.toTokenAmountMin,
             this.toToken.decimals
@@ -87,7 +90,7 @@ export abstract class ContractTrade {
             this.toToken.decimals
         );
 
-        const toNumOfBlockchain = toContractTrade.contract.getNumOfBlockchain();
+        const toNumOfBlockchain = await toContractTrade.contract.getNumOfBlockchain();
 
         const firstPath = this.getFirstPath();
         const secondPath = toContractTrade.getSecondPath();

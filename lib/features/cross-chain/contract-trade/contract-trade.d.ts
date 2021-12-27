@@ -26,7 +26,7 @@ export declare abstract class ContractTrade {
     /**
      * Returns method's arguments to use in source network.
      */
-    getMethodArguments(toContractTrade: ContractTrade, walletAddress: string): unknown[];
+    getMethodArguments(toContractTrade: ContractTrade, walletAddress: string): Promise<unknown[]>;
     /**
      * Returns `first path` method argument, converted from instant-trade data and chosen provider.
      * Must be called on source contract.

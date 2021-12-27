@@ -269,7 +269,7 @@ export class CrossChainTrade {
 
         const { methodName, contractAbi } = fromTrade.getMethodNameAndContractAbi();
 
-        const methodArguments = fromTrade.getMethodArguments(toTrade, this.walletAddress);
+        const methodArguments = await fromTrade.getMethodArguments(toTrade, this.walletAddress);
 
         const tokenInAmountAbsolute = fromTrade.fromToken.weiAmount;
         const value = this.cryptoFeeToken.weiAmount
