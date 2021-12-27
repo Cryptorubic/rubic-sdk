@@ -20,6 +20,13 @@ module.exports = {
                 return /(.*\/genesisStates\/.*\.json)/.test(resource)
             },
         }),
+        new webpack.ProvidePlugin({
+            Buffer: ['buffer', 'Buffer'],
+            process: 'process/browser'
+        }),
+        new webpack.SourceMapDevToolPlugin({
+            filename: "[file].map",
+        }),
     ],
     resolve: {
         extensions: ['.ts', '.js'],
@@ -35,15 +42,17 @@ module.exports = {
         fallback: {
             "path": false,
             "os": false,
-            "http": false,
-            "https": false,
-            "stream": false,
-            "crypto": false
+            "url": false,
+            "http": require.resolve("http-browserify"),
+            "https": require.resolve("https-browserify"),
+            "stream": require.resolve("stream-browserify"),
+            "crypto": require.resolve("crypto-browserify")
         }
     },
     output: {
         filename: 'rubic-sdk.min.js',
         path: path.resolve(__dirname, 'dist'),
+        library: 'RubicSDK',
         clean: true
     },
     optimization: {

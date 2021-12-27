@@ -39,6 +39,11 @@ In dApps a lot of business logic is often concentrated on the frontend for inter
 Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
 
 ## Installation
+### Installation with cdn
+```html
+<script src="https://unpkg.com/web3@latest/dist/rubic-sdk.min.js"></script>
+```
+
 ### Installation with npm and webpack (React, ...)
 1. `npm install rubic-sdk`
 
@@ -109,12 +114,51 @@ Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
    (window as AppWindow).Buffer = (window as any).Buffer || require('buffer').Buffer;
    ```
 
-## Get started
+## Usage
 
+### Get started after cdn installation
+```html
+ <script>
+        // you have to declare rpc links only for networks you will use
+        const configuration = {
+            rpcProviders: {
+                ETH: {
+                    mainRpc: '<your ethereum rpc>'
+                },
+                BSC: {
+                    mainRpc: '<your bsc rpc>'
+                }
+            }
+        }
+        
+        async function main() {
+            // create SDK instance
+            const sdk = await RubicSDK.SDK.createSDK(configuration);
+            
+            // define example trade parameters
+            const blockchain = 'ETH';
+            const fromTokenAddress = '0x0000000000000000000000000000000000000000';
+            const fromAmount = 1;
+            const toTokenAddress = '0xdac17f958d2ee523a2206206994597c13d831ec7';
+            
+            // calculate trades
+            const trades = await sdk.instantTrades
+                .calculateTrade({blockchain, address: fromTokenAddress}, fromAmount, toTokenAddress);
+            
+            console.log(trades);
+        }
+
+        main();
+    </script>
+```
+
+
+### Get started after npm installation
 1. Create configuration
     ```typescript
     import { BLOCKCHAIN_NAME, Configuration } from 'rubic-sdk';
     
+    // you have to declare rpc links only for networks you will use
     export const configuration: Configuration = {
         rpcProviders: {
             [BLOCKCHAIN_NAME.ETHEREUM]: {
