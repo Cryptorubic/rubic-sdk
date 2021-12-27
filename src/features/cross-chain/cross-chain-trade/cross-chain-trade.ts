@@ -251,7 +251,7 @@ export class CrossChainTrade {
         await Promise.all([
             this.checkContractsState(),
             this.checkToBlockchainGasPrice(),
-            this.checkToContractBalance(),
+            // this.checkToContractBalance(),
             this.checkUserBalance()
         ]);
 
