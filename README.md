@@ -306,4 +306,44 @@ console.log(token.stringWeiAmount); // 1000000
 
 ## API
 
-// TODO: add full api description
+### Instant trades
+
+#### sdk.instantTrades.calculateTrade
+
+You have to set up rpc provider for network in which you will calculate trade.
+To calculate trade use `sdk.instantTrades.calculateTrade`:
+
+**sdk.instantTrades.calculateTrade method parameters:**
+
+| Parameter  | Type                                                           | Description                                                                                                                 |
+|------------|----------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| fromToken  | `Token`  or `{ address: string; blockchain: BLOCKCHAIN_NAME;}` | Token sell.                                                                                                                 |
+| fromAmount | `string` or `number`                                           | Amount in token units (**not in wei!**) to swap.                                                                            |
+| toToken    | `Token` or `string`                                            | Token to get. You can pass Token object, or string token address. Must has same blockchain as fromToken if passed as Token. |
+| options?   | `SwapManagerCalculationOptions`                                | Swap calculation options.                                                                                                   |
+
+**SwapManagerCalculationOptions description:**
+
+| Option             | Type                                                   | Description                                                                                                                                                                                                          | Default     |
+|--------------------|--------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| timeout?           | `number`                                               | Specify trade calculation timeout in ms (same timeout for every provider separately).                                                                                                                                | 3000        |
+| disabledProviders? | `TradeType[]`                                          | Specify providers which must be ignored.                                                                                                                                                                             | []          |
+| gasCalculation?    | `'disabled'` or `'calculate'` or `'rubicOptimisation'` | Disable estimated gas calculation, or use rubic gas optimisation to consider the gas fee when calculating route profit (works only for UniswapV2-like and UniswapV3-like providers.).                                | 'calculate' |
+| disableMultihops?  | `boolean`                                              | Disable not direct swap routes. It can help to reduce gas fee, but can worsen the exchange rate. Better use `gasCalculation = 'rubicOptiomisation'` when it is possible.                                             | false       |
+| slippageTolerance? | `number`                                               | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap. Can be changed after trade calculation for every trade separately (excluding 0x trade).                                           | 0.02        |
+| deadlineMinutes?   | `number`                                               | Transaction deadline in minutes (countdown from the transaction sending date). Will be applied only for UniswapV2-like and UniswapV3-like trades. Can be changed after trade calculation for every trade separately. | 20          |
+
+Returns `Promise<TypedTrades> = Promisr<Partial<Record<TradeType, InstantTrade>>>` -- mapping of successful calculated trades and their types. 
+
+#### sdk.instantTrades.blockchainTradeProviders
+
+If you need to calculate trade with the special provider options, you can get needed provider instance in `sdk.instantTrades.blockchainTradeProviders`
+and calculate trade directly via this instance.
+
+```typescript
+// calculate trade with exact output
+const trade = await sdk.instantTrades.blockchainTradeProviders[BLOCKCHAIN_NAME.ETHEREUM][TRADE_TYPE.UNISWAP_V2]
+  .calculateDifficultTrade(from, to, weiAmount, 'output', options);
+```
+
+#### instantTrade.swap
