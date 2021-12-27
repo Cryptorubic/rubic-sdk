@@ -6,6 +6,7 @@ import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Pure } from '@common/decorators/pure.decorator';
 import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { Token } from '@core/blockchain/tokens/token';
+import { Web3Pure } from 'src/core';
 
 export class InstantTradeContractTrade extends ContractTrade {
     public get fromToken(): PriceTokenAmount {
@@ -16,17 +17,9 @@ export class InstantTradeContractTrade extends ContractTrade {
         return this.instantTrade.to;
     }
 
-    public get toAmount(): BigNumber {
-        return this.instantTrade.to.tokenAmount;
-    }
-
-    public get toAmountWei(): BigNumber {
-        return this.instantTrade.to.weiAmount;
-    }
-
     @Pure
-    public get toAmountMin(): BigNumber {
-        return this.toAmount.multipliedBy(1 - this.slippageTolerance);
+    public get toTokenAmountMin(): BigNumber {
+        return this.toToken.tokenAmount.multipliedBy(1 - this.slippageTolerance);
     }
 
     public get path(): ReadonlyArray<Token> {
@@ -34,11 +27,20 @@ export class InstantTradeContractTrade extends ContractTrade {
     }
 
     constructor(
-        public readonly blockchain: CrossChainSupportedBlockchain,
-        public readonly contract: ContractData,
+        blockchain: CrossChainSupportedBlockchain,
+        contract: ContractData,
+        providerIndex: number,
         public readonly slippageTolerance: number,
         private readonly instantTrade: UniswapV2AbstractTrade
     ) {
-        super(blockchain, contract);
+        super(blockchain, contract, providerIndex);
+    }
+
+    public getFirstPath(): string[] {
+        return this.path.map(token => token.address);
+    }
+
+    public getSecondPath(): string[] {
+        return this.path.map(token => Web3Pure.addressToBytes32(token.address));
     }
 }

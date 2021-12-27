@@ -1,9 +1,7 @@
 import { ContractTrade } from '@features/cross-chain/contract-trade/contract-trade';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
-import { CROSS_CHAIN_SWAP_METHOD } from '@features/cross-chain/cross-chain-trade/models/CROSS_CHAIN_SWAP_METHOD';
 import { Injector } from '@core/sdk/injector';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { CrossChainContractMethodData } from '@features/cross-chain/cross-chain-trade/models/cross-chain-contract-method-data';
 import { GasData } from '@features/cross-chain/models/gas-data';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { crossChainContractAbi } from '@features/cross-chain/constants/cross-chain-contract-abi';
@@ -21,6 +19,7 @@ import { UnnecessaryApprove } from '@common/errors/swap/unnecessary-approve';
 import { Pure } from '@common/decorators/pure.decorator';
 import { WalletNotConnectedError } from '@common/errors/swap/wallet-not-connected.error';
 import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
+import { ContractParams } from '@features/cross-chain/cross-chain-trade/models/contract-params';
 
 export class CrossChainTrade {
     public static async getGasData(
@@ -43,7 +42,7 @@ export class CrossChainTrade {
                     transitFeeToken: {} as PriceTokenAmount,
                     minMaxAmountsErrors: {},
                     gasData: null
-                }).getContractMethodData();
+                }).getContractParams();
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasPrice] = await Promise.all([
@@ -206,8 +205,8 @@ export class CrossChainTrade {
 
     private async checkContractsState(): Promise<void> {
         const [sourceContractPaused, targetContractPaused] = await Promise.all([
-            this.fromTrade.contract.isContractPaused(),
-            this.toTrade.contract.isContractPaused()
+            this.fromTrade.contract.isPaused(),
+            this.toTrade.contract.isPaused()
         ]);
 
         if (sourceContractPaused || targetContractPaused) {
@@ -264,46 +263,23 @@ export class CrossChainTrade {
         }
     }
 
-    private async getContractMethodData(): Promise<CrossChainContractMethodData> {
+    private async getContractParams(): Promise<ContractParams> {
         const { fromTrade, toTrade } = this;
 
         const contractAddress = fromTrade.contract.address;
 
-        const methodName = fromTrade.fromToken.isNative
-            ? CROSS_CHAIN_SWAP_METHOD.SWAP_CRYPTO
-            : CROSS_CHAIN_SWAP_METHOD.SWAP_TOKENS;
+        const { methodName, contractAbi } = fromTrade.getMethodNameAndContractAbi();
 
-        const toBlockchainInContract = await toTrade.contract.getNumOfContract();
+        const methodArguments = fromTrade.getMethodArguments(toTrade, this.walletAddress);
 
         const tokenInAmountAbsolute = fromTrade.fromToken.weiAmount;
-        const tokenOutAmountMin = toTrade.toAmountMin;
-        const tokenOutAmountMinAbsolute = Web3Pure.toWei(
-            tokenOutAmountMin,
-            toTrade.toToken.decimals
-        );
-
-        const fromTransitTokenAmountAbsolute = fromTrade.toAmountWei;
-
-        const methodArguments = [
-            [
-                toBlockchainInContract,
-                tokenInAmountAbsolute,
-                fromTrade.path,
-                toTrade.path,
-                fromTransitTokenAmountAbsolute,
-                tokenOutAmountMinAbsolute,
-                this.walletAddress,
-                toTrade.toToken.isNative,
-                true
-            ]
-        ];
-
         const value = this.cryptoFeeToken.weiAmount
             .plus(fromTrade.fromToken.isNative ? tokenInAmountAbsolute : 0)
             .toFixed(0);
 
         return {
             contractAddress,
+            contractAbi,
             methodName,
             methodArguments,
             value
@@ -316,7 +292,7 @@ export class CrossChainTrade {
         await this.checkAllowanceAndApprove(options);
 
         const { contractAddress, methodName, methodArguments, value } =
-            await this.getContractMethodData();
+            await this.getContractParams();
 
         let transactionHash: string;
         try {
