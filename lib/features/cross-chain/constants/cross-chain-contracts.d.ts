@@ -23,14 +23,14 @@ export declare const crossChainContractsData: {
         }];
     };
     readonly POLYGON: {
-        readonly address: "0xb02c0b6ba0e7719de2d44e613fc4ad01ac2f60ad";
+        readonly address: "0xe6625BBE80710C7Bb473721EdAC24Ce326940a6f";
         readonly providersData: readonly [{
             readonly ProviderClass: typeof QuickSwapProvider;
             readonly methodSuffix: "";
         }];
     };
     readonly AVALANCHE: {
-        readonly address: "0x3df5f6165fe8429744F9488a9C18259E9a93B4C0";
+        readonly address: "0xd23B4dA264A756F427e13C72AB6cA5A6C95E4608";
         readonly providersData: readonly [{
             readonly ProviderClass: typeof PangolinProvider;
             readonly methodSuffix: "";
