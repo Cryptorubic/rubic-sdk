@@ -4,7 +4,6 @@ import { Injector } from '@core/sdk/injector';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { GasData } from '@features/cross-chain/models/gas-data';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
-import { crossChainContractAbi } from '@features/cross-chain/constants/cross-chain-contract-abi';
 import { MinMaxAmountsErrors } from '@features/cross-chain/cross-chain-trade/models/min-max-amounts-errors';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { CrossChainIsUnavailableError } from '@common/errors/cross-chain/cross-chain-is-unavailable.error';
@@ -34,7 +33,7 @@ export class CrossChainTrade {
         }
 
         try {
-            const { contractAddress, methodName, methodArguments, value } =
+            const { contractAddress, contractAbi, methodName, methodArguments, value } =
                 await new CrossChainTrade({
                     fromTrade,
                     toTrade,
@@ -47,7 +46,7 @@ export class CrossChainTrade {
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasPrice] = await Promise.all([
                 web3Public.getEstimatedGas(
-                    crossChainContractAbi,
+                    contractAbi,
                     contractAddress,
                     methodName,
                     methodArguments,
@@ -291,7 +290,7 @@ export class CrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { contractAddress, methodName, methodArguments, value } =
+        const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getContractParams();
 
         let transactionHash: string;
@@ -305,7 +304,7 @@ export class CrossChainTrade {
 
             await Injector.web3Private.tryExecuteContractMethod(
                 contractAddress,
-                crossChainContractAbi,
+                contractAbi,
                 methodName,
                 methodArguments,
                 {
