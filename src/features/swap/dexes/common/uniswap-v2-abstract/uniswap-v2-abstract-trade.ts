@@ -11,7 +11,6 @@ import { BatchCall } from '@core/blockchain/web3-public/models/batch-call';
 import { ContractMulticallResponse } from '@core/blockchain/web3-public/models/contract-multicall-response';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
-import { createTokenNativeAddressProxyInPathStartAndEnd } from '@features/swap/dexes/common/utils/token-native-address-proxy';
 import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { Injector } from '@core/sdk/injector';
 import { InstantTrade } from '@features/swap/instant-trade';
@@ -162,10 +161,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
         this.nativeSupportedPath = tradeStruct.nativeSupportedPath;
 
-        this.path = createTokenNativeAddressProxyInPathStartAndEnd(
-            this.nativeSupportedPath,
-            Web3Pure.nativeTokenAddress
-        );
+        this.path = this.nativeSupportedPath;
     }
 
     private getAmountInAndAmountOut(): { amountIn: string; amountOut: string } {
