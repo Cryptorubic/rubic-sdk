@@ -1,5 +1,5 @@
 import { getCrossChainContract } from '@features/cross-chain/constants/cross-chain-contracts';
-import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
+import { ContractData } from '@features/cross-chain/contract-data/contract-data';
 import {
     CrossChainSupportedBlockchain,
     crossChainSupportedBlockchains
@@ -11,9 +11,9 @@ import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { compareAddresses } from '@common/utils/blockchain';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
-import { ContractTrade } from '@features/cross-chain/models/ContractTrade/ContractTrade';
-import { DirectContractTrade } from '@features/cross-chain/models/ContractTrade/DirectContractTrade';
-import { ItContractTrade } from '@features/cross-chain/models/ContractTrade/ItContractTrade';
+import { ContractTrade } from '@features/cross-chain/contract-trade/contract-trade';
+import { DirectContractTrade } from '@features/cross-chain/contract-trade/direct-contract-trade';
+import { InstantTradeContractTrade } from '@features/cross-chain/contract-trade/instant-trade-contract-trade';
 import { CrossChainTrade } from '@features/cross-chain/cross-chain-trade/cross-chain-trade';
 import { MinMaxAmountsErrors } from '@features/cross-chain/cross-chain-trade/models/min-max-amounts-errors';
 import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity.error';
@@ -40,7 +40,7 @@ interface DirectCalculatedTrade extends CalculatedTrade {
 }
 
 interface CalculatedContractTrade {
-    contract: CrossChainContract;
+    contract: ContractData;
     trade: ItCalculatedTrade | DirectCalculatedTrade;
 }
 
@@ -53,7 +53,7 @@ export class CrossChainManager {
         );
     }
 
-    private readonly contracts: (blockchain: CrossChainSupportedBlockchain) => CrossChainContract[];
+    private readonly contracts: (blockchain: CrossChainSupportedBlockchain) => ContractData[];
 
     constructor() {
         this.contracts = getCrossChainContract;
@@ -236,7 +236,7 @@ export class CrossChainManager {
         const bestContract = calculatedContractTrade.contract;
 
         if ('instantTrade' in calculatedContractTrade.trade) {
-            return new ItContractTrade(
+            return new InstantTradeContractTrade(
                 blockchain,
                 bestContract,
                 slippageTolerance,
@@ -252,7 +252,7 @@ export class CrossChainManager {
     }
 
     private async getCalculatedTrade(
-        contract: CrossChainContract,
+        contract: ContractData,
         from: PriceTokenAmount,
         toToken: PriceToken,
         slippageTolerance: number
@@ -317,7 +317,7 @@ export class CrossChainManager {
             );
 
             if (type === 'minAmount') {
-                if (fromTrade instanceof ItContractTrade) {
+                if (fromTrade instanceof InstantTradeContractTrade) {
                     return fromTransitTokenAmount.dividedBy(fromTrade.slippageTolerance);
                 }
                 return fromTransitTokenAmount;

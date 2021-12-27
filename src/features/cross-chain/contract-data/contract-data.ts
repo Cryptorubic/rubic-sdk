@@ -9,7 +9,7 @@ import { BlockchainsInfo } from '@core/blockchain/blockchains-info';
 import { crossChainContractAbi } from '@features/cross-chain/constants/cross-chain-contract-abi';
 import { UniswapV2AbstractProvider } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
 
-export class CrossChainContract {
+export class ContractData {
     private readonly web3Public: Web3Public;
 
     constructor(
@@ -60,7 +60,7 @@ export class CrossChainContract {
         return parseInt(feeAbsolute) / 10000;
     }
 
-    public async getCryptoFeeToken(toContract: CrossChainContract): Promise<PriceTokenAmount> {
+    public async getCryptoFeeToken(toContract: ContractData): Promise<PriceTokenAmount> {
         const numOfToContract = await toContract.getNumOfContract();
         const feeAmount = new BigNumber(
             await this.web3Public.callContractMethod(

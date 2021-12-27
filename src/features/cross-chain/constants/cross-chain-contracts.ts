@@ -1,5 +1,5 @@
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
-import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
+import { ContractData } from '@features/cross-chain/contract-data/contract-data';
 import { PancakeSwapProvider } from '@features/swap/dexes/bsc/pancake-swap/pancake-swap-provider';
 import { UniSwapV2Provider } from '@features/swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
 import { QuickSwapProvider } from '@features/swap/dexes/polygon/quick-swap/quick-swap-provider';
@@ -55,15 +55,13 @@ export const crossChainContractsData = {
     ]
 } as const;
 
-const crossChainContracts: Record<CrossChainSupportedBlockchain, CrossChainContract[] | null> =
+const crossChainContracts: Record<CrossChainSupportedBlockchain, ContractData[] | null> =
     crossChainSupportedBlockchains.reduce(
         (acc, blockchain) => ({ ...acc, [blockchain]: null }),
-        {} as Record<CrossChainSupportedBlockchain, CrossChainContract[] | null>
+        {} as Record<CrossChainSupportedBlockchain, ContractData[] | null>
     );
 
-export function getCrossChainContract(
-    blockchain: CrossChainSupportedBlockchain
-): CrossChainContract[] {
+export function getCrossChainContract(blockchain: CrossChainSupportedBlockchain): ContractData[] {
     const storedContract = crossChainContracts[blockchain];
     if (storedContract) {
         return storedContract;
@@ -71,7 +69,7 @@ export function getCrossChainContract(
 
     const contractCreationData = crossChainContractsData[blockchain];
     const contracts = contractCreationData.map(
-        data => new CrossChainContract(blockchain, data.address, new data.Provider())
+        data => new ContractData(blockchain, data.address, new data.Provider())
     );
     crossChainContracts[blockchain] = contracts;
     return contracts;

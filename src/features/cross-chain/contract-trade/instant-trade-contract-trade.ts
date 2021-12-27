@@ -1,13 +1,13 @@
 import { CrossChainSupportedBlockchain } from '@features/cross-chain/constants/cross-chain-supported-blockchains';
-import { CrossChainContract } from '@features/cross-chain/cross-chain-contract/cross-chain-contract';
-import { ContractTrade } from '@features/cross-chain/models/ContractTrade/ContractTrade';
+import { ContractData } from '@features/cross-chain/contract-data/contract-data';
+import { ContractTrade } from '@features/cross-chain/contract-trade/contract-trade';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Pure } from '@common/decorators/pure.decorator';
 import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { Token } from '@core/blockchain/tokens/token';
 
-export class ItContractTrade extends ContractTrade {
+export class InstantTradeContractTrade extends ContractTrade {
     public get fromToken(): PriceTokenAmount {
         return this.instantTrade.from;
     }
@@ -35,7 +35,7 @@ export class ItContractTrade extends ContractTrade {
 
     constructor(
         public readonly blockchain: CrossChainSupportedBlockchain,
-        public readonly contract: CrossChainContract,
+        public readonly contract: ContractData,
         public readonly slippageTolerance: number,
         private readonly instantTrade: UniswapV2AbstractTrade
     ) {

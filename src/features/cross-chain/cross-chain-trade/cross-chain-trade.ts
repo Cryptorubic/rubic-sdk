@@ -1,6 +1,6 @@
-import { ContractTrade } from '@features/cross-chain/models/ContractTrade/ContractTrade';
+import { ContractTrade } from '@features/cross-chain/contract-trade/contract-trade';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
-import { CROSS_CHAIN_ROUTING_SWAP_METHOD } from '@features/cross-chain/cross-chain-trade/models/CROSS_CHAIN_ROUTING_SWAP_METHOD';
+import { CROSS_CHAIN_SWAP_METHOD } from '@features/cross-chain/cross-chain-trade/models/CROSS_CHAIN_SWAP_METHOD';
 import { Injector } from '@core/sdk/injector';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { CrossChainContractMethodData } from '@features/cross-chain/cross-chain-trade/models/cross-chain-contract-method-data';
@@ -270,8 +270,8 @@ export class CrossChainTrade {
         const contractAddress = fromTrade.contract.address;
 
         const methodName = fromTrade.fromToken.isNative
-            ? CROSS_CHAIN_ROUTING_SWAP_METHOD.SWAP_CRYPTO
-            : CROSS_CHAIN_ROUTING_SWAP_METHOD.SWAP_TOKENS;
+            ? CROSS_CHAIN_SWAP_METHOD.SWAP_CRYPTO
+            : CROSS_CHAIN_SWAP_METHOD.SWAP_TOKENS;
 
         const toBlockchainInContract = await toTrade.contract.getNumOfContract();
 
