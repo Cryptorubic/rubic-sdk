@@ -15,5 +15,5 @@ export {
 export { GasFeeInfo } from './models/gas-fee-info';
 export { SwapCalculationOptions } from './models/swap-calculation-options';
 export { TRADE_TYPE, TradeType } from './models/trade-type';
-export { TypedTrade } from './models/typed-trade';
+export { TypedTrades } from 'src/features/swap/models/typed-trades';
 export { TypedTradeProviders } from './models/typed-trade-provider';

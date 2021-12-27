@@ -57,4 +57,14 @@ export class SDK {
         this.instantTrades = new InstantTradesManager();
         this.crossChain = new CrossChainManager();
     }
+
+    private async updateConfiguration(configuration: Configuration): Promise<void> {
+        const [web3PublicService, web3Private, httpClient] = await Promise.all([
+            SDK.createWeb3PublicService(configuration),
+            SDK.createWeb3Private(configuration),
+            SDK.createHttpClient(configuration)
+        ]);
+
+        Injector.createInjector(web3PublicService, web3Private, httpClient);
+    }
 }

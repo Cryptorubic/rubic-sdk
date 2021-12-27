@@ -15,11 +15,9 @@ import { ContractTrade } from '@features/cross-chain/models/ContractTrade/Contra
 import { DirectContractTrade } from '@features/cross-chain/models/ContractTrade/DirectContractTrade';
 import { ItContractTrade } from '@features/cross-chain/models/ContractTrade/ItContractTrade';
 import { CrossChainTrade } from '@features/cross-chain/cross-chain-trade/cross-chain-trade';
-import { Injector } from '@core/sdk/injector';
 import { MinMaxAmountsErrors } from '@features/cross-chain/cross-chain-trade/models/min-max-amounts-errors';
 import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity.error';
 import { MinMaxAmounts } from '@features/cross-chain/models/min-max-amounts';
-import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { GasData } from '@features/cross-chain/models/gas-data';
 import { NotSupportedBlockchain } from '@common/errors/swap/not-supported-blockchain';
 import { notNull } from '@common/utils/object';
@@ -57,11 +55,8 @@ export class CrossChainManager {
 
     private readonly contracts: (blockchain: CrossChainSupportedBlockchain) => CrossChainContract[];
 
-    private readonly getWeb3Public: (blockchain: BLOCKCHAIN_NAME) => Web3Public;
-
     constructor() {
         this.contracts = getCrossChainContract;
-        this.getWeb3Public = Injector.web3PublicService.getWeb3Public;
     }
 
     public async calculateTrade(
@@ -71,7 +66,7 @@ export class CrossChainManager {
                   address: string;
                   blockchain: BLOCKCHAIN_NAME;
               },
-        fromAmount: string,
+        fromAmount: string | number,
         toToken:
             | Token
             | {
@@ -84,7 +79,11 @@ export class CrossChainManager {
             throw new RubicSdkError('Blockchains of from and to tokens must be different.');
         }
 
-        const { from, to } = await getPriceTokensFromInputTokens(fromToken, fromAmount, toToken);
+        const { from, to } = await getPriceTokensFromInputTokens(
+            fromToken,
+            fromAmount.toString(),
+            toToken
+        );
 
         return this.calculateTradeFromTokens(from, to, this.getFullOptions(options));
     }

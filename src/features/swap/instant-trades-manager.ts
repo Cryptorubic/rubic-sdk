@@ -27,7 +27,7 @@ import { SushiSwapPolygonProvider } from '@features/swap/dexes/polygon/sushi-swa
 import { InstantTradeProvider } from '@features/swap/instant-trade-provider';
 import { SwapManagerCalculationOptions } from '@features/swap/models/swap-manager-calculation-options';
 import { TRADE_TYPE, TradeType } from '@features/swap/models/trade-type';
-import { TypedTrade } from '@features/swap/models/typed-trade';
+import { TypedTrades } from '@features/swap/models/typed-trades';
 import { TypedTradeProviders } from '@features/swap/models/typed-trade-provider';
 import pTimeout from 'p-timeout';
 import { MarkRequired } from 'ts-essentials';
@@ -101,7 +101,7 @@ export class InstantTradesManager {
         fromAmount: string | number,
         toToken: Token | string,
         options?: SwapManagerCalculationOptions
-    ): Promise<TypedTrade[]> {
+    ): Promise<TypedTrades> {
         if (toToken instanceof Token && fromToken.blockchain !== toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be same.');
         }
@@ -128,7 +128,7 @@ export class InstantTradesManager {
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredSwapManagerCalculationOptions
-    ): Promise<TypedTrade[]> {
+    ): Promise<TypedTrades> {
         const { timeout, disabledProviders, ...providersOptions } = options;
         const providers = Object.entries(this.blockchainTradeProviders[from.blockchain]).filter(
             ([type]) => !disabledProviders.includes(type as TradeType)
@@ -144,10 +144,7 @@ export class InstantTradesManager {
                     provider.calculate(from, to, providersOptions),
                     timeout
                 );
-                return {
-                    trade,
-                    type
-                };
+                return [type, trade] as const;
             } catch (e) {
                 console.debug(
                     `[RUBIC_SDK] Trade calculation error occurred for ${type} trade provider.`,
@@ -158,6 +155,6 @@ export class InstantTradesManager {
         });
 
         const results = await Promise.all(calculationPromises);
-        return results.filter(notNull);
+        return Object.fromEntries(results.filter(notNull));
     }
 }
