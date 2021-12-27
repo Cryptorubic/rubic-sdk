@@ -1,10 +1,6 @@
 ## Rubic SDK
 
-{% warning %}
-
-**Danger:** Rubik SDK is at the alpha stage. Don't use it in production code. Use rubik sdk at your own risk. During the first quarter of 2022, a beta release is planned, in which many interfaces and types can be changed. For now, you can explore our solution and try it out in a test environment. [An example of using rubik sdk](https://github.com/Cryptorubic/rubic-sdk-usage)
-
-{% endwarning %}
+> ⚠️ **Danger:** Rubik SDK is at the alpha stage. Don't use it in production code. Use rubik sdk at your own risk. During the first quarter of 2022, a beta release is planned, in which many interfaces and types can be changed. For now, you can explore our solution and try it out in a test environment. [An example of using rubik sdk](https://github.com/Cryptorubic/rubic-sdk-usage)
 
 ### Description
 In dApps a lot of business logic is often concentrated on the frontend for interacting with the blockchain. This SDK is built on the basis of [Rubic](https://github.com/Cryptorubic/rubic-app) multichain DeFi frontend part. SDK is a library for interacting with various dexes, as well as Rubic cross-chain swaps. It also includes a number of utilities useful when working with Ethereum.
@@ -60,7 +56,7 @@ Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
        })
        ```
     2. add `resolve.fallback`
-       ```
+       ```json
        fallback: {
          "fs": false,
          "constants": false,
@@ -85,7 +81,7 @@ Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
 
 2. `npm install --save-dev stream-browserify assert https-browserify os-browserify stream-http crypto-browserify process buffer`
 3. Modify tsconfig.json
-    ```
+    ```json
     {
       "compilerOptions": {
         ...
@@ -101,7 +97,7 @@ Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
    }
    ```
 4. Modify polyfills.ts
-    ```
+    ```typescript
     import Process = NodeJS.Process;
    
     export interface AppWindow extends Window {
@@ -190,7 +186,8 @@ Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
     ```
    
 ### Get started with cross-chain swaps
-Steps 1. and 2. is the same. You can use single sdk instance for instant trades and cross-chain swaps calculations. 
+Steps 1. and 2. is the same. You can use single sdk instance for instant trades and cross-chain swaps calculations.
+
 3. Use sdk instance for trade calculation
     ```typescript
     import { BLOCKCHAIN_NAME, BINANCE_SMART_CHAIN } from 'rubic-sdk';
