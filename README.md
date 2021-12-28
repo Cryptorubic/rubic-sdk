@@ -805,6 +805,206 @@ If you sell, or get native coin (like ETH, BNB, MATIC, ...) in swap, `path[0]` o
 
 ---
 
-### Tokens
+### Tokens Manager
 
-### Utils
+#### tokensManager.createTokenFromStruct method
+```typescript
+tokensManager.createTokenFromStruct(tokenStruct: TokenStruct): Token
+```
+
+Creates `Token` instance by full token data struct.
+
+---
+
+#### tokensManager.createToken method
+```typescript
+tokensManager.createToken(tokenBaseStruct: TokenBaseStruct): Promise<Token>
+```
+
+Fetches token data and creates `Token` by token address and token blockchain. 
+
+---
+
+#### tokensManager.createTokensFromStructs method
+```typescript
+tokensManager.createTokensFromStructs(tokensStructs: TokenStruct[]): Token[]
+```
+
+Same as `tokensManager.createTokenFromStruct` for multiple token structs.
+
+---
+
+#### tokensManager.createTokens method
+```typescript
+tokensManager.createTokens(addresses: string[], blockchain: BLOCKCHAIN_NAME): Promise<Token[]>
+```
+
+Same as `tokensManager.createToken` for multiple token structs. But using multicall for data fetching, so makes only one rpc request.
+Use this method to crate tokens list instead of `Promise.all` and `tokensManager.createToken`.
+
+---
+
+#### tokensManager.createPriceTokenFromStruct method
+```typescript
+tokensManager.createPriceTokenFromStruct(priceTokenStruct: PriceTokenStruct): PriceToken
+```
+
+Creates price token from full price token struct including price.
+
+---
+
+#### tokensManager.createPriceToken method
+```typescript
+tokensManager.createPriceToken(token: TokenBaseStruct | TokenStruct): Promise<PriceToken>
+```
+
+Creates price token from full token struct (without price) or from token address and blockchain.
+
+---
+
+#### tokensManager.createPriceTokenAmountFromStruct method
+```typescript
+tokensManager.createPriceTokenAmountFromStruct(priceTokenAmountStruct: PriceTokenAmountStruct): PriceTokenAmount
+```
+
+Creates price token amount from full price token amount struct.
+
+---
+
+#### tokensManager.createPriceTokenAmount method
+```typescript
+tokensManager.createPriceTokenAmount(
+    priceTokenAmountStruct:
+      | PriceTokenAmountBaseStruct
+      | (TokenStruct & ({ weiAmount: BigNumber } | { tokenAmount: BigNumber }))
+): Promise<PriceTokenAmount>
+```
+
+Creates price token amount from token struct (without price) and amount or from token address, blockchain and amount.
+
+---
+
+### Token
+
+#### token fields
+```typescript
+readonly blockchain: BLOCKCHAIN_NAME;
+
+readonly address: string;
+
+readonly name: string;
+
+readonly symbol: string;
+
+readonly decimals: number;
+```
+
+---
+
+#### token.isNative method
+Use `token.isNative` to detect native coins like ETH, BNB, MATIC, ... instead of comparing token address with 0x000...0.
+
+---
+
+#### token.isEqualTo method
+```typescript
+token.isEqualTo(token: TokenBaseStruct): boolean
+```
+Use it to check that two tokens have equal blockchains and addresses (in any case: lower/upper/mixed).
+Token is TokenBaseStruct so you can pass Token instance to `token.isEqualTo`.
+
+---
+
+#### token.isEqualTo method
+```typescript
+token.isEqualTo(token: TokenBaseStruct): boolean
+```
+Use it to check that two tokens have equal blockchains and addresses (in any case: lower/upper/mixed).
+Token is TokenBaseStruct so you can pass Token instance to `token.isEqualTo`.
+
+---
+
+#### token.clone method
+```typescript
+token.clone(replaceStruct?: Partial<TokenStruct>): Token
+```
+
+Use it to deep clone token object and replace some properties.
+
+---
+
+### PriceToken 
+Extends `Token`.
+
+#### priceToken.price getter
+Returns last set token price as `BigNumber`.
+
+---
+
+#### priceToken.asStruct getter
+Serializes priceToken and its price to struct object.
+
+---
+
+#### priceToken.getAndUpdateTokenPrice method
+```typescript
+priceToken.getAndUpdateTokenPrice(): Promise<BigNumber>
+```
+
+Fetches current token price and saves it into token.
+
+---
+
+#### priceToken.cloneAndCreate
+```typescript
+priceToken.cloneAndCreate(tokenStruct?: Partial<PriceTokenStruct>): Promise<PriceToken>
+```
+
+Same as `token.clone` but fetches new price for new `PriceToken`.
+
+---
+
+### PriceTokenAmount
+Extends `PriceToken`.
+
+#### priceTokenAmount.weiAmount getter
+Returns saved token amount in wei as `BigNumber` (weiAmount = tokenAmount * (10 ** token.decimals)).
+
+---
+
+#### priceTokenAmount.stringWeiAmount getter
+Returns saved token amount in wei as string.
+
+---
+
+#### priceTokenAmount.tokenAmount getter
+Returns saved token amount in human-readable token units as `BigNumber` (tokenAmount = weiAmount / (10 ** token.decimals)).
+
+---
+
+#### priceTokenAmount.weiAmountMinusSlippage method
+```typescript
+priceTokenAmount.weiAmountMinusSlippage(slippage: number): BigNumber
+```
+
+Returns wei amount decreased by (1 - slippage) times. Slippage is in range from 0 to 1. 
+
+---
+
+#### priceTokenAmount.weiAmountPlusSlippage method
+```typescript
+priceTokenAmount.weiAmountPlusSlippage(slippage: number): BigNumber
+```
+
+Returns wei amount increased by (1 - slippage) times. Slippage is in range from 0 to 1. 
+
+---
+
+#### priceTokenAmount.calculatePriceImpactPercent method
+```typescript
+calculatePriceImpactPercent(toToken: PriceTokenAmount): number | null
+```
+
+Calculates trade price impact percent if instance token is selling token, and parameter is buying token.
+If selling usd amount is less than buying usd amount, returns 0.
+

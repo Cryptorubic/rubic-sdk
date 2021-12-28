@@ -108,7 +108,7 @@ export class CrossChainTrade {
         priceImpactTo: number | null;
     } {
         const calculatePriceImpact = (trade: ContractTrade): number | null => {
-            return trade.fromToken.calculatePriceImpact(trade.toToken);
+            return trade.fromToken.calculatePriceImpactPercent(trade.toToken);
         };
 
         return {
