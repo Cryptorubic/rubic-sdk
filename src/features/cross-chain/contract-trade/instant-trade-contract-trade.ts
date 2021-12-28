@@ -37,10 +37,10 @@ export class InstantTradeContractTrade extends ContractTrade {
     }
 
     public getFirstPath(): string[] {
-        return this.path.map(token => token.address);
+        return this.instantTrade.wrappedPath.map(token => token.address);
     }
 
     public getSecondPath(): string[] {
-        return this.path.map(token => Web3Pure.addressToBytes32(token.address));
+        return this.instantTrade.wrappedPath.map(token => Web3Pure.addressToBytes32(token.address));
     }
 }
