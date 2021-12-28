@@ -2,6 +2,40 @@
 
 > ⚠️ **Danger:** Rubik SDK is at the alpha stage. Don't use it in production code. Use rubik sdk at your own risk. During the first quarter of 2022, a beta release is planned, in which many interfaces and types can be changed. For now, you can explore our solution and try it out in a test environment. [An example of using rubik sdk](https://github.com/Cryptorubic/rubic-sdk-usage)
 
+## Table of contents
+- [Description](#description)
+  - [Supported DEX-es](#supported-dex-es)
+  - [Multi-Chain swaps supported blockchains](#multi-chain-swaps-supported-blockchains)
+- [Installation](#installation)
+  - [Installation with cdn](#installation-with-cdn)
+  - [Installation with npm and webpack](#installation-with-npm-and-webpack-react-)
+  - [Installation with npm for angular](#installation-with-npm-for-angular)
+- [Usage](#usage)
+  - [Get started after cdn installation](#get-started-after-cdn-installation)
+  - [Get started after npm installation](#get-started-after-npm-installation)
+  - [Get started with cross-chain swaps](#get-started-with-cross-chain-swaps)
+  - [Get started with tokens](#get-started-with-tokens)
+- [API](#api)
+  - [Core](#core)
+  - [Instant Trades Manager](#instant-trades-manager)
+    - [sdk.instantTrades.calculateTrade method](#sdkinstanttradescalculatetrade-method)
+    - [sdk.instantTrades.blockchainTradeProviders readonly field](#sdkinstanttradesblockchaintradeproviders-readonly-field)
+  - [Instant Trade](#instant-trade)
+    - [instantTrade.swap method](#instanttradeswap-method)
+    - [instantTrade.encode method](#instanttradeencode-method)
+    - [instantTrade.needApprove method](#instanttradeneedapprove-method)
+    - [instantTrade.from readonly field](#instanttradefrom-readonly-field)
+    - [instantTrade.to readonly field](#instanttradeto-readonly-field)
+    - [instantTrade.gasFeeInfo mutable field](#instanttradegasfeeinfo-mutable-field)
+    - [instantTrade.slippageTolerance mutable field](#instanttradeslippagetolerance-mutable-field)
+    - [instantTrade.toTokenAmountMin getter](#instanttradetotokenamountmin-getter)
+    - [instantTrade.deadlineMinutes mutable field](#instanttradedeadlineminutes-mutable-field)
+    - [instantTrade.path readonly field](#instanttradepath-readonly-field)
+  - [Cross Chain Manager](#cross-chain-manager)
+  - [Cross Chain Trade](#cross-chain-trade)
+  - [Tokens](#tokens)
+  - [Utils](#utils)
+
 ## Description
 In dApps a lot of business logic is often concentrated on the frontend for interacting with the blockchain. This SDK is built on the basis of [Rubic](https://github.com/Cryptorubic/rubic-app) multichain DeFi frontend part. SDK is a library for interacting with various dexes, as well as Rubic cross-chain swaps. It also includes a number of utilities useful when working with Ethereum.
 
@@ -35,7 +69,7 @@ In dApps a lot of business logic is often concentrated on the frontend for inter
 - Harmony
     - [Sushiswap](https://sushi.com/)
 
-### Multi-chain swaps supported blockchains
+### Multi-Chain swaps supported blockchains
 Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
 
 ## Installation
@@ -77,7 +111,7 @@ Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
        }
        ```
 
-### Installation with npm and Angular
+### Installation with npm for Angular
 1. `npm install rubic-sdk`
 
 
@@ -490,7 +524,7 @@ Token to sell with price in USD per 1 token unit and selling amount.
 
 ---
 
-#### instantTrade.to readonly mutable field
+#### instantTrade.to readonly field
 
 ```typescript
 readonly instantTrade.to: PriceTokenAmount
@@ -544,7 +578,7 @@ Is same as `instantTrade.to`, but amount less than `instantTrade.to` by `(instan
 
 ---
 
-### instantTrade.deadlineMinutes mutable field
+#### instantTrade.deadlineMinutes mutable field
 
 ```typescript
 instantTrade.deadlineMinutes: number
@@ -556,7 +590,7 @@ Transaction deadline in minutes (countdown from the transaction sending date). C
 
 ---
 
-### instantTrade.path readonly field
+#### instantTrade.path readonly field
 
 ```typescript
 instantTrade.path: ReadonlyArray<Token>
@@ -580,5 +614,7 @@ If you sell, or get native coin (like ETH, BNB, MATIC, ...) in swap, `path[0]` o
 
 
 ---
+
+### Tokens
 
 ### Utils
