@@ -3,6 +3,7 @@
 ### Todo
 
 - [ ] Add README
+- [ ] Make instant trades calculation return type stricter 
 - [ ] Add husky, check imports in lib
 - [ ] Replace deprecated tscpaths to babel
 - [ ] Add github actions, auto npm deploy
