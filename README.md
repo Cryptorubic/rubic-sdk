@@ -225,7 +225,7 @@ Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
     );
     
     // explore trades info
-    Object.values(trades).forEach(([tradeType, trade]) =>
+    Object.entries(trades).forEach(([tradeType, trade]) =>
         console.log(tradeType, `to amount: ${trade.to.tokenAmount.toFormat(3)}`)
     ) 
     ```
@@ -342,6 +342,187 @@ console.log(token.stringWeiAmount); // 1000000
 
 ### Core 
 
+#### SDK.createSDK static method
+```typescript
+SDK.createSDK(configuration: Configuration): Promise<SDK>
+```
+
+Creates new sdk instance. Changes dependencies of all sdk entities according to new configuration (even for entities created with other previous sdk instances).
+
+| Parameter     | Type          | Description                                                                        |
+|---------------|---------------|------------------------------------------------------------------------------------|
+| configuration | Configuration | Object contains main sdk settings like .env: rpc providers links, wallet object... |
+
+Configuration structure
+```typescript
+interface Configuration {
+    readonly rpcProviders: Partial<Record<BLOCKCHAIN_NAME, RpcProvider>>;
+    readonly walletProvider?: WalletProvider;
+    readonly httpClient?: HttpClient;
+}
+
+interface RpcProvider {
+    readonly mainRpc: string;
+    readonly spareRpc?: string;
+    readonly mainPrcTimeout?: number;
+    readonly healthCheckTimeout?: number;
+}
+
+interface WalletProvider {
+    readonly core: provider | Web3;
+    readonly address: string;
+    readonly chainId: number | string;
+}
+```
+
+**Configuration description:**
+
+| Property        | Type                                            | Description                                                                                                                                                                                                                                                                                                                                                                          | Default                              |
+|-----------------|-------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------|
+| rpcProviders    | `Partial<Record<BLOCKCHAIN_NAME, RpcProvider>>` | Rpc data to connect to blockchains you will use. You have to pass rpcProvider for each blockchain you will use with sdk.                                                                                                                                                                                                                                                             | Not set.                             |
+| walletProvider? | `WalletProvider`                                | Required to use `swap`, `approve` and other methods which sends transactions. But you can calculate and encode trades without `walletProvider`. Pass it when user connects wallet. Please note that address and chainId must match account address and selected chainId in the user wallet.                                                                                          | Not set.                             |
+| httpClient?     | `HttpClient`                                    | You can pass you own httpClient (e.g. HttpClient in Angular) if you have it to not duplicate http clients and decrease bundle size. Please note that default axios or native js fetch clients can't be used as `HttpClient` without modifications. Your http client must return promise which will resolve with parsed response body (like Angular httpClient). See interface below. | Lazy loading axios with interceptor. |
+
+**HttpClient interface:**
+
+```typescript
+interface HttpClient {
+    post<ResponseBody>(url: string, body: Object): Promise<ResponseBody>;
+    get<ResponseBody>(
+        url: string,
+        options?: {
+            headers?: {
+                [header: string]: string | string[];
+            };
+            params?: {
+                [param: string]:
+                    | string
+                    | number
+                    | boolean
+                    | ReadonlyArray<string | number | boolean>;
+            };
+        }
+    ): Promise<ResponseBody>;
+}
+```
+
+**RpcProvider description:**
+
+| Property            | Type     | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Default  |
+|---------------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| mainRpc             | `string` | Rpc link. Copy it from your rpc provider (like Infura, Quicknode, Getblock, Moralis, ...) website.                                                                                                                                                                                                                                                                                                                                                                    | Not set. |
+| spareRpc?           | `string` | Same as `mainRpc`. Will be used instead `mainRpc` if mainRpc is out of timeout = `mainPrcTimeout`.                                                                                                                                                                                                                                                                                                                                                                    | Not set. |
+| mainPrcTimeout?     | number   | Specifies timeout **in ms** after that `mainRpc` will be replaced with `spareRpc` (if `spareRpc` is defined)                                                                                                                                                                                                                                                                                                                                                          | 10_000   |
+| healthCheckTimeout? | number   | Before the `mainRpc` link is applied to the sdk, all the `mainRpc` links will be checked for operability by receiving from the blockchain and verifying the predefined data. If an error occurs during the request, the received data does not match the specified one, or the timeout is exceeded, the `mainRpc` will be replaced with a spare one. This `healthCheckTimeout` parameter allows you to set the maximum allowable timeout when checking the `mainRpc`. | 4_000    |
+
+---
+
+#### sdk.updateConfiguration method
+
+```typescript
+sdk.updateConfiguration(configuration: Configuration): Promise<void>
+```
+
+Updates sdk configuration and sdk entities dependencies. Call it if user connects wallet, or user changes network or account in him wallet.
+
+---
+
+#### sdk.instantTrades readonly field
+
+```typescript
+sdk.instantTrades: InstantTradesManager
+```
+
+Instant trades manager object. Use it to calculate and create instant trades. [See more.](#instant-trades-manager)
+
+---
+
+#### sdk.crossChain readonly field
+
+```typescript
+sdk.crossChain: CrossChainManager
+```
+
+Cross-chain trades manager object. Use it to calculate and create cross-chain trades. [See more.](#cross-chain-manager)
+
+---
+
+#### sdk.tokens readonly field
+
+```typescript
+sdk.tokens: TokensManager
+```
+
+Tokens manager object. Use it to fetch tokens data, to create new `Token`, `PriceToken`, `PriceTokenAmount` objects. [See more.](#tokens)
+
+---
+
+#### sdk.web3PublicService readonly field
+
+```typescript
+sdk.web3PublicService: Web3PublicService
+```
+
+Use it to get `Web3Public` instance by blockchain name to get read information from blockchain.
+
+```typescript
+const web3Public = sdk.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ETHEREUM);
+const ethBalance = await web3Public.getBalance('<user address>');
+const tokenBalance = await web3Public.getBalance('<user address>', '<token address>');
+```
+
+Explore Web3Public class to see available methods.
+
+--- 
+
+#### sdk.web3Private readonly field
+
+```typescript
+sdk.web3Private: Web3Private
+```
+
+Use it to send transactions and execute smart contracts methods.
+
+```typescript
+const web3Private = sdk.web3Private;
+const transacionReceipt = await web3Private.transferTokens('<constract address>', ',toAddress>', 1000);
+```
+
+Explore Web3Private class to see available methods.
+
+---
+
+#### sdk.gasPriceApi readonly field
+
+```typescript
+sdk.gasPriceApi: GasPriceApi
+```
+
+Use it to get gas price information.
+
+```typescript
+const gasPriceApi = sdk.gasPriceApi;
+const gasPrice = await gasPriceApi.getGasPrice(BLOCKCHAIN_NAME.ETHEREUM);
+```
+
+Explore GasPriceApi class to see available methods.
+
+---
+
+#### sdk.cryptoPriceApi readonly field
+
+```typescript
+sdk.cryptoPriceApi: CoingeckoApi
+```
+
+Use it to get crypto price information.
+
+```typescript
+const cryptoPriceApi = sdk.cryptoPriceApi;
+const tokenUSDPrice = await cryptoPriceApi.getErc20TokenPrice('<token address>', '<BLOCKCHAIN_NAME.>');
+```
+
+Explore CoingeckoApi class to see available methods.
 
 ---
 
@@ -369,23 +550,23 @@ Method calculates instant trades parameters and estimated output amount.
 
 **sdk.instantTrades.calculateTrade method parameters:**
 
-| Parameter  | Type                                                           | Description                                                                                                                 |
-|------------|----------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| fromToken  | `Token`  or `{ address: string; blockchain: BLOCKCHAIN_NAME;}` | Token sell.                                                                                                                 |
-| fromAmount | `string` or `number`                                           | Amount in token units (**not in wei!**) to swap.                                                                            |
-| toToken    | `Token` or `string`                                            | Token to get. You can pass Token object, or string token address. Must has same blockchain as fromToken if passed as Token. |
-| options?   | `SwapManagerCalculationOptions`                                | Swap calculation options.                                                                                                   |
+| Parameter  | Type                                                               | Description                                                                                                                 |
+|------------|--------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| fromToken  | `Token`  &#124; `{ address: string; blockchain: BLOCKCHAIN_NAME;}` | Token sell.                                                                                                                 |
+| fromAmount | `string` &#124; `number`                                           | Amount in token units (**not in wei!**) to swap.                                                                            |
+| toToken    | `Token` &#124; `string`                                            | Token to get. You can pass Token object, or string token address. Must has same blockchain as fromToken if passed as Token. |
+| options?   | `SwapManagerCalculationOptions`                                    | Swap calculation options.                                                                                                   |
 
 **SwapManagerCalculationOptions description:**
 
-| Option             | Type                                                   | Description                                                                                                                                                                                                          | Default     |
-|--------------------|--------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
-| timeout?           | `number`                                               | Specify trade calculation timeout in ms (same timeout for every provider separately).                                                                                                                                | 3000        |
-| disabledProviders? | `TradeType[]`                                          | Specify providers which must be ignored.                                                                                                                                                                             | []          |
-| gasCalculation?    | `'disabled'` or `'calculate'` or `'rubicOptimisation'` | Disable estimated gas calculation, or use rubic gas optimisation to consider the gas fee when calculating route profit (works only for UniswapV2-like and UniswapV3-like providers.).                                | 'calculate' |
-| disableMultihops?  | `boolean`                                              | Disable not direct swap routes. It can help to reduce gas fee, but can worsen the exchange rate. Better use `gasCalculation = 'rubicOptiomisation'` when it is possible.                                             | false       |
-| slippageTolerance? | `number`                                               | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap. Can be changed after trade calculation for every trade separately (excluding 0x trade).                                           | 0.02        |
-| deadlineMinutes?   | `number`                                               | Transaction deadline in minutes (countdown from the transaction sending date). Will be applied only for UniswapV2-like and UniswapV3-like trades. Can be changed after trade calculation for every trade separately. | 20          |
+| Option             | Type                                                           | Description                                                                                                                                                                                                          | Default     |
+|--------------------|----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| timeout?           | `number`                                                       | Specify trade calculation timeout in ms (same timeout for every provider separately).                                                                                                                                | 3000        |
+| disabledProviders? | `TradeType[]`                                                  | Specify providers which must be ignored.                                                                                                                                                                             | []          |
+| gasCalculation?    | `'disabled'` &#124; `'calculate'` &#124; `'rubicOptimisation'` | Disable estimated gas calculation, or use rubic gas optimisation to consider the gas fee when calculating route profit (works only for UniswapV2-like and UniswapV3-like providers.).                                | 'calculate' |
+| disableMultihops?  | `boolean`                                                      | Disable not direct swap routes. It can help to reduce gas fee, but can worsen the exchange rate. Better use `gasCalculation = 'rubicOptiomisation'` when it is possible.                                             | false       |
+| slippageTolerance? | `number`                                                       | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap. Can be changed after trade calculation for every trade separately (excluding 0x trade).                                           | 0.02        |
+| deadlineMinutes?   | `number`                                                       | Transaction deadline in minutes (countdown from the transaction sending date). Will be applied only for UniswapV2-like and UniswapV3-like trades. Can be changed after trade calculation for every trade separately. | 20          |
 
 **Returns** `Promise<TypedTrades> = Promisr<Partial<Record<TradeType, InstantTrade>>>` -- mapping of successful calculated trades and their types. 
 

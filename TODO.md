@@ -13,6 +13,7 @@
   - [ ] Write unit tests
   - [ ] Write API tests
 - [ ] Add CONTRIBUTING.md
+- [ ] Add information about Web3Public/Private/Pure to README
 
 ### In Progress
 
