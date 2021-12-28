@@ -19,9 +19,9 @@ export abstract class InstantTrade {
 
     public abstract readonly to: PriceTokenAmount;
 
-    public abstract readonly gasFeeInfo: GasFeeInfo | null;
+    public abstract gasFeeInfo: GasFeeInfo | null;
 
-    public abstract readonly slippageTolerance: number;
+    public abstract slippageTolerance: number;
 
     protected abstract contractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 

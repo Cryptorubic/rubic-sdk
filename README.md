@@ -306,7 +306,12 @@ console.log(token.stringWeiAmount); // 1000000
 
 ## API
 
-### Instant trades
+### Core 
+
+
+---
+
+### Instant Trades Manager 
 
 #### sdk.instantTrades.calculateTrade method
 
@@ -350,10 +355,12 @@ Method calculates instant trades parameters and estimated output amount.
 
 **Returns** `Promise<TypedTrades> = Promisr<Partial<Record<TradeType, InstantTrade>>>` -- mapping of successful calculated trades and their types. 
 
-#### sdk.instantTrades.blockchainTradeProviders field
+---
+
+#### sdk.instantTrades.blockchainTradeProviders readonly field
 
 ```typescript
-sdk.instantTrades.blockchainTradeProviders: Readonly<Record<BLOCKCHAIN_NAME, Partial<TypedTradeProviders>>
+readonly sdk.instantTrades.blockchainTradeProviders: Readonly<Record<BLOCKCHAIN_NAME, Partial<TypedTradeProviders>>
 ```
 
 If you need to calculate trade with the special provider options, you can get needed provider instance in `sdk.instantTrades.blockchainTradeProviders`
@@ -364,6 +371,10 @@ and calculate trade directly via this instance.
 const trade = await sdk.instantTrades.blockchainTradeProviders[BLOCKCHAIN_NAME.ETHEREUM][TRADE_TYPE.UNISWAP_V2]
   .calculateDifficultTrade(from, to, weiAmount, 'output', options);
 ```
+
+---
+
+### Instant Trade
 
 #### instantTrade.swap method
 
@@ -394,6 +405,8 @@ If user has not enough allowance, the method will automatically send approve tra
 
 **Returns** `Promise<TransactionReceipt>` -- swap transaction receipt. Promise will be resolved, when swap transaction gets to block.
 
+---
+
 #### instantTrade.encode method
 
 ```typescript
@@ -421,6 +434,8 @@ to pass it to the transaction when you need to send it, you can use `instantTrad
 
 **Returns** `Promise<TransactionConfig>` -- web3 transaction structure to send. 
 
+---
+
 #### instantTrade.needApprove method
 
 ```typescript
@@ -434,6 +449,8 @@ Swap method will automatically call approve if needed, but you can use methods p
 if you want to know if approve is needed before execute swap to show user double button, or swap stages in UI.
 
 **instantTrade.needApprove Returns** `Promise<boolean>` -- True if approve required, that is user has not enough allowance. Otherwise false.
+
+---
 
 #### instantTrade.approve method
 
@@ -461,4 +478,107 @@ Use `approve` if you want to show swap stages in UI after allowance check via `n
 
 **Returns** `Promise<TransactionReceipt>` -- approve transaction receipt. Promise will be resolved, when swap transaction gets to block.
 
+---
 
+#### instantTrade.from readonly field
+
+```typescript
+readonly instantTrade.from: PriceTokenAmount
+```
+
+Token to sell with price in USD per 1 token unit and selling amount.
+
+---
+
+#### instantTrade.to readonly mutable field
+
+```typescript
+readonly instantTrade.to: PriceTokenAmount
+```
+
+Token to buy with price in USD per 1 token unit and estimated get amount (not to be confused with `instantTrade.toTokenAmountMin`).
+
+---
+
+#### instantTrade.gasFeeInfo mutable field
+
+```typescript
+instantTrade.gasFeeInfo: GasFeeInfo | null
+```
+
+where 
+```typescript
+interface GasFeeInfo {
+    readonly gasLimit?: BigNumber;
+    readonly gasPrice?: BigNumber;
+    readonly gasFeeInEth?: BigNumber;
+    readonly gasFeeInUsd?: BigNumber;
+}
+```
+
+Information about predicted gas fee connected to this trade. Will be null if option `gasCalculation` was set as `'disabled'` when trade was calculated.
+Some properties of `gasFeeInfo` can be undefined if there are errors while gas fetching.
+
+Can be changed: just modify gasFeeInfo field.
+
+---
+
+#### instantTrade.slippageTolerance mutable field
+
+```typescript
+instantTrade.slippageTolerance: number
+```
+
+Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap. Can be changed **(excluding 0x trade)**: just modify slippageTolerance field.
+
+---
+
+#### instantTrade.toTokenAmountMin getter
+
+```typescript
+instantTrade.toTokenAmountMin: PriceTokenAmount
+```
+
+Is same as `instantTrade.to`, but amount less than `instantTrade.to` by `(instantTrade.slippageTolerance * 100)` percent.
+
+
+---
+
+### instantTrade.deadlineMinutes mutable field
+
+```typescript
+instantTrade.deadlineMinutes: number
+```
+
+> ⚠️ Is available only in uniswapV2-like and uniswapV3-like trades.
+
+Transaction deadline in minutes (countdown from the transaction sending date). Can be changed: just modify deadlineMinutes field.
+
+---
+
+### instantTrade.path readonly field
+
+```typescript
+instantTrade.path: ReadonlyArray<Token>
+```
+
+> ⚠️ Is not available for 0x trades.
+
+Swap path. E.g. if you change ETH to LINK path might be [ETH, USDT, LINK].
+Path elements is `Token`, so you can get address, symbol and other properties of each element.
+If you sell, or get native coin (like ETH, BNB, MATIC, ...) in swap, `path[0]` or `path[path.length -1]` **won't** be wrapped tokens like WETH, but will be native tokens. 
+
+---
+
+### Cross Chain Manager
+
+
+
+---
+
+### Cross Chain Trade
+
+
+---
+
+### Utils
