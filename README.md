@@ -308,10 +308,25 @@ console.log(token.stringWeiAmount); // 1000000
 
 ### Instant trades
 
-#### sdk.instantTrades.calculateTrade
+#### sdk.instantTrades.calculateTrade method
 
-You have to set up rpc provider for network in which you will calculate trade.
-To calculate trade use `sdk.instantTrades.calculateTrade`:
+```typescript
+sdk.instantTradescalculateTrade(
+        fromToken:
+            | Token
+            | {
+                  address: string;
+                  blockchain: BLOCKCHAIN_NAME;
+              },
+        fromAmount: string | number,
+        toToken: Token | string,
+        options?: SwapManagerCalculationOptions
+    ): Promise<TypedTrades>
+```
+
+> ℹ️️ You have to set up **rpc provider 🌐** for network in which you will calculate trade.
+
+Method calculates instant trades parameters and estimated output amount.
 
 **sdk.instantTrades.calculateTrade method parameters:**
 
@@ -333,9 +348,13 @@ To calculate trade use `sdk.instantTrades.calculateTrade`:
 | slippageTolerance? | `number`                                               | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap. Can be changed after trade calculation for every trade separately (excluding 0x trade).                                           | 0.02        |
 | deadlineMinutes?   | `number`                                               | Transaction deadline in minutes (countdown from the transaction sending date). Will be applied only for UniswapV2-like and UniswapV3-like trades. Can be changed after trade calculation for every trade separately. | 20          |
 
-Returns `Promise<TypedTrades> = Promisr<Partial<Record<TradeType, InstantTrade>>>` -- mapping of successful calculated trades and their types. 
+**Returns** `Promise<TypedTrades> = Promisr<Partial<Record<TradeType, InstantTrade>>>` -- mapping of successful calculated trades and their types. 
 
-#### sdk.instantTrades.blockchainTradeProviders
+#### sdk.instantTrades.blockchainTradeProviders field
+
+```typescript
+sdk.instantTrades.blockchainTradeProviders: Readonly<Record<BLOCKCHAIN_NAME, Partial<TypedTradeProviders>>
+```
 
 If you need to calculate trade with the special provider options, you can get needed provider instance in `sdk.instantTrades.blockchainTradeProviders`
 and calculate trade directly via this instance.
@@ -346,4 +365,100 @@ const trade = await sdk.instantTrades.blockchainTradeProviders[BLOCKCHAIN_NAME.E
   .calculateDifficultTrade(from, to, weiAmount, 'output', options);
 ```
 
-#### instantTrade.swap
+#### instantTrade.swap method
+
+```typescript
+instantTrade.swap(options?: SwapTransactionOptions): Promise<TransactionReceipt>
+```
+
+> ℹ️️ You have to set up **wallet provider 👛** for network in which you will execute trade swap.
+
+Method checks balance, network id correctness, and executes swap transaction.
+A transaction confirmation window will open in the connected user's wallet.
+If user has not enough allowance, the method will automatically send approve transaction before swap transaction.
+
+**instantTrade.swap method parameters:**
+
+| Parameter | Type                     | Description                          |
+|-----------|--------------------------|--------------------------------------|
+| options?  | `SwapTransactionOptions` | Additional swap transaction options. |
+
+**SwapTransactionOptions description:**
+
+| Option     | Type                     | Description                                                                                                                           | Default                                                                                                                                |
+|------------|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| onConfirm? | `(hash: string) => void` | Callback that will be called after the user signs swap transaction.                                                                   | Not set.                                                                                                                               |
+| onApprove? | `(hash: string) => void` | Callback that will be called after the user signs approve transaction. If user has enough allowance, this callback won't be called.   | Not set.                                                                                                                               |
+| gasPrice?  | `string`                 | Specifies gas price **in wei** for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing. | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+| gasLimit?  | `string`                 | Specifies gas limit for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing.            | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+
+**Returns** `Promise<TransactionReceipt>` -- swap transaction receipt. Promise will be resolved, when swap transaction gets to block.
+
+#### instantTrade.encode method
+
+```typescript
+instantTrade.encode(options?: EncodeTransactionOptions): Promise<TransactionConfig>
+```
+
+> ℹ️️ You have to set up **rpc provider 🌐** for trade network for which you will call encode.
+
+If you don't want to execute transaction instantly (e.g. if you use SDK in the server-side), you can get full transaction data 
+to pass it to the transaction when you need to send it, you can use `instantTrade.encode` method.
+
+**instantTrade.encode method parameters:**
+
+| Parameter | Type                       | Description                                                                                                      |
+|-----------|----------------------------|------------------------------------------------------------------------------------------------------------------|
+| options   | `EncodeTransactionOptions` | Additional options. Optional for uniswapV3-like and 0x trades, but required for uniswapV2-like and 1inch trades. |
+
+**EncodeTransactionOptions description:**
+
+| Option      | Type     | Description                                                                                                                                                                                                                            | Default                                                                                                                                |
+|-------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| fromAddress | `string` | Not needed for uniswapV3-like and 0x trades, but required for uniswapV2-like and 1inch trades. Address of account which will executes swap transaction by encoded data. This address must has enough allowance to successfully encode. | Not set.                                                                                                                               |
+| gasPrice?   | `string` | Specifies gas price **in wei** for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing.                                                                                                  | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+| gasLimit?   | `string` | Specifies gas limit for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing.                                                                                                             | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+
+**Returns** `Promise<TransactionConfig>` -- web3 transaction structure to send. 
+
+#### instantTrade.needApprove method
+
+```typescript
+instantTrade.needApprove(): Promise<boolean>
+```
+
+
+> ℹ️️ You have to set up **rpc provider 🌐** for trade network for which you will call needApprove.
+
+Swap method will automatically call approve if needed, but you can use methods pair `needApprove`-`approve` 
+if you want to know if approve is needed before execute swap to show user double button, or swap stages in UI.
+
+**instantTrade.needApprove Returns** `Promise<boolean>` -- True if approve required, that is user has not enough allowance. Otherwise false.
+
+#### instantTrade.approve method
+
+```typescript
+instantTrade.approve(options?: BasicTransactionOptions): Promise<TransactionReceipt>
+```
+
+> ℹ️️ You have to set up **wallet provider 👛** for network in which you will execute trade swap.
+
+Use `approve` if you want to show swap stages in UI after allowance check via `needApprove` method.
+
+**instantTrade.approve method parameters:**
+
+| Parameter | Type                      | Description                     |
+|-----------|---------------------------|---------------------------------|
+| options   | `BasicTransactionOptions` | Additional transaction options. |
+
+**BasicTransactionOptions description:**
+
+| Option             | Type                     | Description                                                                                                                 | Default                                                                                                                                |
+|--------------------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| onTransactionHash? | `(hash: string) => void` | Callback that will be called after the user signs the approve transaction.                                                  |
+| gasPrice?          | `string`                 | Specifies gas price **in wei** for **approve** transaction. Set this parameter only if you know exactly what you are doing. | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+| gasLimit?          | `string`                 | Specifies gas limit for **approve** transactions. Set this parameter only if you know exactly what you are doing.           | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+
+**Returns** `Promise<TransactionReceipt>` -- approve transaction receipt. Promise will be resolved, when swap transaction gets to block.
+
+

@@ -71,7 +71,7 @@ export abstract class InstantTrade {
             this.from.address,
             this.contractAddress,
             'infinity',
-            options
+            { ...options, gas: options?.gasLimit }
         );
     }
 
