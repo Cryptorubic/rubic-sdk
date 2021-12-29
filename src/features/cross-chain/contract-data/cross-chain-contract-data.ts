@@ -7,21 +7,29 @@ import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import BigNumber from 'bignumber.js';
 import { BlockchainsInfo } from '@core/blockchain/blockchains-info';
 import { crossChainContractAbi } from '@features/cross-chain/constants/cross-chain-contract-abi';
-import { UniswapV2AbstractProvider } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
+import { ProviderData } from '@features/cross-chain/contract-data/models/provider-data';
+import { UniswapV2AbstractProvider } from 'src/features';
 
-export class CrossChainContract {
+/**
+ * Class to work with readable methods of cross-chain contract.
+ */
+export class CrossChainContractData {
     private readonly web3Public: Web3Public;
 
     constructor(
         private readonly blockchain: BLOCKCHAIN_NAME,
         public readonly address: string,
-        public readonly uniswapV2Provider: UniswapV2AbstractProvider
+        public readonly providersData: ProviderData[]
     ) {
         this.web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
     }
 
+    public getProvider(providerIndex: number): UniswapV2AbstractProvider {
+        return this.providersData[providerIndex].provider;
+    }
+
     @PCache
-    public async getNumOfContract(): Promise<number> {
+    public async getNumOfBlockchain(): Promise<number> {
         const numOfContract = await this.web3Public.callContractMethod(
             this.address,
             crossChainContractAbi,
@@ -32,7 +40,7 @@ export class CrossChainContract {
 
     @PCache
     public async getTransitToken(): Promise<Token> {
-        const numOfContract = await this.getNumOfContract();
+        const numOfContract = await this.getNumOfBlockchain();
         const transitTokenAddress = await this.web3Public.callContractMethod(
             this.address,
             crossChainContractAbi,
@@ -48,7 +56,7 @@ export class CrossChainContract {
     }
 
     public async getFeeInPercents(): Promise<number> {
-        const numOfContract = await this.getNumOfContract();
+        const numOfContract = await this.getNumOfBlockchain();
         const feeAbsolute = await this.web3Public.callContractMethod(
             this.address,
             crossChainContractAbi,
@@ -60,8 +68,8 @@ export class CrossChainContract {
         return parseInt(feeAbsolute) / 10000;
     }
 
-    public async getCryptoFeeToken(toContract: CrossChainContract): Promise<PriceTokenAmount> {
-        const numOfToContract = await toContract.getNumOfContract();
+    public async getCryptoFeeToken(toContract: CrossChainContractData): Promise<PriceTokenAmount> {
+        const numOfToContract = await toContract.getNumOfBlockchain();
         const feeAmount = new BigNumber(
             await this.web3Public.callContractMethod(
                 this.address,
@@ -87,7 +95,7 @@ export class CrossChainContract {
         );
     }
 
-    public isContractPaused(): Promise<boolean> {
+    public isPaused(): Promise<boolean> {
         return this.web3Public.callContractMethod<boolean>(
             this.address,
             crossChainContractAbi,

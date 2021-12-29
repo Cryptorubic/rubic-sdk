@@ -12,7 +12,7 @@ describe('Cross chain trades module tests', () => {
         expect(typeof sdk.crossChain).toBe('object');
     });
 
-    test('Should calculate ETH to USDT trade', async () => {
+    test('Should calculate MATIC to USDT trade', async () => {
         const fromToken = {
             address: '0x0000000000000000000000000000000000000000',
             blockchain: BLOCKCHAIN_NAME.POLYGON
