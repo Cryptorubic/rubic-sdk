@@ -166,7 +166,7 @@ export class OneinchTrade extends InstantTrade {
         const swapRequest = {
             params: {
                 fromTokenAddress: this.nativeSupportedFrom.address,
-                toTokenAddress: this.to.address,
+                toTokenAddress: this.nativeSupportedTo.address,
                 amount: this.nativeSupportedFrom.stringWeiAmount,
                 slippage: (this.slippageTolerance * 100).toString(),
                 fromAddress: fromAddress || this.walletAddress,
