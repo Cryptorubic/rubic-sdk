@@ -54,7 +54,21 @@
       - [tokensManager.createPriceTokenAmount method](#tokensmanagercreatepricetokenamount-method)
     - [Token](#token)
       - [token fields](#token-fields)
-      - []
+      - [token.isNative method](#tokenisnative-method)
+      - [token.isEqualTo method](#tokenisequalto-method)
+      - [token.clone method](#tokenclone-method)
+    - [PriceToken](#pricetoken)
+      - [priceToken.asStruct getter](#pricetokenasstruct-getter)
+      - [priceToken.getAndUpdateTokenPrice method](#pricetokengetandupdatetokenprice-method)
+      - [priceToken.cloneAndCreate](#pricetokencloneandcreate)
+    - [PriceTokenAmount](#pricetokenamount)
+      - [priceTokenAmount.weiAmount getter](#pricetokenamountweiamount-getter)
+      - [priceTokenAmount.stringWeiAmount getter](#pricetokenamountstringweiamount-getter)
+      - [priceTokenAmount.tokenAmount getter](#pricetokenamounttokenamount-getter)
+      - [priceTokenAmount.weiAmountMinusSlippage method](#pricetokenamountweiamountminusslippage-method)
+      - [priceTokenAmount.weiAmountPlusSlippage method](#pricetokenamountweiamountplusslippage-method)
+      - [priceTokenAmount.calculatePriceImpactPercent method](#pricetokenamountcalculatepriceimpactpercent-method)
+
 ## Description
 In dApps a lot of business logic is often concentrated on the frontend for interacting with the blockchain. This SDK is built on the basis of [Rubic](https://github.com/Cryptorubic/rubic-app) multichain DeFi frontend part. SDK is a library for interacting with various dexes, as well as Rubic cross-chain swaps. It also includes a number of utilities useful when working with Ethereum.
 
@@ -913,15 +927,6 @@ readonly decimals: number;
 
 #### token.isNative method
 Use `token.isNative` to detect native coins like ETH, BNB, MATIC, ... instead of comparing token address with 0x000...0.
-
----
-
-#### token.isEqualTo method
-```typescript
-token.isEqualTo(token: TokenBaseStruct): boolean
-```
-Use it to check that two tokens have equal blockchains and addresses (in any case: lower/upper/mixed).
-Token is TokenBaseStruct so you can pass Token instance to `token.isEqualTo`.
 
 ---
 
