@@ -31,11 +31,11 @@ export class DirectContractTrade extends ContractTrade {
         super(blockchain, contract, 0);
     }
 
-    public getFirstPath(): string[] {
+    protected getFirstPath(): string[] {
         return [this.token.address];
     }
 
-    public getSecondPath(): string[] {
+    protected getSecondPath(): string[] {
         return [Web3Pure.addressToBytes32(this.token.address)];
     }
 }

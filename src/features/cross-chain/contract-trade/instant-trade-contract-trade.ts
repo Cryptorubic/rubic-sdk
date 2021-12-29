@@ -36,11 +36,11 @@ export class InstantTradeContractTrade extends ContractTrade {
         super(blockchain, contract, providerIndex);
     }
 
-    public getFirstPath(): string[] {
+    protected getFirstPath(): string[] {
         return this.instantTrade.wrappedPath.map(token => token.address);
     }
 
-    public getSecondPath(): string[] {
+    protected getSecondPath(): string[] {
         return this.instantTrade.wrappedPath.map(token => Web3Pure.addressToBytes32(token.address));
     }
 }

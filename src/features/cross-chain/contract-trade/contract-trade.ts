@@ -107,8 +107,8 @@ export abstract class ContractTrade {
                 tokenOutAmountMinAbsolute,
                 Web3Pure.addressToBytes32(walletAddress),
                 this.toToken.isNative,
-                true,
-                false,
+                true, // use 'exactInput' method
+                false, // TODO add processing of tokens with fee (now `false` for common tokens)
                 swapToUserMethodSignature
             ]
         ];
@@ -118,13 +118,13 @@ export abstract class ContractTrade {
      * Returns `first path` method argument, converted from instant-trade data and chosen provider.
      * Must be called on source contract.
      */
-    public abstract getFirstPath(): string[];
+    protected abstract getFirstPath(): string[];
 
     /**
      * Returns `second path` method argument, converted from instant-trade data and chosen provider.
      * Must be called on target contract.
      */
-    public abstract getSecondPath(): string[];
+    protected abstract getSecondPath(): string[];
 
     /**
      * Returns `signature` method argument, build from function name and its arguments.
