@@ -1,5 +1,5 @@
 import { CrossChainSupportedBlockchain } from '@features/cross-chain/constants/cross-chain-supported-blockchains';
-import { ContractData } from '@features/cross-chain/contract-data/contract-data';
+import { CrossChainContractData } from '@features/cross-chain/contract-data/cross-chain-contract-data';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Token } from '@core/blockchain/tokens/token';
@@ -21,13 +21,13 @@ enum TO_USER_SWAP_METHOD {
 }
 
 export abstract class ContractTrade {
-    public abstract get fromToken(): PriceTokenAmount;
+    public abstract readonly fromToken: PriceTokenAmount;
 
-    public abstract get toToken(): PriceTokenAmount;
+    public abstract readonly toToken: PriceTokenAmount;
 
-    public abstract get toTokenAmountMin(): BigNumber;
+    public abstract readonly toTokenAmountMin: BigNumber;
 
-    public abstract get path(): ReadonlyArray<Token>;
+    public abstract readonly path: ReadonlyArray<Token>;
 
     @Pure
     public get provider(): UniswapV2AbstractProvider {
@@ -41,7 +41,7 @@ export abstract class ContractTrade {
 
     protected constructor(
         public readonly blockchain: CrossChainSupportedBlockchain,
-        public readonly contract: ContractData,
+        public readonly contract: CrossChainContractData,
         private readonly providerIndex: number
     ) {}
 
@@ -79,21 +79,32 @@ export abstract class ContractTrade {
         toContractTrade: ContractTrade,
         walletAddress: string
     ): Promise<unknown[]> {
+        const toNumOfBlockchain = await toContractTrade.contract.getNumOfBlockchain();
+
         const tokenInAmountAbsolute = this.fromToken.stringWeiAmount;
-        const tokenOutAmountMinAbsolute = Web3Pure.toWei(
-            toContractTrade.toTokenAmountMin,
-            this.toToken.decimals
-        );
+
+        const firstPath = this.getFirstPath();
+
+        const secondPath = toContractTrade.getSecondPath();
 
         const fromTransitTokenAmountMinAbsolute = Web3Pure.toWei(
             this.toTokenAmountMin,
             this.toToken.decimals
         );
 
-        const toNumOfBlockchain = await toContractTrade.contract.getNumOfBlockchain();
+        const tokenOutAmountMinAbsolute = Web3Pure.toWei(
+            toContractTrade.toTokenAmountMin,
+            this.toToken.decimals
+        );
 
-        const firstPath = this.getFirstPath();
-        const secondPath = toContractTrade.getSecondPath();
+        const walletAddressBytes32 = Web3Pure.addressToBytes32(walletAddress);
+
+        const isToTokenNative = this.toToken.isNative;
+
+        const useExactInputMethod = true;
+
+        // TODO: add processing of tokens with fee
+        const useSupportingFeeMethod = false;
 
         const swapToUserMethodSignature = toContractTrade.getSwapToUserMethodSignature();
 
@@ -105,10 +116,10 @@ export abstract class ContractTrade {
                 secondPath,
                 fromTransitTokenAmountMinAbsolute,
                 tokenOutAmountMinAbsolute,
-                Web3Pure.addressToBytes32(walletAddress),
-                this.toToken.isNative,
-                true, // use 'exactInput' method
-                false, // TODO add processing of tokens with fee (now `false` for common tokens)
+                walletAddressBytes32,
+                isToTokenNative,
+                useExactInputMethod,
+                useSupportingFeeMethod,
                 swapToUserMethodSignature
             ]
         ];
@@ -145,8 +156,18 @@ export abstract class ContractTrade {
 
         methodName += this.providerData.methodSuffix;
 
+        const methodArgumentsSignature = this.getArgumentsSignature(contractAbiMethod);
+
+        return methodName + methodArgumentsSignature;
+    }
+
+    /**
+     * Returns signature of arguments of cross-chain swap method.
+     * @param contractAbiMethod Swap method in cross-chain contract.
+     */
+    private getArgumentsSignature(contractAbiMethod: AbiItem): string {
         const parameters = contractAbiMethod.inputs![0].components!;
-        const paramsSignature = parameters.reduce((acc, parameter, index) => {
+        return parameters.reduce((acc, parameter, index) => {
             if (index === 0) {
                 acc = '((';
             }
@@ -158,7 +179,5 @@ export abstract class ContractTrade {
             }
             return `${acc},`;
         }, '');
-
-        return methodName + paramsSignature;
     }
 }

@@ -10,7 +10,10 @@ import { crossChainContractAbi } from '@features/cross-chain/constants/cross-cha
 import { ProviderData } from '@features/cross-chain/contract-data/models/provider-data';
 import { UniswapV2AbstractProvider } from 'src/features';
 
-export class ContractData {
+/**
+ * Class to work with readable methods of cross-chain contract.
+ */
+export class CrossChainContractData {
     private readonly web3Public: Web3Public;
 
     constructor(
@@ -65,7 +68,7 @@ export class ContractData {
         return parseInt(feeAbsolute) / 10000;
     }
 
-    public async getCryptoFeeToken(toContract: ContractData): Promise<PriceTokenAmount> {
+    public async getCryptoFeeToken(toContract: CrossChainContractData): Promise<PriceTokenAmount> {
         const numOfToContract = await toContract.getNumOfBlockchain();
         const feeAmount = new BigNumber(
             await this.web3Public.callContractMethod(

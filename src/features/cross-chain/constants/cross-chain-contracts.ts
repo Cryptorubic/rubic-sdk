@@ -1,5 +1,5 @@
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
-import { ContractData } from '@features/cross-chain/contract-data/contract-data';
+import { CrossChainContractData } from '@features/cross-chain/contract-data/cross-chain-contract-data';
 import { PancakeSwapProvider } from '@features/swap/dexes/bsc/pancake-swap/pancake-swap-provider';
 import { UniSwapV2Provider } from '@features/swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
 import { QuickSwapProvider } from '@features/swap/dexes/polygon/quick-swap/quick-swap-provider';
@@ -12,6 +12,12 @@ import { JoeProvider } from '@features/swap/dexes/avalanche/joe/joe-provider';
 import { SolarbeamProvider } from '@features/swap/dexes/moonriver/solarbeam/solarbeam-provider';
 import { PangolinProvider } from '@features/swap/dexes/avalanche/pangolin/pangolin-provider';
 
+/**
+ * Stores contracts info.
+ * Every contract may have several instant-trade providers.
+ * Because of that every provider has `method suffix` - suffix
+ * to add to default swap-method name to call that provider's method.
+ */
 export const crossChainContractsData = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
         address: '0xb9a94be803eC1197A234406eF5c0113f503d3178',
@@ -73,20 +79,22 @@ export const crossChainContractsData = {
     }
 } as const;
 
-const crossChainContracts: Record<CrossChainSupportedBlockchain, ContractData | null> =
+const crossChainContracts: Record<CrossChainSupportedBlockchain, CrossChainContractData | null> =
     crossChainSupportedBlockchains.reduce(
         (acc, blockchain) => ({ ...acc, [blockchain]: null }),
-        {} as Record<CrossChainSupportedBlockchain, ContractData | null>
+        {} as Record<CrossChainSupportedBlockchain, CrossChainContractData | null>
     );
 
-export function getCrossChainContract(blockchain: CrossChainSupportedBlockchain): ContractData {
+export function getCrossChainContract(
+    blockchain: CrossChainSupportedBlockchain
+): CrossChainContractData {
     const storedContract = crossChainContracts[blockchain];
     if (storedContract) {
         return storedContract;
     }
 
     const contract = crossChainContractsData[blockchain];
-    crossChainContracts[blockchain] = new ContractData(
+    crossChainContracts[blockchain] = new CrossChainContractData(
         blockchain,
         contract.address,
         contract.providersData.map(providerData => ({

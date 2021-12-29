@@ -1,5 +1,5 @@
 import { getCrossChainContract } from '@features/cross-chain/constants/cross-chain-contracts';
-import { ContractData } from '@features/cross-chain/contract-data/contract-data';
+import { CrossChainContractData } from '@features/cross-chain/contract-data/cross-chain-contract-data';
 import {
     CrossChainSupportedBlockchain,
     crossChainSupportedBlockchains
@@ -49,7 +49,9 @@ export class CrossChainManager {
         );
     }
 
-    private readonly contracts: (blockchain: CrossChainSupportedBlockchain) => ContractData;
+    private readonly contracts: (
+        blockchain: CrossChainSupportedBlockchain
+    ) => CrossChainContractData;
 
     constructor() {
         this.contracts = getCrossChainContract;
@@ -221,7 +223,7 @@ export class CrossChainManager {
     }
 
     private async getCalculatedTrade(
-        contract: ContractData,
+        contract: CrossChainContractData,
         providerIndex: number,
         from: PriceTokenAmount,
         toToken: PriceToken,
