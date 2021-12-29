@@ -7,6 +7,7 @@ import {
 } from '@core/blockchain/tokens/price-token-amount';
 import { Token, TokenStruct } from '@core/blockchain/tokens/token';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import BigNumber from 'bignumber.js';
 
 export class TokensManager {
     public createTokenFromStruct(tokenStruct: TokenStruct): Token {
@@ -45,7 +46,7 @@ export class TokensManager {
     public createPriceTokenAmount(
         priceTokenAmountStruct:
             | PriceTokenAmountBaseStruct
-            | Parameters<typeof PriceTokenAmount.createFromToken>[number]
+            | (TokenStruct & ({ weiAmount: BigNumber } | { tokenAmount: BigNumber }))
     ): Promise<PriceTokenAmount> {
         if (
             'name' in priceTokenAmountStruct &&

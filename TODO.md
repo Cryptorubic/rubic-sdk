@@ -3,7 +3,8 @@
 ### Todo
 
 - [ ] Add README
-- [ ] Make instant trades calculation return type stricter 
+- [ ] Make instant trades calculation return type stricter
+- [ ] Remove rxjs and rewrite cacheable decorators
 - [ ] Add husky, check imports in lib
 - [ ] Replace deprecated tscpaths to babel
 - [ ] Add github actions, auto npm deploy
@@ -13,6 +14,7 @@
   - [ ] Write unit tests
   - [ ] Write API tests
 - [ ] Add CONTRIBUTING.md
+- [ ] Add information about Web3Public/Private/Pure and Utils to README
 
 ### In Progress
 

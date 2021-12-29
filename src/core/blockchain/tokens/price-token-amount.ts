@@ -86,7 +86,7 @@ export class PriceTokenAmount extends PriceToken {
         return new PriceTokenAmount({ ...this, ...tokenStruct });
     }
 
-    public calculatePriceImpact(toToken: PriceTokenAmount): number | null {
+    public calculatePriceImpactPercent(toToken: PriceTokenAmount): number | null {
         if (
             !this.price ||
             !toToken.price ||
@@ -98,11 +98,13 @@ export class PriceTokenAmount extends PriceToken {
 
         const fromTokenCost = this.tokenAmount.multipliedBy(this.price);
         const toTokenCost = toToken.tokenAmount.multipliedBy(toToken.price);
-        return fromTokenCost
+        const impact = fromTokenCost
             .minus(toTokenCost)
             .dividedBy(fromTokenCost)
             .multipliedBy(100)
             .dp(2, BigNumber.ROUND_HALF_UP)
             .toNumber();
+
+        return impact > 0 ? impact : 0;
     }
 }

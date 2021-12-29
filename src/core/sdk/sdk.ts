@@ -14,6 +14,8 @@ export class SDK {
 
     public readonly crossChain: CrossChainManager;
 
+    public readonly tokens = new TokensManager();
+
     public readonly web3PublicService = Injector.web3PublicService;
 
     public readonly web3Private = Injector.web3Private;
@@ -21,8 +23,6 @@ export class SDK {
     public readonly gasPriceApi = Injector.gasPriceApi;
 
     public readonly cryptoPriceApi = Injector.coingeckoApi;
-
-    public readonly tokens = new TokensManager();
 
     public static async createSDK(configuration: Configuration): Promise<SDK> {
         const [web3PublicService, web3Private, httpClient] = await Promise.all([
@@ -58,7 +58,7 @@ export class SDK {
         this.crossChain = new CrossChainManager();
     }
 
-    private async updateConfiguration(configuration: Configuration): Promise<void> {
+    public async updateConfiguration(configuration: Configuration): Promise<void> {
         const [web3PublicService, web3Private, httpClient] = await Promise.all([
             SDK.createWeb3PublicService(configuration),
             SDK.createWeb3Private(configuration),

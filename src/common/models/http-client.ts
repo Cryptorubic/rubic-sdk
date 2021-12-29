@@ -1,6 +1,6 @@
 export interface HttpClient {
-    post<T>(url: string, body: Object): Promise<T>;
-    get<T>(
+    post<ResponseBody>(url: string, body: Object): Promise<ResponseBody>;
+    get<ResponseBody>(
         url: string,
         options?: {
             headers?: {
@@ -14,5 +14,5 @@ export interface HttpClient {
                     | ReadonlyArray<string | number | boolean>;
             };
         }
-    ): Promise<T>;
+    ): Promise<ResponseBody>;
 }
