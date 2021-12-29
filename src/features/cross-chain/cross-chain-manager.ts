@@ -93,7 +93,7 @@ export class CrossChainManager {
         });
     }
 
-    public async calculateTradeFromTokens(
+    private async calculateTradeFromTokens(
         from: PriceTokenAmount,
         toToken: PriceToken,
         options: CrossChainOptions
