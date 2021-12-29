@@ -27,6 +27,7 @@ import {
 import { defaultUniswapV2Abi } from '@features/swap/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi';
 import { DefaultEstimatedGas } from '@features/swap/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
 import BigNumber from 'bignumber.js';
+import { TradeType } from 'src/features';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
@@ -61,6 +62,10 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             console.debug(e);
             throw new RubicSdkError('Trying to read abstract class field');
         }
+    }
+
+    public static get type(): TradeType {
+        throw new RubicSdkError(`Static TRADE_TYPE getter is not implemented by ${this.name}`);
     }
 
     public static readonly contractAbi: AbiItem[] = defaultUniswapV2Abi;
@@ -99,6 +104,10 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     public readonly wrappedPath: ReadonlyArray<Token>;
 
     public readonly exact: 'input' | 'output';
+
+    public get type(): TradeType {
+        return (this.constructor as typeof UniswapV2AbstractTrade).type;
+    }
 
     public set settings(value: { deadlineMinutes?: number; slippageTolerance?: number }) {
         this.deadlineMinutes = value.deadlineMinutes || this.deadlineMinutes;

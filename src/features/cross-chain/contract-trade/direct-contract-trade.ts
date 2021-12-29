@@ -2,16 +2,17 @@ import { CrossChainSupportedBlockchain } from '@features/cross-chain/constants/c
 import { CrossChainContractData } from '@features/cross-chain/contract-data/cross-chain-contract-data';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { ContractTrade } from '@features/cross-chain/contract-trade/contract-trade';
+import BigNumber from 'bignumber.js';
 import { Web3Pure } from 'src/core';
 
 export class DirectContractTrade extends ContractTrade {
-    public readonly fromToken = this.token;
+    public readonly fromToken: PriceTokenAmount;
 
-    public readonly toToken = this.token;
+    public readonly toToken: PriceTokenAmount;
 
-    public readonly toTokenAmountMin = this.token.tokenAmount;
+    public readonly toTokenAmountMin: BigNumber;
 
-    public readonly path = [this.token];
+    public readonly path: PriceTokenAmount[];
 
     constructor(
         blockchain: CrossChainSupportedBlockchain,
@@ -19,6 +20,11 @@ export class DirectContractTrade extends ContractTrade {
         private readonly token: PriceTokenAmount
     ) {
         super(blockchain, contract, 0);
+
+        this.fromToken = this.token;
+        this.toToken = this.token;
+        this.toTokenAmountMin = this.token.tokenAmount;
+        this.path = [this.token];
     }
 
     protected getFirstPath(): string[] {

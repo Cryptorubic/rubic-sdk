@@ -21,26 +21,7 @@ describe('Instant trades module tests', () => {
         const fromAmount = 1;
 
         const trades = await sdk.instantTrades.calculateTrade(fromToken, fromAmount, toToken);
-        trades.forEach(trade => {
-            const { from } = trade.trade;
-            const { to } = trade.trade;
-            console.log(trade.type);
-            console.log(
-                'from',
-                JSON.stringify({
-                    ...from,
-                    amount: from.stringWeiAmount,
-                    price: from.price.toString()
-                })
-            );
-            console.log(
-                'to',
-                JSON.stringify({
-                    ...to,
-                    amount: to.stringWeiAmount,
-                    price: to.price.toString()
-                })
-            );
-        });
+        expect(Array.isArray(trades)).toBeTruthy();
+        expect(trades.length).not.toBe(0);
     });
 });

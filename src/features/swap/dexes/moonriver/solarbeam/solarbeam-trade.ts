@@ -9,9 +9,14 @@ import {
     SOLARBEAM_CONTRACT_ABI,
     SOLARBEAM_CONTRACT_ADDRESS
 } from '@features/swap/dexes/moonriver/solarbeam/constants';
+import { TRADE_TYPE, TradeType } from 'src/features';
 
 export class SolarbeamTrade extends UniswapV2AbstractTrade {
     public static readonly contractAbi = SOLARBEAM_CONTRACT_ABI;
+
+    public static get type(): TradeType {
+        return TRADE_TYPE.SOLAR_BEAM;
+    }
 
     public static callForRoutes(
         blockchain: BLOCKCHAIN_NAME,

@@ -29,6 +29,6 @@ describe('Cross chain trades module tests', () => {
             toToken
         );
 
-        console.log(trade);
-    });
+        expect(!!trade).toBeTruthy();
+    }, 10000);
 });

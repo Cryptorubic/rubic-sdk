@@ -18,6 +18,7 @@ import { UniSwapV3Trade } from '@features/swap/dexes/ethereum/uni-swap-v3/uni-sw
 import { GasPriceInfo } from '@features/swap/models/gas-price-info';
 import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
 import { InstantTradeProvider } from '@features/swap/instant-trade-provider';
+import { TRADE_TYPE, TradeType } from 'src/features';
 
 const RUBIC_OPTIMIZATION_DISABLED = true;
 
@@ -38,6 +39,10 @@ export class UniSwapV3Provider extends InstantTradeProvider {
     private wethAddress = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 
     private liquidityPoolsController = new LiquidityPoolsController(this.web3Public);
+
+    public get type(): TradeType {
+        return TRADE_TYPE.UNISWAP_V3;
+    }
 
     public async calculate(
         from: PriceTokenAmount,

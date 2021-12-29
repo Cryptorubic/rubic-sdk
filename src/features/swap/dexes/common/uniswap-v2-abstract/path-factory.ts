@@ -194,7 +194,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
                     ...this.to.asStruct,
                     weiAmount: toAmount
                 }),
-                nativeSupportedPath: route.path,
+                wrappedPath: route.path,
                 exact: this.exact,
                 deadlineMinutes: this.options.deadlineMinutes,
                 slippageTolerance: this.options.slippageTolerance

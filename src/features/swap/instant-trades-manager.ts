@@ -1,6 +1,7 @@
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { notNull } from '@common/utils/object';
 import { combineOptions } from '@common/utils/options';
+import { Mutable } from '@common/utils/types/mutable';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
@@ -26,10 +27,10 @@ import { QuickSwapProvider } from '@features/swap/dexes/polygon/quick-swap/quick
 import { SushiSwapPolygonProvider } from '@features/swap/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
 import { InstantTradeProvider } from '@features/swap/instant-trade-provider';
 import { SwapManagerCalculationOptions } from '@features/swap/models/swap-manager-calculation-options';
-import { TRADE_TYPE, TradeType } from '@features/swap/models/trade-type';
-import { TypedTrades } from '@features/swap/models/typed-trades';
+import { TradeType } from '@features/swap/models/trade-type';
 import { TypedTradeProviders } from '@features/swap/models/typed-trade-provider';
 import pTimeout from 'p-timeout';
+import { InstantTrade } from 'src/features';
 import { MarkRequired } from 'ts-essentials';
 import { ZrxEthereumProvider } from '@features/swap/dexes/ethereum/zrx-ethereum/zrx-ethereum-provider';
 import { getPriceTokensFromInputTokens } from '@common/utils/tokens';
@@ -42,44 +43,44 @@ type RequiredSwapManagerCalculationOptions = MarkRequired<
 export class InstantTradesManager {
     public static readonly defaultCalculationTimeout = 3000;
 
-    private readonly uniswapV2TradeProviders = {
-        [TRADE_TYPE.UNISWAP_V2]: new UniSwapV2Provider(),
-        [TRADE_TYPE.SUSHI_SWAP_ETHEREUM]: new SushiSwapEthereumProvider(),
-        [TRADE_TYPE.PANCAKE_SWAP]: new PancakeSwapProvider(),
-        [TRADE_TYPE.SUSHI_SWAP_BSC]: new SushiSwapBscProvider(),
-        [TRADE_TYPE.QUICK_SWAP]: new QuickSwapProvider(),
-        [TRADE_TYPE.SUSHI_SWAP_POLYGON]: new SushiSwapPolygonProvider(),
-        [TRADE_TYPE.JOE]: new JoeProvider(),
-        [TRADE_TYPE.PANGOLIN]: new PangolinProvider(),
-        [TRADE_TYPE.SUSHI_SWAP_AVALANCHE]: new SushiSwapAvalancheProvider(),
-        [TRADE_TYPE.SPIRIT_SWAP]: new SpiritSwapProvider(),
-        [TRADE_TYPE.SPOOKY_SWAP]: new SpookySwapProvider(),
-        [TRADE_TYPE.SUSHI_SWAP_FANTOM]: new SushiSwapFantomProvider(),
-        [TRADE_TYPE.SUSHI_SWAP_HARMONY]: new SushiSwapHarmonyProvider(),
-        [TRADE_TYPE.SOLAR_BEAM]: new SolarbeamProvider(),
-        [TRADE_TYPE.SUSHI_SWAP_MOONRIVER]: new SushiSwapMoonriverProvider()
-    } as const;
+    private readonly uniswapV2TradeProviders = [
+        UniSwapV2Provider,
+        SushiSwapEthereumProvider,
+        PancakeSwapProvider,
+        SushiSwapBscProvider,
+        QuickSwapProvider,
+        SushiSwapPolygonProvider,
+        JoeProvider,
+        PangolinProvider,
+        SushiSwapAvalancheProvider,
+        SpiritSwapProvider,
+        SpookySwapProvider,
+        SushiSwapFantomProvider,
+        SushiSwapHarmonyProvider,
+        SolarbeamProvider,
+        SushiSwapMoonriverProvider
+    ] as const;
 
-    private readonly uniswapV3TradeProviders = {
-        [TRADE_TYPE.UNISWAP_V3]: new UniSwapV3Provider()
-    } as const;
+    private readonly uniswapV3TradeProviders = [UniSwapV3Provider] as const;
 
-    private oneInchTradeProviders = {
-        [TRADE_TYPE.ONE_INCH_ETHEREUM]: new OneinchEthereumProvider(),
-        [TRADE_TYPE.ONE_INCH_BSC]: new OneinchBscProvider(),
-        [TRADE_TYPE.ONE_INCH_POLYGON]: new OneinchPolygonProvider()
-    } as const;
+    private oneInchTradeProviders = [
+        OneinchEthereumProvider,
+        OneinchBscProvider,
+        OneinchPolygonProvider
+    ] as const;
 
-    private zrxTradeProviders = {
-        [TRADE_TYPE.ZRX_ETHEREUM]: new ZrxEthereumProvider()
-    } as const;
+    private zrxTradeProviders = [ZrxEthereumProvider] as const;
 
-    private tradeProviders: TypedTradeProviders = {
+    private tradeProviders: TypedTradeProviders = [
         ...this.uniswapV2TradeProviders,
         ...this.uniswapV3TradeProviders,
         ...this.oneInchTradeProviders,
         ...this.zrxTradeProviders
-    };
+    ].reduce((acc, ProviderClass) => {
+        const provider = new ProviderClass();
+        acc[provider.type] = provider;
+        return acc;
+    }, {} as Mutable<TypedTradeProviders>);
 
     public readonly blockchainTradeProviders: Readonly<
         Record<BLOCKCHAIN_NAME, Partial<TypedTradeProviders>>
@@ -101,7 +102,7 @@ export class InstantTradesManager {
         fromAmount: string | number,
         toToken: Token | string,
         options?: SwapManagerCalculationOptions
-    ): Promise<TypedTrades> {
+    ): Promise<InstantTrade[]> {
         if (toToken instanceof Token && fromToken.blockchain !== toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be same.');
         }
@@ -128,7 +129,7 @@ export class InstantTradesManager {
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredSwapManagerCalculationOptions
-    ): Promise<TypedTrades> {
+    ): Promise<InstantTrade[]> {
         const { timeout, disabledProviders, ...providersOptions } = options;
         const providers = Object.entries(this.blockchainTradeProviders[from.blockchain]).filter(
             ([type]) => !disabledProviders.includes(type as TradeType)
@@ -140,11 +141,7 @@ export class InstantTradesManager {
 
         const calculationPromises = providers.map(async ([type, provider]) => {
             try {
-                const trade = await pTimeout(
-                    provider.calculate(from, to, providersOptions),
-                    timeout
-                );
-                return [type, trade] as const;
+                return await pTimeout(provider.calculate(from, to, providersOptions), timeout);
             } catch (e) {
                 console.debug(
                     `[RUBIC_SDK] Trade calculation error occurred for ${type} trade provider.`,
@@ -155,6 +152,6 @@ export class InstantTradesManager {
         });
 
         const results = await Promise.all(calculationPromises);
-        return Object.fromEntries(results.filter(notNull));
+        return results.filter(notNull);
     }
 }
