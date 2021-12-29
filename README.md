@@ -42,9 +42,19 @@
     - [instantTrade.path readonly field](#instanttradepath-readonly-field)
   - [Cross Chain Manager](#cross-chain-manager)
   - [Cross Chain Trade](#cross-chain-trade)
-  - [Tokens](#tokens)
-  - [Utils](#utils)
-
+  - [Tokens](#tokens-manager)
+    - [Tokens Manager](#tokens-manager)
+      - [tokensManager.createTokenFromStruct method](#tokensmanagercreatetokenfromstruct-method)
+      - [tokensManager.createToken method](#tokensmanagercreatetoken-method)
+      - [tokensManager.createTokensFromStructs method](#tokensmanagercreatetokensfromstructs-method)
+      - [tokensManager.createTokens method](#tokensmanagercreatetokens-method)
+      - [tokensManager.createPriceTokenFromStruct method](#tokensmanagercreatepricetokenfromstruct-method)
+      - [tokensManager.createPriceToken method](#tokensmanagercreatepricetoken-method)
+      - [tokensManager.createPriceTokenAmountFromStruct method](#tokensmanagercreatepricetokenamountfromstruct-method)
+      - [tokensManager.createPriceTokenAmount method](#tokensmanagercreatepricetokenamount-method)
+    - [Token](#token)
+      - [token fields](#token-fields)
+      - []
 ## Description
 In dApps a lot of business logic is often concentrated on the frontend for interacting with the blockchain. This SDK is built on the basis of [Rubic](https://github.com/Cryptorubic/rubic-app) multichain DeFi frontend part. SDK is a library for interacting with various dexes, as well as Rubic cross-chain swaps. It also includes a number of utilities useful when working with Ethereum.
 
