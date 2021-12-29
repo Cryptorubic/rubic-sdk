@@ -12,6 +12,7 @@ import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-a
 import BigNumber from 'bignumber.js';
 import { UniswapCalculatedInfo } from '@features/swap/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
 import { createTokenNativeAddressProxy } from '@features/swap/dexes/common/utils/token-native-address-proxy';
+import { TradeType } from 'src/features';
 
 export abstract class UniswapV2AbstractProvider<
     T extends UniswapV2AbstractTrade = UniswapV2AbstractTrade
@@ -19,6 +20,10 @@ export abstract class UniswapV2AbstractProvider<
     public abstract readonly InstantTradeClass: UniswapV2TradeClass<T>;
 
     public abstract readonly providerSettings: UniswapV2ProviderConfiguration;
+
+    public get type(): TradeType {
+        return this.InstantTradeClass.type;
+    }
 
     protected readonly defaultOptions: Required<SwapCalculationOptions> = {
         gasCalculation: 'calculate',

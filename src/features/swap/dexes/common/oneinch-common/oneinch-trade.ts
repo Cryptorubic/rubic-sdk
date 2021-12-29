@@ -6,6 +6,8 @@ import { InstantTrade } from '@features/swap/instant-trade';
 import { Injector } from '@core/sdk/injector';
 import { Pure } from '@common/decorators/pure.decorator';
 import BigNumber from 'bignumber.js';
+import { BLOCKCHAIN_NAME } from 'src/core';
+import { TRADE_TYPE, TradeType } from 'src/features/swap/models/trade-type';
 import { TransactionReceipt } from 'web3-eth';
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { InsufficientFundsOneinchError } from '@common/errors/swap/insufficient-funds-oneinch.error';
@@ -30,6 +32,12 @@ type OneinchTradeStruct = {
 };
 
 export class OneinchTrade extends InstantTrade {
+    private static readonly oneInchTradeTypes = {
+        [BLOCKCHAIN_NAME.ETHEREUM]: TRADE_TYPE.ONE_INCH_ETHEREUM,
+        [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: TRADE_TYPE.ONE_INCH_BSC,
+        [BLOCKCHAIN_NAME.POLYGON]: TRADE_TYPE.ONE_INCH_POLYGON
+    } as const;
+
     public static async checkIfNeedApproveAndThrowError(
         from: PriceTokenAmount
     ): Promise<void | never> {
@@ -60,6 +68,12 @@ export class OneinchTrade extends InstantTrade {
     private readonly disableMultihops: boolean;
 
     public readonly path: ReadonlyArray<Token>;
+
+    public get type(): TradeType {
+        return OneinchTrade.oneInchTradeTypes[
+            this.from.blockchain as keyof typeof OneinchTrade.oneInchTradeTypes
+        ];
+    }
 
     @Pure
     private get apiBaseUrl(): string {
@@ -152,7 +166,7 @@ export class OneinchTrade extends InstantTrade {
         const swapRequest = {
             params: {
                 fromTokenAddress: this.nativeSupportedFrom.address,
-                toTokenAddress: this.to.address,
+                toTokenAddress: this.nativeSupportedTo.address,
                 amount: this.nativeSupportedFrom.stringWeiAmount,
                 slippage: (this.slippageTolerance * 100).toString(),
                 fromAddress: fromAddress || this.walletAddress,

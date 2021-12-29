@@ -8,6 +8,7 @@ import {
     swapRouterContractAddress
 } from '@features/swap/dexes/ethereum/uni-swap-v3/constants/swap-router-contract-data';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
+import { TRADE_TYPE, TradeType } from 'src/features';
 import { TransactionReceipt } from 'web3-eth';
 import { compareAddresses } from '@common/utils/blockchain';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
@@ -134,6 +135,10 @@ export class UniSwapV3Trade extends InstantTrade {
     protected readonly contractAddress = swapRouterContractAddress;
 
     private readonly route: UniSwapV3Route;
+
+    public get type(): TradeType {
+        return TRADE_TYPE.UNISWAP_V3;
+    }
 
     private get deadlineMinutesTimestamp(): number {
         return deadlineMinutesTimestamp(this.deadlineMinutes);

@@ -8,6 +8,7 @@ import { Injector } from '@core/sdk/injector';
 import { EncodeTransactionOptions } from '@features/swap/models/encode-transaction-options';
 import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
+import { TradeType } from 'src/features';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
@@ -27,13 +28,15 @@ export abstract class InstantTrade {
 
     protected readonly web3Public: Web3Public;
 
-    protected get walletAddress(): string {
-        return Injector.web3Private.address;
-    }
+    public abstract get type(): TradeType;
 
     public get toTokenAmountMin(): PriceTokenAmount {
         const weiAmountOutMin = this.to.weiAmountMinusSlippage(this.slippageTolerance);
         return new PriceTokenAmount({ ...this.to.asStruct, weiAmount: weiAmountOutMin });
+    }
+
+    protected get walletAddress(): string {
+        return Injector.web3Private.address;
     }
 
     protected constructor(blockchain: BLOCKCHAIN_NAME) {

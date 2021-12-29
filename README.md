@@ -33,6 +33,7 @@
     - [instantTrade.swap method](#instanttradeswap-method)
     - [instantTrade.encode method](#instanttradeencode-method)
     - [instantTrade.needApprove method](#instanttradeneedapprove-method)
+    - [instantTrade.type readonly field](#instanttradetype-readonly-field)
     - [instantTrade.from readonly field](#instanttradefrom-readonly-field)
     - [instantTrade.to readonly field](#instanttradeto-readonly-field)
     - [instantTrade.gasFeeInfo mutable field](#instanttradegasfeeinfo-mutable-field)
@@ -40,6 +41,10 @@
     - [instantTrade.toTokenAmountMin getter](#instanttradetotokenamountmin-getter)
     - [instantTrade.deadlineMinutes mutable field](#instanttradedeadlineminutes-mutable-field)
     - [instantTrade.path readonly field](#instanttradepath-readonly-field)
+    - [isUniswapV2LikeTrade function](#isuniswapv2liketrade-function)
+    - [isUniswapV3LikeTrade function](#isuniswapv3liketrade-function)
+    - [isOneInchLikeTrade function](#isoneinchliketrade-function)
+    - [isZrxLikeTradeLikeTrade function](#iszrxliketradeliketrade-function)
   - [Cross Chain Manager](#cross-chain-manager)
   - [Cross Chain Trade](#cross-chain-trade)
   - [Tokens](#tokens-manager)
@@ -574,7 +579,7 @@ sdk.instantTradescalculateTrade(
         fromAmount: string | number,
         toToken: Token | string,
         options?: SwapManagerCalculationOptions
-    ): Promise<TypedTrades>
+    ): Promise<InstantTrade[]>
 ```
 
 > ℹ️️ You have to set up **rpc provider 🌐** for network in which you will calculate trade.
@@ -601,7 +606,7 @@ Method calculates instant trades parameters and estimated output amount.
 | slippageTolerance? | `number`                                                       | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap. Can be changed after trade calculation for every trade separately (excluding 0x trade).                                           | 0.02        |
 | deadlineMinutes?   | `number`                                                       | Transaction deadline in minutes (countdown from the transaction sending date). Will be applied only for UniswapV2-like and UniswapV3-like trades. Can be changed after trade calculation for every trade separately. | 20          |
 
-**Returns** `Promise<TypedTrades> = Promisr<Partial<Record<TradeType, InstantTrade>>>` -- mapping of successful calculated trades and their types. 
+**Returns** `Promise<InstantTrade[]>` -- list of successful calculated trades. 
 
 ---
 
@@ -728,6 +733,16 @@ Use `approve` if you want to show swap stages in UI after allowance check via `n
 
 ---
 
+#### instantTrade.type readonly field
+
+```typescript
+readonly instantTrade.type: TradeType
+```
+
+Instant trade type (like `TRADE_TYPE.UNISWAP_V2`, `TRADE_TYPE.QUICK_SWAP`, ...).
+
+---
+
 #### instantTrade.from readonly field
 
 ```typescript
@@ -817,6 +832,76 @@ Path elements is `Token`, so you can get address, symbol and other properties of
 If you sell, or get native coin (like ETH, BNB, MATIC, ...) in swap, `path[0]` or `path[path.length -1]` **won't** be wrapped tokens like WETH, but will be native tokens. 
 
 ---
+
+#### isUniswapV2LikeTrade function
+```typescript
+function isUniswapV2LikeTrade(trade: InstantTrade): trade is UniswapV2AbstractTrade
+```
+
+Type guard checks that trade is UniswapV2AbstractTrade. Use it to parse result of `sdk.instantTrades.calculateTrade` and 
+show specific uniswapV2 trade data like `deadline` and `path`, or use its specific methods.
+
+List of uniswapV2LikeTrades/Providers:
+- UniSwap V2
+- SushiSwap Ethereum
+- PancakeSwap
+- SushiSwap Bsc
+- QuickSwap
+- SushiSwap Polygon
+- Joe
+- Pangolin
+- SushiSwap Avalanche
+- SpiritSwap
+- SpookySwap
+- SushiSwap Fantom
+- SushiSwap Harmony
+- Solarbeam
+- SushiSwap Moonriver
+
+---
+
+#### isUniswapV3LikeTrade function
+```typescript
+function isUniswapV3LikeTrade(trade: InstantTrade): trade is UniSwapV3Trade
+```
+
+Type guard checks that trade is UniSwapV3Trade. Use it to parse result of `sdk.instantTrades.calculateTrade` and
+show specific UniSwapV3 trade data, or use its specific methods. 
+
+List of uniswapV2LikeTrades/Providers:
+- UniSwapV3
+- (Algebra and UniSwapV3 Polygon soon!)
+
+--- 
+
+#### isOneInchLikeTrade function
+```typescript
+function isOneInchLikeTrade(trade: InstantTrade): trade is OneinchTrade
+```
+
+Type guard checks that trade is OneinchTrade. Use it to parse result of `sdk.instantTrades.calculateTrade` and
+show specific OneinchTrade trade data, or use its specific methods.
+
+List of OneinchTrade/Providers:
+- OneInch Ethereum
+- OneInch Bsc
+- OneInch Polygon
+
+--- 
+
+#### isZrxLikeTradeLikeTrade function
+```typescript
+function isZrxLikeTradeLikeTrade(trade: InstantTrade): trade is ZrxTrade
+```
+
+Type guard checks that trade is 0x Trade. Use it to parse result of `sdk.instantTrades.calculateTrade` and
+show specific 0x Trade trade data, or use its specific methods.
+
+List of OneinchTrade/Providers:
+- 0x Ethereum
+- (other blockchains for 0x soon!)
+
+--- 
 
 ### Cross Chain Manager
 

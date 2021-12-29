@@ -1,6 +1,7 @@
 import { Injector } from '@core/sdk/injector';
 import { InstantTrade } from '@features/swap/instant-trade';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
+import { TRADE_TYPE, TradeType } from 'src/features';
 import { TransactionReceipt } from 'web3-eth';
 import { ZrxQuoteResponse } from '@features/swap/dexes/common/zrx-common/models/zrx-types';
 import { OptionsGasParams, TransactionGasParams } from '@features/swap/models/gas-params';
@@ -32,6 +33,10 @@ export class ZrxTrade extends InstantTrade {
     private readonly apiTradeData: ZrxQuoteResponse;
 
     protected readonly contractAddress: string;
+
+    public get type(): TradeType {
+        return TRADE_TYPE.ZRX_ETHEREUM;
+    }
 
     constructor(tradeStruct: ZrxTradeStruct) {
         super(tradeStruct.from.blockchain);

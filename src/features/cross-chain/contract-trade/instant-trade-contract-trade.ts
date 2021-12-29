@@ -2,18 +2,17 @@ import { CrossChainSupportedBlockchain } from '@features/cross-chain/constants/c
 import { CrossChainContractData } from '@features/cross-chain/contract-data/cross-chain-contract-data';
 import { ContractTrade } from '@features/cross-chain/contract-trade/contract-trade';
 import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
-import { Web3Pure } from 'src/core';
+import BigNumber from 'bignumber.js';
+import { PriceTokenAmount, Token, Web3Pure } from 'src/core';
 
 export class InstantTradeContractTrade extends ContractTrade {
-    public readonly fromToken = this.instantTrade.from;
+    public readonly fromToken: PriceTokenAmount;
 
-    public readonly toToken = this.instantTrade.to;
+    public readonly toToken: PriceTokenAmount;
 
-    public readonly toTokenAmountMin = this.toToken.tokenAmount.multipliedBy(
-        1 - this.slippageTolerance
-    );
+    public readonly toTokenAmountMin: BigNumber;
 
-    public readonly path = this.instantTrade.path;
+    public readonly path: ReadonlyArray<Token>;
 
     constructor(
         blockchain: CrossChainSupportedBlockchain,
@@ -23,6 +22,11 @@ export class InstantTradeContractTrade extends ContractTrade {
         private readonly instantTrade: UniswapV2AbstractTrade
     ) {
         super(blockchain, contract, providerIndex);
+
+        this.fromToken = this.instantTrade.from;
+        this.toToken = this.instantTrade.to;
+        this.toTokenAmountMin = this.toToken.tokenAmount.multipliedBy(1 - this.slippageTolerance);
+        this.path = this.instantTrade.path;
     }
 
     protected getFirstPath(): string[] {

@@ -9,11 +9,14 @@ import { GasPriceInfo } from '@features/swap/models/gas-price-info';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import BigNumber from 'bignumber.js';
 import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
+import { TradeType } from 'src/features';
 
 export abstract class InstantTradeProvider {
     public abstract readonly blockchain: BLOCKCHAIN_NAME;
 
     protected abstract readonly gasMargin: number;
+
+    public abstract get type(): TradeType;
 
     protected get web3Public(): Web3Public {
         return Injector.web3PublicService.getWeb3Public(this.blockchain);
