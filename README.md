@@ -113,7 +113,7 @@ Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
 ## Installation
 ### Installation with cdn
 ```html
-<script src="https://unpkg.com/web3@latest/dist/rubic-sdk.min.js"></script>
+<script src="https://unpkg.com/rubic-sdk@latest/dist/rubic-sdk.min.js"></script>
 ```
 
 ### Installation with npm and webpack (React, ...)
