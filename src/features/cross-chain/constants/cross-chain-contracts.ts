@@ -29,7 +29,7 @@ export const crossChainContractsData = {
         ]
     },
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: {
-        address: '0x6b8904739059afbaa91311aab99187f5885c6dc0',
+        address: '0xEda6DdA4fD1581B6Ab8951750DB596566d0FBf9C',
         providersData: [
             {
                 ProviderClass: PancakeSwapProvider,
@@ -69,7 +69,7 @@ export const crossChainContractsData = {
         ]
     },
     [BLOCKCHAIN_NAME.FANTOM]: {
-        address: '0xeDfA29ca1BdbFaCBBDc6AAda385c983020015177',
+        address: '0x55Be05ecC1c417B16163b000CB71DcE8526a5D06',
         providersData: [
             {
                 ProviderClass: SpookySwapProvider,
