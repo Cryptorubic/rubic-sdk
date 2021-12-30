@@ -27,8 +27,8 @@
     - [sdk.gasPriceApi readonly field](#sdkgaspriceapi-readonly-field)
     - [sdk.cryptoPriceApi readonly field](#sdkcryptopriceapi-readonly-field)
   - [Instant Trades Manager](#instant-trades-manager)
-    - [sdk.instantTradesManager.calculateTrade method](#sdkinstanttradesmanagercalculatetrade-method)
-    - [sdk.instantTradesManager.blockchainTradeProviders readonly field](#sdkinstanttradesmanagerblockchaintradeproviders-readonly-field)
+    - [sdk.instantTrades.calculateTrade method](#sdkinstanttradescalculatetrade-method)
+    - [sdk.instantTrades.blockchainTradeProviders readonly field](#sdkinstanttradesblockchaintradeproviders-readonly-field)
   - [Instant Trade](#instant-trade)
     - [instantTrade.swap method](#instanttradeswap-method)
     - [instantTrade.encode method](#instanttradeencode-method)
@@ -46,7 +46,7 @@
     - [isOneInchLikeTrade function](#isoneinchliketrade-function)
     - [isZrxLikeTradeLikeTrade function](#iszrxliketradeliketrade-function)
   - [Cross Chain Manager](#cross-chain-manager)
-    - [sdk.crossChainManager.calculateTrade method](#sdkcrosschainmanagercalculatetrade-method)
+    - [sdk.crossChain.calculateTrade method](#sdkcrosschaincalculatetrade-method)
   - [Cross Chain Trade](#cross-chain-trade)
     - [crossChainTrade.swap method](#crosschaintradeswap-method)
     - [crossChainTrade.needAapprove method](#crosschaintradeneedapprove-method)
@@ -575,10 +575,10 @@ Explore CoingeckoApi class to see available methods.
 
 ### Instant Trades Manager 
 
-#### sdk.instantTradesManager.calculateTrade method
+#### sdk.instantTrades.calculateTrade method
 
 ```typescript
-sdk.instantTradesManager.calculateTrade(
+sdk.instantTrades.calculateTrade(
         fromToken:
             | Token
             | {
@@ -619,10 +619,10 @@ Method calculates instant trades parameters and estimated output amount.
 
 ---
 
-#### sdk.instantTradesManager.blockchainTradeProviders readonly field
+#### sdk.instantTrades.blockchainTradeProviders readonly field
 
 ```typescript
-readonly sdk.instantTradesManager.blockchainTradeProviders: Readonly<Record<BLOCKCHAIN_NAME, Partial<TypedTradeProviders>>
+readonly sdk.instantTrades.blockchainTradeProviders: Readonly<Record<BLOCKCHAIN_NAME, Partial<TypedTradeProviders>>
 ```
 
 If you need to calculate trade with the special provider options, you can get needed provider instance in `sdk.instantTrades.blockchainTradeProviders`
@@ -916,10 +916,10 @@ List of OneinchTrade/Providers:
 
 > ⚠️ **Danger:** Currently, Cross Chain Manager uses dev-mode contracts. Its' logic is the same as of prod-mode contracts, but settings (such as minimum amount of tokens to sell) are different.
 
-#### sdk.crossChainManager.calculateTrade method
+#### sdk.crossChain.calculateTrade method
 
 ```typescript
-sdk.crossChainManager.calculateTrade(
+sdk.crossChain.calculateTrade(
         fromToken:
             | Token
             | {
@@ -939,9 +939,9 @@ sdk.crossChainManager.calculateTrade(
 
 > ℹ️️ You have to set up **rpc provider 🌐** for network in which you will calculate trade.
 
-Method calculates cross chain trade and estimated output amount.
+Method calculates [CrossChainTrade](#cross-chain-trade).
 
-**sdk.crossChainManager.calculateTrade method parameters:**
+**sdk.crossChain.calculateTrade method parameters:**
 
 | Parameter  | Type                                                               | Description                                      |
 |------------|--------------------------------------------------------------------|--------------------------------------------------|
@@ -957,11 +957,11 @@ Method calculates cross chain trade and estimated output amount.
 | fromSlippageTolerance | `number` | Swap slippage in range 0 to 1. Defines minimum amount after swap in **first blockchain**.                   | 0.02    |
 | toSlippageTolerance   | `number` | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap in **second blockchain**. | 0.02    |
 
-**Returns** `Promise<TypedTrades> = Promise<Partial<Record<TradeType, InstantTrade>>>` -- mapping of successful calculated trades and their types.
-
 ---
 
 ### Cross Chain Trade
+
+Stores information about trade and provides method to make swap.
 
 #### crossChainTrade.swap method
 
