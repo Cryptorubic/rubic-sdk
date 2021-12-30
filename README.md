@@ -914,6 +914,8 @@ List of OneinchTrade/Providers:
 
 ### Cross Chain Manager
 
+> ⚠️ **Danger:** Currently, Cross Chain Manager uses dev-mode contracts. Its' logic is the same as of prod-mode contracts, but settings (such as minimum amount of tokens to sell) are different.
+
 #### sdk.crossChainManager.calculateTrade method
 
 ```typescript
