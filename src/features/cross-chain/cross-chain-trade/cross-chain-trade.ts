@@ -19,6 +19,7 @@ import { Pure } from '@common/decorators/pure.decorator';
 import { WalletNotConnectedError } from '@common/errors/swap/wallet-not-connected.error';
 import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
 import { ContractParams } from '@features/cross-chain/cross-chain-trade/models/contract-params';
+import { BasicTransactionOptions } from 'src/core';
 
 export class CrossChainTrade {
     public static async getGasData(
@@ -85,13 +86,15 @@ export class CrossChainTrade {
 
     private readonly toWeb3Public: Web3Public;
 
-    private get walletAddress(): string {
-        return Injector.web3Private.address;
-    }
-
     public readonly from: PriceTokenAmount;
 
     public readonly to: PriceTokenAmount;
+
+    public readonly toTokenAmountMin: BigNumber;
+
+    private get walletAddress(): string {
+        return Injector.web3Private.address;
+    }
 
     public get estimatedGas(): BigNumber | null {
         if (!this.gasData) {
@@ -132,6 +135,7 @@ export class CrossChainTrade {
 
         this.from = this.fromTrade.fromToken;
         this.to = this.toTrade.toToken;
+        this.toTokenAmountMin = this.toTrade.toTokenAmountMin;
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.fromTrade.blockchain);
         this.toWeb3Public = Injector.web3PublicService.getWeb3Public(this.toTrade.blockchain);
@@ -152,7 +156,7 @@ export class CrossChainTrade {
         return this.fromTrade.fromToken.weiAmount.gt(allowance);
     }
 
-    public approve(options: TransactionOptions): Promise<TransactionReceipt> {
+    public approve(options: BasicTransactionOptions): Promise<TransactionReceipt> {
         if (!this.needApprove()) {
             throw new UnnecessaryApprove();
         }

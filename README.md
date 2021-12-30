@@ -46,7 +46,16 @@
     - [isOneInchLikeTrade function](#isoneinchliketrade-function)
     - [isZrxLikeTradeLikeTrade function](#iszrxliketradeliketrade-function)
   - [Cross Chain Manager](#cross-chain-manager)
+    - [sdk.crossChain.calculateTrade method](#sdkcrosschaincalculatetrade-method)
   - [Cross Chain Trade](#cross-chain-trade)
+    - [crossChainTrade.swap method](#crosschaintradeswap-method)
+    - [crossChainTrade.needAapprove method](#crosschaintradeneedapprove-method)
+    - [crossChainTrade.approve method](#crosschaintradeapprove-method)
+    - [crossChainTrade.from readonly field](#crosschaintradefrom-readonly-field)
+    - [crossChainTrade.to readonly field](#crosschaintradeto-readonly-field)
+    - [crossChainTrade.toTokenAmountMin readonly field](#crosschaintradetotokenamountmin-readonly-field)
+    - [crossChainTrade.estimatedGas getter](#crosschaintradeestimatedgas-getter)
+    - [crossChainTrade.priceImpactData getter](#crosschaintradepriceimpactdata-getter)
   - [Tokens](#tokens-manager)
     - [Tokens Manager](#tokens-manager)
       - [tokensManager.createTokenFromStruct method](#tokensmanagercreatetokenfromstruct-method)
@@ -569,7 +578,7 @@ Explore CoingeckoApi class to see available methods.
 #### sdk.instantTrades.calculateTrade method
 
 ```typescript
-sdk.instantTradescalculateTrade(
+sdk.instantTrades.calculateTrade(
         fromToken:
             | Token
             | {
@@ -905,12 +914,180 @@ List of OneinchTrade/Providers:
 
 ### Cross Chain Manager
 
+> ⚠️ **Danger:** Currently, Cross Chain Manager uses dev-mode contracts. Its' logic is the same as of prod-mode contracts, but settings (such as minimum amount of tokens to sell) are different.
 
+#### sdk.crossChain.calculateTrade method
+
+```typescript
+sdk.crossChain.calculateTrade(
+        fromToken:
+            | Token
+            | {
+              address: string;
+              blockchain: BLOCKCHAIN_NAME;
+            },
+        fromAmount: string | number,
+        toToken:
+            | Token
+            | {
+              address: string;
+              blockchain: BLOCKCHAIN_NAME;
+            },
+        options?: CrossChainOptions
+): Promise<CrossChainTrade>
+```
+
+> ℹ️️ You have to set up **rpc provider 🌐** for network in which you will calculate trade.
+
+Method calculates [CrossChainTrade](#cross-chain-trade).
+
+**sdk.crossChain.calculateTrade method parameters:**
+
+| Parameter  | Type                                                               | Description                                      |
+|------------|--------------------------------------------------------------------|--------------------------------------------------|
+| fromToken  | `Token`  &#124; `{ address: string; blockchain: BLOCKCHAIN_NAME;}` | Token to sell.                                   |
+| fromAmount | `string` &#124; `number`                                           | Amount in token units (**not in wei!**) to swap. |
+| toToken    | `Token`  &#124; `{ address: string; blockchain: BLOCKCHAIN_NAME;}` | Token to get.                                    |
+| options?   | `CrossChainOptions`                                                | Swap calculation options.                        |
+
+**CrossChainOptions description:**
+
+| Option                | Type     | Description                                                                                                 | Default |
+|-----------------------|----------|-------------------------------------------------------------------------------------------------------------|---------|
+| fromSlippageTolerance | `number` | Swap slippage in range 0 to 1. Defines minimum amount after swap in **first blockchain**.                   | 0.02    |
+| toSlippageTolerance   | `number` | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap in **second blockchain**. | 0.02    |
 
 ---
 
 ### Cross Chain Trade
 
+Stores information about trade and provides method to make swap.
+
+#### crossChainTrade.swap method
+
+```typescript
+instantTrade.swap(options?: SwapTransactionOptions): Promise<TransactionReceipt>
+```
+
+> ℹ️️ You have to set up **wallet provider 👛** for network in which you will execute trade swap.
+
+Method checks balance, network id correctness, cross-chain contracts state and executes swap transaction.
+A transaction confirmation window will open in the connected user's wallet.
+If user has not enough allowance, the method will automatically send approve transaction before swap transaction.
+
+**crossChainTrade.swap method parameters:**
+
+| Parameter | Type                     | Description                          |
+|-----------|--------------------------|--------------------------------------|
+| options?  | `SwapTransactionOptions` | Additional swap transaction options. |
+
+**SwapTransactionOptions description:**
+
+| Option     | Type                     | Description                                                                                                                           | Default                                                                                                                                |
+|------------|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| onConfirm? | `(hash: string) => void` | Callback that will be called after the user signs swap transaction.                                                                   | Not set.                                                                                                                               |
+| onApprove? | `(hash: string) => void` | Callback that will be called after the user signs approve transaction. If user has enough allowance, this callback won't be called.   | Not set.                                                                                                                               |
+| gasPrice?  | `string`                 | Specifies gas price **in wei** for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing. | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+| gasLimit?  | `string`                 | Specifies gas limit for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing.            | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+
+**Returns** `Promise<TransactionReceipt>` -- swap transaction receipt **in first blockchain**. Promise will be resolved, when swap transaction gets to block.
+
+---
+
+#### crossChainTrade.needApprove method
+
+```typescript
+crossChainTrade.needApprove(): Promise<boolean>
+```
+
+
+> ℹ️️ You have to set up **rpc provider 🌐** for trade network for which you will call needApprove.
+
+Swap method will automatically call approve if needed, but you can use methods pair `needApprove`-`approve`
+if you want to know if approve is needed before execute swap to show user double button, or swap stages in UI.
+
+**crossChainTrade.needApprove Returns** `Promise<boolean>` -- True if approve is required, that is user doesn't have enough allowance. Otherwise, false.
+
+---
+
+#### crossChainTrade.approve method
+
+```typescript
+crossChainTrade.approve(options?: BasicTransactionOptions): Promise<TransactionReceipt>
+```
+
+> ℹ️️ You have to set up **wallet provider 👛** for network in which you will execute trade swap.
+
+Use `approve` if you want to show swap stages in UI after allowance check via `needApprove` method.
+
+**crossChainTrade.approve method parameters:**
+
+| Parameter | Type                      | Description                     |
+|-----------|---------------------------|---------------------------------|
+| options   | `BasicTransactionOptions` | Additional transaction options. |
+
+**BasicTransactionOptions description:**
+
+| Option             | Type                     | Description                                                                                                                 | Default                                                                                                                                |
+|--------------------|--------------------------|-----------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| onTransactionHash? | `(hash: string) => void` | Callback that will be called after the user signs the approve transaction.                                                  |
+| gasPrice?          | `string`                 | Specifies gas price **in wei** for **approve** transaction. Set this parameter only if you know exactly what you are doing. | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+| gasLimit?          | `string`                 | Specifies gas limit for **approve** transactions. Set this parameter only if you know exactly what you are doing.           | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+
+**Returns** `Promise<TransactionReceipt>` -- approve transaction receipt. Promise will be resolved, when swap transaction gets to block.
+
+---
+
+#### crossChainTrade.from readonly field
+
+```typescript
+readonly crossChainTrade.from: PriceTokenAmount
+```
+
+Token to sell with price in USD per 1 token unit and selling amount.
+
+---
+
+#### crossChainTrade.to readonly field
+
+```typescript
+readonly crossChainTrade.to: PriceTokenAmount
+```
+
+Token to buy with price in USD per 1 token unit and estimated output amount.
+
+---
+
+#### crossChainTrade.toTokenAmountMin readonly field
+
+```typescript
+readonly crossChainTrade.to: PriceTokenAmount
+```
+
+Is same as `crossChainTrade.to`, but amount less than `crossChainTrade.to` by `(toSlippageTolerance * 100)` percent.
+
+---
+
+#### crossChainTrade.estimatedGas getter
+
+```typescript
+crossChainTrade.estimateGas(): GasFeeInfo | null
+```
+
+Gets gasFee, that is gasLimit * gasPrice. Equals `null` if gas couldn't be calculated.
+
+---
+
+#### crossChainTrade.priceImpactData getter
+
+```typescript
+crossChainTrade.priceImpactData(): {
+  priceImpactFrom: number | null;
+  priceImpactTo: number | null;
+}
+```
+
+Returns price impact in first and second blockchains, based on tokens usd prices, taken from coingecko api.
 
 ---
 
