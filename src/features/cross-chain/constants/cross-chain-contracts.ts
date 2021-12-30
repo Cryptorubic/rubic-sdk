@@ -20,7 +20,7 @@ import { PangolinProvider } from '@features/swap/dexes/avalanche/pangolin/pangol
  */
 export const crossChainContractsData = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
-        address: '0xb9a94be803eC1197A234406eF5c0113f503d3178',
+        address: '0xD8b19613723215EF8CC80fC35A1428f8E8826940',
         providersData: [
             {
                 ProviderClass: UniSwapV2Provider,
@@ -60,7 +60,7 @@ export const crossChainContractsData = {
         ]
     },
     [BLOCKCHAIN_NAME.MOONRIVER]: {
-        address: '0x3645Dca27D9f5Cf5ee0d6f52EE53ae366e4ceAc2',
+        address: '0xD8b19613723215EF8CC80fC35A1428f8E8826940',
         providersData: [
             {
                 ProviderClass: SolarbeamProvider,
