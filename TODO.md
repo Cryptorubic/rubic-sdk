@@ -2,8 +2,6 @@
 
 ### Todo
 
-- [ ] Add README
-- [ ] Make instant trades calculation return type stricter
 - [ ] Remove rxjs and rewrite cacheable decorators
 - [ ] Add husky, check imports in lib
 - [ ] Replace deprecated tscpaths to babel

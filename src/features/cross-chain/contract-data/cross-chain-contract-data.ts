@@ -1,7 +1,7 @@
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { Injector } from '@core/sdk/injector';
-import { PCache } from '@common/decorators/cache.decorator';
+import { Cache } from '@common/decorators/cache.decorator';
 import { Token } from '@core/blockchain/tokens/token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import BigNumber from 'bignumber.js';
@@ -28,7 +28,7 @@ export class CrossChainContractData {
         return this.providersData[providerIndex].provider;
     }
 
-    @PCache
+    @Cache
     public async getNumOfBlockchain(): Promise<number> {
         const numOfContract = await this.web3Public.callContractMethod(
             this.address,
@@ -38,7 +38,7 @@ export class CrossChainContractData {
         return parseInt(numOfContract);
     }
 
-    @PCache
+    @Cache
     public async getTransitToken(): Promise<Token> {
         const numOfContract = await this.getNumOfBlockchain();
         const transitTokenAddress = await this.web3Public.callContractMethod(

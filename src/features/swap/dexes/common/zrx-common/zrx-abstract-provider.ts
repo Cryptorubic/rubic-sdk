@@ -8,11 +8,11 @@ import { zrxApiParams } from '@features/swap/dexes/common/zrx-common/constants';
 import { ZrxQuoteRequest } from '@features/swap/dexes/common/zrx-common/models/zrx-quote-request';
 import { Injector } from '@core/sdk/injector';
 import { ZrxQuoteResponse } from '@features/swap/dexes/common/zrx-common/models/zrx-types';
-import { Pure } from '@common/decorators/pure.decorator';
 import { getZrxApiBaseUrl } from '@features/swap/dexes/common/zrx-common/utils';
 import { ZrxSwapCalculationOptions } from '@features/swap/dexes/common/zrx-common/models/zrx-swap-calculation-options';
 import BigNumber from 'bignumber.js';
 import { ZrxTrade } from '@features/swap/dexes/common/zrx-common/zrx-trade';
+import { Cache } from 'src/common';
 
 export abstract class ZrxAbstractProvider extends InstantTradeProvider {
     protected readonly gasMargin = 1.4;
@@ -23,7 +23,7 @@ export abstract class ZrxAbstractProvider extends InstantTradeProvider {
         affiliateAddress: null
     };
 
-    @Pure
+    @Cache
     private get apiBaseUrl(): string {
         return getZrxApiBaseUrl(this.blockchain);
     }

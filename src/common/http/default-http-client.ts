@@ -1,8 +1,8 @@
-import { PCache } from '@common/decorators/cache.decorator';
 import { AxiosInstance } from 'axios';
+import { Cache } from 'src/common';
 
 export class DefaultHttpClient {
-    @PCache
+    @Cache
     public static async getInstance(): Promise<AxiosInstance> {
         const axios = (await import('axios')) as unknown as AxiosInstance;
         DefaultHttpClient.addBodyInterceptor(axios);

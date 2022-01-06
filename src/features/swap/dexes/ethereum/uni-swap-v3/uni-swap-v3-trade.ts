@@ -8,6 +8,7 @@ import {
     swapRouterContractAddress
 } from '@features/swap/dexes/ethereum/uni-swap-v3/constants/swap-router-contract-data';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
+import { Cache } from 'src/common';
 import { TRADE_TYPE, TradeType } from 'src/features';
 import { TransactionReceipt } from 'web3-eth';
 import { compareAddresses } from '@common/utils/blockchain';
@@ -23,7 +24,6 @@ import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { Injector } from '@core/sdk/injector';
 import { TransactionConfig } from 'web3-core';
 import { EncodeTransactionOptions } from '@features/swap/models/encode-transaction-options';
-import { Pure } from '@common/decorators/pure.decorator';
 import { GasFeeInfo } from '@features/swap/models/gas-fee-info';
 import { Token } from '@core/blockchain/tokens/token';
 import { SwapOptions } from '@features/swap/models/swap-options';
@@ -144,7 +144,7 @@ export class UniSwapV3Trade extends InstantTrade {
         return deadlineMinutesTimestamp(this.deadlineMinutes);
     }
 
-    @Pure
+    @Cache
     public get path(): ReadonlyArray<Token> {
         const initialPool = this.route.poolsPath[0];
         const path: Token[] = [
