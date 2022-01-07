@@ -2,7 +2,7 @@ import { HttpClient } from '@common/models/http-client';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import BigNumber from 'bignumber.js';
 import pTimeout, { TimeoutError } from 'p-timeout';
-import { PCacheable } from 'ts-cacheable';
+import { Cache } from 'src/common';
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 
@@ -57,9 +57,8 @@ export class CoingeckoApi {
      * Gets price of native coin in usd from coingecko.
      * @param blockchain Supported by {@link supportedBlockchains} blockchain.
      */
-    @PCacheable({
-        maxAge: 15_000,
-        maxCacheCount: supportedBlockchains.length
+    @Cache({
+        maxAge: 15_000
     })
     public async getNativeCoinPrice(blockchain: BLOCKCHAIN_NAME): Promise<BigNumber> {
         if (!CoingeckoApi.isSupportedBlockchain(blockchain)) {
@@ -98,9 +97,8 @@ export class CoingeckoApi {
      * Gets price of token in usd from coingecko.
      * @param token Token to get price for.
      */
-    @PCacheable({
-        maxAge: 15_000,
-        maxCacheCount: 4
+    @Cache({
+        maxAge: 15_000
     })
     public async getErc20TokenPrice(token: {
         address: string;

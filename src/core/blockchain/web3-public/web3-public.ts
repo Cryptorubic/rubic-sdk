@@ -1,4 +1,5 @@
-import { Cache, ConditionalResult } from '@common/decorators/cache.decorator';
+import { Cache } from '@common/decorators/cache.decorator';
+import { ConditionalResult } from '@common/decorators/models/conditional-result';
 import { HealthcheckError } from '@common/errors/blockchain/healthcheck.error';
 import { ERC20_TOKEN_ABI } from '@core/blockchain/constants/erc-20-abi';
 import {

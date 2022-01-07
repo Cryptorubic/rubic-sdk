@@ -326,6 +326,68 @@ describe('Cache decorator tests', () => {
         expect(firstCallResult).toBe(returnedValue);
         expect(secondCallResult).toBe(returnedValue);
     });
-});
 
-// TODO: conditional cache работает неправильно с промисами
+    test('Conditional cache must be saved if flag is not passed in async method.', async () => {
+        const spyFn = fn();
+        const promise = new JestMockPromise();
+        const returnedValue = 1;
+        class CacheTestClass {
+            @Cache({ conditionalCache: true })
+            public async conditionalAsyncCacheableMethod() {
+                spyFn();
+                await promise;
+                return {
+                    notSave: false,
+                    value: returnedValue
+                };
+            }
+        }
+
+        const testClassInstance = new CacheTestClass();
+        const firstCallPromise = testClassInstance.conditionalAsyncCacheableMethod();
+        promise.resolve();
+        const secondCallPromise = testClassInstance.conditionalAsyncCacheableMethod();
+        const firstCallResult = await firstCallPromise;
+        const secondCallResult = await secondCallPromise;
+
+        expect(spyFn.mock.calls.length).toBe(1);
+        expect(firstCallResult).toBe(returnedValue);
+        expect(secondCallResult).toBe(returnedValue);
+    });
+
+    test('Conditional cache must be saved before async method resolves, but must not be saved after promise resolving if fleg is passed.', async () => {
+        const spyFn = fn();
+        const promise = new JestMockPromise();
+        const returnedValue = 1;
+        class CacheTestClass {
+            @Cache({ conditionalCache: true })
+            public async conditionalAsyncCacheableMethod() {
+                spyFn();
+                await promise;
+                return {
+                    notSave: true,
+                    value: returnedValue
+                };
+            }
+        }
+
+        const testClassInstance = new CacheTestClass();
+        const firstCallPromise = testClassInstance.conditionalAsyncCacheableMethod();
+        const secondCallPromise = testClassInstance.conditionalAsyncCacheableMethod();
+        const spyCallsNumberAfterSecondMethodCall = spyFn.mock.calls.length;
+        promise.resolve();
+        const firstCallResult = await firstCallPromise;
+        const secondCallResult = await secondCallPromise;
+
+        const thirdCallPromise = testClassInstance.conditionalAsyncCacheableMethod();
+        const spyCallsNumberAfterThirdMethodCall = spyFn.mock.calls.length;
+        promise.resolve();
+        const thirdCallResult = await thirdCallPromise;
+
+        expect(spyCallsNumberAfterSecondMethodCall).toBe(1);
+        expect(spyCallsNumberAfterThirdMethodCall).toBe(2);
+        expect(firstCallResult).toBe(returnedValue);
+        expect(secondCallResult).toBe(returnedValue);
+        expect(thirdCallResult).toBe(returnedValue);
+    });
+});

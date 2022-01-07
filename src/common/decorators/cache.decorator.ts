@@ -10,7 +10,7 @@ type DecoratorSignature = <T>(
 
 type CacheItem<T> = {
     validUntilTimestamp: number;
-    value: T;
+    value: T | Promise<T>;
 };
 
 function generateKey(...args: unknown[]): string {
@@ -77,6 +77,17 @@ function modifyMethodCacheDescriptor<T>(
         );
 
         if (cacheConfig.conditionalCache) {
+            if (result instanceof Promise) {
+                const handledPromise = result.then((resolved: ConditionalResult<T>) => {
+                    if (resolved.notSave) {
+                        instanceStore.delete(key);
+                    }
+                    return resolved.value;
+                }) as unknown as T;
+                saveResult(instanceStore, key, handledPromise, cacheConfig.maxAge);
+                return handledPromise;
+            }
+
             result = result as ConditionalResult<T>;
             if (result.notSave) {
                 instanceStore.delete(key);
