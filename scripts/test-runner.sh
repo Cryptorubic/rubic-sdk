@@ -5,7 +5,7 @@ last_pid=$!
 
 while ! ( grep -q 'Account #19:' ./hardhat.log )
 	do
-		sleep 1
+		sleep 2
 		echo "Waiting for node..."
 	done
 

@@ -42,7 +42,7 @@ export class Chain {
         return {
             rpcProviders: {
                 [BLOCKCHAIN_NAME.ETHEREUM]: {
-                    mainRpc: 'http://127.0.0.1:8545/'
+                    mainRpc: Chain.nodeUrl
                 }
             },
             walletProvider: {
