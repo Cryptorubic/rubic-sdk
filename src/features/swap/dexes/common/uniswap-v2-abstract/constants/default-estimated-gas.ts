@@ -15,7 +15,7 @@ export const defaultEstimatedGas: DefaultEstimatedGas = {
         new BigNumber(400_000)
     ],
     ethToTokens: [
-        new BigNumber(150_000),
+        new BigNumber(180_000),
         new BigNumber(240_000),
         new BigNumber(320_000),
         new BigNumber(400_000)
