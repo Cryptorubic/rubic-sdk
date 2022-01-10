@@ -47,7 +47,8 @@
   "scripts": {
     "build": "webpack",
     "compile": "./node_modules/rimraf/bin.js lib && tsc --project tsconfig.json && tscpaths -p ./tsconfig.json -s ./src -o ./lib",
-    "test": "jest",
+    "test": "cd ./scripts && bash test-runner.sh",
+    "run-test-node": "npx hardhat node",
     "publish": "yarn compile && yarn build && npm publish --access public",
     "analyze": "webpack --profile --json > stats.json &&  webpack-bundle-analyzer stats.json"
   },
@@ -60,6 +61,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-0",
+    "@nomiclabs/hardhat-web3": "^2.0.0",
     "@types/jest": "^27.0.3",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
@@ -71,6 +73,7 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-unused-imports": "^1.1.4",
+    "hardhat": "^2.8.2",
     "http-browserify": "^1.7.0",
     "https-browserify": "^1.0.0",
     "jest": "^27.1.1",

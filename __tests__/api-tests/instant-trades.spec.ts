@@ -23,5 +23,5 @@ describe('Instant trades module tests', () => {
         const trades = await sdk.instantTrades.calculateTrade(fromToken, fromAmount, toToken);
         expect(Array.isArray(trades)).toBeTruthy();
         expect(trades.length).not.toBe(0);
-    });
+    }, 10000);
 });
