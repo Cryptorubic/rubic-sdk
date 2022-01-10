@@ -13,9 +13,9 @@ import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/fai
 import { InsufficientFundsGasPriceValueError } from '@common/errors/cross-chain/insufficient-funds-gas-price-value.error';
 import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
 import BigNumber from 'bignumber.js';
+import { Cache } from 'src/common';
 import { TransactionReceipt } from 'web3-eth';
 import { UnnecessaryApprove } from '@common/errors/swap/unnecessary-approve';
-import { Pure } from '@common/decorators/pure.decorator';
 import { WalletNotConnectedError } from '@common/errors/swap/wallet-not-connected.error';
 import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
 import { ContractParams } from '@features/cross-chain/cross-chain-trade/models/contract-params';
@@ -103,7 +103,7 @@ export class CrossChainTrade {
         return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
     }
 
-    @Pure
+    @Cache
     public get priceImpactData(): {
         priceImpactFrom: number | null;
         priceImpactTo: number | null;

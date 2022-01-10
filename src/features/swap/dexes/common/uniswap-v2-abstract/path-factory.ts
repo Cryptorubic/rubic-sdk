@@ -17,7 +17,7 @@ import { UniswapV2ProviderConfiguration } from '@features/swap/dexes/common/unis
 import { UniswapV2TradeClass } from '@features/swap/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-class';
 import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
-import { Pure } from '@common/decorators/pure.decorator';
+import { Cache } from 'src/common';
 
 export interface PathFactoryStruct {
     readonly from: PriceToken;
@@ -55,7 +55,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         return Injector.web3Private.address;
     }
 
-    @Pure
+    @Cache
     private get stringWeiAmount(): string {
         return this.weiAmount.toFixed(0);
     }

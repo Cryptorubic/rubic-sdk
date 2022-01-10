@@ -1,4 +1,3 @@
-import { PCacheable } from 'ts-cacheable';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
@@ -156,9 +155,8 @@ export class UniswapV3QuoterController {
     /**
      * Returns all liquidity pools, containing passed tokens addresses, and concatenates with most popular pools.
      */
-    @PCacheable({
-        maxAge: 1000 * 60 * 10,
-        maxCacheCount: 10
+    @Cache({
+        maxAge: 1000 * 60 * 10
     })
     private async getAllLiquidityPools(
         firstToken: Token,
