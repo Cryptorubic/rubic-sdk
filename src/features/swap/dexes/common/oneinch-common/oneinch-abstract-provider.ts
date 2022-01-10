@@ -17,8 +17,8 @@ import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { OneinchTrade } from '@features/swap/dexes/common/oneinch-common/oneinch-trade';
 import { InstantTradeProvider } from '@features/swap/instant-trade-provider';
 import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
-import { Pure } from '@common/decorators/pure.decorator';
 import { createTokenNativeAddressProxy } from '@features/swap/dexes/common/utils/token-native-address-proxy';
+import { Cache } from 'src/common';
 
 type OneinchSwapCalculationOptions = Omit<SwapCalculationOptions, 'deadlineMinutes'>;
 
@@ -39,7 +39,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         return Injector.web3Private.address;
     }
 
-    @Pure
+    @Cache
     private get apiBaseUrl(): string {
         return getOneinchApiBaseUrl(this.blockchain);
     }

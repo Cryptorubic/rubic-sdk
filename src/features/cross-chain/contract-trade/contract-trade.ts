@@ -6,7 +6,7 @@ import { Token } from '@core/blockchain/tokens/token';
 import { AbiItem } from 'web3-utils';
 import { crossChainContractAbiV2 } from '@features/cross-chain/contract-trade/constants/cross-chain-contract-abi-v2';
 import { BLOCKCHAIN_NAME, Web3Pure } from 'src/core';
-import { Pure } from 'src/common';
+import { Cache } from 'src/common';
 import { ProviderData } from '@features/cross-chain/contract-data/models/provider-data';
 import { UniswapV2AbstractProvider } from 'src/features';
 
@@ -29,12 +29,12 @@ export abstract class ContractTrade {
 
     public abstract readonly path: ReadonlyArray<Token>;
 
-    @Pure
+    @Cache
     public get provider(): UniswapV2AbstractProvider {
         return this.contract.providersData[this.providerIndex].provider;
     }
 
-    @Pure
+    @Cache
     private get providerData(): ProviderData {
         return this.contract.providersData[this.providerIndex];
     }

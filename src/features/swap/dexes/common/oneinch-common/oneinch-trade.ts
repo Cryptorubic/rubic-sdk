@@ -4,8 +4,8 @@ import { getOneinchApiBaseUrl } from '@features/swap/dexes/common/oneinch-common
 import { createTokenNativeAddressProxy } from '@features/swap/dexes/common/utils/token-native-address-proxy';
 import { InstantTrade } from '@features/swap/instant-trade';
 import { Injector } from '@core/sdk/injector';
-import { Pure } from '@common/decorators/pure.decorator';
 import BigNumber from 'bignumber.js';
+import { Cache } from 'src/common';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/BLOCKCHAIN_NAME';
 import { TRADE_TYPE, TradeType } from 'src/features/swap/models/trade-type';
 import { TransactionReceipt } from 'web3-eth';
@@ -75,7 +75,7 @@ export class OneinchTrade extends InstantTrade {
         ];
     }
 
-    @Pure
+    @Cache
     private get apiBaseUrl(): string {
         return getOneinchApiBaseUrl(this.from.blockchain);
     }
