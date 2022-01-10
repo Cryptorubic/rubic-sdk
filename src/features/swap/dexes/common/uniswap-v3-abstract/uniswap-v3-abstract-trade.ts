@@ -1,7 +1,7 @@
 import { UniswapV3Route } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
 import { UniswapV3QuoterController } from '@features/swap/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
-import { compareAddresses, Pure } from 'src/common';
+import { Cache, compareAddresses } from 'src/common';
 import { Token } from '@core/blockchain/tokens/token';
 import {
     UniswapV3AlgebraAbstractTrade,
@@ -19,7 +19,7 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
 
     private readonly route: UniswapV3Route;
 
-    @Pure
+    @Cache
     public get path(): ReadonlyArray<Token> {
         const initialPool = this.route.poolsPath[0];
         const path: Token[] = [
