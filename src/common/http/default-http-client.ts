@@ -20,7 +20,7 @@ export class DefaultHttpClient {
     private static addCacheDisablingInterceptor(axios: AxiosInstance): void {
         axios.interceptors.request.use(
             request => {
-                request.params.timestamp = Date.now();
+                request.params = { ...request.params, timestamp: Date.now() };
                 return request;
             },
             error => Promise.reject(error)
