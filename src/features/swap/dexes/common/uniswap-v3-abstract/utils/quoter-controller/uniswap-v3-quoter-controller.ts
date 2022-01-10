@@ -5,28 +5,27 @@ import { PriceToken } from '@core/blockchain/tokens/price-token';
 import {
     FeeAmount,
     LiquidityPool
-} from '@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/models/liquidity-pool';
+} from '@features/swap/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
 import { compareAddresses } from '@common/utils/blockchain';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
 import {
-    factoryContractAbi,
-    factoryContractAddress
-} from '@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/constants/factory-contract-data';
+    FACTORY_CONTRACT_ABI,
+    FACTORY_CONTRACT_ADDRESS
+} from '@features/swap/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/factory-contract-data';
 import { notNull } from '@common/utils/object';
-import { UniSwapV3Route } from '@features/swap/dexes/ethereum/uni-swap-v3/models/uni-swap-v3-route';
+import { UniswapV3Route } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
 import { Token } from '@core/blockchain/tokens/token';
 import { Cache } from '@common/decorators/cache.decorator';
 import {
-    quoterContractAbi,
-    quoterContractAddress
-} from '@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/constants/quoter-contract-data';
-import {
-    routerLiquidityPools,
-    routerTokens
-} from '@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/constants/router-liqudity-pools';
+    QUOTER_CONTRACT_ABI,
+    QUOTER_CONTRACT_ADDRESS
+} from '@features/swap/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/quoter-contract-data';
+
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { Injector } from '@core/sdk/injector';
+import { UniswapV3RouterConfiguration } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
@@ -37,7 +36,7 @@ interface GetQuoterMethodsDataOptions {
 /**
  * Works with requests, related to Uniswap v3 liquidity pools.
  */
-export class LiquidityPoolsController {
+export class UniswapV3QuoterController {
     /**
      * Converts uni v3 route to encoded bytes string to pass it to contract.
      * Structure of encoded string: '0x${tokenAddress_0}${toHex(fee_0)}${tokenAddress_1}${toHex(fee_1)}...${tokenAddress_n}.
@@ -96,12 +95,14 @@ export class LiquidityPoolsController {
             methodData: {
                 methodName: 'quoteExactInput',
                 methodArguments: [
-                    LiquidityPoolsController.getEncodedPoolsPath(poolsPath, from.address),
+                    UniswapV3QuoterController.getEncodedPoolsPath(poolsPath, from.address),
                     from.weiAmount
                 ]
             }
         };
     }
+
+    private readonly web3Public: Web3Public;
 
     private routerTokens: Token[] | undefined;
 
@@ -109,7 +110,12 @@ export class LiquidityPoolsController {
 
     private readonly feeAmounts: FeeAmount[] = [500, 3000, 10000];
 
-    constructor(private readonly web3Public: Web3Public) {}
+    constructor(
+        private readonly blockchain: BLOCKCHAIN_NAME,
+        private readonly routerConfiguration: UniswapV3RouterConfiguration<string>
+    ) {
+        this.web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
+    }
 
     private async getRouterTokensAndLiquidityPools(): Promise<{
         routerTokens: Token[];
@@ -117,19 +123,25 @@ export class LiquidityPoolsController {
     }> {
         if (!this.routerTokens || !this.routerLiquidityPools) {
             const tokens: Token[] = await Token.createTokens(
-                Object.values(routerTokens),
-                BLOCKCHAIN_NAME.ETHEREUM
+                Object.values(this.routerConfiguration.tokens),
+                this.blockchain
             );
-            const liquidityPools: LiquidityPool[] = routerLiquidityPools.map(liquidityPool => {
-                const tokenA = tokens.find(token => token.symbol === liquidityPool.tokenSymbolA)!;
-                const tokenB = tokens.find(token => token.symbol === liquidityPool.tokenSymbolB)!;
-                return new LiquidityPool(
-                    liquidityPool.poolAddress,
-                    tokenA,
-                    tokenB,
-                    liquidityPool.fee
-                );
-            });
+            const liquidityPools: LiquidityPool[] = this.routerConfiguration.liquidityPools.map(
+                liquidityPool => {
+                    const tokenA = tokens.find(
+                        token => token.symbol === liquidityPool.tokenSymbolA
+                    )!;
+                    const tokenB = tokens.find(
+                        token => token.symbol === liquidityPool.tokenSymbolB
+                    )!;
+                    return new LiquidityPool(
+                        liquidityPool.poolAddress,
+                        tokenA,
+                        tokenB,
+                        liquidityPool.fee
+                    );
+                }
+            );
 
             this.routerTokens = tokens;
             this.routerLiquidityPools = liquidityPools;
@@ -193,8 +205,8 @@ export class LiquidityPoolsController {
 
         const poolsAddresses = (
             await this.web3Public.multicallContractMethod<{ 0: string }>(
-                factoryContractAddress,
-                factoryContractAbi,
+                FACTORY_CONTRACT_ADDRESS,
+                FACTORY_CONTRACT_ABI,
                 'getPool',
                 getPoolsMethodArguments.map(methodArguments => [
                     methodArguments.tokenA.address,
@@ -230,7 +242,7 @@ export class LiquidityPoolsController {
         from: PriceTokenAmount,
         toToken: PriceToken,
         routeMaxTransitPools: number
-    ): Promise<UniSwapV3Route[]> {
+    ): Promise<UniswapV3Route[]> {
         const routesLiquidityPools = await this.getAllLiquidityPools(from, toToken);
         const options: GetQuoterMethodsDataOptions = {
             routesLiquidityPools,
@@ -243,8 +255,8 @@ export class LiquidityPoolsController {
 
         return this.web3Public
             .multicallContractMethods<{ 0: string }>(
-                quoterContractAddress,
-                quoterContractAbi,
+                QUOTER_CONTRACT_ADDRESS,
+                QUOTER_CONTRACT_ABI,
                 quoterMethodsData.map(quoterMethodData => quoterMethodData.methodData)
             )
             .then(results => {
@@ -279,7 +291,7 @@ export class LiquidityPoolsController {
                 pool.isPoolWithTokens(lastTokenAddress, toToken.address)
             );
             return pools.map(pool =>
-                LiquidityPoolsController.getQuoterMethodData(path.concat(pool), from, toToken)
+                UniswapV3QuoterController.getQuoterMethodData(path.concat(pool), from, toToken)
             );
         }
 

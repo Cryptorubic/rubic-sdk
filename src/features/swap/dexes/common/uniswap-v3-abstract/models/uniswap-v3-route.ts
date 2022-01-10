@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
-import { LiquidityPool } from '@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/models/liquidity-pool';
+import { LiquidityPool } from '@features/swap/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
 
-export interface UniSwapV3Route {
+export interface UniswapV3Route {
     /**
      * Resulting value in Wei.
      */

@@ -1,4 +1,7 @@
-import { FeeAmount } from '@features/swap/dexes/ethereum/uni-swap-v3/utils/liquidity-pool-controller/models/liquidity-pool';
+import {
+    UniswapV3RouterConfiguration,
+    UniswapV3RouterLiquidityPool
+} from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
 
 /**
  * Most popular tokens in uni v3 to use in a route.
@@ -7,7 +10,7 @@ const tokensSymbols = ['WETH', 'USDT', 'USDC', 'WBTC', 'DAI'] as const;
 
 type TokenSymbol = typeof tokensSymbols[number];
 
-export const routerTokens: Record<TokenSymbol, string> = {
+const routerTokens: Record<TokenSymbol, string> = {
     WETH: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
     USDT: '0xdac17f958d2ee523a2206206994597c13d831ec7',
     USDC: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
@@ -15,14 +18,7 @@ export const routerTokens: Record<TokenSymbol, string> = {
     DAI: '0x6b175474e89094c44da98b954eedeac495271d0f'
 };
 
-interface RouterLiquidityPool {
-    poolAddress: string;
-    tokenSymbolA: TokenSymbol;
-    tokenSymbolB: TokenSymbol;
-    fee: FeeAmount;
-}
-
-export const routerLiquidityPools: RouterLiquidityPool[] = [
+const routerLiquidityPools: UniswapV3RouterLiquidityPool<TokenSymbol>[] = [
     {
         poolAddress: '0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8',
         tokenSymbolA: 'USDC',
@@ -60,3 +56,8 @@ export const routerLiquidityPools: RouterLiquidityPool[] = [
         fee: 500
     }
 ];
+
+export const UNI_SWAP_V3_ROUTER_CONFIGURATION: UniswapV3RouterConfiguration<TokenSymbol> = {
+    tokens: routerTokens,
+    liquidityPools: routerLiquidityPools
+};
