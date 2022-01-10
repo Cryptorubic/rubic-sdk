@@ -2,5 +2,5 @@ import { AxiosInstance } from 'axios';
 export declare class DefaultHttpClient {
     static getInstance(): Promise<AxiosInstance>;
     private static addBodyInterceptor;
-    private static disableCacheControlHeader;
+    private static addCacheDisablingInterceptor;
 }
