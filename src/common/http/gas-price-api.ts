@@ -1,6 +1,6 @@
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { Injector } from '@core/sdk/injector';
-import { PCacheable } from 'ts-cacheable';
+import { Cache } from 'src/common';
 import BigNumber from 'bignumber.js';
 import pTimeout from 'p-timeout';
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
@@ -60,7 +60,7 @@ export class GasPriceApi {
      * Gets Ethereum gas price from different APIs, sorted by priority.
      * @return Promise<BigNumber> Average gas price in Wei.
      */
-    @PCacheable({
+    @Cache({
         maxAge: GasPriceApi.requestInterval
     })
     private async fetchEthGas(): Promise<string> {
@@ -90,7 +90,7 @@ export class GasPriceApi {
      * Gets Avalanche gas price.
      * @return Promise<BigNumber> Average gas price in Wei.
      */
-    @PCacheable({
+    @Cache({
         maxAge: GasPriceApi.requestInterval
     })
     private fetchAvalancheGas(): Promise<string> {

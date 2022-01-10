@@ -56,8 +56,6 @@
     "axios": "^0.22.0",
     "bignumber.js": "^9.0.1",
     "p-timeout": "^5.0.2",
-    "rxjs": "^7.4.0",
-    "ts-cacheable": "^1.0.5",
     "web3": "~1.5.3"
   },
   "devDependencies": {
@@ -76,6 +74,7 @@
     "http-browserify": "^1.7.0",
     "https-browserify": "^1.0.0",
     "jest": "^27.1.1",
+    "jest-mock-promise": "^2.0.2",
     "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
     "stream-browserify": "^3.0.0",

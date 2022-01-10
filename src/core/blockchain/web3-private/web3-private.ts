@@ -186,7 +186,7 @@ export class Web3Private {
             });
             return await this.sendTransaction(toAddress, value, options);
         } catch (err: unknown) {
-            console.error(`Tokens transfer error. ${err}`);
+            console.error('Tokens transfer error', err);
             throw Web3Private.parseError(err as Web3Error);
         }
     }

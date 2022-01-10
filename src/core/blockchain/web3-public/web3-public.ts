@@ -1,4 +1,5 @@
-import { ConditionalResult, PCache, PConditionalCache } from '@common/decorators/cache.decorator';
+import { Cache } from '@common/decorators/cache.decorator';
+import { ConditionalResult } from '@common/decorators/models/conditional-result';
 import { HealthcheckError } from '@common/errors/blockchain/healthcheck.error';
 import { ERC20_TOKEN_ABI } from '@core/blockchain/constants/erc-20-abi';
 import {
@@ -450,7 +451,7 @@ export class Web3Public {
      * @param tokenAddress Address of token.
      * @param tokenFields Token's fields to get.
      */
-    @PCache
+    @Cache
     public async callForTokenInfo(
         tokenAddress: string,
         tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
@@ -473,7 +474,7 @@ export class Web3Public {
      * Gets ERC-20 tokens info by addresses.
      * @param tokenAddresses Addresses of tokens.
      */
-    @PConditionalCache
+    @Cache({ conditionalCache: true })
     public async callForTokensInfo(
         tokenAddresses: string[] | ReadonlyArray<string>
     ): Promise<Record<SupportedTokenField, string | undefined>[]> {
