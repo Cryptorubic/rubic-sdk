@@ -13,9 +13,9 @@ export class Chain {
         const { web3 } = hardhat;
         web3.setProvider(this.nodeUrl);
 
-        const jsonRpcUrl = (global as unknown as Global).sdkEnv.hardhatProviders[blockchainName]
+        const jsonRpcUrl = (global as unknown as Global).sdkEnv.providers[blockchainName]
             ?.jsonRpcUrl;
-        const blockNumber = (global as unknown as Global).sdkEnv.hardhatProviders[blockchainName]
+        const blockNumber = (global as unknown as Global).sdkEnv.providers[blockchainName]
             ?.blockNumber;
         if (!jsonRpcUrl || !blockNumber) {
             throw new Error(`You must configure ${blockchainName} provider in __tests__/env.js`);

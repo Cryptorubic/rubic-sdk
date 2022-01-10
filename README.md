@@ -1,4 +1,6 @@
-# Rubic SDK
+# Rubic SDK 
+
+![build status](https://github.com/Cryptorubic/rubic-sdk/actions/workflows/ci-master.yml/badge.svg) [![license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/Cryptorubic/rubic-sdk/blob/main/LICENSE)
 
 > ⚠️ **Danger:** Rubic SDK is at the alpha stage. Don't use it in production code. Use Rubic sdk at your own risk. During the first quarter of 2022, a beta release is planned, in which many interfaces and types can be changed. For now, you can explore our solution and try it out in a test environment. [An example of using rubik sdk](https://github.com/Cryptorubic/rubic-sdk-usage)
 

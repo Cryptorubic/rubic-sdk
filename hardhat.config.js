@@ -9,8 +9,8 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: global.sdkEnv.hardhatProviders.ETH.jsonRpcUrl,
-        blockNumber: global.sdkEnv.hardhatProviders.ETH.blockNumber
+        url: global.sdkEnv.providers.ETH.jsonRpcUrl,
+        blockNumber: global.sdkEnv.providers.ETH.blockNumber
       },
       chainId: 1
     }
