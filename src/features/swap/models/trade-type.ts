@@ -18,7 +18,8 @@ export const TRADE_TYPE = {
     ONE_INCH_ETHEREUM: 'ONE_INCH_ETHEREUM',
     ONE_INCH_BSC: 'ONE_INCH_BSC',
     ONE_INCH_POLYGON: 'ONE_INCH_POLYGON',
-    ZRX_ETHEREUM: 'ZRX_ETHEREUM'
+    ZRX_ETHEREUM: 'ZRX_ETHEREUM',
+    ALGEBRA: 'ALGEBRA'
 } as const;
 
 export type TradeType = keyof typeof TRADE_TYPE;

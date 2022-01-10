@@ -1,12 +1,7 @@
-import BigNumber from 'bignumber.js';
 import { LiquidityPool } from '@features/swap/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
+import { UniswapV3AlgebraRoute } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
 
-export interface UniswapV3Route {
-    /**
-     * Resulting value in Wei.
-     */
-    outputAbsoluteAmount: BigNumber;
-
+export interface UniswapV3Route extends UniswapV3AlgebraRoute {
     /**
      * List of pools' contract addresses to use in a trade's route.
      */

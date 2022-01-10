@@ -1,6 +1,6 @@
 import { AbiItem } from 'web3-utils';
 
-export const SWAP_ROUTER_CONTRACT_ABI = [
+export const UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI = [
     {
         inputs: [
             {
