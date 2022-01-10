@@ -2,7 +2,7 @@ import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-ad
 import { BLOCKCHAIN_NAME } from 'src/core';
 import { Token } from 'src/core/blockchain/tokens/token';
 
-export const TOKENS: Record<string, Token> = {
+export const TOKENS = {
     ETH: new Token({
         blockchain: BLOCKCHAIN_NAME.ETHEREUM,
         address: NATIVE_TOKEN_ADDRESS,
@@ -17,4 +17,4 @@ export const TOKENS: Record<string, Token> = {
         symbol: 'USDT',
         name: 'Tether USD'
     })
-};
+} as const;

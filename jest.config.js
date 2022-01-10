@@ -4,12 +4,13 @@ module.exports = {
     "src", "__tests__"
   ],
   setupFiles: ["./__tests__/env.js"],
-  moduleDirectories: ['node_modules', '<rootDir>/src'],
+  moduleDirectories: ['node_modules', '<root-dir>/src'],
   testEnvironment: 'node',
   transform: {
     "node_modules/(ethereum-cryptography|p-timeout)/.+\\.(j|t)sx?$": "ts-jest",
   },
   transformIgnorePatterns: [ 'node_modules/((?!ethereum-cryptography|p-timeout)/.*)'],
+  testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
   globals: {
     'ts-jest': {
       tsconfig: 'tsconfig.test.json'
