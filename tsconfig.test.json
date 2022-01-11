@@ -38,7 +38,8 @@
       "src/*": ["./src/*"],
       "@core/*": ["./src/core/*"],
       "@common/*": ["./src/common/*"],
-      "@features/*": ["./src/features/*"]
+      "@features/*": ["./src/features/*"],
+      "__tests__/*": ["./__tests__/*"]
     },
     "allowJs": true
   }

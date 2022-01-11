@@ -6,7 +6,7 @@ import { InstantTrade } from '@features/swap/instant-trade';
 import { Injector } from '@core/sdk/injector';
 import BigNumber from 'bignumber.js';
 import { Cache } from 'src/common';
-import { BLOCKCHAIN_NAME } from 'src/core';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/BLOCKCHAIN_NAME';
 import { TRADE_TYPE, TradeType } from 'src/features/swap/models/trade-type';
 import { TransactionReceipt } from 'web3-eth';
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
