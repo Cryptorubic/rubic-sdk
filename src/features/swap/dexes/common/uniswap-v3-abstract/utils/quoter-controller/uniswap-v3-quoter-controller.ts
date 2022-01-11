@@ -25,6 +25,7 @@ import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { Injector } from '@core/sdk/injector';
 import { UniswapV3RouterConfiguration } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
+import { UniswapV3AlgebraQuoterController } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
@@ -35,7 +36,7 @@ interface GetQuoterMethodsDataOptions {
 /**
  * Works with requests, related to Uniswap v3 liquidity pools.
  */
-export class UniswapV3QuoterController {
+export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterController {
     /**
      * Converts uni v3 route to encoded bytes string to pass it to contract.
      * Structure of encoded string: '0x${tokenAddress_0}${toHex(fee_0)}${tokenAddress_1}${toHex(fee_1)}...${tokenAddress_n}.
@@ -234,12 +235,12 @@ export class UniswapV3QuoterController {
      * Returns all routes between given tokens with output amount.
      * @param from From token and amount.
      * @param toToken To token.
-     * @param routeMaxTransitPools Max amount of transit pools.
+     * @param routeMaxTransitTokens Max amount of transit tokens.
      */
     public async getAllRoutes(
         from: PriceTokenAmount,
         toToken: PriceToken,
-        routeMaxTransitPools: number
+        routeMaxTransitTokens: number
     ): Promise<UniswapV3Route[]> {
         const routesLiquidityPools = await this.getAllLiquidityPools(from, toToken);
         const options: GetQuoterMethodsDataOptions = {
@@ -247,7 +248,7 @@ export class UniswapV3QuoterController {
             from,
             toToken
         };
-        const quoterMethodsData = [...Array(routeMaxTransitPools + 1)]
+        const quoterMethodsData = [...Array(routeMaxTransitTokens + 1)]
             .map((_, index) => this.getQuoterMethodsData(options, [], from.address, index))
             .flat();
 
@@ -280,11 +281,11 @@ export class UniswapV3QuoterController {
         options: GetQuoterMethodsDataOptions,
         path: LiquidityPool[],
         lastTokenAddress: string,
-        maxTransitPools: number
+        routeMaxTransitTokens: number
     ): { poolsPath: LiquidityPool[]; methodData: MethodData }[] {
         const { routesLiquidityPools, from, toToken } = options;
 
-        if (path.length === maxTransitPools) {
+        if (path.length === routeMaxTransitTokens) {
             const pools = routesLiquidityPools.filter(pool =>
                 pool.isPoolWithTokens(lastTokenAddress, toToken.address)
             );
@@ -304,7 +305,7 @@ export class UniswapV3QuoterController {
                             options,
                             extendedPath,
                             pool.token1.address,
-                            maxTransitPools
+                            routeMaxTransitTokens
                         )
                     );
                 }
@@ -315,7 +316,7 @@ export class UniswapV3QuoterController {
                             options,
                             extendedPath,
                             pool.token0.address,
-                            maxTransitPools
+                            routeMaxTransitTokens
                         )
                     );
                 }

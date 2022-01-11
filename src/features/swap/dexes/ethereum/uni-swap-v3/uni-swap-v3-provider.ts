@@ -4,7 +4,7 @@ import { UniswapV3AbstractProvider } from '@features/swap/dexes/common/uniswap-v
 import { UNI_SWAP_V3_PROVIDER_CONFIGURATION } from '@features/swap/dexes/ethereum/uni-swap-v3/constants/provider-configuration';
 import { UNI_SWAP_V3_ROUTER_CONFIGURATION } from '@features/swap/dexes/ethereum/uni-swap-v3/constants/router-configuration';
 
-export class UniSwapV3Provider extends UniswapV3AbstractProvider {
+export class UniSwapV3Provider extends UniswapV3AbstractProvider<UniSwapV3Trade> {
     public readonly blockchain = BLOCKCHAIN_NAME.ETHEREUM;
 
     public readonly InstantTradeClass = UniSwapV3Trade;

@@ -11,6 +11,7 @@ import {
 import { Injector } from '@core/sdk/injector';
 import { ROUTER_TOKENS } from '@features/swap/dexes/polygon/algebra/utils/quoter-controller/constants/router-tokens';
 import { Token } from '@core/blockchain/tokens/token';
+import { UniswapV3AlgebraQuoterController } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 
 interface RecGraphVisitorOptions {
     routesTokens: Token[];
@@ -22,7 +23,7 @@ interface RecGraphVisitorOptions {
 /**
  * Works with requests, related to Uniswap v3 liquidity pools.
  */
-export class AlgebraQuoterController {
+export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController {
     private routerTokens: Token[] | undefined;
 
     /**
@@ -71,8 +72,6 @@ export class AlgebraQuoterController {
     }
 
     private readonly web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.POLYGON);
-
-    constructor() {}
 
     private async getRouterTokens(): Promise<Token[]> {
         if (!this.routerTokens) {
