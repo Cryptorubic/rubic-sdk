@@ -75,7 +75,9 @@ export class Chain {
             throw new Error(`${
                 token.symbol
             } holder balance is not enough to transfer, set other holder to config.
-             Holder balance is ${holderBalance.toFixed()}, but ${weiAmount.toFixed(0)} is required.`);
+             Holder balance is ${holderBalance.toFixed()}, but ${weiAmount.toFixed(
+                0
+            )} is required.`);
         }
 
         await this.impersonateAccount(holder);
