@@ -49,7 +49,7 @@
     "compile": "./node_modules/rimraf/bin.js lib && tsc --project tsconfig.json && tscpaths -p ./tsconfig.json -s ./src -o ./lib",
     "lint": "eslint src __tests__",
     "test": "cd ./scripts && bash test-runner.sh",
-    "run-test-node": "npx hardhat node",
+    "hh-node": "npx hardhat node",
     "publish": "yarn compile && yarn build && npm publish --access public",
     "analyze": "webpack --profile --json > stats.json &&  webpack-bundle-analyzer stats.json"
   },
