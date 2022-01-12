@@ -211,7 +211,7 @@ export class CrossChainManager {
         const feeInPercents = await fromTrade.contract.getFeeInPercents();
         const transitFeeToken = new PriceTokenAmount({
             ...fromTransitToken.asStruct,
-            tokenAmount: fromTransitTokenMinAmount.multipliedBy(feeInPercents)
+            tokenAmount: fromTransitTokenMinAmount.multipliedBy(feeInPercents).dividedBy(100)
         });
 
         const toTransitTokenAmount = fromTransitTokenMinAmount.minus(transitFeeToken.tokenAmount);
