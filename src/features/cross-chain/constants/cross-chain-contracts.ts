@@ -11,6 +11,13 @@ import { SpookySwapProvider } from '@features/swap/dexes/fantom/spooky-swap/spoo
 import { JoeProvider } from '@features/swap/dexes/avalanche/joe/joe-provider';
 import { SolarbeamProvider } from '@features/swap/dexes/moonriver/solarbeam/solarbeam-provider';
 import { PangolinProvider } from '@features/swap/dexes/avalanche/pangolin/pangolin-provider';
+import { SushiSwapEthereumProvider } from '@features/swap/dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider';
+import { SushiSwapBscProvider } from '@features/swap/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
+import { SushiSwapPolygonProvider } from '@features/swap/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
+import { SushiSwapMoonriverProvider } from '@features/swap/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
+import { SpiritSwapProvider } from '@features/swap/dexes/fantom/spirit-swap/spirit-swap-provider';
+import { SushiSwapFantomProvider } from '@features/swap/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-provider';
+import { SushiSwapAvalancheProvider } from '@features/swap/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
 
 /**
  * Stores contracts info.
@@ -25,6 +32,10 @@ export const crossChainContractsData = {
             {
                 ProviderClass: UniSwapV2Provider,
                 methodSuffix: ''
+            },
+            {
+                ProviderClass: SushiSwapEthereumProvider,
+                methodSuffix: '1'
             }
         ]
     },
@@ -34,6 +45,10 @@ export const crossChainContractsData = {
             {
                 ProviderClass: PancakeSwapProvider,
                 methodSuffix: ''
+            },
+            {
+                ProviderClass: SushiSwapBscProvider,
+                methodSuffix: '1'
             }
         ]
     },
@@ -43,6 +58,10 @@ export const crossChainContractsData = {
             {
                 ProviderClass: QuickSwapProvider,
                 methodSuffix: ''
+            },
+            {
+                ProviderClass: SushiSwapPolygonProvider,
+                methodSuffix: '1'
             }
         ]
     },
@@ -51,11 +70,15 @@ export const crossChainContractsData = {
         providersData: [
             {
                 ProviderClass: PangolinProvider,
-                methodSuffix: ''
+                methodSuffix: 'AVAX'
             },
             {
                 ProviderClass: JoeProvider,
-                methodSuffix: '1'
+                methodSuffix: 'AVAX1'
+            },
+            {
+                ProviderClass: SushiSwapAvalancheProvider,
+                methodSuffix: ''
             }
         ]
     },
@@ -65,6 +88,10 @@ export const crossChainContractsData = {
             {
                 ProviderClass: SolarbeamProvider,
                 methodSuffix: ''
+            },
+            {
+                ProviderClass: SushiSwapMoonriverProvider,
+                methodSuffix: '1'
             }
         ]
     },
@@ -74,6 +101,14 @@ export const crossChainContractsData = {
             {
                 ProviderClass: SpookySwapProvider,
                 methodSuffix: ''
+            },
+            {
+                ProviderClass: SpiritSwapProvider,
+                methodSuffix: '1'
+            },
+            {
+                ProviderClass: SushiSwapFantomProvider,
+                methodSuffix: '2'
             }
         ]
     }
