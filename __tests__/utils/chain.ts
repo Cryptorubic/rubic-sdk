@@ -1,5 +1,8 @@
+import { ERC20_TOKEN_ABI } from '@core/blockchain/constants/erc-20-abi';
 import { Global } from '__tests__/utils/models/global';
-import { BLOCKCHAIN_NAME, Configuration } from 'src/core';
+import { TOKENS_HOLDERS } from '__tests__/utils/tokens';
+import BigNumber from 'bignumber.js';
+import { BLOCKCHAIN_NAME, Configuration, Token } from 'src/core';
 import * as util from 'util';
 import Web3 from 'web3';
 import { HttpProvider } from 'web3-core';
@@ -51,5 +54,76 @@ export class Chain {
                 address: this.accounts[0]
             }
         };
+    }
+
+    public async increaseTokensBalance(
+        token: Token,
+        amount: number | string | BigNumber,
+        options: { inEtherUnits: boolean } = { inEtherUnits: false }
+    ): Promise<void> {
+        const weiAmount = options.inEtherUnits
+            ? new BigNumber(amount).multipliedBy(10 ** token.decimals)
+            : new BigNumber(amount);
+        const holder = this.getTokenHolderAddress(token);
+        await this.setBalance(holder, 1, {
+            inEtherUnits: true
+        });
+
+        const tokenContract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, token.address);
+        const holderBalance = new BigNumber(await tokenContract.methods.balanceOf(holder).call());
+        if (holderBalance.lt(weiAmount)) {
+            throw new Error(`${
+                token.symbol
+            } holder balance is not enough to transfer, set other holder to config.
+             Holder balance is ${holderBalance.toFixed()}, but ${weiAmount.toFixed(0)} is required.`);
+        }
+
+        await this.impersonateAccount(holder);
+        await tokenContract.methods
+            .transfer(this.accounts[0], weiAmount.toFixed(0))
+            .send({ from: holder, gas: 100_000 });
+        await this.stopImpersonateAccount(holder);
+    }
+
+    private getTokenHolderAddress(token: Token): string {
+        const holder =
+            TOKENS_HOLDERS[token.blockchain as keyof typeof TOKENS_HOLDERS]?.[token.address];
+        if (!holder) {
+            throw new Error(`Holder for ${token.symbol} is not specified.`);
+        }
+        return holder;
+    }
+
+    public async impersonateAccount(address: string): Promise<void> {
+        await this.sendRpcRequest('hardhat_impersonateAccount', [address]);
+    }
+
+    public async stopImpersonateAccount(address: string): Promise<void> {
+        await this.sendRpcRequest('hardhat_stopImpersonatingAccount', [address]);
+    }
+
+    public async setBalance(
+        address: string,
+        value: number | string | BigNumber,
+        options: { inEtherUnits: boolean } = { inEtherUnits: false }
+    ): Promise<void> {
+        const bnValue = options.inEtherUnits
+            ? new BigNumber(value).multipliedBy(10 ** 18)
+            : new BigNumber(value);
+
+        const hexValue = `0x${bnValue.toString(16)}`;
+
+        await this.sendRpcRequest('hardhat_setBalance', [address, hexValue]);
+    }
+
+    private async sendRpcRequest(method: string, params: string[]): Promise<void> {
+        await util.promisify(
+            (this.web3.currentProvider as HttpProvider).send.bind(this.web3.currentProvider)
+        )({
+            method,
+            params,
+            jsonrpc: '2.0',
+            id: new Date().getTime()
+        });
     }
 }
