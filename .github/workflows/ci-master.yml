@@ -1,4 +1,4 @@
-name: Check code quality before merge to master
+name: Tests and build
 
 on:
   pull_request:
