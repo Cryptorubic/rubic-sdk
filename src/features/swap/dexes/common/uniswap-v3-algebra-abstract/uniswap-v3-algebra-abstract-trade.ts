@@ -64,12 +64,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         options: Required<SwapOptions>,
         route: UniswapV3AlgebraRoute
     ): Promise<BigNumber> {
-        const estimateGasParams = UniswapV3AlgebraAbstractTrade.getEstimateGasParams(
-            from,
-            toToken,
-            options,
-            route
-        );
+        const estimateGasParams = this.getEstimateGasParams(from, toToken, options, route);
         let gasLimit = estimateGasParams.defaultGasLimit;
 
         const walletAddress = Injector.web3Private.address;
@@ -98,7 +93,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         routes: UniswapV3AlgebraRoute[]
     ): Promise<BigNumber[]> {
         const routesEstimateGasParams = routes.map(route =>
-            UniswapV3AlgebraAbstractTrade.getEstimateGasParams(from, toToken, options, route)
+            this.getEstimateGasParams(from, toToken, options, route)
         );
         const gasLimits = routesEstimateGasParams.map(
             estimateGasParams => estimateGasParams.defaultGasLimit
@@ -170,7 +165,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
     }
 
     private get defaultEstimatedGas(): BigNumber {
-        return DEFAULT_ESTIMATED_GAS[this.path.length - 1].plus(
+        return DEFAULT_ESTIMATED_GAS[this.path.length - 2].plus(
             this.from.isNative ? WETH_TO_ETH_ESTIMATED_GAS : 0
         );
     }
@@ -199,6 +194,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
         await this.checkWalletState();
+        await this.checkAllowanceAndApprove(options);
 
         const { methodName, methodArguments } = this.getSwapRouterMethodData();
         const { gas, gasPrice } = this.getGasParams(options);

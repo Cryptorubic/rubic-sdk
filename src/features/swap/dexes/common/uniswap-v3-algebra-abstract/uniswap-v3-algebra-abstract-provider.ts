@@ -19,6 +19,7 @@ import { UniswapV3TradeClass } from '@features/swap/dexes/common/uniswap-v3-abst
 import { UniswapV3AlgebraTradeStruct } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 import { UniswapV3Route } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
 import { AlgebraRoute } from '@features/swap/dexes/polygon/algebra/models/algebra-route';
+import { GasPriceApi } from '@common/http/gas-price-api';
 
 export abstract class UniswapV3AlgebraAbstractProvider extends InstantTradeProvider {
     protected abstract readonly InstantTradeClass:
@@ -62,7 +63,10 @@ export abstract class UniswapV3AlgebraAbstractProvider extends InstantTradeProvi
         );
 
         let gasPriceInfo: GasPriceInfo | undefined;
-        if (fullOptions.gasCalculation !== 'disabled') {
+        if (
+            fullOptions.gasCalculation !== 'disabled' &&
+            GasPriceApi.isSupportedBlockchain(from.blockchain)
+        ) {
             gasPriceInfo = await this.getGasPriceInfo();
         }
 
@@ -120,7 +124,12 @@ export abstract class UniswapV3AlgebraAbstractProvider extends InstantTradeProvi
             };
         }
 
-        if (!this.isUniswapV3 && options.gasCalculation === 'rubicOptimisation' && toToken.price) {
+        if (
+            !this.isUniswapV3 &&
+            options.gasCalculation === 'rubicOptimisation' &&
+            toToken.price?.isFinite() &&
+            gasPriceInUsd
+        ) {
             const estimatedGasLimits = await this.InstantTradeClass.estimateGasLimitForRoutes(
                 from,
                 toToken,

@@ -34,6 +34,7 @@ import { InstantTrade } from 'src/features';
 import { MarkRequired } from 'ts-essentials';
 import { ZrxEthereumProvider } from '@features/swap/dexes/ethereum/zrx-ethereum/zrx-ethereum-provider';
 import { getPriceTokensFromInputTokens } from '@common/utils/tokens';
+import { AlgebraProvider } from '@features/swap/dexes/polygon/algebra/algebra-provider';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCalculationOptions,
@@ -71,11 +72,14 @@ export class InstantTradesManager {
 
     private zrxTradeProviders = [ZrxEthereumProvider] as const;
 
+    private algebraTradeProviders = [AlgebraProvider] as const;
+
     private tradeProviders: TypedTradeProviders = [
         ...this.uniswapV2TradeProviders,
         ...this.uniswapV3TradeProviders,
         ...this.oneInchTradeProviders,
-        ...this.zrxTradeProviders
+        ...this.zrxTradeProviders,
+        ...this.algebraTradeProviders
     ].reduce((acc, ProviderClass) => {
         const provider = new ProviderClass();
         acc[provider.type] = provider;

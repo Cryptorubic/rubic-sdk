@@ -46,7 +46,7 @@ export class AlgebraTrade extends UniswapV3AlgebraAbstractTrade {
      * Returns swap `exactInput` method's name and arguments to use in Swap contract.
      */
     protected getSwapRouterExactInputMethodData(walletAddress: string): MethodData {
-        const amountOutMin = this.from.weiAmountMinusSlippage(this.slippageTolerance).toFixed(0);
+        const amountOutMin = this.to.weiAmountMinusSlippage(this.slippageTolerance).toFixed(0);
 
         if (this.route.path.length === 2) {
             return {

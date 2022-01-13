@@ -46,7 +46,7 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
      * Returns swap `exactInput` method's name and arguments to use in Swap contract.
      */
     protected getSwapRouterExactInputMethodData(walletAddress: string): MethodData {
-        const amountOutMin = this.from.weiAmountMinusSlippage(this.slippageTolerance).toFixed(0);
+        const amountOutMin = this.to.weiAmountMinusSlippage(this.slippageTolerance).toFixed(0);
 
         if (this.route.poolsPath.length === 1) {
             return {
@@ -58,7 +58,7 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
                         this.route.poolsPath[0].fee,
                         walletAddress,
                         this.deadlineMinutesTimestamp,
-                        this.from.weiAmount,
+                        this.from.stringWeiAmount,
                         amountOutMin,
                         0
                     ]
@@ -75,7 +75,7 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
                     ),
                     walletAddress,
                     this.deadlineMinutesTimestamp,
-                    this.from.weiAmount,
+                    this.from.stringWeiAmount,
                     amountOutMin
                 ]
             ]
