@@ -293,11 +293,11 @@ export class CrossChainManager {
 
             if (type === 'minAmount') {
                 if (fromTrade instanceof InstantTradeContractTrade) {
-                    return fromTransitTokenAmount.dividedBy(fromTrade.slippageTolerance);
+                    return fromTransitTokenAmount.dividedBy(1 - fromTrade.slippageTolerance);
                 }
                 return fromTransitTokenAmount;
             }
-            return fromTransitTokenAmount.minus(1);
+            return fromTransitTokenAmount;
         };
 
         return Promise.all([getAmount('minAmount'), getAmount('maxAmount')]).then(
