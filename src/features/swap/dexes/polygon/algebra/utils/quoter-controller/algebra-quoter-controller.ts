@@ -13,7 +13,7 @@ import { ROUTER_TOKENS } from '@features/swap/dexes/polygon/algebra/utils/quoter
 import { Token } from '@core/blockchain/tokens/token';
 import { UniswapV3AlgebraQuoterController } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 
-interface RecGraphVisitorOptions {
+interface GetQuoterMethodsDataOptions {
     routesTokens: Token[];
     toToken: Token;
     amountAbsolute: string;
@@ -98,7 +98,7 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
                 !compareAddresses(token.address, toToken.address)
         );
 
-        const options: Omit<RecGraphVisitorOptions, 'maxTransitTokens'> = {
+        const options: Omit<GetQuoterMethodsDataOptions, 'maxTransitTokens'> = {
             routesTokens,
             toToken,
             amountAbsolute: from.stringWeiAmount
@@ -138,7 +138,7 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
      * Returns swap methods' names and arguments, built with passed pools' addresses, to use it in Quoter contract.
      */
     private getQuoterMethodsData(
-        options: RecGraphVisitorOptions,
+        options: GetQuoterMethodsDataOptions,
         path: Token[]
     ): { path: Token[]; methodData: MethodData }[] {
         const { routesTokens, toToken, amountAbsolute, maxTransitTokens } = options;

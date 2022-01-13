@@ -31,6 +31,7 @@ interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
     from: PriceTokenAmount;
     toToken: Token;
+    maxTransitTokens: number;
 }
 
 /**
@@ -243,13 +244,22 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
         routeMaxTransitTokens: number
     ): Promise<UniswapV3Route[]> {
         const routesLiquidityPools = await this.getAllLiquidityPools(from, toToken);
-        const options: GetQuoterMethodsDataOptions = {
+        const options: Omit<GetQuoterMethodsDataOptions, 'maxTransitTokens'> = {
             routesLiquidityPools,
             from,
             toToken
         };
         const quoterMethodsData = [...Array(routeMaxTransitTokens + 1)]
-            .map((_, index) => this.getQuoterMethodsData(options, [], from.address, index))
+            .map((_, maxTransitTokens) =>
+                this.getQuoterMethodsData(
+                    {
+                        ...options,
+                        maxTransitTokens
+                    },
+                    [],
+                    from.address
+                )
+            )
             .flat();
 
         return this.web3Public
@@ -280,12 +290,11 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
     private getQuoterMethodsData(
         options: GetQuoterMethodsDataOptions,
         path: LiquidityPool[],
-        lastTokenAddress: string,
-        routeMaxTransitTokens: number
+        lastTokenAddress: string
     ): { poolsPath: LiquidityPool[]; methodData: MethodData }[] {
-        const { routesLiquidityPools, from, toToken } = options;
+        const { routesLiquidityPools, from, toToken, maxTransitTokens } = options;
 
-        if (path.length === routeMaxTransitTokens) {
+        if (path.length === maxTransitTokens) {
             const pools = routesLiquidityPools.filter(pool =>
                 pool.isPoolWithTokens(lastTokenAddress, toToken.address)
             );
@@ -301,23 +310,13 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
                 if (compareAddresses(pool.token0.address, lastTokenAddress)) {
                     const extendedPath = path.concat(pool);
                     methodsData.push(
-                        ...this.getQuoterMethodsData(
-                            options,
-                            extendedPath,
-                            pool.token1.address,
-                            routeMaxTransitTokens
-                        )
+                        ...this.getQuoterMethodsData(options, extendedPath, pool.token1.address)
                     );
                 }
                 if (compareAddresses(pool.token1.address, lastTokenAddress)) {
                     const extendedPath = path.concat(pool);
                     methodsData.push(
-                        ...this.getQuoterMethodsData(
-                            options,
-                            extendedPath,
-                            pool.token0.address,
-                            routeMaxTransitTokens
-                        )
+                        ...this.getQuoterMethodsData(options, extendedPath, pool.token0.address)
                     );
                 }
                 return methodsData;

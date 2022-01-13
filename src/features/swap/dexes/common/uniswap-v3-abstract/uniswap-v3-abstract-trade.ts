@@ -12,6 +12,8 @@ import {
     UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI,
     UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS
 } from '@features/swap/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
+import { createTokenNativeAddressProxyInPathStartAndEnd } from '@features/swap/dexes/common/utils/token-native-address-proxy';
+import { Web3Pure } from 'src/core';
 
 export interface UniswapV3TradeStruct extends UniswapV3AlgebraTradeStruct {
     route: UniswapV3Route;
@@ -32,13 +34,16 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
                 ? initialPool.token0
                 : initialPool.token1
         ];
-        return path.concat(
-            ...this.route.poolsPath.map(pool =>
+
+        this.route.poolsPath.forEach(pool => {
+            path.push(
                 !compareAddresses(pool.token0.address, path[path.length - 1].address)
                     ? pool.token0
                     : pool.token1
-            )
-        );
+            );
+        });
+
+        return createTokenNativeAddressProxyInPathStartAndEnd(path, Web3Pure.nativeTokenAddress);
     }
 
     protected constructor(tradeStruct: UniswapV3TradeStruct) {
