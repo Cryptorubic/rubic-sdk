@@ -211,7 +211,7 @@ export class CrossChainManager {
         const feeInPercents = await fromTrade.contract.getFeeInPercents();
         const transitFeeToken = new PriceTokenAmount({
             ...fromTransitToken.asStruct,
-            tokenAmount: fromTransitTokenMinAmount.multipliedBy(feeInPercents)
+            tokenAmount: fromTransitTokenMinAmount.multipliedBy(feeInPercents).dividedBy(100)
         });
 
         const toTransitTokenAmount = fromTransitTokenMinAmount.minus(transitFeeToken.tokenAmount);
@@ -293,11 +293,11 @@ export class CrossChainManager {
 
             if (type === 'minAmount') {
                 if (fromTrade instanceof InstantTradeContractTrade) {
-                    return fromTransitTokenAmount.dividedBy(fromTrade.slippageTolerance);
+                    return fromTransitTokenAmount.dividedBy(1 - fromTrade.slippageTolerance);
                 }
                 return fromTransitTokenAmount;
             }
-            return fromTransitTokenAmount.minus(1);
+            return fromTransitTokenAmount;
         };
 
         return Promise.all([getAmount('minAmount'), getAmount('maxAmount')]).then(
