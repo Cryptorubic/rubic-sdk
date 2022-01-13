@@ -20,6 +20,7 @@ import { WalletNotConnectedError } from '@common/errors/swap/wallet-not-connecte
 import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
 import { ContractParams } from '@features/cross-chain/cross-chain-trade/models/contract-params';
 import { BasicTransactionOptions } from 'src/core';
+import { InstantTradeContractTrade } from '@features/cross-chain/contract-trade/instant-trade-contract-trade';
 
 export class CrossChainTrade {
     public static async getGasData(
@@ -134,7 +135,16 @@ export class CrossChainTrade {
         this.gasData = crossChainTrade.gasData;
 
         this.from = this.fromTrade.fromToken;
-        this.to = this.toTrade.toToken;
+
+        const fromSlippage =
+            this.fromTrade instanceof InstantTradeContractTrade
+                ? this.fromTrade.slippageTolerance
+                : 0;
+        this.to = new PriceTokenAmount({
+            ...this.toTrade.toToken.asStruct,
+            weiAmount: this.toTrade.toToken.weiAmountPlusSlippage(fromSlippage)
+        });
+
         this.toTokenAmountMin = this.toTrade.toTokenAmountMin;
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.fromTrade.blockchain);
