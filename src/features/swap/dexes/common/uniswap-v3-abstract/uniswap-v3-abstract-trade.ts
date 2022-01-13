@@ -8,13 +8,18 @@ import {
     UniswapV3AlgebraTradeStruct
 } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 
-import { UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI } from '@features/swap/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
+import {
+    UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI,
+    UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS
+} from '@features/swap/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
 
 export interface UniswapV3TradeStruct extends UniswapV3AlgebraTradeStruct {
     route: UniswapV3Route;
 }
 
 export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTrade {
+    protected readonly contractAddress = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS;
+
     protected readonly contractAbi = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
 
     private readonly route: UniswapV3Route;

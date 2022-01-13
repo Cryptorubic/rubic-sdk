@@ -57,7 +57,8 @@ const routerLiquidityPools: UniswapV3RouterLiquidityPool<TokenSymbol>[] = [
     }
 ];
 
-export const UNI_SWAP_V3_ROUTER_CONFIGURATION: UniswapV3RouterConfiguration<TokenSymbol> = {
-    tokens: routerTokens,
-    liquidityPools: routerLiquidityPools
-};
+export const UNI_SWAP_V3_ETHEREUM_ROUTER_CONFIGURATION: UniswapV3RouterConfiguration<TokenSymbol> =
+    {
+        tokens: routerTokens,
+        liquidityPools: routerLiquidityPools
+    };

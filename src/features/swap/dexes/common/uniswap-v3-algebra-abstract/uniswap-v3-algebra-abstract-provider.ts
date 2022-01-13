@@ -28,7 +28,7 @@ export abstract class UniswapV3AlgebraAbstractProvider extends InstantTradeProvi
 
     protected abstract readonly quoterController: UniswapV3AlgebraQuoterController;
 
-    public abstract readonly providerConfiguration: UniswapV3AlgebraProviderConfiguration;
+    protected abstract readonly providerConfiguration: UniswapV3AlgebraProviderConfiguration;
 
     protected readonly gasMargin = 1.2;
 

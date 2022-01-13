@@ -217,7 +217,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
 
         return poolsAddresses
             .map((poolAddress, index) => {
-                if (Web3Pure.isZeroAddress(poolAddress)) {
+                if (!Web3Pure.isZeroAddress(poolAddress)) {
                     return new LiquidityPool(
                         poolAddress,
                         getPoolsMethodArguments[index].tokenA,

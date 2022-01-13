@@ -12,7 +12,7 @@ export abstract class UniswapV3AbstractProvider<
 > extends UniswapV3AlgebraAbstractProvider {
     protected abstract readonly InstantTradeClass: UniswapV3TradeClass<T>;
 
-    public abstract readonly routerConfiguration: UniswapV3RouterConfiguration<string>;
+    protected abstract readonly routerConfiguration: UniswapV3RouterConfiguration<string>;
 
     @Cache
     protected get quoterController(): UniswapV3QuoterController {
