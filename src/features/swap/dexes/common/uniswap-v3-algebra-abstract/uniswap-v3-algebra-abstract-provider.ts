@@ -10,21 +10,21 @@ import {
     UniswapV3AlgebraCalculatedInfoWithProfit
 } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-calculated-info';
 import { InsufficientLiquidityError } from 'src/common';
-import { UniswapV3AbstractTrade } from '@features/swap/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
 import { UniswapV3AlgebraQuoterController } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 import { UniswapV3AlgebraProviderConfiguration } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-provider-configuration';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { AlgebraTrade } from '@features/swap/dexes/polygon/algebra/algebra-trade';
-import { UniswapV3TradeClass } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-class';
 import { UniswapV3AlgebraTradeStruct } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 import { UniswapV3Route } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
 import { AlgebraRoute } from '@features/swap/dexes/polygon/algebra/models/algebra-route';
 import { GasPriceApi } from '@common/http/gas-price-api';
+import { UniswapV3AbstractTrade } from '@features/swap/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
+import { AlgebraTrade } from '@features/swap/dexes/polygon/algebra/algebra-trade';
+import { UniswapV3TradeClass } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-class';
 
-export abstract class UniswapV3AlgebraAbstractProvider extends InstantTradeProvider {
-    protected abstract readonly InstantTradeClass:
-        | UniswapV3TradeClass<UniswapV3AbstractTrade>
-        | typeof AlgebraTrade;
+export abstract class UniswapV3AlgebraAbstractProvider<
+    T extends UniswapV3AbstractTrade = UniswapV3AbstractTrade
+> extends InstantTradeProvider {
+    protected abstract readonly InstantTradeClass: UniswapV3TradeClass<T> | typeof AlgebraTrade;
 
     protected abstract readonly quoterController: UniswapV3AlgebraQuoterController;
 
@@ -39,18 +39,20 @@ export abstract class UniswapV3AlgebraAbstractProvider extends InstantTradeProvi
         slippageTolerance: 0.02
     };
 
-    /**
-     * True if class is instance of Uniswap-V3, false if of Algebra.
-     */
-    private get isUniswapV3(): boolean {
-        return this instanceof UniswapV3AbstractTrade;
+    protected get isRubicOptimisationEnabled(): boolean {
+        return true;
     }
+
+    protected abstract createTradeInstance(
+        tradeStruct: UniswapV3AlgebraTradeStruct,
+        route: UniswapV3Route | AlgebraRoute
+    ): T | AlgebraTrade;
 
     public async calculate(
         from: PriceTokenAmount,
         toToken: PriceToken,
         options?: SwapCalculationOptions
-    ): Promise<UniswapV3AbstractTrade | AlgebraTrade> {
+    ): Promise<T | AlgebraTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
         const fromClone = createTokenNativeAddressProxy(
@@ -125,7 +127,7 @@ export abstract class UniswapV3AlgebraAbstractProvider extends InstantTradeProvi
         }
 
         if (
-            !this.isUniswapV3 &&
+            !this.isRubicOptimisationEnabled &&
             options.gasCalculation === 'rubicOptimisation' &&
             toToken.price?.isFinite() &&
             gasPriceInUsd
@@ -166,22 +168,5 @@ export abstract class UniswapV3AlgebraAbstractProvider extends InstantTradeProvi
             route,
             estimatedGas
         };
-    }
-
-    protected createTradeInstance(
-        tradeStruct: UniswapV3AlgebraTradeStruct,
-        route: UniswapV3Route | AlgebraRoute
-    ): UniswapV3AbstractTrade | AlgebraTrade {
-        if (this.InstantTradeClass === AlgebraTrade) {
-            return new this.InstantTradeClass({
-                ...tradeStruct,
-                route: route as AlgebraRoute
-            });
-        }
-
-        return new (this.InstantTradeClass as UniswapV3TradeClass<UniswapV3AbstractTrade>)({
-            ...tradeStruct,
-            route: route as UniswapV3Route
-        });
     }
 }

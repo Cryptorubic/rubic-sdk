@@ -24,6 +24,8 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
 
     protected readonly contractAbi = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
 
+    protected readonly unwrapWethMethodName = 'unwrapWETH9';
+
     private readonly route: UniswapV3Route;
 
     @Cache

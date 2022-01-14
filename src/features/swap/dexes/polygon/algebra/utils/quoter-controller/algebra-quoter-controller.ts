@@ -1,7 +1,7 @@
-import { BLOCKCHAIN_NAME, PriceToken, PriceTokenAmount } from 'src/core';
+import { BLOCKCHAIN_NAME, PriceToken, PriceTokenAmount, Web3Public } from 'src/core';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
 import { AlgebraRoute } from '@features/swap/dexes/polygon/algebra/models/algebra-route';
-import { compareAddresses, notNull } from 'src/common';
+import { notNull } from 'src/common';
 import BigNumber from 'bignumber.js';
 import { ContractMulticallResponse } from '@core/blockchain/web3-public/models/contract-multicall-response';
 import {
@@ -57,7 +57,12 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
                 path,
                 methodData: {
                     methodName: 'quoteExactInputSingle',
-                    methodArguments: [path[0].address, path[1].address, amountAbsolute, 0]
+                    methodArguments: [
+                        path[0].address,
+                        path[1].address,
+                        amountAbsolute,
+                        0 // limitSqrtPrice
+                    ]
                 }
             };
         }
@@ -71,9 +76,11 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
         };
     }
 
-    private readonly web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.POLYGON);
+    private get web3Public(): Web3Public {
+        return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.POLYGON);
+    }
 
-    private async getRouterTokens(): Promise<Token[]> {
+    private async getOrCreateRouterTokens(): Promise<Token[]> {
         if (!this.routerTokens) {
             this.routerTokens = await Token.createTokens(ROUTER_TOKENS, BLOCKCHAIN_NAME.POLYGON);
         }
@@ -92,10 +99,8 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
         toToken: PriceToken,
         routeMaxTransitPools: number
     ): Promise<AlgebraRoute[]> {
-        const routesTokens = (await this.getRouterTokens()).filter(
-            token =>
-                !compareAddresses(token.address, from.address) &&
-                !compareAddresses(token.address, toToken.address)
+        const routesTokens = (await this.getOrCreateRouterTokens()).filter(
+            token => !token.isEqualTo(from) && !token.isEqualTo(toToken)
         );
 
         const options: Omit<GetQuoterMethodsDataOptions, 'maxTransitTokens'> = {

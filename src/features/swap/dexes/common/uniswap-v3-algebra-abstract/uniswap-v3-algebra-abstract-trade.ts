@@ -144,6 +144,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
 
     protected abstract readonly contractAbi: AbiItem[];
 
+    protected abstract unwrapWethMethodName: 'unwrapWETH9' | 'unwrapWNativeToken';
+
     public readonly from: PriceTokenAmount;
 
     public readonly to: PriceTokenAmount;
@@ -168,13 +170,6 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         return DEFAULT_ESTIMATED_GAS[this.path.length - 2].plus(
             this.from.isNative ? WETH_TO_ETH_ESTIMATED_GAS : 0
         );
-    }
-
-    /**
-     * True if class is instance of Uniswap-V3, false if of Algebra.
-     */
-    private get isUniswapV3(): boolean {
-        return this instanceof UniswapV3AbstractTrade;
     }
 
     protected constructor(tradeStruct: UniswapV3AlgebraTradeStruct) {
@@ -248,7 +243,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         const amountOutMin = this.to.weiAmountMinusSlippage(this.slippageTolerance).toFixed(0);
         const unwrapWETHMethodEncoded = Web3Pure.encodeFunctionCall(
             this.contractAbi,
-            this.isUniswapV3 ? 'unwrapWETH9' : 'unwrapWNativeToken',
+            this.unwrapWethMethodName,
             [amountOutMin, this.walletAddress]
         );
 

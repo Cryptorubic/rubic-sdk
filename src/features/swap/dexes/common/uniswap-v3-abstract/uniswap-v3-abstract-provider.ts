@@ -1,15 +1,16 @@
 import { TradeType } from 'src/features';
 import { UniswapV3QuoterController } from '@features/swap/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
-
 import { Cache } from 'src/common';
 import { UniswapV3AbstractTrade } from '@features/swap/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
-import { UniswapV3TradeClass } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-class';
 import { UniswapV3RouterConfiguration } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
 import { UniswapV3AlgebraAbstractProvider } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
+import { UniswapV3AlgebraTradeStruct } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
+import { UniswapV3Route } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
+import { UniswapV3TradeClass } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-class';
 
 export abstract class UniswapV3AbstractProvider<
     T extends UniswapV3AbstractTrade = UniswapV3AbstractTrade
-> extends UniswapV3AlgebraAbstractProvider {
+> extends UniswapV3AlgebraAbstractProvider<T> {
     protected abstract readonly InstantTradeClass: UniswapV3TradeClass<T>;
 
     protected abstract readonly routerConfiguration: UniswapV3RouterConfiguration<string>;
@@ -19,7 +20,21 @@ export abstract class UniswapV3AbstractProvider<
         return new UniswapV3QuoterController(this.blockchain, this.routerConfiguration);
     }
 
+    protected get isRubicOptimisationEnabled(): boolean {
+        return false;
+    }
+
     public get type(): TradeType {
         return this.InstantTradeClass.type;
+    }
+
+    protected createTradeInstance(
+        tradeStruct: UniswapV3AlgebraTradeStruct,
+        route: UniswapV3Route
+    ): T {
+        return new this.InstantTradeClass({
+            ...tradeStruct,
+            route
+        });
     }
 }

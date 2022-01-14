@@ -27,6 +27,8 @@ export class AlgebraTrade extends UniswapV3AlgebraAbstractTrade {
 
     protected readonly contractAbi = ALGEBRA_SWAP_ROUTER_CONTRACT_ABI;
 
+    protected readonly unwrapWethMethodName = 'unwrapWNativeToken';
+
     private readonly route: AlgebraRoute;
 
     public readonly path: ReadonlyArray<Token>;

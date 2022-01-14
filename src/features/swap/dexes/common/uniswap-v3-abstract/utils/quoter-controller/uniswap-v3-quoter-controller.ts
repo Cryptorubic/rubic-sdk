@@ -85,8 +85,8 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
                         from.address,
                         toToken.address,
                         poolsPath[0].fee,
-                        from.weiAmount,
-                        0
+                        from.stringWeiAmount,
+                        0 // sqrtPriceLimitX96
                     ]
                 }
             };
@@ -97,13 +97,11 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
                 methodName: 'quoteExactInput',
                 methodArguments: [
                     UniswapV3QuoterController.getEncodedPoolsPath(poolsPath, from.address),
-                    from.weiAmount
+                    from.stringWeiAmount
                 ]
             }
         };
     }
-
-    private readonly web3Public: Web3Public;
 
     private routerTokens: Token[] | undefined;
 
@@ -111,14 +109,16 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
 
     private readonly feeAmounts: FeeAmount[] = [500, 3000, 10000];
 
+    private get web3Public(): Web3Public {
+        return Injector.web3PublicService.getWeb3Public(this.blockchain);
+    }
+
     constructor(
         private readonly blockchain: BLOCKCHAIN_NAME,
         private readonly routerConfiguration: UniswapV3RouterConfiguration<string>
-    ) {
-        this.web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
-    }
+    ) {}
 
-    private async getRouterTokensAndLiquidityPools(): Promise<{
+    private async getOrCreateRouterTokensAndLiquidityPools(): Promise<{
         routerTokens: Token[];
         routerLiquidityPools: LiquidityPool[];
     }> {
@@ -165,15 +165,14 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
         secondToken: Token
     ): Promise<LiquidityPool[]> {
         const { routerTokens, routerLiquidityPools } =
-            await this.getRouterTokensAndLiquidityPools();
+            await this.getOrCreateRouterTokensAndLiquidityPools();
 
         let getPoolsMethodArguments: { tokenA: Token; tokenB: Token; fee: FeeAmount }[] = [];
         getPoolsMethodArguments.push(
             ...Object.values(routerTokens)
                 .filter(
                     routerToken =>
-                        !compareAddresses(firstToken.address, routerToken.address) &&
-                        !compareAddresses(secondToken.address, routerToken.address)
+                        !routerToken.isEqualTo(firstToken) && !routerToken.isEqualTo(secondToken)
                 )
                 .map(routerToken =>
                     this.feeAmounts
