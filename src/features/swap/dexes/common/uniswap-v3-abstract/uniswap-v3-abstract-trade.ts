@@ -61,12 +61,20 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
         const amountOutMin = this.to.weiAmountMinusSlippage(this.slippageTolerance).toFixed(0);
 
         if (this.route.poolsPath.length === 1) {
+            const pool = this.route.poolsPath[0];
+            const toTokenAddress = compareAddresses(
+                pool.token0.address,
+                this.route.initialTokenAddress
+            )
+                ? pool.token1.address
+                : pool.token0.address;
+
             return {
                 methodName: 'exactInputSingle',
                 methodArguments: [
                     [
                         this.route.initialTokenAddress,
-                        this.to.address,
+                        toTokenAddress,
                         this.route.poolsPath[0].fee,
                         walletAddress,
                         this.deadlineMinutesTimestamp,

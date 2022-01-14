@@ -56,7 +56,7 @@ export class AlgebraTrade extends UniswapV3AlgebraAbstractTrade {
                 methodArguments: [
                     [
                         this.route.path[0].address,
-                        this.to.address,
+                        this.route.path[1].address,
                         walletAddress,
                         this.deadlineMinutesTimestamp,
                         this.from.stringWeiAmount,
