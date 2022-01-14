@@ -1,9 +1,8 @@
 import BigNumber from 'bignumber.js';
-import { AlgebraRoute } from '@features/swap/dexes/polygon/algebra/models/algebra-route';
-import { UniswapV3Route } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
+import { UniswapV3AlgebraRoute } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
 
 export interface UniswapV3AlgebraCalculatedInfo {
-    route: UniswapV3Route | AlgebraRoute;
+    route: UniswapV3AlgebraRoute;
     estimatedGas?: BigNumber;
 }
 

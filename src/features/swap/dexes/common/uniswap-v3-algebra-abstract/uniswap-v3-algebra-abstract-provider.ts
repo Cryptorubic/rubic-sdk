@@ -14,12 +14,11 @@ import { UniswapV3AlgebraQuoterController } from '@features/swap/dexes/common/un
 import { UniswapV3AlgebraProviderConfiguration } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-provider-configuration';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { UniswapV3AlgebraTradeStruct } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
-import { UniswapV3Route } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
-import { AlgebraRoute } from '@features/swap/dexes/polygon/algebra/models/algebra-route';
 import { GasPriceApi } from '@common/http/gas-price-api';
 import { UniswapV3AbstractTrade } from '@features/swap/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
 import { AlgebraTrade } from '@features/swap/dexes/polygon/algebra/algebra-trade';
 import { UniswapV3TradeClass } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-class';
+import { UniswapV3AlgebraRoute } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AbstractTrade = UniswapV3AbstractTrade
@@ -45,7 +44,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
 
     protected abstract createTradeInstance(
         tradeStruct: UniswapV3AlgebraTradeStruct,
-        route: UniswapV3Route | AlgebraRoute
+        route: UniswapV3AlgebraRoute
     ): T | AlgebraTrade;
 
     public async calculate(
