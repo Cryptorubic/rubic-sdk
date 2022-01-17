@@ -3,6 +3,7 @@ import { BLOCKCHAIN_NAME } from 'src/core';
 import { Token } from 'src/core/blockchain/tokens/token';
 
 export const TOKENS = {
+    // ETHEREUM
     ETH: new Token({
         blockchain: BLOCKCHAIN_NAME.ETHEREUM,
         address: NATIVE_TOKEN_ADDRESS,
@@ -44,6 +45,22 @@ export const TOKENS = {
         decimals: 8,
         symbol: 'WBTC',
         name: 'Wrapped BTC'
+    }),
+
+    // POLYGON
+    MATIC: new Token({
+        blockchain: BLOCKCHAIN_NAME.POLYGON,
+        address: NATIVE_TOKEN_ADDRESS,
+        decimals: 18,
+        symbol: 'MAT',
+        name: 'Matoc'
+    }),
+    USDT_POLYGON: new Token({
+        blockchain: BLOCKCHAIN_NAME.POLYGON,
+        address: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
+        decimals: 6,
+        symbol: 'USDT',
+        name: '(PoS) Tether USD'
     })
 } as const;
 

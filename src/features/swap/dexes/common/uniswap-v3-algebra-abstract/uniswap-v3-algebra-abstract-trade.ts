@@ -144,7 +144,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
 
     protected abstract readonly contractAbi: AbiItem[];
 
-    protected abstract unwrapWethMethodName: 'unwrapWETH9' | 'unwrapWNativeToken';
+    protected abstract readonly unwrapWethMethodName: 'unwrapWETH9' | 'unwrapWNativeToken';
 
     public readonly from: PriceTokenAmount;
 

@@ -7,7 +7,7 @@ import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount'
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
 import { UniSwapV3EthereumProvider } from '@features/swap/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
 
-describe('Uniswap V3 provider tests', () => {
+describe('UnisSwap V3 Ethereum provider tests', () => {
     let uniswapV3Provider: UniSwapV3EthereumProvider;
 
     beforeAll(async () => {

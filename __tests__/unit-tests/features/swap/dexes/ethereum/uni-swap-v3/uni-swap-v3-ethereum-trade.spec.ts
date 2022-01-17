@@ -10,7 +10,7 @@ import { TransactionReceipt } from 'web3-eth';
 import { UniSwapV3EthereumProvider } from '@features/swap/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
 import fn = jest.fn;
 
-describe('Uniswap V3 trade tests.', () => {
+describe('UniSwap V3 Ethereum trade tests.', () => {
     let chain: Chain;
     let uniswapV3Provider: UniSwapV3EthereumProvider;
     let web3Public: Web3Public;
