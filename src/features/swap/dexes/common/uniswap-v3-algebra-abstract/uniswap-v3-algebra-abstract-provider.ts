@@ -29,6 +29,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
 
     protected abstract readonly providerConfiguration: UniswapV3AlgebraProviderConfiguration;
 
+    protected readonly isRubicOptimisationEnabled: boolean = true;
+
     protected readonly gasMargin = 1.2;
 
     protected readonly defaultOptions: Required<SwapCalculationOptions> = {
@@ -37,10 +39,6 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         deadlineMinutes: 20,
         slippageTolerance: 0.02
     };
-
-    protected get isRubicOptimisationEnabled(): boolean {
-        return true;
-    }
 
     protected abstract createTradeInstance(
         tradeStruct: UniswapV3AlgebraTradeStruct,

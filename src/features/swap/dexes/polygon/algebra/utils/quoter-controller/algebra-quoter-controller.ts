@@ -53,6 +53,7 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
         methodData: MethodData;
     } {
         if (path.length === 2) {
+            const limitSqrtPrice = 0;
             return {
                 path,
                 methodData: {
@@ -61,7 +62,7 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
                         path[0].address,
                         path[1].address,
                         amountAbsolute,
-                        0 // limitSqrtPrice
+                        limitSqrtPrice
                     ]
                 }
             };
@@ -100,7 +101,7 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
         routeMaxTransitPools: number
     ): Promise<AlgebraRoute[]> {
         const routesTokens = (await this.getOrCreateRouterTokens()).filter(
-            token => !token.isEqualTo(from) && !token.isEqualTo(toToken)
+            token => !token.isEqualToTokens([from, toToken])
         );
 
         const options: Omit<GetQuoterMethodsDataOptions, 'maxTransitTokens'> = {

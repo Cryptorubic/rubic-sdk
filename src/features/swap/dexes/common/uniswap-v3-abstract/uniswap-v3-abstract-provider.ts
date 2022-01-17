@@ -15,13 +15,11 @@ export abstract class UniswapV3AbstractProvider<
 
     protected abstract readonly routerConfiguration: UniswapV3RouterConfiguration<string>;
 
+    protected readonly isRubicOptimisationEnabled: boolean = false;
+
     @Cache
     protected get quoterController(): UniswapV3QuoterController {
         return new UniswapV3QuoterController(this.blockchain, this.routerConfiguration);
-    }
-
-    protected get isRubicOptimisationEnabled(): boolean {
-        return false;
     }
 
     public get type(): TradeType {

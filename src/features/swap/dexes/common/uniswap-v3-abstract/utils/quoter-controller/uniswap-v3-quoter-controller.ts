@@ -77,6 +77,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
         methodData: MethodData;
     } {
         if (poolsPath.length === 1) {
+            const sqrtPriceLimitX96 = 0;
             return {
                 poolsPath,
                 methodData: {
@@ -86,7 +87,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
                         toToken.address,
                         poolsPath[0].fee,
                         from.stringWeiAmount,
-                        0 // sqrtPriceLimitX96
+                        sqrtPriceLimitX96
                     ]
                 }
             };
@@ -170,10 +171,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
         let getPoolsMethodArguments: { tokenA: Token; tokenB: Token; fee: FeeAmount }[] = [];
         getPoolsMethodArguments.push(
             ...Object.values(routerTokens)
-                .filter(
-                    routerToken =>
-                        !routerToken.isEqualTo(firstToken) && !routerToken.isEqualTo(secondToken)
-                )
+                .filter(routerToken => !routerToken.isEqualToTokens([firstToken, secondToken]))
                 .map(routerToken =>
                     this.feeAmounts
                         .map(fee => [
