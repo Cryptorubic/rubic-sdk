@@ -7,7 +7,7 @@ import { ALGEBRA_V3_PROVIDER_CONFIGURATION } from '@features/swap/dexes/polygon/
 import { UniswapV3AlgebraTradeStruct } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 import { AlgebraRoute } from '@features/swap/dexes/polygon/algebra/models/algebra-route';
 
-export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider {
+export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider<AlgebraTrade> {
     public readonly blockchain = BLOCKCHAIN_NAME.POLYGON;
 
     protected readonly InstantTradeClass = AlgebraTrade;
