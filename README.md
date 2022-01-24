@@ -1,4 +1,4 @@
-# Rubic SDK 
+# Rubic  SDK 
 
 ![build status](https://github.com/Cryptorubic/rubic-sdk/actions/workflows/ci-master.yml/badge.svg) [![license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/Cryptorubic/rubic-sdk/blob/main/LICENSE)
 
