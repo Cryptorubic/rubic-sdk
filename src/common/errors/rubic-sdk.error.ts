@@ -1,1 +1,7 @@
-export class RubicSdkError extends Error {}
+export class RubicSdkError {
+    message?: string;
+
+    constructor(message?: string) {
+        this.message = message;
+    }
+}
