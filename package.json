@@ -46,7 +46,7 @@
   "license": "GPL-3.0",
   "scripts": {
     "build": "webpack",
-    "compile": "./node_modules/rimraf/bin.js lib && tsc --project tsconfig.json && tscpaths -p ./tsconfig.json -s ./src -o ./lib",
+    "compile": "npx rimraf lib && tsc --project tsconfig.json && tscpaths -p ./tsconfig.json -s ./src -o ./lib",
     "lint": "eslint src __tests__",
     "test": "cd ./scripts && bash test-runner.sh",
     "hh-node": "npx hardhat node",
