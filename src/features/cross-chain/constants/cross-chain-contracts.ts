@@ -40,7 +40,7 @@ export const crossChainContractsData = {
         ]
     },
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: {
-        address: '0xEda6DdA4fD1581B6Ab8951750DB596566d0FBf9C',
+        address: '0x70e8C8139d1ceF162D5ba3B286380EB5913098c4',
         providersData: [
             {
                 ProviderClass: PancakeSwapProvider,
@@ -53,7 +53,7 @@ export const crossChainContractsData = {
         ]
     },
     [BLOCKCHAIN_NAME.POLYGON]: {
-        address: '0xe6625BBE80710C7Bb473721EdAC24Ce326940a6f',
+        address: '0xeC52A30E4bFe2D6B0ba1D0dbf78f265c0a119286',
         providersData: [
             {
                 ProviderClass: QuickSwapProvider,
@@ -66,7 +66,7 @@ export const crossChainContractsData = {
         ]
     },
     [BLOCKCHAIN_NAME.AVALANCHE]: {
-        address: '0xd23B4dA264A756F427e13C72AB6cA5A6C95E4608',
+        address: '0x541eC7c03F330605a2176fCD9c255596a30C00dB',
         providersData: [
             {
                 ProviderClass: PangolinProvider,
@@ -96,7 +96,7 @@ export const crossChainContractsData = {
         ]
     },
     [BLOCKCHAIN_NAME.FANTOM]: {
-        address: '0x55Be05ecC1c417B16163b000CB71DcE8526a5D06',
+        address: '0xd23B4dA264A756F427e13C72AB6cA5A6C95E4608',
         providersData: [
             {
                 ProviderClass: SpookySwapProvider,
