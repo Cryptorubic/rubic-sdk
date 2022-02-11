@@ -264,7 +264,7 @@ export class CrossChainTrade {
         await Promise.all([
             this.checkContractsState(),
             this.checkToBlockchainGasPrice(),
-            // this.checkToContractBalance(),
+            this.checkToContractBalance(),
             this.checkUserBalance()
         ]);
 
@@ -300,9 +300,10 @@ export class CrossChainTrade {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        const { onConfirm, gasLimit, gasPrice } = options;
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
+
+        const { onConfirm, gasLimit, gasPrice } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getContractParams();
