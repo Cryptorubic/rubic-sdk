@@ -41,7 +41,7 @@ describe('Uniswap V2 trade tests.', () => {
         await mockInjector(configuration);
         web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ETHEREUM);
         userAddress = Injector.web3Private.address;
-    });
+    }, 20_000);
 
     test('Swap method must works with NATIVE-ERC20 trade', async () => {
         const ethTokenAmountToSwap = 1;
@@ -76,7 +76,7 @@ describe('Uniswap V2 trade tests.', () => {
 
         const trade1 = await uniswapV2Provider.calculate(from, to, { gasCalculation: 'disabled' });
         expect(trade1.to.weiAmount.isEqualTo(trade.to.weiAmount)).not.toBeTruthy();
-    }, 10_000);
+    }, 20_000);
 
     test('Swap method must works with ERC20-NATIVE trade', async () => {
         const rbcTokenAmountToSwap = 1;
@@ -115,7 +115,7 @@ describe('Uniswap V2 trade tests.', () => {
             )
         ).toBeTruthy();
         expect(onApprove.mock.calls.length).toBe(1);
-    }, 10_000);
+    }, 20_000);
 
     test('Swap method must works with ERC20-ERC20 trade', async () => {
         const rbcTokenAmountToSwap = 1;
@@ -148,5 +148,5 @@ describe('Uniswap V2 trade tests.', () => {
                 )
             )
         ).toBeTruthy();
-    }, 10_000);
+    }, 20_000);
 });

@@ -1,7 +1,8 @@
+import { TimeoutError } from '@common/errors/utils/timeout.error';
 import { HttpClient } from '@common/models/http-client';
+import pTimeout from '@common/utils/p-timeout';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import BigNumber from 'bignumber.js';
-import pTimeout, { TimeoutError } from 'p-timeout';
 import { Cache } from 'src/common';
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
