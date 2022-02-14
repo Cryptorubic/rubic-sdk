@@ -6,85 +6,91 @@ import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME, Web3Public } from 'src/core';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
-import { UniSwapV3EthereumProvider } from '@features/swap/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
+import { UniSwapV3PolygonProvider } from '@features/swap/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
 import { Utils } from '__tests__/unit-tests/features/swap/utils/utils';
 import fn = jest.fn;
 
-describe('UniSwap V3 Ethereum trade tests.', () => {
+describe('UniSwap V3 Polygon trade tests.', () => {
     let chain: Chain;
-    let uniswapV3Provider: UniSwapV3EthereumProvider;
+    let uniswapV3Provider: UniSwapV3PolygonProvider;
     let web3Public: Web3Public;
     let userAddress: string;
     let utils: Utils;
 
     beforeAll(async () => {
-        uniswapV3Provider = new UniSwapV3EthereumProvider();
+        uniswapV3Provider = new UniSwapV3PolygonProvider();
     });
 
     beforeEach(async () => {
-        chain = await Chain.reset(BLOCKCHAIN_NAME.ETHEREUM);
+        chain = await Chain.reset(BLOCKCHAIN_NAME.POLYGON);
         const configuration = await chain.getConfiguration();
         await mockInjector(configuration);
-        web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ETHEREUM);
+        web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.POLYGON);
         userAddress = Injector.web3Private.address;
         utils = new Utils(chain, web3Public);
     });
 
     test('Swap method must works with NATIVE-ERC20 trade', async () => {
-        const ethTokenAmountToSwap = 1;
-        const expectedToTokensAmount = '3177.56875989798300356'; // constant data about tokens rate in 13961175 block
-        const ethBalanceBefore = await web3Public.getBalance(userAddress);
-        const daiBalanceBefore = await web3Public.getBalance(userAddress, TOKENS.DAI.address);
+        const maticTokenAmountToSwap = 1;
+        const expectedToTokensAmount = '2.055903'; // constant data about tokens rate in 23571568 block
+        const maticBalanceBefore = await web3Public.getBalance(userAddress);
+        const usdtBalanceBefore = await web3Public.getBalance(
+            userAddress,
+            TOKENS.USDT_POLYGON.address
+        );
         const from = await PriceTokenAmount.createFromToken({
-            ...TOKENS.ETH,
-            tokenAmount: new BigNumber(ethTokenAmountToSwap)
+            ...TOKENS.MATIC,
+            tokenAmount: new BigNumber(maticTokenAmountToSwap)
         });
-        const to = await PriceToken.createFromToken(TOKENS.DAI);
+        const to = await PriceToken.createFromToken(TOKENS.USDT_POLYGON);
 
         const trade = await uniswapV3Provider.calculate(from, to, { gasCalculation: 'disabled' });
         const transactionReceipt = await trade.swap();
-        const ethBalanceAfter = await web3Public.getBalance(userAddress);
-        const daiBalanceAfter = await web3Public.getBalance(userAddress, TOKENS.DAI.address);
+        const maticBalanceAfter = await web3Public.getBalance(userAddress);
+        const usdtBalanceAfter = await web3Public.getBalance(
+            userAddress,
+            TOKENS.USDT_POLYGON.address
+        );
         const transactionFee = await utils.getTransactionFeeByReceipt(transactionReceipt);
 
         expect(transactionReceipt.status).toBeTruthy();
         expect(
-            ethBalanceAfter.isEqualTo(
-                ethBalanceBefore
-                    .minus(ethTokenAmountToSwap * 10 ** TOKENS.ETH.decimals)
+            maticBalanceAfter.isEqualTo(
+                maticBalanceBefore
+                    .minus(maticTokenAmountToSwap * 10 ** from.decimals)
                     .minus(transactionFee)
             )
         ).toBeTruthy();
         expect(
-            daiBalanceAfter.isEqualTo(
-                daiBalanceBefore.plus(
-                    new BigNumber(expectedToTokensAmount).multipliedBy(10 ** TOKENS.DAI.decimals)
+            usdtBalanceAfter.isEqualTo(
+                usdtBalanceBefore.plus(
+                    new BigNumber(expectedToTokensAmount).multipliedBy(10 ** to.decimals)
                 )
             )
         ).toBeTruthy();
 
         const trade1 = await uniswapV3Provider.calculate(from, to, { gasCalculation: 'disabled' });
         expect(trade1.to.weiAmount.isEqualTo(trade.to.weiAmount)).not.toBeTruthy();
-    }, 10_000);
+    }, 300_000);
 
     test('Swap method must works with ERC20-NATIVE trade', async () => {
         const usdtTokenAmountToSwap = 1;
-        const expectedToTokensAmount = '0.000314923189705958'; // constant data about tokens rate in 13961175 block
+        const expectedToTokensAmount = '0.487261802620573316'; // constant data about tokens rate in 23571568 block
         const from = await PriceTokenAmount.createFromToken({
-            ...TOKENS.USDT,
+            ...TOKENS.USDT_POLYGON,
             tokenAmount: new BigNumber(usdtTokenAmountToSwap)
         });
-        const to = await PriceToken.createFromToken(TOKENS.ETH);
+        const to = await PriceToken.createFromToken(TOKENS.MATIC);
         await chain.increaseTokensBalance(from, usdtTokenAmountToSwap, { inEtherUnits: true });
         const usdtBalanceBefore = await web3Public.getBalance(userAddress, from.address);
-        const ethBalanceBefore = await web3Public.getBalance(userAddress);
+        const maticBalanceBefore = await web3Public.getBalance(userAddress);
         let approveTxHash = '';
 
         const onApprove = fn(hash => (approveTxHash = hash));
         const trade = await uniswapV3Provider.calculate(from, to, { gasCalculation: 'disabled' });
         const transactionReceipt = await trade.swap({ onApprove });
         const usdtBalanceAfter = await web3Public.getBalance(userAddress, from.address);
-        const ethBalanceAfter = await web3Public.getBalance(userAddress);
+        const maticBalanceAfter = await web3Public.getBalance(userAddress);
         const approveTransactionFee = await utils.getTransactionFeeByHash(approveTxHash);
         const transactionFee = await utils.getTransactionFeeByReceipt(transactionReceipt);
 
@@ -96,24 +102,24 @@ describe('UniSwap V3 Ethereum trade tests.', () => {
         ).toBeTruthy();
 
         expect(
-            ethBalanceAfter.isEqualTo(
-                ethBalanceBefore
+            maticBalanceAfter.isEqualTo(
+                maticBalanceBefore
                     .plus(new BigNumber(expectedToTokensAmount).multipliedBy(10 ** to.decimals))
                     .minus(approveTransactionFee)
                     .minus(transactionFee)
             )
         ).toBeTruthy();
         expect(onApprove.mock.calls.length).toBe(1);
-    }, 10_000);
+    }, 300_000);
 
     test('Swap method must works with ERC20-ERC20 trade', async () => {
         const usdtTokenAmountToSwap = 1;
-        const expectedToTokensAmount = '1.02692208070202167'; // constant data about tokens rate in 13961175 block
+        const expectedToTokensAmount = '0.998641521554865859'; // constant data about tokens rate in 23571568 block
         const from = await PriceTokenAmount.createFromToken({
-            ...TOKENS.USDT,
+            ...TOKENS.USDT_POLYGON,
             tokenAmount: new BigNumber(usdtTokenAmountToSwap)
         });
-        const to = await PriceToken.createFromToken(TOKENS.DAI);
+        const to = await PriceToken.createFromToken(TOKENS.DAI_POLYGON);
         await chain.increaseTokensBalance(from, usdtTokenAmountToSwap, { inEtherUnits: true });
         const usdtBalanceBefore = await web3Public.getBalance(userAddress, from.address);
         const daiBalanceBefore = await web3Public.getBalance(userAddress, to.address);
@@ -137,5 +143,5 @@ describe('UniSwap V3 Ethereum trade tests.', () => {
                 )
             )
         ).toBeTruthy();
-    }, 10_000);
+    }, 300_000);
 });

@@ -61,6 +61,13 @@ export const TOKENS = {
         decimals: 6,
         symbol: 'USDT',
         name: '(PoS) Tether USD'
+    }),
+    DAI_POLYGON: new Token({
+        blockchain: BLOCKCHAIN_NAME.POLYGON,
+        address: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
+        decimals: 18,
+        symbol: 'DAI',
+        name: '(PoS) Dai Stablecoin'
     })
 } as const;
 
@@ -68,5 +75,8 @@ export const TOKENS_HOLDERS: Partial<Record<BLOCKCHAIN_NAME, Record<string, stri
     [BLOCKCHAIN_NAME.ETHEREUM]: {
         '0xa4eed63db85311e22df4473f87ccfc3dadcfa3e3': '0x0541f3300307984984a587aeb7c34139e19124fa', // RBC
         '0xdac17f958d2ee523a2206206994597c13d831ec7': '0x5754284f345afc66a98fbb0a0afe71e0f007b949' // USDT
+    },
+    [BLOCKCHAIN_NAME.POLYGON]: {
+        '0xc2132d05d31c914a87c6611c10748aeb04b58e8f': '0xdac17f958d2ee523a2206206994597c13d831ec7' // USDT
     }
 };
