@@ -7,9 +7,9 @@ module.exports = {
   moduleDirectories: ['node_modules', '<root-dir>/src'],
   testEnvironment: 'node',
   transform: {
-    "node_modules/(ethereum-cryptography|p-timeout)/.+\\.(j|t)sx?$": "ts-jest",
+    "node_modules/(ethereum-cryptography)/.+\\.(j|t)sx?$": "ts-jest",
   },
-  transformIgnorePatterns: [ 'node_modules/((?!ethereum-cryptography|p-timeout)/.*)'],
+  transformIgnorePatterns: [ 'node_modules/((?!ethereum-cryptography)/.*)'],
   testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
   globals: {
     'ts-jest': {
