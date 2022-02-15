@@ -88,6 +88,10 @@ export class Token {
         );
     }
 
+    public isEqualToTokens(tokens: TokenBaseStruct[]): boolean {
+        return tokens.some(token => this.isEqualTo(token));
+    }
+
     public clone(tokenStruct?: Partial<TokenStruct>): Token {
         return new Token({ ...this, ...tokenStruct });
     }

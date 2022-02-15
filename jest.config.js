@@ -22,6 +22,6 @@ module.exports = {
     '@common/(.*)$': '<root-dir>/../../src/common/$1',
     '@features/(.*)$': '<root-dir>/../../src/features/$1',
     '__tests__/(.*)$': '<root-dir>/../../__tests__/$1',
-
-  }
+  },
+  testTimeout: 300_000
 };

@@ -46,6 +46,9 @@ export class Chain {
             rpcProviders: {
                 [BLOCKCHAIN_NAME.ETHEREUM]: {
                     mainRpc: Chain.nodeUrl
+                },
+                [BLOCKCHAIN_NAME.POLYGON]: {
+                    mainRpc: Chain.nodeUrl
                 }
             },
             walletProvider: {

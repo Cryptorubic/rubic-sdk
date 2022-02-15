@@ -385,7 +385,9 @@ export class Web3Private {
                     ...(options.value && {
                         value: Web3Private.stringifyAmount(options.value)
                     }),
-                    ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
+                    ...(options.gas && {
+                        gas: Web3Private.stringifyAmount(options.gas)
+                    }),
                     ...(options.gasPrice && {
                         gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                     })

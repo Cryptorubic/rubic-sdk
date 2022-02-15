@@ -47,21 +47,16 @@ export type UniswapV2TradeStruct = {
 export abstract class UniswapV2AbstractTrade extends InstantTrade {
     @Cache
     public static getContractAddress(blockchain: BLOCKCHAIN_NAME): string {
-        try {
-            // see  https://github.com/microsoft/TypeScript/issues/34516
-            // @ts-ignore
-            const instance = new this({
-                from: { blockchain },
-                wrappedPath: [{ isNative: () => false }, { isNative: () => false }]
-            });
-            if (!instance.contractAddress) {
-                throw new RubicSdkError('Trying to read abstract class field');
-            }
-            return instance.contractAddress;
-        } catch (e) {
-            console.debug(e);
+        // see  https://github.com/microsoft/TypeScript/issues/34516
+        // @ts-ignore
+        const instance = new this({
+            from: { blockchain },
+            wrappedPath: [{ isNative: () => false }, { isNative: () => false }]
+        });
+        if (!instance.contractAddress) {
             throw new RubicSdkError('Trying to read abstract class field');
         }
+        return instance.contractAddress;
     }
 
     public static get type(): TradeType {

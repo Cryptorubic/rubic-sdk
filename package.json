@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -50,7 +50,7 @@
     "lint": "eslint src __tests__",
     "test": "cd ./scripts && bash test-runner.sh",
     "hh-node": "npx hardhat node",
-    "publish": "yarn compile && yarn build && npm publish --access public",
+    "build:publish": "yarn compile && yarn build && npm publish --access public",
     "analyze": "webpack --profile --json > stats.json &&  webpack-bundle-analyzer stats.json"
   },
   "dependencies": {
