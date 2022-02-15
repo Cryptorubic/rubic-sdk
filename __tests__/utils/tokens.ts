@@ -68,6 +68,13 @@ export const TOKENS = {
         decimals: 18,
         symbol: 'DAI',
         name: '(PoS) Dai Stablecoin'
+    }),
+    USDC_POLYGON: new Token({
+        blockchain: BLOCKCHAIN_NAME.POLYGON,
+        address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
+        decimals: 6,
+        symbol: 'USDC',
+        name: 'USD Coin (PoS)'
     })
 } as const;
 
