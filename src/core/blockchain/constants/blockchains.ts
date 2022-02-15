@@ -38,6 +38,17 @@ export const blockchains: ReadonlyArray<Blockchain> = [
         })
     },
     {
+        id: 250,
+        name: BLOCKCHAIN_NAME.FANTOM,
+        nativeCoin: new Token({
+            blockchain: BLOCKCHAIN_NAME.FANTOM,
+            address: NATIVE_TOKEN_ADDRESS,
+            name: 'Fantom',
+            symbol: 'FTM',
+            decimals: 18
+        })
+    },
+    {
         id: 1666600000,
         name: BLOCKCHAIN_NAME.HARMONY,
         nativeCoin: new Token({

@@ -15,7 +15,7 @@ import { SushiSwapBscProvider } from '@features/swap/dexes/bsc/sushi-swap-bsc/su
 import { OneinchEthereumProvider } from '@features/swap/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
 import { SushiSwapEthereumProvider } from '@features/swap/dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider';
 import { UniSwapV2Provider } from '@features/swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
-import { UniSwapV3Provider } from '@features/swap/dexes/ethereum/uni-swap-v3/uni-swap-v3-provider';
+import { UniSwapV3EthereumProvider } from '@features/swap/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
 import { SpiritSwapProvider } from '@features/swap/dexes/fantom/spirit-swap/spirit-swap-provider';
 import { SpookySwapProvider } from '@features/swap/dexes/fantom/spooky-swap/spooky-swap-provider';
 import { SushiSwapFantomProvider } from '@features/swap/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-provider';
@@ -34,6 +34,8 @@ import { InstantTrade } from 'src/features';
 import { MarkRequired } from 'ts-essentials';
 import { ZrxEthereumProvider } from '@features/swap/dexes/ethereum/zrx-ethereum/zrx-ethereum-provider';
 import { getPriceTokensFromInputTokens } from '@common/utils/tokens';
+import { AlgebraProvider } from '@features/swap/dexes/polygon/algebra/algebra-provider';
+import { UniSwapV3PolygonProvider } from '@features/swap/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCalculationOptions,
@@ -61,7 +63,10 @@ export class InstantTradesManager {
         SushiSwapMoonriverProvider
     ] as const;
 
-    private readonly uniswapV3TradeProviders = [UniSwapV3Provider] as const;
+    private readonly uniswapV3TradeProviders = [
+        UniSwapV3EthereumProvider,
+        UniSwapV3PolygonProvider
+    ] as const;
 
     private oneInchTradeProviders = [
         OneinchEthereumProvider,
@@ -71,11 +76,14 @@ export class InstantTradesManager {
 
     private zrxTradeProviders = [ZrxEthereumProvider] as const;
 
+    private algebraTradeProviders = [AlgebraProvider] as const;
+
     private tradeProviders: TypedTradeProviders = [
         ...this.uniswapV2TradeProviders,
         ...this.uniswapV3TradeProviders,
         ...this.oneInchTradeProviders,
-        ...this.zrxTradeProviders
+        ...this.zrxTradeProviders,
+        ...this.algebraTradeProviders
     ].reduce((acc, ProviderClass) => {
         const provider = new ProviderClass();
         acc[provider.type] = provider;
