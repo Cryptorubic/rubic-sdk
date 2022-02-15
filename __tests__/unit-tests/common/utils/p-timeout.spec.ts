@@ -118,6 +118,10 @@ describe('p-timeout tests', () => {
                 }
             }
         });
+
+        expect(setTimeoutSpy.mock.calls.length).toBe(1);
+        expect(setTimeoutSpy.mock.calls[0]).toEqual([bigTimeout]);
+        expect(clearTimeoutSpy.mock.calls.length).toBe(1);
     });
 
     test('`.clear()` method', async () => {
