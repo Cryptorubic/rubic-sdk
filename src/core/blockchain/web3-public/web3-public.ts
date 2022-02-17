@@ -1,6 +1,8 @@
 import { Cache } from '@common/decorators/cache.decorator';
 import { ConditionalResult } from '@common/decorators/models/conditional-result';
 import { HealthcheckError } from '@common/errors/blockchain/healthcheck.error';
+import { TimeoutError } from '@common/errors/utils/timeout.error';
+import pTimeout from '@common/utils/p-timeout';
 import { ERC20_TOKEN_ABI } from '@core/blockchain/constants/erc-20-abi';
 import {
     HEALTHCHECK,
@@ -16,7 +18,6 @@ import { ContractMulticallResponse } from '@core/blockchain/web3-public/models/c
 import { MulticallResponse } from '@core/blockchain/web3-public/models/multicall-response';
 import { RpcResponse } from '@core/blockchain/web3-public/models/rpc-response';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
-import pTimeout, { TimeoutError } from 'p-timeout';
 import Web3 from 'web3';
 import BigNumber from 'bignumber.js';
 import { Method } from 'web3-core-method';

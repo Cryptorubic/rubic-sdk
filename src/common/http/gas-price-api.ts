@@ -1,8 +1,8 @@
+import pTimeout from '@common/utils/p-timeout';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { Injector } from '@core/sdk/injector';
 import { Cache } from 'src/common';
 import BigNumber from 'bignumber.js';
-import pTimeout from 'p-timeout';
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { HttpClient } from '@common/models/http-client';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
