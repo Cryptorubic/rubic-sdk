@@ -18,6 +18,12 @@ import { SushiSwapMoonriverProvider } from '@features/swap/dexes/moonriver/sushi
 import { SpiritSwapProvider } from '@features/swap/dexes/fantom/spirit-swap/spirit-swap-provider';
 import { SushiSwapFantomProvider } from '@features/swap/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-provider';
 import { SushiSwapAvalancheProvider } from '@features/swap/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
+import { OneinchEthereumProvider } from '@features/swap/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
+import { OneinchBscProvider } from '@features/swap/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
+import { OneinchPolygonProvider } from '@features/swap/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
+import { UniSwapV3EthereumProvider } from '@features/swap/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
+import { UniSwapV3PolygonProvider } from '@features/swap/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
+import { AlgebraProvider } from '@features/swap/dexes/polygon/algebra/algebra-provider';
 
 /**
  * Stores contracts info.
@@ -36,6 +42,14 @@ export const crossChainContractsData = {
             {
                 ProviderClass: SushiSwapEthereumProvider,
                 methodSuffix: '1'
+            },
+            {
+                ProviderClass: UniSwapV3EthereumProvider,
+                methodSuffix: 'V3'
+            },
+            {
+                ProviderClass: OneinchEthereumProvider,
+                methodSuffix: 'Inch'
             }
         ]
     },
@@ -49,11 +63,15 @@ export const crossChainContractsData = {
             {
                 ProviderClass: SushiSwapBscProvider,
                 methodSuffix: '1'
+            },
+            {
+                ProviderClass: OneinchBscProvider,
+                methodSuffix: 'Inch'
             }
         ]
     },
     [BLOCKCHAIN_NAME.POLYGON]: {
-        address: '0xeC52A30E4bFe2D6B0ba1D0dbf78f265c0a119286',
+        address: '0xe6625BBE80710C7Bb473721EdAC24Ce326940a6f',
         providersData: [
             {
                 ProviderClass: QuickSwapProvider,
@@ -62,6 +80,18 @@ export const crossChainContractsData = {
             {
                 ProviderClass: SushiSwapPolygonProvider,
                 methodSuffix: '1'
+            },
+            {
+                ProviderClass: UniSwapV3PolygonProvider,
+                methodSuffix: 'V3'
+            },
+            {
+                ProviderClass: AlgebraProvider,
+                methodSuffix: 'ALGB'
+            },
+            {
+                ProviderClass: OneinchPolygonProvider,
+                methodSuffix: 'Inch'
             }
         ]
     },

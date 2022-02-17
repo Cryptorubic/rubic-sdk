@@ -18,12 +18,13 @@ import { UniswapV2TradeClass } from '@features/swap/dexes/common/uniswap-v2-abst
 import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
 import { Cache } from 'src/common';
+import { Exact } from '@features/swap/models/exact';
 
 export interface PathFactoryStruct {
     readonly from: PriceToken;
     readonly to: PriceToken;
     readonly weiAmount: BigNumber;
-    readonly exact: 'input' | 'output';
+    readonly exact: Exact;
     readonly options: Required<SwapCalculationOptions>;
 }
 
@@ -41,7 +42,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
     private readonly weiAmount: BigNumber;
 
-    private readonly exact: 'input' | 'output';
+    private readonly exact: Exact;
 
     private readonly options: Required<SwapCalculationOptions>;
 

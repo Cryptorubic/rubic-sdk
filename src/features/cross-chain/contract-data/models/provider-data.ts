@@ -1,6 +1,6 @@
-import { UniswapV2AbstractProvider } from 'src/features';
+import { CrossChainSupportedInstantTradeProvider } from '@features/cross-chain/models/cross-chain-supported-instant-trade';
 
 export interface ProviderData {
-    provider: UniswapV2AbstractProvider;
+    provider: CrossChainSupportedInstantTradeProvider;
     methodSuffix: string;
 }

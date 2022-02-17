@@ -24,13 +24,13 @@ import { notNull } from '@common/utils/object';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { combineOptions } from '@common/utils/options';
-import { UniswapV2AbstractTrade } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { getPriceTokensFromInputTokens } from '@common/utils/tokens';
+import { CrossChainSupportedInstantTrade } from '@features/cross-chain/models/cross-chain-supported-instant-trade';
 
 interface InstantTradeCalculatedTrade {
     toAmount: BigNumber;
     providerIndex: number;
-    instantTrade: UniswapV2AbstractTrade;
+    instantTrade: CrossChainSupportedInstantTrade;
 }
 
 export class CrossChainManager {
@@ -121,7 +121,8 @@ export class CrossChainManager {
         );
 
         const { toTransitTokenAmount, transitFeeToken } = await this.getToTransitTokenAmount(
-            fromTrade
+            fromTrade,
+            toBlockchain
         );
 
         const toTrade = await this.calculateBestTrade(
@@ -196,14 +197,17 @@ export class CrossChainManager {
         );
     }
 
-    private async getToTransitTokenAmount(fromTrade: ContractTrade): Promise<{
+    private async getToTransitTokenAmount(
+        fromTrade: ContractTrade,
+        toBlockchain: CrossChainSupportedBlockchain
+    ): Promise<{
         toTransitTokenAmount: BigNumber;
         transitFeeToken: PriceTokenAmount;
     }> {
         const fromTransitToken = fromTrade.toToken;
         const fromTransitTokenMinAmount = fromTrade.toTokenAmountMin;
 
-        const feeInPercents = await fromTrade.contract.getFeeInPercents();
+        const feeInPercents = await this.contracts(toBlockchain).getFeeInPercents();
         const transitFeeToken = new PriceTokenAmount({
             ...fromTransitToken.asStruct,
             tokenAmount: fromTransitTokenMinAmount.multipliedBy(feeInPercents).dividedBy(100)
@@ -306,7 +310,7 @@ export class CrossChainManager {
             return transitTokenAmount;
         }
 
-        const instantTrade = await fromTrade.provider.calculateExactOutput(
+        const tokenAmount = await fromTrade.provider.calculateExactOutputAmount(
             fromTrade.fromToken,
             new PriceTokenAmount({
                 ...transitToken,
@@ -317,7 +321,7 @@ export class CrossChainManager {
                 gasCalculation: 'disabled'
             }
         );
-        return instantTrade.from.tokenAmount;
+        return tokenAmount;
     }
 
     private async getCryptoFeeTokenAndGasData(

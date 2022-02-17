@@ -142,7 +142,7 @@ export class CrossChainTrade {
                 : 0;
         this.to = new PriceTokenAmount({
             ...this.toTrade.toToken.asStruct,
-            weiAmount: this.toTrade.toToken.weiAmountPlusSlippage(fromSlippage)
+            weiAmount: this.toTrade.toToken.weiAmount.dividedBy(1 - fromSlippage).dp(0)
         });
 
         this.toTokenAmountMin = this.toTrade.toTokenAmountMin;
@@ -242,7 +242,7 @@ export class CrossChainTrade {
     }
 
     private checkToContractBalance(): Promise<void | never> {
-        return this.fromWeb3Public.checkBalance(
+        return this.toWeb3Public.checkBalance(
             this.toTrade.fromToken,
             this.fromTrade.fromToken.tokenAmount,
             this.toTrade.contract.address

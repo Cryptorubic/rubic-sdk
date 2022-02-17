@@ -31,6 +31,8 @@ export class AlgebraTrade extends UniswapV3AlgebraAbstractTrade {
 
     private readonly route: AlgebraRoute;
 
+    public readonly wrappedPath: ReadonlyArray<Token>;
+
     public readonly path: ReadonlyArray<Token>;
 
     constructor(tradeStruct: AlgebraTradeStruct) {
@@ -38,6 +40,7 @@ export class AlgebraTrade extends UniswapV3AlgebraAbstractTrade {
 
         this.route = tradeStruct.route;
 
+        this.wrappedPath = this.route.path;
         this.path = createTokenNativeAddressProxyInPathStartAndEnd(
             this.route.path,
             Web3Pure.nativeTokenAddress
@@ -48,33 +51,36 @@ export class AlgebraTrade extends UniswapV3AlgebraAbstractTrade {
      * Returns swap `exactInput` method's name and arguments to use in Swap contract.
      */
     protected getSwapRouterExactInputMethodData(walletAddress: string): MethodData {
-        const amountOutMin = this.to.weiAmountMinusSlippage(this.slippageTolerance).toFixed(0);
+        const amountParams = this.getAmountParams();
 
         if (this.route.path.length === 2) {
+            const methodName = this.exact === 'input' ? 'exactInputSingle' : 'exactOutputSingle';
+
             return {
-                methodName: 'exactInputSingle',
+                methodName,
                 methodArguments: [
                     [
                         this.route.path[0].address,
                         this.route.path[1].address,
                         walletAddress,
                         this.deadlineMinutesTimestamp,
-                        this.from.stringWeiAmount,
-                        amountOutMin,
+                        ...amountParams,
                         0
                     ]
                 ]
             };
         }
+
+        const methodName = this.exact === 'input' ? 'exactInput' : 'exactOutput';
+
         return {
-            methodName: 'exactInput',
+            methodName,
             methodArguments: [
                 [
                     AlgebraQuoterController.getEncodedPath(this.route.path),
                     walletAddress,
                     this.deadlineMinutesTimestamp,
-                    this.from.stringWeiAmount,
-                    amountOutMin
+                    ...amountParams
                 ]
             ]
         };
