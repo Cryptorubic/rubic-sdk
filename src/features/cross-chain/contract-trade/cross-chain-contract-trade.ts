@@ -10,7 +10,7 @@ import { ProviderData } from '@features/cross-chain/contract-data/models/provide
 import { CrossChainSupportedInstantTradeProvider } from '@features/cross-chain/models/cross-chain-supported-instant-trade';
 import { crossChainContractAbiV3 } from '@features/cross-chain/contract-trade/constants/cross-chain-contract-abi-v3';
 import { UniswapV3AlgebraAbstractProvider } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
-import { OneinchAbstractProvider } from '@features/swap/dexes/common/oneinch-common/oneinch-abstract-provider';
+import { UniswapV2AbstractProvider } from '@features/swap/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
 import { crossChainContractAbiInch } from '@features/cross-chain/contract-trade/constants/cross-chain-contract-abi-inch';
 
 enum TO_OTHER_BLOCKCHAIN_SWAP_METHOD {
@@ -23,7 +23,7 @@ enum TO_USER_SWAP_METHOD {
     SWAP_CRYPTO = 'swapCryptoToUserWithFee'
 }
 
-export abstract class ContractTrade {
+export abstract class CrossChainContractTrade {
     public abstract readonly fromToken: PriceTokenAmount;
 
     public abstract readonly toToken: PriceTokenAmount;
@@ -56,21 +56,7 @@ export abstract class ContractTrade {
         let methodName: string = this.fromToken.isNative
             ? TO_OTHER_BLOCKCHAIN_SWAP_METHOD.SWAP_CRYPTO
             : TO_OTHER_BLOCKCHAIN_SWAP_METHOD.SWAP_TOKENS;
-        let contractAbiMethod = {
-            ...crossChainContractAbiV2.find(method => method.name === methodName)!
-        };
-
-        if (this.provider instanceof UniswapV3AlgebraAbstractProvider) {
-            contractAbiMethod = {
-                ...crossChainContractAbiV3.find(method => method.name!.startsWith(methodName))!
-            };
-        }
-
-        if (this.provider instanceof OneinchAbstractProvider) {
-            contractAbiMethod = {
-                ...crossChainContractAbiInch.find(method => method.name!.startsWith(methodName))!
-            };
-        }
+        const contractAbiMethod = this.getAbiMethodByProvider(methodName);
 
         methodName += this.providerData.methodSuffix;
         contractAbiMethod.name = methodName;
@@ -81,11 +67,29 @@ export abstract class ContractTrade {
         };
     }
 
+    private getAbiMethodByProvider(methodName: string): AbiItem {
+        if (this.provider instanceof UniswapV2AbstractProvider) {
+            return {
+                ...crossChainContractAbiV2.find(method => method.name === methodName)!
+            };
+        }
+
+        if (this.provider instanceof UniswapV3AlgebraAbstractProvider) {
+            return {
+                ...crossChainContractAbiV3.find(method => method.name!.startsWith(methodName))!
+            };
+        }
+
+        return {
+            ...crossChainContractAbiInch.find(method => method.name!.startsWith(methodName))!
+        };
+    }
+
     /**
      * Returns method's arguments to use in source network.
      */
     public async getMethodArguments(
-        toContractTrade: ContractTrade,
+        toContractTrade: CrossChainContractTrade,
         walletAddress: string
     ): Promise<unknown[]> {
         const toNumOfBlockchain = await toContractTrade.contract.getNumOfBlockchain();

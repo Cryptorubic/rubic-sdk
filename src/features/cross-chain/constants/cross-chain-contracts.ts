@@ -71,7 +71,7 @@ export const crossChainContractsData = {
         ]
     },
     [BLOCKCHAIN_NAME.POLYGON]: {
-        address: '0xe6625BBE80710C7Bb473721EdAC24Ce326940a6f',
+        address: '0xeC52A30E4bFe2D6B0ba1D0dbf78f265c0a119286',
         providersData: [
             {
                 ProviderClass: QuickSwapProvider,

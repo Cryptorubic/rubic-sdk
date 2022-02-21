@@ -1,4 +1,4 @@
-import { ContractTrade } from '@features/cross-chain/contract-trade/contract-trade';
+import { CrossChainContractTrade } from '@features/cross-chain/contract-trade/cross-chain-contract-trade';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@core/sdk/injector';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
@@ -20,12 +20,12 @@ import { WalletNotConnectedError } from '@common/errors/swap/wallet-not-connecte
 import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
 import { ContractParams } from '@features/cross-chain/cross-chain-trade/models/contract-params';
 import { BasicTransactionOptions } from 'src/core';
-import { InstantTradeContractTrade } from '@features/cross-chain/contract-trade/instant-trade-contract-trade';
+import { ItCrossChainContractTrade } from '@features/cross-chain/contract-trade/it-contract-trade/it-cross-chain-contract-trade';
 
 export class CrossChainTrade {
     public static async getGasData(
-        fromTrade: ContractTrade,
-        toTrade: ContractTrade,
+        fromTrade: CrossChainContractTrade,
+        toTrade: CrossChainContractTrade,
         cryptoFeeToken: PriceTokenAmount
     ): Promise<GasData | null> {
         const fromBlockchain = fromTrade.blockchain;
@@ -71,9 +71,9 @@ export class CrossChainTrade {
         }
     }
 
-    private readonly fromTrade: ContractTrade;
+    private readonly fromTrade: CrossChainContractTrade;
 
-    private readonly toTrade: ContractTrade;
+    private readonly toTrade: CrossChainContractTrade;
 
     public readonly cryptoFeeToken: PriceTokenAmount;
 
@@ -109,7 +109,7 @@ export class CrossChainTrade {
         priceImpactFrom: number | null;
         priceImpactTo: number | null;
     } {
-        const calculatePriceImpact = (trade: ContractTrade): number | null => {
+        const calculatePriceImpact = (trade: CrossChainContractTrade): number | null => {
             return trade.fromToken.calculatePriceImpactPercent(trade.toToken);
         };
 
@@ -120,8 +120,8 @@ export class CrossChainTrade {
     }
 
     constructor(crossChainTrade: {
-        fromTrade: ContractTrade;
-        toTrade: ContractTrade;
+        fromTrade: CrossChainContractTrade;
+        toTrade: CrossChainContractTrade;
         cryptoFeeToken: PriceTokenAmount;
         transitFeeToken: PriceTokenAmount;
         minMaxAmountsErrors: MinMaxAmountsErrors;
@@ -137,7 +137,7 @@ export class CrossChainTrade {
         this.from = this.fromTrade.fromToken;
 
         const fromSlippage =
-            this.fromTrade instanceof InstantTradeContractTrade
+            this.fromTrade instanceof ItCrossChainContractTrade
                 ? this.fromTrade.slippageTolerance
                 : 0;
         this.to = new PriceTokenAmount({

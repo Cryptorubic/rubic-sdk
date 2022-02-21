@@ -1,11 +1,11 @@
 import { CrossChainSupportedBlockchain } from '@features/cross-chain/constants/cross-chain-supported-blockchains';
 import { CrossChainContractData } from '@features/cross-chain/contract-data/cross-chain-contract-data';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { ContractTrade } from '@features/cross-chain/contract-trade/contract-trade';
+import { CrossChainContractTrade } from '@features/cross-chain/contract-trade/cross-chain-contract-trade';
 import BigNumber from 'bignumber.js';
 import { Web3Pure } from 'src/core';
 
-export class DirectContractTrade extends ContractTrade {
+export class DirectCrossChainContractTrade extends CrossChainContractTrade {
     public readonly fromToken: PriceTokenAmount;
 
     public readonly toToken: PriceTokenAmount;
