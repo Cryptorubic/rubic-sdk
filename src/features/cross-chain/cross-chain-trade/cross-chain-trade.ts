@@ -21,6 +21,8 @@ import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
 import { ContractParams } from '@features/cross-chain/cross-chain-trade/models/contract-params';
 import { BasicTransactionOptions } from 'src/core';
 import { InstantTradeContractTrade } from '@features/cross-chain/contract-trade/instant-trade-contract-trade';
+import { EncodeTransactionOptions } from 'src/features';
+import { TransactionConfig } from 'web3-core';
 
 export class CrossChainTrade {
     public static async getGasData(
@@ -358,5 +360,24 @@ export class CrossChainTrade {
             throw new InsufficientFundsGasPriceValueError();
         }
         throw err;
+    }
+
+    public async encode(options: EncodeTransactionOptions = {}): Promise<TransactionConfig> {
+        const { gasLimit, gasPrice } = options;
+
+        const { contractAddress, contractAbi, methodName, methodArguments, value } =
+            await this.getContractParams();
+
+        return Web3Pure.encodeMethodCall(
+            contractAddress,
+            contractAbi,
+            methodName,
+            methodArguments,
+            value,
+            {
+                gas: gasLimit || undefined,
+                gasPrice: gasPrice || undefined
+            }
+        );
     }
 }
