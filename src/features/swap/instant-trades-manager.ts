@@ -1,6 +1,7 @@
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { notNull } from '@common/utils/object';
 import { combineOptions } from '@common/utils/options';
+import pTimeout from '@common/utils/p-timeout';
 import { Mutable } from '@common/utils/types/mutable';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
@@ -29,7 +30,6 @@ import { InstantTradeProvider } from '@features/swap/instant-trade-provider';
 import { SwapManagerCalculationOptions } from '@features/swap/models/swap-manager-calculation-options';
 import { TradeType } from '@features/swap/models/trade-type';
 import { TypedTradeProviders } from '@features/swap/models/typed-trade-provider';
-import pTimeout from 'p-timeout';
 import { InstantTrade } from 'src/features';
 import { MarkRequired } from 'ts-essentials';
 import { ZrxEthereumProvider } from '@features/swap/dexes/ethereum/zrx-ethereum/zrx-ethereum-provider';
