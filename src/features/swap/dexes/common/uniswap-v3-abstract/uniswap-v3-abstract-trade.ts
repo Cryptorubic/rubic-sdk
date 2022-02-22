@@ -26,7 +26,7 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
 
     protected readonly unwrapWethMethodName = 'unwrapWETH9';
 
-    private readonly route: UniswapV3Route;
+    public readonly route: UniswapV3Route;
 
     @Cache
     public get path(): ReadonlyArray<Token> {
@@ -58,9 +58,11 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
      * Returns swap `exactInput` method's name and arguments to use in Swap contract.
      */
     protected getSwapRouterExactInputMethodData(walletAddress: string): MethodData {
-        const amountOutMin = this.to.weiAmountMinusSlippage(this.slippageTolerance).toFixed(0);
+        const amountParams = this.getAmountParams();
 
         if (this.route.poolsPath.length === 1) {
+            const methodName = this.exact === 'input' ? 'exactInputSingle' : 'exactOutputSingle';
+
             const pool = this.route.poolsPath[0];
             const toTokenAddress = compareAddresses(
                 pool.token0.address,
@@ -70,7 +72,7 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
                 : pool.token0.address;
 
             return {
-                methodName: 'exactInputSingle',
+                methodName,
                 methodArguments: [
                     [
                         this.route.initialTokenAddress,
@@ -78,15 +80,17 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
                         this.route.poolsPath[0].fee,
                         walletAddress,
                         this.deadlineMinutesTimestamp,
-                        this.from.stringWeiAmount,
-                        amountOutMin,
+                        ...amountParams,
                         0
                     ]
                 ]
             };
         }
+
+        const methodName = this.exact === 'input' ? 'exactInput' : 'exactOutput';
+
         return {
-            methodName: 'exactInput',
+            methodName,
             methodArguments: [
                 [
                     UniswapV3QuoterController.getEncodedPoolsPath(
@@ -95,8 +99,7 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
                     ),
                     walletAddress,
                     this.deadlineMinutesTimestamp,
-                    this.from.stringWeiAmount,
-                    amountOutMin
+                    ...amountParams
                 ]
             ]
         };

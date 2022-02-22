@@ -23,10 +23,13 @@ import {
     DEFAULT_ESTIMATED_GAS,
     WETH_TO_ETH_ESTIMATED_GAS
 } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/constants/estimated-gas';
+import { Exact } from '@features/swap/models/exact';
+import { getFromToTokensAmountsByExact } from '@features/swap/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
 
 export interface UniswapV3AlgebraTradeStruct {
     from: PriceTokenAmount;
     to: PriceTokenAmount;
+    exact: Exact;
     slippageTolerance: number;
     deadlineMinutes: number;
     gasFeeInfo?: GasFeeInfo | null;
@@ -59,12 +62,22 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
     }
 
     public static async estimateGasLimitForRoute(
-        from: PriceTokenAmount,
+        fromToken: PriceToken,
         toToken: PriceToken,
+        exact: Exact,
+        weiAmount: BigNumber,
         options: Required<SwapOptions>,
         route: UniswapV3AlgebraRoute
     ): Promise<BigNumber> {
-        const estimateGasParams = this.getEstimateGasParams(from, toToken, options, route);
+        const { from, to } = getFromToTokensAmountsByExact(
+            fromToken,
+            toToken,
+            exact,
+            weiAmount,
+            route.outputAbsoluteAmount
+        );
+
+        const estimateGasParams = this.getEstimateGasParams(from, to, exact, options, route);
         let gasLimit = estimateGasParams.defaultGasLimit;
 
         const walletAddress = Injector.web3Private.address;
@@ -87,21 +100,30 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
     }
 
     public static async estimateGasLimitForRoutes(
-        from: PriceTokenAmount,
+        fromToken: PriceToken,
         toToken: PriceToken,
+        exact: Exact,
+        weiAmount: BigNumber,
         options: Required<SwapOptions>,
         routes: UniswapV3AlgebraRoute[]
     ): Promise<BigNumber[]> {
-        const routesEstimateGasParams = routes.map(route =>
-            this.getEstimateGasParams(from, toToken, options, route)
-        );
+        const routesEstimateGasParams = routes.map(route => {
+            const { from, to } = getFromToTokensAmountsByExact(
+                fromToken,
+                toToken,
+                exact,
+                weiAmount,
+                route.outputAbsoluteAmount
+            );
+            return this.getEstimateGasParams(from, to, exact, options, route);
+        });
         const gasLimits = routesEstimateGasParams.map(
             estimateGasParams => estimateGasParams.defaultGasLimit
         );
 
         const walletAddress = Injector.web3Private.address;
         if (walletAddress) {
-            const web3Public = Injector.web3PublicService.getWeb3Public(from.blockchain);
+            const web3Public = Injector.web3PublicService.getWeb3Public(fromToken.blockchain);
             const estimatedGasLimits = await web3Public.batchEstimatedGas(
                 this.contractAbi,
                 this.contractAddress,
@@ -120,7 +142,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
 
     private static getEstimateGasParams(
         from: PriceTokenAmount,
-        toToken: PriceToken,
+        to: PriceTokenAmount,
+        exact: Exact,
         options: Required<SwapOptions>,
         route: UniswapV3AlgebraRoute
     ) {
@@ -128,10 +151,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
             // @ts-ignore
             return new this({
                 from,
-                to: new PriceTokenAmount({
-                    ...toToken.asStruct,
-                    weiAmount: route.outputAbsoluteAmount
-                }),
+                to,
+                exact,
                 slippageTolerance: options.slippageTolerance,
                 deadlineMinutes: options.deadlineMinutes,
                 route
@@ -149,6 +170,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
     public readonly from: PriceTokenAmount;
 
     public readonly to: PriceTokenAmount;
+
+    protected readonly exact: Exact;
 
     public readonly gasFeeInfo: GasFeeInfo | null;
 
@@ -177,9 +200,20 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
+        this.exact = tradeStruct.exact;
         this.gasFeeInfo = tradeStruct.gasFeeInfo || null;
         this.slippageTolerance = tradeStruct.slippageTolerance;
         this.deadlineMinutes = tradeStruct.deadlineMinutes;
+    }
+
+    protected getAmountParams(): [string, string] {
+        if (this.exact === 'input') {
+            const amountOutMin = this.to.weiAmountMinusSlippage(this.slippageTolerance).toFixed(0);
+            return [this.from.stringWeiAmount, amountOutMin];
+        }
+
+        const amountInMax = this.from.weiAmountPlusSlippage(this.slippageTolerance).toFixed(0);
+        return [this.to.stringWeiAmount, amountInMax];
     }
 
     /**

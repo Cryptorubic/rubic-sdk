@@ -10,6 +10,7 @@ import {
     SOLARBEAM_CONTRACT_ADDRESS
 } from '@features/swap/dexes/moonriver/solarbeam/constants';
 import { TRADE_TYPE, TradeType } from 'src/features';
+import { Exact } from '@features/swap/models/exact';
 
 export class SolarbeamTrade extends UniswapV2AbstractTrade {
     public static readonly contractAbi = SOLARBEAM_CONTRACT_ABI;
@@ -20,7 +21,7 @@ export class SolarbeamTrade extends UniswapV2AbstractTrade {
 
     public static callForRoutes(
         blockchain: BLOCKCHAIN_NAME,
-        exact: 'input' | 'output',
+        exact: Exact,
         routesMethodArguments: [string, string[]][]
     ): Promise<ContractMulticallResponse<{ amounts: string[] }>[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);

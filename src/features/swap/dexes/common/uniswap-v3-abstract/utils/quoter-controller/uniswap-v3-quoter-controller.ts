@@ -1,6 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { PriceToken } from '@core/blockchain/tokens/price-token';
 import {
     FeeAmount,
     LiquidityPool
@@ -26,11 +24,14 @@ import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { Injector } from '@core/sdk/injector';
 import { UniswapV3RouterConfiguration } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
 import { UniswapV3AlgebraQuoterController } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
+import { Exact } from '@features/swap/models/exact';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
-    from: PriceTokenAmount;
-    toToken: Token;
+    from: Token;
+    to: Token;
+    exact: Exact;
+    weiAmount: string;
     maxTransitTokens: number;
 }
 
@@ -64,41 +65,49 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
     /**
      * Returns swap method's name and arguments to pass it to Quoter contract.
      * @param poolsPath Pools, included in the route.
-     * @param from From token and amount.
-     * @param toToken To token.
+     * @param from From token.
+     * @param to To token.
+     * @param exact Is exact input or output trade.
+     * @param weiAmount Amount of tokens to trade.
      */
     @Cache
     private static getQuoterMethodData(
         poolsPath: LiquidityPool[],
-        from: PriceTokenAmount,
-        toToken: Token
+        from: Token,
+        to: Token,
+        exact: Exact,
+        weiAmount: string
     ): {
         poolsPath: LiquidityPool[];
         methodData: MethodData;
     } {
         if (poolsPath.length === 1) {
+            const methodName =
+                exact === 'input' ? 'quoteExactInputSingle' : 'quoteExactOutputSingle';
             const sqrtPriceLimitX96 = 0;
             return {
                 poolsPath,
                 methodData: {
-                    methodName: 'quoteExactInputSingle',
+                    methodName,
                     methodArguments: [
                         from.address,
-                        toToken.address,
+                        to.address,
                         poolsPath[0].fee,
-                        from.stringWeiAmount,
+                        weiAmount,
                         sqrtPriceLimitX96
                     ]
                 }
             };
         }
+
+        const methodName = exact === 'input' ? 'quoteExactInput' : 'quoteExactOutput';
         return {
             poolsPath,
             methodData: {
-                methodName: 'quoteExactInput',
+                methodName,
                 methodArguments: [
                     UniswapV3QuoterController.getEncodedPoolsPath(poolsPath, from.address),
-                    from.stringWeiAmount
+                    weiAmount
                 ]
             }
         };
@@ -229,22 +238,20 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
             .concat(routerLiquidityPools);
     }
 
-    /**
-     * Returns all routes between given tokens with output amount.
-     * @param from From token and amount.
-     * @param toToken To token.
-     * @param routeMaxTransitTokens Max amount of transit tokens.
-     */
     public async getAllRoutes(
-        from: PriceTokenAmount,
-        toToken: PriceToken,
+        from: Token,
+        to: Token,
+        exact: Exact,
+        weiAmount: string,
         routeMaxTransitTokens: number
     ): Promise<UniswapV3Route[]> {
-        const routesLiquidityPools = await this.getAllLiquidityPools(from, toToken);
+        const routesLiquidityPools = await this.getAllLiquidityPools(from, to);
         const options: Omit<GetQuoterMethodsDataOptions, 'maxTransitTokens'> = {
             routesLiquidityPools,
             from,
-            toToken
+            to,
+            exact,
+            weiAmount
         };
         const quoterMethodsData = [...Array(routeMaxTransitTokens + 1)]
             .map((_, maxTransitTokens) =>
@@ -289,14 +296,20 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
         path: LiquidityPool[],
         lastTokenAddress: string
     ): { poolsPath: LiquidityPool[]; methodData: MethodData }[] {
-        const { routesLiquidityPools, from, toToken, maxTransitTokens } = options;
+        const { routesLiquidityPools, from, to, exact, weiAmount, maxTransitTokens } = options;
 
         if (path.length === maxTransitTokens) {
             const pools = routesLiquidityPools.filter(pool =>
-                pool.isPoolWithTokens(lastTokenAddress, toToken.address)
+                pool.isPoolWithTokens(lastTokenAddress, to.address)
             );
             return pools.map(pool =>
-                UniswapV3QuoterController.getQuoterMethodData(path.concat(pool), from, toToken)
+                UniswapV3QuoterController.getQuoterMethodData(
+                    path.concat(pool),
+                    from,
+                    to,
+                    exact,
+                    weiAmount
+                )
             );
         }
 
