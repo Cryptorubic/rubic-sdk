@@ -20,6 +20,7 @@ import { TransactionConfig } from 'web3-core';
 import { LowSlippageError } from '@common/errors/swap/low-slippage.error';
 import { EncodeFromAddressTransactionOptions } from '@features/swap/models/encode-transaction-options';
 import { OptionsGasParams, TransactionGasParams } from '@features/swap/models/gas-params';
+import { OneinchSwapRequest } from '@features/swap/dexes/common/oneinch-common/models/oneinch-swap-request';
 
 type OneinchTradeStruct = {
     contractAddress: string;
@@ -163,13 +164,14 @@ export class OneinchTrade extends InstantTrade {
     }
 
     private getTradeData(fromAddress?: string): Promise<OneinchSwapResponse> {
-        const swapRequest = {
+        const swapRequest: OneinchSwapRequest = {
             params: {
                 fromTokenAddress: this.nativeSupportedFrom.address,
                 toTokenAddress: this.nativeSupportedTo.address,
                 amount: this.nativeSupportedFrom.stringWeiAmount,
                 slippage: (this.slippageTolerance * 100).toString(),
                 fromAddress: fromAddress || this.walletAddress,
+                disableEstimate: false,
                 ...(this.disableMultihops && { mainRouteParts: '1' })
             }
         };

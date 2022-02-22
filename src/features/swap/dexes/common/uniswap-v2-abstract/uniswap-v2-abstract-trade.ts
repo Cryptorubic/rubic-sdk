@@ -33,11 +33,12 @@ import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
 import { EncodeFromAddressTransactionOptions } from '@features/swap/models/encode-transaction-options';
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
+import { Exact } from 'src/features/swap/models/exact';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount;
     to: PriceTokenAmount;
-    exact: 'input' | 'output';
+    exact: Exact;
     wrappedPath: ReadonlyArray<Token> | Token[];
     deadlineMinutes: number;
     slippageTolerance: number;
@@ -47,7 +48,7 @@ export type UniswapV2TradeStruct = {
 export abstract class UniswapV2AbstractTrade extends InstantTrade {
     @Cache
     public static getContractAddress(blockchain: BLOCKCHAIN_NAME): string {
-        // see  https://github.com/microsoft/TypeScript/issues/34516
+        // see https://github.com/microsoft/TypeScript/issues/34516
         // @ts-ignore
         const instance = new this({
             from: { blockchain },
@@ -71,7 +72,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     public static callForRoutes(
         blockchain: BLOCKCHAIN_NAME,
-        exact: 'input' | 'output',
+        exact: Exact,
         routesMethodArguments: [string, string[]][]
     ): Promise<ContractMulticallResponse<{ amounts: string[] }>[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
@@ -98,7 +99,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     public readonly wrappedPath: ReadonlyArray<Token>;
 
-    public readonly exact: 'input' | 'output';
+    public readonly exact: Exact;
 
     public get type(): TradeType {
         return (this.constructor as typeof UniswapV2AbstractTrade).type;
