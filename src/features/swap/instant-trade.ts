@@ -122,7 +122,7 @@ export abstract class InstantTrade {
         }
     }
 
-    protected getGasLimit(options?: { gasLimit?: string | null }): string | undefined {
+    protected getGasLimit(options?: { gasLimit?: string }): string | undefined {
         if (options?.gasLimit) {
             return options.gasLimit;
         }
@@ -132,12 +132,12 @@ export abstract class InstantTrade {
         return undefined;
     }
 
-    protected getGasPrice(options?: { gasPrice?: string | null }): string | undefined {
+    protected getGasPrice(options?: { gasPrice?: string }): string | undefined {
         if (options?.gasPrice) {
             return options.gasPrice;
         }
         if (this.gasFeeInfo?.gasPrice?.isFinite()) {
-            return this.gasFeeInfo.gasPrice.toFixed(0);
+            return this.gasFeeInfo.gasPrice.toFixed();
         }
         return undefined;
     }

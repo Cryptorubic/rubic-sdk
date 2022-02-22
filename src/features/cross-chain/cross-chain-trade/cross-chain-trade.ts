@@ -325,8 +325,8 @@ export class CrossChainTrade {
                 methodName,
                 methodArguments,
                 {
-                    gas: gasLimit || undefined,
-                    gasPrice: gasPrice || undefined,
+                    gas: gasLimit,
+                    gasPrice,
                     value,
                     onTransactionHash
                 },
@@ -376,8 +376,8 @@ export class CrossChainTrade {
             methodArguments,
             value,
             {
-                gas: gasLimit || undefined,
-                gasPrice: gasPrice || undefined
+                gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
+                gasPrice: gasPrice || this.gasData?.gasPrice.toFixed()
             }
         );
     }

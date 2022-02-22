@@ -307,7 +307,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         };
     }
 
-    protected getGasLimit(options?: { gasLimit?: string | null }): string {
+    protected getGasLimit(options?: { gasLimit?: string }): string {
         const gasLimit = super.getGasLimit(options);
         if (gasLimit) {
             return gasLimit;
