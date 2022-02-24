@@ -4,7 +4,6 @@ import { Injector } from '@core/sdk/injector';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { GasData } from '@features/cross-chain/models/gas-data';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
-import { MinMaxAmountsErrors } from '@features/cross-chain/cross-chain-trade/models/min-max-amounts-errors';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { CrossChainIsUnavailableError } from '@common/errors/cross-chain/cross-chain-is-unavailable.error';
 import { MaxGasPriceOverflowError } from '@common/errors/cross-chain/max-gas-price-overflow.error';
@@ -41,7 +40,6 @@ export class CrossChainTrade {
                     toTrade,
                     cryptoFeeToken,
                     transitFeeToken: {} as PriceTokenAmount,
-                    minMaxAmountsErrors: {},
                     gasData: null
                 }).getContractParams();
 
@@ -78,8 +76,6 @@ export class CrossChainTrade {
     public readonly cryptoFeeToken: PriceTokenAmount;
 
     public readonly transitFeeToken: PriceTokenAmount;
-
-    private readonly minMaxAmountsErrors: MinMaxAmountsErrors;
 
     private readonly gasData: GasData | null;
 
@@ -124,14 +120,12 @@ export class CrossChainTrade {
         toTrade: CrossChainContractTrade;
         cryptoFeeToken: PriceTokenAmount;
         transitFeeToken: PriceTokenAmount;
-        minMaxAmountsErrors: MinMaxAmountsErrors;
         gasData: GasData | null;
     }) {
         this.fromTrade = crossChainTrade.fromTrade;
         this.toTrade = crossChainTrade.toTrade;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.transitFeeToken = crossChainTrade.transitFeeToken;
-        this.minMaxAmountsErrors = crossChainTrade.minMaxAmountsErrors;
         this.gasData = crossChainTrade.gasData;
 
         this.from = this.fromTrade.fromToken;
@@ -267,13 +261,6 @@ export class CrossChainTrade {
             this.checkToContractBalance(),
             this.checkUserBalance()
         ]);
-
-        if (this.minMaxAmountsErrors.minAmount) {
-            throw new Error(`Minimum amount is ${this.minMaxAmountsErrors.minAmount}`);
-        }
-        if (this.minMaxAmountsErrors.maxAmount) {
-            throw new Error(`Maximum amount is ${this.minMaxAmountsErrors.maxAmount}`);
-        }
     }
 
     private async getContractParams(): Promise<ContractParams> {
