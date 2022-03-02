@@ -1,6 +1,6 @@
 export interface EncodeTransactionOptions {
-    gasPrice?: string | null;
-    gasLimit?: string | null;
+    gasPrice?: string;
+    gasLimit?: string;
 }
 
 export interface EncodeFromAddressTransactionOptions extends EncodeTransactionOptions {
