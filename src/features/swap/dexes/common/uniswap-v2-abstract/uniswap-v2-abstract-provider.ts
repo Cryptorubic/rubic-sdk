@@ -13,6 +13,7 @@ import BigNumber from 'bignumber.js';
 import { UniswapCalculatedInfo } from '@features/swap/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
 import { createTokenNativeAddressProxy } from '@features/swap/dexes/common/utils/token-native-address-proxy';
 import { TradeType } from 'src/features';
+import { Exact } from '@features/swap/models/exact';
 
 export abstract class UniswapV2AbstractProvider<
     T extends UniswapV2AbstractTrade = UniswapV2AbstractTrade
@@ -50,11 +51,19 @@ export abstract class UniswapV2AbstractProvider<
         return this.calculateDifficultTrade(from, to, to.weiAmount, 'output', options);
     }
 
+    public async calculateExactOutputAmount(
+        from: PriceToken,
+        to: PriceTokenAmount,
+        options?: SwapCalculationOptions
+    ): Promise<BigNumber> {
+        return (await this.calculateExactOutput(from, to, options)).from.tokenAmount;
+    }
+
     public async calculateDifficultTrade(
         from: PriceToken,
         to: PriceToken,
         weiAmount: BigNumber,
-        exact: 'input' | 'output',
+        exact: Exact,
         options?: SwapCalculationOptions
     ): Promise<UniswapV2AbstractTrade> {
         const fullOptions: Required<SwapCalculationOptions> = combineOptions(
@@ -106,7 +115,7 @@ export abstract class UniswapV2AbstractProvider<
         from: PriceToken,
         to: PriceToken,
         weiAmount: BigNumber,
-        exact: 'input' | 'output',
+        exact: Exact,
         options: Required<SwapCalculationOptions>,
         gasPriceInUsd: BigNumber | undefined
     ): Promise<UniswapCalculatedInfo> {

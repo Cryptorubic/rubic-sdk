@@ -19,6 +19,7 @@ import { InstantTradeProvider } from '@features/swap/instant-trade-provider';
 import { SwapCalculationOptions } from '@features/swap/models/swap-calculation-options';
 import { createTokenNativeAddressProxy } from '@features/swap/dexes/common/utils/token-native-address-proxy';
 import { Cache } from 'src/common';
+import { BlockchainsInfo } from 'src/core';
 
 type OneinchSwapCalculationOptions = Omit<SwapCalculationOptions, 'deadlineMinutes'>;
 
@@ -64,6 +65,14 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
             address: string;
         }>(`${this.apiBaseUrl}/approve/spender`);
         return response.address;
+    }
+
+    public async calculateExactOutputAmount(
+        from: PriceToken,
+        to: PriceTokenAmount,
+        options?: OneinchSwapCalculationOptions
+    ): Promise<BigNumber> {
+        return (await this.calculate(to, from, options)).to.tokenAmount;
     }
 
     public async calculate(
@@ -121,7 +130,11 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         from: PriceTokenAmount,
         toToken: Token,
         options: Required<OneinchSwapCalculationOptions>
-    ): Promise<{ toTokenAmountInWei: BigNumber; estimatedGas: BigNumber; path: Token[] }> {
+    ): Promise<{
+        toTokenAmountInWei: BigNumber;
+        estimatedGas: BigNumber;
+        path: Token[];
+    }> {
         const quoteTradeParams: OneinchQuoteRequest = {
             params: {
                 fromTokenAddress: from.address,
@@ -135,13 +148,20 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         let estimatedGas: BigNumber;
         let toTokenAmount: string;
         try {
-            await OneinchTrade.checkIfNeedApproveAndThrowError(from);
+            if (!this.walletAddress) {
+                throw new Error('Address is not set');
+            }
+
+            if (options.gasCalculation !== 'disabled') {
+                await OneinchTrade.checkIfNeedApproveAndThrowError(from);
+            }
 
             const swapTradeParams: OneinchSwapRequest = {
                 params: {
                     ...quoteTradeParams.params,
                     slippage: (options.slippageTolerance * 100).toString(),
-                    fromAddress: this.walletAddress
+                    fromAddress: this.walletAddress,
+                    disableEstimate: options.gasCalculation === 'disabled'
                 }
             };
             oneInchTrade = await this.httpClient.get<OneinchSwapResponse>(
@@ -181,7 +201,21 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         const addressesPath = oneInchTrade.protocols[0].map(protocol => protocol[0].toTokenAddress);
         addressesPath.pop();
 
-        const tokensPath = await Token.createTokens(addressesPath, this.blockchain);
+        const tokensPathWithoutNative = await Token.createTokens(
+            addressesPath.filter(tokenAddress => tokenAddress !== oneinchApiParams.nativeAddress),
+            this.blockchain
+        );
+        let tokensPathWithoutNativeIndex = 0;
+        const tokensPath = addressesPath.map(tokenAddress => {
+            if (tokenAddress === oneinchApiParams.nativeAddress) {
+                return BlockchainsInfo.getBlockchainByName(this.blockchain).nativeCoin;
+            }
+
+            const token = tokensPathWithoutNative[tokensPathWithoutNativeIndex];
+            tokensPathWithoutNativeIndex++;
+
+            return token;
+        });
 
         return [fromToken, ...tokensPath, toToken];
     }

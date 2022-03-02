@@ -21,6 +21,8 @@ import { GasPriceApi } from '@common/http/gas-price-api';
 import { AlgebraTrade } from '@features/swap/dexes/polygon/algebra/algebra-trade';
 import { UniswapV3TradeClass } from '@features/swap/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-class';
 import { UniswapV3AlgebraRoute } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
+import { Exact } from '@features/swap/models/exact';
+import { getFromToTokensAmountsByExact } from '@features/swap/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
@@ -52,10 +54,36 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         toToken: PriceToken,
         options?: SwapCalculationOptions
     ): Promise<T> {
+        return this.calculateDifficultTrade(from, toToken, 'input', from.weiAmount, options);
+    }
+
+    public async calculateExactOutput(
+        fromToken: PriceToken,
+        to: PriceTokenAmount,
+        options?: SwapCalculationOptions
+    ): Promise<T> {
+        return this.calculateDifficultTrade(fromToken, to, 'output', to.weiAmount, options);
+    }
+
+    public async calculateExactOutputAmount(
+        fromToken: PriceToken,
+        to: PriceTokenAmount,
+        options?: SwapCalculationOptions
+    ): Promise<BigNumber> {
+        return (await this.calculateExactOutput(fromToken, to, options)).from.tokenAmount;
+    }
+
+    private async calculateDifficultTrade(
+        fromToken: PriceToken,
+        toToken: PriceToken,
+        exact: Exact,
+        weiAmount: BigNumber,
+        options?: SwapCalculationOptions
+    ): Promise<T> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
         const fromClone = createTokenNativeAddressProxy(
-            from,
+            fromToken,
             this.providerConfiguration.wethAddress
         );
         const toClone = createTokenNativeAddressProxy(
@@ -66,7 +94,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         let gasPriceInfo: GasPriceInfo | undefined;
         if (
             fullOptions.gasCalculation !== 'disabled' &&
-            GasPriceApi.isSupportedBlockchain(from.blockchain)
+            GasPriceApi.isSupportedBlockchain(fromToken.blockchain)
         ) {
             gasPriceInfo = await this.getGasPriceInfo();
         }
@@ -74,16 +102,24 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         const { route, estimatedGas } = await this.getRoute(
             fromClone,
             toClone,
+            exact,
+            weiAmount,
             fullOptions,
             gasPriceInfo?.gasPriceInUsd
         );
 
+        const { from, to } = getFromToTokensAmountsByExact(
+            fromToken,
+            toToken,
+            exact,
+            weiAmount,
+            route.outputAbsoluteAmount
+        );
+
         const tradeStruct = {
             from,
-            to: new PriceTokenAmount({
-                ...toToken.asStruct,
-                weiAmount: route.outputAbsoluteAmount
-            }),
+            to,
+            exact,
             slippageTolerance: fullOptions.slippageTolerance,
             deadlineMinutes: fullOptions.deadlineMinutes
         };
@@ -102,15 +138,19 @@ export abstract class UniswapV3AlgebraAbstractProvider<
     }
 
     private async getRoute(
-        from: PriceTokenAmount,
-        toToken: PriceToken,
+        from: PriceToken,
+        to: PriceToken,
+        exact: Exact,
+        weiAmount: BigNumber,
         options: Required<SwapCalculationOptions>,
         gasPriceInUsd?: BigNumber
     ): Promise<UniswapV3AlgebraCalculatedInfo> {
         const routes = (
             await this.quoterController.getAllRoutes(
                 from,
-                toToken,
+                to,
+                exact,
+                weiAmount.toFixed(0),
                 options.disableMultihops ? 0 : this.providerConfiguration.maxTransitTokens
             )
         ).sort((a, b) => b.outputAbsoluteAmount.comparedTo(a.outputAbsoluteAmount));
@@ -128,12 +168,14 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         if (
             !this.isRubicOptimisationEnabled &&
             options.gasCalculation === 'rubicOptimisation' &&
-            toToken.price?.isFinite() &&
+            to.price?.isFinite() &&
             gasPriceInUsd
         ) {
             const estimatedGasLimits = await this.InstantTradeClass.estimateGasLimitForRoutes(
                 from,
-                toToken,
+                to,
+                exact,
+                weiAmount,
                 options,
                 routes
             );
@@ -142,9 +184,10 @@ export abstract class UniswapV3AlgebraAbstractProvider<
                 (route, index) => {
                     const estimatedGas = estimatedGasLimits[index];
                     const gasFeeInUsd = gasPriceInUsd!.multipliedBy(estimatedGas);
-                    const profit = Web3Pure.fromWei(route.outputAbsoluteAmount, toToken.decimals)
-                        .multipliedBy(toToken.price)
+                    const profit = Web3Pure.fromWei(route.outputAbsoluteAmount, to.decimals)
+                        .multipliedBy(to.price)
                         .minus(gasFeeInUsd);
+
                     return {
                         route,
                         estimatedGas,
@@ -159,7 +202,9 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         const route = routes[0];
         const estimatedGas = await this.InstantTradeClass.estimateGasLimitForRoute(
             from,
-            toToken,
+            to,
+            exact,
+            weiAmount,
             options,
             route
         );

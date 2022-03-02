@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_NAME, PriceToken, PriceTokenAmount, Web3Public } from 'src/core';
+import { BLOCKCHAIN_NAME, PriceToken, Web3Public } from 'src/core';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
 import { AlgebraRoute } from '@features/swap/dexes/polygon/algebra/models/algebra-route';
 import { notNull } from 'src/common';
@@ -12,11 +12,13 @@ import { Injector } from '@core/sdk/injector';
 import { ROUTER_TOKENS } from '@features/swap/dexes/polygon/algebra/utils/quoter-controller/constants/router-tokens';
 import { Token } from '@core/blockchain/tokens/token';
 import { UniswapV3AlgebraQuoterController } from '@features/swap/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
+import { Exact } from '@features/swap/models/exact';
 
 interface GetQuoterMethodsDataOptions {
     routesTokens: Token[];
-    toToken: Token;
-    amountAbsolute: string;
+    to: Token;
+    exact: Exact;
+    weiAmount: string;
     maxTransitTokens: number;
 }
 
@@ -43,36 +45,36 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
     /**
      * Returns swap method's name and arguments to pass it to Quoter contract.
      * @param path Pools, included in route.
-     * @param amountAbsolute From or to amount.
+     * @param exact Is exact input or output trade.
+     * @param weiAmount Amount of tokens to trade.
      */
     private static getQuoterMethodData(
         path: Token[],
-        amountAbsolute: string
+        exact: Exact,
+        weiAmount: string
     ): {
         path: Token[];
         methodData: MethodData;
     } {
         if (path.length === 2) {
+            const methodName =
+                exact === 'input' ? 'quoteExactInputSingle' : 'quoteExactOutputSingle';
             const limitSqrtPrice = 0;
             return {
                 path,
                 methodData: {
-                    methodName: 'quoteExactInputSingle',
-                    methodArguments: [
-                        path[0].address,
-                        path[1].address,
-                        amountAbsolute,
-                        limitSqrtPrice
-                    ]
+                    methodName,
+                    methodArguments: [path[0].address, path[1].address, weiAmount, limitSqrtPrice]
                 }
             };
         }
 
+        const methodName = exact === 'input' ? 'quoteExactInput' : 'quoteExactOutput';
         return {
             path,
             methodData: {
-                methodName: 'quoteExactInput',
-                methodArguments: [AlgebraQuoterController.getEncodedPath(path), amountAbsolute]
+                methodName,
+                methodArguments: [AlgebraQuoterController.getEncodedPath(path), weiAmount]
             }
         };
     }
@@ -89,27 +91,24 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
         return this.routerTokens;
     }
 
-    /**
-     * Returns all routes between given tokens with output amount.
-     * @param from From token.
-     * @param toToken To token.
-     * @param routeMaxTransitPools Max amount of transit pools.
-     */
     public async getAllRoutes(
-        from: PriceTokenAmount,
-        toToken: PriceToken,
-        routeMaxTransitPools: number
+        from: PriceToken,
+        to: PriceToken,
+        exact: Exact,
+        weiAmount: string,
+        routeMaxTransitTokens: number
     ): Promise<AlgebraRoute[]> {
         const routesTokens = (await this.getOrCreateRouterTokens()).filter(
-            token => !token.isEqualToTokens([from, toToken])
+            token => !token.isEqualToTokens([from, to])
         );
 
         const options: Omit<GetQuoterMethodsDataOptions, 'maxTransitTokens'> = {
             routesTokens,
-            toToken,
-            amountAbsolute: from.stringWeiAmount
+            to,
+            exact,
+            weiAmount
         };
-        const quoterMethodsData = [...Array(routeMaxTransitPools + 1)]
+        const quoterMethodsData = [...Array(routeMaxTransitTokens + 1)]
             .map((_, maxTransitTokens) =>
                 this.getQuoterMethodsData(
                     {
@@ -147,12 +146,10 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
         options: GetQuoterMethodsDataOptions,
         path: Token[]
     ): { path: Token[]; methodData: MethodData }[] {
-        const { routesTokens, toToken, amountAbsolute, maxTransitTokens } = options;
+        const { routesTokens, to, exact, weiAmount, maxTransitTokens } = options;
 
         if (path.length === maxTransitTokens + 1) {
-            return [
-                AlgebraQuoterController.getQuoterMethodData(path.concat(toToken), amountAbsolute)
-            ];
+            return [AlgebraQuoterController.getQuoterMethodData(path.concat(to), exact, weiAmount)];
         }
 
         return routesTokens

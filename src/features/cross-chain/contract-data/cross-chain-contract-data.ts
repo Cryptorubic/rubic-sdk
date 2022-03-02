@@ -8,7 +8,7 @@ import BigNumber from 'bignumber.js';
 import { BlockchainsInfo } from '@core/blockchain/blockchains-info';
 import { crossChainContractAbi } from '@features/cross-chain/constants/cross-chain-contract-abi';
 import { ProviderData } from '@features/cross-chain/contract-data/models/provider-data';
-import { UniswapV2AbstractProvider } from 'src/features';
+import { CrossChainSupportedInstantTradeProvider } from '@features/cross-chain/models/cross-chain-supported-instant-trade';
 
 /**
  * Class to work with readable methods of cross-chain contract.
@@ -24,7 +24,7 @@ export class CrossChainContractData {
         this.web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
     }
 
-    public getProvider(providerIndex: number): UniswapV2AbstractProvider {
+    public getProvider(providerIndex: number): CrossChainSupportedInstantTradeProvider {
         return this.providersData[providerIndex].provider;
     }
 
@@ -87,11 +87,11 @@ export class CrossChainContractData {
         });
     }
 
-    public getMinOrMaxTransitTokenAmount(type: 'minAmount' | 'maxAmount'): Promise<string> {
+    public getMinOrMaxTransitTokenAmount(type: 'min' | 'max'): Promise<string> {
         return this.web3Public.callContractMethod(
             this.address,
             crossChainContractAbi,
-            type === 'minAmount' ? 'minTokenAmount' : 'maxTokenAmount'
+            type === 'min' ? 'minTokenAmount' : 'maxTokenAmount'
         );
     }
 
