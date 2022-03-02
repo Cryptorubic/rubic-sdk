@@ -1,29 +1,29 @@
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
-import { CrossChainContractData } from '@features/cross-chain/contract-data/cross-chain-contract-data';
-import { PancakeSwapProvider } from '@features/swap/dexes/bsc/pancake-swap/pancake-swap-provider';
-import { UniSwapV2Provider } from '@features/swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
-import { QuickSwapProvider } from '@features/swap/dexes/polygon/quick-swap/quick-swap-provider';
+import { CrossChainContractData } from '@features/cross-chain/cross-chain-contract-data/cross-chain-contract-data';
+import { PancakeSwapProvider } from '@features/instant-trades/dexes/bsc/pancake-swap/pancake-swap-provider';
+import { UniSwapV2Provider } from '@features/instant-trades/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
+import { QuickSwapProvider } from '@features/instant-trades/dexes/polygon/quick-swap/quick-swap-provider';
 import {
     CrossChainSupportedBlockchain,
     crossChainSupportedBlockchains
 } from '@features/cross-chain/constants/cross-chain-supported-blockchains';
-import { SpookySwapProvider } from '@features/swap/dexes/fantom/spooky-swap/spooky-swap-provider';
-import { JoeProvider } from '@features/swap/dexes/avalanche/joe/joe-provider';
-import { SolarbeamProvider } from '@features/swap/dexes/moonriver/solarbeam/solarbeam-provider';
-import { PangolinProvider } from '@features/swap/dexes/avalanche/pangolin/pangolin-provider';
-import { SushiSwapEthereumProvider } from '@features/swap/dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider';
-import { SushiSwapBscProvider } from '@features/swap/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
-import { SushiSwapPolygonProvider } from '@features/swap/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
-import { SushiSwapMoonriverProvider } from '@features/swap/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
-import { SpiritSwapProvider } from '@features/swap/dexes/fantom/spirit-swap/spirit-swap-provider';
-import { SushiSwapFantomProvider } from '@features/swap/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-provider';
-import { SushiSwapAvalancheProvider } from '@features/swap/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
-import { OneinchEthereumProvider } from '@features/swap/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
-import { OneinchBscProvider } from '@features/swap/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
-import { OneinchPolygonProvider } from '@features/swap/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
-import { UniSwapV3EthereumProvider } from '@features/swap/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
-import { UniSwapV3PolygonProvider } from '@features/swap/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
-import { AlgebraProvider } from '@features/swap/dexes/polygon/algebra/algebra-provider';
+import { SpookySwapProvider } from '@features/instant-trades/dexes/fantom/spooky-swap/spooky-swap-provider';
+import { JoeProvider } from '@features/instant-trades/dexes/avalanche/joe/joe-provider';
+import { SolarbeamProvider } from '@features/instant-trades/dexes/moonriver/solarbeam/solarbeam-provider';
+import { PangolinProvider } from '@features/instant-trades/dexes/avalanche/pangolin/pangolin-provider';
+import { SushiSwapEthereumProvider } from '@features/instant-trades/dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider';
+import { SushiSwapBscProvider } from '@features/instant-trades/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
+import { SushiSwapPolygonProvider } from '@features/instant-trades/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
+import { SushiSwapMoonriverProvider } from '@features/instant-trades/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
+import { SpiritSwapProvider } from '@features/instant-trades/dexes/fantom/spirit-swap/spirit-swap-provider';
+import { SushiSwapFantomProvider } from '@features/instant-trades/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-provider';
+import { SushiSwapAvalancheProvider } from '@features/instant-trades/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
+import { OneinchEthereumProvider } from '@features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
+import { OneinchBscProvider } from '@features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
+import { OneinchPolygonProvider } from '@features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
+import { UniSwapV3EthereumProvider } from '@features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
+import { UniSwapV3PolygonProvider } from '@features/instant-trades/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
+import { AlgebraProvider } from '@features/instant-trades/dexes/polygon/algebra/algebra-provider';
 
 /**
  * Stores contracts info.

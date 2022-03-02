@@ -1,0 +1,41 @@
+import { CrossChainSupportedBlockchain } from '@features/cross-chain/constants/cross-chain-supported-blockchains';
+import { CrossChainContractData } from '@features/cross-chain/cross-chain-contract-data/cross-chain-contract-data';
+import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
+import { CrossChainContractTrade } from '@features/cross-chain/cross-chain-contract-trade/cross-chain-contract-trade';
+import BigNumber from 'bignumber.js';
+import { Web3Pure } from 'src/core';
+
+export class DirectCrossChainContractTrade extends CrossChainContractTrade {
+    public readonly fromToken: PriceTokenAmount;
+
+    public readonly toToken: PriceTokenAmount;
+
+    public readonly toTokenAmountMin: BigNumber;
+
+    constructor(
+        blockchain: CrossChainSupportedBlockchain,
+        contract: CrossChainContractData,
+        private readonly token: PriceTokenAmount
+    ) {
+        super(blockchain, contract, 0);
+
+        this.fromToken = this.token;
+        this.toToken = this.token;
+        this.toTokenAmountMin = this.token.tokenAmount;
+    }
+
+    protected getFirstPath(): string[] {
+        return [this.token.address];
+    }
+
+    protected getSecondPath(): string[] {
+        return [Web3Pure.addressToBytes32(this.token.address)];
+    }
+
+    protected async modifyArgumentsForProvider(methodArguments: unknown[][]): Promise<void> {
+        const exactTokensForTokens = true;
+        const swapTokenWithFee = false;
+
+        methodArguments[0].push(exactTokensForTokens, swapTokenWithFee);
+    }
+}

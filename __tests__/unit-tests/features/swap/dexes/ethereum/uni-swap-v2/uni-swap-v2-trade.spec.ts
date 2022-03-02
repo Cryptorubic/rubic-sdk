@@ -1,5 +1,5 @@
 import { Injector } from '@core/sdk/injector';
-import { UniSwapV2Provider } from '@features/swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
+import { UniSwapV2Provider } from '@features/instant-trades/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
 import { Chain } from '__tests__/utils/chain';
 import { mockInjector } from '__tests__/utils/mock-injector';
 import { TOKENS } from '__tests__/utils/tokens';

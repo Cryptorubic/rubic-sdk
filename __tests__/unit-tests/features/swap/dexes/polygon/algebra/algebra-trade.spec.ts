@@ -7,7 +7,7 @@ import { BLOCKCHAIN_NAME, Web3Public } from 'src/core';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
 import { Utils } from '__tests__/unit-tests/features/swap/utils/utils';
-import { AlgebraProvider } from '@features/swap/dexes/polygon/algebra/algebra-provider';
+import { AlgebraProvider } from '@features/instant-trades/dexes/polygon/algebra/algebra-provider';
 import fn = jest.fn;
 
 describe('Algebra trade tests.', () => {

@@ -1,4 +1,4 @@
-import { CrossChainContractTrade } from '@features/cross-chain/contract-trade/cross-chain-contract-trade';
+import { CrossChainContractTrade } from '@features/cross-chain/cross-chain-contract-trade/cross-chain-contract-trade';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@core/sdk/injector';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
@@ -10,7 +10,7 @@ import { MaxGasPriceOverflowError } from '@common/errors/cross-chain/max-gas-pri
 import { TransactionOptions } from '@core/blockchain/models/transaction-options';
 import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/failed-to-check-for-transaction-receipt.error';
 import { InsufficientFundsGasPriceValueError } from '@common/errors/cross-chain/insufficient-funds-gas-price-value.error';
-import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
+import { SwapTransactionOptions } from '@features/instant-trades/models/swap-transaction-options';
 import BigNumber from 'bignumber.js';
 import { Cache } from 'src/common';
 import { TransactionReceipt } from 'web3-eth';
@@ -19,7 +19,7 @@ import { WalletNotConnectedError } from '@common/errors/swap/wallet-not-connecte
 import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
 import { ContractParams } from '@features/cross-chain/cross-chain-trade/models/contract-params';
 import { BasicTransactionOptions } from 'src/core';
-import { ItCrossChainContractTrade } from '@features/cross-chain/contract-trade/it-contract-trade/it-cross-chain-contract-trade';
+import { ItCrossChainContractTrade } from '@features/cross-chain/cross-chain-contract-trade/it-cross-chain-contract-trade/it-cross-chain-contract-trade';
 import { EncodeTransactionOptions } from 'src/features';
 import { TransactionConfig } from 'web3-core';
 

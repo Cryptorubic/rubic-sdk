@@ -5,7 +5,7 @@ import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME } from 'src/core';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
-import { UniSwapV3PolygonProvider } from '@features/swap/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
+import { UniSwapV3PolygonProvider } from '@features/instant-trades/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
 
 describe('UnisSwap V3 Polygon provider tests', () => {
     let uniswapV3Provider: UniSwapV3PolygonProvider;
