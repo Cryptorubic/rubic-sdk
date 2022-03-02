@@ -38,6 +38,28 @@ export const blockchains: ReadonlyArray<Blockchain> = [
         })
     },
     {
+        id: 43114,
+        name: BLOCKCHAIN_NAME.AVALANCHE,
+        nativeCoin: new Token({
+            blockchain: BLOCKCHAIN_NAME.AVALANCHE,
+            address: NATIVE_TOKEN_ADDRESS,
+            name: 'AVAX',
+            symbol: 'AVAX',
+            decimals: 18
+        })
+    },
+    {
+        id: 1285,
+        name: BLOCKCHAIN_NAME.MOONRIVER,
+        nativeCoin: new Token({
+            blockchain: BLOCKCHAIN_NAME.MOONRIVER,
+            address: NATIVE_TOKEN_ADDRESS,
+            name: 'MOVR',
+            symbol: 'MOVR',
+            decimals: 18
+        })
+    },
+    {
         id: 250,
         name: BLOCKCHAIN_NAME.FANTOM,
         nativeCoin: new Token({
@@ -60,24 +82,24 @@ export const blockchains: ReadonlyArray<Blockchain> = [
         })
     },
     {
-        id: 43114,
-        name: BLOCKCHAIN_NAME.AVALANCHE,
+        id: 42161,
+        name: BLOCKCHAIN_NAME.ARBITRUM,
         nativeCoin: new Token({
-            blockchain: BLOCKCHAIN_NAME.AVALANCHE,
+            blockchain: BLOCKCHAIN_NAME.ARBITRUM,
             address: NATIVE_TOKEN_ADDRESS,
-            name: 'AVAX',
-            symbol: 'AVAX',
+            name: 'AETH',
+            symbol: 'AETH',
             decimals: 18
         })
     },
     {
-        id: 1285,
-        name: BLOCKCHAIN_NAME.MOONRIVER,
+        id: 1313161554,
+        name: BLOCKCHAIN_NAME.AURORA,
         nativeCoin: new Token({
-            blockchain: BLOCKCHAIN_NAME.MOONRIVER,
+            blockchain: BLOCKCHAIN_NAME.ARBITRUM,
             address: NATIVE_TOKEN_ADDRESS,
-            name: 'MOVR',
-            symbol: 'MOVR',
+            name: 'aETH',
+            symbol: 'aETH',
             decimals: 18
         })
     },

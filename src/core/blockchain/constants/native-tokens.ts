@@ -35,18 +35,31 @@ export const nativeTokensList: NativeTokensList = {
         symbol: 'MOVR',
         decimals: 18
     },
-    [BLOCKCHAIN_NAME.HARMONY]: {
-        address: NATIVE_TOKEN_ADDRESS,
-        name: 'ONE',
-        symbol: 'ONE',
-        decimals: 18
-    },
     [BLOCKCHAIN_NAME.FANTOM]: {
         address: NATIVE_TOKEN_ADDRESS,
         name: 'FTM',
         symbol: 'FTM',
         decimals: 18
     },
+    [BLOCKCHAIN_NAME.HARMONY]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'ONE',
+        symbol: 'ONE',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.ARBITRUM]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'AETH',
+        symbol: 'AETH',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.AURORA]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'aETH',
+        symbol: 'aETH',
+        decimals: 18
+    },
+    // Testnets.
     [BLOCKCHAIN_NAME.KOVAN]: {
         address: NATIVE_TOKEN_ADDRESS,
         name: 'Ethereum',
