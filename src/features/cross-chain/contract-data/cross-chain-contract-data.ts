@@ -87,11 +87,11 @@ export class CrossChainContractData {
         });
     }
 
-    public getMinOrMaxTransitTokenAmount(type: 'minAmount' | 'maxAmount'): Promise<string> {
+    public getMinOrMaxTransitTokenAmount(type: 'min' | 'max'): Promise<string> {
         return this.web3Public.callContractMethod(
             this.address,
             crossChainContractAbi,
-            type === 'minAmount' ? 'minTokenAmount' : 'maxTokenAmount'
+            type === 'min' ? 'minTokenAmount' : 'maxTokenAmount'
         );
     }
 

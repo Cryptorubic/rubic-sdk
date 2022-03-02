@@ -25,7 +25,12 @@ import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { combineOptions } from '@common/utils/options';
 import { getPriceTokensFromInputTokens } from '@common/utils/tokens';
-import { CrossChainSupportedInstantTrade } from '@features/cross-chain/models/cross-chain-supported-instant-trade';
+import {
+    CrossChainSupportedInstantTrade,
+    CrossChainSupportedInstantTradeProvider
+} from '@features/cross-chain/models/cross-chain-supported-instant-trade';
+import { CrossChainMaxAmountError } from '@common/errors/cross-chain/cross-chain-max-amount-error';
+import { CrossChainMinAmountError } from '@common/errors/cross-chain/cross-chain-min-amount-error';
 
 interface ItCalculatedTrade {
     toAmount: BigNumber;
@@ -45,6 +50,8 @@ export class CrossChainManager {
     private readonly contracts: (
         blockchain: CrossChainSupportedBlockchain
     ) => CrossChainContractData;
+
+    private readonly defaultSlippageTolerance = 0.02;
 
     constructor() {
         this.contracts = getCrossChainContract;
@@ -81,8 +88,8 @@ export class CrossChainManager {
 
     private getFullOptions(options?: CrossChainOptions): Required<CrossChainOptions> {
         return combineOptions(options, {
-            fromSlippageTolerance: 0.02,
-            toSlippageTolerance: 0.02
+            fromSlippageTolerance: this.defaultSlippageTolerance,
+            toSlippageTolerance: this.defaultSlippageTolerance
         });
     }
 
@@ -119,6 +126,7 @@ export class CrossChainManager {
             fromTransitToken,
             fromSlippageTolerance
         );
+        await this.checkMinMaxAmountsErrors(fromTrade);
 
         const { toTransitTokenAmount, transitFeeToken } = await this.getToTransitTokenAmount(
             fromTrade,
@@ -132,17 +140,16 @@ export class CrossChainManager {
             toSlippageTolerance
         );
 
-        const [{ cryptoFeeToken, gasData }, minMaxAmountsErrors] = await Promise.all([
-            this.getCryptoFeeTokenAndGasData(fromTrade, toTrade),
-            this.getMinMaxAmountsErrors(fromTrade)
-        ]);
+        const { cryptoFeeToken, gasData } = await this.getCryptoFeeTokenAndGasData(
+            fromTrade,
+            toTrade
+        );
 
         return new CrossChainTrade({
             fromTrade,
             toTrade,
             cryptoFeeToken,
             transitFeeToken,
-            minMaxAmountsErrors,
             gasData
         });
     }
@@ -250,12 +257,16 @@ export class CrossChainManager {
         };
     }
 
-    private async getMinMaxAmountsErrors(
+    private async checkMinMaxAmountsErrors(
         fromTrade: CrossChainContractTrade
     ): Promise<MinMaxAmountsErrors> {
-        const fromTransitTokenAmount = fromTrade.toToken.tokenAmount;
+        const slippageTolerance =
+            fromTrade instanceof ItCrossChainContractTrade
+                ? fromTrade.slippageTolerance
+                : undefined;
         const { minAmount: minTransitTokenAmount, maxAmount: maxTransitTokenAmount } =
-            await this.getMinMaxTransitTokenAmounts(fromTrade);
+            await this.getMinMaxTransitTokenAmounts(fromTrade.blockchain, slippageTolerance);
+        const fromTransitTokenAmount = fromTrade.toToken.tokenAmount;
 
         if (fromTransitTokenAmount.lt(minTransitTokenAmount)) {
             const minAmount = await this.getTokenAmountForExactTransitTokenAmount(
@@ -265,9 +276,7 @@ export class CrossChainManager {
             if (!minAmount?.isFinite()) {
                 throw new InsufficientLiquidityError();
             }
-            return {
-                minAmount
-            };
+            throw new CrossChainMinAmountError(minAmount, fromTrade.fromToken.symbol);
         }
 
         if (fromTransitTokenAmount.gt(maxTransitTokenAmount)) {
@@ -275,42 +284,124 @@ export class CrossChainManager {
                 fromTrade,
                 maxTransitTokenAmount
             );
-            return {
-                maxAmount
-            };
+            throw new CrossChainMaxAmountError(maxAmount, fromTrade.fromToken.symbol);
         }
 
         return {};
     }
 
-    private async getMinMaxTransitTokenAmounts(
-        fromTrade: CrossChainContractTrade
+    public async getMinMaxAmounts(
+        fromToken:
+            | Token
+            | {
+                  address: string;
+                  blockchain: BLOCKCHAIN_NAME;
+              },
+        slippageTolerance?: number
     ): Promise<MinMaxAmounts> {
-        const fromTransitToken = await fromTrade.contract.getTransitToken();
+        const from = fromToken instanceof Token ? fromToken : await Token.createToken(fromToken);
+        return this.getMinMaxAmountsDifficult(
+            from,
+            slippageTolerance || this.defaultSlippageTolerance
+        );
+    }
 
-        const getAmount = async (type: 'minAmount' | 'maxAmount'): Promise<BigNumber> => {
-            const fromTransitTokenAmountAbsolute =
-                await fromTrade.contract.getMinOrMaxTransitTokenAmount(type);
+    private async getMinMaxAmountsDifficult(
+        fromToken: Token,
+        slippageTolerance: number
+    ): Promise<MinMaxAmounts> {
+        const fromBlockchain = fromToken.blockchain;
+        if (!CrossChainManager.isSupportedBlockchain(fromBlockchain)) {
+            throw new NotSupportedBlockchain();
+        }
+
+        const transitToken = await this.contracts(fromBlockchain).getTransitToken();
+        if (compareAddresses(fromToken.address, transitToken.address)) {
+            return this.getMinMaxTransitTokenAmounts(fromBlockchain);
+        }
+
+        const { minAmount: minTransitTokenAmount, maxAmount: maxTransitTokenAmount } =
+            await this.getMinMaxTransitTokenAmounts(fromBlockchain, slippageTolerance);
+        const minAmount = await this.getMinOrMaxAmount(
+            fromBlockchain,
+            fromToken,
+            transitToken,
+            minTransitTokenAmount,
+            'min'
+        );
+        const maxAmount = await this.getMinOrMaxAmount(
+            fromBlockchain,
+            fromToken,
+            transitToken,
+            maxTransitTokenAmount,
+            'max'
+        );
+
+        return { minAmount, maxAmount };
+    }
+
+    private async getMinOrMaxAmount(
+        fromBlockchain: CrossChainSupportedBlockchain,
+        fromToken: Token,
+        transitToken: Token,
+        transitTokenAmount: BigNumber,
+        type: 'min' | 'max'
+    ): Promise<BigNumber> {
+        const fromContract = this.contracts(fromBlockchain);
+        const promises = fromContract.providersData.map(providerData => {
+            return this.getTokenAmountForExactTransitTokenAmountByProvider(
+                fromToken,
+                transitToken,
+                transitTokenAmount,
+                providerData.provider
+            );
+        });
+
+        const sortedAmounts = (await Promise.allSettled(promises))
+            .map(result => {
+                if (result.status === 'fulfilled') {
+                    return result.value;
+                }
+                return null;
+            })
+            .filter(notNull)
+            .sort((a, b) => a.comparedTo(b));
+
+        if (type === 'min') {
+            return sortedAmounts[0];
+        }
+        return sortedAmounts[sortedAmounts.length - 1];
+    }
+
+    private async getMinMaxTransitTokenAmounts(
+        fromBlockchain: CrossChainSupportedBlockchain,
+        slippageTolerance?: number
+    ): Promise<MinMaxAmounts> {
+        const fromContract = this.contracts(fromBlockchain);
+        const fromTransitToken = await fromContract.getTransitToken();
+
+        const getAmount = async (type: 'min' | 'max'): Promise<BigNumber> => {
+            const fromTransitTokenAmountAbsolute = await fromContract.getMinOrMaxTransitTokenAmount(
+                type
+            );
             const fromTransitTokenAmount = Web3Pure.fromWei(
                 fromTransitTokenAmountAbsolute,
                 fromTransitToken.decimals
             );
 
-            if (type === 'minAmount') {
-                if (fromTrade instanceof ItCrossChainContractTrade) {
-                    return fromTransitTokenAmount.dividedBy(1 - fromTrade.slippageTolerance);
+            if (type === 'min') {
+                if (slippageTolerance) {
+                    return fromTransitTokenAmount.dividedBy(1 - slippageTolerance);
                 }
                 return fromTransitTokenAmount;
             }
             return fromTransitTokenAmount;
         };
 
-        return Promise.all([getAmount('minAmount'), getAmount('maxAmount')]).then(
-            ([minAmount, maxAmount]) => ({
-                minAmount,
-                maxAmount
-            })
-        );
+        return Promise.all([getAmount('min'), getAmount('max')]).then(([minAmount, maxAmount]) => ({
+            minAmount,
+            maxAmount
+        }));
     }
 
     private async getTokenAmountForExactTransitTokenAmount(
@@ -325,8 +416,25 @@ export class CrossChainManager {
             return transitTokenAmount;
         }
 
-        const tokenAmount = await fromTrade.provider.calculateExactOutputAmount(
+        return this.getTokenAmountForExactTransitTokenAmountByProvider(
             fromTrade.fromToken,
+            transitToken,
+            transitTokenAmount,
+            fromTrade.provider
+        );
+    }
+
+    private getTokenAmountForExactTransitTokenAmountByProvider(
+        fromToken: Token,
+        transitToken: Token,
+        transitTokenAmount: BigNumber,
+        provider: CrossChainSupportedInstantTradeProvider
+    ) {
+        return provider.calculateExactOutputAmount(
+            new PriceToken({
+                ...fromToken,
+                price: new BigNumber(NaN)
+            }),
             new PriceTokenAmount({
                 ...transitToken,
                 tokenAmount: transitTokenAmount,
@@ -336,7 +444,6 @@ export class CrossChainManager {
                 gasCalculation: 'disabled'
             }
         );
-        return tokenAmount;
     }
 
     private async getCryptoFeeTokenAndGasData(
