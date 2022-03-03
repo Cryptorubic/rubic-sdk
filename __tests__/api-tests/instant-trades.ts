@@ -24,5 +24,5 @@ export const instantTradesApiSpec = () =>
             const trades = await sdk.instantTrades.calculateTrade(fromToken, fromAmount, toToken);
             expect(Array.isArray(trades)).toBeTruthy();
             expect(trades.length).not.toBe(0);
-        }, 10000);
+        }, 400_000);
     });

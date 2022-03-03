@@ -37,7 +37,7 @@ export const uniswapV3PolygonProviderSpec = () =>
             expect(trade.path.length).toBe(2);
             expect(trade.path[0].address).toBe(TOKENS.MATIC.address);
             expect(trade.path[1].address).toBe(TOKENS.USDT_POLYGON.address);
-        }, 300_000);
+        }, 400_000);
 
         test('Must calculate correct ERC20-NATIVE trade with simple path.', async () => {
             const expectedToTokensAmount = '0.487261802620573316'; // constant data about tokens rate in 23571568 block
@@ -56,7 +56,7 @@ export const uniswapV3PolygonProviderSpec = () =>
             expect(trade.path[0].address).toBe(TOKENS.USDT_POLYGON.address);
             expect(trade.path[1].address).toBe(TOKENS.DAI_POLYGON.address);
             expect(trade.path[2].address).toBe(TOKENS.MATIC.address);
-        }, 300_000);
+        }, 400_000);
 
         test('Must calculate correct ERC20-ERC20 trade with simple path.', async () => {
             const expectedToTokensAmount = '0.998641521554865859'; // constant data about tokens rate in 23571568 block
@@ -69,11 +69,10 @@ export const uniswapV3PolygonProviderSpec = () =>
             const trade = await uniswapV3Provider.calculate(from, to, {
                 gasCalculation: 'disabled'
             });
-            console.log(trade.to.tokenAmount.toFixed(), trade.path);
 
             expect(trade.to.tokenAmount.isEqualTo(expectedToTokensAmount)).toBeTruthy();
             expect(trade.path.length).toBe(2);
             expect(trade.path[0].address).toBe(TOKENS.USDT_POLYGON.address);
             expect(trade.path[1].address).toBe(TOKENS.DAI_POLYGON.address);
-        }, 300_000);
+        }, 400_000);
     });

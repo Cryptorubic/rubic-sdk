@@ -84,7 +84,7 @@ export const uniswapV2TradeSpec = () =>
                 gasCalculation: 'disabled'
             });
             expect(trade1.to.weiAmount.isEqualTo(trade.to.weiAmount)).not.toBeTruthy();
-        }, 20_000);
+        }, 400_000);
 
         test('Swap method must works with ERC20-NATIVE trade', async () => {
             const rbcTokenAmountToSwap = 1;
@@ -125,7 +125,7 @@ export const uniswapV2TradeSpec = () =>
                 )
             ).toBeTruthy();
             expect(onApprove.mock.calls.length).toBe(1);
-        }, 20_000);
+        }, 400_000);
 
         test('Swap method must works with ERC20-ERC20 trade', async () => {
             const rbcTokenAmountToSwap = 1;
@@ -160,5 +160,5 @@ export const uniswapV2TradeSpec = () =>
                     )
                 )
             ).toBeTruthy();
-        }, 20_000);
+        }, 400_000);
     });

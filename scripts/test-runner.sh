@@ -15,3 +15,5 @@ while ! ( grep -q 'Account #19:' scripts/node.log )
 sleep 1
 
 jest
+
+docker compose down

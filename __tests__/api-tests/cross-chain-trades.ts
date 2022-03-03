@@ -2,7 +2,7 @@ import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { SDK } from '@core/sdk/sdk';
 import { minimalConfiguration } from '../utils/configuration';
 
-export const crosschainApiSpec = () =>
+export const crossChainApiSpec = () =>
     describe('Cross chain trades module tests', () => {
         let sdk: SDK;
         beforeEach(async () => {
@@ -31,5 +31,5 @@ export const crosschainApiSpec = () =>
             );
 
             expect(!!trade).toBeTruthy();
-        }, 20000);
+        }, 400_000);
     });

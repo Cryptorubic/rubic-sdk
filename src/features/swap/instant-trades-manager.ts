@@ -43,7 +43,7 @@ type RequiredSwapManagerCalculationOptions = MarkRequired<
 >;
 
 export class InstantTradesManager {
-    public static readonly defaultCalculationTimeout = 3000;
+    public static readonly defaultCalculationTimeout = 400_000;
 
     private readonly uniswapV2TradeProviders = [
         UniSwapV2Provider,

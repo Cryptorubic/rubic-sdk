@@ -37,7 +37,7 @@ export const uniswapV3EthProviderSpec = () =>
             expect(trade.path.length).toBe(2);
             expect(trade.path[0].address).toBe(TOKENS.ETH.address);
             expect(trade.path[1].address).toBe(TOKENS.DAI.address);
-        }, 20_000);
+        }, 800_000);
 
         test('Must calculate correct ERC20-NATIVE trade with simple path.', async () => {
             const expectedToTokensAmount = '0.000314923189705958'; // constant data about tokens rate in 13961175 block
@@ -55,7 +55,7 @@ export const uniswapV3EthProviderSpec = () =>
             expect(trade.path.length).toBe(2);
             expect(trade.path[0].address).toBe(TOKENS.USDT.address);
             expect(trade.path[1].address).toBe(TOKENS.ETH.address);
-        }, 20_000);
+        }, 400_000);
 
         test('Must calculate correct ERC20-ERC20 trade with simple path.', async () => {
             const expectedToTokensAmount = '1.02692208070202167'; // constant data about tokens rate in 13961175 block
@@ -74,5 +74,5 @@ export const uniswapV3EthProviderSpec = () =>
             expect(trade.path[0].address).toBe(TOKENS.USDT.address);
             expect(trade.path[1].address).toBe(TOKENS.WBTC.address);
             expect(trade.path[2].address).toBe(TOKENS.DAI.address);
-        }, 20_000);
+        }, 400_000);
     });

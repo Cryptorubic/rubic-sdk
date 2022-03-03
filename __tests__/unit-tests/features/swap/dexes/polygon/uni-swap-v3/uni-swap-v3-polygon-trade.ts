@@ -76,7 +76,7 @@ export const uniswapV3PolygonTradeSpec = () =>
                 gasCalculation: 'disabled'
             });
             expect(trade1.to.weiAmount.isEqualTo(trade.to.weiAmount)).not.toBeTruthy();
-        }, 300_000);
+        }, 400_000);
 
         test('Swap method must works with ERC20-NATIVE trade', async () => {
             const usdtTokenAmountToSwap = 1;
@@ -117,7 +117,7 @@ export const uniswapV3PolygonTradeSpec = () =>
                 )
             ).toBeTruthy();
             expect(onApprove.mock.calls.length).toBe(1);
-        }, 300_000);
+        }, 400_000);
 
         test('Swap method must works with ERC20-ERC20 trade', async () => {
             const usdtTokenAmountToSwap = 1;
@@ -152,5 +152,5 @@ export const uniswapV3PolygonTradeSpec = () =>
                     )
                 )
             ).toBeTruthy();
-        }, 300_000);
+        }, 400_000);
     });
