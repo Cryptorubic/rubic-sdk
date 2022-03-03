@@ -6,7 +6,10 @@ export const crossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.POLYGON,
     BLOCKCHAIN_NAME.AVALANCHE,
     BLOCKCHAIN_NAME.MOONRIVER,
-    BLOCKCHAIN_NAME.FANTOM
+    BLOCKCHAIN_NAME.FANTOM,
+    BLOCKCHAIN_NAME.HARMONY,
+    BLOCKCHAIN_NAME.ARBITRUM,
+    BLOCKCHAIN_NAME.AURORA
 ] as const;
 
 export type CrossChainSupportedBlockchain = typeof crossChainSupportedBlockchains[number];

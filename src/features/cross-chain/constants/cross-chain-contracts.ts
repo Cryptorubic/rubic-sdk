@@ -24,6 +24,13 @@ import { OneinchPolygonProvider } from '@features/instant-trades/dexes/polygon/o
 import { UniSwapV3EthereumProvider } from '@features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
 import { UniSwapV3PolygonProvider } from '@features/instant-trades/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
 import { AlgebraProvider } from '@features/instant-trades/dexes/polygon/algebra/algebra-provider';
+import { ViperSwapHarmonyProvider } from '@features/instant-trades/dexes/harmony/viper-swap-harmony/viper-swap-harmony-provider';
+import { SushiSwapHarmonyProvider } from '@features/instant-trades/dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-provider';
+import { OneinchArbitrumProvider } from '@features/instant-trades/dexes/arbitrum/oneinch-arbitrum/oneinch-arbitrum-provider';
+import { SushiSwapArbitrumProvider } from '@features/instant-trades/dexes/arbitrum/sushi-swap-arbitrum/sushi-swap-arbitrum-provider';
+import { UniSwapV3ArbitrumProvider } from '@features/instant-trades/dexes/arbitrum/uni-swap-v3-ethereum/uni-swap-v3-arbitrum-provider';
+import { WannaSwapAuroraProvider } from '@features/instant-trades/dexes/aurora/wanna-swap-aurora/wanna-swap-aurora-provider';
+import { TrisolarisAuroraProvider } from '@features/instant-trades/dexes/aurora/trisolaris-aurora/trisolaris-aurora-provider';
 
 /**
  * Stores contracts info.
@@ -139,6 +146,49 @@ export const crossChainContractsData = {
             {
                 ProviderClass: SushiSwapFantomProvider,
                 methodSuffix: '2'
+            }
+        ]
+    },
+    [BLOCKCHAIN_NAME.HARMONY]: {
+        address: '0x5681012ccc3ec5bafefac21ce4280ad7fe22bbf2',
+        providersData: [
+            {
+                ProviderClass: SushiSwapHarmonyProvider,
+                methodSuffix: ''
+            },
+            {
+                ProviderClass: ViperSwapHarmonyProvider,
+                methodSuffix: '1'
+            }
+        ]
+    },
+    [BLOCKCHAIN_NAME.ARBITRUM]: {
+        address: '0x5F3c8d58A01Aad4f875d55E2835D82e12f99723c',
+        providersData: [
+            {
+                ProviderClass: SushiSwapArbitrumProvider,
+                methodSuffix: ''
+            },
+            {
+                ProviderClass: UniSwapV3ArbitrumProvider,
+                methodSuffix: 'V3'
+            },
+            {
+                ProviderClass: OneinchArbitrumProvider,
+                methodSuffix: 'Inch'
+            }
+        ]
+    },
+    [BLOCKCHAIN_NAME.AURORA]: {
+        address: '0x55Be05ecC1c417B16163b000CB71DcE8526a5D06',
+        providersData: [
+            {
+                ProviderClass: TrisolarisAuroraProvider,
+                methodSuffix: ''
+            },
+            {
+                ProviderClass: WannaSwapAuroraProvider,
+                methodSuffix: '1'
             }
         ]
     }
