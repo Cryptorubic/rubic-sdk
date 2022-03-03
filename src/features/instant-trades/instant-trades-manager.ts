@@ -15,7 +15,7 @@ import { PancakeSwapProvider } from '@features/instant-trades/dexes/bsc/pancake-
 import { SushiSwapBscProvider } from '@features/instant-trades/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
 import { OneinchEthereumProvider } from '@features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
 import { SushiSwapEthereumProvider } from '@features/instant-trades/dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider';
-import { UniSwapV2Provider } from '@features/instant-trades/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
+import { UniSwapV2EthereumProvider } from '@features/instant-trades/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-provider';
 import { UniSwapV3EthereumProvider } from '@features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
 import { SpiritSwapProvider } from '@features/instant-trades/dexes/fantom/spirit-swap/spirit-swap-provider';
 import { SpookySwapProvider } from '@features/instant-trades/dexes/fantom/spooky-swap/spooky-swap-provider';
@@ -36,6 +36,12 @@ import { ZrxEthereumProvider } from '@features/instant-trades/dexes/ethereum/zrx
 import { getPriceTokensFromInputTokens } from '@common/utils/tokens';
 import { AlgebraProvider } from '@features/instant-trades/dexes/polygon/algebra/algebra-provider';
 import { UniSwapV3PolygonProvider } from '@features/instant-trades/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
+import { ViperSwapHarmonyProvider } from '@features/instant-trades/dexes/harmony/viper-swap-harmony/viper-swap-harmony-provider';
+import { OneinchArbitrumProvider } from '@features/instant-trades/dexes/arbitrum/oneinch-arbitrum/oneinch-arbitrum-provider';
+import { SushiSwapArbitrumProvider } from '@features/instant-trades/dexes/arbitrum/sushi-swap-arbitrum/sushi-swap-arbitrum-provider';
+import { UniSwapV3ArbitrumProvider } from '@features/instant-trades/dexes/arbitrum/uni-swap-v3-ethereum/uni-swap-v3-arbitrum-provider';
+import { TrisolarisAuroraProvider } from '@features/instant-trades/dexes/aurora/trisolaris-aurora/trisolaris-aurora-provider';
+import { WannaSwapAuroraProvider } from '@features/instant-trades/dexes/aurora/wanna-swap-aurora/wanna-swap-aurora-provider';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCalculationOptions,
@@ -46,21 +52,36 @@ export class InstantTradesManager {
     public static readonly defaultCalculationTimeout = 3000;
 
     private readonly uniswapV2TradeProviders = [
-        UniSwapV2Provider,
+        // ethereum
+        UniSwapV2EthereumProvider,
         SushiSwapEthereumProvider,
+        // bsc
         PancakeSwapProvider,
         SushiSwapBscProvider,
+        // polygon
         QuickSwapProvider,
         SushiSwapPolygonProvider,
+        // avalanche
         JoeProvider,
         PangolinProvider,
         SushiSwapAvalancheProvider,
+        // moonriver
+        SolarbeamProvider,
+        SushiSwapMoonriverProvider,
+        // fantom
         SpiritSwapProvider,
         SpookySwapProvider,
         SushiSwapFantomProvider,
+        // harmony
         SushiSwapHarmonyProvider,
-        SolarbeamProvider,
-        SushiSwapMoonriverProvider
+        ViperSwapHarmonyProvider,
+        // arbitrum
+        OneinchArbitrumProvider,
+        SushiSwapArbitrumProvider,
+        UniSwapV3ArbitrumProvider,
+        // aurora
+        TrisolarisAuroraProvider,
+        WannaSwapAuroraProvider
     ] as const;
 
     private readonly uniswapV3TradeProviders = [

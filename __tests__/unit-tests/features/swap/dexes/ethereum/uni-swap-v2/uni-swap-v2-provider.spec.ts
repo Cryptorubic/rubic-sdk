@@ -1,4 +1,4 @@
-import { UniSwapV2Provider } from '@features/instant-trades/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
+import { UniSwapV2EthereumProvider } from '@features/instant-trades/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-provider';
 import { Chain } from '__tests__/utils/chain';
 import { mockInjector } from '__tests__/utils/mock-injector';
 import { TOKENS } from '__tests__/utils/tokens';
@@ -8,10 +8,10 @@ import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount'
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
 
 describe('Uniswap V2 provider tests', () => {
-    let uniswapV2Provider: UniSwapV2Provider;
+    let uniswapV2Provider: UniSwapV2EthereumProvider;
 
     beforeAll(async () => {
-        uniswapV2Provider = new UniSwapV2Provider();
+        uniswapV2Provider = new UniSwapV2EthereumProvider();
     });
 
     beforeEach(async () => {

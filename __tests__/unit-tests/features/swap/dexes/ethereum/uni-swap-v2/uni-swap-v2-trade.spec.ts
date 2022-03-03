@@ -1,5 +1,5 @@
 import { Injector } from '@core/sdk/injector';
-import { UniSwapV2Provider } from '@features/instant-trades/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
+import { UniSwapV2EthereumProvider } from '@features/instant-trades/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-provider';
 import { Chain } from '__tests__/utils/chain';
 import { mockInjector } from '__tests__/utils/mock-injector';
 import { TOKENS } from '__tests__/utils/tokens';
@@ -12,7 +12,7 @@ import fn = jest.fn;
 
 describe('Uniswap V2 trade tests.', () => {
     let chain: Chain;
-    let uniswapV2Provider: UniSwapV2Provider;
+    let uniswapV2Provider: UniSwapV2EthereumProvider;
     let web3Public: Web3Public;
     let userAddress: string;
 
@@ -32,7 +32,7 @@ describe('Uniswap V2 trade tests.', () => {
     };
 
     beforeAll(async () => {
-        uniswapV2Provider = new UniSwapV2Provider();
+        uniswapV2Provider = new UniSwapV2EthereumProvider();
     });
 
     beforeEach(async () => {

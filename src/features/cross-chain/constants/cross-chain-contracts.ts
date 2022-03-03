@@ -1,7 +1,7 @@
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { CrossChainContractData } from '@features/cross-chain/cross-chain-contract-data/cross-chain-contract-data';
 import { PancakeSwapProvider } from '@features/instant-trades/dexes/bsc/pancake-swap/pancake-swap-provider';
-import { UniSwapV2Provider } from '@features/instant-trades/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
+import { UniSwapV2EthereumProvider } from '@features/instant-trades/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-provider';
 import { QuickSwapProvider } from '@features/instant-trades/dexes/polygon/quick-swap/quick-swap-provider';
 import {
     CrossChainSupportedBlockchain,
@@ -36,7 +36,7 @@ export const crossChainContractsData = {
         address: '0xD8b19613723215EF8CC80fC35A1428f8E8826940',
         providersData: [
             {
-                ProviderClass: UniSwapV2Provider,
+                ProviderClass: UniSwapV2EthereumProvider,
                 methodSuffix: ''
             },
             {
