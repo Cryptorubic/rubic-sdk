@@ -70,11 +70,12 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
         }
 
         const methodName = exact === 'input' ? 'quoteExactInput' : 'quoteExactOutput';
+        const tokensPath = exact === 'input' ? path : path.reverse();
         return {
             path,
             methodData: {
                 methodName,
-                methodArguments: [AlgebraQuoterController.getEncodedPath(path), weiAmount]
+                methodArguments: [AlgebraQuoterController.getEncodedPath(tokensPath), weiAmount]
             }
         };
     }
