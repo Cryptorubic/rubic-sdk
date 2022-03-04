@@ -101,12 +101,14 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
         }
 
         const methodName = exact === 'input' ? 'quoteExactInput' : 'quoteExactOutput';
+        const tokensPath = exact === 'input' ? poolsPath : poolsPath.reverse();
+        const initialTokenAddress = exact === 'input' ? from.address : to.address;
         return {
             poolsPath,
             methodData: {
                 methodName,
                 methodArguments: [
-                    UniswapV3QuoterController.getEncodedPoolsPath(poolsPath, from.address),
+                    UniswapV3QuoterController.getEncodedPoolsPath(tokensPath, initialTokenAddress),
                     weiAmount
                 ]
             }
