@@ -1,10 +1,10 @@
 import { RubicSdkError } from 'src/common';
 
-export class TimeoutError extends Error {
+export class TimeoutError extends RubicSdkError {
     constructor(message?: string) {
         super(message);
         this.name = 'TimeoutError';
 
-        Object.setPrototypeOf(this, RubicSdkError.prototype);
+        Object.setPrototypeOf(this, TimeoutError.prototype);
     }
 }

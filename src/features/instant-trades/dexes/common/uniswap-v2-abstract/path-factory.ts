@@ -85,8 +85,10 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
     public async getAmountAndPath(
         gasPriceInUsd: BigNumber | undefined
     ): Promise<UniswapCalculatedInfo> {
-        const routes = (await this.getAllRoutes()).sort((a, b) =>
-            b.outputAbsoluteAmount.comparedTo(a.outputAbsoluteAmount)
+        const routes = (await this.getAllRoutes()).sort(
+            (a, b) =>
+                b.outputAbsoluteAmount.comparedTo(a.outputAbsoluteAmount) *
+                (this.exact === 'input' ? 1 : -1)
         );
         if (routes.length === 0) {
             throw new InsufficientLiquidityError();

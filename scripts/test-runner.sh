@@ -1,18 +1,19 @@
-rm -f -- hardhat.log &> /dev/null
+rm node.log 2> /dev/null
 
-npx hardhat node &> hardhat.log &
-last_pid=$!
+cd ..
 
-while ! ( grep -q 'Account #19:' ./hardhat.log )
+docker compose up &> scripts/node.log &
+
+echo 'See node logs in scripts/node.log'
+
+while ! ( grep -q 'Account #19:' scripts/node.log )
 	do
 		sleep 2
 		echo "Waiting for node..."
 	done
 
 sleep 1
-rm hardhat.log
-cd ..
 
-npx jest
+jest
 
-kill $last_pid
+docker compose down

@@ -153,7 +153,11 @@ export abstract class UniswapV3AlgebraAbstractProvider<
                 weiAmount.toFixed(0),
                 options.disableMultihops ? 0 : this.providerConfiguration.maxTransitTokens
             )
-        ).sort((a, b) => b.outputAbsoluteAmount.comparedTo(a.outputAbsoluteAmount));
+        ).sort(
+            (a, b) =>
+                b.outputAbsoluteAmount.comparedTo(a.outputAbsoluteAmount) *
+                (exact === 'input' ? 1 : -1)
+        );
 
         if (routes.length === 0) {
             throw new InsufficientLiquidityError();

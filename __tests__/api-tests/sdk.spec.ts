@@ -1,9 +1,9 @@
 import { SDK } from '@core/sdk/sdk';
-import { configuration } from '../utils/configuration';
+import { minimalConfiguration } from '../utils/configuration';
 
 describe('Common SDK tests', () => {
     test('Should create sdk instance', async () => {
-        const sdk = await SDK.createSDK(configuration);
+        const sdk = await SDK.createSDK(minimalConfiguration);
         expect(typeof sdk).toBe('object');
     });
 });
