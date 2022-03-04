@@ -1,6 +1,4 @@
 import { Injector } from '@core/sdk/injector';
-import { UniSwapV2Provider } from '@features/swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
-
 import { Chain } from '__tests__/utils/chain';
 import { mockInjector } from '__tests__/utils/mock-injector';
 import { TOKENS } from '__tests__/utils/tokens';
@@ -9,12 +7,13 @@ import { BLOCKCHAIN_NAME, Web3Public } from 'src/core';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
 import { TransactionReceipt } from 'web3-eth';
+import { UniSwapV2EthereumProvider } from '@features/instant-trades/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-provider';
 import fn = jest.fn;
 
 export const uniswapV2TradeSpec = () =>
     describe('Uniswap V2 trade tests.', () => {
         let chain: Chain;
-        let uniswapV2Provider: UniSwapV2Provider;
+        let uniswapV2Provider: UniSwapV2EthereumProvider;
         let web3Public: Web3Public;
         let userAddress: string;
 
@@ -36,7 +35,7 @@ export const uniswapV2TradeSpec = () =>
         };
 
         beforeAll(async () => {
-            uniswapV2Provider = new UniSwapV2Provider();
+            uniswapV2Provider = new UniSwapV2EthereumProvider();
         });
 
         beforeEach(async () => {

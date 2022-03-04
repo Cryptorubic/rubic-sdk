@@ -6,7 +6,7 @@ import { Web3PublicService } from '@core/blockchain/web3-public/web3-public-serv
 import { Injector } from '@core/sdk/injector';
 import { Configuration } from '@core/sdk/models/configuration';
 import { CrossChainManager } from '@features/cross-chain/cross-chain-manager';
-import { InstantTradesManager } from '@features/swap/instant-trades-manager';
+import { InstantTradesManager } from '@features/instant-trades/instant-trades-manager';
 import { TokensManager } from '@features/tokens/tokens-manager';
 
 export class SDK {

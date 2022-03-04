@@ -5,7 +5,7 @@ import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME } from 'src/core';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
-import { AlgebraProvider } from '@features/swap/dexes/polygon/algebra/algebra-provider';
+import { AlgebraProvider } from '@features/instant-trades/dexes/polygon/algebra/algebra-provider';
 
 describe('Algebra provider tests', () => {
     let algebraProvider: AlgebraProvider;
