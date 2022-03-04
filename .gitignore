@@ -7,3 +7,4 @@
 /__tests__/env.js
 /lib/
 /cache/
+/scripts/node.log
