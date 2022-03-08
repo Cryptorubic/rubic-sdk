@@ -45,9 +45,10 @@ export const TOKENS = {
         decimals: 8,
         symbol: 'WBTC',
         name: 'Wrapped BTC'
-    }),
+    })
+} as const;
 
-    // POLYGON
+export const TOKENS_POLYGON = {
     MATIC: new Token({
         blockchain: BLOCKCHAIN_NAME.POLYGON,
         address: NATIVE_TOKEN_ADDRESS,
@@ -55,26 +56,47 @@ export const TOKENS = {
         symbol: 'MAT',
         name: 'Matoc'
     }),
-    USDT_POLYGON: new Token({
+    WMATIC: new Token({
+        blockchain: BLOCKCHAIN_NAME.POLYGON,
+        address: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+        decimals: 18,
+        symbol: 'WMATIC',
+        name: 'Wrapped Matic'
+    }),
+    WETH: new Token({
+        blockchain: BLOCKCHAIN_NAME.POLYGON,
+        address: '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619',
+        decimals: 18,
+        symbol: 'WETH',
+        name: 'Wrapped Ether'
+    }),
+    USDT: new Token({
         blockchain: BLOCKCHAIN_NAME.POLYGON,
         address: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
         decimals: 6,
         symbol: 'USDT',
         name: '(PoS) Tether USD'
     }),
-    DAI_POLYGON: new Token({
+    DAI: new Token({
         blockchain: BLOCKCHAIN_NAME.POLYGON,
         address: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
         decimals: 18,
         symbol: 'DAI',
         name: '(PoS) Dai Stablecoin'
     }),
-    USDC_POLYGON: new Token({
+    USDC: new Token({
         blockchain: BLOCKCHAIN_NAME.POLYGON,
         address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
         decimals: 6,
         symbol: 'USDC',
         name: 'USD Coin (PoS)'
+    }),
+    QUICK: new Token({
+        blockchain: BLOCKCHAIN_NAME.POLYGON,
+        address: '0x831753DD7087CaC61aB5644b308642cc1c33Dc13',
+        decimals: 18,
+        symbol: 'QUICK',
+        name: 'Quickswap'
     })
 } as const;
 

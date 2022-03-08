@@ -1,7 +1,7 @@
 import { Injector } from '@core/sdk/injector';
 import { Chain } from '__tests__/utils/chain';
 import { mockInjector } from '__tests__/utils/mock-injector';
-import { TOKENS } from '__tests__/utils/tokens';
+import { TOKENS_POLYGON } from '__tests__/utils/tokens';
 import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME, Web3Public } from 'src/core';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
@@ -37,13 +37,13 @@ export const uniswapV3PolygonTradeSpec = () =>
             const maticBalanceBefore = await web3Public.getBalance(userAddress);
             const usdtBalanceBefore = await web3Public.getBalance(
                 userAddress,
-                TOKENS.USDT_POLYGON.address
+                TOKENS_POLYGON.USDT.address
             );
             const from = await PriceTokenAmount.createFromToken({
-                ...TOKENS.MATIC,
+                ...TOKENS_POLYGON.MATIC,
                 tokenAmount: new BigNumber(maticTokenAmountToSwap)
             });
-            const to = await PriceToken.createFromToken(TOKENS.USDT_POLYGON);
+            const to = await PriceToken.createFromToken(TOKENS_POLYGON.USDT);
 
             const trade = await uniswapV3Provider.calculate(from, to, {
                 gasCalculation: 'disabled'
@@ -52,7 +52,7 @@ export const uniswapV3PolygonTradeSpec = () =>
             const maticBalanceAfter = await web3Public.getBalance(userAddress);
             const usdtBalanceAfter = await web3Public.getBalance(
                 userAddress,
-                TOKENS.USDT_POLYGON.address
+                TOKENS_POLYGON.USDT.address
             );
             const transactionFee = await utils.getTransactionFeeByReceipt(transactionReceipt);
 
@@ -82,10 +82,10 @@ export const uniswapV3PolygonTradeSpec = () =>
             const usdtTokenAmountToSwap = 1;
             const expectedToTokensAmount = '0.487261802620573316'; // constant data about tokens rate in 23571568 block
             const from = await PriceTokenAmount.createFromToken({
-                ...TOKENS.USDT_POLYGON,
+                ...TOKENS_POLYGON.USDT,
                 tokenAmount: new BigNumber(usdtTokenAmountToSwap)
             });
-            const to = await PriceToken.createFromToken(TOKENS.MATIC);
+            const to = await PriceToken.createFromToken(TOKENS_POLYGON.MATIC);
             await chain.increaseTokensBalance(from, usdtTokenAmountToSwap, { inEtherUnits: true });
             const usdtBalanceBefore = await web3Public.getBalance(userAddress, from.address);
             const maticBalanceBefore = await web3Public.getBalance(userAddress);
@@ -123,10 +123,10 @@ export const uniswapV3PolygonTradeSpec = () =>
             const usdtTokenAmountToSwap = 1;
             const expectedToTokensAmount = '0.998641521554865859'; // constant data about tokens rate in 23571568 block
             const from = await PriceTokenAmount.createFromToken({
-                ...TOKENS.USDT_POLYGON,
+                ...TOKENS_POLYGON.USDT,
                 tokenAmount: new BigNumber(usdtTokenAmountToSwap)
             });
-            const to = await PriceToken.createFromToken(TOKENS.DAI_POLYGON);
+            const to = await PriceToken.createFromToken(TOKENS_POLYGON.DAI);
             await chain.increaseTokensBalance(from, usdtTokenAmountToSwap, { inEtherUnits: true });
             const usdtBalanceBefore = await web3Public.getBalance(userAddress, from.address);
             const daiBalanceBefore = await web3Public.getBalance(userAddress, to.address);
