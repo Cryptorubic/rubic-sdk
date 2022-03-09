@@ -1,7 +1,8 @@
 import { BLOCKCHAIN_NAME } from 'src/core';
-import { SushiSwapFantomTrade } from 'src/features/swap/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-trade';
-import { SUSHI_SWAP_FANTOM_PROVIDER_CONFIGURATION } from 'src/features/swap/dexes/fantom/sushi-swap-fantom/constants';
-import { SushiSwapFantomProvider } from 'src/features/swap/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-provider';
+import { SushiSwapFantomProvider } from 'src/features/instant-trades/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-provider';
+import { SushiSwapFantomTrade } from 'src/features/instant-trades/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-trade';
+import { SUSHI_SWAP_FANTOM_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/fantom/sushi-swap-fantom/constants';
+
 
 export const sushiSwapFantomProviderSpec = () => {
     let sushiSwapProvider: SushiSwapFantomProvider;

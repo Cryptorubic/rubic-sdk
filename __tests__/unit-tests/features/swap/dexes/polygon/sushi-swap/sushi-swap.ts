@@ -3,11 +3,11 @@ import { mockInjector } from '__tests__/utils/mock-injector';
 import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
-import { SushiSwapPolygonProvider } from 'src/features/swap/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
 import { BLOCKCHAIN_NAME } from 'src/core';
-import { SushiSwapPolygonTrade } from 'src/features/swap/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-trade';
-import { SUSHI_SWAP_POLYGON_PROVIDER_CONFIGURATION } from 'src/features/swap/dexes/polygon/sushi-swap-polygon/constants';
 import BigNumber from 'bignumber.js';
+import { SushiSwapPolygonProvider } from 'src/features/instant-trades/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
+import { SushiSwapPolygonTrade } from 'src/features/instant-trades/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-trade';
+import { SUSHI_SWAP_POLYGON_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/polygon/sushi-swap-polygon/constants';
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.POLYGON];
 

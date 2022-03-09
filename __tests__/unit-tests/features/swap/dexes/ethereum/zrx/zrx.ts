@@ -1,6 +1,6 @@
 import { BLOCKCHAIN_NAME } from 'src/core';
-import { ZrxEthereumProvider } from 'src/features/swap/dexes/ethereum/zrx-ethereum/zrx-ethereum-provider';
 import { TRADE_TYPE } from 'src/features';
+import { ZrxEthereumProvider } from 'src/features/instant-trades/dexes/ethereum/zrx-ethereum/zrx-ethereum-provider';
 
 export const zrxProviderEthereumSpec = () => {
     let zrxProvider: ZrxEthereumProvider;

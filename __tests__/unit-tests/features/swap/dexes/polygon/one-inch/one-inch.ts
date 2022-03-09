@@ -1,6 +1,6 @@
 import { TRADE_TYPE } from 'src/features';
-import { OneinchPolygonProvider } from 'src/features/swap/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
 import { BLOCKCHAIN_NAME } from 'src/core';
+import { OneinchPolygonProvider } from 'src/features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
 
 let oneinchPolygonProvider: OneinchPolygonProvider;
 

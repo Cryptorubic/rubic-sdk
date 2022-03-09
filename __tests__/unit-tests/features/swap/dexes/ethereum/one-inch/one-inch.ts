@@ -1,6 +1,6 @@
-import { OneinchEthereumProvider } from 'src/features/swap/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
 import { BLOCKCHAIN_NAME } from 'src/core';
 import { TRADE_TYPE } from 'src/features';
+import { OneinchEthereumProvider } from 'src/features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
 
 export const oneinchProviderEthereumSpec = () => {
     let oneinchProvider: OneinchEthereumProvider;

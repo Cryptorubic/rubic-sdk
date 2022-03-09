@@ -1,7 +1,7 @@
-import { SpiritSwapProvider } from 'src/features/swap/dexes/fantom/spirit-swap/spirit-swap-provider';
 import { BLOCKCHAIN_NAME } from 'src/core';
-import { SpookySwapTrade } from 'src/features/swap/dexes/fantom/spooky-swap/spooky-swap-trade';
-import { SPOOKY_SWAP_PROVIDER_CONFIGURATION } from 'src/features/swap/dexes/fantom/spooky-swap/constants';
+import { SpiritSwapProvider } from 'src/features/instant-trades/dexes/fantom/spirit-swap/spirit-swap-provider';
+import { SpookySwapTrade } from 'src/features/instant-trades/dexes/fantom/spooky-swap/spooky-swap-trade';
+import { SPOOKY_SWAP_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/fantom/spooky-swap/constants';
 
 export const spookySwapFantomProviderSpec = () => {
     let spookySwapProvider: SpiritSwapProvider;
