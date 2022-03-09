@@ -6,6 +6,9 @@ import { BLOCKCHAIN_NAME } from 'src/core';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
 import { UniSwapV3EthereumProvider } from '@features/swap/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
+import { UniSwapV3EthereumTrade } from 'src/features/swap/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-trade';
+import { UNI_SWAP_V3_ETHEREUM_PROVIDER_CONFIGURATION } from 'src/features/swap/dexes/ethereum/uni-swap-v3-ethereum/constants/provider-configuration';
+import { UNI_SWAP_V3_ETHEREUM_ROUTER_CONFIGURATION } from 'src/features/swap/dexes/ethereum/uni-swap-v3-ethereum/constants/router-configuration';
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.ETHEREUM];
 
@@ -13,14 +16,25 @@ export const uniswapV3EthProviderSpec = () =>
     describe('UnisSwap V3 Ethereum provider tests', () => {
         let uniswapV3Provider: UniSwapV3EthereumProvider;
 
-        beforeAll(async () => {
+        beforeEach(async () => {
             uniswapV3Provider = new UniSwapV3EthereumProvider();
         });
 
-        beforeEach(async () => {
+        beforeAll(async () => {
             const chain = await Chain.reset(BLOCKCHAIN_NAME.ETHEREUM);
             const configuration = await chain.getConfiguration();
             await mockInjector(configuration);
+        });
+
+        test('Initialize values', () => {
+            expect(uniswapV3Provider.blockchain).toBe(BLOCKCHAIN_NAME.ETHEREUM);
+            expect(typeof uniswapV3Provider.InstantTradeClass).toBe(typeof UniSwapV3EthereumTrade);
+            expect(uniswapV3Provider.providerConfiguration).toBe(
+                UNI_SWAP_V3_ETHEREUM_PROVIDER_CONFIGURATION
+            );
+            expect(uniswapV3Provider.routerConfiguration).toBe(
+                UNI_SWAP_V3_ETHEREUM_ROUTER_CONFIGURATION
+            );
         });
 
         test('Must calculate correct NATIVE-ERC20 trade with simple path.', async () => {

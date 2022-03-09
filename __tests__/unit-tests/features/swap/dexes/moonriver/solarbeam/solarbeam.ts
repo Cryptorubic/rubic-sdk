@@ -3,8 +3,8 @@ import { SolarbeamProvider } from 'src/features/swap/dexes/moonriver/solarbeam/s
 import { SOLARBEAM_PROVIDER_CONFIGURATION } from 'src/features/swap/dexes/moonriver/solarbeam/constants';
 import { SolarbeamTrade } from 'src/features/swap/dexes/moonriver/solarbeam/solarbeam-trade';
 
-export const solarbeamMoonriverСonstants = () => {
-    describe('QuickSwap provider tests', () => {
+export const solarbeamMoonriverProviderSpec = () => {
+    describe('Solarbeam provider tests', () => {
         let solarbeamProvider: SolarbeamProvider;
 
         beforeEach(async () => {

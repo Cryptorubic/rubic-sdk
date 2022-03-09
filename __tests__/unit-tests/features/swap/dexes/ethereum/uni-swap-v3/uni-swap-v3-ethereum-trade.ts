@@ -1,13 +1,13 @@
-import { Injector } from '@core/sdk/injector';
 import { Chain } from '__tests__/utils/chain';
 import { mockInjector } from '__tests__/utils/mock-injector';
 import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
+import { Utils } from '__tests__/unit-tests/features/swap/utils/utils';
+import { Injector } from '@core/sdk/injector';
 import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME, Web3Public } from 'src/core';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
 import { UniSwapV3EthereumProvider } from '@features/swap/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
-import { Utils } from '__tests__/unit-tests/features/swap/utils/utils';
 import fn = jest.fn;
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.ETHEREUM];
@@ -20,11 +20,11 @@ export const uniswapV3EthTradeSpec = () =>
         let userAddress: string;
         let utils: Utils;
 
-        beforeAll(async () => {
+        beforeEach(async () => {
             uniswapV3Provider = new UniSwapV3EthereumProvider();
         });
 
-        beforeEach(async () => {
+        beforeAll(async () => {
             chain = await Chain.reset(BLOCKCHAIN_NAME.ETHEREUM);
             const configuration = await chain.getConfiguration();
             await mockInjector(configuration);
