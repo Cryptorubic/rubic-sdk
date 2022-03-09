@@ -1,5 +1,5 @@
 import { getCrossChainContract } from '@features/cross-chain/constants/cross-chain-contracts';
-import { CrossChainContractData } from '@features/cross-chain/contract-data/cross-chain-contract-data';
+import { CrossChainContractData } from '@features/cross-chain/cross-chain-contract-data/cross-chain-contract-data';
 import {
     CrossChainSupportedBlockchain,
     crossChainSupportedBlockchains
@@ -11,9 +11,9 @@ import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { compareAddresses } from '@common/utils/blockchain';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
-import { CrossChainContractTrade } from '@features/cross-chain/contract-trade/cross-chain-contract-trade';
-import { DirectCrossChainContractTrade } from '@features/cross-chain/contract-trade/direct-cross-chain-contract-trade';
-import { ItCrossChainContractTrade } from '@features/cross-chain/contract-trade/it-contract-trade/it-cross-chain-contract-trade';
+import { CrossChainContractTrade } from '@features/cross-chain/cross-chain-contract-trade/cross-chain-contract-trade';
+import { DirectCrossChainContractTrade } from '@features/cross-chain/cross-chain-contract-trade/direct-cross-chain-contract-trade';
+import { ItCrossChainContractTrade } from '@features/cross-chain/cross-chain-contract-trade/it-cross-chain-contract-trade/it-cross-chain-contract-trade';
 import { CrossChainTrade } from '@features/cross-chain/cross-chain-trade/cross-chain-trade';
 import { MinMaxAmountsErrors } from '@features/cross-chain/cross-chain-trade/models/min-max-amounts-errors';
 import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity.error';

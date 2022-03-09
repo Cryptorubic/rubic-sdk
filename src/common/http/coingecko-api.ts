@@ -11,10 +11,12 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,
     BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
     BLOCKCHAIN_NAME.POLYGON,
-    BLOCKCHAIN_NAME.HARMONY,
     BLOCKCHAIN_NAME.AVALANCHE,
     BLOCKCHAIN_NAME.MOONRIVER,
-    BLOCKCHAIN_NAME.FANTOM
+    BLOCKCHAIN_NAME.FANTOM,
+    BLOCKCHAIN_NAME.HARMONY,
+    BLOCKCHAIN_NAME.ARBITRUM,
+    BLOCKCHAIN_NAME.AURORA
 ] as const;
 
 type SupportedBlockchain = typeof supportedBlockchains[number];
@@ -37,20 +39,24 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.ETHEREUM]: 'ethereum',
             [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: 'binancecoin',
             [BLOCKCHAIN_NAME.POLYGON]: 'matic-network',
-            [BLOCKCHAIN_NAME.HARMONY]: 'harmony',
             [BLOCKCHAIN_NAME.AVALANCHE]: 'avalanche-2',
             [BLOCKCHAIN_NAME.MOONRIVER]: 'moonriver',
-            [BLOCKCHAIN_NAME.FANTOM]: 'fantom'
+            [BLOCKCHAIN_NAME.FANTOM]: 'fantom',
+            [BLOCKCHAIN_NAME.HARMONY]: 'harmony',
+            [BLOCKCHAIN_NAME.ARBITRUM]: 'ethereum',
+            [BLOCKCHAIN_NAME.AURORA]: 'ethereum'
         };
 
         this.tokenBlockchainId = {
             [BLOCKCHAIN_NAME.ETHEREUM]: 'ethereum',
             [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: 'binance-smart-chain',
             [BLOCKCHAIN_NAME.POLYGON]: 'polygon-pos',
-            [BLOCKCHAIN_NAME.HARMONY]: 'harmony-shard-0',
             [BLOCKCHAIN_NAME.AVALANCHE]: 'avalanche',
             [BLOCKCHAIN_NAME.MOONRIVER]: 'moonriver',
-            [BLOCKCHAIN_NAME.FANTOM]: 'fantom'
+            [BLOCKCHAIN_NAME.FANTOM]: 'fantom',
+            [BLOCKCHAIN_NAME.HARMONY]: 'harmony-shard-0',
+            [BLOCKCHAIN_NAME.ARBITRUM]: 'arbitrum-one',
+            [BLOCKCHAIN_NAME.AURORA]: 'aurora'
         };
     }
 

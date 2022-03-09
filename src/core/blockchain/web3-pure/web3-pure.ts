@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { TransactionConfig } from 'web3-core';
 import { toChecksumAddress, isAddress, toWei, fromWei, AbiItem } from 'web3-utils';
-import { TransactionGasParams } from '@features/swap/models/gas-params';
+import { TransactionGasParams } from '@features/instant-trades/models/gas-params';
 
 export class Web3Pure {
     public static readonly ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';

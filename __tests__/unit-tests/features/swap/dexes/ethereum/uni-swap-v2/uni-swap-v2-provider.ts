@@ -13,10 +13,10 @@ const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.ETHEREUM];
 
 export const uniswapV2ProviderSpec = () =>
     describe('Uniswap V2 provider tests', () => {
-        let uniswapV2Provider: UniSwapV2Provider;
+        let uniswapV2Provider: UniSwapV2EthereumProvider;
 
         beforeAll(async () => {
-            uniswapV2Provider = new UniSwapV2Provider();
+            uniswapV2Provider = new UniSwapV2EthereumProvider();
         });
 
         beforeEach(async () => {

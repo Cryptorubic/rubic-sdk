@@ -7,7 +7,7 @@ import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME, Web3Public } from 'src/core';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
-import { AlgebraProvider } from '@features/swap/dexes/polygon/algebra/algebra-provider';
+import { AlgebraProvider } from '@features/instant-trades/dexes/polygon/algebra/algebra-provider';
 import fn = jest.fn;
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.POLYGON];
