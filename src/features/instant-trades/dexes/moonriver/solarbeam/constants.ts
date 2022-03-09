@@ -13,7 +13,7 @@ const routingProvidersAddresses = [
     '0x6bD193Ee6D2104F14F94E2cA6efefae561A4334B' // SOLAR
 ];
 
-const wethAddress = '0xAA30eF758139ae4a7f798112902Bf6d65612045f';
+const wethAddress = '0x98878B06940aE243284CA214f92Bb71a2b032B8A';
 
 export const SOLARBEAM_PROVIDER_CONFIGURATION: UniswapV2ProviderConfiguration = {
     ...defaultMoonriverProviderConfiguration,
