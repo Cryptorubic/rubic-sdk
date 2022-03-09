@@ -5,13 +5,13 @@ import { uniswapV3EthTradeSpec } from '__tests__/unit-tests/features/swap/dexes/
 import { uniswapV3EthProviderSpec } from '__tests__/unit-tests/features/swap/dexes/ethereum/uni-swap-v3/uni-swap-v3-ethereum-provider';
 import { uniswapV2TradeSpec } from '__tests__/unit-tests/features/swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-trade';
 
-describe('Eth tests', () => {
-    instantTradesApiSpec();
-    crossChainApiSpec();
-
-    uniswapV2ProviderSpec();
-    uniswapV2TradeSpec();
-
-    uniswapV3EthProviderSpec();
-    uniswapV3EthTradeSpec();
-});
+// describe('Eth tests', () => {
+//     instantTradesApiSpec();
+//     crossChainApiSpec();
+//
+//     uniswapV2ProviderSpec();
+//     uniswapV2TradeSpec();
+//
+//     uniswapV3EthProviderSpec();
+//     uniswapV3EthTradeSpec();
+// });

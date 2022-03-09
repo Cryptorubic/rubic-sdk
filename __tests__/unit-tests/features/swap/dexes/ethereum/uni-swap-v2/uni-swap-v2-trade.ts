@@ -1,15 +1,16 @@
-import { Injector } from '@core/sdk/injector';
-import { UniSwapV2Provider } from '@features/swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
-
 import { Chain } from '__tests__/utils/chain';
 import { mockInjector } from '__tests__/utils/mock-injector';
-import { TOKENS } from '__tests__/utils/tokens';
+import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
+import { Injector } from '@core/sdk/injector';
+import { UniSwapV2Provider } from '@features/swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
 import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME, Web3Public } from 'src/core';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
 import { TransactionReceipt } from 'web3-eth';
 import fn = jest.fn;
+
+const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.ETHEREUM];
 
 export const uniswapV2TradeSpec = () =>
     describe('Uniswap V2 trade tests.', () => {

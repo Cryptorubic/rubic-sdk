@@ -1,11 +1,13 @@
 import { UniSwapV2Provider } from '@features/swap/dexes/ethereum/uni-swap-v2/uni-swap-v2-provider';
 import { Chain } from '__tests__/utils/chain';
 import { mockInjector } from '__tests__/utils/mock-injector';
-import { TOKENS } from '__tests__/utils/tokens';
+import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
 import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME } from 'src/core';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
+
+const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.ETHEREUM];
 
 export const uniswapV2ProviderSpec = () =>
     describe('Uniswap V2 provider tests', () => {
