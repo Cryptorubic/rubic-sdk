@@ -7,7 +7,7 @@ export const joeAvalancheProviderSpec = () => {
     describe('Joe provider tests', () => {
         let joeProvider: JoeProvider;
 
-        beforeEach(() => {
+        beforeAll(() => {
             joeProvider = new JoeProvider();
         });
 

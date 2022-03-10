@@ -6,7 +6,7 @@ import { SPOOKY_SWAP_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/
 export const spiritSwapFantomProviderSpec = () => {
     let spiritSwapProvider: SpiritSwapProvider;
 
-    beforeEach(() => {
+    beforeAll(() => {
         spiritSwapProvider = new SpiritSwapProvider();
     });
 

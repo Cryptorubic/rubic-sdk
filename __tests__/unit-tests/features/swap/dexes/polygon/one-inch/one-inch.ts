@@ -1,12 +1,14 @@
 import { TRADE_TYPE } from 'src/features';
 import { BLOCKCHAIN_NAME } from 'src/core';
 import { OneinchPolygonProvider } from 'src/features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
-
-let oneinchPolygonProvider: OneinchPolygonProvider;
+import { mockEmptyInjector } from '__tests__/utils/mock-injector';
 
 export const oneinchPolygonProviderSpec = () => {
     describe('QuickSwap provider tests', () => {
-        beforeEach(async () => {
+        let oneinchPolygonProvider: OneinchPolygonProvider;
+
+        beforeAll(() => {
+            mockEmptyInjector();
             oneinchPolygonProvider = new OneinchPolygonProvider();
         });
 

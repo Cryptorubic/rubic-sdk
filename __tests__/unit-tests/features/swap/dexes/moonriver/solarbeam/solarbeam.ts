@@ -7,7 +7,7 @@ export const solarbeamMoonriverProviderSpec = () => {
     describe('Solarbeam provider tests', () => {
         let solarbeamProvider: SolarbeamProvider;
 
-        beforeEach(async () => {
+        beforeAll(async () => {
             solarbeamProvider = new SolarbeamProvider();
         });
 

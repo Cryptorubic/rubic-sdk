@@ -7,7 +7,7 @@ export const sushiSwapAvalancheProviderSpec = () => {
     describe('SushiSwap provider tests', () => {
         let sushiSwapProvider: SushiSwapAvalancheProvider;
 
-        beforeEach(() => {
+        beforeAll(() => {
             sushiSwapProvider = new SushiSwapAvalancheProvider();
         });
 

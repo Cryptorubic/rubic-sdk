@@ -16,11 +16,11 @@ export const uniswapV3EthProviderSpec = () =>
     describe('UnisSwap V3 Ethereum provider tests', () => {
         let uniswapV3Provider: UniSwapV3EthereumProvider;
 
-        beforeEach(async () => {
+        beforeAll(async () => {
             uniswapV3Provider = new UniSwapV3EthereumProvider();
         });
 
-        beforeAll(async () => {
+        beforeEach(async () => {
             const chain = await Chain.reset(BLOCKCHAIN_NAME.ETHEREUM);
             const configuration = await chain.getConfiguration();
             await mockInjector(configuration);

@@ -6,7 +6,7 @@ import { PANCAKE_SWAP_PROVIDER_CONFIGURATION } from 'src/features/instant-trades
 export const pancakeSwapBscProviderSpec = () => {
     let pancakeSwapProvider: PancakeSwapProvider;
 
-    beforeEach(() => {
+    beforeAll(() => {
         pancakeSwapProvider = new PancakeSwapProvider();
     });
 

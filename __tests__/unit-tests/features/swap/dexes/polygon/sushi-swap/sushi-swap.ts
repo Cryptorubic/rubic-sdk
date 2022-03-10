@@ -15,14 +15,14 @@ export const sushiSwapPolygonProviderSpec = () => {
     describe('SushiSwap provider tests', () => {
         let sushiSwapProvider: SushiSwapPolygonProvider;
 
-        beforeAll(async () => {
-            const chain = await Chain.reset(BLOCKCHAIN_NAME.POLYGON);
-            const configuration = await chain.getConfiguration();
-            await mockInjector(configuration);
+        beforeEach(async () => {
+            sushiSwapProvider = new SushiSwapPolygonProvider();
         });
 
         beforeEach(async () => {
-            sushiSwapProvider = new SushiSwapPolygonProvider();
+            const chain = await Chain.reset(BLOCKCHAIN_NAME.POLYGON);
+            const configuration = await chain.getConfiguration();
+            await mockInjector(configuration);
         });
 
         test('Initialize values', () => {
@@ -196,9 +196,7 @@ export const sushiSwapPolygonProviderSpec = () => {
             expect(trade.to.tokenAmount.isEqualTo(expectedToTokensAmount)).toBeTruthy();
             expect(trade.path.length).toBe(3);
             expect(trade.path[0].address).toBe(TOKENS.DAI.address);
-            expect(trade.path[1].address.toLowerCase()).toBe(
-                TOKENS.USDT.address.toLowerCase()
-            );
+            expect(trade.path[1].address.toLowerCase()).toBe(TOKENS.USDT.address.toLowerCase());
             expect(trade.path[2].address).toBe(TOKENS.MATIC.address);
         }, 400_000);
     });

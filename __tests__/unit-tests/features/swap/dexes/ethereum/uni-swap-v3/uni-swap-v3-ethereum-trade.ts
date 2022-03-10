@@ -7,8 +7,8 @@ import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME, Web3Public } from 'src/core';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
-import fn = jest.fn;
 import { UniSwapV3EthereumProvider } from 'src/features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
+import fn = jest.fn;
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.ETHEREUM];
 
@@ -20,11 +20,11 @@ export const uniswapV3EthTradeSpec = () =>
         let userAddress: string;
         let utils: Utils;
 
-        beforeEach(async () => {
+        beforeAll(async () => {
             uniswapV3Provider = new UniSwapV3EthereumProvider();
         });
 
-        beforeAll(async () => {
+        beforeEach(async () => {
             chain = await Chain.reset(BLOCKCHAIN_NAME.ETHEREUM);
             const configuration = await chain.getConfiguration();
             await mockInjector(configuration);

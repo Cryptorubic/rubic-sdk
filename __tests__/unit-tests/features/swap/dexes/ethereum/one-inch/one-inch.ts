@@ -1,11 +1,13 @@
 import { BLOCKCHAIN_NAME } from 'src/core';
 import { TRADE_TYPE } from 'src/features';
 import { OneinchEthereumProvider } from 'src/features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
+import { mockEmptyInjector } from '__tests__/utils/mock-injector';
 
 export const oneinchProviderEthereumSpec = () => {
     let oneinchProvider: OneinchEthereumProvider;
 
-    beforeEach(() => {
+    beforeAll(() => {
+        mockEmptyInjector();
         oneinchProvider = new OneinchEthereumProvider();
     });
 

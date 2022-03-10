@@ -28,7 +28,9 @@ export const uniswapV2ProviderSpec = () =>
         test('Initialize values', () => {
             expect(uniswapV2Provider.blockchain).toBe(BLOCKCHAIN_NAME.ETHEREUM);
             expect(typeof uniswapV2Provider.InstantTradeClass).toBe(typeof UniSwapV2EthereumTrade);
-            expect(uniswapV2Provider.providerSettings).toBe(UNISWAP_V2_ETHEREUM_PROVIDER_CONFIGURATION);
+            expect(uniswapV2Provider.providerSettings).toBe(
+                UNISWAP_V2_ETHEREUM_PROVIDER_CONFIGURATION
+            );
         });
 
         test('Must calculate correct NATIVE-ERC20 trade with simple path.', async () => {

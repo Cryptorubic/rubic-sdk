@@ -6,7 +6,7 @@ import { SUSHI_SWAP_HARMONY_PROVIDER_CONFIGURATION } from 'src/features/instant-
 export const sushiSwapHarmonyProviderSpec = () => {
     let sushiSwapProvider: SushiSwapHarmonyProvider;
 
-    beforeEach(() => {
+    beforeAll(() => {
         sushiSwapProvider = new SushiSwapHarmonyProvider();
     });
 

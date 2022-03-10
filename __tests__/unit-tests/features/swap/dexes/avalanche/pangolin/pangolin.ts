@@ -7,7 +7,7 @@ export const pangolinAvalancheProviderSpec = () => {
     describe('Pangolin provider tests', () => {
         let pangolinProvider: PangolinProvider;
 
-        beforeEach(() => {
+        beforeAll(() => {
             pangolinProvider = new PangolinProvider();
         });
 

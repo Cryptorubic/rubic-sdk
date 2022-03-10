@@ -16,13 +16,13 @@ export const quickSwapPolygonProviderSpec = () => {
         let quickSwapProvider: QuickSwapProvider;
 
         beforeAll(async () => {
-            const chain = await Chain.reset(BLOCKCHAIN_NAME.POLYGON);
-            const configuration = await chain.getConfiguration();
-            await mockInjector(configuration);
+            quickSwapProvider = new QuickSwapProvider();
         });
 
         beforeEach(async () => {
-            quickSwapProvider = new QuickSwapProvider();
+            const chain = await Chain.reset(BLOCKCHAIN_NAME.POLYGON);
+            const configuration = await chain.getConfiguration();
+            await mockInjector(configuration);
         });
 
         test('Initialize values', () => {

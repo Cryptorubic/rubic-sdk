@@ -2,11 +2,10 @@ import { BLOCKCHAIN_NAME } from 'src/core';
 import { SushiSwapEthereumProvider } from 'src/features/instant-trades/dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider';
 import { SUSHI_SWAP_ETHEREUM_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/ethereum/sushi-swap-ethereum/constants';
 
-
 export const sushiSwapProviderEthereumSpec = () => {
     let sushiSwapProvider: SushiSwapEthereumProvider;
 
-    beforeEach(() => {
+    beforeAll(() => {
         sushiSwapProvider = new SushiSwapEthereumProvider();
     });
 

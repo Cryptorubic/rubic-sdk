@@ -22,7 +22,7 @@ export const crossChainApiSpec = () =>
                 address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
                 blockchain: BLOCKCHAIN_NAME.ETHEREUM
             };
-            const fromAmount = 1;
+            const fromAmount = 100;
 
             const trade = await sdk.crossChain.calculateTrade(
                 fromToken,

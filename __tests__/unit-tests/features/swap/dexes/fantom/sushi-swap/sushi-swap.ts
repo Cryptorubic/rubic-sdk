@@ -3,11 +3,10 @@ import { SushiSwapFantomProvider } from 'src/features/instant-trades/dexes/fanto
 import { SushiSwapFantomTrade } from 'src/features/instant-trades/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-trade';
 import { SUSHI_SWAP_FANTOM_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/fantom/sushi-swap-fantom/constants';
 
-
 export const sushiSwapFantomProviderSpec = () => {
     let sushiSwapProvider: SushiSwapFantomProvider;
 
-    beforeEach(() => {
+    beforeAll(() => {
         sushiSwapProvider = new SushiSwapFantomProvider();
     });
 

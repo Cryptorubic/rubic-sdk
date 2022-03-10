@@ -6,7 +6,7 @@ import { SUSHI_SWAP_BSC_PROVIDER_CONFIGURATION } from 'src/features/instant-trad
 export const sushiSwapBscProviderSpec = () => {
     let sushiSwapBscProvider: SushiSwapBscProvider;
 
-    beforeEach(() => {
+    beforeAll(() => {
         sushiSwapBscProvider = new SushiSwapBscProvider();
     });
 

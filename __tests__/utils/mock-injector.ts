@@ -13,3 +13,8 @@ export async function mockInjector(configuration: Configuration): Promise<void> 
 
     Injector.createInjector(web3PublicService, web3Private, httpClient);
 }
+
+export function mockEmptyInjector(): void {
+    // @ts-ignore
+    Injector.createInjector(null, null, null);
+}
