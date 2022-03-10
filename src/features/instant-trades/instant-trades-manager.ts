@@ -39,7 +39,7 @@ import { UniSwapV3PolygonProvider } from '@features/instant-trades/dexes/polygon
 import { ViperSwapHarmonyProvider } from '@features/instant-trades/dexes/harmony/viper-swap-harmony/viper-swap-harmony-provider';
 import { OneinchArbitrumProvider } from '@features/instant-trades/dexes/arbitrum/oneinch-arbitrum/oneinch-arbitrum-provider';
 import { SushiSwapArbitrumProvider } from '@features/instant-trades/dexes/arbitrum/sushi-swap-arbitrum/sushi-swap-arbitrum-provider';
-import { UniSwapV3ArbitrumProvider } from '@features/instant-trades/dexes/arbitrum/uni-swap-v3-ethereum/uni-swap-v3-arbitrum-provider';
+import { UniSwapV3ArbitrumProvider } from '@features/instant-trades/dexes/arbitrum/uni-swap-v3-arbitrum/uni-swap-v3-arbitrum-provider';
 import { TrisolarisAuroraProvider } from '@features/instant-trades/dexes/aurora/trisolaris-aurora/trisolaris-aurora-provider';
 import { WannaSwapAuroraProvider } from '@features/instant-trades/dexes/aurora/wanna-swap-aurora/wanna-swap-aurora-provider';
 

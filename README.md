@@ -2,8 +2,6 @@
 
 ![build status](https://github.com/Cryptorubic/rubic-sdk/actions/workflows/ci-master.yml/badge.svg) [![license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/Cryptorubic/rubic-sdk/blob/main/LICENSE)
 
-> ⚠️ **Danger:** Rubic SDK is at the alpha stage. Don't use it in production code. Use Rubic sdk at your own risk. During the first quarter of 2022, a beta release is planned, in which many interfaces and types can be changed. For now, you can explore our solution and try it out in a test environment. [An example of using rubik sdk](https://github.com/Cryptorubic/rubic-sdk-usage)
-
 ## Table of contents
 - [Description](#description)
   - [Supported DEX-es](#supported-dex-es)
@@ -104,6 +102,8 @@ In dApps a lot of business logic is often concentrated on the frontend for inter
     - [Quick Swap](https://quickswap.exchange/)
     - [Sushiswap](https://sushi.com/)
     - [1inch](https://app.1inch.io/)
+    - [Uniswap V3](https://uniswap.org/)
+    - [Algebra](https://app.algebra.finance/)
 - Avalanche
     - [Joe](https://traderjoexyz.com/#/home)
     - [Pangolin](https://app.pangolin.exchange/#/swap)
@@ -117,6 +117,14 @@ In dApps a lot of business logic is often concentrated on the frontend for inter
     - [Sushiswap](https://sushi.com/)
 - Harmony
     - [Sushiswap](https://sushi.com/)
+    - [Viper Swap](https://viperswap.one/)
+- Arbitrum
+  - [Uniswap V3](https://uniswap.org/)
+  - [Sushiswap](https://sushi.com/)
+  - [1inch](https://app.1inch.io/)
+- Aurora
+  - [Wanna Swap](https://wannaswap.finance/exchange/swap)
+  - [Trisolaris](https://www.trisolaris.io/)
 
 ### Multi-Chain swaps supported blockchains
 Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
