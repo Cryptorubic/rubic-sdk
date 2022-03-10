@@ -7,6 +7,7 @@ export interface Configuration {
     readonly rpcProviders: Partial<Record<BLOCKCHAIN_NAME, RpcProvider>>;
     readonly walletProvider?: WalletProvider;
     readonly httpClient?: HttpClient;
+    readonly providerAddress?: string;
 }
 
 export interface RpcProvider {

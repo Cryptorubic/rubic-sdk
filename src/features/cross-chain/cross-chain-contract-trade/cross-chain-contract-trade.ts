@@ -90,7 +90,8 @@ export abstract class CrossChainContractTrade {
      */
     public async getMethodArguments(
         toContractTrade: CrossChainContractTrade,
-        walletAddress: string
+        walletAddress: string,
+        providerAddress: string
     ): Promise<unknown[]> {
         const toNumOfBlockchain = await toContractTrade.contract.getNumOfBlockchain();
 
@@ -110,7 +111,7 @@ export abstract class CrossChainContractTrade {
             this.toToken.decimals
         );
 
-        const walletAddressBytes32 = Web3Pure.addressToBytes32(walletAddress);
+        const toWalletAddressBytes32 = Web3Pure.addressToBytes32(walletAddress);
 
         const isToTokenNative = this.toToken.isNative;
 
@@ -124,12 +125,13 @@ export abstract class CrossChainContractTrade {
                 secondPath,
                 fromTransitTokenAmountMinAbsolute,
                 tokenOutAmountMinAbsolute,
-                walletAddressBytes32,
+                toWalletAddressBytes32,
+                providerAddress,
                 isToTokenNative
             ]
         ];
 
-        await this.modifyArgumentsForProvider(methodArguments, walletAddress);
+        await this.modifyArgumentsForProvider(methodArguments, this.contract.address);
 
         methodArguments[0].push(swapToUserMethodSignature);
 
