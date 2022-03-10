@@ -1,11 +1,16 @@
 import { Chain } from '__tests__/utils/chain';
 import { mockInjector } from '__tests__/utils/mock-injector';
-import { TOKENS } from '__tests__/utils/tokens';
+import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
 import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME } from 'src/core';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
-import { UniSwapV3EthereumProvider } from '@features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
+import { UniSwapV3EthereumTrade } from 'src/features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-trade';
+import { UNI_SWAP_V3_ETHEREUM_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/constants/provider-configuration';
+import { UNI_SWAP_V3_ETHEREUM_ROUTER_CONFIGURATION } from 'src/features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/constants/router-configuration';
+import { UniSwapV3EthereumProvider } from 'src/features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
+
+const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.ETHEREUM];
 
 export const uniswapV3EthProviderSpec = () =>
     describe('UnisSwap V3 Ethereum provider tests', () => {
@@ -19,6 +24,17 @@ export const uniswapV3EthProviderSpec = () =>
             const chain = await Chain.reset(BLOCKCHAIN_NAME.ETHEREUM);
             const configuration = await chain.getConfiguration();
             await mockInjector(configuration);
+        });
+
+        test('Initialize values', () => {
+            expect(uniswapV3Provider.blockchain).toBe(BLOCKCHAIN_NAME.ETHEREUM);
+            expect(typeof uniswapV3Provider.InstantTradeClass).toBe(typeof UniSwapV3EthereumTrade);
+            expect(uniswapV3Provider.providerConfiguration).toBe(
+                UNI_SWAP_V3_ETHEREUM_PROVIDER_CONFIGURATION
+            );
+            expect(uniswapV3Provider.routerConfiguration).toBe(
+                UNI_SWAP_V3_ETHEREUM_ROUTER_CONFIGURATION
+            );
         });
 
         test('Must calculate correct NATIVE-ERC20 trade with simple path.', async () => {

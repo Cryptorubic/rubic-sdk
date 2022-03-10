@@ -7,9 +7,9 @@ import { UNI_SWAP_V3_ETHEREUM_ROUTER_CONFIGURATION } from '@features/instant-tra
 export class UniSwapV3EthereumProvider extends UniswapV3AbstractProvider<UniSwapV3EthereumTrade> {
     public readonly blockchain = BLOCKCHAIN_NAME.ETHEREUM;
 
-    protected readonly InstantTradeClass = UniSwapV3EthereumTrade;
+    public readonly InstantTradeClass = UniSwapV3EthereumTrade;
 
-    protected readonly providerConfiguration = UNI_SWAP_V3_ETHEREUM_PROVIDER_CONFIGURATION;
+    public readonly providerConfiguration = UNI_SWAP_V3_ETHEREUM_PROVIDER_CONFIGURATION;
 
-    protected readonly routerConfiguration = UNI_SWAP_V3_ETHEREUM_ROUTER_CONFIGURATION;
+    public readonly routerConfiguration = UNI_SWAP_V3_ETHEREUM_ROUTER_CONFIGURATION;
 }
