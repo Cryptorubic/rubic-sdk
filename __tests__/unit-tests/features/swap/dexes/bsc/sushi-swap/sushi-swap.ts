@@ -1,7 +1,7 @@
-import { SushiSwapBscProvider } from 'src/features/swap/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
 import { BLOCKCHAIN_NAME } from 'src/core';
-import { SushiSwapBscTrade } from 'src/features/swap/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-trade';
-import { SUSHI_SWAP_BSC_PROVIDER_CONFIGURATION } from 'src/features/swap/dexes/bsc/sushi-swap-bsc/constants';
+import { SushiSwapBscProvider } from 'src/features/instant-trades/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
+import { SushiSwapBscTrade } from 'src/features/instant-trades/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-trade';
+import { SUSHI_SWAP_BSC_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/bsc/sushi-swap-bsc/constants';
 
 export const sushiSwapBscProviderSpec = () => {
     let sushiSwapBscProvider: SushiSwapBscProvider;

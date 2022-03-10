@@ -1,7 +1,7 @@
-import { JoeProvider } from 'src/features/swap/dexes/avalanche/joe/joe-provider';
 import { BLOCKCHAIN_NAME } from 'src/core';
-import { JoeTrade } from 'src/features/swap/dexes/avalanche/joe/joe-trade';
-import { JOE_PROVIDER_CONFIGURATION } from 'src/features/swap/dexes/avalanche/joe/constants';
+import { JoeProvider } from 'src/features/instant-trades/dexes/avalanche/joe/joe-provider';
+import { JoeTrade } from 'src/features/instant-trades/dexes/avalanche/joe/joe-trade';
+import { JOE_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/avalanche/joe/constants';
 
 export const joeAvalancheProviderSpec = () => {
     describe('Joe provider tests', () => {
