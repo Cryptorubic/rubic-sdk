@@ -1,17 +1,16 @@
-import { ContractTrade } from '@features/cross-chain/contract-trade/contract-trade';
+import { CrossChainContractTrade } from '@features/cross-chain/cross-chain-contract-trade/cross-chain-contract-trade';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@core/sdk/injector';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { GasData } from '@features/cross-chain/models/gas-data';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
-import { MinMaxAmountsErrors } from '@features/cross-chain/cross-chain-trade/models/min-max-amounts-errors';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { CrossChainIsUnavailableError } from '@common/errors/cross-chain/cross-chain-is-unavailable.error';
 import { MaxGasPriceOverflowError } from '@common/errors/cross-chain/max-gas-price-overflow.error';
 import { TransactionOptions } from '@core/blockchain/models/transaction-options';
 import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/failed-to-check-for-transaction-receipt.error';
 import { InsufficientFundsGasPriceValueError } from '@common/errors/cross-chain/insufficient-funds-gas-price-value.error';
-import { SwapTransactionOptions } from '@features/swap/models/swap-transaction-options';
+import { SwapTransactionOptions } from '@features/instant-trades/models/swap-transaction-options';
 import BigNumber from 'bignumber.js';
 import { Cache } from 'src/common';
 import { TransactionReceipt } from 'web3-eth';
@@ -20,12 +19,14 @@ import { WalletNotConnectedError } from '@common/errors/swap/wallet-not-connecte
 import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
 import { ContractParams } from '@features/cross-chain/cross-chain-trade/models/contract-params';
 import { BasicTransactionOptions } from 'src/core';
-import { InstantTradeContractTrade } from '@features/cross-chain/contract-trade/instant-trade-contract-trade';
+import { ItCrossChainContractTrade } from '@features/cross-chain/cross-chain-contract-trade/it-cross-chain-contract-trade/it-cross-chain-contract-trade';
+import { EncodeTransactionOptions } from 'src/features';
+import { TransactionConfig } from 'web3-core';
 
 export class CrossChainTrade {
     public static async getGasData(
-        fromTrade: ContractTrade,
-        toTrade: ContractTrade,
+        fromTrade: CrossChainContractTrade,
+        toTrade: CrossChainContractTrade,
         cryptoFeeToken: PriceTokenAmount
     ): Promise<GasData | null> {
         const fromBlockchain = fromTrade.blockchain;
@@ -41,7 +42,6 @@ export class CrossChainTrade {
                     toTrade,
                     cryptoFeeToken,
                     transitFeeToken: {} as PriceTokenAmount,
-                    minMaxAmountsErrors: {},
                     gasData: null
                 }).getContractParams();
 
@@ -71,15 +71,13 @@ export class CrossChainTrade {
         }
     }
 
-    private readonly fromTrade: ContractTrade;
+    private readonly fromTrade: CrossChainContractTrade;
 
-    private readonly toTrade: ContractTrade;
+    private readonly toTrade: CrossChainContractTrade;
 
     public readonly cryptoFeeToken: PriceTokenAmount;
 
     public readonly transitFeeToken: PriceTokenAmount;
-
-    private readonly minMaxAmountsErrors: MinMaxAmountsErrors;
 
     private readonly gasData: GasData | null;
 
@@ -109,7 +107,7 @@ export class CrossChainTrade {
         priceImpactFrom: number | null;
         priceImpactTo: number | null;
     } {
-        const calculatePriceImpact = (trade: ContractTrade): number | null => {
+        const calculatePriceImpact = (trade: CrossChainContractTrade): number | null => {
             return trade.fromToken.calculatePriceImpactPercent(trade.toToken);
         };
 
@@ -120,29 +118,27 @@ export class CrossChainTrade {
     }
 
     constructor(crossChainTrade: {
-        fromTrade: ContractTrade;
-        toTrade: ContractTrade;
+        fromTrade: CrossChainContractTrade;
+        toTrade: CrossChainContractTrade;
         cryptoFeeToken: PriceTokenAmount;
         transitFeeToken: PriceTokenAmount;
-        minMaxAmountsErrors: MinMaxAmountsErrors;
         gasData: GasData | null;
     }) {
         this.fromTrade = crossChainTrade.fromTrade;
         this.toTrade = crossChainTrade.toTrade;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.transitFeeToken = crossChainTrade.transitFeeToken;
-        this.minMaxAmountsErrors = crossChainTrade.minMaxAmountsErrors;
         this.gasData = crossChainTrade.gasData;
 
         this.from = this.fromTrade.fromToken;
 
         const fromSlippage =
-            this.fromTrade instanceof InstantTradeContractTrade
+            this.fromTrade instanceof ItCrossChainContractTrade
                 ? this.fromTrade.slippageTolerance
                 : 0;
         this.to = new PriceTokenAmount({
             ...this.toTrade.toToken.asStruct,
-            weiAmount: this.toTrade.toToken.weiAmountPlusSlippage(fromSlippage)
+            weiAmount: this.toTrade.toToken.weiAmount.dividedBy(1 - fromSlippage).dp(0)
         });
 
         this.toTokenAmountMin = this.toTrade.toTokenAmountMin;
@@ -242,7 +238,7 @@ export class CrossChainTrade {
     }
 
     private checkToContractBalance(): Promise<void | never> {
-        return this.fromWeb3Public.checkBalance(
+        return this.toWeb3Public.checkBalance(
             this.toTrade.fromToken,
             this.fromTrade.fromToken.tokenAmount,
             this.toTrade.contract.address
@@ -264,16 +260,9 @@ export class CrossChainTrade {
         await Promise.all([
             this.checkContractsState(),
             this.checkToBlockchainGasPrice(),
-            // this.checkToContractBalance(),
+            this.checkToContractBalance(),
             this.checkUserBalance()
         ]);
-
-        if (this.minMaxAmountsErrors.minAmount) {
-            throw new Error(`Minimum amount is ${this.minMaxAmountsErrors.minAmount}`);
-        }
-        if (this.minMaxAmountsErrors.maxAmount) {
-            throw new Error(`Maximum amount is ${this.minMaxAmountsErrors.maxAmount}`);
-        }
     }
 
     private async getContractParams(): Promise<ContractParams> {
@@ -300,9 +289,10 @@ export class CrossChainTrade {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        const { onConfirm, gasLimit, gasPrice } = options;
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
+
+        const { onConfirm, gasLimit, gasPrice } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getContractParams();
@@ -322,8 +312,8 @@ export class CrossChainTrade {
                 methodName,
                 methodArguments,
                 {
-                    gas: gasLimit || undefined,
-                    gasPrice: gasPrice || undefined,
+                    gas: gasLimit,
+                    gasPrice,
                     value,
                     onTransactionHash
                 },
@@ -358,5 +348,24 @@ export class CrossChainTrade {
             throw new InsufficientFundsGasPriceValueError();
         }
         throw err;
+    }
+
+    public async encode(options: EncodeTransactionOptions = {}): Promise<TransactionConfig> {
+        const { gasLimit, gasPrice } = options;
+
+        const { contractAddress, contractAbi, methodName, methodArguments, value } =
+            await this.getContractParams();
+
+        return Web3Pure.encodeMethodCall(
+            contractAddress,
+            contractAbi,
+            methodName,
+            methodArguments,
+            value,
+            {
+                gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
+                gasPrice: gasPrice || this.gasData?.gasPrice.toFixed()
+            }
+        );
     }
 }

@@ -3,7 +3,6 @@ module.exports = {
   roots: [
     "src", "__tests__"
   ],
-  setupFiles: ["./__tests__/env.js"],
   moduleDirectories: ['node_modules', '<root-dir>/src'],
   testEnvironment: 'node',
   transform: {
@@ -22,6 +21,6 @@ module.exports = {
     '@common/(.*)$': '<root-dir>/../../src/common/$1',
     '@features/(.*)$': '<root-dir>/../../src/features/$1',
     '__tests__/(.*)$': '<root-dir>/../../__tests__/$1',
-
-  }
+  },
+  testTimeout: 300_000
 };

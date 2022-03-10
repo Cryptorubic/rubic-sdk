@@ -1,41 +1,50 @@
 import { ERC20_TOKEN_ABI } from '@core/blockchain/constants/erc-20-abi';
-import { Global } from '__tests__/utils/models/global';
+import { generateAccountsFromMnemonic } from '__tests__/utils/accounts-from-mnemonic';
+import {
+    publicProvidersRPC,
+    publicProvidersSupportServerUrls
+} from '__tests__/utils/configuration';
+import { DEFAULT_MNEMONIC } from '__tests__/utils/constants/mnemonic';
 import { TOKENS_HOLDERS } from '__tests__/utils/tokens';
+import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME, Configuration, Token } from 'src/core';
 import * as util from 'util';
 import Web3 from 'web3';
 import { HttpProvider } from 'web3-core';
-import hardhat from 'hardhat';
-import '@nomiclabs/hardhat-web3';
 
 export class Chain {
-    public static nodeUrl = 'http://localhost:8545';
+    private static walletsNumber = 10;
 
-    public static async reset(blockchainName: BLOCKCHAIN_NAME): Promise<Chain> {
-        const { web3 } = hardhat;
-        web3.setProvider(this.nodeUrl);
+    private static wallets = generateAccountsFromMnemonic(DEFAULT_MNEMONIC, Chain.walletsNumber);
 
-        const jsonRpcUrl = (global as unknown as Global).sdkEnv.providers[blockchainName]
-            ?.jsonRpcUrl;
-        const blockNumber = (global as unknown as Global).sdkEnv.providers[blockchainName]
-            ?.blockNumber;
-        if (!jsonRpcUrl || !blockNumber) {
-            throw new Error(`You must configure ${blockchainName} provider in __tests__/env.js`);
+    private static web3Instances = Object.fromEntries(
+        Object.entries(publicProvidersRPC).map(([key, value]) => {
+            const web3 = new Web3(value);
+            Chain.wallets.forEach(wallet => {
+                web3.eth.accounts.wallet.add(wallet.privateKey);
+            });
+            return [key, web3];
+        })
+    );
+
+    private static get accounts(): string[] {
+        return Chain.wallets.map(wallet => wallet.address);
+    }
+
+    public static async reset(
+        blockchainName: BLOCKCHAIN_NAME,
+        blockNumber?: number
+    ): Promise<Chain> {
+        const rpcUrl = publicProvidersRPC[blockchainName];
+        const resetUrl = publicProvidersSupportServerUrls[blockchainName];
+
+        if (!rpcUrl || !resetUrl) {
+            throw new Error(`RPC for ${blockchainName} was not set.`);
         }
+        await axios.post(resetUrl, { blockNumber });
 
-        await util.promisify(
-            (web3.currentProvider as HttpProvider).send.bind(web3.currentProvider)
-        )({
-            method: 'hardhat_reset',
-            params: [{ forking: { jsonRpcUrl, blockNumber } }],
-            jsonrpc: '2.0',
-            id: new Date().getTime()
-        });
-
-        const accounts = await web3.eth.getAccounts();
-
-        return new Chain(web3, accounts);
+        return new Chain(Chain.web3Instances[blockchainName], Chain.accounts);
     }
 
     private constructor(public web3: Web3, public accounts: string[]) {}
@@ -43,11 +52,14 @@ export class Chain {
     public async getConfiguration(): Promise<Configuration> {
         const chainId = await this.web3.eth.getChainId();
         return {
-            rpcProviders: {
-                [BLOCKCHAIN_NAME.ETHEREUM]: {
-                    mainRpc: Chain.nodeUrl
-                }
-            },
+            rpcProviders: Object.fromEntries(
+                Object.entries(publicProvidersRPC).map(([key, value]) => [
+                    key,
+                    {
+                        mainRpc: value
+                    }
+                ])
+            ),
             walletProvider: {
                 core: this.web3,
                 chainId,

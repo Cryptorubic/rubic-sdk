@@ -1,34 +1,29 @@
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
-import { Configuration } from '@core/sdk/models/configuration';
-import { Global } from '__tests__/utils/models/global';
+import { Configuration } from 'src/core';
 
-const { providers } = (global as unknown as Global).sdkEnv;
+const baseRpcUrl = 'http://localhost';
 
-function checkConfig() {
-    if (!providers[BLOCKCHAIN_NAME.ETHEREUM]?.jsonRpcUrl) {
-        throw new Error('Eth rpc was not configured');
-    }
+const addPort = (port: number) => `${baseRpcUrl}:${port}`;
 
-    if (!providers[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]?.jsonRpcUrl) {
-        throw new Error('Bsc rpc was not configured');
-    }
+export const publicProvidersRPC: Partial<Record<BLOCKCHAIN_NAME, string>> = {
+    [BLOCKCHAIN_NAME.ETHEREUM]: addPort(8545),
+    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: addPort(8546),
+    [BLOCKCHAIN_NAME.POLYGON]: addPort(8547)
+};
 
-    if (!providers[BLOCKCHAIN_NAME.POLYGON]?.jsonRpcUrl) {
-        throw new Error('Polygon rpc was not configured');
-    }
-}
+export const publicProvidersSupportServerUrls: Partial<Record<BLOCKCHAIN_NAME, string>> = {
+    [BLOCKCHAIN_NAME.ETHEREUM]: addPort(1545),
+    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: addPort(1546),
+    [BLOCKCHAIN_NAME.POLYGON]: addPort(1547)
+};
 
-checkConfig();
-export const configuration: Configuration = {
-    rpcProviders: {
-        [BLOCKCHAIN_NAME.ETHEREUM]: {
-            mainRpc: providers[BLOCKCHAIN_NAME.ETHEREUM]?.jsonRpcUrl!!
-        },
-        [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: {
-            mainRpc: providers[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]?.jsonRpcUrl!!
-        },
-        [BLOCKCHAIN_NAME.POLYGON]: {
-            mainRpc: providers[BLOCKCHAIN_NAME.POLYGON]?.jsonRpcUrl!!
-        }
-    }
+export const minimalConfiguration: Configuration = {
+    rpcProviders: Object.fromEntries(
+        Object.entries(publicProvidersRPC).map(([key, value]) => [
+            key,
+            {
+                mainRpc: value
+            }
+        ])
+    )
 };

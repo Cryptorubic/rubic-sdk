@@ -18,6 +18,21 @@ import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/fai
  */
 export class Web3Private {
     /**
+     * @description converts number, string or BigNumber value to integer string
+     * @param amount value to convert
+     */
+    private static stringifyAmount(amount: number | string | BigNumber): string {
+        const bnAmount = new BigNumber(amount);
+        if (!bnAmount.isInteger()) {
+            throw new RubicSdkError(`Value ${amount} is not integer`);
+        }
+
+        return bnAmount.toFixed(0);
+    }
+
+    private readonly APPROVE_GAS_LIMIT = 60_000;
+
+    /**
      * @description instance of web3, initialized with ethereum wallet, e.g. Metamask, WalletConnect
      */
     private readonly web3: Web3;
@@ -34,19 +49,6 @@ export class Web3Private {
      */
     public get blockchainName(): string {
         return this.walletConnectionConfiguration.blockchainName;
-    }
-
-    /**
-     * @description converts number, string or BigNumber value to integer string
-     * @param amount value to convert
-     */
-    private static stringifyAmount(amount: number | string | BigNumber): string {
-        const bnAmount = new BigNumber(amount);
-        if (!bnAmount.isInteger()) {
-            throw new RubicSdkError(`Value ${amount} is not integer`);
-        }
-
-        return bnAmount.toFixed(0);
     }
 
     /**
@@ -285,14 +287,21 @@ export class Web3Private {
         } else {
             rawValue = value;
         }
-        const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI as AbiItem[], tokenAddress);
+        const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
+
+        let { gas } = options;
+        if (!gas) {
+            gas = await contract.methods.approve(spenderAddress, rawValue.toFixed(0)).estimateGas({
+                from: this.address
+            });
+        }
 
         return new Promise((resolve, reject) => {
             contract.methods
                 .approve(spenderAddress, rawValue.toFixed(0))
                 .send({
                     from: this.address,
-                    ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
+                    ...(gas && { gas: Web3Private.stringifyAmount(gas) }),
                     ...(options.gasPrice && {
                         gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                     })
@@ -328,7 +337,7 @@ export class Web3Private {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
 
         try {
-            await contract.methods[methodName](...methodArguments).call({
+            const gas = await contract.methods[methodName](...methodArguments).estimateGas({
                 from: this.address,
                 ...(options.value && { value: Web3Private.stringifyAmount(options.value) }),
                 ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
@@ -341,7 +350,10 @@ export class Web3Private {
                 contractAbi,
                 methodName,
                 methodArguments,
-                options
+                {
+                    ...options,
+                    gas: options.gas || gas
+                }
             );
         } catch (err: unknown) {
             if (allowError && allowError(err as Web3Error)) {
@@ -385,7 +397,9 @@ export class Web3Private {
                     ...(options.value && {
                         value: Web3Private.stringifyAmount(options.value)
                     }),
-                    ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
+                    ...(options.gas && {
+                        gas: Web3Private.stringifyAmount(options.gas)
+                    }),
                     ...(options.gasPrice && {
                         gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                     })
