@@ -127,7 +127,7 @@ In dApps a lot of business logic is often concentrated on the frontend for inter
   - [Trisolaris](https://www.trisolaris.io/)
 
 ### Multi-Chain swaps supported blockchains
-Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver
+Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver, Harmony, Aurora, Arbitrum
 
 ## Installation
 ### Installation with cdn
