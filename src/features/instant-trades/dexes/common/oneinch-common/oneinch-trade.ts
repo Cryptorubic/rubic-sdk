@@ -149,7 +149,7 @@ export class OneinchTrade extends InstantTrade {
 
     public async encode(options: EncodeFromAddressTransactionOptions): Promise<TransactionConfig> {
         try {
-            const apiTradeData = await this.getTradeData(options.fromAddress);
+            const apiTradeData = await this.getTradeData(true, options.fromAddress);
             const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, apiTradeData);
 
             return {
@@ -163,7 +163,10 @@ export class OneinchTrade extends InstantTrade {
         }
     }
 
-    private getTradeData(fromAddress?: string): Promise<OneinchSwapResponse> {
+    private getTradeData(
+        disableEstimate = false,
+        fromAddress?: string
+    ): Promise<OneinchSwapResponse> {
         const swapRequest: OneinchSwapRequest = {
             params: {
                 fromTokenAddress: this.nativeSupportedFrom.address,
@@ -171,7 +174,7 @@ export class OneinchTrade extends InstantTrade {
                 amount: this.nativeSupportedFrom.stringWeiAmount,
                 slippage: (this.slippageTolerance * 100).toString(),
                 fromAddress: fromAddress || this.walletAddress,
-                disableEstimate: false,
+                disableEstimate,
                 ...(this.disableMultihops && { mainRouteParts: '1' })
             }
         };

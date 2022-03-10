@@ -8,6 +8,7 @@ import { Configuration } from '@core/sdk/models/configuration';
 import { CrossChainManager } from '@features/cross-chain/cross-chain-manager';
 import { InstantTradesManager } from '@features/instant-trades/instant-trades-manager';
 import { TokensManager } from '@features/tokens/tokens-manager';
+import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 
 export class SDK {
     public readonly instantTrades: InstantTradesManager;
@@ -32,7 +33,7 @@ export class SDK {
         ]);
 
         Injector.createInjector(web3PublicService, web3Private, httpClient);
-        return new SDK();
+        return new SDK(configuration.providerAddress || EMPTY_ADDRESS);
     }
 
     private static createWeb3Private(configuration: Configuration): Promise<Web3Private> {
@@ -53,9 +54,9 @@ export class SDK {
         return configuration.httpClient;
     }
 
-    private constructor() {
+    private constructor(providerAddress: string) {
         this.instantTrades = new InstantTradesManager();
-        this.crossChain = new CrossChainManager();
+        this.crossChain = new CrossChainManager(providerAddress);
     }
 
     public async updateConfiguration(configuration: Configuration): Promise<void> {
