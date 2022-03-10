@@ -22,6 +22,7 @@ import { BasicTransactionOptions } from 'src/core';
 import { ItCrossChainContractTrade } from '@features/cross-chain/cross-chain-contract-trade/it-cross-chain-contract-trade/it-cross-chain-contract-trade';
 import { EncodeTransactionOptions } from 'src/features';
 import { TransactionConfig } from 'web3-core';
+import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 
 export class CrossChainTrade {
     public static async getGasData(
@@ -37,13 +38,16 @@ export class CrossChainTrade {
 
         try {
             const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                await new CrossChainTrade({
-                    fromTrade,
-                    toTrade,
-                    cryptoFeeToken,
-                    transitFeeToken: {} as PriceTokenAmount,
-                    gasData: null
-                }).getContractParams();
+                await new CrossChainTrade(
+                    {
+                        fromTrade,
+                        toTrade,
+                        cryptoFeeToken,
+                        transitFeeToken: {} as PriceTokenAmount,
+                        gasData: null
+                    },
+                    EMPTY_ADDRESS
+                ).getContractParams();
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasPrice] = await Promise.all([
@@ -117,13 +121,16 @@ export class CrossChainTrade {
         };
     }
 
-    constructor(crossChainTrade: {
-        fromTrade: CrossChainContractTrade;
-        toTrade: CrossChainContractTrade;
-        cryptoFeeToken: PriceTokenAmount;
-        transitFeeToken: PriceTokenAmount;
-        gasData: GasData | null;
-    }) {
+    constructor(
+        crossChainTrade: {
+            fromTrade: CrossChainContractTrade;
+            toTrade: CrossChainContractTrade;
+            cryptoFeeToken: PriceTokenAmount;
+            transitFeeToken: PriceTokenAmount;
+            gasData: GasData | null;
+        },
+        private readonly providerAddress: string
+    ) {
         this.fromTrade = crossChainTrade.fromTrade;
         this.toTrade = crossChainTrade.toTrade;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
@@ -272,7 +279,11 @@ export class CrossChainTrade {
 
         const { methodName, contractAbi } = fromTrade.getMethodNameAndContractAbi();
 
-        const methodArguments = await fromTrade.getMethodArguments(toTrade, this.walletAddress);
+        const methodArguments = await fromTrade.getMethodArguments(
+            toTrade,
+            this.walletAddress,
+            this.providerAddress
+        );
 
         const tokenInAmountAbsolute = fromTrade.fromToken.weiAmount;
         const value = this.cryptoFeeToken.weiAmount

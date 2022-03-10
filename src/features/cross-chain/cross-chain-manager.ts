@@ -53,7 +53,7 @@ export class CrossChainManager {
 
     private readonly defaultSlippageTolerance = 0.02;
 
-    constructor() {
+    constructor(private readonly providerAddress: string) {
         this.contracts = getCrossChainContract;
     }
 
@@ -145,13 +145,16 @@ export class CrossChainManager {
             toTrade
         );
 
-        return new CrossChainTrade({
-            fromTrade,
-            toTrade,
-            cryptoFeeToken,
-            transitFeeToken,
-            gasData
-        });
+        return new CrossChainTrade(
+            {
+                fromTrade,
+                toTrade,
+                cryptoFeeToken,
+                transitFeeToken,
+                gasData
+            },
+            this.providerAddress
+        );
     }
 
     private async calculateBestTrade(
@@ -243,7 +246,9 @@ export class CrossChainManager {
         const fromTransitToken = fromTrade.toToken;
         const fromTransitTokenMinAmount = fromTrade.toTokenAmountMin;
 
-        const feeInPercents = await this.contracts(toBlockchain).getFeeInPercents();
+        const feeInPercents = await this.contracts(toBlockchain).getFeeInPercents(
+            fromTrade.contract
+        );
         const transitFeeToken = new PriceTokenAmount({
             ...fromTransitToken.asStruct,
             tokenAmount: fromTransitTokenMinAmount.multipliedBy(feeInPercents).dividedBy(100)

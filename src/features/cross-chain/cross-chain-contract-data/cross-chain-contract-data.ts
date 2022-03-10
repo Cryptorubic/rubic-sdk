@@ -30,23 +30,23 @@ export class CrossChainContractData {
 
     @Cache
     public async getNumOfBlockchain(): Promise<number> {
-        const numOfContract = await this.web3Public.callContractMethod(
+        const numOfBlockchain = await this.web3Public.callContractMethod(
             this.address,
             crossChainContractAbi,
             'numOfThisBlockchain'
         );
-        return parseInt(numOfContract);
+        return parseInt(numOfBlockchain);
     }
 
     @Cache
     public async getTransitToken(): Promise<Token> {
-        const numOfContract = await this.getNumOfBlockchain();
+        const numOfBlockchain = await this.getNumOfBlockchain();
         const transitTokenAddress = await this.web3Public.callContractMethod(
             this.address,
             crossChainContractAbi,
             'RubicAddresses',
             {
-                methodArguments: [numOfContract]
+                methodArguments: [numOfBlockchain]
             }
         );
         return Token.createToken({
@@ -55,28 +55,28 @@ export class CrossChainContractData {
         });
     }
 
-    public async getFeeInPercents(): Promise<number> {
-        const numOfContract = await this.getNumOfBlockchain();
+    public async getFeeInPercents(fromContract: CrossChainContractData): Promise<number> {
+        const numOfFromBlockchain = await fromContract.getNumOfBlockchain();
         const feeAbsolute = await this.web3Public.callContractMethod(
             this.address,
             crossChainContractAbi,
             'feeAmountOfBlockchain',
             {
-                methodArguments: [numOfContract]
+                methodArguments: [numOfFromBlockchain]
             }
         );
         return parseInt(feeAbsolute) / 10000;
     }
 
     public async getCryptoFeeToken(toContract: CrossChainContractData): Promise<PriceTokenAmount> {
-        const numOfToContract = await toContract.getNumOfBlockchain();
+        const numOfToBlockchain = await toContract.getNumOfBlockchain();
         const feeAmount = new BigNumber(
             await this.web3Public.callContractMethod(
                 this.address,
                 crossChainContractAbi,
                 'blockchainCryptoFee',
                 {
-                    methodArguments: [numOfToContract]
+                    methodArguments: [numOfToBlockchain]
                 }
             )
         );
