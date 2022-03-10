@@ -131,7 +131,7 @@ export abstract class CrossChainContractTrade {
             ]
         ];
 
-        await this.modifyArgumentsForProvider(methodArguments, walletAddress);
+        await this.modifyArgumentsForProvider(methodArguments, this.contract.address);
 
         methodArguments[0].push(swapToUserMethodSignature);
 
