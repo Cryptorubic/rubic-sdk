@@ -52,6 +52,13 @@ export class PriceTokenAmount extends PriceToken {
         return new BigNumber(this._weiAmount).div(new BigNumber(10).pow(this.decimals));
     }
 
+    public get asStruct(): PriceTokenAmountStruct {
+        return {
+            ...this,
+            price: this.price
+        };
+    }
+
     constructor(tokenStruct: PriceTokenAmountStruct) {
         super(tokenStruct);
         if ('weiAmount' in tokenStruct) {
