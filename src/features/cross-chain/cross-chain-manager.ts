@@ -166,7 +166,7 @@ export class CrossChainManager {
         if (compareAddresses(from.address, toToken.address)) {
             const contract = this.contracts(blockchain);
             if (!from.price.isFinite()) {
-                from = new PriceTokenAmount({ ...from.asStruct, price: toToken.price });
+                from = new PriceTokenAmount({ ...from.asStructWithAmount, price: toToken.price });
             }
 
             return new DirectCrossChainContractTrade(blockchain, contract, from);
