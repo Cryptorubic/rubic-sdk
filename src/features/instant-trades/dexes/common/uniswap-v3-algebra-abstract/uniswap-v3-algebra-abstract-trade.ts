@@ -81,7 +81,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         let gasLimit = estimateGasParams.defaultGasLimit;
 
         const walletAddress = Injector.web3Private.address;
-        if (walletAddress) {
+        if (walletAddress && estimateGasParams.callData) {
             const web3Public = Injector.web3PublicService.getWeb3Public(from.blockchain);
             const estimatedGas = await web3Public.getEstimatedGas(
                 this.contractAbi,
@@ -122,7 +122,10 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         );
 
         const walletAddress = Injector.web3Private.address;
-        if (walletAddress) {
+        if (
+            walletAddress &&
+            routesEstimateGasParams.every(estimateGasParams => estimateGasParams.callData)
+        ) {
             const web3Public = Injector.web3PublicService.getWeb3Public(fromToken.blockchain);
             const estimatedGasLimits = await web3Public.batchEstimatedGas(
                 this.contractAbi,
@@ -158,7 +161,6 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
                 route
             }).getEstimateGasParams();
         } catch (err) {
-            console.debug(err);
             throw new RubicSdkError('Trying to call abstract class method');
         }
     }
@@ -242,8 +244,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         );
     }
 
-    public async encode(options: EncodeTransactionOptions = {}): Promise<TransactionConfig> {
-        const { methodName, methodArguments } = this.getSwapRouterMethodData();
+    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+        const { methodName, methodArguments } = this.getSwapRouterMethodData(options.fromAddress);
         const gasParams = this.getGasParams(options);
 
         return Web3Pure.encodeMethodCall(
@@ -256,10 +258,10 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         );
     }
 
-    private getSwapRouterMethodData(): MethodData {
+    private getSwapRouterMethodData(fromAddress?: string): MethodData {
         if (!this.to.isNative) {
             const { methodName: exactInputMethodName, methodArguments: exactInputMethodArguments } =
-                this.getSwapRouterExactInputMethodData(this.walletAddress);
+                this.getSwapRouterExactInputMethodData(fromAddress || this.walletAddress);
             return {
                 methodName: exactInputMethodName,
                 methodArguments: exactInputMethodArguments
@@ -278,7 +280,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         const unwrapWETHMethodEncoded = Web3Pure.encodeFunctionCall(
             this.contractAbi,
             this.unwrapWethMethodName,
-            [amountOutMin, this.walletAddress]
+            [amountOutMin, fromAddress || this.walletAddress]
         );
 
         return {
@@ -290,16 +292,23 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
     /**
      * Returns encoded data of estimated gas function and default estimated gas.
      */
-    private getEstimateGasParams(): { callData: BatchCall; defaultGasLimit: BigNumber } {
-        const { methodName, methodArguments } = this.getSwapRouterMethodData();
+    private getEstimateGasParams(): { callData: BatchCall | null; defaultGasLimit: BigNumber } {
+        try {
+            const { methodName, methodArguments } = this.getSwapRouterMethodData();
 
-        return {
-            callData: {
-                contractMethod: methodName,
-                params: methodArguments,
-                value: this.from.isNative ? this.from.stringWeiAmount : undefined
-            },
-            defaultGasLimit: this.defaultEstimatedGas
-        };
+            return {
+                callData: {
+                    contractMethod: methodName,
+                    params: methodArguments,
+                    value: this.from.isNative ? this.from.stringWeiAmount : undefined
+                },
+                defaultGasLimit: this.defaultEstimatedGas
+            };
+        } catch (_err) {
+            return {
+                callData: null,
+                defaultGasLimit: this.defaultEstimatedGas
+            };
+        }
     }
 }

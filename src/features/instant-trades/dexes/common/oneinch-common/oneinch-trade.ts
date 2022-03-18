@@ -18,7 +18,7 @@ import { GasFeeInfo } from '@features/instant-trades/models/gas-fee-info';
 import { Token } from '@core/blockchain/tokens/token';
 import { TransactionConfig } from 'web3-core';
 import { LowSlippageError } from '@common/errors/swap/low-slippage.error';
-import { EncodeFromAddressTransactionOptions } from '@features/instant-trades/models/encode-transaction-options';
+import { EncodeTransactionOptions } from '@features/instant-trades/models/encode-transaction-options';
 import { OptionsGasParams, TransactionGasParams } from '@features/instant-trades/models/gas-params';
 import { OneinchSwapRequest } from '@features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-request';
 
@@ -147,7 +147,7 @@ export class OneinchTrade extends InstantTrade {
         }
     }
 
-    public async encode(options: EncodeFromAddressTransactionOptions): Promise<TransactionConfig> {
+    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         try {
             const apiTradeData = await this.getTradeData(true, options.fromAddress);
             const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, apiTradeData);
