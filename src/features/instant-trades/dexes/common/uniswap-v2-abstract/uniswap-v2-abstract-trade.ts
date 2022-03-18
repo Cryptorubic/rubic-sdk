@@ -186,7 +186,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         const methodName = await this.getMethodName(options);
         const swapParameters = this.getSwapParametersByMethod(methodName, options);
 
-        return Injector.web3Private.executeContractMethod(...swapParameters);
+        return Injector.web3Private.tryExecuteContractMethod(...swapParameters);
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
@@ -307,24 +307,6 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     }
 
     public getDefaultEstimatedGas(): BigNumber {
-        return new BigNumber(this.getGasLimit());
-    }
-
-    private estimateGasForAnyToAnyTrade(): BatchCall {
-        const value = this.nativeValueToSend;
-        return {
-            contractMethod: this.regularSwapMethod,
-            params: this.getCallParameters(),
-            ...(value && { value })
-        };
-    }
-
-    protected getGasLimit(options?: { gasLimit?: string }): string {
-        const gasLimit = super.getGasLimit(options);
-        if (gasLimit) {
-            return gasLimit;
-        }
-
         const transitTokensNumber = this.wrappedPath.length - 2;
         let methodName: keyof DefaultEstimatedGas = 'tokensToTokens';
         if (this.from.isNative) {
@@ -334,8 +316,18 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             methodName = 'tokensToEth';
         }
 
-        return (<typeof UniswapV2AbstractTrade>this.constructor).defaultEstimatedGasInfo[
+        const gasLimit = (<typeof UniswapV2AbstractTrade>this.constructor).defaultEstimatedGasInfo[
             methodName
         ][transitTokensNumber].toFixed(0);
+        return new BigNumber(gasLimit);
+    }
+
+    private estimateGasForAnyToAnyTrade(): BatchCall {
+        const value = this.nativeValueToSend;
+        return {
+            contractMethod: this.regularSwapMethod,
+            params: this.getCallParameters(),
+            ...(value && { value })
+        };
     }
 }

@@ -193,7 +193,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
 
     private get defaultEstimatedGas(): BigNumber {
         return DEFAULT_ESTIMATED_GAS[this.path.length - 2].plus(
-            this.from.isNative ? WETH_TO_ETH_ESTIMATED_GAS : 0
+            this.to.isNative ? WETH_TO_ETH_ESTIMATED_GAS : 0
         );
     }
 
