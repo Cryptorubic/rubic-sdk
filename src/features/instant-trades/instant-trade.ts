@@ -43,8 +43,10 @@ export abstract class InstantTrade {
         this.web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
     }
 
-    public async needApprove(): Promise<boolean> {
-        this.checkWalletConnected();
+    public async needApprove(fromAddress?: string): Promise<boolean> {
+        if (!fromAddress) {
+            this.checkWalletConnected();
+        }
 
         if (this.from.isNative) {
             return false;
@@ -52,7 +54,7 @@ export abstract class InstantTrade {
 
         const allowance = await this.web3Public.getAllowance(
             this.from.address,
-            this.walletAddress,
+            fromAddress || this.walletAddress,
             this.contractAddress
         );
         return allowance.lt(this.from.weiAmount);
@@ -102,7 +104,7 @@ export abstract class InstantTrade {
 
     public abstract swap(options?: SwapTransactionOptions): Promise<TransactionReceipt>;
 
-    public abstract encode(options?: EncodeTransactionOptions): Promise<TransactionConfig>;
+    public abstract encode(options: EncodeTransactionOptions): Promise<TransactionConfig>;
 
     protected async checkWalletState(): Promise<void> {
         this.checkWalletConnected();
@@ -122,33 +124,7 @@ export abstract class InstantTrade {
         }
     }
 
-    protected getGasLimit(options?: { gasLimit?: string }): string | undefined {
-        if (options?.gasLimit) {
-            return options.gasLimit;
-        }
-        if (this.gasFeeInfo?.gasLimit?.isFinite()) {
-            return this.gasFeeInfo.gasLimit.toFixed(0);
-        }
-        return undefined;
-    }
-
-    protected getGasPrice(options?: { gasPrice?: string }): string | undefined {
-        if (options?.gasPrice) {
-            return options.gasPrice;
-        }
-        if (this.gasFeeInfo?.gasPrice?.isFinite()) {
-            return this.gasFeeInfo.gasPrice.toFixed();
-        }
-        return undefined;
-    }
-
     protected getGasParams(options: OptionsGasParams): TransactionGasParams {
-        const gas = this.getGasLimit({
-            gasLimit: options.gasLimit
-        });
-        const gasPrice = this.getGasPrice({
-            gasPrice: options.gasPrice
-        });
-        return { gas, gasPrice };
+        return { gas: options?.gasLimit, gasPrice: options?.gasPrice };
     }
 }

@@ -27,11 +27,10 @@ import {
 import { defaultUniswapV2Abi } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi';
 import { DefaultEstimatedGas } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
 import BigNumber from 'bignumber.js';
-import { TradeType } from 'src/features';
+import { EncodeTransactionOptions, TradeType } from 'src/features';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
-import { EncodeFromAddressTransactionOptions } from '@features/instant-trades/models/encode-transaction-options';
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { Exact } from 'src/features/instant-trades/models/exact';
 
@@ -121,18 +120,6 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         return undefined;
     }
 
-    private get callParameters() {
-        const { amountIn, amountOut } = this.getAmountInAndAmountOut();
-        const amountParameters = this.from.isNative ? [amountOut] : [amountIn, amountOut];
-
-        return [
-            ...amountParameters,
-            this.wrappedPath.map(t => t.address),
-            this.walletAddress,
-            this.deadlineMinutesTimestamp
-        ];
-    }
-
     private get regularSwapMethod(): string {
         return (<typeof UniswapV2AbstractTrade>this.constructor).swapMethods[this.exact][
             this.regularSwapMethodKey
@@ -199,16 +186,23 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         const methodName = await this.getMethodName(options);
         const swapParameters = this.getSwapParametersByMethod(methodName, options);
 
-        return Injector.web3Private.executeContractMethod(...swapParameters);
+        return Injector.web3Private.tryExecuteContractMethod(...swapParameters);
     }
 
-    public encode(options: EncodeFromAddressTransactionOptions): Promise<TransactionConfig> {
-        return this.encodeAnyToAnyTrade(options);
-    }
+    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+        if (await this.needApprove(options.fromAddress)) {
+            throw new RubicSdkError('To use `encode` function, token must be approved for wallet.');
+        }
+        try {
+            await this.web3Public.checkBalance(
+                this.from,
+                this.from.tokenAmount,
+                options.fromAddress
+            );
+        } catch (_err) {
+            throw new RubicSdkError('To use `encode` function, wallet must have enough balance.');
+        }
 
-    private async encodeAnyToAnyTrade(
-        options: EncodeFromAddressTransactionOptions
-    ): Promise<TransactionConfig> {
         const methodName = await this.getMethodName(options, options.fromAddress);
         const gasParams = this.getGasParams(options);
 
@@ -216,20 +210,37 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             this.contractAddress,
             (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
             methodName,
-            this.callParameters,
+            this.getCallParameters(options.fromAddress),
             this.nativeValueToSend,
             gasParams
         );
+    }
+
+    private getCallParameters(fromAddress?: string) {
+        const { amountIn, amountOut } = this.getAmountInAndAmountOut();
+        const amountParameters = this.from.isNative ? [amountOut] : [amountIn, amountOut];
+
+        return [
+            ...amountParameters,
+            this.wrappedPath.map(t => t.address),
+            fromAddress || this.walletAddress,
+            this.deadlineMinutesTimestamp
+        ];
     }
 
     private async getMethodName(
         options: SwapTransactionOptions,
         fromAddress?: string
     ): Promise<string> {
-        const regularParameters = this.getSwapParametersByMethod(this.regularSwapMethod, options);
+        const regularParameters = this.getSwapParametersByMethod(
+            this.regularSwapMethod,
+            options,
+            fromAddress
+        );
         const supportedFeeParameters = this.getSwapParametersByMethod(
             this.supportedFeeSwapMethod,
-            options
+            options,
+            fromAddress
         );
 
         const regularMethodResult = await tryExecuteAsync(
@@ -258,7 +269,8 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     private getSwapParametersByMethod(
         method: string,
-        options: SwapTransactionOptions
+        options: SwapTransactionOptions,
+        fromAddress?: string
     ): Parameters<InstanceType<typeof Web3Private>['executeContractMethod']> {
         const value = this.nativeValueToSend;
         const { gas, gasPrice } = this.getGasParams(options);
@@ -267,7 +279,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             this.contractAddress,
             (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
             method,
-            this.callParameters,
+            this.getCallParameters(fromAddress),
             {
                 onTransactionHash: options.onConfirm,
                 value,
@@ -295,24 +307,6 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     }
 
     public getDefaultEstimatedGas(): BigNumber {
-        return new BigNumber(this.getGasLimit());
-    }
-
-    private estimateGasForAnyToAnyTrade(): BatchCall {
-        const value = this.nativeValueToSend;
-        return {
-            contractMethod: this.regularSwapMethod,
-            params: this.callParameters,
-            ...(value && { value })
-        };
-    }
-
-    protected getGasLimit(options?: { gasLimit?: string }): string {
-        const gasLimit = super.getGasLimit(options);
-        if (gasLimit) {
-            return gasLimit;
-        }
-
         const transitTokensNumber = this.wrappedPath.length - 2;
         let methodName: keyof DefaultEstimatedGas = 'tokensToTokens';
         if (this.from.isNative) {
@@ -322,8 +316,18 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             methodName = 'tokensToEth';
         }
 
-        return (<typeof UniswapV2AbstractTrade>this.constructor).defaultEstimatedGasInfo[
+        const gasLimit = (<typeof UniswapV2AbstractTrade>this.constructor).defaultEstimatedGasInfo[
             methodName
         ][transitTokensNumber].toFixed(0);
+        return new BigNumber(gasLimit);
+    }
+
+    private estimateGasForAnyToAnyTrade(): BatchCall {
+        const value = this.nativeValueToSend;
+        return {
+            contractMethod: this.regularSwapMethod,
+            params: this.getCallParameters(),
+            ...(value && { value })
+        };
     }
 }

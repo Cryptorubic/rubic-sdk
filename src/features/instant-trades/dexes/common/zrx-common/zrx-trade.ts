@@ -68,7 +68,7 @@ export class ZrxTrade extends InstantTrade {
         );
     }
 
-    public async encode(options: EncodeTransactionOptions = {}): Promise<TransactionConfig> {
+    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, this.apiTradeData);
 
         return {
