@@ -272,7 +272,7 @@ export class CrossChainTrade {
         ]);
     }
 
-    private async getContractParams(): Promise<ContractParams> {
+    private async getContractParams(fromAddress?: string): Promise<ContractParams> {
         const { fromTrade, toTrade } = this;
 
         const contractAddress = fromTrade.contract.address;
@@ -281,7 +281,7 @@ export class CrossChainTrade {
 
         const methodArguments = await fromTrade.getMethodArguments(
             toTrade,
-            this.walletAddress,
+            fromAddress || this.walletAddress,
             this.providerAddress
         );
 
@@ -361,11 +361,11 @@ export class CrossChainTrade {
         throw err;
     }
 
-    public async encode(options: EncodeTransactionOptions = {}): Promise<TransactionConfig> {
+    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         const { gasLimit, gasPrice } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams();
+            await this.getContractParams(options.fromAddress);
 
         return Web3Pure.encodeMethodCall(
             contractAddress,

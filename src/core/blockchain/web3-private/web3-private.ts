@@ -11,6 +11,7 @@ import { TransactionRevertedError } from '@common/errors/blockchain/transaction-
 import { WalletConnectionConfiguration } from '@core/blockchain/models/wallet-connection-configuration';
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/failed-to-check-for-transaction-receipt.error';
+import { Web3Pure } from 'src/core';
 
 /**
  * Class containing methods for executing the functions of contracts and sending transactions in order to change the state of the blockchain.
@@ -352,7 +353,7 @@ export class Web3Private {
                 methodArguments,
                 {
                     ...options,
-                    gas: options.gas || gas
+                    gas: options.gas || Web3Pure.calculateGasMargin(gas, 1.15)
                 }
             );
         } catch (err: unknown) {

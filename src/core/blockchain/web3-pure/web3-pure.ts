@@ -31,7 +31,7 @@ export class Web3Pure {
         gasLimit: BigNumber | string | number | undefined,
         multiplier: number
     ): BigNumber {
-        return new BigNumber(gasLimit || '0').multipliedBy(multiplier);
+        return new BigNumber(gasLimit || '0').multipliedBy(multiplier).dp(0);
     }
 
     /**
