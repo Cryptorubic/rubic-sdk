@@ -219,7 +219,9 @@ Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver, Harmony, A
                 BSC: {
                     mainRpc: '<your bsc rpc>'
                 }
-            }
+            },
+            // if you are whitelisted integrator, provide your wallet address here
+            providerAddress: '0x0000000000000000000000000000000000000000'
         }
         
         async function main() {
@@ -258,7 +260,9 @@ Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver, Harmony, A
             [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: {
                 mainRpc: '<your bsc rpc>'
             }
-        }
+        },
+        // if you are whitelisted integrator, provide your wallet address here
+        providerAddress: '0x0000000000000000000000000000000000000000'
     }
     ```
 2. Create sdk instance
@@ -309,6 +313,8 @@ Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver, Harmony, A
                 mainRpc: '<your bsc rpc>'
             }
         },
+        // if you are whitelisted integrator, provide your wallet address here
+        providerAddress: '0x0000000000000000000000000000000000000000',
         walletProvider
     }
     await sdk.updateConfiguration(configuration);
