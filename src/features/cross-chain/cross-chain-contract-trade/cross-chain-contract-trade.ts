@@ -108,7 +108,7 @@ export abstract class CrossChainContractTrade {
 
         const tokenOutAmountMinAbsolute = Web3Pure.toWei(
             toContractTrade.toTokenAmountMin,
-            this.toToken.decimals
+            toContractTrade.toToken.decimals
         );
 
         const toWalletAddressBytes32 = Web3Pure.addressToBytes32(walletAddress);
