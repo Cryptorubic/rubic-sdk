@@ -10,7 +10,7 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
     }
 
     public getSecondPath(): string[] {
-        return this.instantTrade.path.map(token => Web3Pure.addressToBytes32(token.address));
+        return this.instantTrade.wrappedPath.map(token => Web3Pure.addressToBytes32(token.address));
     }
 
     public async modifyArgumentsForProvider(
