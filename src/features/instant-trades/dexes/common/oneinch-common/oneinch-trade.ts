@@ -1,7 +1,10 @@
 import { oneinchApiParams } from '@features/instant-trades/dexes/common/oneinch-common/constants';
 import { OneinchSwapResponse } from '@features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-response';
 import { getOneinchApiBaseUrl } from '@features/instant-trades/dexes/common/oneinch-common/utils';
-import { createTokenNativeAddressProxy } from '@features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import {
+    createTokenNativeAddressProxy,
+    createTokenNativeAddressProxyInPathStartAndEnd
+} from '@features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { InstantTrade } from '@features/instant-trades/instant-trade';
 import { Injector } from '@core/sdk/injector';
 import BigNumber from 'bignumber.js';
@@ -70,6 +73,8 @@ export class OneinchTrade extends InstantTrade {
 
     public readonly path: ReadonlyArray<Token>;
 
+    public readonly wrappedPath: ReadonlyArray<Token>;
+
     public get type(): TradeType {
         return OneinchTrade.oneInchTradeTypes[
             this.from.blockchain as keyof typeof OneinchTrade.oneInchTradeTypes
@@ -99,6 +104,11 @@ export class OneinchTrade extends InstantTrade {
         this.slippageTolerance = oneinchTradeStruct.slippageTolerance;
         this.disableMultihops = oneinchTradeStruct.disableMultihops;
         this.path = oneinchTradeStruct.path;
+
+        this.wrappedPath = createTokenNativeAddressProxyInPathStartAndEnd(
+            this.path,
+            oneinchApiParams.nativeAddress
+        );
     }
 
     public async needApprove(): Promise<boolean> {
