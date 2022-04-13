@@ -150,7 +150,11 @@ export class InstantTradesManager {
     ): RequiredSwapManagerCalculationOptions {
         return combineOptions(options, {
             timeout: InstantTradesManager.defaultCalculationTimeout,
-            disabledProviders: [] as TradeType[]
+            disabledProviders: [] as TradeType[],
+            gasCalculation: 'calculate',
+            disableMultihops: false,
+            slippageTolerance: 0.02,
+            deadlineMinutes: 20
         });
     }
 
