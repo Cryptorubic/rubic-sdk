@@ -18,7 +18,6 @@ import { CrossChainTrade } from '@features/cross-chain/cross-chain-trade/cross-c
 import { MinMaxAmountsErrors } from '@features/cross-chain/cross-chain-trade/models/min-max-amounts-errors';
 import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity.error';
 import { MinMaxAmounts } from '@features/cross-chain/models/min-max-amounts';
-import { GasData } from '@features/cross-chain/models/gas-data';
 import { NotSupportedBlockchain } from '@common/errors/swap/not-supported-blockchain';
 import { notNull } from '@common/utils/object';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
@@ -89,7 +88,8 @@ export class CrossChainManager {
     private getFullOptions(options?: CrossChainOptions): Required<CrossChainOptions> {
         return combineOptions(options, {
             fromSlippageTolerance: this.defaultSlippageTolerance,
-            toSlippageTolerance: this.defaultSlippageTolerance
+            toSlippageTolerance: this.defaultSlippageTolerance,
+            gasCalculation: 'enabled'
         });
     }
 
@@ -140,10 +140,11 @@ export class CrossChainManager {
             toSlippageTolerance
         );
 
-        const { cryptoFeeToken, gasData } = await this.getCryptoFeeTokenAndGasData(
-            fromTrade,
-            toTrade
-        );
+        const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
+        const gasData =
+            options.gasCalculation === 'enabled'
+                ? await CrossChainTrade.getGasData(fromTrade, toTrade, cryptoFeeToken)
+                : null;
 
         return new CrossChainTrade(
             {
@@ -452,20 +453,5 @@ export class CrossChainManager {
                 gasCalculation: 'disabled'
             }
         );
-    }
-
-    private async getCryptoFeeTokenAndGasData(
-        fromTrade: CrossChainContractTrade,
-        toTrade: CrossChainContractTrade
-    ): Promise<{
-        cryptoFeeToken: PriceTokenAmount;
-        gasData: GasData | null;
-    }> {
-        const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
-        const gasData = await CrossChainTrade.getGasData(fromTrade, toTrade, cryptoFeeToken);
-        return {
-            cryptoFeeToken,
-            gasData
-        };
     }
 }

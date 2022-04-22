@@ -1,4 +1,3 @@
-import { GasPriceApi } from '@common/http/gas-price-api';
 import { combineOptions } from '@common/utils/options';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
@@ -75,10 +74,7 @@ export abstract class UniswapV2AbstractProvider<
         const toProxy = createTokenNativeAddressProxy(to, this.providerSettings.wethAddress);
 
         let gasPriceInfo: GasPriceInfo | undefined;
-        if (
-            fullOptions.gasCalculation !== 'disabled' &&
-            GasPriceApi.isSupportedBlockchain(from.blockchain)
-        ) {
+        if (fullOptions.gasCalculation !== 'disabled') {
             gasPriceInfo = await this.getGasPriceInfo();
         }
 

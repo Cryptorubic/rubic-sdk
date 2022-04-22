@@ -1,4 +1,3 @@
-import { GasPriceApi } from '@common/http/gas-price-api';
 import { combineOptions } from '@common/utils/options';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Token } from '@core/blockchain/tokens/token';
@@ -111,10 +110,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
             disableMultihops: fullOptions.disableMultihops,
             path
         };
-        if (
-            fullOptions.gasCalculation === 'disabled' ||
-            !GasPriceApi.isSupportedBlockchain(from.blockchain)
-        ) {
+        if (fullOptions.gasCalculation === 'disabled') {
             return new OneinchTrade(oneinchTradeStruct);
         }
 

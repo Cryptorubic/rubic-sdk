@@ -17,7 +17,6 @@ import {
     UniswapV3AlgebraAbstractTrade,
     UniswapV3AlgebraTradeStruct
 } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
-import { GasPriceApi } from '@common/http/gas-price-api';
 import { AlgebraTrade } from '@features/instant-trades/dexes/polygon/algebra/algebra-trade';
 import { UniswapV3TradeClass } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-class';
 import { UniswapV3AlgebraRoute } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
@@ -92,10 +91,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         );
 
         let gasPriceInfo: GasPriceInfo | undefined;
-        if (
-            fullOptions.gasCalculation !== 'disabled' &&
-            GasPriceApi.isSupportedBlockchain(fromToken.blockchain)
-        ) {
+        if (fullOptions.gasCalculation !== 'disabled') {
             gasPriceInfo = await this.getGasPriceInfo();
         }
 
