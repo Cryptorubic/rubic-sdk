@@ -32,7 +32,8 @@ export class CrossChainTrade {
     ): Promise<GasData | null> {
         const fromBlockchain = fromTrade.blockchain;
         const walletAddress = Injector.web3Private.address;
-        if (fromBlockchain !== BLOCKCHAIN_NAME.ETHEREUM || !walletAddress) {
+        if (!walletAddress) {
+            console.debug('Cannot calculate gas data before user logged in');
             return null;
         }
 
@@ -66,8 +67,9 @@ export class CrossChainTrade {
                 return null;
             }
 
+            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
             return {
-                gasLimit,
+                gasLimit: increasedGasLimit,
                 gasPrice
             };
         } catch (_err) {
