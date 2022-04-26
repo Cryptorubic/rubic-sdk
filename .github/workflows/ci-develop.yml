@@ -1,7 +1,7 @@
 name: Check code quality before merge to develop
 
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - develop
 
