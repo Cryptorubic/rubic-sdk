@@ -10,7 +10,6 @@ while ! ( grep -q 'Account #19:' scripts/node.log )
 	do
 		sleep 2
 		echo "Waiting for node..."
-		cat scripts/node.log
 	done
 
 sleep 1
