@@ -2,19 +2,13 @@ version: "3.7"
 
 services:
   eth-node:
-    image: siandreev/rubic-sdk-tools:eth-node-1.2
+    image: ottebrut/rubic-sdk-tools:eth-node-1.2
     container_name: eth-node
     ports:
       - 8545:8545
       - 1545:1545
-  bsc-node:
-    image: siandreev/rubic-sdk-tools:bsc-node-1.2
-    container_name: bsc-node
-    ports:
-      - 8546:8545
-      - 1546:1545
   polygon-node:
-    image: siandreev/rubic-sdk-tools:polygon-node-1.2
+    image: ottebrut/rubic-sdk-tools:polygon-node-1.2
     container_name: polygon-node
     ports:
       - 8547:8545

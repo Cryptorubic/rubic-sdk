@@ -7,8 +7,8 @@ import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME, Web3Public } from 'src/core';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
-import fn = jest.fn;
 import { UniSwapV3PolygonProvider } from 'src/features/instant-trades/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
+import fn = jest.fn;
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.POLYGON];
 
@@ -37,10 +37,7 @@ export const uniswapV3PolygonTradeSpec = () =>
             const maticTokenAmountToSwap = 1;
             const expectedToTokensAmount = '2.055903'; // constant data about tokens rate in 23571568 block
             const maticBalanceBefore = await web3Public.getBalance(userAddress);
-            const usdtBalanceBefore = await web3Public.getBalance(
-                userAddress,
-                TOKENS.USDT.address
-            );
+            const usdtBalanceBefore = await web3Public.getBalance(userAddress, TOKENS.USDT.address);
             const from = await PriceTokenAmount.createFromToken({
                 ...TOKENS.MATIC,
                 tokenAmount: new BigNumber(maticTokenAmountToSwap)
@@ -52,10 +49,7 @@ export const uniswapV3PolygonTradeSpec = () =>
             });
             const transactionReceipt = await trade.swap();
             const maticBalanceAfter = await web3Public.getBalance(userAddress);
-            const usdtBalanceAfter = await web3Public.getBalance(
-                userAddress,
-                TOKENS.USDT.address
-            );
+            const usdtBalanceAfter = await web3Public.getBalance(userAddress, TOKENS.USDT.address);
             const transactionFee = await utils.getTransactionFeeByReceipt(transactionReceipt);
 
             expect(transactionReceipt.status).toBeTruthy();

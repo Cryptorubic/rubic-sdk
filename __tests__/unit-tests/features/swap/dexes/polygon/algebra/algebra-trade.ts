@@ -37,10 +37,7 @@ export const algebraPolygonTradeSpec = () => {
             const maticTokenAmountToSwap = 1;
             const expectedToTokensAmount = '2.037958'; // constant data about tokens rate in 23571568 block
             const maticBalanceBefore = await web3Public.getBalance(userAddress);
-            const usdtBalanceBefore = await web3Public.getBalance(
-                userAddress,
-                TOKENS.USDT.address
-            );
+            const usdtBalanceBefore = await web3Public.getBalance(userAddress, TOKENS.USDT.address);
             const from = await PriceTokenAmount.createFromToken({
                 ...TOKENS.MATIC,
                 tokenAmount: new BigNumber(maticTokenAmountToSwap)
@@ -50,10 +47,7 @@ export const algebraPolygonTradeSpec = () => {
             const trade = await algebraProvider.calculate(from, to, { gasCalculation: 'disabled' });
             const transactionReceipt = await trade.swap();
             const maticBalanceAfter = await web3Public.getBalance(userAddress);
-            const usdtBalanceAfter = await web3Public.getBalance(
-                userAddress,
-                TOKENS.USDT.address
-            );
+            const usdtBalanceAfter = await web3Public.getBalance(userAddress, TOKENS.USDT.address);
             const transactionFee = await utils.getTransactionFeeByReceipt(transactionReceipt);
 
             expect(transactionReceipt.status).toBeTruthy();
@@ -72,7 +66,9 @@ export const algebraPolygonTradeSpec = () => {
                 )
             ).toBeTruthy();
 
-            const trade1 = await algebraProvider.calculate(from, to, { gasCalculation: 'disabled' });
+            const trade1 = await algebraProvider.calculate(from, to, {
+                gasCalculation: 'disabled'
+            });
             expect(trade1.to.weiAmount.isEqualTo(trade.to.weiAmount)).not.toBeTruthy();
         }, 300_000);
 

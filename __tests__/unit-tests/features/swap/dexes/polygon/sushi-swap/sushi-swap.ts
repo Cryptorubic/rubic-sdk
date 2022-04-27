@@ -182,7 +182,7 @@ export const sushiSwapPolygonProviderSpec = () => {
         }, 400_000);
 
         test('Must calculate correct ERC20-NATIVE trade with simple path with rubic optimisation.', async () => {
-            const expectedToTokensAmount = '0.486266716980642046'; // constant data about tokens rate in 13961175 block
+            const expectedToTokensAmount = '0.486133316016377403'; // constant data about tokens rate in 13961175 block
             const from = await PriceTokenAmount.createFromToken({
                 ...TOKENS.DAI,
                 tokenAmount: new BigNumber(1)
@@ -194,10 +194,9 @@ export const sushiSwapPolygonProviderSpec = () => {
             });
 
             expect(trade.to.tokenAmount.isEqualTo(expectedToTokensAmount)).toBeTruthy();
-            expect(trade.path.length).toBe(3);
+            expect(trade.path.length).toBe(2);
             expect(trade.path[0].address).toBe(TOKENS.DAI.address);
-            expect(trade.path[1].address.toLowerCase()).toBe(TOKENS.USDT.address.toLowerCase());
-            expect(trade.path[2].address).toBe(TOKENS.MATIC.address);
+            expect(trade.path[1].address).toBe(TOKENS.MATIC.address);
         }, 400_000);
     });
 };
