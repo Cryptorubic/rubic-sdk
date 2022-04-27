@@ -110,11 +110,11 @@ export class CrossChainManager {
         const [fromTransitToken, toTransitToken] = await Promise.all([
             new PriceToken({
                 ...(await this.contracts(fromBlockchain).getTransitToken()),
-                price: new BigNumber(NaN)
+                price: new BigNumber(1)
             }),
             new PriceToken({
                 ...(await this.contracts(toBlockchain).getTransitToken()),
-                price: new BigNumber(NaN)
+                price: new BigNumber(1)
             })
         ]);
 

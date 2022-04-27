@@ -1,7 +1,7 @@
 name: Check code quality before merge to develop
 
 on:
-  pull_request_target:
+  pull_request:
     branches:
       - develop
 
@@ -38,7 +38,13 @@ jobs:
         run: yarn build
 
       - name: Set up env.js
-        run: node ./scripts/build-env.js --eth ${{ secrets.ETH_RPC }} --bsc ${{ secrets.BSC_RPC }} --polygon ${{ secrets.POLYGON_RPC }}
+        run: node ./scripts/build-env.js --eth ${{ secrets.ETH_RPC }} --polygon ${{ secrets.POLYGON_RPC }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Run tests
         run: yarn test

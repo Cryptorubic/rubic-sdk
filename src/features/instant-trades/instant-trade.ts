@@ -14,6 +14,7 @@ import { TransactionReceipt } from 'web3-eth';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
 import { OptionsGasParams, TransactionGasParams } from '@features/instant-trades/models/gas-params';
+import { Cache } from 'src/common';
 
 export abstract class InstantTrade {
     public abstract readonly from: PriceTokenAmount;
@@ -37,6 +38,11 @@ export abstract class InstantTrade {
 
     protected get walletAddress(): string {
         return Injector.web3Private.address;
+    }
+
+    @Cache
+    public get priceImpact(): number | null {
+        return this.from.calculatePriceImpactPercent(this.to);
     }
 
     protected constructor(blockchain: BLOCKCHAIN_NAME) {
