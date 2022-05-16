@@ -56,11 +56,13 @@ export class ItCrossChainContractTrade extends CrossChainContractTrade {
 
     protected modifyArgumentsForProvider(
         methodArguments: unknown[][],
-        walletAddress: string
+        walletAddress: string,
+        swapTokenWithFee: boolean
     ): Promise<void> {
         return this.crossChainInstantTrade.modifyArgumentsForProvider(
             methodArguments,
-            walletAddress
+            walletAddress,
+            swapTokenWithFee
         );
     }
 }

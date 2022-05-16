@@ -91,7 +91,8 @@ export abstract class CrossChainContractTrade {
     public async getMethodArguments(
         toContractTrade: CrossChainContractTrade,
         walletAddress: string,
-        providerAddress: string
+        providerAddress: string,
+        swapTokenWithFee = false
     ): Promise<unknown[]> {
         const toNumOfBlockchain = await toContractTrade.contract.getNumOfBlockchain();
 
@@ -131,7 +132,11 @@ export abstract class CrossChainContractTrade {
             ]
         ];
 
-        await this.modifyArgumentsForProvider(methodArguments, this.contract.address);
+        await this.modifyArgumentsForProvider(
+            methodArguments,
+            this.contract.address,
+            swapTokenWithFee
+        );
 
         methodArguments[0].push(swapToUserMethodSignature);
 
@@ -140,7 +145,8 @@ export abstract class CrossChainContractTrade {
 
     protected abstract modifyArgumentsForProvider(
         methodArguments: unknown[][],
-        walletAddress: string
+        walletAddress: string,
+        swapTokenWithFee: boolean
     ): Promise<void>;
 
     /**

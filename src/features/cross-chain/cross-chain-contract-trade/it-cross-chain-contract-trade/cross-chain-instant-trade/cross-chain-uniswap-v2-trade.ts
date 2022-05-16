@@ -13,9 +13,12 @@ export class CrossChainUniswapV2Trade implements CrossChainInstantTrade {
         return this.instantTrade.wrappedPath.map(token => Web3Pure.addressToBytes32(token.address));
     }
 
-    public async modifyArgumentsForProvider(methodArguments: unknown[][]): Promise<void> {
+    public async modifyArgumentsForProvider(
+        methodArguments: unknown[][],
+        _walletAddress: string,
+        swapTokenWithFee = false
+    ): Promise<void> {
         const exactTokensForTokens = true;
-        const swapTokenWithFee = false;
 
         methodArguments[0].push(exactTokensForTokens);
         methodArguments[0].push(swapTokenWithFee);
