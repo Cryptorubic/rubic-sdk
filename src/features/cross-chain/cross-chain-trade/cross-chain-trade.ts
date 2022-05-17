@@ -23,6 +23,7 @@ import { ItCrossChainContractTrade } from '@features/cross-chain/cross-chain-con
 import { EncodeTransactionOptions } from 'src/features';
 import { TransactionConfig } from 'web3-core';
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
+import { TOKEN_WITH_FEE_ERRORS } from '@features/cross-chain/cross-chain-trade/constants/token-with-fee-errors';
 
 export class CrossChainTrade {
     public static async getGasData(
@@ -313,14 +314,19 @@ export class CrossChainTrade {
         try {
             transactionHash = await this.executeContractMethod(options);
         } catch (err) {
-            const parsedError = this.parseSwapErrors(err);
-            if (parsedError instanceof RubicSdkError) {
-                throw parsedError;
-            }
-            try {
-                transactionHash = await this.executeContractMethod(options, true);
-            } catch (_err) {
-                throw new LowSlippageDeflationaryTokenError();
+            const errMessage = err.message || err.toString?.();
+            if (
+                TOKEN_WITH_FEE_ERRORS.some(errText =>
+                    errMessage.toLowerCase().includes(errText.toLowerCase())
+                )
+            ) {
+                try {
+                    transactionHash = await this.executeContractMethod(options, true);
+                } catch (_err) {
+                    throw new LowSlippageDeflationaryTokenError();
+                }
+            } else {
+                throw this.parseSwapErrors(err);
             }
         }
         return transactionHash;
