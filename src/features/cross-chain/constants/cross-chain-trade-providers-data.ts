@@ -28,6 +28,8 @@ import { WannaSwapAuroraProvider } from '@features/instant-trades/dexes/aurora/w
 import { DeepReadonly } from 'ts-essentials';
 import { InstantTradeProvider } from 'src/features';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
+import { SushiSwapTelosProvider } from '@features/instant-trades/dexes/telos/sushi-swap-telos/sushi-swap-telos-provider';
+import { ZappyProvider } from '@features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
 
 /**
  * Stores contracts info.
@@ -166,11 +168,11 @@ export const crossChainTradeProvidersData: DeepReadonly<
     ],
     [BLOCKCHAIN_NAME.TELOS]: [
         {
-            ProviderClass: TrisolarisAuroraProvider, // Sushi
+            ProviderClass: SushiSwapTelosProvider,
             methodSuffix: ''
         },
         {
-            ProviderClass: TrisolarisAuroraProvider, // Zappy
+            ProviderClass: ZappyProvider,
             methodSuffix: '1'
         }
     ]

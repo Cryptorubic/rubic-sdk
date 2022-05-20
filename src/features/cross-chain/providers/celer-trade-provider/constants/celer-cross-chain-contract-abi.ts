@@ -1,5 +1,5 @@
 import { AbiItem } from 'web3-utils';
-
+// @TODO Remove unused methods.
 export const celerCrossChainContractAbi: AbiItem[] = [
     {
         inputs: [

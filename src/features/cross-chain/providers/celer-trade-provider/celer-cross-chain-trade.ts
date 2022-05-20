@@ -136,13 +136,12 @@ export class CelerCrossChainTrade extends CrossChainTrade {
         await Promise.all([
             this.checkContractsState(),
             this.checkToBlockchainGasPrice(),
-            this.checkToContractBalance(),
             this.checkUserBalance()
         ]);
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        // await this.checkTradeErrors();
+        await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
         const { onConfirm, gasLimit, gasPrice } = options;
