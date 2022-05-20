@@ -59,20 +59,23 @@ export class CelerDirectCrossChainContractTrade extends CelerCrossChainContractT
         toContractTrade: CelerCrossChainContractTrade,
         walletAddress: string,
         providerAddress: string,
-        maxSlippage?: number
+        options: {
+            maxSlippage: number;
+        }
     ): Promise<unknown[]> {
-        console.debug('[MAX SLIPPAGE]', maxSlippage);
         const receiver = toContractTrade.contract.address || walletAddress;
-        console.debug('[RECEIVER]', receiver);
         const tokenInAmountAbsolute = this.fromToken.stringWeiAmount;
-        console.debug('[tokenInAmountAbsolute]', tokenInAmountAbsolute);
         const targetChainId = BlockchainsInfo.getBlockchainByName(this.toToken.blockchain).id;
-        console.debug('[targetChainId]', targetChainId);
         const source = this.getCelerSourceTrade();
-        console.debug('[source]', source);
         const destination = toContractTrade.getCelerDestionationTrade(providerAddress);
-        console.debug('[destination]', destination);
 
-        return [receiver, tokenInAmountAbsolute, targetChainId, source, destination, maxSlippage];
+        return [
+            receiver,
+            tokenInAmountAbsolute,
+            targetChainId,
+            source,
+            destination,
+            options.maxSlippage
+        ];
     }
 }

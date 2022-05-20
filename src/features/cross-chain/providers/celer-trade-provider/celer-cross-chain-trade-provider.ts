@@ -61,8 +61,6 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             })
         ]);
 
-        console.log('[TRANSIT TOKENS]: ', fromTransitToken, toTransitToken);
-
         const { gasCalculation, providerAddress, ...slippages } = options;
 
         const fromTrade = await this.calculateBestTrade(
@@ -79,8 +77,6 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             fromTransitToken
         );
 
-        console.log('[CELER SLIPPAGE]: ', celerSlippage);
-
         let { fromSlippageTolerance, toSlippageTolerance } = slippages;
         fromSlippageTolerance -= celerSlippage / 2;
         toSlippageTolerance -= celerSlippage / 2;
@@ -88,10 +84,6 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
         if (fromSlippageTolerance < 0) {
             throw new LowSlippageError();
         }
-
-        console.log('[FROM SLIPPAGE]: ', fromSlippageTolerance);
-
-        console.log('[FROM TRADE]: ', fromTrade);
 
         const estimateTransitAmountWithSlippage = await this.fetchCelerAmount(
             fromBlockchain,
@@ -102,8 +94,6 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             celerSlippage
         );
 
-        console.log('[ESTIMATED TRANSIT]: ', estimateTransitAmountWithSlippage);
-
         const { toTransitTokenAmount, transitFeeToken } = await this.getToTransitTokenAmount(
             toBlockchain,
             fromTrade.fromToken,
@@ -111,20 +101,10 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             fromTrade.contract
         );
 
-        console.log('SOSOK');
-
-        console.log(
-            '[TRANSIT]: ',
-            toTransitTokenAmount,
-            toTransitTokenAmount.toString(),
-            transitFeeToken
-        );
         const toTransit = new PriceTokenAmount({
             ...toTransitToken.asStruct,
             tokenAmount: toTransitTokenAmount
         });
-        console.log('[TO REQUISITS] ', toBlockchain, toTransit, to, toSlippageTolerance);
-
         const toTrade = await this.calculateBestTrade(
             toBlockchain,
             toTransit,
@@ -132,10 +112,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             toSlippageTolerance
         );
 
-        console.log('[TO TRADE]: ', toTrade);
-
         const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
-        console.log('[CRYPTO FEE TOKEN]: ', cryptoFeeToken);
         const gasData =
             gasCalculation === 'enabled'
                 ? await CelerCrossChainTrade.getGasData(
@@ -145,7 +122,6 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
                       celerSlippage * 10 ** 6 * 100
                   )
                 : null;
-        console.log('[GAS DATA]: ', gasData);
 
         return new CelerCrossChainTrade(
             {
@@ -199,13 +175,6 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             amount,
             fromTransitToken,
             slippage
-        );
-
-        console.log(
-            '[EST CELER] ',
-            estimate,
-            estimate.estimated_receive_amt,
-            toTransitToken.decimals
         );
 
         return Web3Pure.fromWei(estimate.estimated_receive_amt, toTransitToken.decimals);
@@ -276,7 +245,6 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
         );
 
         const bestTrade = await Promise.allSettled(promises).then(async results => {
-            console.debug('[RESULTS] ', results);
             const sortedResults = results
                 .map(result => {
                     if (result.status === 'fulfilled') {
@@ -288,8 +256,6 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
                 .sort((a, b) => b.toAmount.comparedTo(a.toAmount))
                 // @TODO Remove UniV2 filter
                 .filter(trade => isUniswapV2LikeTrade(trade.instantTrade));
-
-            console.debug('[SORTED RESULTSS] ', sortedResults);
 
             if (!sortedResults.length) {
                 throw (results[0] as PromiseRejectedResult).reason;

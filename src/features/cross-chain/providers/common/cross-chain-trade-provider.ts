@@ -42,18 +42,10 @@ export abstract class CrossChainTradeProvider {
         slippageTolerance: number
     ): Promise<ItCalculatedTrade> {
         const provider = contract.getProvider(providerIndex);
-        console.debug('[PROVIDER TO SWAP] ', provider.type);
-        console.debug(
-            '[TO SWAP REQUISITES] ',
-            from,
-            from.tokenAmount.toFixed(0),
-            slippageTolerance
-        );
         const instantTrade = await provider.calculate(from, toToken, {
             gasCalculation: 'disabled',
             slippageTolerance
         });
-        console.debug('[IT] ', instantTrade);
         return {
             toAmount: instantTrade.to.tokenAmount,
             providerIndex,

@@ -45,11 +45,13 @@ export class RubicItCrossChainContractTrade extends RubicCrossChainContractTrade
 
     protected modifyArgumentsForProvider(
         methodArguments: unknown[][],
-        walletAddress: string
+        walletAddress: string,
+        swapTokenWithFee: boolean
     ): Promise<void> {
         return this.crossChainInstantTrade.modifyArgumentsForProvider(
             methodArguments,
-            walletAddress
+            walletAddress,
+            swapTokenWithFee
         );
     }
 

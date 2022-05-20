@@ -30,7 +30,6 @@ export class CelerCrossChainContractData extends CrossChainContractData {
 
     public async destinationCryptoFee(toBlockchain: BlockchainName): Promise<BigNumber> {
         const destinationBlockchainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id;
-        console.debug('dstFeeCals: ', this.address, [String(destinationBlockchainId)]);
         return this.web3Public.callContractMethod(
             this.address,
             celerCrossChainContractAbi,

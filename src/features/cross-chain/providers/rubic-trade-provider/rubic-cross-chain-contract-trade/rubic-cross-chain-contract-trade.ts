@@ -72,7 +72,10 @@ export abstract class RubicCrossChainContractTrade extends CrossChainContractTra
     public async getMethodArguments(
         toContractTrade: CrossChainContractTrade,
         walletAddress: string,
-        providerAddress: string
+        providerAddress: string,
+        options: {
+            swapTokenWithFee: boolean;
+        } = { swapTokenWithFee: false }
     ): Promise<unknown[]> {
         const toNumOfBlockchain = await toContractTrade.contract.getNumOfBlockchain();
 
@@ -112,7 +115,11 @@ export abstract class RubicCrossChainContractTrade extends CrossChainContractTra
             ]
         ];
 
-        await this.modifyArgumentsForProvider(methodArguments, this.contract.address);
+        await this.modifyArgumentsForProvider(
+            methodArguments,
+            this.contract.address,
+            options.swapTokenWithFee
+        );
 
         methodArguments[0].push(swapToUserMethodSignature);
 

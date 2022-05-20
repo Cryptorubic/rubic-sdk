@@ -6,7 +6,11 @@ export interface CrossChainInstantTrade {
 
     getSecondPath(): string[];
 
-    modifyArgumentsForProvider(methodArguments: unknown[][], walletAddress: string): Promise<void>;
+    modifyArgumentsForProvider(
+        methodArguments: unknown[][],
+        walletAddress: string,
+        swapTokenWithFee?: boolean
+    ): Promise<void>;
 
     getCelerSourceObject(slippage: number): SwapInfoSource;
 

@@ -7,14 +7,14 @@ import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/fai
 import { InsufficientFundsGasPriceValueError } from '@common/errors/cross-chain/insufficient-funds-gas-price-value.error';
 import { SwapTransactionOptions } from '@features/instant-trades/models/swap-transaction-options';
 import BigNumber from 'bignumber.js';
-import { MaxGasPriceOverflowError } from 'src/common';
 import { RubicItCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
 import { Web3Public } from 'src/core';
 import { CrossChainContractTrade } from '@features/cross-chain/providers/common/cross-chain-contract-trade';
 import { ContractParams } from '@features/cross-chain/models/contract-params';
+import { LowSlippageDeflationaryTokenError, RubicSdkError } from 'src/common';
+import { TOKEN_WITH_FEE_ERRORS } from '@features/cross-chain/constants/token-with-fee-errors';
 
 export class RubicCrossChainTrade extends CrossChainTrade {
     public static async getGasData(
@@ -134,24 +134,80 @@ export class RubicCrossChainTrade extends CrossChainTrade {
         ]);
     }
 
+    protected async getContractParams(
+        fromAddress?: string,
+        swapTokenWithFee = false
+    ): Promise<ContractParams> {
+        const { fromTrade, toTrade } = this;
+
+        const contractAddress = fromTrade.contract.address;
+
+        const { methodName, contractAbi } = fromTrade.getMethodNameAndContractAbi();
+
+        const methodArguments = await fromTrade.getMethodArguments(
+            toTrade,
+            fromAddress || this.walletAddress,
+            this.providerAddress,
+            {
+                swapTokenWithFee
+            }
+        );
+
+        const tokenInAmountAbsolute = fromTrade.fromToken.weiAmount;
+        const value = this.cryptoFeeToken.weiAmount
+            .plus(fromTrade.fromToken.isNative ? tokenInAmountAbsolute : 0)
+            .toFixed(0);
+
+        return {
+            contractAddress,
+            contractAbi,
+            methodName,
+            methodArguments,
+            value
+        };
+    }
+
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
+        let transactionHash: string;
+        try {
+            transactionHash = await this.executeContractMethod(options);
+        } catch (err) {
+            const errMessage = err.message || err.toString?.();
+            if (
+                TOKEN_WITH_FEE_ERRORS.some(errText =>
+                    errMessage.toLowerCase().includes(errText.toLowerCase())
+                )
+            ) {
+                try {
+                    transactionHash = await this.executeContractMethod(options, true);
+                } catch (_err) {
+                    throw new LowSlippageDeflationaryTokenError();
+                }
+            } else {
+                throw this.parseSwapErrors(err);
+            }
+        }
+        return transactionHash;
+    }
+
+    private async executeContractMethod(options: SwapTransactionOptions, swapTokenWithFee = false) {
         const { onConfirm, gasLimit, gasPrice } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams();
+            await this.getContractParams(this.walletAddress, swapTokenWithFee);
 
         let transactionHash: string;
-        try {
-            const onTransactionHash = (hash: string) => {
-                if (onConfirm) {
-                    onConfirm(hash);
-                }
-                transactionHash = hash;
-            };
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
 
+        try {
             await Injector.web3Private.tryExecuteContractMethod(
                 contractAddress,
                 contractAbi,
@@ -175,65 +231,24 @@ export class RubicCrossChainTrade extends CrossChainTrade {
                     return includesErrCode && includesPhrase;
                 }
             );
-
-            return transactionHash!;
         } catch (err) {
             if (err instanceof FailedToCheckForTransactionReceiptError) {
                 return transactionHash!;
             }
-            return this.parseSwapErrors(err);
+            throw err;
         }
+
+        return transactionHash!;
     }
 
-    protected async checkToBlockchainGasPrice(): Promise<void | never> {
-        if (this.toTrade.blockchain !== BLOCKCHAIN_NAME.ETHEREUM) {
-            return;
-        }
-
-        const [maxGasPrice, currentGasPrice] = await Promise.all([
-            this.toTrade.contract.getMaxGasPrice(),
-            Injector.gasPriceApi.getGasPriceInEthUnits(this.toTrade.blockchain)
-        ]);
-        if (maxGasPrice.lt(currentGasPrice)) {
-            throw new MaxGasPriceOverflowError();
-        }
-    }
-
-    private parseSwapErrors(err: Error): never {
+    private parseSwapErrors(err: Error): RubicSdkError | Error {
         const errMessage = err?.message || err?.toString?.();
         if (errMessage?.includes('swapContract: Not enough amount of tokens')) {
-            throw new CrossChainIsUnavailableError();
+            return new CrossChainIsUnavailableError();
         }
         if (errMessage?.includes('err: insufficient funds for gas * price + value')) {
-            throw new InsufficientFundsGasPriceValueError();
+            return new InsufficientFundsGasPriceValueError();
         }
-        throw err;
-    }
-
-    protected async getContractParams(fromAddress?: string): Promise<ContractParams> {
-        const { fromTrade, toTrade } = this;
-
-        const contractAddress = fromTrade.contract.address;
-
-        const { methodName, contractAbi } = fromTrade.getMethodNameAndContractAbi();
-
-        const methodArguments = await fromTrade.getMethodArguments(
-            toTrade,
-            fromAddress || this.walletAddress,
-            this.providerAddress
-        );
-
-        const tokenInAmountAbsolute = fromTrade.fromToken.weiAmount;
-        const value = this.cryptoFeeToken.weiAmount
-            .plus(fromTrade.fromToken.isNative ? tokenInAmountAbsolute : 0)
-            .toFixed(0);
-
-        return {
-            contractAddress,
-            contractAbi,
-            methodName,
-            methodArguments,
-            value
-        };
+        return err;
     }
 }

@@ -27,11 +27,9 @@ export abstract class CelerCrossChainContractTrade extends CrossChainContractTra
         contractAbi: AbiItem[];
     } {
         const methodName = this.getSwapMethod();
-        console.debug('[METHOD NAME]', methodName);
         const contractAbiMethod = this.getAbiMethodByProvider(methodName);
 
         contractAbiMethod.name = methodName;
-        console.debug('[CONTRACT ABI METHOD]', contractAbiMethod);
 
         return {
             methodName,

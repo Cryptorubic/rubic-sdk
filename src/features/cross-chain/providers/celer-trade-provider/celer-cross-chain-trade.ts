@@ -30,7 +30,6 @@ export class CelerCrossChainTrade extends CrossChainTrade {
         const fromBlockchain = fromTrade.blockchain;
         const walletAddress = Injector.web3Private.address;
         if (!walletAddress) {
-            console.debug('Cannot calculate gas data before user logged in');
             return null;
         }
 
@@ -150,7 +149,7 @@ export class CelerCrossChainTrade extends CrossChainTrade {
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getContractParams();
-        console.log('[PARAMS]', contractAddress, contractAbi, methodName, methodArguments, value);
+
         let transactionHash: string;
         try {
             const onTransactionHash = (hash: string) => {
@@ -210,23 +209,20 @@ export class CelerCrossChainTrade extends CrossChainTrade {
 
         const contractAddress = fromTrade.contract.address;
 
-        console.debug('[GET CONTRACT PARAMS]', fromTrade, toTrade, contractAddress);
-
         const { methodName, contractAbi } = fromTrade.getMethodNameAndContractAbi();
 
         const methodArguments = await fromTrade.getMethodArguments(
             toTrade,
             fromAddress || this.walletAddress,
             this.providerAddress,
-            this.maxSlippage
+            {
+                maxSlippage: this.maxSlippage
+            }
         );
 
         const tokenInAmountAbsolute = fromTrade.fromToken.weiAmount;
-        console.debug('[tokenInAmountAbsolute]', tokenInAmountAbsolute);
         const msgValue = await this.calculateSwapValue(tokenInAmountAbsolute, methodArguments);
-        console.debug('[msgValue]', msgValue);
         const value = new BigNumber(msgValue).toFixed(0);
-        console.debug('[value]', value);
         return {
             contractAddress,
             contractAbi,
@@ -241,18 +237,12 @@ export class CelerCrossChainTrade extends CrossChainTrade {
         const { isNative } = this.fromTrade.fromToken;
         const isBridge = this.fromTrade.fromToken.isEqualTo(this.fromTrade.toToken);
         const isToTransit = this.toTrade.fromToken.isEqualTo(this.toTrade.toToken);
-        console.debug('[swap calcs]', isNative, isBridge, isToTransit);
 
         const message = Web3Pure.asciiToBytes32(JSON.stringify(data));
-        console.debug('[MESSAGE]', message);
         const messageBusAddress = await contract.messageBusAddress();
-        console.debug('[MESSAGE BUS ADDRESS]', messageBusAddress);
         const cryptoFee = await contract.destinationCryptoFee(this.toTrade.blockchain);
-        console.debug('[CryptoFEE] ', cryptoFee);
         const feePerByte = await contract.celerFeePerByte(message, messageBusAddress);
-        console.debug('[feePerByte] ', feePerByte);
         const feeBase = await contract.celerFeeBase(messageBusAddress);
-        console.debug('[feePerByte] ', feeBase);
         if (isNative) {
             return amountIn.plus(feePerByte).plus(cryptoFee).plus(feeBase).toNumber();
         }

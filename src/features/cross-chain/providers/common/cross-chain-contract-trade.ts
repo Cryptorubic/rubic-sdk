@@ -40,12 +40,16 @@ export abstract class CrossChainContractTrade {
         toContractTrade: CrossChainContractTrade,
         walletAddress: string,
         providerAddress: string,
-        maxSlippage?: number
+        options?: {
+            swapTokenWithFee?: boolean;
+            maxSlippage?: number;
+        }
     ): Promise<unknown[]>;
 
     protected abstract modifyArgumentsForProvider(
         methodArguments: unknown[][],
-        walletAddress: string
+        walletAddress: string,
+        swapTokenWithFee?: boolean
     ): Promise<void>;
 
     /**

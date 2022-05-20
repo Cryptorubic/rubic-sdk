@@ -71,7 +71,6 @@ export class CrossChainManager {
             toToken
         );
 
-        console.log('[FROM, TO]: ', from, to);
         return this.calculateTradeFromTokens(from, to, this.getFullOptions(options));
     }
 
