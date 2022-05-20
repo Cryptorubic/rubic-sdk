@@ -1,9 +1,9 @@
 import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
 import { Blockchain } from '@core/blockchain/models/blockchain';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
 import { Token } from '@core/blockchain/tokens/token';
 
-export const blockchains: ReadonlyArray<Blockchain> = [
+const mainnetBlockchains: ReadonlyArray<Blockchain> = [
     {
         id: 1,
         name: BLOCKCHAIN_NAME.ETHEREUM,
@@ -103,7 +103,20 @@ export const blockchains: ReadonlyArray<Blockchain> = [
             decimals: 18
         })
     },
-    // Testnets
+    {
+        id: 40,
+        name: BLOCKCHAIN_NAME.TELOS,
+        nativeCoin: new Token({
+            blockchain: BLOCKCHAIN_NAME.TELOS,
+            address: NATIVE_TOKEN_ADDRESS,
+            name: 'Telos EVM',
+            symbol: 'TLOS',
+            decimals: 18
+        })
+    }
+];
+
+const testnetBlockchains: ReadonlyArray<Blockchain> = [
     {
         id: 42,
         name: BLOCKCHAIN_NAME.KOVAN,
@@ -170,4 +183,9 @@ export const blockchains: ReadonlyArray<Blockchain> = [
             decimals: 18
         })
     }
+];
+
+export const blockchains: ReadonlyArray<Blockchain> = [
+    ...mainnetBlockchains,
+    ...testnetBlockchains
 ];

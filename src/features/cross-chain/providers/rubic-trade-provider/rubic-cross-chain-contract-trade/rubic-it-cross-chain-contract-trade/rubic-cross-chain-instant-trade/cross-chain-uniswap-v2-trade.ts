@@ -1,0 +1,55 @@
+import { Web3Pure } from 'src/core';
+import { CrossChainInstantTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/cross-chain-instant-trade';
+import { SwapInfoV2 } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/swap-info-v2.interface';
+import { UniswapV2AbstractTrade } from 'src/features';
+import { SwapInfoDest } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/swap-info-dest.interface';
+import { SwapVersion } from '@features/cross-chain/providers/common/models/provider-type.enum';
+
+export class CrossChainUniswapV2Trade implements CrossChainInstantTrade {
+    private readonly defaultDeadline = 999999999999999;
+
+    constructor(private readonly instantTrade: UniswapV2AbstractTrade) {}
+
+    public getFirstPath(): string[] {
+        return this.instantTrade.wrappedPath.map(token => token.address);
+    }
+
+    public getSecondPath(): string[] {
+        return this.instantTrade.wrappedPath.map(token => Web3Pure.addressToBytes32(token.address));
+    }
+
+    public async modifyArgumentsForProvider(methodArguments: unknown[][]): Promise<void> {
+        const exactTokensForTokens = true;
+        const swapTokenWithFee = false;
+
+        methodArguments[0].push(exactTokensForTokens);
+        methodArguments[0].push(swapTokenWithFee);
+    }
+
+    public getCelerSourceObject(slippage: number): SwapInfoV2 {
+        const path = this.getFirstPath();
+        const amountOutMinimum = this.instantTrade.toTokenAmountMin
+            .weiAmountMinusSlippage(slippage)
+            .toFixed(0);
+        const dex = (this.instantTrade as unknown as { contractAddress: string }).contractAddress;
+        return { dex, path, deadline: this.defaultDeadline, amountOutMinimum };
+    }
+
+    public getCelerDestinationObject(slippage: number, integratorAddress: string): SwapInfoDest {
+        const dex = (this.instantTrade as unknown as { contractAddress: string }).contractAddress;
+        const deadline = this.defaultDeadline;
+        const amountOutMinimum = this.instantTrade.toTokenAmountMin
+            .weiAmountMinusSlippage(slippage)
+            .toFixed(0);
+
+        return {
+            dex,
+            integrator: integratorAddress,
+            version: SwapVersion.V2,
+            path: this.getFirstPath(),
+            pathV3: '0x',
+            deadline,
+            amountOutMinimum
+        };
+    }
+}

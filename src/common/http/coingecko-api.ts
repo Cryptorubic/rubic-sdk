@@ -1,7 +1,7 @@
 import { TimeoutError } from '@common/errors/utils/timeout.error';
 import { HttpClient } from '@common/models/http-client';
 import pTimeout from '@common/utils/p-timeout';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BLOCKCHAIN_NAME, BlockchainName } from '@core/blockchain/models/blockchain-name';
 import BigNumber from 'bignumber.js';
 import { Cache } from 'src/common';
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
@@ -25,7 +25,7 @@ const API_BASE_URL = 'https://api.coingecko.com/api/v3/';
 
 export class CoingeckoApi {
     private static isSupportedBlockchain(
-        blockchain: BLOCKCHAIN_NAME
+        blockchain: BlockchainName
     ): blockchain is SupportedBlockchain {
         return supportedBlockchains.some(supportedBlockchain => supportedBlockchain === blockchain);
     }
@@ -67,7 +67,7 @@ export class CoingeckoApi {
     @Cache({
         maxAge: 15_000
     })
-    public async getNativeCoinPrice(blockchain: BLOCKCHAIN_NAME): Promise<BigNumber> {
+    public async getNativeCoinPrice(blockchain: BlockchainName): Promise<BigNumber> {
         if (!CoingeckoApi.isSupportedBlockchain(blockchain)) {
             throw new RubicSdkError(`Blockchain ${blockchain} is not supported by coingecko-api`);
         }
@@ -109,7 +109,7 @@ export class CoingeckoApi {
     })
     public async getErc20TokenPrice(token: {
         address: string;
-        blockchain: BLOCKCHAIN_NAME;
+        blockchain: BlockchainName;
     }): Promise<BigNumber> {
         const { blockchain } = token;
         if (!CoingeckoApi.isSupportedBlockchain(blockchain)) {
@@ -147,7 +147,7 @@ export class CoingeckoApi {
      */
     public getTokenPrice(token: {
         address: string;
-        blockchain: BLOCKCHAIN_NAME;
+        blockchain: BlockchainName;
     }): Promise<BigNumber> {
         if (Web3Pure.isNativeAddress(token.address)) {
             return this.getNativeCoinPrice(token.blockchain);

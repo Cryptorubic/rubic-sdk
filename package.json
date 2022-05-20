@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "1.1.9",
+  "version": "1.2.0-alpha.0",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -41,6 +41,11 @@
       "name": "Andrey Ott",
       "email": "ott@mywish.io",
       "url": "https://github.com/ottebrut"
+    },
+    {
+      "name": "Sleta Dmitry",
+      "email": "sleta@rubic.finance",
+      "url": "https://github.com/axtezy"
     }
   ],
   "license": "GPL-3.0",

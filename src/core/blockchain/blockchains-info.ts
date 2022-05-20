@@ -1,6 +1,6 @@
 import { blockchains } from '@core/blockchain/constants/blockchains';
 import { Blockchain } from '@core/blockchain/models/blockchain';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import BigNumber from 'bignumber.js';
 
 export class BlockchainsInfo {
@@ -11,7 +11,7 @@ export class BlockchainsInfo {
         return BlockchainsInfo.blockchains.find(blockchain => blockchain.id === chainIdNumber);
     }
 
-    public static getBlockchainByName(blockchainName: BLOCKCHAIN_NAME): Blockchain {
+    public static getBlockchainByName(blockchainName: BlockchainName): Blockchain {
         return BlockchainsInfo.blockchains.find(blockchain => blockchain.name === blockchainName)!;
     }
 }

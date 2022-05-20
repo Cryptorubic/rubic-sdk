@@ -3,7 +3,7 @@ import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-ad
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { TransactionConfig } from 'web3-core';
-import { toChecksumAddress, isAddress, toWei, fromWei, AbiItem } from 'web3-utils';
+import { toChecksumAddress, isAddress, toWei, fromWei, AbiItem, fromAscii } from 'web3-utils';
 import { TransactionGasParams } from '@features/instant-trades/models/gas-params';
 
 export class Web3Pure {
@@ -141,5 +141,14 @@ export class Web3Pure {
             throw Error('No such method in abi');
         }
         return this.web3Eth.abi.encodeFunctionCall(methodSignature, methodArguments as string[]);
+    }
+
+    /**
+     * @description Converts ascii address to bytes32 format
+     * @param address Address to convert.
+     */
+    public static asciiToBytes32(address: string): string {
+        const bytes = fromAscii(address);
+        return `0x${bytes.slice(2).padStart(64, '0')}`;
     }
 }

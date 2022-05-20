@@ -3,7 +3,7 @@ import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { LowSlippageDeflationaryTokenError } from '@common/errors/swap/low-slippage-deflationary-token.error';
 import { LowSlippageError } from '@common/errors/swap/low-slippage.error';
 import { tryExecuteAsync } from '@common/utils/functions';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { Token } from '@core/blockchain/tokens/token';
 import { Web3Private } from '@core/blockchain/web3-private/web3-private';
@@ -46,7 +46,7 @@ export type UniswapV2TradeStruct = {
 
 export abstract class UniswapV2AbstractTrade extends InstantTrade {
     @Cache
-    public static getContractAddress(blockchain: BLOCKCHAIN_NAME): string {
+    public static getContractAddress(blockchain: BlockchainName): string {
         // see https://github.com/microsoft/TypeScript/issues/34516
         // @ts-ignore
         const instance = new this({
@@ -70,7 +70,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     public static readonly defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
 
     public static callForRoutes(
-        blockchain: BLOCKCHAIN_NAME,
+        blockchain: BlockchainName,
         exact: Exact,
         routesMethodArguments: [string, string[]][]
     ): Promise<ContractMulticallResponse<{ amounts: string[] }>[]> {

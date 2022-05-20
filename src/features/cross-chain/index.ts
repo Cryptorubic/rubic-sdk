@@ -1,2 +1,7 @@
-export type { CrossChainManager } from './cross-chain-manager';
-export type { CrossChainTrade } from './cross-chain-trade/cross-chain-trade';
+export { CrossChainManager } from './cross-chain-manager';
+
+export { CrossChainTrade } from './providers/common/cross-chain-trade';
+export { RubicCrossChainTrade } from './providers/rubic-trade-provider/rubic-cross-chain-trade';
+export { CelerCrossChainTrade } from './providers/celer-trade-provider/celer-cross-chain-trade';
+
+export { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from './models/cross-chain-trade-type';

@@ -2,13 +2,13 @@ version: "3.7"
 
 services:
   eth-node:
-    image: ottebrut/rubic-sdk-tools:eth-node-1.2
+    image: axtezy/rubic-sdk-tools:eth-node-1.2
     container_name: eth-node
     ports:
       - 8545:8545
       - 1545:1545
   polygon-node:
-    image: ottebrut/rubic-sdk-tools:polygon-node-1.2
+    image: axtezy/rubic-sdk-tools:polygon-node-1.2
     container_name: polygon-node
     ports:
       - 8547:8545

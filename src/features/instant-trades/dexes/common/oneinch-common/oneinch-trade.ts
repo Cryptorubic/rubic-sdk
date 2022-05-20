@@ -9,7 +9,7 @@ import { InstantTrade } from '@features/instant-trades/instant-trade';
 import { Injector } from '@core/sdk/injector';
 import BigNumber from 'bignumber.js';
 import { Cache } from 'src/common';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/BLOCKCHAIN_NAME';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import { TransactionReceipt } from 'web3-eth';
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
@@ -55,7 +55,7 @@ export class OneinchTrade extends InstantTrade {
 
     private readonly httpClient = Injector.httpClient;
 
-    protected readonly contractAddress: string;
+    public readonly contractAddress: string;
 
     public readonly from: PriceTokenAmount;
 

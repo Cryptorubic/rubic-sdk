@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { InstantTrade } from '@features/instant-trades/instant-trade';
@@ -12,7 +12,7 @@ import { GasFeeInfo } from '@features/instant-trades/models/gas-fee-info';
 import { TradeType } from 'src/features';
 
 export abstract class InstantTradeProvider {
-    public abstract readonly blockchain: BLOCKCHAIN_NAME;
+    public abstract readonly blockchain: BlockchainName;
 
     protected abstract readonly gasMargin: number;
 

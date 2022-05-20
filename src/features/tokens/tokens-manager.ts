@@ -6,7 +6,7 @@ import {
     PriceTokenAmountStruct
 } from '@core/blockchain/tokens/price-token-amount';
 import { Token, TokenStruct } from '@core/blockchain/tokens/token';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import BigNumber from 'bignumber.js';
 
 export class TokensManager {
@@ -22,7 +22,7 @@ export class TokensManager {
         return tokensStructs.map(tokenStruct => this.createTokenFromStruct(tokenStruct));
     }
 
-    public createTokens(addresses: string[], blockchain: BLOCKCHAIN_NAME): Promise<Token[]> {
+    public createTokens(addresses: string[], blockchain: BlockchainName): Promise<Token[]> {
         return Token.createTokens(addresses, blockchain);
     }
 
