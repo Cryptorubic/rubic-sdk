@@ -69,14 +69,14 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             fromTransitToken,
             slippages.fromSlippageTolerance
         );
-
+        console.debug('[FROM TRADE] ', fromTrade);
         const celerSlippage = await this.fetchCelerSlippage(
             fromBlockchain,
             toBlockchain,
             fromTrade.toTokenAmountMin,
             fromTransitToken
         );
-
+        console.debug('[CELER SLIPPAGE] ', celerSlippage);
         let { fromSlippageTolerance, toSlippageTolerance } = slippages;
         fromSlippageTolerance -= celerSlippage / 2;
         toSlippageTolerance -= celerSlippage / 2;
@@ -93,7 +93,10 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             toTransitToken,
             celerSlippage
         );
-
+        console.debug(
+            '[ESTIMATE TRANSIT WITH SLIPPAGE] ',
+            estimateTransitAmountWithSlippage.toFixed(0)
+        );
         const { toTransitTokenAmount, transitFeeToken } = await this.getToTransitTokenAmount(
             toBlockchain,
             fromTrade.fromToken,
@@ -111,7 +114,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             to,
             toSlippageTolerance
         );
-
+        console.debug('[TO TRADE] ', toTrade);
         const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
         const gasData =
             gasCalculation === 'enabled'
@@ -119,7 +122,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
                       fromTrade,
                       toTrade,
                       cryptoFeeToken,
-                      celerSlippage * 10 ** 6 * 100
+                      Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
                   )
                 : null;
 
@@ -132,7 +135,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
                 gasData
             },
             providerAddress,
-            celerSlippage * 10 ** 6 * 100
+            Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
         );
     }
 

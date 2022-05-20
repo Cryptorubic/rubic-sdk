@@ -6,5 +6,7 @@
 /coverage/
 /__tests__/env.js
 /lib/
+/dist/
 /cache/
 /scripts/node.log
+/docker-compose.yml
