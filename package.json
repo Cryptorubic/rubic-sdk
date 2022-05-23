@@ -62,7 +62,7 @@
     "assert": "^2.0.0",
     "axios": "^0.22.0",
     "bignumber.js": "^9.0.1",
-    "web3": "~1.5.3"
+    "web3": "~1.7.3"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-0",
