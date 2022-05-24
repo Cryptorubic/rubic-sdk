@@ -250,7 +250,7 @@ export class CrossChainTrade {
     private checkToContractBalance(): Promise<void | never> {
         return this.toWeb3Public.checkBalance(
             this.toTrade.fromToken,
-            this.fromTrade.fromToken.tokenAmount,
+            this.toTrade.fromToken.tokenAmount,
             this.toTrade.contract.address
         );
     }
