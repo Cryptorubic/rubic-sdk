@@ -1,12 +1,12 @@
 import { Web3Pure } from 'src/core';
 import { CrossChainInstantTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/cross-chain-instant-trade';
-import { SwapInfoV2 } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/swap-info-v2.interface';
+import { v2LikeCelerSwap } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/v2-like-celer-swap-info';
 import { UniswapV2AbstractTrade } from 'src/features';
-import { SwapInfoDest } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/swap-info-dest.interface';
+import { DestinationCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
 import { SwapVersion } from '@features/cross-chain/providers/common/models/provider-type.enum';
 
 export class CrossChainUniswapV2Trade implements CrossChainInstantTrade {
-    private readonly defaultDeadline = 999999999999999;
+    readonly defaultDeadline = 999999999999999;
 
     constructor(private readonly instantTrade: UniswapV2AbstractTrade) {}
 
@@ -29,7 +29,7 @@ export class CrossChainUniswapV2Trade implements CrossChainInstantTrade {
         methodArguments[0].push(swapTokenWithFee);
     }
 
-    public getCelerSourceObject(slippage: number): SwapInfoV2 {
+    public getCelerSourceObject(slippage: number): v2LikeCelerSwap {
         const path = this.getFirstPath();
         const amountOutMinimum = this.instantTrade.toTokenAmountMin
             .weiAmountMinusSlippage(slippage)
@@ -38,7 +38,10 @@ export class CrossChainUniswapV2Trade implements CrossChainInstantTrade {
         return { dex, path, deadline: this.defaultDeadline, amountOutMinimum };
     }
 
-    public getCelerDestinationObject(slippage: number, integratorAddress: string): SwapInfoDest {
+    public getCelerDestinationObject(
+        slippage: number,
+        integratorAddress: string
+    ): DestinationCelerSwapInfo {
         const dex = (this.instantTrade as unknown as { contractAddress: string }).contractAddress;
         const deadline = this.defaultDeadline;
         const amountOutMinimum = this.instantTrade.toTokenAmountMin

@@ -33,6 +33,7 @@ type OneinchTradeStruct = {
     disableMultihops: boolean;
     path: ReadonlyArray<Token>;
     gasFeeInfo?: GasFeeInfo | null;
+    data: string | null;
 };
 
 export class OneinchTrade extends InstantTrade {
@@ -75,6 +76,8 @@ export class OneinchTrade extends InstantTrade {
 
     public readonly wrappedPath: ReadonlyArray<Token>;
 
+    public readonly transactionData: string | null;
+
     public get type(): TradeType {
         return OneinchTrade.oneInchTradeTypes[
             this.from.blockchain as keyof typeof OneinchTrade.oneInchTradeTypes
@@ -104,7 +107,7 @@ export class OneinchTrade extends InstantTrade {
         this.slippageTolerance = oneinchTradeStruct.slippageTolerance;
         this.disableMultihops = oneinchTradeStruct.disableMultihops;
         this.path = oneinchTradeStruct.path;
-
+        this.transactionData = oneinchTradeStruct.data;
         this.wrappedPath = createTokenNativeAddressProxyInPathStartAndEnd(
             this.path,
             oneinchApiParams.nativeAddress

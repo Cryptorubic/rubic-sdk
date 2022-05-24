@@ -1,16 +1,17 @@
-import { OneinchTrade, UniswapV2AbstractTrade } from 'src/features';
+import { OneinchTrade } from 'src/features';
 import { Web3Pure } from 'src/core';
 import { CrossChainInstantTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/cross-chain-instant-trade';
 
-import { SwapInfoDest } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/swap-info-dest.interface';
-import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
+import { DestinationCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
 
-import { SwapInfoInch } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/swap-info-inch.interface';
+import { InchCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/inch-celer-swap-info';
 import { oneinchApiParams } from '@features/instant-trades/dexes/common/oneinch-common/constants';
 import { wrappedNative } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/wrapped-native';
 import { CelerCrossChainSupportedBlockchain } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
 
 export class CrossChainOneinchTrade implements CrossChainInstantTrade {
+    readonly defaultDeadline = 999999999999999;
+
     constructor(private readonly instantTrade: OneinchTrade) {}
 
     public getFirstPath(): string {
@@ -29,8 +30,10 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
         methodArguments[0].push(data);
     }
 
-    // @TODO Add 1Inch
-    public getCelerSourceObject(slippage: number): SwapInfoInch {
+    public getCelerSourceObject(slippage: number): InchCelerSwapInfo {
+        if (!this.instantTrade.transactionData) {
+            throw new Error(`[RUBIC SDK] Can't estimate 1inch trade.`);
+        }
         const dex = this.instantTrade.contractAddress;
         const [tokenIn, ...restPath] = this.instantTrade.path.map(token => token.address);
         const isOneInchNative = oneinchApiParams.nativeAddress === tokenIn;
@@ -44,18 +47,10 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
             .weiAmountMinusSlippage(slippage)
             .toFixed(0);
 
-        return { dex, path, data: '', amountOutMinimum };
+        return { dex, path, data: this.instantTrade.transactionData, amountOutMinimum };
     }
 
-    // @TODO Add 1Inch
-    public getCelerDestinationObject(slippage: number): SwapInfoDest {
-        const dex = UniswapV2AbstractTrade.getContractAddress(this.instantTrade.from.blockchain);
-        const path = this.getSecondPath();
-        const deadline = 0;
-        const amountOutMinimum = this.instantTrade.toTokenAmountMin
-            .weiAmountMinusSlippage(slippage)
-            .toFixed(0);
-
-        return { dex, integrator: EMPTY_ADDRESS, path, deadline, amountOutMinimum };
+    public getCelerDestinationObject(): DestinationCelerSwapInfo {
+        throw Error('[RUBIC SDK] 1Inch is not supported as target provider yet.');
     }
 }

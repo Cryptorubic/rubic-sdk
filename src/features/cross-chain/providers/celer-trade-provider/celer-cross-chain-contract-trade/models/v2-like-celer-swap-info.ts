@@ -1,4 +1,4 @@
-export interface SwapInfoV2 {
+export interface v2LikeCelerSwap {
     dex: string;
     path: string[];
     deadline: number;

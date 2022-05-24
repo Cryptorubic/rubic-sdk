@@ -3,13 +3,15 @@ import { CrossChainInstantTrade } from '@features/cross-chain/providers/rubic-tr
 import { UniswapV3AbstractTrade } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
 import { UniswapV3QuoterController } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
 import { compareAddresses } from 'src/common';
-import { SwapInfoV3 } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/swap-info-v3.interface';
+import { v3LikeCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/v3-like-celer-swap-info';
 import { UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
-import { SwapInfoDest } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/swap-info-dest.interface';
-import { UniswapV2AbstractTrade } from 'src/features';
+import { DestinationCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
+import { SwapVersion } from '@features/cross-chain/providers/common/models/provider-type.enum';
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 
 export class CrossChainUniswapV3Trade implements CrossChainInstantTrade {
+    readonly defaultDeadline = 999999999999999;
+
     constructor(private readonly instantTrade: UniswapV3AbstractTrade) {}
 
     public getFirstPath(): string {
@@ -49,26 +51,35 @@ export class CrossChainUniswapV3Trade implements CrossChainInstantTrade {
         methodArguments[0].push(exactTokensForTokens);
     }
 
-    // @TODO
-    public getCelerSourceObject(slippage: number): SwapInfoV3 {
+    public getCelerSourceObject(slippage: number): v3LikeCelerSwapInfo {
         const dex = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS;
         const path = this.getFirstPath();
         const amountOutMinimum = this.instantTrade.toTokenAmountMin
             .weiAmountMinusSlippage(slippage)
             .toFixed(0);
 
-        return { dex, path, deadline: 0, amountOutMinimum };
+        return { dex, path, deadline: this.defaultDeadline, amountOutMinimum };
     }
 
-    // @TODO
-    public getCelerDestinationObject(slippage: number): SwapInfoDest {
-        const dex = UniswapV2AbstractTrade.getContractAddress(this.instantTrade.from.blockchain);
-        const path = this.getSecondPath();
-        const deadline = 0;
+    public getCelerDestinationObject(
+        slippage: number,
+        integratorAddress: string
+    ): DestinationCelerSwapInfo {
+        const dex = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS;
+        const pathV3 = this.getFirstPath();
+        const deadline = this.defaultDeadline;
         const amountOutMinimum = this.instantTrade.toTokenAmountMin
             .weiAmountMinusSlippage(slippage)
             .toFixed(0);
 
-        return { dex, integrator: EMPTY_ADDRESS, path, deadline, amountOutMinimum };
+        return {
+            dex,
+            integrator: integratorAddress,
+            version: SwapVersion.V3,
+            path: EMPTY_ADDRESS,
+            pathV3,
+            deadline,
+            amountOutMinimum
+        };
     }
 }

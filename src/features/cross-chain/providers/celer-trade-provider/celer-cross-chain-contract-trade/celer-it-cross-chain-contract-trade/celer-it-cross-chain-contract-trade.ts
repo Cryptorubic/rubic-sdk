@@ -6,6 +6,11 @@ import { CrossChainUniswapV2Trade } from '@features/cross-chain/providers/rubic-
 import { CelerCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
 import BigNumber from 'bignumber.js';
 import { CelerCrossChainContractData } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
+import { UniswapV3AbstractTrade } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
+import { CrossChainOneinchTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-cross-chain-instant-trade/cross-chain-oneinch-trade';
+import { CrossChainAlgebraTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-cross-chain-instant-trade/cross-chain-algebra-trade';
+import { OneinchTrade } from 'src/features';
+import { CrossChainUniswapV3Trade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-cross-chain-instant-trade/cross-chain-uniswap-v3-trade';
 
 export class CelerItCrossChainContractTrade extends CelerCrossChainContractTrade {
     public readonly fromToken: PriceTokenAmount;
@@ -59,19 +64,16 @@ export class CelerItCrossChainContractTrade extends CelerCrossChainContractTrade
     }
 
     private getTrade(): CrossChainInstantTrade {
-        return new CrossChainUniswapV2Trade(this.instantTrade as UniswapV2AbstractTrade);
-        // if (this.instantTrade instanceof UniswapV2AbstractTrade) {
-        //     return new CrossChainUniswapV2Trade(this.instantTrade);
-        // }
-        throw new Error('[RUBIC SDK] Provider is not allowd.');
-        // @TODO Add other providers.
-        // if (this.instantTrade instanceof OneinchTrade) {
-        //     return new CrossChainOneinchTrade(this.instantTrade);
-        // }
-        // if (this.instantTrade instanceof UniswapV3AbstractTrade) {
-        //     return new CrossChainUniswapV3Trade(this.instantTrade);
-        // }
-        // return new CrossChainAlgebraTrade(this.instantTrade);
+        if (this.instantTrade instanceof UniswapV2AbstractTrade) {
+            return new CrossChainUniswapV2Trade(this.instantTrade);
+        }
+        if (this.instantTrade instanceof OneinchTrade) {
+            return new CrossChainOneinchTrade(this.instantTrade);
+        }
+        if (this.instantTrade instanceof UniswapV3AbstractTrade) {
+            return new CrossChainUniswapV3Trade(this.instantTrade);
+        }
+        return new CrossChainAlgebraTrade(this.instantTrade);
     }
 
     /**

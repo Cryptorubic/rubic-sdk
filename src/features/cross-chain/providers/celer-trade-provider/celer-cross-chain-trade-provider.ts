@@ -21,7 +21,6 @@ import { CelerCrossChainContractTrade } from '@features/cross-chain/providers/ce
 import { ItCalculatedTrade } from '@features/cross-chain/providers/common/models/it-calculated-trade';
 import { CelerItCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
 import { CelerDirectCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
-import { isUniswapV2LikeTrade } from '@features/instant-trades/utils/type-guards';
 
 export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -77,9 +76,10 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             fromTransitToken
         );
         console.debug('[CELER SLIPPAGE] ', celerSlippage);
-        let { fromSlippageTolerance, toSlippageTolerance } = slippages;
-        fromSlippageTolerance -= celerSlippage / 2;
-        toSlippageTolerance -= celerSlippage / 2;
+
+        const { fromSlippageTolerance, toSlippageTolerance: toSlippage } = slippages;
+        const toSlippageTolerance = toSlippage - celerSlippage;
+        console.debug('[SLIPPAGES (FROM, TO)] ', fromSlippageTolerance, toSlippageTolerance);
 
         if (fromSlippageTolerance < 0) {
             throw new LowSlippageError();
@@ -95,7 +95,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
         );
         console.debug(
             '[ESTIMATE TRANSIT WITH SLIPPAGE] ',
-            estimateTransitAmountWithSlippage.toFixed(0)
+            estimateTransitAmountWithSlippage.toString()
         );
         const { toTransitTokenAmount, transitFeeToken } = await this.getToTransitTokenAmount(
             toBlockchain,
@@ -116,6 +116,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
         );
         console.debug('[TO TRADE] ', toTrade);
         const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
+        console.debug('[CRYPTO FEE TOKEN] ', cryptoFeeToken);
         const gasData =
             gasCalculation === 'enabled'
                 ? await CelerCrossChainTrade.getGasData(
@@ -125,7 +126,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
                       Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
                   )
                 : null;
-
+        console.debug('[INTEGRATOR ADDRESS] ', providerAddress);
         return new CelerCrossChainTrade(
             {
                 fromTrade,
@@ -256,9 +257,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
                     return null;
                 })
                 .filter(notNull)
-                .sort((a, b) => b.toAmount.comparedTo(a.toAmount))
-                // @TODO Remove UniV2 filter
-                .filter(trade => isUniswapV2LikeTrade(trade.instantTrade));
+                .sort((a, b) => b.toAmount.comparedTo(a.toAmount));
 
             if (!sortedResults.length) {
                 throw (results[0] as PromiseRejectedResult).reason;
