@@ -28,7 +28,9 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
     private readonly defaultOptions: Required<OneinchSwapCalculationOptions> = {
         gasCalculation: 'calculate',
         disableMultihops: false,
-        slippageTolerance: 0.02
+        slippageTolerance: 0.02,
+        wrappedAddress: oneinchApiParams.nativeAddress,
+        fromAddress: this.walletAddress
     };
 
     protected readonly gasMargin = 1;
@@ -160,7 +162,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
                 params: {
                     ...quoteTradeParams.params,
                     slippage: (options.slippageTolerance * 100).toString(),
-                    fromAddress: this.walletAddress,
+                    fromAddress: options.fromAddress,
                     disableEstimate: options.gasCalculation === 'disabled'
                 }
             };

@@ -22,6 +22,7 @@ import { UniswapV3TradeClass } from '@features/instant-trades/dexes/common/unisw
 import { UniswapV3AlgebraRoute } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
 import { Exact } from '@features/instant-trades/models/exact';
 import { getFromToTokensAmountsByExact } from '@features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
+import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
@@ -40,7 +41,9 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         gasCalculation: 'calculate',
         disableMultihops: false,
         deadlineMinutes: 20,
-        slippageTolerance: 0.02
+        slippageTolerance: 0.02,
+        wrappedAddress: EMPTY_ADDRESS,
+        fromAddress: ''
     };
 
     protected abstract createTradeInstance(

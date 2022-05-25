@@ -8,6 +8,7 @@ import { InchCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-p
 import { oneinchApiParams } from '@features/instant-trades/dexes/common/oneinch-common/constants';
 import { wrappedNative } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/wrapped-native';
 import { CelerCrossChainSupportedBlockchain } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
+import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 
 export class CrossChainOneinchTrade implements CrossChainInstantTrade {
     readonly defaultDeadline = 999999999999999;
@@ -36,7 +37,8 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
         }
         const dex = this.instantTrade.contractAddress;
         const [tokenIn, ...restPath] = this.instantTrade.path.map(token => token.address);
-        const isOneInchNative = oneinchApiParams.nativeAddress === tokenIn;
+        const isOneInchNative =
+            oneinchApiParams.nativeAddress === tokenIn || tokenIn === EMPTY_ADDRESS;
         const fromBlockchain = this.instantTrade.from
             .blockchain as CelerCrossChainSupportedBlockchain;
         const firstToken = isOneInchNative ? wrappedNative[fromBlockchain] : tokenIn;

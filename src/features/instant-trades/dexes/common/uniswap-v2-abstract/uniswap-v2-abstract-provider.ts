@@ -13,6 +13,7 @@ import { UniswapCalculatedInfo } from '@features/instant-trades/dexes/common/uni
 import { createTokenNativeAddressProxy } from '@features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { TradeType } from 'src/features';
 import { Exact } from '@features/instant-trades/models/exact';
+import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 
 export abstract class UniswapV2AbstractProvider<
     T extends UniswapV2AbstractTrade = UniswapV2AbstractTrade
@@ -29,7 +30,9 @@ export abstract class UniswapV2AbstractProvider<
         gasCalculation: 'calculate',
         disableMultihops: false,
         deadlineMinutes: 20,
-        slippageTolerance: 0.02
+        slippageTolerance: 0.02,
+        wrappedAddress: EMPTY_ADDRESS,
+        fromAddress: ''
     };
 
     protected readonly gasMargin = 1.2;
