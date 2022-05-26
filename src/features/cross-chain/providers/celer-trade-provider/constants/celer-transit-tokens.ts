@@ -27,7 +27,7 @@ export const celerTransitTokens: Record<CelerCrossChainSupportedBlockchain, Toke
     [BLOCKCHAIN_NAME.AVALANCHE]: {
         blockchain: BLOCKCHAIN_NAME.AVALANCHE,
         address: '0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664',
-        name: 'USDC.e',
+        name: 'USDC',
         symbol: 'USDC.e',
         decimals: 6
     },
