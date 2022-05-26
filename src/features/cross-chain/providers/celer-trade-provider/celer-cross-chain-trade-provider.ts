@@ -1,4 +1,4 @@
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
+import { CROSS_CHAIN_TRADE_TYPE, TRADE_TYPE, TradeType } from 'src/features';
 import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
 import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
@@ -114,7 +114,13 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             toBlockchain,
             toTransit,
             to,
-            toSlippageTolerance
+            toSlippageTolerance,
+            [
+                TRADE_TYPE.ONE_INCH_ARBITRUM,
+                TRADE_TYPE.ONE_INCH_BSC,
+                TRADE_TYPE.ONE_INCH_ETHEREUM,
+                TRADE_TYPE.ONE_INCH_POLYGON
+            ]
         );
         console.debug('[TO TRADE] ', toTrade);
         const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
@@ -215,7 +221,8 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
         blockchain: CelerCrossChainSupportedBlockchain,
         from: PriceTokenAmount,
         toToken: PriceToken,
-        slippageTolerance: number
+        slippageTolerance: number,
+        disabledProviders?: TradeType[]
     ): Promise<CelerCrossChainContractTrade> {
         if (compareAddresses(from.address, toToken.address)) {
             const contract = this.contracts(blockchain);
@@ -226,7 +233,13 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             return new CelerDirectCrossChainContractTrade(blockchain, contract, from);
         }
 
-        return this.getBestItContractTrade(blockchain, from, toToken, slippageTolerance);
+        return this.getBestItContractTrade(
+            blockchain,
+            from,
+            toToken,
+            slippageTolerance,
+            disabledProviders
+        );
     }
 
     protected async getItCalculatedTrade(
@@ -255,11 +268,13 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
         blockchain: CelerCrossChainSupportedBlockchain,
         from: PriceTokenAmount,
         toToken: PriceToken,
-        slippageTolerance: number
+        slippageTolerance: number,
+        disabledProviders?: TradeType[]
     ): Promise<CelerItCrossChainContractTrade> {
         const contract = this.contracts(blockchain);
-        const promises: Promise<ItCalculatedTrade>[] = contract.providersData.map(
-            async (_, providerIndex) => {
+        const promises: Promise<ItCalculatedTrade>[] = contract.providersData
+            .filter(data => !disabledProviders?.some(provider => provider === data.provider.type))
+            .map(async (_, providerIndex) => {
                 return this.getItCalculatedTrade(
                     contract,
                     providerIndex,
@@ -267,8 +282,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
                     toToken,
                     slippageTolerance
                 );
-            }
-        );
+            });
 
         const bestTrade = await Promise.allSettled(promises).then(async results => {
             const sortedResults = results

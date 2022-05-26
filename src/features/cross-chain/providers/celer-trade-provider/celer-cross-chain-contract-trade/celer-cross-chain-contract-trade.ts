@@ -3,6 +3,7 @@ import { BlockchainName } from 'src/core';
 import { AbiItem } from 'web3-utils';
 import { CelerSwapMethod } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-swap-methods';
 import {
+    isAlgebraProvider,
     isOneInchLikeProvider,
     isUniswapV2LikeProvider,
     isUniswapV3LikeProvider
@@ -66,9 +67,10 @@ export abstract class CelerCrossChainContractTrade extends CrossChainContractTra
             return nativeIn ? CelerSwapMethod.SWAP_V2_NATIVE : CelerSwapMethod.SWAP_V2;
         }
 
-        if (isUniswapV3LikeProvider(this.provider)) {
+        if (isUniswapV3LikeProvider(this.provider) || isAlgebraProvider(this.provider)) {
             return nativeIn ? CelerSwapMethod.SWAP_V3_NATIVE : CelerSwapMethod.SWAP_V3;
         }
+
         throw new Error('[RUBIC SDK]: Unknown swap method.');
     }
 
