@@ -7,7 +7,7 @@ import {
 } from '@features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
 import { compareAddresses, notNull, NotSupportedBlockchain } from 'src/common';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
-import { BlockchainName, MAINNET_BLOCKCHAIN_NAME } from 'src/core';
+import { BlockchainName } from 'src/core';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { RubicCrossChainTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-trade';
@@ -191,14 +191,12 @@ export class RubicCrossChainTradeProvider extends CrossChainTradeProvider {
     }
 
     protected async getBestItContractTrade(
-        blockchain: MAINNET_BLOCKCHAIN_NAME,
+        blockchain: RubicCrossChainSupportedBlockchain,
         from: PriceTokenAmount,
         toToken: PriceToken,
         slippageTolerance: number
     ): Promise<RubicItCrossChainContractTrade> {
         const contract = this.contracts(blockchain);
-        // @TODO FIX 1inc celer address
-        // @TODO MOVE TO celer
         const promises: Promise<ItCalculatedTrade>[] = contract.providersData.map(
             async (_, providerIndex) => {
                 return this.getItCalculatedTrade(

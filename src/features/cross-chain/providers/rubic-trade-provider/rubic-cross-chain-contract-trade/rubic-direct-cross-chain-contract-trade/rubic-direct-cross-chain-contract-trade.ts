@@ -1,8 +1,9 @@
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import BigNumber from 'bignumber.js';
-import { MAINNET_BLOCKCHAIN_NAME, Web3Pure } from 'src/core';
+import { Web3Pure } from 'src/core';
 import { CrossChainContractData } from '@features/cross-chain/providers/common/cross-chain-contract-data';
 import { RubicCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-cross-chain-contract-trade';
+import { RubicCrossChainSupportedBlockchain } from '@features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
 
 export class RubicDirectCrossChainContractTrade extends RubicCrossChainContractTrade {
     public readonly fromToken: PriceTokenAmount;
@@ -12,7 +13,7 @@ export class RubicDirectCrossChainContractTrade extends RubicCrossChainContractT
     public readonly toTokenAmountMin: BigNumber;
 
     constructor(
-        blockchain: MAINNET_BLOCKCHAIN_NAME,
+        blockchain: RubicCrossChainSupportedBlockchain,
         contract: CrossChainContractData,
         private readonly token: PriceTokenAmount
     ) {

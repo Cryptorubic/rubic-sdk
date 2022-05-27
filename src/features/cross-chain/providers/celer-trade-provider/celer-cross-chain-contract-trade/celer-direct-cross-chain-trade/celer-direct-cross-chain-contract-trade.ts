@@ -1,12 +1,13 @@
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import BigNumber from 'bignumber.js';
-import { BlockchainsInfo, MAINNET_BLOCKCHAIN_NAME, Web3Pure } from 'src/core';
+import { BlockchainsInfo, Web3Pure } from 'src/core';
 import { CelerCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 import { CelerCrossChainContractData } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
 import { DestinationCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
 import { SwapVersion } from '@features/cross-chain/providers/common/models/provider-type.enum';
 import { BridgeCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/bridge-celer-swap-info';
+import { CelerCrossChainSupportedBlockchain } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
 
 export class CelerDirectCrossChainContractTrade extends CelerCrossChainContractTrade {
     public readonly fromToken: PriceTokenAmount;
@@ -16,7 +17,7 @@ export class CelerDirectCrossChainContractTrade extends CelerCrossChainContractT
     public readonly toTokenAmountMin: BigNumber;
 
     constructor(
-        blockchain: MAINNET_BLOCKCHAIN_NAME,
+        blockchain: CelerCrossChainSupportedBlockchain,
         contract: CelerCrossChainContractData,
         private readonly token: PriceTokenAmount
     ) {

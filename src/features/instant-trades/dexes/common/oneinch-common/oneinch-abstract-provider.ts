@@ -138,7 +138,10 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
     }> {
         const quoteTradeParams: OneinchQuoteRequest = {
             params: {
-                fromTokenAddress: from.address,
+                fromTokenAddress:
+                    options.wrappedAddress !== oneinchApiParams.nativeAddress
+                        ? options.wrappedAddress
+                        : from.address,
                 toTokenAddress: toToken.address,
                 amount: from.stringWeiAmount,
                 mainRouteParts: options.disableMultihops ? '1' : undefined
