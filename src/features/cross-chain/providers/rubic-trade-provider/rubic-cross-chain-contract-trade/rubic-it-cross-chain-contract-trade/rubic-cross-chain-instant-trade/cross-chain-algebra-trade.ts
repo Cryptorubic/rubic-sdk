@@ -42,7 +42,7 @@ export class CrossChainAlgebraTrade implements CrossChainInstantTrade {
         integratorAddress: string
     ): DestinationCelerSwapInfo {
         const dex = ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS;
-        const pathV3 = this.getSecondPath();
+        const pathV3 = this.getFirstPath();
         const deadline = this.defaultDeadline;
         const amountOutMinimum = this.instantTrade.toTokenAmountMin
             .weiAmountMinusSlippage(slippage)
