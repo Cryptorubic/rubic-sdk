@@ -55,7 +55,6 @@
     "lint": "eslint src __tests__",
     "test": "cd ./scripts && bash test-runner.sh",
     "build:publish": "yarn compile && yarn build && npm publish --access public",
-    "build:publish:alpha": "yarn compile && yarn build && npm publish --tag alpha --access public",
     "analyze": "webpack --profile --json > stats.json &&  webpack-bundle-analyzer stats.json"
   },
   "dependencies": {
