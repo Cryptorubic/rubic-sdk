@@ -201,10 +201,14 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
     ): Promise<EstimateAmtResponse> {
         const sourceChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id;
         const destinationChainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id;
+        // Celer accepts only USDC symbol, USDC.e for avalanche is not allowed.
+        const tokenSymbol = transitToken.symbol.toLowerCase().includes('usdc')
+            ? 'USDC'
+            : transitToken.symbol;
         const params = {
             src_chain_id: sourceChainId,
             dst_chain_id: destinationChainId,
-            token_symbol: transitToken.symbol,
+            token_symbol: tokenSymbol,
             slippage_tolerance: new BigNumber(slippageTolerance)
                 .multipliedBy(10 ** 6)
                 .multipliedBy(100)
