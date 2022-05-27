@@ -52,7 +52,7 @@ export class CrossChainAlgebraTrade implements CrossChainInstantTrade {
             dex,
             integrator: integratorAddress,
             version: SwapVersion.V3,
-            path: EMPTY_ADDRESS,
+            path: [EMPTY_ADDRESS],
             pathV3,
             deadline,
             amountOutMinimum
