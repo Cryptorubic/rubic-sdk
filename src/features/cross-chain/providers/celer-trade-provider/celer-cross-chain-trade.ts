@@ -149,14 +149,6 @@ export class CelerCrossChainTrade extends CrossChainTrade {
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getContractParams();
 
-        console.debug(
-            '[CONTRACT PARAMS] ',
-            contractAddress,
-            contractAbi,
-            methodName,
-            methodArguments,
-            value
-        );
         let transactionHash: string;
         try {
             const onTransactionHash = (hash: string) => {

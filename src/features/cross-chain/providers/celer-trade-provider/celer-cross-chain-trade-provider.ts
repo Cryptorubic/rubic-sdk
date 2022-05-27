@@ -70,18 +70,15 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             fromTransitToken,
             slippages.fromSlippageTolerance
         );
-        console.debug('[FROM TRADE] ', fromTrade);
         const celerSlippage = await this.fetchCelerSlippage(
             fromBlockchain,
             toBlockchain,
             fromTrade.toTokenAmountMin,
             fromTransitToken
         );
-        console.debug('[CELER SLIPPAGE] ', celerSlippage);
 
         const { fromSlippageTolerance, toSlippageTolerance: toSlippage } = slippages;
         const toSlippageTolerance = toSlippage - celerSlippage;
-        console.debug('[SLIPPAGES (FROM, TO)] ', fromSlippageTolerance, toSlippageTolerance);
 
         if (fromSlippageTolerance < 0) {
             throw new LowSlippageError();
@@ -95,10 +92,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             toTransitToken,
             celerSlippage
         );
-        console.debug(
-            '[ESTIMATE TRANSIT WITH SLIPPAGE] ',
-            estimateTransitAmountWithSlippage.toString()
-        );
+
         const { toTransitTokenAmount, transitFeeToken } = await this.getToTransitTokenAmount(
             toBlockchain,
             fromTrade.fromToken,
@@ -122,9 +116,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
                 TRADE_TYPE.ONE_INCH_POLYGON
             ]
         );
-        console.debug('[TO TRADE] ', toTrade);
         const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
-        console.debug('[CRYPTO FEE TOKEN] ', cryptoFeeToken);
         const gasData =
             gasCalculation === 'enabled'
                 ? await CelerCrossChainTrade.getGasData(
@@ -134,7 +126,6 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
                       Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
                   )
                 : null;
-        console.debug('[INTEGRATOR ADDRESS] ', providerAddress);
         return new CelerCrossChainTrade(
             {
                 fromTrade,

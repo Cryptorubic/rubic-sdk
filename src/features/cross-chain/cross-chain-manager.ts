@@ -38,49 +38,6 @@ export class CrossChainManager {
 
     constructor(private readonly providerAddress: string) {}
 
-    /**
-     * Calculates all providers trades.
-     * @param fromToken
-     * @param fromAmount
-     * @param toToken
-     * @param options
-     */
-    public async calculateTrades(
-        fromToken:
-            | Token
-            | {
-                  address: string;
-                  blockchain: BlockchainName;
-              },
-        fromAmount: string | number,
-        toToken:
-            | Token
-            | {
-                  address: string;
-                  blockchain: BlockchainName;
-              },
-        options?: SwapManagerCrossChainCalculationOptions
-    ): Promise<CrossChainTrade[]> {
-        if (toToken instanceof Token && fromToken.blockchain === toToken.blockchain) {
-            throw new RubicSdkError('Blockchains of from and to tokens must be different.');
-        }
-
-        const { from, to } = await getPriceTokensFromInputTokens(
-            fromToken,
-            fromAmount.toString(),
-            toToken
-        );
-
-        return this.calculateTradeFromTokens(from, to, this.getFullOptions(options));
-    }
-
-    /**
-     * Calculates best cross-chain trade.
-     * @param fromToken
-     * @param fromAmount
-     * @param toToken
-     * @param options
-     */
     public async calculateTrade(
         fromToken:
             | Token
@@ -117,7 +74,7 @@ export class CrossChainManager {
             fromSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
             toSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
             gasCalculation: 'enabled',
-            disabledProviders: ['RUBIC'],
+            disabledProviders: [],
             timeout: CrossChainManager.defaultCalculationTimeout,
             providerAddress: this.providerAddress
         });
