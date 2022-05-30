@@ -9,7 +9,7 @@ import { InstantTrade } from '@features/instant-trades/instant-trade';
 import { Injector } from '@core/sdk/injector';
 import BigNumber from 'bignumber.js';
 import { Cache } from 'src/common';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/BLOCKCHAIN_NAME';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import { TransactionReceipt } from 'web3-eth';
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
@@ -33,6 +33,7 @@ type OneinchTradeStruct = {
     disableMultihops: boolean;
     path: ReadonlyArray<Token>;
     gasFeeInfo?: GasFeeInfo | null;
+    data: string | null;
 };
 
 export class OneinchTrade extends InstantTrade {
@@ -55,7 +56,7 @@ export class OneinchTrade extends InstantTrade {
 
     private readonly httpClient = Injector.httpClient;
 
-    protected readonly contractAddress: string;
+    public readonly contractAddress: string;
 
     public readonly from: PriceTokenAmount;
 
@@ -74,6 +75,8 @@ export class OneinchTrade extends InstantTrade {
     public readonly path: ReadonlyArray<Token>;
 
     public readonly wrappedPath: ReadonlyArray<Token>;
+
+    public readonly transactionData: string | null;
 
     public get type(): TradeType {
         return OneinchTrade.oneInchTradeTypes[
@@ -104,7 +107,7 @@ export class OneinchTrade extends InstantTrade {
         this.slippageTolerance = oneinchTradeStruct.slippageTolerance;
         this.disableMultihops = oneinchTradeStruct.disableMultihops;
         this.path = oneinchTradeStruct.path;
-
+        this.transactionData = oneinchTradeStruct.data;
         this.wrappedPath = createTokenNativeAddressProxyInPathStartAndEnd(
             this.path,
             oneinchApiParams.nativeAddress

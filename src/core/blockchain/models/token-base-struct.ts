@@ -1,6 +1,6 @@
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 
 export interface TokenBaseStruct {
     address: string;
-    blockchain: BLOCKCHAIN_NAME;
+    blockchain: BlockchainName;
 }

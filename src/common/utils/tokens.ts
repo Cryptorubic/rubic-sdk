@@ -3,14 +3,14 @@ import { Token } from '@core/blockchain/tokens/token';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import BigNumber from 'bignumber.js';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 
 export async function getPriceTokensFromInputTokens(
     from:
         | Token
         | {
               address: string;
-              blockchain: BLOCKCHAIN_NAME;
+              blockchain: BlockchainName;
           },
     fromAmount: string,
     to:
@@ -18,7 +18,7 @@ export async function getPriceTokensFromInputTokens(
         | string
         | {
               address: string;
-              blockchain: BLOCKCHAIN_NAME;
+              blockchain: BlockchainName;
           }
 ): Promise<{
     from: PriceTokenAmount;

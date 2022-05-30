@@ -1,8 +1,8 @@
 import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BLOCKCHAIN_NAME, BlockchainName } from '@core/blockchain/models/blockchain-name';
 import { TokenStruct } from '@core/blockchain/tokens/token';
 
-export type NativeTokensList = Record<BLOCKCHAIN_NAME, Omit<TokenStruct, 'blockchain'>>;
+export type NativeTokensList = Record<BlockchainName, Omit<TokenStruct, 'blockchain'>>;
 
 export const nativeTokensList: NativeTokensList = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
@@ -101,5 +101,11 @@ export const nativeTokensList: NativeTokensList = {
         name: 'FTM',
         symbol: 'FTM',
         decimals: 18
+    },
+    [BLOCKCHAIN_NAME.TELOS]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'TLOS',
+        symbol: 'TLOS',
+        decimals: 24
     }
 };

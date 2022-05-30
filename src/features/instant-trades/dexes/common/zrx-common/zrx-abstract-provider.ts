@@ -12,6 +12,7 @@ import { ZrxSwapCalculationOptions } from '@features/instant-trades/dexes/common
 import BigNumber from 'bignumber.js';
 import { ZrxTrade } from '@features/instant-trades/dexes/common/zrx-common/zrx-trade';
 import { Cache } from 'src/common';
+import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 
 export abstract class ZrxAbstractProvider extends InstantTradeProvider {
     protected readonly gasMargin = 1.4;
@@ -19,7 +20,9 @@ export abstract class ZrxAbstractProvider extends InstantTradeProvider {
     private readonly defaultOptions: Required<ZrxSwapCalculationOptions> = {
         gasCalculation: 'calculate',
         slippageTolerance: 0.02,
-        affiliateAddress: null
+        affiliateAddress: null,
+        wrappedAddress: EMPTY_ADDRESS,
+        fromAddress: ''
     };
 
     @Cache

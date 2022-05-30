@@ -2,12 +2,10 @@ export function combineOptions<T extends object>(
     options: Partial<T> | undefined,
     defaultOptions: Required<T>
 ): Required<T> {
-    return Object.fromEntries(
-        Object.entries(defaultOptions).map(([key, value]) => [
-            key,
-            options?.[key as keyof T] ? options?.[key as keyof T] : value
-        ])
-    ) as Required<T>;
+    return {
+        ...defaultOptions,
+        ...options
+    };
 }
 
 export function deadlineMinutesTimestamp(deadlineMinutes: number): number {

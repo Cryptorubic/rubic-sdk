@@ -1,10 +1,10 @@
 import { HttpClient } from '@common/models/http-client';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import Web3 from 'web3';
 import { provider } from 'web3-core';
 
 export interface Configuration {
-    readonly rpcProviders: Partial<Record<BLOCKCHAIN_NAME, RpcProvider>>;
+    readonly rpcProviders: Partial<Record<BlockchainName, RpcProvider>>;
     readonly walletProvider?: WalletProvider;
     readonly httpClient?: HttpClient;
     readonly providerAddress?: string;

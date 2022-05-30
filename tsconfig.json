@@ -44,5 +44,9 @@
     "allowJs": true
   },
   "include": ["src"],
-  "exclude": ["__tests__" ,"node_modules", "lib", "types"]
+  "exclude": ["__tests__" ,"node_modules", "lib", "types"],
+  "typedocOptions": {
+    "entryPoints": ["src/index.ts"],
+    "out": "docs"
+  }
 }
