@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
 import { ZrxAbstractProvider } from '@features/instant-trades/dexes/common/zrx-common/zrx-abstract-provider';
 import { TRADE_TYPE, TradeType } from 'src/features';
 

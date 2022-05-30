@@ -110,7 +110,7 @@ describe('p-timeout tests', () => {
             customTimers: {
                 setTimeout: function (handler: () => void, timeout?: number) {
                     setTimeoutSpy(timeout);
-                    return setTimeout(handler as unknown as () => void, timeout);
+                    return setTimeout(handler as unknown as () => void, timeout || 1000);
                 } as typeof setTimeout,
                 clearTimeout(timeoutId) {
                     clearTimeoutSpy();

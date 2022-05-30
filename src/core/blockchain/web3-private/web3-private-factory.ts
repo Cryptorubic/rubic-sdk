@@ -1,7 +1,7 @@
 import { WrongChainIdError } from '@common/errors/provider/wrong-chain-id.error';
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { BlockchainsInfo } from '@core/blockchain/blockchains-info';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import { WalletConnectionConfiguration } from '@core/blockchain/models/wallet-connection-configuration';
 import { Web3Private } from '@core/blockchain/web3-private/web3-private';
 import { WalletProvider } from '@core/sdk/models/configuration';
@@ -14,7 +14,7 @@ export class Web3PrivateFactory {
 
     private address: string | undefined;
 
-    private blockchainName: BLOCKCHAIN_NAME | undefined;
+    private blockchainName: BlockchainName | undefined;
 
     public static async createWeb3Private(walletProvider?: WalletProvider): Promise<Web3Private> {
         if (!walletProvider) {

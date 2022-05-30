@@ -3,4 +3,5 @@ export interface SwapTransactionOptions {
     onApprove?: (hash: string | null) => void;
     gasPrice?: string;
     gasLimit?: string;
+    fromAddress?: string;
 }

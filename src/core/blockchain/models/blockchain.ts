@@ -1,8 +1,8 @@
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import { Token } from '@core/blockchain/tokens/token';
 
 export interface Blockchain {
     id: number;
-    name: BLOCKCHAIN_NAME;
+    name: BlockchainName;
     nativeCoin: Token;
 }

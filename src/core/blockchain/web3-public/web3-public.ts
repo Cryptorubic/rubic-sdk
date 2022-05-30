@@ -9,7 +9,7 @@ import {
     isBlockchainHealthcheckAvailable
 } from '@core/blockchain/constants/healthcheck';
 import { nativeTokensList } from '@core/blockchain/constants/native-tokens';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import { MULTICALL_ABI } from '@core/blockchain/web3-public/constants/multicall-abi';
 import { MULTICALL_ADDRESSES } from '@core/blockchain/web3-public/constants/multicall-addresses';
 import { BatchCall } from '@core/blockchain/web3-public/models/batch-call';
@@ -36,7 +36,7 @@ type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
  * To send transaction or execute contract method use {@link Web3Private}.
  */
 export class Web3Public {
-    private multicallAddresses: Record<BLOCKCHAIN_NAME, string> = MULTICALL_ADDRESSES;
+    private multicallAddresses: Record<BlockchainName, string> = MULTICALL_ADDRESSES;
 
     private readonly clearController: { clear: boolean } = { clear: false };
 
@@ -47,7 +47,7 @@ export class Web3Public {
      */
     constructor(
         private readonly web3: Web3,
-        private readonly blockchainName: BLOCKCHAIN_NAME,
+        private readonly blockchainName: BlockchainName,
         private httpClient?: HttpClient
     ) {}
 

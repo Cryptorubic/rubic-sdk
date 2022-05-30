@@ -1,5 +1,5 @@
 import { ERC20_TOKEN_ABI } from '@core/blockchain/constants/erc-20-abi';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BLOCKCHAIN_NAME, BlockchainName } from '@core/blockchain/models/blockchain-name';
 
 export const HEALTHCHECK = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
@@ -55,6 +55,12 @@ export const HEALTHCHECK = {
         contractAbi: ERC20_TOKEN_ABI,
         method: 'symbol',
         expected: 'USDT'
+    },
+    [BLOCKCHAIN_NAME.TELOS]: {
+        contractAddress: '0x4988a896b1227218e4A686fdE5EabdcAbd91571f',
+        contractAbi: ERC20_TOKEN_ABI,
+        method: 'symbol',
+        expected: 'USDT'
     }
 };
 
@@ -63,7 +69,7 @@ export type HealthcheckAvailableBlockchain = keyof typeof HEALTHCHECK;
 export const healthcheckAvailableBlockchains = Object.keys(HEALTHCHECK);
 
 export function isBlockchainHealthcheckAvailable(
-    blockchainName: BLOCKCHAIN_NAME
+    blockchainName: BlockchainName
 ): blockchainName is HealthcheckAvailableBlockchain {
     return healthcheckAvailableBlockchains.includes(blockchainName);
 }

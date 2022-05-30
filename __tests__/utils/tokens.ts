@@ -1,6 +1,7 @@
 import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
-import { BLOCKCHAIN_NAME } from 'src/core';
+import { BlockchainName } from 'src/core';
 import { Token } from 'src/core/blockchain/tokens/token';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
 
 export const TOKENS = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
@@ -100,7 +101,7 @@ export const TOKENS = {
     }
 };
 
-export const TOKENS_HOLDERS: Partial<Record<BLOCKCHAIN_NAME, Record<string, string>>> = {
+export const TOKENS_HOLDERS: Partial<Record<BlockchainName, Record<string, string>>> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
         '0xa4eed63db85311e22df4473f87ccfc3dadcfa3e3': '0x0541f3300307984984a587aeb7c34139e19124fa', // RBC
         '0xdac17f958d2ee523a2206206994597c13d831ec7': '0x5754284f345afc66a98fbb0a0afe71e0f007b949' // USDT
