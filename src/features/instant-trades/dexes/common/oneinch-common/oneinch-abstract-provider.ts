@@ -136,10 +136,10 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         path: Token[];
         data: string | null;
     }> {
-        const isDefaultWethAddress = options.wrappedAddress === oneinchApiParams.nativeAddress;
+        const isDefaultWrappedAddress = options.wrappedAddress === oneinchApiParams.nativeAddress;
         const isNative = from.isNative || from.address === oneinchApiParams.nativeAddress;
         const fromTokenAddress =
-            isNative && !isDefaultWethAddress ? options.wrappedAddress : from.address;
+            isNative && !isDefaultWrappedAddress ? options.wrappedAddress : from.address;
         const quoteTradeParams: OneinchQuoteRequest = {
             params: {
                 fromTokenAddress,
