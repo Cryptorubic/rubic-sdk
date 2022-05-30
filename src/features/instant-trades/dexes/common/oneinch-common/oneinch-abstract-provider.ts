@@ -83,12 +83,12 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
     ): Promise<OneinchTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
-        const fromClone = createTokenNativeAddressProxy(from, oneinchApiParams.nativeAddress);
+        const fromTokenClone = createTokenNativeAddressProxy(from, oneinchApiParams.nativeAddress);
         const toTokenClone = createTokenNativeAddressProxy(toToken, oneinchApiParams.nativeAddress);
 
         const supportedTokensAddresses = await this.getSupportedTokensByBlockchain();
         if (
-            !supportedTokensAddresses.includes(fromClone.address.toLowerCase()) ||
+            !supportedTokensAddresses.includes(fromTokenClone.address.toLowerCase()) ||
             !supportedTokensAddresses.includes(toTokenClone.address.toLowerCase())
         ) {
             throw new RubicSdkError("Oneinch doesn't support this tokens");
@@ -97,7 +97,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         const [contractAddress, { toTokenAmountInWei, estimatedGas, path, data }] =
             await Promise.all([
                 this.loadContractAddress(),
-                this.getTradeInfo(fromClone, toTokenClone, fullOptions)
+                this.getTradeInfo(fromTokenClone, toTokenClone, fullOptions)
             ]);
         path[0] = from;
         path[path.length - 1] = toToken;
@@ -136,12 +136,13 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         path: Token[];
         data: string | null;
     }> {
+        const isDefaultWethAddress = options.wrappedAddress === oneinchApiParams.nativeAddress;
+        const isNative = from.isNative || from.address === oneinchApiParams.nativeAddress;
+        const fromTokenAddress =
+            isNative && !isDefaultWethAddress ? options.wrappedAddress : from.address;
         const quoteTradeParams: OneinchQuoteRequest = {
             params: {
-                fromTokenAddress:
-                    options.wrappedAddress !== oneinchApiParams.nativeAddress
-                        ? options.wrappedAddress
-                        : from.address,
+                fromTokenAddress,
                 toTokenAddress: toToken.address,
                 amount: from.stringWeiAmount,
                 mainRouteParts: options.disableMultihops ? '1' : undefined
