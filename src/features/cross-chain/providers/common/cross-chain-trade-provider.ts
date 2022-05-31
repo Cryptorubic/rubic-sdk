@@ -148,7 +148,7 @@ export abstract class CrossChainTradeProvider {
         fromTrade: CrossChainContractTrade,
         transitTokenAmount: BigNumber
     ): Promise<BigNumber> {
-        const transitToken = await fromTrade.contract.getTransitToken();
+        const transitToken = await fromTrade.contract.getTransitToken(fromTrade.fromToken);
         if (
             compareAddresses(fromTrade.fromToken.address, transitToken.address) ||
             transitTokenAmount.eq(0)

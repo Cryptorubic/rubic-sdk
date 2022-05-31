@@ -125,7 +125,7 @@ export abstract class CrossChainTrade {
         );
     }
 
-    public abstract swap(options: SwapTransactionOptions): Promise<string | never>;
+    public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         const { gasLimit, gasPrice } = options;

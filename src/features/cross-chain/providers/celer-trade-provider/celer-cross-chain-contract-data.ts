@@ -53,8 +53,8 @@ export class CelerCrossChainContractData extends CrossChainContractData {
     }
 
     @Cache
-    public async getTransitToken(from: PriceToken): Promise<Token> {
-        const blockchain = from.blockchain as CelerCrossChainSupportedBlockchain;
+    public async getTransitToken(token: PriceToken): Promise<Token> {
+        const blockchain = token.blockchain as CelerCrossChainSupportedBlockchain;
         const address = this.getTransitTokenAddressBasedOnBlockchain(blockchain);
         return Token.createToken({
             address,

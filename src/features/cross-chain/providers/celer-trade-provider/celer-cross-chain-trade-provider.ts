@@ -70,6 +70,8 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             fromTransitToken,
             slippages.fromSlippageTolerance
         );
+        await this.checkMinMaxAmountsErrors(fromTrade);
+
         const celerSlippage = await this.fetchCelerSlippage(
             fromBlockchain,
             toBlockchain,
