@@ -53,6 +53,10 @@ export abstract class CrossChainTrade {
 
     protected abstract readonly toWeb3Public: Web3Public;
 
+    public abstract readonly to: PriceTokenAmount;
+
+    public abstract readonly from: PriceTokenAmount;
+
     protected get walletAddress(): string {
         return Injector.web3Private.address;
     }
