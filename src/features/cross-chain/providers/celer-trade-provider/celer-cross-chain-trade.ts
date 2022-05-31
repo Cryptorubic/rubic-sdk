@@ -76,9 +76,9 @@ export class CelerCrossChainTrade extends CrossChainTrade {
 
     private readonly transitFeeToken: PriceTokenAmount;
 
-    private readonly from: PriceTokenAmount;
+    public readonly from: PriceTokenAmount;
 
-    private readonly to: PriceTokenAmount;
+    public readonly to: PriceTokenAmount;
 
     public readonly toTokenAmountMin: BigNumber;
 
