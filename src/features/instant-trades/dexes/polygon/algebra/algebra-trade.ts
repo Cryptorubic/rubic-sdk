@@ -53,7 +53,7 @@ export class AlgebraTrade extends UniswapV3AlgebraAbstractTrade {
     protected getSwapRouterExactInputMethodData(walletAddress: string): MethodData {
         const amountParams = this.getAmountParams();
 
-        if (this.route.path.length === 2) {
+        if (this.route.path.length === 2 && this.route?.path?.[0] && this.route?.path?.[1]) {
             const methodName = this.exact === 'input' ? 'exactInputSingle' : 'exactOutputSingle';
 
             return {

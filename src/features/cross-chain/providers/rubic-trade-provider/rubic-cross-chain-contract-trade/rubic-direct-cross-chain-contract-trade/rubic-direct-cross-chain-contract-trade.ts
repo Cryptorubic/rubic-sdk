@@ -35,6 +35,10 @@ export class RubicDirectCrossChainContractTrade extends RubicCrossChainContractT
         const exactTokensForTokens = true;
         const swapTokenWithFee = false;
 
+        if (!methodArguments?.[0]) {
+            throw new Error('[RUBIC SDK] Method arguments array length has to be bigget than 0.');
+        }
+
         methodArguments[0].push(exactTokensForTokens, swapTokenWithFee);
     }
 }

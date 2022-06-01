@@ -121,6 +121,10 @@ export abstract class RubicCrossChainContractTrade extends CrossChainContractTra
             options.swapTokenWithFee
         );
 
+        if (!methodArguments?.[0]) {
+            throw new Error('[RUBIC SDK] Method arguments have to be defined.');
+        }
+
         methodArguments[0].push(swapToUserMethodSignature);
 
         return methodArguments;

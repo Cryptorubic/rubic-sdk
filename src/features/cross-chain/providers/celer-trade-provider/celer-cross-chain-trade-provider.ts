@@ -298,6 +298,10 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             return sortedResults[0];
         });
 
+        if (!bestTrade) {
+            throw new Error(`[RUBIC SDK] Can't calculate best trade for with current params.`);
+        }
+
         return new CelerItCrossChainContractTrade(
             blockchain,
             contract,

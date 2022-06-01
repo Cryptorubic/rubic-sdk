@@ -76,7 +76,7 @@ export class CoingeckoApi {
 
         try {
             const response = await pTimeout(
-                this.httpClient.get<{ [key: string]: { usd: string } }>(
+                this.httpClient.get<{ [key: typeof coingeckoId]: { usd: string } }>(
                     `${API_BASE_URL}simple/price`,
                     {
                         params: { ids: coingeckoId, vs_currencies: 'usd' }
@@ -84,8 +84,12 @@ export class CoingeckoApi {
                 ),
                 3_000
             );
+            const amount = response?.[coingeckoId]?.usd;
+            if (!amount) {
+                throw new Error('[RUBIC SDK] Coingecko amoun has to be defined.');
+            }
 
-            return new BigNumber(response[coingeckoId].usd);
+            return new BigNumber(amount);
         } catch (err: unknown) {
             if (err instanceof TimeoutError) {
                 console.debug('[RUBIC SDK]: Timeout Error. Coingecko cannot retrieve token price');

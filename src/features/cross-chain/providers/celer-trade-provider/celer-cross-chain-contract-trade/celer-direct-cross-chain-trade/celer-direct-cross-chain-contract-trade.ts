@@ -39,6 +39,10 @@ export class CelerDirectCrossChainContractTrade extends CelerCrossChainContractT
         const exactTokensForTokens = true;
         const swapTokenWithFee = false;
 
+        if (!methodArguments?.[0]) {
+            throw new Error('[RUBIC SDK] Wrong method arguments. Arguments array is unknown.');
+        }
+
         methodArguments[0].push(exactTokensForTokens, swapTokenWithFee);
     }
 

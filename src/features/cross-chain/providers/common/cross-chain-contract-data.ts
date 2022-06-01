@@ -16,7 +16,11 @@ export abstract class CrossChainContractData {
     }
 
     public getProvider(providerIndex: number): CrossChainSupportedInstantTradeProvider {
-        return this.providersData[providerIndex].provider;
+        const provider = this.providersData?.[providerIndex]?.provider;
+        if (!provider) {
+            throw new Error('[RUBIC SDK] Provider has to be defined.');
+        }
+        return provider;
     }
 
     public abstract getNumOfBlockchain(): Promise<number>;
