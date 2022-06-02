@@ -23,6 +23,9 @@ export function getRubicCrossChainContract(
     }
 
     const pureProvidersData = crossChainTradeProvidersData[blockchain];
+    if (!pureProvidersData) {
+        throw new Error('[RUBIC SDK] Providers data has to be defined.');
+    }
     const contractAddress = rubicCrossChainContractsAddresses[blockchain];
     const providersData = pureProvidersData.map(providerData => ({
         // @ts-ignore Can't create instance of abstract class.

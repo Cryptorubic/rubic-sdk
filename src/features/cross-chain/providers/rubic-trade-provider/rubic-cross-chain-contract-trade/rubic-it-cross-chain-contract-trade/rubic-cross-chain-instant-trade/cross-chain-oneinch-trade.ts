@@ -16,6 +16,9 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
     constructor(private readonly instantTrade: OneinchTrade) {}
 
     public getFirstPath(): string {
+        if (!this.instantTrade.path?.[0]) {
+            throw new Error('[RUBIC SDK] Instant trade path has to be defined.');
+        }
         return this.instantTrade.path[0].address;
     }
 
@@ -28,6 +31,9 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
         walletAddress: string
     ): Promise<void> {
         const { data } = await this.instantTrade.encode({ fromAddress: walletAddress });
+        if (!methodArguments?.[0]) {
+            throw new Error('[RUBIC SDK] Method arguments have to be defined.');
+        }
         methodArguments[0].push(data);
     }
 
@@ -42,6 +48,9 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
         const fromBlockchain = this.instantTrade.from
             .blockchain as CelerCrossChainSupportedBlockchain;
         const firstToken = isOneInchNative ? wrappedNative[fromBlockchain] : tokenIn;
+        if (!firstToken) {
+            throw new Error('[RUBIC SDK] First token has to be defined');
+        }
 
         const path = [firstToken, restPath.at(-1) as string];
 

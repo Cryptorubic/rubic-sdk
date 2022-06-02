@@ -205,7 +205,12 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         toToken: Token,
         oneInchTrade: OneinchSwapResponse | OneinchQuoteResponse
     ): Promise<Token[]> {
-        const addressesPath = oneInchTrade.protocols[0].map(protocol => protocol[0].toTokenAddress);
+        const addressesPath = oneInchTrade.protocols[0].map(protocol => {
+            if (!protocol?.[0]) {
+                throw new Error('[RUBIC SDK] Protocol[0] has to be defined.');
+            }
+            return protocol[0].toTokenAddress;
+        });
         addressesPath.pop();
 
         const tokensPathWithoutNative = await Token.createTokens(
@@ -219,6 +224,10 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
             }
 
             const token = tokensPathWithoutNative[tokensPathWithoutNativeIndex];
+            if (!token) {
+                throw new Error('[RUBIC SDK] Token has to be defined.');
+            }
+
             tokensPathWithoutNativeIndex++;
 
             return token;

@@ -24,6 +24,10 @@ export class CrossChainAlgebraTrade implements CrossChainInstantTrade {
     public async modifyArgumentsForProvider(methodArguments: unknown[][]): Promise<void> {
         const exactTokensForTokens = true;
 
+        if (!methodArguments?.[0]) {
+            throw new Error('[RUBIC SDK] Wrong method arguments. Arguments array is unknown.');
+        }
+
         methodArguments[0].push(exactTokensForTokens);
     }
 

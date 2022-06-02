@@ -29,6 +29,7 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "useUnknownInCatchVariables": false,
+    "noUncheckedIndexedAccess": true,
     "outDir": "lib",
     "baseUrl": ".",
     "paths": {

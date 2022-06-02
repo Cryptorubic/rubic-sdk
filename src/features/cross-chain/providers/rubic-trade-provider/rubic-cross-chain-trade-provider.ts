@@ -166,10 +166,16 @@ export class RubicCrossChainTradeProvider extends CrossChainTradeProvider {
             .filter(notNull)
             .sort((a, b) => a.comparedTo(b));
 
-        if (type === 'min') {
+        if (type === 'min' && sortedAmounts?.[0]) {
             return sortedAmounts[0];
         }
-        return sortedAmounts[sortedAmounts.length - 1];
+
+        const amount = sortedAmounts?.[sortedAmounts.length - 1];
+        if (!amount) {
+            throw new Error('[RUBIC SDK] Amount has to be defined.');
+        }
+
+        return amount;
     }
 
     protected async calculateBestTrade(
@@ -225,6 +231,10 @@ export class RubicCrossChainTradeProvider extends CrossChainTradeProvider {
             }
             return sortedResults[0];
         });
+
+        if (!bestTrade) {
+            throw new Error('[RUBIC SDK] Best trade has to be defined.');
+        }
 
         return new RubicItCrossChainContractTrade(
             blockchain,

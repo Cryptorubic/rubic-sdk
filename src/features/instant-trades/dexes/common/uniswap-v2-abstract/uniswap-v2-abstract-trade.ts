@@ -316,9 +316,14 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             methodName = 'tokensToEth';
         }
 
-        const gasLimit = (<typeof UniswapV2AbstractTrade>this.constructor).defaultEstimatedGasInfo[
-            methodName
-        ][transitTokensNumber].toFixed(0);
+        const constructor = <typeof UniswapV2AbstractTrade>this.constructor;
+        const gasLimitAmount =
+            constructor.defaultEstimatedGasInfo[methodName]?.[transitTokensNumber];
+        if (!gasLimitAmount) {
+            throw new Error('[RUBIC SDK] Gas limit has to be defined.');
+        }
+
+        const gasLimit = gasLimitAmount.toFixed(0);
         return new BigNumber(gasLimit);
     }
 

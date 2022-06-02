@@ -46,8 +46,13 @@ export class Token {
                 throw new RubicSdkError('Error while loading token');
             }
 
+            const address = tokensAddresses?.[index];
+            if (!address) {
+                throw new RubicSdkError('[RUBIC SDK] Address has to be defined.');
+            }
+
             return new Token({
-                address: tokensAddresses[index],
+                address,
                 blockchain,
                 name: tokenInfo.name,
                 symbol: tokenInfo.symbol,

@@ -15,6 +15,7 @@ import { SwapManagerCrossChainCalculationOptions } from '@features/cross-chain/m
 import pTimeout from '@common/utils/p-timeout';
 import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
 import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
+import { hasLengthAtLeast } from '@features/instant-trades/utils/type-guards';
 import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
@@ -86,6 +87,9 @@ export class CrossChainManager {
         options: RequiredSwapManagerCalculationOptions
     ): Promise<CrossChainTrade> {
         const trades = await this.calculateTradeFromTokens(from, to, this.getFullOptions(options));
+        if (!hasLengthAtLeast(trades, 1)) {
+            throw new Error('[RUBIC SDK] Trades array has to be defined');
+        }
         return trades.sort((firstTrade, secondTrade) =>
             firstTrade.toTokenAmountMin.gt(secondTrade.toTokenAmountMin) ? 1 : -1
         )[0];
@@ -117,8 +121,10 @@ export class CrossChainManager {
                 return null;
             }
         });
-
-        const results = await Promise.all(calculationPromises);
-        return results.filter(notNull);
+        const results = (await Promise.all(calculationPromises)).filter(notNull);
+        if (!results?.length) {
+            throw new Error('[RUBIC_SDK] No success providers calculation for the trade.');
+        }
+        return results;
     }
 }
