@@ -81,7 +81,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
         poolsPath: LiquidityPool[];
         methodData: MethodData;
     } {
-        if (poolsPath.length === 1) {
+        if (poolsPath.length === 1 && poolsPath?.[0]) {
             const methodName =
                 exact === 'input' ? 'quoteExactInputSingle' : 'quoteExactOutputSingle';
             const sqrtPriceLimitX96 = 0;
@@ -226,12 +226,16 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
 
         return poolsAddresses
             .map((poolAddress, index) => {
+                const poolMethodArguments = getPoolsMethodArguments?.[index];
+                if (!poolMethodArguments) {
+                    throw new Error('[RUBIC SDK] Method arguments for pool have to be defined.');
+                }
                 if (!Web3Pure.isZeroAddress(poolAddress)) {
                     return new LiquidityPool(
                         poolAddress,
-                        getPoolsMethodArguments[index].tokenA,
-                        getPoolsMethodArguments[index].tokenB,
-                        getPoolsMethodArguments[index].fee
+                        poolMethodArguments.tokenA,
+                        poolMethodArguments.tokenB,
+                        poolMethodArguments.fee
                     );
                 }
                 return null;
@@ -277,10 +281,14 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
             .then(results => {
                 return results
                     .map((result, index) => {
+                        const pool = quoterMethodsData?.[index];
+                        if (!pool) {
+                            throw new Error('[RUBIC SDK] Pool has to be defined');
+                        }
                         if (result.success) {
                             return {
                                 outputAbsoluteAmount: new BigNumber(result.output![0]),
-                                poolsPath: quoterMethodsData[index].poolsPath,
+                                poolsPath: pool.poolsPath,
                                 initialTokenAddress: from.address
                             };
                         }

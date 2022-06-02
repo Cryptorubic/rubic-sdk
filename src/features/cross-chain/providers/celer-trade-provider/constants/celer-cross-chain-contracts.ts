@@ -26,6 +26,9 @@ export function getCelerCrossChainContract(
     const pureProvidersData = crossChainTradeProvidersData[blockchain];
     const swapContractAddress = celerCrossChainContractsAddresses[blockchain];
     const mainContractAddress = rubicCrossChainContractsAddresses[blockchain];
+    if (!pureProvidersData) {
+        throw new Error('[RUBIC SDK] Cross-Chain trade providers data has to be defined.');
+    }
     const providersData = pureProvidersData.map(providerData => ({
         // @ts-ignore Can't create instance of abstract class.
         provider: new providerData.ProviderClass(),

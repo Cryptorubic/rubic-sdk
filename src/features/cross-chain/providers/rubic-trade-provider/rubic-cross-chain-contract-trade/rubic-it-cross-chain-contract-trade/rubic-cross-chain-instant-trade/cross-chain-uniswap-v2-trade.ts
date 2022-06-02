@@ -25,6 +25,10 @@ export class CrossChainUniswapV2Trade implements CrossChainInstantTrade {
     ): Promise<void> {
         const exactTokensForTokens = true;
 
+        if (!methodArguments?.[0]) {
+            throw new Error('[RUBIC SDK] Method arguments[0] has to be defined');
+        }
+
         methodArguments[0].push(exactTokensForTokens);
         methodArguments[0].push(swapTokenWithFee);
     }

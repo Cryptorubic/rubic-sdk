@@ -19,6 +19,7 @@ import { UniswapV2AbstractTrade } from '@features/instant-trades/dexes/common/un
 import BigNumber from 'bignumber.js';
 import { Cache } from 'src/common';
 import { Exact } from '@features/instant-trades/models/exact';
+import { hasLengthAtLeast } from '@features/instant-trades/utils/type-guards';
 
 export interface PathFactoryStruct {
     readonly from: PriceToken;
@@ -95,6 +96,9 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         }
 
         if (this.options.gasCalculation === 'disabled') {
+            if (!hasLengthAtLeast(routes, 1)) {
+                throw new Error('[RUBIC SDK] Routes array length has to be bigger than 0');
+            }
             return {
                 route: routes[0]
             };
@@ -124,6 +128,9 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             const routesWithProfit: UniswapCalculatedInfoWithProfit[] = routes.map(
                 (route, index) => {
                     const estimatedGas = gasLimits[index];
+                    if (!estimatedGas) {
+                        throw new Error('[RUBIC SDK] Estimated gas has to be defined.');
+                    }
                     const gasFeeInUsd = estimatedGas.multipliedBy(gasPriceInUsd);
                     let profit: BigNumber;
                     if (this.exact === 'input') {
@@ -149,6 +156,10 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
                 b.profit.comparedTo(a.profit)
             );
 
+            if (!sortedByProfitRoutes?.[0]) {
+                throw new Error('[RUBIC SDK] Profit routes array length has to be bigger than 0.');
+            }
+
             return sortedByProfitRoutes[0];
         }
 
@@ -156,6 +167,9 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
         if (this.walletAddress) {
             const callData = this.getGasRequests(routes.slice(0, 1))[0];
+            if (!callData) {
+                throw new Error('[RUBIC SDK] Call data has to be defined.');
+            }
             const estimatedGas = await this.web3Public.getEstimatedGas(
                 this.InstantTradeClass.contractAbi,
                 this.InstantTradeClass.getContractAddress(this.from.blockchain),
@@ -167,6 +181,10 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             if (estimatedGas?.isFinite()) {
                 gasLimit = estimatedGas;
             }
+        }
+
+        if (!routes?.[0]) {
+            throw new Error('[RUBIC SDK] Routes length has to be bigger than 0.');
         }
 
         return {
@@ -248,20 +266,26 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             routesMethodArguments
         );
 
-        return responses
-            .map((response, index) => {
-                if (!response.success || !response.output) {
-                    return null;
-                }
-                const { amounts } = response.output;
-                const amount = new BigNumber(
-                    this.exact === 'input' ? amounts[amounts.length - 1] : amounts[0]
-                );
-                return {
-                    outputAbsoluteAmount: amount,
-                    path: routesPaths[index]
-                };
-            })
-            .filter(notNull);
+        const tokens = responses.map((response, index) => {
+            if (!response.success || !response.output) {
+                return null;
+            }
+            const { amounts } = response.output;
+
+            const numberAmount = this.exact === 'input' ? amounts[amounts.length - 1] : amounts[0];
+            if (!numberAmount) {
+                throw new Error('[RUBIC SDK] Amount has to be defined.');
+            }
+            const outputAbsoluteAmount = new BigNumber(numberAmount);
+
+            const path = routesPaths?.[index];
+            if (!path) {
+                throw new Error('[RUBIC SDK] Path has to be defined.');
+            }
+
+            return { outputAbsoluteAmount, path };
+        });
+
+        return tokens.filter(notNull);
     }
 }

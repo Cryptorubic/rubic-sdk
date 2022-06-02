@@ -18,12 +18,20 @@ export abstract class CrossChainContractTrade {
 
     @Cache
     public get provider(): CrossChainSupportedInstantTradeProvider {
-        return this.contract.providersData[this.providerIndex].provider;
+        const provider = this.contract.providersData?.[this.providerIndex]?.provider;
+        if (!provider) {
+            throw new Error('[RUBIC SDK] Provider has to be defined.');
+        }
+        return provider;
     }
 
     @Cache
     protected get providerData(): ProviderData {
-        return this.contract.providersData[this.providerIndex];
+        const providersData = this.contract.providersData?.[this.providerIndex];
+        if (!providersData) {
+            throw new Error('[RUBIC SDK] Providers data has to be defined.');
+        }
+        return providersData;
     }
 
     protected constructor(

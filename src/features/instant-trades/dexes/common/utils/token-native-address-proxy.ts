@@ -22,7 +22,15 @@ export function createTokenNativeAddressProxyInPathStartAndEnd<T extends Token>(
     path: T[] | ReadonlyArray<T>,
     wrappedNativeAddress: string
 ): ReadonlyArray<T> {
+    if (!path?.[0]) {
+        throw new Error('');
+    }
+    const tokenAddress = path[path.length - 1];
+    if (!tokenAddress) {
+        throw new Error('[RUBIC SDK] Token has to be defined.');
+    }
+
     return [createTokenNativeAddressProxy(path[0], wrappedNativeAddress)]
         .concat(path.slice(1, path.length - 1))
-        .concat(createTokenNativeAddressProxy(path[path.length - 1], wrappedNativeAddress));
+        .concat(createTokenNativeAddressProxy(tokenAddress, wrappedNativeAddress));
 }
