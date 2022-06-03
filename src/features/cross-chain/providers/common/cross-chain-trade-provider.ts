@@ -1,7 +1,6 @@
 import { CrossChainTradeType } from 'src/features';
 import { BlockchainName, Token, Web3Pure } from 'src/core';
 import { CrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
-import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
 import { CrossChainContractData } from '@features/cross-chain/providers/common/cross-chain-contract-data';
 import { CrossChainContractTrade } from '@features/cross-chain/providers/common/cross-chain-contract-trade';
 import { compareAddresses, InsufficientLiquidityError } from 'src/common';
@@ -15,6 +14,7 @@ import { CrossChainMaxAmountError } from '@common/errors/cross-chain/cross-chain
 import { MinMaxAmounts } from '@features/cross-chain/models/min-max-amounts';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { ItCalculatedTrade } from '@features/cross-chain/providers/common/models/it-calculated-trade';
+import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
 
 export abstract class CrossChainTradeProvider {
     public abstract type: CrossChainTradeType;

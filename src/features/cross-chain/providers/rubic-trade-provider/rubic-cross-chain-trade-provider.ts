@@ -13,7 +13,6 @@ import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { RubicCrossChainTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-trade';
 import { Token } from '@core/blockchain/tokens/token';
 import { CrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
-import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
 import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
 import { RubicDirectCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade';
 import { RubicCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-cross-chain-contract-trade';
@@ -41,7 +40,7 @@ export class RubicCrossChainTradeProvider extends CrossChainTradeProvider {
         from: PriceTokenAmount,
         to: PriceToken,
         options: CrossChainOptions
-    ): Promise<CrossChainTrade> {
+    ): Promise<RubicCrossChainTrade> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = to.blockchain;
         if (

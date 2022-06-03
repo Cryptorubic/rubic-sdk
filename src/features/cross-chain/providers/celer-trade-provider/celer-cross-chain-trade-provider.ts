@@ -10,7 +10,6 @@ import {
 } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
 import { getCelerCrossChainContract } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contracts';
 import { CrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
-import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
 import { CelerCrossChainTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade';
 import BigNumber from 'bignumber.js';
 import { compareAddresses, LowSlippageError, notNull, NotSupportedBlockchain } from 'src/common';
@@ -41,7 +40,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
         from: PriceTokenAmount,
         to: PriceToken,
         options: CrossChainOptions
-    ): Promise<CrossChainTrade> {
+    ): Promise<CelerCrossChainTrade> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = to.blockchain;
         if (

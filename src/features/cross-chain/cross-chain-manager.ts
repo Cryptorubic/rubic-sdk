@@ -13,9 +13,9 @@ import { CrossChainTradeType } from 'src/features';
 import { MarkRequired } from 'ts-essentials';
 import { SwapManagerCrossChainCalculationOptions } from '@features/cross-chain/models/swap-manager-cross-chain-options';
 import pTimeout from '@common/utils/p-timeout';
-import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
 import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
 import { hasLengthAtLeast } from '@features/instant-trades/utils/type-guards';
+import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
 import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
@@ -91,7 +91,7 @@ export class CrossChainManager {
             throw new Error('[RUBIC SDK] Trades array has to be defined');
         }
         return trades.sort((firstTrade, secondTrade) =>
-            firstTrade.toTokenAmountMin.gt(secondTrade.toTokenAmountMin) ? 1 : -1
+            firstTrade.to.tokenAmount.comparedTo(secondTrade.to.tokenAmount)
         )[0];
     }
 
