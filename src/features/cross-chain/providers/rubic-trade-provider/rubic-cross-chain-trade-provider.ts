@@ -10,7 +10,7 @@ import { BlockchainName } from 'src/core';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { RubicCrossChainTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-trade';
-import { CrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
+import { RequiredCrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
 import { RubicDirectCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade';
 import { RubicCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-cross-chain-contract-trade';
 import { RubicItCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
@@ -37,7 +37,7 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
     public async calculate(
         from: PriceTokenAmount,
         to: PriceToken,
-        options: CrossChainOptions
+        options: RequiredCrossChainOptions
     ): Promise<RubicCrossChainTrade> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = to.blockchain;

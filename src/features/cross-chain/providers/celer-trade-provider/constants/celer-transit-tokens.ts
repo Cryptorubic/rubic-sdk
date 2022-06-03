@@ -31,7 +31,6 @@ export const celerTransitTokens: Record<CelerCrossChainSupportedBlockchain, Toke
         symbol: 'USDC.e',
         decimals: 6
     },
-
     [BLOCKCHAIN_NAME.FANTOM]: {
         blockchain: BLOCKCHAIN_NAME.FANTOM,
         address: '0x04068DA6C83AFCFA0e13ba15A6696662335D5B75',

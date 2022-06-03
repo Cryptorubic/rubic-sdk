@@ -10,7 +10,6 @@ import { Mutable } from '@common/utils/types/mutable';
 import { CelerCrossChainTradeProvider } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade-provider';
 import { CcrTypedTradeProviders } from '@features/cross-chain/models/typed-trade-provider';
 import { CrossChainTradeType } from 'src/features';
-import { MarkRequired } from 'ts-essentials';
 import { SwapManagerCrossChainCalculationOptions } from '@features/cross-chain/models/swap-manager-cross-chain-options';
 import pTimeout from '@common/utils/p-timeout';
 import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
@@ -18,15 +17,14 @@ import { hasLengthAtLeast } from '@features/instant-trades/utils/type-guards';
 import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
 import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 
-type RequiredSwapManagerCalculationOptions = MarkRequired<
-    SwapManagerCrossChainCalculationOptions,
-    'timeout' | 'disabledProviders'
->;
+type RequiredSwapManagerCalculationOptions = Required<SwapManagerCrossChainCalculationOptions>;
 
 export class CrossChainManager {
     public static readonly defaultCalculationTimeout = 360_000;
 
     private static readonly defaultSlippageTolerance = 0.02;
+
+    private static readonly defaultDeadline = 20;
 
     private tradeProviders: CcrTypedTradeProviders = [
         RubicCrossChainTradeProvider,
@@ -77,7 +75,10 @@ export class CrossChainManager {
             gasCalculation: 'enabled',
             disabledProviders: [],
             timeout: CrossChainManager.defaultCalculationTimeout,
-            providerAddress: this.providerAddress
+            providerAddress: this.providerAddress,
+            slippageTolerance: CrossChainManager.defaultSlippageTolerance * 2,
+            deadline: CrossChainManager.defaultDeadline,
+            fromAddress: ''
         });
     }
 
