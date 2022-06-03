@@ -1,5 +1,4 @@
 import { CROSS_CHAIN_TRADE_TYPE, TRADE_TYPE, TradeType } from 'src/features';
-import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
 import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
@@ -22,8 +21,9 @@ import { CelerItCrossChainContractTrade } from '@features/cross-chain/providers/
 import { CelerDirectCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
 import { CrossChainContractData } from '@features/cross-chain/providers/common/cross-chain-contract-data';
 import { wrappedNative } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/wrapped-native';
+import { CelerRubicCrossChainTradeProvider } from '@features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
 
-export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
+export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(
         blockchain: BlockchainName
     ): blockchain is CelerCrossChainSupportedBlockchain {
