@@ -1,17 +1,15 @@
 import { BlockchainName, Token, Web3Pure } from 'src/core';
-import { CrossChainContractData } from '@features/cross-chain/providers/common/cross-chain-contract-data';
-import { CrossChainContractTrade } from '@features/cross-chain/providers/common/cross-chain-contract-trade';
+import { CrossChainContractData } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
+import { CrossChainContractTrade } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import { compareAddresses, InsufficientLiquidityError } from 'src/common';
 import { RubicItCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
 import BigNumber from 'bignumber.js';
-import { CrossChainSupportedInstantTradeProvider } from '@features/cross-chain/providers/common/models/cross-chain-supported-instant-trade';
+import { CrossChainSupportedInstantTradeProvider } from '@features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { MinMaxAmountsErrors } from '@features/cross-chain/models/min-max-amounts-errors';
-import { CrossChainMinAmountError } from '@common/errors/cross-chain/cross-chain-min-amount-error';
-import { CrossChainMaxAmountError } from '@common/errors/cross-chain/cross-chain-max-amount-error';
 import { MinMaxAmounts } from '@features/cross-chain/models/min-max-amounts';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { ItCalculatedTrade } from '@features/cross-chain/providers/common/models/it-calculated-trade';
+import { ItCalculatedTrade } from '@features/cross-chain/providers/common/celer-rubic/models/it-calculated-trade';
 import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
 
 export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeProvider {
@@ -80,7 +78,9 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
             if (!minAmount?.isFinite()) {
                 throw new InsufficientLiquidityError();
             }
-            throw new CrossChainMinAmountError(minAmount, fromTrade.fromToken.symbol);
+            return {
+                minAmount
+            };
         }
 
         if (fromTransitTokenAmount.gt(maxTransitTokenAmount)) {
@@ -88,7 +88,9 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
                 fromTrade,
                 maxTransitTokenAmount
             );
-            throw new CrossChainMaxAmountError(maxAmount, fromTrade.fromToken.symbol);
+            return {
+                maxAmount
+            };
         }
 
         return {};

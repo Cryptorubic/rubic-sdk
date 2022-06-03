@@ -14,8 +14,9 @@ import { RequiredCrossChainOptions } from '@features/cross-chain/models/cross-ch
 import { RubicDirectCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade';
 import { RubicCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-cross-chain-contract-trade';
 import { RubicItCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
-import { ItCalculatedTrade } from '@features/cross-chain/providers/common/models/it-calculated-trade';
+import { ItCalculatedTrade } from '@features/cross-chain/providers/common/celer-rubic/models/it-calculated-trade';
 import { CelerRubicCrossChainTradeProvider } from '@features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
+import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 
 export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -38,7 +39,7 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<RubicCrossChainTrade> {
+    ): Promise<WrappedCrossChainTrade> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = to.blockchain;
         if (
@@ -68,7 +69,7 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             fromTransitToken,
             fromSlippageTolerance
         );
-        await this.checkMinMaxAmountsErrors(fromTrade);
+        const minMaxErrors = await this.checkMinMaxAmountsErrors(fromTrade);
 
         const { toTransitTokenAmount, transitFeeToken } = await this.getToTransitTokenAmount(
             toBlockchain,
@@ -90,7 +91,7 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                 ? await RubicCrossChainTrade.getGasData(fromTrade, toTrade, cryptoFeeToken)
                 : null;
 
-        return new RubicCrossChainTrade(
+        const trade = new RubicCrossChainTrade(
             {
                 fromTrade,
                 toTrade,
@@ -100,6 +101,12 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             },
             providerAddress
         );
+
+        return {
+            trade,
+            minAmountError: minMaxErrors.minAmount,
+            maxAmountError: minMaxErrors.maxAmount
+        };
     }
 
     protected async calculateBestTrade(

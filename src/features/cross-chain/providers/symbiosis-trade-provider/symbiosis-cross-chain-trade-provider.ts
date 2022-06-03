@@ -16,7 +16,6 @@ import {
     TokenAmount as SymbiosisTokenAmount
 } from 'symbiosis-js-sdk';
 import { SYMBIOSIS_CONFIG } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
-import { CrossChainMinAmountError } from '@common/errors/cross-chain/cross-chain-min-amount-error';
 import BigNumber from 'bignumber.js';
 import { SymbiosisCrossChainTrade } from '@features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
@@ -27,6 +26,7 @@ import { OneinchEthereumProvider } from '@features/instant-trades/dexes/ethereum
 import { OneinchBscProvider } from '@features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
 import { OneinchPolygonProvider } from '@features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
 import { OneinchAvalancheProvider } from '@features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
+import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -59,7 +59,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         from: PriceTokenAmount,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<SymbiosisCrossChainTrade> {
+    ): Promise<WrappedCrossChainTrade> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = toToken.blockchain;
         if (
@@ -120,15 +120,17 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                     ? await SymbiosisCrossChainTrade.getGasData(from, to, transactionRequest)
                     : null;
 
-            return new SymbiosisCrossChainTrade(
-                {
-                    from,
-                    to,
-                    transactionRequest,
-                    gasData
-                },
-                options.providerAddress
-            );
+            return {
+                trade: new SymbiosisCrossChainTrade(
+                    {
+                        from,
+                        to,
+                        transactionRequest,
+                        gasData
+                    },
+                    options.providerAddress
+                )
+            };
             // @ts-ignore
         } catch (err: { code: ErrorCode; message: string }) {
             if (
@@ -143,7 +145,10 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                     transitTokenAmount,
                     'min'
                 );
-                throw new CrossChainMinAmountError(minAmount, from.symbol);
+                return {
+                    trade: null,
+                    minAmountError: minAmount
+                };
             }
             if (err?.code === ErrorCode.AMOUNT_TOO_HIGH) {
                 const index = err.message.lastIndexOf('$');
@@ -154,7 +159,10 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                     transitTokenAmount,
                     'max'
                 );
-                throw new CrossChainMinAmountError(maxAmount, from.symbol);
+                return {
+                    trade: null,
+                    maxAmountError: maxAmount
+                };
             }
 
             throw err;

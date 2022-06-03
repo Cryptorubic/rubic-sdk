@@ -14,7 +14,8 @@ import { SwapManagerCrossChainCalculationOptions } from '@features/cross-chain/m
 import pTimeout from '@common/utils/p-timeout';
 import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
 import { hasLengthAtLeast } from '@features/instant-trades/utils/type-guards';
-import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
+import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import BigNumber from 'bignumber.js';
 import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 
 type RequiredSwapManagerCalculationOptions = Required<SwapManagerCrossChainCalculationOptions>;
@@ -52,7 +53,7 @@ export class CrossChainManager {
                   blockchain: BlockchainName;
               },
         options?: SwapManagerCrossChainCalculationOptions
-    ): Promise<CrossChainTrade> {
+    ): Promise<WrappedCrossChainTrade> {
         if (toToken instanceof Token && fromToken.blockchain === toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be different.');
         }
@@ -86,21 +87,55 @@ export class CrossChainManager {
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredSwapManagerCalculationOptions
-    ): Promise<CrossChainTrade> {
+    ): Promise<WrappedCrossChainTrade> {
         const trades = await this.calculateTradeFromTokens(from, to, this.getFullOptions(options));
         if (!hasLengthAtLeast(trades, 1)) {
             throw new Error('[RUBIC SDK] Trades array has to be defined');
         }
-        return trades.sort((firstTrade, secondTrade) =>
-            firstTrade.to.tokenAmount.comparedTo(secondTrade.to.tokenAmount)
-        )[0];
+
+        const sortedTrades = trades.sort((firstTrade, secondTrade) => {
+            const firstTradeAmount = firstTrade.trade?.to?.tokenAmount || new BigNumber(0);
+            const secondTradeAmount = secondTrade.trade?.to?.tokenAmount || new BigNumber(0);
+
+            return firstTradeAmount.comparedTo(secondTradeAmount);
+        });
+
+        const filteredTrades = sortedTrades.filter(
+            trade => !trade?.minAmountError && !trade?.maxAmountError
+        );
+        if (filteredTrades.length) {
+            return {
+                trade: filteredTrades[0]!.trade!
+            };
+        }
+
+        let minAmountError: BigNumber | undefined;
+        let maxAmountError: BigNumber | undefined;
+        sortedTrades.forEach(trade => {
+            if (trade.minAmountError) {
+                minAmountError = minAmountError
+                    ? BigNumber.min(minAmountError, trade.minAmountError)
+                    : trade.minAmountError;
+            }
+            if (trade.maxAmountError) {
+                maxAmountError = maxAmountError
+                    ? BigNumber.max(maxAmountError, trade.maxAmountError)
+                    : trade.maxAmountError;
+            }
+        });
+
+        return {
+            trade: sortedTrades[0].trade,
+            minAmountError,
+            maxAmountError
+        };
     }
 
     private async calculateTradeFromTokens(
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredSwapManagerCalculationOptions
-    ): Promise<CrossChainTrade[]> {
+    ): Promise<WrappedCrossChainTrade[]> {
         const { disabledProviders, timeout, ...providersOptions } = options;
         const providers = Object.entries(this.tradeProviders).filter(
             ([type]) => !disabledProviders.includes(type as CrossChainTradeType)

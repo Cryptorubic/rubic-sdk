@@ -14,12 +14,13 @@ import { compareAddresses, LowSlippageError, notNull, NotSupportedBlockchain } f
 import { EstimateAmtResponse } from '@features/cross-chain/providers/celer-trade-provider/models/estimate-amount-response';
 import { Injector } from '@core/sdk/injector';
 import { CelerCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
-import { ItCalculatedTrade } from '@features/cross-chain/providers/common/models/it-calculated-trade';
+import { ItCalculatedTrade } from '@features/cross-chain/providers/common/celer-rubic/models/it-calculated-trade';
 import { CelerItCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
 import { CelerDirectCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
-import { CrossChainContractData } from '@features/cross-chain/providers/common/cross-chain-contract-data';
+import { CrossChainContractData } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 import { wrappedNative } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/wrapped-native';
 import { CelerRubicCrossChainTradeProvider } from '@features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
+import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 
 export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -38,7 +39,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<CelerCrossChainTrade> {
+    ): Promise<WrappedCrossChainTrade> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = to.blockchain;
         if (
@@ -67,7 +68,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             fromTransitToken,
             slippages.fromSlippageTolerance
         );
-        await this.checkMinMaxAmountsErrors(fromTrade);
+        const minMaxErrors = await this.checkMinMaxAmountsErrors(fromTrade);
 
         const celerSlippage = await this.fetchCelerSlippage(
             fromBlockchain,
@@ -125,7 +126,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                       Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
                   )
                 : null;
-        return new CelerCrossChainTrade(
+        const trade = new CelerCrossChainTrade(
             {
                 fromTrade,
                 toTrade,
@@ -136,6 +137,12 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             providerAddress,
             Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
         );
+
+        return {
+            trade,
+            minAmountError: minMaxErrors.minAmount,
+            maxAmountError: minMaxErrors.maxAmount
+        };
     }
 
     /**

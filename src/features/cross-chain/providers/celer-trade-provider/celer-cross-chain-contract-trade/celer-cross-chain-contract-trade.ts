@@ -1,4 +1,4 @@
-import { CrossChainContractTrade } from '@features/cross-chain/providers/common/cross-chain-contract-trade';
+import { CrossChainContractTrade } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import { BlockchainName } from 'src/core';
 import { AbiItem } from 'web3-utils';
 import { CelerSwapMethod } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-swap-methods';

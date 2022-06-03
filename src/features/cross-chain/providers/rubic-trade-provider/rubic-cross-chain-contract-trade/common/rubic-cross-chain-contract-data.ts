@@ -6,7 +6,7 @@ import BigNumber from 'bignumber.js';
 import { BlockchainsInfo } from '@core/blockchain/blockchains-info';
 import { rubicCrossChainContractAbi } from '@features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contract-abi';
 import { ProviderData } from '@features/cross-chain/models/provider-data';
-import { CrossChainContractData } from '@features/cross-chain/providers/common/cross-chain-contract-data';
+import { CrossChainContractData } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 
 /**
  * Class to work with readable methods of cross-chain contract.

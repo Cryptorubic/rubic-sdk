@@ -1,7 +1,7 @@
 import { PriceTokenAmount, Web3Public } from 'src/core';
 import BigNumber from 'bignumber.js';
 import { Cache, CrossChainIsUnavailableError, MaxGasPriceOverflowError } from 'src/common';
-import { CrossChainContractTrade } from '@features/cross-chain/providers/common/cross-chain-contract-trade';
+import { CrossChainContractTrade } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import { Injector } from '@core/sdk/injector';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
 import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
