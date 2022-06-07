@@ -15,7 +15,6 @@ import {
     Token as SymbiosisToken,
     TokenAmount as SymbiosisTokenAmount
 } from 'symbiosis-js-sdk';
-import { SYMBIOSIS_CONFIG } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
 import BigNumber from 'bignumber.js';
 import { SymbiosisCrossChainTrade } from '@features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
@@ -27,6 +26,7 @@ import { OneinchBscProvider } from '@features/instant-trades/dexes/bsc/oneinch-b
 import { OneinchPolygonProvider } from '@features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
 import { OneinchAvalancheProvider } from '@features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
 import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { getSymbiosisConfig } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -39,7 +39,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
 
-    private readonly symbiosis = new Symbiosis(SYMBIOSIS_CONFIG, 'rubic');
+    private readonly symbiosis = new Symbiosis(getSymbiosisConfig(), 'rubic');
 
     private readonly oneInchService: Record<
         SymbiosisCrossChainSupportedBlockchain,
