@@ -4,7 +4,7 @@ import {
     RubicCrossChainSupportedBlockchain,
     rubicCrossChainSupportedBlockchains
 } from '@features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
-import { compareAddresses, notNull, NotSupportedBlockchain } from 'src/common';
+import { compareAddresses, notNull } from 'src/common';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
 import { BlockchainName } from 'src/core';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
@@ -39,14 +39,14 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<WrappedCrossChainTrade> {
+    ): Promise<WrappedCrossChainTrade | null> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = to.blockchain;
         if (
             !RubicCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) ||
             !RubicCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
         ) {
-            throw new NotSupportedBlockchain();
+            return null;
         }
 
         const [fromTransitToken, toTransitToken] = await Promise.all([

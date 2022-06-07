@@ -11,5 +11,5 @@ export abstract class CrossChainTradeProvider {
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<WrappedCrossChainTrade>;
+    ): Promise<WrappedCrossChainTrade | null>;
 }

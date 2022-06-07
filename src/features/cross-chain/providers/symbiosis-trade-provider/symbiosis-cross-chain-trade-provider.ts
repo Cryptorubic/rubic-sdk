@@ -7,7 +7,7 @@ import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
 } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { compareAddresses, CrossChainIsUnavailableError, NotSupportedBlockchain } from 'src/common';
+import { compareAddresses, CrossChainIsUnavailableError } from 'src/common';
 import { Injector } from '@core/sdk/injector';
 import {
     ErrorCode,
@@ -59,14 +59,14 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         from: PriceTokenAmount,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<WrappedCrossChainTrade> {
+    ): Promise<WrappedCrossChainTrade | null> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = toToken.blockchain;
         if (
             !SymbiosisCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) ||
             !SymbiosisCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
         ) {
-            throw new NotSupportedBlockchain();
+            return null;
         }
 
         const fromAddress = options.fromAddress || this.walletAddress;

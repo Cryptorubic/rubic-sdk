@@ -10,7 +10,7 @@ import { getCelerCrossChainContract } from '@features/cross-chain/providers/cele
 import { RequiredCrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
 import { CelerCrossChainTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade';
 import BigNumber from 'bignumber.js';
-import { compareAddresses, LowSlippageError, notNull, NotSupportedBlockchain } from 'src/common';
+import { compareAddresses, LowSlippageError, notNull } from 'src/common';
 import { EstimateAmtResponse } from '@features/cross-chain/providers/celer-trade-provider/models/estimate-amount-response';
 import { Injector } from '@core/sdk/injector';
 import { CelerCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
@@ -39,14 +39,14 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<WrappedCrossChainTrade> {
+    ): Promise<WrappedCrossChainTrade | null> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = to.blockchain;
         if (
             !CelerCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) ||
             !CelerCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
         ) {
-            throw new NotSupportedBlockchain();
+            return null;
         }
 
         const [fromTransitToken, toTransitToken] = await Promise.all([
