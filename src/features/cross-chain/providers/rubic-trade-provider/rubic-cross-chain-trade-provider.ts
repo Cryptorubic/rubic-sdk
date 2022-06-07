@@ -85,6 +85,8 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             toSlippageTolerance
         );
 
+        await this.checkContractsState(fromTrade, toTrade);
+
         const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
         const gasData =
             gasCalculation === 'enabled'

@@ -16,6 +16,7 @@ import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/
 import { hasLengthAtLeast } from '@features/instant-trades/utils/type-guards';
 import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import BigNumber from 'bignumber.js';
+import { SymbiosisCrossChainTradeProvider } from '@features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
 import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 
 type RequiredSwapManagerCalculationOptions = Required<SwapManagerCrossChainCalculationOptions>;
@@ -29,7 +30,8 @@ export class CrossChainManager {
 
     private tradeProviders: CcrTypedTradeProviders = [
         RubicCrossChainTradeProvider,
-        CelerCrossChainTradeProvider
+        CelerCrossChainTradeProvider,
+        SymbiosisCrossChainTradeProvider
     ].reduce((acc, ProviderClass) => {
         const provider = new ProviderClass();
         acc[provider.type] = provider;

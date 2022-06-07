@@ -36,5 +36,12 @@ export const SYMBIOSIS_CONTRACT_ABI = [
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function'
+    },
+    {
+        inputs: [],
+        name: 'paused',
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        stateMutability: 'view',
+        type: 'function'
     }
 ] as AbiItem[];

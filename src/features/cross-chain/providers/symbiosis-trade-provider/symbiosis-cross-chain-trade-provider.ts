@@ -7,7 +7,7 @@ import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
 } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { compareAddresses, NotSupportedBlockchain } from 'src/common';
+import { compareAddresses, CrossChainIsUnavailableError, NotSupportedBlockchain } from 'src/common';
 import { Injector } from '@core/sdk/injector';
 import {
     ErrorCode,
@@ -71,8 +71,10 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
 
         const fromAddress = options.fromAddress || this.walletAddress;
         if (!fromAddress) {
-            throw new Error('From address must not be empty');
+            throw new Error('From address or wallet address must not be empty');
         }
+
+        await this.checkContractState(fromBlockchain);
 
         const tokenIn = new SymbiosisToken({
             chainId: BlockchainsInfo.getBlockchainByName(fromBlockchain).id,
@@ -227,5 +229,19 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             return amount.multipliedBy(1 + approximatePercentDifference);
         }
         return amount.multipliedBy(1 - approximatePercentDifference);
+    }
+
+    private async checkContractState(fromBlockchain: SymbiosisCrossChainSupportedBlockchain) {
+        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+
+        const isPaused = await web3PublicService.callContractMethod<number>(
+            SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain],
+            SYMBIOSIS_CONTRACT_ABI,
+            'paused'
+        );
+
+        if (isPaused) {
+            throw new CrossChainIsUnavailableError();
+        }
     }
 }

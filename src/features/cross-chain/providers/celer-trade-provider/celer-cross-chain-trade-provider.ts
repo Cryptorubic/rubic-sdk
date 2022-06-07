@@ -113,9 +113,13 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                 TRADE_TYPE.ONE_INCH_ARBITRUM,
                 TRADE_TYPE.ONE_INCH_BSC,
                 TRADE_TYPE.ONE_INCH_ETHEREUM,
-                TRADE_TYPE.ONE_INCH_POLYGON
+                TRADE_TYPE.ONE_INCH_POLYGON,
+                TRADE_TYPE.ONE_INCH_AVALANCHE
             ]
         );
+
+        await this.checkContractsState(fromTrade, toTrade);
+
         const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
         const gasData =
             gasCalculation === 'enabled'
@@ -126,6 +130,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                       Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
                   )
                 : null;
+
         const trade = new CelerCrossChainTrade(
             {
                 fromTrade,

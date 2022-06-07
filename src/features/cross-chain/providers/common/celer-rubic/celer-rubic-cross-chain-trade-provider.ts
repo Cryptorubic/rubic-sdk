@@ -1,7 +1,11 @@
 import { BlockchainName, Token, Web3Pure } from 'src/core';
 import { CrossChainContractData } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 import { CrossChainContractTrade } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
-import { compareAddresses, InsufficientLiquidityError } from 'src/common';
+import {
+    compareAddresses,
+    CrossChainIsUnavailableError,
+    InsufficientLiquidityError
+} from 'src/common';
 import { RubicItCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
 import BigNumber from 'bignumber.js';
 import { CrossChainSupportedInstantTradeProvider } from '@features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
@@ -177,4 +181,18 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
         toToken: PriceToken,
         slippageTolerance: number
     ): Promise<CrossChainContractTrade>;
+
+    protected async checkContractsState(
+        fromTrade: CrossChainContractTrade,
+        toTrade: CrossChainContractTrade
+    ): Promise<void> {
+        const [sourceContractPaused, targetContractPaused] = await Promise.all([
+            fromTrade.contract.isPaused(),
+            toTrade.contract.isPaused()
+        ]);
+
+        if (sourceContractPaused || targetContractPaused) {
+            throw new CrossChainIsUnavailableError();
+        }
+    }
 }
