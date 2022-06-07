@@ -29,5 +29,12 @@ export const SYMBIOSIS_CONTRACT_ABI = [
         outputs: [],
         stateMutability: 'payable',
         type: 'function'
+    },
+    {
+        inputs: [{ internalType: 'address', name: '', type: 'address' }],
+        name: 'integratorFee',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function'
     }
 ] as AbiItem[];

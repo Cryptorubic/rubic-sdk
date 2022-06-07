@@ -80,7 +80,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             decimals: from.decimals,
             isNative: from.isNative
         });
-        const feePercent = await this.getFeePercent(fromBlockchain);
+        const feePercent = await this.getFeePercent(fromBlockchain, options.providerAddress);
         const fromAmountWithoutFee = from.tokenAmount.multipliedBy(100 - feePercent).dividedBy(100);
         const tokenAmountIn = new SymbiosisTokenAmount(
             tokenIn,
@@ -170,9 +170,23 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     }
 
     private async getFeePercent(
-        fromBlockchain: SymbiosisCrossChainSupportedBlockchain
+        fromBlockchain: SymbiosisCrossChainSupportedBlockchain,
+        providerAddress?: string
     ): Promise<number> {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+
+        if (providerAddress) {
+            return (
+                (await web3PublicService.callContractMethod<number>(
+                    SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain],
+                    SYMBIOSIS_CONTRACT_ABI,
+                    'integratorFee',
+                    {
+                        methodArguments: [providerAddress]
+                    }
+                )) / 10000
+            );
+        }
 
         return (
             (await web3PublicService.callContractMethod<number>(
