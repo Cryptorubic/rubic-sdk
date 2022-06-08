@@ -98,7 +98,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         });
 
         const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
-        const slippageTolerance = options.slippageTolerance * 100;
+        const slippageTolerance = options.slippageTolerance * 10000;
 
         const swapping = this.symbiosis.newSwapping();
 
