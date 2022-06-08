@@ -1,4 +1,5 @@
-import { CrossChainTrade, SwapTransactionOptions } from 'src/features';
+import { SwapTransactionOptions } from 'src/features';
+import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
 import { TransactionRequest } from '@ethersproject/providers';
 import { PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import { Injector } from '@core/sdk/injector';
