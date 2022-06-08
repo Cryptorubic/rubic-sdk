@@ -103,7 +103,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         const swapping = this.symbiosis.newSwapping();
 
         try {
-            const { tokenAmountOut, transactionRequest } = await swapping.exactIn(
+            const { tokenAmountOut, transactionRequest, priceImpact } = await swapping.exactIn(
                 tokenAmountIn,
                 tokenOut,
                 fromAddress,
@@ -129,7 +129,8 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                         from,
                         to,
                         transactionRequest,
-                        gasData
+                        gasData,
+                        priceImpact: parseFloat(priceImpact.toFixed())
                     },
                     options.providerAddress
                 )

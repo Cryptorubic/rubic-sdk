@@ -14,10 +14,18 @@ export class CrossChainSymbiosisManager {
     }
 
     public getUserTrades(fromAddress?: string): Promise<PendingRequest[]> {
-        return this.symbiosis.getPendingRequests(fromAddress || this.walletAddress);
+        fromAddress ||= this.walletAddress;
+        if (!fromAddress) {
+            throw new Error('From address or wallet address must not be empty');
+        }
+
+        return this.symbiosis.getPendingRequests(fromAddress);
     }
 
-    public async revertTrade(revertTransactionHash: string, options: SwapTransactionOptions = {}) {
+    public async revertTrade(
+        revertTransactionHash: string,
+        options: SwapTransactionOptions = {}
+    ): Promise<string | never> {
         const pendingRequest = await this.getUserTrades();
         const request = pendingRequest.find(
             pendingRequest =>
