@@ -27,6 +27,7 @@ import { OneinchPolygonProvider } from '@features/instant-trades/dexes/polygon/o
 import { OneinchAvalancheProvider } from '@features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
 import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { getSymbiosisConfig } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
+import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -173,11 +174,11 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
 
     private async getFeePercent(
         fromBlockchain: SymbiosisCrossChainSupportedBlockchain,
-        providerAddress?: string
+        providerAddress: string
     ): Promise<number> {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 
-        if (providerAddress) {
+        if (providerAddress !== EMPTY_ADDRESS) {
             return (
                 (await web3PublicService.callContractMethod<number>(
                     SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain],
