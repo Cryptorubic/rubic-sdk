@@ -986,14 +986,15 @@ Method calculates [WrappedCrossChainTrade](#wrapped-cross-chain-trade).
 
 **CrossChainOptions description:**
 
-| Option                | Type                             | Description                                                                                                                      | Default                  |
-|-----------------------|----------------------------------|----------------------------------------------------------------------------------------------------------------------------------|--------------------------|
-| fromSlippageTolerance | `number`                         | Swap slippage in range 0 to 1. Defines minimum amount after swap in **first blockchain** (for Celer and Rubic).                  | 0.02                     |
-| toSlippageTolerance   | `number`                         | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap in **second blockchain** (for Celer and Rubic).| 0.02                     |
-| slippageTolerance     | `number`                         | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap (for Symbiosis).                               | 0.04                     |
-| fromAddress           | `string`                         | User wallet address to calculate trade for (for Symbiosis).                                                                      | Connected wallet address |
-| deadline              | `number`                         | Deadline of the trade in minutes (for Symbiosis).                                                                                | 20                       |
-| gasCalculation        | `'enabled'` &#124; `'disabled'`  | Disables or enables gas limit and gas price calclation.                                                                          | 'enabled'                |
+| Option                | Type                            | Description                                                                                                                       | Default                  |
+|-----------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|--------------------------|
+| fromSlippageTolerance | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount after swap in **first blockchain** (for Celer and Rubic).                   | 0.02                     |
+| toSlippageTolerance   | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap in **second blockchain** (for Celer and Rubic). | 0.02                     |
+| slippageTolerance     | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap (for Symbiosis).                                | 0.04                     |
+| fromAddress           | `string`                        | User wallet address to calculate trade for (for Symbiosis).                                                                       | Connected wallet address |
+| deadline              | `number`                        | Deadline of the trade in minutes (for Symbiosis).                                                                                 | 20                       |
+| gasCalculation        | `'enabled'` &#124; `'disabled'` | Disables or enables gas limit and gas price calclation.                                                                           | 'enabled'                |
+| disabledProviders     | `CrossChainTradeType[]`         | Disables passed providers.                                                                                                        | []                       |
 
 ---
 
