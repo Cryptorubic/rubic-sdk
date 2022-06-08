@@ -10,11 +10,14 @@ import { InstantTradesManager } from '@features/instant-trades/instant-trades-ma
 import { TokensManager } from '@features/tokens/tokens-manager';
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 import { BlockchainName } from 'src/core';
+import { CrossChainSymbiosisManager } from '@features/cross-chain/cross-chain-symbiosis-manager';
 
 export class SDK {
     public readonly instantTrades: InstantTradesManager;
 
     public readonly crossChain: CrossChainManager;
+
+    public readonly crossChainSymbiosisManager: CrossChainSymbiosisManager;
 
     public readonly tokens = new TokensManager();
 
@@ -62,6 +65,7 @@ export class SDK {
     private constructor(providerAddress: string) {
         this.instantTrades = new InstantTradesManager();
         this.crossChain = new CrossChainManager(providerAddress);
+        this.crossChainSymbiosisManager = new CrossChainSymbiosisManager();
     }
 
     public async updateConfiguration(configuration: Configuration): Promise<void> {
