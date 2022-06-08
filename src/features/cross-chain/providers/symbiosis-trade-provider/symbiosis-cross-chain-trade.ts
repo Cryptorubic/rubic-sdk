@@ -6,7 +6,6 @@ import { SYMBIOSIS_CONTRACT_ADDRESS } from '@features/cross-chain/providers/symb
 import { SymbiosisCrossChainSupportedBlockchain } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { ContractParams } from '@features/cross-chain/models/contract-params';
 import { SYMBIOSIS_CONTRACT_ABI } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/contract-abi';
-import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
 import { FailedToCheckForTransactionReceiptError } from 'src/common';
 import { GasData } from '@features/cross-chain/models/gas-data';
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
@@ -150,10 +149,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
                 contractAddress,
                 contractAbi,
                 methodName: 'SymbiosisCallWithNative',
-                methodArguments: [
-                    this.providerAddress || NATIVE_TOKEN_ADDRESS,
-                    this.transactionRequest.data
-                ],
+                methodArguments: [this.providerAddress, this.transactionRequest.data],
                 value: this.from.stringWeiAmount
             };
         }
@@ -165,7 +161,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             methodArguments: [
                 this.from.address,
                 this.from.stringWeiAmount,
-                NATIVE_TOKEN_ADDRESS,
+                this.providerAddress,
                 this.transactionRequest.data
             ],
             value: '0'
