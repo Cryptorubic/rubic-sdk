@@ -99,7 +99,7 @@ export class CrossChainManager {
             const firstTradeAmount = firstTrade.trade?.to?.tokenAmount || new BigNumber(0);
             const secondTradeAmount = secondTrade.trade?.to?.tokenAmount || new BigNumber(0);
 
-            return firstTradeAmount.comparedTo(secondTradeAmount);
+            return secondTradeAmount.comparedTo(firstTradeAmount);
         });
 
         const filteredTrades = sortedTrades.filter(
