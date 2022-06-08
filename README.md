@@ -57,9 +57,9 @@
     - [crossChainTrade.to readonly field](#crosschaintradeto-readonly-field)
     - [crossChainTrade.toTokenAmountMin readonly field](#crosschaintradetotokenamountmin-readonly-field)
     - [crossChainTrade.estimatedGas getter](#crosschaintradeestimatedgas-getter)
-  - [Celer Cross Chain Trade and Rubic Cross Chain Trade](#celercrosschaintrade-and-rubiccrosschaintrade)
+  - [Celer Cross Chain Trade and Rubic Cross Chain Trade](#celer-cross-chain-trade-and-rubic-cross-chain-trade)
     - [crossChainTrade.priceImpactData getter](#crosschaintradepriceimpactdata-getter)
-  - [Symbiosis Cross Chain Trade](#symbiosiscrosschaintrade)
+  - [Symbiosis Cross Chain Trade](#symbiosis-cross-chain-trade)
     - [crossChainTrade.priceImpact readonly field](#crosschaintradepriceimpact-readonly-field)
   - [Cross Chain Symbiosis Manager](#cross-chain-symbiosis-manager)
     - [crossChainTrade.getUserTrades method](#crosschainsymbiosismanagergetusertrades-method)
@@ -1014,7 +1014,7 @@ Wraps cross chain trade and possible min max amount errors. If `minAmountError` 
 ### Cross Chain Trade
 
 Stores information about trade and provides method to make swap.
-Can be one of type: `CelerCrossChainTrade`, `RubicCrossChainTrade`, `SymbiosisCrossChainTrade`.
+Extends to types: `CelerCrossChainTrade`, `RubicCrossChainTrade`, `SymbiosisCrossChainTrade`.
 
 #### crossChainTrade.swap method
 
@@ -1131,7 +1131,9 @@ Gets gasFee, that is gasLimit * gasPrice. Equals `null` if gas couldn't be calcu
 
 ---
 
-### CelerCrossChainTrade and RubicCrossChainTrade
+### Celer Cross Chain Trade and Rubic Cross Chain Trade
+
+Extend `CrossChainTrade` class.
 
 #### crossChainTrade.priceImpactData getter
 
@@ -1146,7 +1148,9 @@ Returns price impact in first and second blockchains, based on tokens usd prices
 
 ---
 
-### SymbiosisCrossChainTrade
+### Symbiosis Cross Chain Trade
+
+Extends `CrossChainTrade` class.
 
 #### crossChainTrade.priceImpact readonly field
 
