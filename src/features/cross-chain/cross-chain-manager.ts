@@ -9,7 +9,7 @@ import { getPriceTokensFromInputTokens } from '@common/utils/tokens';
 import { Mutable } from '@common/utils/types/mutable';
 import { CelerCrossChainTradeProvider } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade-provider';
 import { CcrTypedTradeProviders } from '@features/cross-chain/models/typed-trade-provider';
-import { CrossChainTradeType } from 'src/features';
+import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from 'src/features';
 import { SwapManagerCrossChainCalculationOptions } from '@features/cross-chain/models/swap-manager-cross-chain-options';
 import pTimeout from '@common/utils/p-timeout';
 import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
@@ -139,9 +139,21 @@ export class CrossChainManager {
         options: RequiredSwapManagerCalculationOptions
     ): Promise<WrappedCrossChainTrade[]> {
         const { disabledProviders, timeout, ...providersOptions } = options;
-        const providers = Object.entries(this.tradeProviders).filter(
-            ([type]) => !disabledProviders.includes(type as CrossChainTradeType)
-        ) as [CrossChainTradeType, CrossChainTradeProvider][];
+        const providers = Object.entries(this.tradeProviders).filter(([type]) => {
+            if (disabledProviders.includes(type as CrossChainTradeType)) {
+                return false;
+            }
+
+            if (
+                type === CROSS_CHAIN_TRADE_TYPE.RUBIC &&
+                CelerCrossChainTradeProvider.isSupportedBlockchain(from.blockchain) &&
+                CelerCrossChainTradeProvider.isSupportedBlockchain(to.blockchain)
+            ) {
+                return false;
+            }
+
+            return true;
+        }) as [CrossChainTradeType, CrossChainTradeProvider][];
 
         if (!providers.length) {
             throw new RubicSdkError(`There are no providers for trade`);

@@ -18,7 +18,7 @@ import { ItCalculatedTrade } from '@features/cross-chain/providers/common/celer-
 import { CelerItCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
 import { CelerDirectCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
 import { CrossChainContractData } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
-import { wrappedNative } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/wrapped-native';
+import { wrappedNative } from '@features/cross-chain/providers/celer-trade-provider/constants/wrapped-native';
 import { CelerRubicCrossChainTradeProvider } from '@features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
 import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 
@@ -114,7 +114,8 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                 TRADE_TYPE.ONE_INCH_BSC,
                 TRADE_TYPE.ONE_INCH_ETHEREUM,
                 TRADE_TYPE.ONE_INCH_POLYGON,
-                TRADE_TYPE.ONE_INCH_AVALANCHE
+                TRADE_TYPE.ONE_INCH_AVALANCHE,
+                TRADE_TYPE.ONE_INCH_ARBITRUM
             ]
         );
 

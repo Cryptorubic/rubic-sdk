@@ -6,7 +6,7 @@ import { DestinationCelerSwapInfo } from '@features/cross-chain/providers/celer-
 
 import { InchCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/inch-celer-swap-info';
 import { oneinchApiParams } from '@features/instant-trades/dexes/common/oneinch-common/constants';
-import { wrappedNative } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/wrapped-native';
+import { wrappedNative } from '@features/cross-chain/providers/celer-trade-provider/constants/wrapped-native';
 import { CelerCrossChainSupportedBlockchain } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 

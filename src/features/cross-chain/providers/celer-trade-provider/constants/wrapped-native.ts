@@ -5,11 +5,13 @@ import { defaultFantomProviderConfiguration } from '@features/instant-trades/dex
 import { defaultBscProviderConfiguration } from '@features/instant-trades/dexes/bsc/default-constants';
 import { defaultPolygonProviderConfiguration } from '@features/instant-trades/dexes/polygon/default-constants';
 import { defaultAvalancheProviderConfiguration } from '@features/instant-trades/dexes/avalanche/default-constants';
+import { defaultArbitrumProviderConfiguration } from '@features/instant-trades/dexes/arbitrum/default-constants';
 
 export const wrappedNative: Record<CelerCrossChainSupportedBlockchain, string> = {
+    [BLOCKCHAIN_NAME.ETHEREUM]: defaultEthereumProviderConfiguration.wethAddress,
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: defaultBscProviderConfiguration.wethAddress,
     [BLOCKCHAIN_NAME.POLYGON]: defaultPolygonProviderConfiguration.wethAddress,
     [BLOCKCHAIN_NAME.AVALANCHE]: defaultAvalancheProviderConfiguration.wethAddress,
     [BLOCKCHAIN_NAME.FANTOM]: defaultFantomProviderConfiguration.wethAddress,
-    [BLOCKCHAIN_NAME.ETHEREUM]: defaultEthereumProviderConfiguration.wethAddress
+    [BLOCKCHAIN_NAME.ARBITRUM]: defaultArbitrumProviderConfiguration.wethAddress
 };
