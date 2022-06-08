@@ -77,10 +77,10 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             fromTransitToken
         );
 
-        const { fromSlippageTolerance, toSlippageTolerance: toSlippage } = slippages;
+        const { toSlippageTolerance: toSlippage } = slippages;
         const toSlippageTolerance = toSlippage - celerSlippage;
 
-        if (fromSlippageTolerance < 0) {
+        if (toSlippageTolerance < 0) {
             throw new LowSlippageError();
         }
 

@@ -7,7 +7,6 @@ import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/fai
 import { InsufficientFundsGasPriceValueError } from '@common/errors/cross-chain/insufficient-funds-gas-price-value.error';
 import { SwapTransactionOptions } from '@features/instant-trades/models/swap-transaction-options';
 import BigNumber from 'bignumber.js';
-import { RubicItCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 import { CelerRubicCrossChainTrade } from '@features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade';
 import { Web3Public } from 'src/core';
@@ -19,6 +18,7 @@ import {
     celerTargetTransitTokenFeeMultiplier
 } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-fee-multipliers';
 import { CelerCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
+import { CelerItCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
 
 export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
     public static async getGasData(
@@ -120,7 +120,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         this.from = this.fromTrade.fromToken;
 
         const fromSlippage =
-            this.fromTrade instanceof RubicItCrossChainContractTrade ? this.fromTrade.slippage : 0;
+            this.fromTrade instanceof CelerItCrossChainContractTrade ? this.fromTrade.slippage : 0;
         this.to = new PriceTokenAmount({
             ...this.toTrade.toToken.asStruct,
             weiAmount: this.toTrade.toToken.weiAmount.dividedBy(1 - fromSlippage).dp(0)
