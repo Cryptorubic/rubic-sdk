@@ -1,12 +1,9 @@
-import { RubicCrossChainSupportedBlockchain } from '@features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
 
 /**
  * Stores rubic cross-chain contract addresses.
  */
-export const rubicCrossChainContractsAddresses: Readonly<
-    Record<RubicCrossChainSupportedBlockchain, string>
-> = {
+export const rubicCrossChainContractsAddresses = {
     [BLOCKCHAIN_NAME.ETHEREUM]: '0xD8b19613723215EF8CC80fC35A1428f8E8826940',
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: '0x70e8C8139d1ceF162D5ba3B286380EB5913098c4',
     [BLOCKCHAIN_NAME.POLYGON]: '0xeC52A30E4bFe2D6B0ba1D0dbf78f265c0a119286',

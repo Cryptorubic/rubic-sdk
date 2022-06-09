@@ -14,8 +14,4 @@ export type { Blockchain } from './blockchain/models/blockchain';
 export type { TokenBaseStruct } from './blockchain/models/token-base-struct';
 export type { TransactionOptions } from './blockchain/models/transaction-options';
 export type { WalletConnectionConfiguration } from './blockchain/models/wallet-connection-configuration';
-export {
-    MAINNET_BLOCKCHAIN_NAME,
-    TESTNET_BLOCKCHAIN_NAME
-} from './blockchain/models/blockchain-name';
 export { Configuration, RpcProvider, WalletProvider } from './sdk/models/configuration';

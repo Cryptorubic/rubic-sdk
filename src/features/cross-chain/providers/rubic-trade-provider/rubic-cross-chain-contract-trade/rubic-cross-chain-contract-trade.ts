@@ -1,4 +1,4 @@
-import { CrossChainContractTrade } from '@features/cross-chain/providers/common/cross-chain-contract-trade';
+import { CrossChainContractTrade } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import { AbiItem } from 'web3-utils';
 import { UniswapV2AbstractProvider } from 'src/features';
 import { crossChainContractAbiV2 } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/cross-chain-contract-abi-v2';

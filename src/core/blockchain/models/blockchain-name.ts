@@ -1,14 +1,4 @@
-export const TESTNET_BLOCKCHAIN_NAME = {
-    KOVAN: 'KOVAN',
-    BINANCE_SMART_CHAIN_TESTNET: 'BSC_TESTNET',
-    POLYGON_TESTNET: 'POLYGON_TESTNET',
-    HARMONY_TESTNET: 'HARMONY_TESTNET',
-    AVALANCHE_TESTNET: 'AVALANCHE_TESTNET',
-    MOONRIVER_TESTNET: 'MOONRIVER_TESTNET',
-    FANTOM_TESTNET: 'FANTOM_TESTNET'
-} as const;
-
-export const MAINNET_BLOCKCHAIN_NAME = {
+export const BLOCKCHAIN_NAME = {
     ETHEREUM: 'ETH',
     BINANCE_SMART_CHAIN: 'BSC',
     POLYGON: 'POLYGON',
@@ -21,10 +11,4 @@ export const MAINNET_BLOCKCHAIN_NAME = {
     TELOS: 'TELOS'
 } as const;
 
-export const BLOCKCHAIN_NAME = {
-    ...MAINNET_BLOCKCHAIN_NAME,
-    ...TESTNET_BLOCKCHAIN_NAME
-};
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export type BlockchainName = typeof BLOCKCHAIN_NAME[keyof typeof BLOCKCHAIN_NAME];

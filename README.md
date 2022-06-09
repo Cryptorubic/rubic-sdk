@@ -21,6 +21,7 @@
     - [sdk.updateConfiguration method](#sdkupdateconfiguration-method)
     - [sdk.instantTrades readonly field](#sdkinstanttrades-readonly-field)
     - [sdk.crossChain readonly field](#sdkcrosschain-readonly-field)
+    - [sdk.crossChainSymbiosisManger readonly field](#sdkcrosschainsymbiosismanager-readonly-field)
     - [sdk.tokens readonly field](#sdktokens-readonly-field)
     - [sdk.web3PublicService readonly field](#sdkweb3publicservice-readonly-field)
     - [sdk.web3Private readonly field](#sdkweb3private-readonly-field)
@@ -47,6 +48,7 @@
     - [isZrxLikeTradeLikeTrade function](#iszrxliketradeliketrade-function)
   - [Cross Chain Manager](#cross-chain-manager)
     - [sdk.crossChain.calculateTrade method](#sdkcrosschaincalculatetrade-method)
+  - [Wrapped Cross Chain Trade](#wrapped-cross-chain-trade)
   - [Cross Chain Trade](#cross-chain-trade)
     - [crossChainTrade.swap method](#crosschaintradeswap-method)
     - [crossChainTrade.needAapprove method](#crosschaintradeneedapprove-method)
@@ -55,7 +57,13 @@
     - [crossChainTrade.to readonly field](#crosschaintradeto-readonly-field)
     - [crossChainTrade.toTokenAmountMin readonly field](#crosschaintradetotokenamountmin-readonly-field)
     - [crossChainTrade.estimatedGas getter](#crosschaintradeestimatedgas-getter)
+  - [Celer Cross Chain Trade and Rubic Cross Chain Trade](#celer-cross-chain-trade-and-rubic-cross-chain-trade)
     - [crossChainTrade.priceImpactData getter](#crosschaintradepriceimpactdata-getter)
+  - [Symbiosis Cross Chain Trade](#symbiosis-cross-chain-trade)
+    - [crossChainTrade.priceImpact readonly field](#crosschaintradepriceimpact-readonly-field)
+  - [Cross Chain Symbiosis Manager](#cross-chain-symbiosis-manager)
+    - [crossChainTrade.getUserTrades method](#crosschainsymbiosismanagergetusertrades-method)
+    - [crossChainTrade.revertTrade method](#crosschainsymbiosismanagerreverttrade-method)
   - [Tokens](#tokens-manager)
     - [Tokens Manager](#tokens-manager)
       - [tokensManager.createTokenFromStruct method](#tokensmanagercreatetokenfromstruct-method)
@@ -510,6 +518,16 @@ Cross-chain trades manager object. Use it to calculate and create cross-chain tr
 
 ---
 
+#### sdk.crossChainSymbiosisManager readonly field
+
+```typescript
+sdk.crossChainSymbiosisManager: CrossChainSymbiosisManager
+```
+
+Cross-chain symbiosis manager object. Use it to get pending trades and symbiosis and revert them. [See more.](#cross-chain-symbiosis-manager)
+
+---
+
 #### sdk.tokens readonly field
 
 ```typescript
@@ -950,12 +968,12 @@ sdk.crossChain.calculateTrade(
               blockchain: BLOCKCHAIN_NAME;
             },
         options?: CrossChainOptions
-): Promise<CrossChainTrade>
+): Promise<WrappedCrossChainTrade>
 ```
 
 > ℹ️️ You have to set up **rpc provider 🌐** for network in which you will calculate trade.
 
-Method calculates [CrossChainTrade](#cross-chain-trade).
+Method calculates [WrappedCrossChainTrade](#wrapped-cross-chain-trade).
 
 **sdk.crossChain.calculateTrade method parameters:**
 
@@ -968,21 +986,41 @@ Method calculates [CrossChainTrade](#cross-chain-trade).
 
 **CrossChainOptions description:**
 
-| Option                | Type     | Description                                                                                                 | Default |
-|-----------------------|----------|-------------------------------------------------------------------------------------------------------------|---------|
-| fromSlippageTolerance | `number` | Swap slippage in range 0 to 1. Defines minimum amount after swap in **first blockchain**.                   | 0.02    |
-| toSlippageTolerance   | `number` | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap in **second blockchain**. | 0.02    |
+| Option                | Type                            | Description                                                                                                                       | Default                  |
+|-----------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|--------------------------|
+| fromSlippageTolerance | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount after swap in **first blockchain** (for Celer and Rubic).                   | 0.02                     |
+| toSlippageTolerance   | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap in **second blockchain** (for Celer and Rubic). | 0.02                     |
+| slippageTolerance     | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap (for Symbiosis).                                | 0.04                     |
+| fromAddress           | `string`                        | User wallet address to calculate trade for (for Symbiosis).                                                                       | Connected wallet address |
+| deadline              | `number`                        | Deadline of the trade in minutes (for Symbiosis).                                                                                 | 20                       |
+| gasCalculation        | `'enabled'` &#124; `'disabled'` | Disables or enables gas limit and gas price calclation.                                                                           | 'enabled'                |
+| disabledProviders     | `CrossChainTradeType[]`         | Disables passed providers.                                                                                                        | []                       |
+
+---
+
+### Wrapped Cross Chain Trade
+
+```typescript
+interface WrappedCrossChainTrade {
+    trade: CrossChainTrade | null;
+    minAmountError?: BigNumber;
+    maxAmountError?: BigNumber;
+}
+```
+
+Wraps cross chain trade and possible min max amount errors. If `minAmountError` or `maxAmountError` are not empty, then you must display an error, because [`swap`](#crosschaintradeswap-method) method will return error.
 
 ---
 
 ### Cross Chain Trade
 
 Stores information about trade and provides method to make swap.
+Extends to types: `CelerCrossChainTrade`, `RubicCrossChainTrade`, `SymbiosisCrossChainTrade`.
 
 #### crossChainTrade.swap method
 
 ```typescript
-instantTrade.swap(options?: SwapTransactionOptions): Promise<TransactionReceipt>
+crossChainTrade.swap(options?: SwapTransactionOptions): Promise<TransactionReceipt>
 ```
 
 > ℹ️️ You have to set up **wallet provider 👛** for network in which you will execute trade swap.
@@ -1094,6 +1132,10 @@ Gets gasFee, that is gasLimit * gasPrice. Equals `null` if gas couldn't be calcu
 
 ---
 
+### Celer Cross Chain Trade and Rubic Cross Chain Trade
+
+Extend `CrossChainTrade` class.
+
 #### crossChainTrade.priceImpactData getter
 
 ```typescript
@@ -1104,6 +1146,55 @@ crossChainTrade.priceImpactData(): {
 ```
 
 Returns price impact in first and second blockchains, based on tokens usd prices, taken from coingecko api.
+
+---
+
+### Symbiosis Cross Chain Trade
+
+Extends `CrossChainTrade` class.
+
+#### crossChainTrade.priceImpact readonly field
+
+```typescript
+crossChainTrade.priceImpact: number
+```
+
+Returns overall price impact, based on symbiosis api.
+
+---
+
+### Cross Chain Symbiosis Manager
+
+Contains methods to work with pending user trades and revert them.
+
+#### crossChainSymbiosisManager.getUserTrades method
+
+```typescript
+crossChainSymbiosisManager.getUserTrades(fromAddress?: string): Promise<PendingRequest[]>
+```
+
+Returns pending request for `fromAddress` if provided, otherwise for connected wallet address.
+
+---
+
+#### crossChainSymbiosisManager.revertTrade method
+
+```typescript
+crossChainSymbiosisManager.revertTrade(
+        revertTransactionHash: string,
+        options?: SwapTransactionOptions
+): Promise<string | never>
+```
+
+Reverts trade, which transaction hash is `revertTransactionHash` for connected wallet address.
+
+**SwapTransactionOptions description:**
+
+| Option     | Type                     | Description                                                                                                                           | Default                                                                                                                                |
+|------------|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| onConfirm? | `(hash: string) => void` | Callback that will be called after the user signs swap transaction.                                                                   | Not set.                                                                                                                               |
+| gasPrice?  | `string`                 | Specifies gas price **in wei** for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing. | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+| gasLimit?  | `string`                 | Specifies gas limit for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing.            | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
 
 ---
 

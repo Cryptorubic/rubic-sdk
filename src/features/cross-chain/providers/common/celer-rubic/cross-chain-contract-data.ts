@@ -1,4 +1,4 @@
-import { CrossChainSupportedInstantTradeProvider } from '@features/cross-chain/providers/common/models/cross-chain-supported-instant-trade';
+import { CrossChainSupportedInstantTradeProvider } from '@features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
 import { ProviderData } from '@features/cross-chain/models/provider-data';
 import { Injector } from '@core/sdk/injector';
 import { BlockchainName, PriceToken, PriceTokenAmount, Token, Web3Public } from 'src/core';

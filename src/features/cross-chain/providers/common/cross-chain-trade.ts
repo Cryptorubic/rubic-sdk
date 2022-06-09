@@ -5,57 +5,25 @@ import {
     Web3Public,
     Web3Pure
 } from 'src/core';
-import BigNumber from 'bignumber.js';
-import { TransactionReceipt } from 'web3-eth';
-import { EncodeTransactionOptions, SwapTransactionOptions } from 'src/features';
-import { TransactionConfig } from 'web3-core';
-import {
-    Cache,
-    CrossChainIsUnavailableError,
-    MaxGasPriceOverflowError,
-    UnnecessaryApprove,
-    WalletNotConnectedError,
-    WrongNetworkError
-} from 'src/common';
-import { CrossChainContractTrade } from '@features/cross-chain/providers/common/cross-chain-contract-trade';
 import { GasData } from '@features/cross-chain/models/gas-data';
 import { Injector } from '@core/sdk/injector';
+import BigNumber from 'bignumber.js';
+import { EncodeTransactionOptions, SwapTransactionOptions } from 'src/features';
+import { UnnecessaryApprove, WalletNotConnectedError, WrongNetworkError } from 'src/common';
+import { TransactionReceipt } from 'web3-eth';
 import { ContractParams } from '@features/cross-chain/models/contract-params';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
+import { TransactionConfig } from 'web3-core';
 
 export abstract class CrossChainTrade {
-    public abstract readonly toTokenAmountMin: BigNumber;
-
-    @Cache
-    public get priceImpactData(): {
-        priceImpactFrom: number | null;
-        priceImpactTo: number | null;
-    } {
-        const calculatePriceImpact = (trade: CrossChainContractTrade): number | null => {
-            return trade.fromToken.calculatePriceImpactPercent(trade.toToken);
-        };
-
-        return {
-            priceImpactFrom: calculatePriceImpact(this.fromTrade),
-            priceImpactTo: calculatePriceImpact(this.toTrade)
-        };
-    }
-
-    protected abstract readonly fromTrade: CrossChainContractTrade;
-
-    protected abstract readonly toTrade: CrossChainContractTrade;
-
-    protected abstract readonly gasData: GasData | null;
-
-    protected abstract readonly cryptoFeeToken: PriceTokenAmount;
-
-    protected abstract readonly fromWeb3Public: Web3Public;
-
-    protected abstract readonly toWeb3Public: Web3Public;
-
     public abstract readonly to: PriceTokenAmount;
 
     public abstract readonly from: PriceTokenAmount;
+
+    protected abstract readonly gasData: GasData | null;
+
+    protected abstract readonly fromWeb3Public: Web3Public;
+
+    protected abstract get fromContractAddress(): string;
 
     protected get walletAddress(): string {
         return Injector.web3Private.address;
@@ -70,21 +38,23 @@ export abstract class CrossChainTrade {
 
     protected constructor(protected readonly providerAddress: string) {}
 
-    protected abstract checkTradeErrors(): Promise<void | never>;
+    public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
+
+    protected abstract getContractParams(fromAddress?: string): Promise<ContractParams>;
 
     public async needApprove(): Promise<boolean> {
         this.checkWalletConnected();
 
-        if (this.fromTrade.fromToken.isNative) {
+        if (this.from.isNative) {
             return false;
         }
 
         const allowance = await this.fromWeb3Public.getAllowance(
-            this.fromTrade.fromToken.address,
+            this.from.address,
             this.walletAddress,
-            this.fromTrade.contract.address
+            this.fromContractAddress
         );
-        return this.fromTrade.fromToken.weiAmount.gt(allowance);
+        return this.from.weiAmount.gt(allowance);
     }
 
     public async approve(options: BasicTransactionOptions): Promise<TransactionReceipt> {
@@ -96,8 +66,8 @@ export abstract class CrossChainTrade {
         this.checkBlockchainCorrect();
 
         return Injector.web3Private.approveTokens(
-            this.fromTrade.fromToken.address,
-            this.fromTrade.contract.address,
+            this.from.address,
+            this.fromContractAddress,
             'infinity',
             options
         );
@@ -118,14 +88,12 @@ export abstract class CrossChainTrade {
         };
 
         await Injector.web3Private.approveTokens(
-            this.fromTrade.fromToken.address,
-            this.fromTrade.contract.address,
+            this.from.address,
+            this.fromContractAddress,
             'infinity',
             txOptions
         );
     }
-
-    public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         const { gasLimit, gasPrice } = options;
@@ -153,51 +121,16 @@ export abstract class CrossChainTrade {
     }
 
     protected checkBlockchainCorrect(): never | void {
-        if (Injector.web3Private.blockchainName !== this.fromTrade.blockchain) {
+        if (Injector.web3Private.blockchainName !== this.from.blockchain) {
             throw new WrongNetworkError();
-        }
-    }
-
-    protected async checkContractsState(): Promise<void> {
-        const [sourceContractPaused, targetContractPaused] = await Promise.all([
-            this.fromTrade.contract.isPaused(),
-            this.toTrade.contract.isPaused()
-        ]);
-
-        if (sourceContractPaused || targetContractPaused) {
-            throw new CrossChainIsUnavailableError();
         }
     }
 
     protected checkUserBalance(): Promise<void | never> {
         return this.fromWeb3Public.checkBalance(
-            this.fromTrade.fromToken,
-            this.fromTrade.fromToken.tokenAmount,
+            this.from,
+            this.from.tokenAmount,
             this.walletAddress
-        );
-    }
-
-    protected abstract getContractParams(fromAddress?: string): Promise<ContractParams>;
-
-    protected async checkToBlockchainGasPrice(): Promise<void | never> {
-        if (this.toTrade.blockchain !== BLOCKCHAIN_NAME.ETHEREUM) {
-            return;
-        }
-
-        const [maxGasPrice, currentGasPrice] = await Promise.all([
-            this.toTrade.contract.getMaxGasPrice(),
-            Injector.gasPriceApi.getGasPriceInEthUnits(this.toTrade.blockchain)
-        ]);
-        if (maxGasPrice.lt(currentGasPrice)) {
-            throw new MaxGasPriceOverflowError();
-        }
-    }
-
-    protected async checkToContractBalance(): Promise<void | never> {
-        return this.toWeb3Public.checkBalance(
-            this.toTrade.fromToken,
-            this.fromTrade.fromToken.tokenAmount,
-            this.toTrade.contract.address
         );
     }
 }

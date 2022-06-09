@@ -5,7 +5,7 @@ import { AlgebraQuoterController } from '@features/instant-trades/dexes/polygon/
 import { DestinationCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
 import { v3LikeCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/v3-like-celer-swap-info';
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
-import { SwapVersion } from '@features/cross-chain/providers/common/models/provider-type.enum';
+import { SwapVersion } from '@features/cross-chain/providers/common/celer-rubic/models/provider-type.enum';
 import { ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS } from '@features/instant-trades/dexes/polygon/algebra/constants/swap-router-contract-data';
 
 export class CrossChainAlgebraTrade implements CrossChainInstantTrade {

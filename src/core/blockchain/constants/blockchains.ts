@@ -3,7 +3,7 @@ import { Blockchain } from '@core/blockchain/models/blockchain';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
 import { Token } from '@core/blockchain/tokens/token';
 
-const mainnetBlockchains: ReadonlyArray<Blockchain> = [
+export const blockchains: ReadonlyArray<Blockchain> = [
     {
         id: 1,
         name: BLOCKCHAIN_NAME.ETHEREUM,
@@ -114,78 +114,4 @@ const mainnetBlockchains: ReadonlyArray<Blockchain> = [
             decimals: 18
         })
     }
-];
-
-const testnetBlockchains: ReadonlyArray<Blockchain> = [
-    {
-        id: 42,
-        name: BLOCKCHAIN_NAME.KOVAN,
-        nativeCoin: new Token({
-            blockchain: BLOCKCHAIN_NAME.KOVAN,
-            address: NATIVE_TOKEN_ADDRESS,
-            name: 'Ethereum',
-            symbol: 'ETH',
-            decimals: 18
-        })
-    },
-    {
-        id: 97,
-        name: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET,
-        nativeCoin: new Token({
-            blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET,
-            address: NATIVE_TOKEN_ADDRESS,
-            name: 'Binance Coin',
-            symbol: 'BNB',
-            decimals: 18
-        })
-    },
-    {
-        id: 80001,
-        name: BLOCKCHAIN_NAME.POLYGON_TESTNET,
-        nativeCoin: new Token({
-            blockchain: BLOCKCHAIN_NAME.POLYGON_TESTNET,
-            address: NATIVE_TOKEN_ADDRESS,
-            name: 'Polygon',
-            symbol: 'MATIC',
-            decimals: 18
-        })
-    },
-    {
-        id: 1666700000,
-        name: BLOCKCHAIN_NAME.HARMONY_TESTNET,
-        nativeCoin: new Token({
-            blockchain: BLOCKCHAIN_NAME.HARMONY_TESTNET,
-            address: NATIVE_TOKEN_ADDRESS,
-            name: 'ONE',
-            symbol: 'ONE',
-            decimals: 18
-        })
-    },
-    {
-        id: 43113,
-        name: BLOCKCHAIN_NAME.AVALANCHE_TESTNET,
-        nativeCoin: new Token({
-            blockchain: BLOCKCHAIN_NAME.AVALANCHE_TESTNET,
-            address: NATIVE_TOKEN_ADDRESS,
-            name: 'AVAX',
-            symbol: 'AVAX',
-            decimals: 18
-        })
-    },
-    {
-        id: NaN,
-        name: BLOCKCHAIN_NAME.MOONRIVER_TESTNET,
-        nativeCoin: new Token({
-            blockchain: BLOCKCHAIN_NAME.MOONRIVER_TESTNET,
-            address: NATIVE_TOKEN_ADDRESS,
-            name: 'MOVR',
-            symbol: 'MOVR',
-            decimals: 18
-        })
-    }
-];
-
-export const blockchains: ReadonlyArray<Blockchain> = [
-    ...mainnetBlockchains,
-    ...testnetBlockchains
 ];

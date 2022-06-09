@@ -59,49 +59,6 @@ export const nativeTokensList: NativeTokensList = {
         symbol: 'aETH',
         decimals: 18
     },
-    // Testnets.
-    [BLOCKCHAIN_NAME.KOVAN]: {
-        address: NATIVE_TOKEN_ADDRESS,
-        name: 'Ethereum',
-        symbol: 'ETH',
-        decimals: 18
-    },
-    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: {
-        address: NATIVE_TOKEN_ADDRESS,
-        name: 'Binance Coin',
-        symbol: 'BNB',
-        decimals: 18
-    },
-    [BLOCKCHAIN_NAME.POLYGON_TESTNET]: {
-        address: NATIVE_TOKEN_ADDRESS,
-        name: 'Matic Network',
-        symbol: 'MATIC',
-        decimals: 18
-    },
-    [BLOCKCHAIN_NAME.AVALANCHE_TESTNET]: {
-        address: NATIVE_TOKEN_ADDRESS,
-        name: 'AVAX',
-        symbol: 'AVAX',
-        decimals: 18
-    },
-    [BLOCKCHAIN_NAME.MOONRIVER_TESTNET]: {
-        address: NATIVE_TOKEN_ADDRESS,
-        name: 'MOVR',
-        symbol: 'MOVR',
-        decimals: 18
-    },
-    [BLOCKCHAIN_NAME.HARMONY_TESTNET]: {
-        address: NATIVE_TOKEN_ADDRESS,
-        name: 'ONE',
-        symbol: 'ONE',
-        decimals: 18
-    },
-    [BLOCKCHAIN_NAME.FANTOM_TESTNET]: {
-        address: NATIVE_TOKEN_ADDRESS,
-        name: 'FTM',
-        symbol: 'FTM',
-        decimals: 18
-    },
     [BLOCKCHAIN_NAME.TELOS]: {
         address: NATIVE_TOKEN_ADDRESS,
         name: 'TLOS',
