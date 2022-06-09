@@ -7,7 +7,7 @@ import { AlgebraTrade } from '@features/instant-trades/dexes/polygon/algebra/alg
 import { OneinchAbstractProvider, UniswapV2AbstractProvider } from 'src/features';
 import { UniswapV3AbstractProvider } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-provider';
 import { AlgebraProvider } from '@features/instant-trades/dexes/polygon/algebra/algebra-provider';
-import { CrossChainSupportedInstantTradeProvider } from '@features/cross-chain/providers/common/models/cross-chain-supported-instant-trade';
+import { CrossChainSupportedInstantTradeProvider } from '@features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
 
 export function isUniswapV2LikeTrade(trade: InstantTrade): trade is UniswapV2AbstractTrade {
     return trade instanceof UniswapV2AbstractTrade;

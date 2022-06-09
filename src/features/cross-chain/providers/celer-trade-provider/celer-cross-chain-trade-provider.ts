@@ -1,30 +1,28 @@
 import { CROSS_CHAIN_TRADE_TYPE, TRADE_TYPE, TradeType } from 'src/features';
-import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
 import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-
 import {
     CelerCrossChainSupportedBlockchain,
     celerCrossChainSupportedBlockchains
 } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
 import { getCelerCrossChainContract } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contracts';
-import { CrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
-import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
+import { RequiredCrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
 import { CelerCrossChainTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade';
 import BigNumber from 'bignumber.js';
-import { compareAddresses, LowSlippageError, notNull, NotSupportedBlockchain } from 'src/common';
+import { compareAddresses, LowSlippageError, notNull } from 'src/common';
 import { EstimateAmtResponse } from '@features/cross-chain/providers/celer-trade-provider/models/estimate-amount-response';
 import { Injector } from '@core/sdk/injector';
-
 import { CelerCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
-import { ItCalculatedTrade } from '@features/cross-chain/providers/common/models/it-calculated-trade';
+import { ItCalculatedTrade } from '@features/cross-chain/providers/common/celer-rubic/models/it-calculated-trade';
 import { CelerItCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
 import { CelerDirectCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
-import { CrossChainContractData } from '@features/cross-chain/providers/common/cross-chain-contract-data';
-import { wrappedNative } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/wrapped-native';
+import { CrossChainContractData } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
+import { wrappedNative } from '@features/cross-chain/providers/celer-trade-provider/constants/wrapped-native';
+import { CelerRubicCrossChainTradeProvider } from '@features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
+import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 
-export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
+export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(
         blockchain: BlockchainName
     ): blockchain is CelerCrossChainSupportedBlockchain {
@@ -40,15 +38,15 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
     public async calculate(
         from: PriceTokenAmount,
         to: PriceToken,
-        options: CrossChainOptions
-    ): Promise<CrossChainTrade> {
+        options: RequiredCrossChainOptions
+    ): Promise<WrappedCrossChainTrade | null> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = to.blockchain;
         if (
             !CelerCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) ||
             !CelerCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
         ) {
-            throw new NotSupportedBlockchain();
+            return null;
         }
 
         const [fromTransitToken, toTransitToken] = await Promise.all([
@@ -70,7 +68,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             fromTransitToken,
             slippages.fromSlippageTolerance
         );
-        await this.checkMinMaxAmountsErrors(fromTrade);
+        const minMaxErrors = await this.checkMinMaxAmountsErrors(fromTrade);
 
         const celerSlippage = await this.fetchCelerSlippage(
             fromBlockchain,
@@ -82,7 +80,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
         const { fromSlippageTolerance, toSlippageTolerance: toSlippage } = slippages;
         const toSlippageTolerance = toSlippage - celerSlippage;
 
-        if (fromSlippageTolerance < 0) {
+        if (toSlippageTolerance < 0) {
             throw new LowSlippageError();
         }
 
@@ -115,10 +113,28 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
                 TRADE_TYPE.ONE_INCH_ARBITRUM,
                 TRADE_TYPE.ONE_INCH_BSC,
                 TRADE_TYPE.ONE_INCH_ETHEREUM,
-                TRADE_TYPE.ONE_INCH_POLYGON
+                TRADE_TYPE.ONE_INCH_POLYGON,
+                TRADE_TYPE.ONE_INCH_AVALANCHE,
+                TRADE_TYPE.ONE_INCH_ARBITRUM
             ]
         );
-        const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
+
+        await this.checkContractsState(fromTrade, toTrade);
+
+        let cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
+        const nativeTokenPrice = (
+            await this.getBestItContractTrade(
+                fromBlockchain,
+                cryptoFeeToken,
+                fromTransitToken,
+                fromSlippageTolerance
+            )
+        ).toToken.tokenAmount;
+        cryptoFeeToken = new PriceTokenAmount({
+            ...cryptoFeeToken.asStructWithAmount,
+            price: nativeTokenPrice
+        });
+
         const gasData =
             gasCalculation === 'enabled'
                 ? await CelerCrossChainTrade.getGasData(
@@ -128,7 +144,8 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
                       Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
                   )
                 : null;
-        return new CelerCrossChainTrade(
+
+        const trade = new CelerCrossChainTrade(
             {
                 fromTrade,
                 toTrade,
@@ -139,6 +156,12 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             providerAddress,
             Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
         );
+
+        return {
+            trade,
+            minAmountError: minMaxErrors.minAmount,
+            maxAmountError: minMaxErrors.maxAmount
+        };
     }
 
     /**

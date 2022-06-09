@@ -1,7 +1,7 @@
 import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
 import { ProviderData } from '@features/cross-chain/models/provider-data';
-import { CrossChainContractData } from '@features/cross-chain/providers/common/cross-chain-contract-data';
+import { CrossChainContractData } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 import { celerCrossChainContractAbi } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import { BlockchainsInfo, PriceToken } from 'src/core';
 import { CellerMessageBusController } from '@features/cross-chain/providers/celer-trade-provider/celer-message-bus-controller/celler-message-bus-controller';

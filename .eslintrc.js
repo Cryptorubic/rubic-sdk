@@ -41,15 +41,6 @@ module.exports = {
                 'class-methods-use-this': 'off',
                 complexity: ['error', 20],
                 eqeqeq: ['error', 'smart'],
-                'no-magic-numbers': 'off',
-                '@typescript-eslint/no-magic-numbers': [
-                    'warn',
-                    {
-                        ignore: [-1, 0, 1, 2, 3, 10, 18, 100, 1000, 16, 64, 256],
-                        detectObjects: true,
-                        ignoreReadonlyClassProperties: true
-                    }
-                ],
                 '@typescript-eslint/naming-convention': [
                     'error',
                     {
@@ -130,15 +121,6 @@ module.exports = {
                 'class-methods-use-this': 'off',
                 complexity: ['error', 20],
                 eqeqeq: ['error', 'smart'],
-                'no-magic-numbers': 'off',
-                '@typescript-eslint/no-magic-numbers': [
-                    'warn',
-                    {
-                        ignore: [-1, 0, 1, 2, 3, 10, 100, 1000, 16, 64, 256, 5000, 10_000],
-                        detectObjects: true,
-                        ignoreReadonlyClassProperties: true
-                    }
-                ],
                 '@typescript-eslint/naming-convention': [
                     'error',
                     {

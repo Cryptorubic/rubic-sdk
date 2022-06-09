@@ -6,7 +6,7 @@ import { compareAddresses } from 'src/common';
 import { v3LikeCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/v3-like-celer-swap-info';
 import { UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
 import { DestinationCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
-import { SwapVersion } from '@features/cross-chain/providers/common/models/provider-type.enum';
+import { SwapVersion } from '@features/cross-chain/providers/common/celer-rubic/models/provider-type.enum';
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 
 export class CrossChainUniswapV3Trade implements CrossChainInstantTrade {

@@ -42,7 +42,8 @@
       "@features/*": ["./src/features/*"]
     },
     "rootDir": "src",
-    "allowJs": true
+    "allowJs": true,
+    "skipLibCheck": true
   },
   "include": ["src"],
   "exclude": ["__tests__" ,"node_modules", "lib", "types"],

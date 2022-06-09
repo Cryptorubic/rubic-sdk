@@ -1,6 +1,6 @@
 import { BlockchainName, BlockchainsInfo, PriceTokenAmount } from 'src/core';
 import { UniswapV2AbstractTrade } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
-import { CrossChainSupportedInstantTrade } from '@features/cross-chain/providers/common/models/cross-chain-supported-instant-trade';
+import { CrossChainSupportedInstantTrade } from '@features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
 import { CrossChainInstantTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/cross-chain-instant-trade';
 import { CrossChainUniswapV2Trade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-cross-chain-instant-trade/cross-chain-uniswap-v2-trade';
 import { CelerCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';

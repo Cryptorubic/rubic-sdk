@@ -4,8 +4,8 @@ import { AbiItem } from 'web3-utils';
 import { BlockchainName } from 'src/core';
 import { Cache } from 'src/common';
 import { ProviderData } from '@features/cross-chain/models/provider-data';
-import { CrossChainContractData } from '@features/cross-chain/providers/common/cross-chain-contract-data';
-import { CrossChainSupportedInstantTradeProvider } from '@features/cross-chain/providers/common/models/cross-chain-supported-instant-trade';
+import { CrossChainContractData } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
+import { CrossChainSupportedInstantTradeProvider } from '@features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
 
 export abstract class CrossChainContractTrade {
     public abstract readonly fromToken: PriceTokenAmount;

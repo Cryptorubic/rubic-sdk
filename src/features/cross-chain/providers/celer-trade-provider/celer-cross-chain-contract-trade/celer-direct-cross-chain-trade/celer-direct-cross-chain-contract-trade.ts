@@ -5,7 +5,7 @@ import { CelerCrossChainContractTrade } from '@features/cross-chain/providers/ce
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 import { CelerCrossChainContractData } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
 import { DestinationCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
-import { SwapVersion } from '@features/cross-chain/providers/common/models/provider-type.enum';
+import { SwapVersion } from '@features/cross-chain/providers/common/celer-rubic/models/provider-type.enum';
 import { BridgeCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/bridge-celer-swap-info';
 import { CelerCrossChainSupportedBlockchain } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
 

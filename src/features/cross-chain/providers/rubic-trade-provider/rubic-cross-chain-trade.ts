@@ -9,14 +9,14 @@ import { SwapTransactionOptions } from '@features/instant-trades/models/swap-tra
 import BigNumber from 'bignumber.js';
 import { RubicItCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
-import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
+import { CelerRubicCrossChainTrade } from '@features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade';
 import { Web3Public } from 'src/core';
-import { CrossChainContractTrade } from '@features/cross-chain/providers/common/cross-chain-contract-trade';
+import { CrossChainContractTrade } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import { ContractParams } from '@features/cross-chain/models/contract-params';
 import { LowSlippageDeflationaryTokenError, RubicSdkError } from 'src/common';
 import { TOKEN_WITH_FEE_ERRORS } from '@features/cross-chain/constants/token-with-fee-errors';
 
-export class RubicCrossChainTrade extends CrossChainTrade {
+export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
     public static async getGasData(
         fromTrade: CrossChainContractTrade,
         toTrade: CrossChainContractTrade,

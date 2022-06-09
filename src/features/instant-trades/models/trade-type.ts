@@ -28,7 +28,8 @@ export const TRADE_TYPE = {
     TRISOLARIS: 'TRISOLARIS',
     WANNA_SWAP: 'WANNA_SWAP',
     SUSHI_SWAP_TELOS: 'SUSHI_SWAP_TELOS',
-    ZAPPY: 'ZAPPY'
+    ZAPPY: 'ZAPPY',
+    ONE_INCH_AVALANCHE: 'ONE_INCH_AVALANCHE'
 } as const;
 
 export type TradeType = keyof typeof TRADE_TYPE;
