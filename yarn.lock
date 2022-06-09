@@ -6582,9 +6582,9 @@ swarm-js@^0.1.40:
     xhr-request "^1.0.1"
 
 symbiosis-js-sdk@^2.6.5:
-  version "2.6.5"
-  resolved "https://registry.npmjs.org/symbiosis-js-sdk/-/symbiosis-js-sdk-2.6.5.tgz"
-  integrity sha512-x77JKLLPVZBmJIpMAH4hmAN/zKbUAoiwOtP6b6oS1vFXoBi6MFPC4PG93lbRjVn8NmSvdKzVl+ciOk6ym31mZg==
+  version "2.7.3"
+  resolved "https://registry.yarnpkg.com/symbiosis-js-sdk/-/symbiosis-js-sdk-2.7.3.tgz#d2a0383f3940ea4b761623a5644c71727e9efa13"
+  integrity sha512-qRYN+xPIOr9287cZ5Ey9vpeEHhFpYKRj0YPdR998IDJBAB2T670+5WouFQ57EBwYCoVDd8enPnDIAP3CF7c2eQ==
   dependencies:
     big.js "^5.2.2"
     bignumber.js "^9.0.1"
@@ -6802,10 +6802,10 @@ ts-jest@^27.1.2:
     semver "7.x"
     yargs-parser "20.x"
 
-ts-loader@^9.2.6:
-  version "9.2.6"
-  resolved "https://registry.npmjs.org/ts-loader/-/ts-loader-9.2.6.tgz"
-  integrity sha512-QMTC4UFzHmu9wU2VHZEmWWE9cUajjfcdcws+Gh7FhiO+Dy0RnR1bNz0YCHqhI0yRowCE9arVnNxYHqELOy9Hjw==
+ts-loader@^9.3.0:
+  version "9.3.0"
+  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-9.3.0.tgz#980f4dbfb60e517179e15e10ed98e454b132159f"
+  integrity sha512-2kLLAdAD+FCKijvGKi9sS0OzoqxLCF3CxHpok7rVgCZ5UldRzH0TkbwG9XECKjBzHsAewntC5oDaI/FwKzEUog==
   dependencies:
     chalk "^4.1.0"
     enhanced-resolve "^5.0.0"
