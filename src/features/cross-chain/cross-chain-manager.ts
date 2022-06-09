@@ -9,7 +9,13 @@ import { getPriceTokensFromInputTokens } from '@common/utils/tokens';
 import { Mutable } from '@common/utils/types/mutable';
 import { CelerCrossChainTradeProvider } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade-provider';
 import { CcrTypedTradeProviders } from '@features/cross-chain/models/typed-trade-provider';
-import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from 'src/features';
+import {
+    CelerCrossChainTrade,
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTrade,
+    CrossChainTradeType,
+    SymbiosisCrossChainTrade
+} from 'src/features';
 import { SwapManagerCrossChainCalculationOptions } from '@features/cross-chain/models/swap-manager-cross-chain-options';
 import pTimeout from '@common/utils/p-timeout';
 import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
@@ -90,16 +96,24 @@ export class CrossChainManager {
         to: PriceToken,
         options: RequiredSwapManagerCalculationOptions
     ): Promise<WrappedCrossChainTrade> {
-        const trades = await this.calculateTradeFromTokens(from, to, this.getFullOptions(options));
-        if (!hasLengthAtLeast(trades, 1)) {
+        const wrappedTrades = await this.calculateTradeFromTokens(
+            from,
+            to,
+            this.getFullOptions(options)
+        );
+        if (!hasLengthAtLeast(wrappedTrades, 1)) {
             throw new Error('[RUBIC SDK] Trades array has to be defined');
         }
 
-        const sortedTrades = trades.sort((firstTrade, secondTrade) => {
-            const firstTradeAmount = firstTrade.trade?.to?.tokenAmount || new BigNumber(0);
-            const secondTradeAmount = secondTrade.trade?.to?.tokenAmount || new BigNumber(0);
+        const transitTokenAmount = (
+            wrappedTrades.find(wrappedTrade => wrappedTrade.trade instanceof CelerCrossChainTrade)
+                ?.trade as CelerCrossChainTrade
+        )?.fromTrade.toToken.tokenAmount;
+        const sortedTrades = wrappedTrades.sort((firstTrade, secondTrade) => {
+            const firstTradeAmount = this.getProviderRatio(firstTrade.trade, transitTokenAmount);
+            const secondTradeAmount = this.getProviderRatio(secondTrade.trade, transitTokenAmount);
 
-            return secondTradeAmount.comparedTo(firstTradeAmount);
+            return firstTradeAmount.comparedTo(secondTradeAmount);
         });
 
         const filteredTrades = sortedTrades.filter(
@@ -131,6 +145,20 @@ export class CrossChainManager {
             minAmountError,
             maxAmountError
         };
+    }
+
+    private getProviderRatio(trade: CrossChainTrade | null, transitTokenAmount: BigNumber) {
+        if (!trade) {
+            return new BigNumber(Infinity);
+        }
+
+        if (trade instanceof SymbiosisCrossChainTrade) {
+            return transitTokenAmount.dividedBy(trade.to.tokenAmount);
+        }
+
+        return transitTokenAmount
+            .plus((trade as CelerCrossChainTrade).cryptoFeeToken.price)
+            .dividedBy(trade.to.tokenAmount);
     }
 
     private async calculateTradeFromTokens(

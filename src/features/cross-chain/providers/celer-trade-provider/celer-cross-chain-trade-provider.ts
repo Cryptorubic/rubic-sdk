@@ -77,7 +77,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             fromTransitToken
         );
 
-        const { toSlippageTolerance: toSlippage } = slippages;
+        const { fromSlippageTolerance, toSlippageTolerance: toSlippage } = slippages;
         const toSlippageTolerance = toSlippage - celerSlippage;
 
         if (toSlippageTolerance < 0) {
@@ -121,7 +121,20 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
 
         await this.checkContractsState(fromTrade, toTrade);
 
-        const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
+        let cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
+        const nativeTokenPrice = (
+            await this.getBestItContractTrade(
+                fromBlockchain,
+                cryptoFeeToken,
+                fromTransitToken,
+                fromSlippageTolerance
+            )
+        ).toToken.tokenAmount;
+        cryptoFeeToken = new PriceTokenAmount({
+            ...cryptoFeeToken.asStructWithAmount,
+            price: nativeTokenPrice
+        });
+
         const gasData =
             gasCalculation === 'enabled'
                 ? await CelerCrossChainTrade.getGasData(
