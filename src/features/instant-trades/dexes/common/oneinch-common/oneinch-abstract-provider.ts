@@ -28,7 +28,9 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
     private readonly defaultOptions: Required<OneinchSwapCalculationOptions> = {
         gasCalculation: 'calculate',
         disableMultihops: false,
-        slippageTolerance: 0.02
+        slippageTolerance: 0.02,
+        wrappedAddress: oneinchApiParams.nativeAddress,
+        fromAddress: this.walletAddress
     };
 
     protected readonly gasMargin = 1;
@@ -81,21 +83,22 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
     ): Promise<OneinchTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
-        const fromClone = createTokenNativeAddressProxy(from, oneinchApiParams.nativeAddress);
+        const fromTokenClone = createTokenNativeAddressProxy(from, oneinchApiParams.nativeAddress);
         const toTokenClone = createTokenNativeAddressProxy(toToken, oneinchApiParams.nativeAddress);
 
         const supportedTokensAddresses = await this.getSupportedTokensByBlockchain();
         if (
-            !supportedTokensAddresses.includes(fromClone.address.toLowerCase()) ||
+            !supportedTokensAddresses.includes(fromTokenClone.address.toLowerCase()) ||
             !supportedTokensAddresses.includes(toTokenClone.address.toLowerCase())
         ) {
             throw new RubicSdkError("Oneinch doesn't support this tokens");
         }
 
-        const [contractAddress, { toTokenAmountInWei, estimatedGas, path }] = await Promise.all([
-            this.loadContractAddress(),
-            this.getTradeInfo(fromClone, toTokenClone, fullOptions)
-        ]);
+        const [contractAddress, { toTokenAmountInWei, estimatedGas, path, data }] =
+            await Promise.all([
+                this.loadContractAddress(),
+                this.getTradeInfo(fromTokenClone, toTokenClone, fullOptions)
+            ]);
         path[0] = from;
         path[path.length - 1] = toToken;
 
@@ -108,7 +111,8 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
             }),
             slippageTolerance: fullOptions.slippageTolerance,
             disableMultihops: fullOptions.disableMultihops,
-            path
+            path,
+            data
         };
         if (fullOptions.gasCalculation === 'disabled') {
             return new OneinchTrade(oneinchTradeStruct);
@@ -130,10 +134,15 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         toTokenAmountInWei: BigNumber;
         estimatedGas: BigNumber;
         path: Token[];
+        data: string | null;
     }> {
+        const isDefaultWrappedAddress = options.wrappedAddress === oneinchApiParams.nativeAddress;
+        const isNative = from.isNative || from.address === oneinchApiParams.nativeAddress;
+        const fromTokenAddress =
+            isNative && !isDefaultWrappedAddress ? options.wrappedAddress : from.address;
         const quoteTradeParams: OneinchQuoteRequest = {
             params: {
-                fromTokenAddress: from.address,
+                fromTokenAddress,
                 toTokenAddress: toToken.address,
                 amount: from.stringWeiAmount,
                 mainRouteParts: options.disableMultihops ? '1' : undefined
@@ -143,6 +152,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         let oneInchTrade: OneinchSwapResponse | OneinchQuoteResponse;
         let estimatedGas: BigNumber;
         let toTokenAmount: string;
+        let data: string | null = null;
         try {
             if (!this.walletAddress) {
                 throw new Error('Address is not set');
@@ -156,7 +166,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
                 params: {
                     ...quoteTradeParams.params,
                     slippage: (options.slippageTolerance * 100).toString(),
-                    fromAddress: this.walletAddress,
+                    fromAddress: options.fromAddress,
                     disableEstimate: options.gasCalculation === 'disabled'
                 }
             };
@@ -167,6 +177,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
 
             estimatedGas = new BigNumber(oneInchTrade.tx.gas);
             toTokenAmount = oneInchTrade.toTokenAmount;
+            data = oneInchTrade.tx.data;
         } catch (_err) {
             oneInchTrade = await this.httpClient.get<OneinchQuoteResponse>(
                 `${this.apiBaseUrl}/quote`,
@@ -182,7 +193,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
 
         const path = await this.extractPath(from, toToken, oneInchTrade);
 
-        return { toTokenAmountInWei: new BigNumber(toTokenAmount), estimatedGas, path };
+        return { toTokenAmountInWei: new BigNumber(toTokenAmount), estimatedGas, path, data };
     }
 
     /**
@@ -194,7 +205,12 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         toToken: Token,
         oneInchTrade: OneinchSwapResponse | OneinchQuoteResponse
     ): Promise<Token[]> {
-        const addressesPath = oneInchTrade.protocols[0].map(protocol => protocol[0].toTokenAddress);
+        const addressesPath = oneInchTrade.protocols[0].map(protocol => {
+            if (!protocol?.[0]) {
+                throw new Error('[RUBIC SDK] Protocol[0] has to be defined.');
+            }
+            return protocol[0].toTokenAddress;
+        });
         addressesPath.pop();
 
         const tokensPathWithoutNative = await Token.createTokens(
@@ -208,6 +224,10 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
             }
 
             const token = tokensPathWithoutNative[tokensPathWithoutNativeIndex];
+            if (!token) {
+                throw new Error('[RUBIC SDK] Token has to be defined.');
+            }
+
             tokensPathWithoutNativeIndex++;
 
             return token;

@@ -1,5 +1,5 @@
 import pTimeout from '@common/utils/p-timeout';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BLOCKCHAIN_NAME, BlockchainName } from '@core/blockchain/models/blockchain-name';
 import { Injector } from '@core/sdk/injector';
 import { Cache } from 'src/common';
 import BigNumber from 'bignumber.js';
@@ -19,7 +19,7 @@ export class GasPriceApi {
      * @param blockchain Blockchain to get gas price from.
      * @return Promise<BigNumber> Average gas price in Wei.
      */
-    public getGasPrice(blockchain: BLOCKCHAIN_NAME): Promise<string> {
+    public getGasPrice(blockchain: BlockchainName): Promise<string> {
         if (blockchain === BLOCKCHAIN_NAME.ETHEREUM) {
             return this.fetchEthGas();
         }
@@ -31,7 +31,7 @@ export class GasPriceApi {
      * @param blockchain Blockchain to get gas price from.
      * @return Promise<BigNumber> Average gas price in Eth units.
      */
-    public async getGasPriceInEthUnits(blockchain: BLOCKCHAIN_NAME): Promise<BigNumber> {
+    public async getGasPriceInEthUnits(blockchain: BlockchainName): Promise<BigNumber> {
         return Web3Pure.fromWei(await this.getGasPrice(blockchain));
     }
 
@@ -72,7 +72,7 @@ export class GasPriceApi {
     @Cache({
         maxAge: GasPriceApi.requestInterval
     })
-    private fetchGas(blockchain: BLOCKCHAIN_NAME): Promise<string> {
+    private fetchGas(blockchain: BlockchainName): Promise<string> {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
         return web3Public.getGasPrice();
     }

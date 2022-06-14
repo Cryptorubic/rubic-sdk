@@ -56,7 +56,7 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
         path: Token[];
         methodData: MethodData;
     } {
-        if (path.length === 2) {
+        if (path.length === 2 && path?.[0] && path?.[1]) {
             const methodName =
                 exact === 'input' ? 'quoteExactInputSingle' : 'quoteExactOutputSingle';
             const limitSqrtPrice = 0;
@@ -130,9 +130,13 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
         return results
             .map((result: ContractMulticallResponse<{ 0: string }>, index: number) => {
                 if (result.success) {
+                    const quoter = quoterMethodsData?.[index];
+                    if (!quoter) {
+                        throw new Error('[RUBIC SDK] Quoter has to be defined.');
+                    }
                     return {
                         outputAbsoluteAmount: new BigNumber(result.output![0]),
-                        path: quoterMethodsData[index].path
+                        path: quoter.path
                     };
                 }
                 return null;

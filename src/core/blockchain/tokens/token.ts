@@ -1,12 +1,12 @@
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@core/sdk/injector';
 import { compareAddresses } from '@common/utils/blockchain';
 
 export type TokenStruct = {
-    blockchain: BLOCKCHAIN_NAME;
+    blockchain: BlockchainName;
     address: string;
     name: string;
     symbol: string;
@@ -32,7 +32,7 @@ export class Token {
 
     public static async createTokens(
         tokensAddresses: string[] | ReadonlyArray<string>,
-        blockchain: BLOCKCHAIN_NAME
+        blockchain: BlockchainName
     ): Promise<Token[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
         const tokenInfo = await web3Public.callForTokensInfo(tokensAddresses);
@@ -46,8 +46,13 @@ export class Token {
                 throw new RubicSdkError('Error while loading token');
             }
 
+            const address = tokensAddresses?.[index];
+            if (!address) {
+                throw new RubicSdkError('[RUBIC SDK] Address has to be defined.');
+            }
+
             return new Token({
-                address: tokensAddresses[index],
+                address,
                 blockchain,
                 name: tokenInfo.name,
                 symbol: tokenInfo.symbol,
@@ -60,7 +65,7 @@ export class Token {
         return tokens.map(token => token.address);
     }
 
-    public readonly blockchain: BLOCKCHAIN_NAME;
+    public readonly blockchain: BlockchainName;
 
     public readonly address: string;
 

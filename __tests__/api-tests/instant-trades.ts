@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
 import { SDK } from '@core/sdk/sdk';
 import { minimalConfiguration } from '../utils/configuration';
 

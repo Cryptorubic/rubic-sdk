@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
 import { UniswapV2AbstractProvider } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
 import { UNISWAP_V2_ETHEREUM_PROVIDER_CONFIGURATION } from '@features/instant-trades/dexes/ethereum/uni-swap-v2-ethereum/constants';
 import { UniSwapV2EthereumTrade } from '@features/instant-trades/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-trade';

@@ -8,13 +8,13 @@ import { Injector } from '@core/sdk/injector';
 import { EncodeTransactionOptions } from '@features/instant-trades/models/encode-transaction-options';
 import { GasFeeInfo } from '@features/instant-trades/models/gas-fee-info';
 import { SwapTransactionOptions } from '@features/instant-trades/models/swap-transaction-options';
-import { TradeType } from 'src/features';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { Web3Public } from '@core/blockchain/web3-public/web3-public';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import { OptionsGasParams, TransactionGasParams } from '@features/instant-trades/models/gas-params';
 import { Cache } from 'src/common';
+import { TradeType } from 'src/features';
 
 export abstract class InstantTrade {
     public abstract readonly from: PriceTokenAmount;
@@ -45,7 +45,7 @@ export abstract class InstantTrade {
         return this.from.calculatePriceImpactPercent(this.to);
     }
 
-    protected constructor(blockchain: BLOCKCHAIN_NAME) {
+    protected constructor(blockchain: BlockchainName) {
         this.web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
     }
 

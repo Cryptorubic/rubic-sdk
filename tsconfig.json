@@ -29,6 +29,7 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "useUnknownInCatchVariables": false,
+    "noUncheckedIndexedAccess": true,
     "outDir": "lib",
     "baseUrl": ".",
     "paths": {
@@ -41,8 +42,13 @@
       "@features/*": ["./src/features/*"]
     },
     "rootDir": "src",
-    "allowJs": true
+    "allowJs": true,
+    "skipLibCheck": true
   },
   "include": ["src"],
-  "exclude": ["__tests__" ,"node_modules", "lib", "types"]
+  "exclude": ["__tests__" ,"node_modules", "lib", "types"],
+  "typedocOptions": {
+    "entryPoints": ["src/index.ts"],
+    "out": "docs"
+  }
 }

@@ -8,7 +8,7 @@ import { DEFAULT_MNEMONIC } from '__tests__/utils/constants/mnemonic';
 import { TOKENS_HOLDERS } from '__tests__/utils/tokens';
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
-import { BLOCKCHAIN_NAME, Configuration, Token } from 'src/core';
+import { BlockchainName, Configuration, Token } from 'src/core';
 import * as util from 'util';
 import Web3 from 'web3';
 import { HttpProvider } from 'web3-core';
@@ -33,7 +33,7 @@ export class Chain {
     }
 
     public static async reset(
-        blockchainName: BLOCKCHAIN_NAME,
+        blockchainName: BlockchainName,
         blockNumber?: number
     ): Promise<Chain> {
         const rpcUrl = publicProvidersRPC[blockchainName];

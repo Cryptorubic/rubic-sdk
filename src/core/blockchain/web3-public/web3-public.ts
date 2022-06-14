@@ -9,7 +9,7 @@ import {
     isBlockchainHealthcheckAvailable
 } from '@core/blockchain/constants/healthcheck';
 import { nativeTokensList } from '@core/blockchain/constants/native-tokens';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import { MULTICALL_ABI } from '@core/blockchain/web3-public/constants/multicall-abi';
 import { MULTICALL_ADDRESSES } from '@core/blockchain/web3-public/constants/multicall-addresses';
 import { BatchCall } from '@core/blockchain/web3-public/models/batch-call';
@@ -36,7 +36,7 @@ type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
  * To send transaction or execute contract method use {@link Web3Private}.
  */
 export class Web3Public {
-    private multicallAddresses: Record<BLOCKCHAIN_NAME, string> = MULTICALL_ADDRESSES;
+    private multicallAddresses: Record<BlockchainName, string> = MULTICALL_ADDRESSES;
 
     private readonly clearController: { clear: boolean } = { clear: false };
 
@@ -47,7 +47,7 @@ export class Web3Public {
      */
     constructor(
         private readonly web3: Web3,
-        private readonly blockchainName: BLOCKCHAIN_NAME,
+        private readonly blockchainName: BlockchainName,
         private httpClient?: HttpClient
     ) {}
 
@@ -368,14 +368,16 @@ export class Web3Public {
         contractAbi: AbiItem[],
         methodsData: MethodData[]
     ): Promise<ContractMulticallResponse<Output>[]> {
-        return (
-            await this.multicallContractsMethods<Output>(contractAbi, [
-                {
-                    contractAddress,
-                    methodsData
-                }
-            ])
-        )[0];
+        const results = await this.multicallContractsMethods<Output>(contractAbi, [
+            {
+                contractAddress,
+                methodsData
+            }
+        ]);
+        if (!results?.[0]) {
+            throw new Error('[RUBIC SDK] Cant perform multicall or request data is empty.');
+        }
+        return results[0];
     }
 
     /**
@@ -407,6 +409,10 @@ export class Web3Public {
                     funcSignature => funcSignature.name === methodData.methodName
                 )!.outputs!;
                 const output = outputs[outputIndex];
+                if (!output) {
+                    throw new Error('[RUBIC SDK] Output has to be defined');
+                }
+
                 outputIndex++;
 
                 return {
@@ -465,10 +471,13 @@ export class Web3Public {
             this.callContractMethod(tokenAddress, ERC20_TOKEN_ABI, method)
         );
         const tokenFieldsResults = await Promise.all(tokenFieldsPromises);
-        return tokenFieldsResults.reduce(
-            (acc, field, index) => ({ ...acc, [tokenFields[index]]: field }),
-            {} as Record<SupportedTokenField, string>
-        );
+        return tokenFieldsResults.reduce((acc, field, index) => {
+            const fieldName = tokenFields[index];
+            if (!fieldName) {
+                throw new Error('[RUBIC SDK] Field name has to be defined.');
+            }
+            return { ...acc, [fieldName]: field };
+        }, {} as Record<SupportedTokenField, string>);
     }
 
     /**
@@ -548,8 +557,8 @@ export class Web3Public {
                     from: fromAddress,
                     to: contractAddress,
                     data,
-                    ...(callsData[index].value && {
-                        value: `0x${parseInt(callsData[index].value!).toString(16)}`
+                    ...(callsData?.[index]?.value && {
+                        value: `0x${parseInt(callsData?.[index]?.value!).toString(16)}`
                     })
                 }
             }));

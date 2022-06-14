@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/BLOCKCHAIN_NAME';
+import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import { ContractMulticallResponse } from '@core/blockchain/web3-public/models/contract-multicall-response';
 import { Injector } from '@core/sdk/injector';
 import {
@@ -20,7 +20,7 @@ export class SolarbeamTrade extends UniswapV2AbstractTrade {
     }
 
     public static callForRoutes(
-        blockchain: BLOCKCHAIN_NAME,
+        blockchain: BlockchainName,
         exact: Exact,
         routesMethodArguments: [string, string[]][]
     ): Promise<ContractMulticallResponse<{ amounts: string[] }>[]> {

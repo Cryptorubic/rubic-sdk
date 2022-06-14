@@ -22,6 +22,7 @@ import { UniswapV3TradeClass } from '@features/instant-trades/dexes/common/unisw
 import { UniswapV3AlgebraRoute } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
 import { Exact } from '@features/instant-trades/models/exact';
 import { getFromToTokensAmountsByExact } from '@features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
+import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
@@ -40,7 +41,9 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         gasCalculation: 'calculate',
         disableMultihops: false,
         deadlineMinutes: 20,
-        slippageTolerance: 0.02
+        slippageTolerance: 0.02,
+        wrappedAddress: EMPTY_ADDRESS,
+        fromAddress: ''
     };
 
     protected abstract createTradeInstance(
@@ -159,7 +162,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             throw new InsufficientLiquidityError();
         }
 
-        if (options.gasCalculation === 'disabled') {
+        if (options.gasCalculation === 'disabled' && routes?.[0]) {
             return {
                 route: routes[0]
             };
@@ -183,6 +186,9 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             const calculatedProfits: UniswapV3AlgebraCalculatedInfoWithProfit[] = routes.map(
                 (route, index) => {
                     const estimatedGas = estimatedGasLimits[index];
+                    if (!estimatedGas) {
+                        throw new Error('[RUBIC SDK] Estimate gas has have to be defined.');
+                    }
                     const gasFeeInUsd = gasPriceInUsd!.multipliedBy(estimatedGas);
                     const profit = Web3Pure.fromWei(route.outputAbsoluteAmount, to.decimals)
                         .multipliedBy(to.price)
@@ -196,10 +202,18 @@ export abstract class UniswapV3AlgebraAbstractProvider<
                 }
             );
 
-            return calculatedProfits.sort((a, b) => b.profit.comparedTo(a.profit))[0];
+            const sortedRoutes = calculatedProfits.sort((a, b) => b.profit.comparedTo(a.profit))[0];
+            if (!sortedRoutes) {
+                throw new Error('[RUBIC SDK] Sorted routes have to be defined.');
+            }
+
+            return sortedRoutes;
         }
 
         const route = routes[0];
+        if (!route) {
+            throw new Error('[RUBIC SDK] Route has to be defined.');
+        }
         const estimatedGas = await this.InstantTradeClass.estimateGasLimitForRoute(
             from,
             to,
