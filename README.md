@@ -17,79 +17,78 @@
   - [Get started with tokens](#get-started-with-tokens)
 - [API](#api)
   - [Core](#core)
-    - [SDK.createSDK static method](#sdkcreatesdk-static-method)
-    - [sdk.updateConfiguration method](#sdkupdateconfiguration-method)
-    - [sdk.instantTrades readonly field](#sdkinstanttrades-readonly-field)
-    - [sdk.crossChain readonly field](#sdkcrosschain-readonly-field)
-    - [sdk.crossChainSymbiosisManger readonly field](#sdkcrosschainsymbiosismanager-readonly-field)
-    - [sdk.tokens readonly field](#sdktokens-readonly-field)
-    - [sdk.web3PublicService readonly field](#sdkweb3publicservice-readonly-field)
-    - [sdk.web3Private readonly field](#sdkweb3private-readonly-field)
-    - [sdk.gasPriceApi readonly field](#sdkgaspriceapi-readonly-field)
-    - [sdk.cryptoPriceApi readonly field](#sdkcryptopriceapi-readonly-field)
+    - [createSDK](#sdkcreatesdk-static-method)
+    - [updateConfiguration](#sdkupdateconfiguration-method)
+    - [instantTrades](#sdkinstanttrades-readonly-field)
+    - [crossChain](#sdkcrosschain-readonly-field)
+    - [crossChainSymbiosisManger](#sdkcrosschainsymbiosismanager-readonly-field)
+    - [tokens](#sdktokens-readonly-field)
+    - [web3PublicService](#sdkweb3publicservice-readonly-field)
+    - [web3Private](#sdkweb3private-readonly-field)
+    - [gasPriceApi](#sdkgaspriceapi-readonly-field)
+    - [cryptoPriceApi](#sdkcryptopriceapi-readonly-field)
   - [Instant Trades Manager](#instant-trades-manager)
-    - [sdk.instantTrades.calculateTrade method](#sdkinstanttradescalculatetrade-method)
-    - [sdk.instantTrades.blockchainTradeProviders readonly field](#sdkinstanttradesblockchaintradeproviders-readonly-field)
+    - [calculateTrade](#instanttradescalculatetrade-method)
+    - [blockchainTradeProviders](#instanttradesblockchaintradeproviders-readonly-field)
   - [Instant Trade](#instant-trade)
-    - [instantTrade.swap method](#instanttradeswap-method)
-    - [instantTrade.encode method](#instanttradeencode-method)
-    - [instantTrade.needApprove method](#instanttradeneedapprove-method)
-    - [instantTrade.type readonly field](#instanttradetype-readonly-field)
-    - [instantTrade.from readonly field](#instanttradefrom-readonly-field)
-    - [instantTrade.to readonly field](#instanttradeto-readonly-field)
-    - [instantTrade.gasFeeInfo mutable field](#instanttradegasfeeinfo-mutable-field)
-    - [instantTrade.slippageTolerance mutable field](#instanttradeslippagetolerance-mutable-field)
-    - [instantTrade.toTokenAmountMin getter](#instanttradetotokenamountmin-getter)
-    - [instantTrade.deadlineMinutes mutable field](#instanttradedeadlineminutes-mutable-field)
-    - [instantTrade.path readonly field](#instanttradepath-readonly-field)
-    - [isUniswapV2LikeTrade function](#isuniswapv2liketrade-function)
-    - [isUniswapV3LikeTrade function](#isuniswapv3liketrade-function)
-    - [isOneInchLikeTrade function](#isoneinchliketrade-function)
-    - [isZrxLikeTradeLikeTrade function](#iszrxliketradeliketrade-function)
+    - [swap](#instanttradeswap-method)
+    - [encode](#instanttradeencode-method)
+    - [needApprove](#instanttradeneedapprove-method)
+    - [type](#instanttradetype-readonly-field)
+    - [from](#instanttradefrom-readonly-field)
+    - [to](#instanttradeto-readonly-field)
+    - [gasFeeInfo](#instanttradegasfeeinfo-mutable-field)
+    - [slippageTolerance](#instanttradeslippagetolerance-mutable-field)
+    - [toTokenAmountMin](#instanttradetotokenamountmin-getter)
+    - [deadlineMinutes](#instanttradedeadlineminutes-mutable-field)
+    - [path](#instanttradepath-readonly-field)
+    - [isUniswapV2LikeTrade](#isuniswapv2liketrade-function)
+    - [isUniswapV3LikeTrade](#isuniswapv3liketrade-function)
+    - [isOneInchLikeTrade](#isoneinchliketrade-function)
+    - [isZrxLikeTradeLikeTrade](#iszrxliketradeliketrade-function)
+    - [isAlgebraTrade](#isalgebratrade-function)
   - [Cross Chain Manager](#cross-chain-manager)
-    - [sdk.crossChain.calculateTrade method](#sdkcrosschaincalculatetrade-method)
+    - [calculateTrade](#crosschaincalculatetrade-method)
   - [Wrapped Cross Chain Trade](#wrapped-cross-chain-trade)
   - [Cross Chain Trade](#cross-chain-trade)
-    - [crossChainTrade.swap method](#crosschaintradeswap-method)
-    - [crossChainTrade.needAapprove method](#crosschaintradeneedapprove-method)
-    - [crossChainTrade.approve method](#crosschaintradeapprove-method)
-    - [crossChainTrade.from readonly field](#crosschaintradefrom-readonly-field)
-    - [crossChainTrade.to readonly field](#crosschaintradeto-readonly-field)
-    - [crossChainTrade.toTokenAmountMin readonly field](#crosschaintradetotokenamountmin-readonly-field)
-    - [crossChainTrade.estimatedGas getter](#crosschaintradeestimatedgas-getter)
-  - [Celer Cross Chain Trade and Rubic Cross Chain Trade](#celer-cross-chain-trade-and-rubic-cross-chain-trade)
-    - [crossChainTrade.priceImpactData getter](#crosschaintradepriceimpactdata-getter)
-  - [Symbiosis Cross Chain Trade](#symbiosis-cross-chain-trade)
-    - [crossChainTrade.priceImpact readonly field](#crosschaintradepriceimpact-readonly-field)
+    - [swap](#crosschaintradeswap-method)
+    - [needApprove](#crosschaintradeneedapprove-method)
+    - [approve](#crosschaintradeapprove-method)
+    - [from](#crosschaintradefrom-readonly-field)
+    - [to](#crosschaintradeto-readonly-field)
+    - [toTokenAmountMin](#crosschaintradetotokenamountmin-readonly-field)
+    - [estimatedGas](#crosschaintradeestimatedgas-getter)
+    - [priceImpactData](#crosschaintradepriceimpactdata-getter)
+    - [priceImpact readonly](#crosschaintradepriceimpact-readonly-field)
   - [Cross Chain Symbiosis Manager](#cross-chain-symbiosis-manager)
-    - [crossChainTrade.getUserTrades method](#crosschainsymbiosismanagergetusertrades-method)
-    - [crossChainTrade.revertTrade method](#crosschainsymbiosismanagerreverttrade-method)
+    - [getUserTrades](#crosschainsymbiosismanagergetusertrades-method)
+    - [revertTrade](#crosschainsymbiosismanagerreverttrade-method)
   - [Tokens](#tokens-manager)
     - [Tokens Manager](#tokens-manager)
-      - [tokensManager.createTokenFromStruct method](#tokensmanagercreatetokenfromstruct-method)
-      - [tokensManager.createToken method](#tokensmanagercreatetoken-method)
-      - [tokensManager.createTokensFromStructs method](#tokensmanagercreatetokensfromstructs-method)
-      - [tokensManager.createTokens method](#tokensmanagercreatetokens-method)
-      - [tokensManager.createPriceTokenFromStruct method](#tokensmanagercreatepricetokenfromstruct-method)
-      - [tokensManager.createPriceToken method](#tokensmanagercreatepricetoken-method)
-      - [tokensManager.createPriceTokenAmountFromStruct method](#tokensmanagercreatepricetokenamountfromstruct-method)
-      - [tokensManager.createPriceTokenAmount method](#tokensmanagercreatepricetokenamount-method)
+      - [createTokenFromStruct](#tokensmanagercreatetokenfromstruct-method)
+      - [createToken](#tokensmanagercreatetoken-method)
+      - [createTokensFromStructs](#tokensmanagercreatetokensfromstructs-method)
+      - [createTokens](#tokensmanagercreatetokens-method)
+      - [createPriceTokenFromStruct](#tokensmanagercreatepricetokenfromstruct-method)
+      - [createPriceToken](#tokensmanagercreatepricetoken-method)
+      - [createPriceTokenAmountFromStruct](#tokensmanagercreatepricetokenamountfromstruct-method)
+      - [createPriceTokenAmount](#tokensmanagercreatepricetokenamount-method)
     - [Token](#token)
       - [token fields](#token-fields)
-      - [token.isNative method](#tokenisnative-method)
-      - [token.isEqualTo method](#tokenisequalto-method)
-      - [token.clone method](#tokenclone-method)
+      - [isNative](#tokenisnative-getter)
+      - [isEqualTo](#tokenisequalto-method)
+      - [clone](#tokenclone-method)
     - [PriceToken](#pricetoken)
-      - [priceToken.asStruct getter](#pricetokenasstruct-getter)
-      - [priceToken.getAndUpdateTokenPrice method](#pricetokengetandupdatetokenprice-method)
-      - [priceToken.cloneAndCreate](#pricetokencloneandcreate)
+      - [asStruct](#pricetokenasstruct-getter)
+      - [getAndUpdateTokenPrice](#pricetokengetandupdatetokenprice-method)
+      - [cloneAndCreate](#pricetokencloneandcreate)
     - [PriceTokenAmount](#pricetokenamount)
-      - [priceTokenAmount.weiAmount getter](#pricetokenamountweiamount-getter)
-      - [priceTokenAmount.stringWeiAmount getter](#pricetokenamountstringweiamount-getter)
-      - [priceTokenAmount.tokenAmount getter](#pricetokenamounttokenamount-getter)
-      - [priceTokenAmount.weiAmountMinusSlippage method](#pricetokenamountweiamountminusslippage-method)
-      - [priceTokenAmount.weiAmountPlusSlippage method](#pricetokenamountweiamountplusslippage-method)
-      - [priceTokenAmount.calculatePriceImpactPercent method](#pricetokenamountcalculatepriceimpactpercent-method)
+      - [weiAmount](#pricetokenamountweiamount-getter)
+      - [stringWeiAmount](#pricetokenamountstringweiamount-getter)
+      - [tokenAmount](#pricetokenamounttokenamount-getter)
+      - [weiAmountMinusSlippage](#pricetokenamountweiamountminusslippage-method)
+      - [weiAmountPlusSlippage](#pricetokenamountweiamountplusslippage-method)
+      - [calculatePriceImpactPercent](#pricetokenamountcalculatepriceimpactpercent-method)
 
 ## Description
 In dApps a lot of business logic is often concentrated on the frontend for interacting with the blockchain. This SDK is built on the basis of [Rubic](https://github.com/Cryptorubic/rubic-app) multichain DeFi frontend part. SDK is a library for interacting with various dexes, as well as Rubic cross-chain swaps. It also includes a number of utilities useful when working with Ethereum.
@@ -411,18 +410,19 @@ console.log(token.stringWeiAmount); // 1000000
 
 ## API
 
-### Core 
+## Core 
 
-#### SDK.createSDK static method
+### SDK.createSDK static method
+
 ```typescript
 SDK.createSDK(configuration: Configuration): Promise<SDK>
 ```
 
 Creates new sdk instance. Changes dependencies of all sdk entities according to new configuration (even for entities created with other previous sdk instances).
 
-| Parameter     | Type          | Description                                                                        |
-|---------------|---------------|------------------------------------------------------------------------------------|
-| configuration | Configuration | Object contains main sdk settings like .env: rpc providers links, wallet object... |
+| Parameter     | Type          | Description                                                                           |
+|---------------|---------------|---------------------------------------------------------------------------------------|
+| configuration | Configuration | Object contains main sdk settings like .env: rpc providers links, wallet object, etc. |
 
 Configuration structure
 ```typescript
@@ -448,11 +448,11 @@ interface WalletProvider {
 
 **Configuration description:**
 
-| Property        | Type                                            | Description                                                                                                                                                                                                                                                                                                                                                                          | Default                              |
-|-----------------|-------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------|
-| rpcProviders    | `Partial<Record<BLOCKCHAIN_NAME, RpcProvider>>` | Rpc data to connect to blockchains you will use. You have to pass rpcProvider for each blockchain you will use with sdk.                                                                                                                                                                                                                                                             | Not set.                             |
-| walletProvider? | `WalletProvider`                                | Required to use `swap`, `approve` and other methods which sends transactions. But you can calculate and encode trades without `walletProvider`. Pass it when user connects wallet. Please note that address and chainId must match account address and selected chainId in the user wallet.                                                                                          | Not set.                             |
-| httpClient?     | `HttpClient`                                    | You can pass you own httpClient (e.g. HttpClient in Angular) if you have it to not duplicate http clients and decrease bundle size. Please note that default axios or native js fetch clients can't be used as `HttpClient` without modifications. Your http client must return promise which will resolve with parsed response body (like Angular httpClient). See interface below. | Lazy loading axios with interceptor. |
+| Property        | Type                                            | Description                                                                                                                                                                                                                                                                                                                                                                             | Default                              |
+|-----------------|-------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------|
+| rpcProviders    | `Partial<Record<BLOCKCHAIN_NAME, RpcProvider>>` | Rpc data to connect to blockchains you will use. You have to pass rpcProvider for each blockchain you will use with sdk.                                                                                                                                                                                                                                                                | Not set.                             |
+| walletProvider? | `WalletProvider`                                | Required to use `swap`, `approve` and other methods which sends transactions. But you can calculate and encode trades without `walletProvider`. Pass it when user connects wallet. Please note that `address` and `chainId` must match account address and selected chain id in a user's wallet.                                                                                        | Not set.                             |
+| httpClient?     | `HttpClient`                                    | You can pass your own http client (e.g. HttpClient in Angular) if you have it, to not duplicate http clients and decrease bundle size. Please note that default axios or native js fetch clients can't be used as `HttpClient` without modifications. Your http client must return promise which will resolve with parsed response body (like Angular HttpClient). See interface below. | Lazy loading axios with interceptor. |
 
 **HttpClient interface:**
 
@@ -481,24 +481,24 @@ interface HttpClient {
 
 | Property            | Type     | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Default  |
 |---------------------|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
-| mainRpc             | `string` | Rpc link. Copy it from your rpc provider (like Infura, Quicknode, Getblock, Moralis, ...) website.                                                                                                                                                                                                                                                                                                                                                                    | Not set. |
+| mainRpc             | `string` | Rpc link. Copy it from your rpc provider (like Infura, Quicknode, Getblock, Moralis, etc.) website.                                                                                                                                                                                                                                                                                                                                                                   | Not set. |
 | spareRpc?           | `string` | Same as `mainRpc`. Will be used instead `mainRpc` if mainRpc is out of timeout = `mainPrcTimeout`.                                                                                                                                                                                                                                                                                                                                                                    | Not set. |
 | mainPrcTimeout?     | number   | Specifies timeout **in ms** after that `mainRpc` will be replaced with `spareRpc` (if `spareRpc` is defined)                                                                                                                                                                                                                                                                                                                                                          | 10_000   |
 | healthCheckTimeout? | number   | Before the `mainRpc` link is applied to the sdk, all the `mainRpc` links will be checked for operability by receiving from the blockchain and verifying the predefined data. If an error occurs during the request, the received data does not match the specified one, or the timeout is exceeded, the `mainRpc` will be replaced with a spare one. This `healthCheckTimeout` parameter allows you to set the maximum allowable timeout when checking the `mainRpc`. | 4_000    |
 
 ---
 
-#### sdk.updateConfiguration method
+### sdk.updateConfiguration method
 
 ```typescript
 sdk.updateConfiguration(configuration: Configuration): Promise<void>
 ```
 
-Updates sdk configuration and sdk entities dependencies. Call it if user connects wallet, or user changes network or account in him wallet.
+Updates sdk configuration and sdk entities dependencies. Call it if user connects wallet or changes network or account in their wallet.
 
 ---
 
-#### sdk.instantTrades readonly field
+### sdk.instantTrades readonly field
 
 ```typescript
 sdk.instantTrades: InstantTradesManager
@@ -508,7 +508,7 @@ Instant trades manager object. Use it to calculate and create instant trades. [S
 
 ---
 
-#### sdk.crossChain readonly field
+### sdk.crossChain readonly field
 
 ```typescript
 sdk.crossChain: CrossChainManager
@@ -518,45 +518,46 @@ Cross-chain trades manager object. Use it to calculate and create cross-chain tr
 
 ---
 
-#### sdk.crossChainSymbiosisManager readonly field
+### sdk.crossChainSymbiosisManager readonly field
 
 ```typescript
 sdk.crossChainSymbiosisManager: CrossChainSymbiosisManager
 ```
 
-Cross-chain symbiosis manager object. Use it to get pending trades and symbiosis and revert them. [See more.](#cross-chain-symbiosis-manager)
+Cross-chain symbiosis manager object. Use it to get pending trades in symbiosis and revert them. [See more.](#cross-chain-symbiosis-manager)
 
 ---
 
-#### sdk.tokens readonly field
+### sdk.tokens readonly field
 
 ```typescript
 sdk.tokens: TokensManager
 ```
 
-Tokens manager object. Use it to fetch tokens data, to create new `Token`, `PriceToken`, `PriceTokenAmount` objects. [See more.](#tokens)
+Tokens manager object. Use it to fetch tokens data, to create new `Token`, `PriceToken`, `PriceTokenAmount` objects. [See more.](#tokens-manager)
 
 ---
 
-#### sdk.web3PublicService readonly field
+### sdk.web3PublicService readonly field
 
 ```typescript
 sdk.web3PublicService: Web3PublicService
 ```
 
-Use it to get `Web3Public` instance by blockchain name to get read information from blockchain.
+Use it to get `Web3Public` instance by blockchain name to get public information from blockchain.
 
 ```typescript
 const web3Public = sdk.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ETHEREUM);
 const ethBalance = await web3Public.getBalance('<user address>');
 const tokenBalance = await web3Public.getBalance('<user address>', '<token address>');
+...
 ```
 
 Explore Web3Public class to see available methods.
 
 --- 
 
-#### sdk.web3Private readonly field
+### sdk.web3Private readonly field
 
 ```typescript
 sdk.web3Private: Web3Private
@@ -567,13 +568,14 @@ Use it to send transactions and execute smart contracts methods.
 ```typescript
 const web3Private = sdk.web3Private;
 const transacionReceipt = await web3Private.transferTokens('<constract address>', ',toAddress>', 1000);
+...
 ```
 
 Explore Web3Private class to see available methods.
 
 ---
 
-#### sdk.gasPriceApi readonly field
+### sdk.gasPriceApi readonly field
 
 ```typescript
 sdk.gasPriceApi: GasPriceApi
@@ -584,13 +586,14 @@ Use it to get gas price information.
 ```typescript
 const gasPriceApi = sdk.gasPriceApi;
 const gasPrice = await gasPriceApi.getGasPrice(BLOCKCHAIN_NAME.ETHEREUM);
+...
 ```
 
 Explore GasPriceApi class to see available methods.
 
 ---
 
-#### sdk.cryptoPriceApi readonly field
+### sdk.cryptoPriceApi readonly field
 
 ```typescript
 sdk.cryptoPriceApi: CoingeckoApi
@@ -601,15 +604,16 @@ Use it to get crypto price information.
 ```typescript
 const cryptoPriceApi = sdk.cryptoPriceApi;
 const tokenUSDPrice = await cryptoPriceApi.getErc20TokenPrice('<token address>', '<BLOCKCHAIN_NAME.>');
+...
 ```
 
 Explore CoingeckoApi class to see available methods.
 
 ---
 
-### Instant Trades Manager 
+## Instant Trades Manager 
 
-#### sdk.instantTrades.calculateTrade method
+### instantTrades.calculateTrade method
 
 ```typescript
 sdk.instantTrades.calculateTrade(
@@ -629,38 +633,37 @@ sdk.instantTrades.calculateTrade(
 
 Method calculates instant trades parameters and estimated output amount.
 
-**sdk.instantTrades.calculateTrade method parameters:**
+**Method parameters:**
 
-| Parameter  | Type                                                               | Description                                                                                                                 |
-|------------|--------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| fromToken  | `Token`  &#124; `{ address: string; blockchain: BLOCKCHAIN_NAME;}` | Token sell.                                                                                                                 |
-| fromAmount | `string` &#124; `number`                                           | Amount in token units (**not in wei!**) to swap.                                                                            |
-| toToken    | `Token` &#124; `string`                                            | Token to get. You can pass Token object, or string token address. Must has same blockchain as fromToken if passed as Token. |
-| options?   | `SwapManagerCalculationOptions`                                    | Swap calculation options.                                                                                                   |
+| Parameter  | Type                                                               | Description                                                                                                                        |
+|------------|--------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| fromToken  | `Token`  &#124; `{ address: string; blockchain: BLOCKCHAIN_NAME;}` | Token to sell.                                                                                                                     |
+| fromAmount | `string` &#124; `number`                                           | Amount in token units (**not in wei**) to swap.                                                                                    |
+| toToken    | `Token` &#124; `string`                                            | Token to get. You can pass Token object, or string token address. It must have same blockchain as `fromToken` if passed as Token.  |
+| options?   | `SwapManagerCalculationOptions`                                    | Swap calculation options.                                                                                                          |
 
 **SwapManagerCalculationOptions description:**
 
-| Option             | Type                                                           | Description                                                                                                                                                                                                         | Default     |
-|--------------------|----------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
-| timeout?           | `number`                                                       | Specify trade calculation timeout in ms (same timeout for every provider separately).                                                                                                                               | 3000        |
-| disabledProviders? | `TradeType[]`                                                  | Specify providers which must be ignored.                                                                                                                                                                            | []          |
-| gasCalculation?    | `'disabled'` &#124; `'calculate'` &#124; `'rubicOptimisation'` | Disable estimated gas calculation, or use rubic gas optimisation to consider the gas fee when calculating route profit (works only for UniswapV2-like and UniswapV3-like providers.).                               | 'calculate' |
-| disableMultihops?  | `boolean`                                                      | Disable not direct swap routes. It can help to reduce gas fee, but can worsen the exchange rate. Better use `gasCalculation = 'rubicOptimisation'` when it is possible.                                             | false       |
-| slippageTolerance? | `number`                                                       | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap. Can be changed after trade calculation for every trade separately (excluding 0x trade).                                          | 0.02        |
+| Option             | Type                                                           | Description                                                                                                                                                                                                          | Default     |
+|--------------------|----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| timeout?           | `number`                                                       | Specify trade calculation timeout in ms (same timeout for every provider separately).                                                                                                                                | 3000        |
+| disabledProviders? | `TradeType[]`                                                  | Specify providers which must be ignored.                                                                                                                                                                             | []          |
+| gasCalculation?    | `'disabled'` &#124; `'calculate'` &#124; `'rubicOptimisation'` | Disable estimated gas calculation, or use rubic gas optimisation to consider the gas fee when calculating route profit (works only for UniswapV2-like and UniswapV3-like providers.).                                | 'calculate' |
+| disableMultihops?  | `boolean`                                                      | Disable indirect swap routes. It can help to reduce gas fee, but can worsen the exchange rate. Better use `gasCalculation = 'rubicOptimisation'` when it is possible.                                                | false       |
+| slippageTolerance? | `number`                                                       | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap. Can be changed after trade calculation for every trade separately (excluding 0x trade).                                           | 0.02        |
 | deadlineMinutes?   | `number`                                                       | Transaction deadline in minutes (countdown from the transaction sending date). Will be applied only for UniswapV2-like and UniswapV3-like trades. Can be changed after trade calculation for every trade separately. | 20          |
 
 **Returns** `Promise<InstantTrade[]>` -- list of successful calculated trades. 
 
 ---
 
-#### sdk.instantTrades.blockchainTradeProviders readonly field
+### instantTrades.blockchainTradeProviders readonly field
 
 ```typescript
 readonly sdk.instantTrades.blockchainTradeProviders: Readonly<Record<BLOCKCHAIN_NAME, Partial<TypedTradeProviders>>
 ```
 
-If you need to calculate trade with the special provider options, you can get needed provider instance in `sdk.instantTrades.blockchainTradeProviders`
-and calculate trade directly via this instance.
+If you need to calculate trade with the special provider options, you can get needed provider instance and calculate trade directly via this instance.
 
 ```typescript
 // calculate trade with exact output
@@ -670,9 +673,9 @@ const trade = await sdk.instantTrades.blockchainTradeProviders[BLOCKCHAIN_NAME.E
 
 ---
 
-### Instant Trade
+## Instant Trade
 
-#### instantTrade.swap method
+### instantTrade.swap method
 
 ```typescript
 instantTrade.swap(options?: SwapTransactionOptions): Promise<TransactionReceipt>
@@ -680,11 +683,11 @@ instantTrade.swap(options?: SwapTransactionOptions): Promise<TransactionReceipt>
 
 > ℹ️️ You have to set up **wallet provider 👛** for network in which you will execute trade swap.
 
-Method checks balance, network id correctness, and executes swap transaction.
-A transaction confirmation window will open in the connected user's wallet.
+Method checks balance, network id correctness and executes swap transaction.
+A transaction confirmation window will be opened in the connected user's wallet.
 If user has not enough allowance, the method will automatically send approve transaction before swap transaction.
 
-**instantTrade.swap method parameters:**
+**Method parameters:**
 
 | Parameter | Type                     | Description                          |
 |-----------|--------------------------|--------------------------------------|
@@ -703,7 +706,7 @@ If user has not enough allowance, the method will automatically send approve tra
 
 ---
 
-#### instantTrade.encode method
+### instantTrade.encode method
 
 ```typescript
 instantTrade.encode(options?: EncodeTransactionOptions): Promise<TransactionConfig>
@@ -711,10 +714,10 @@ instantTrade.encode(options?: EncodeTransactionOptions): Promise<TransactionConf
 
 > ℹ️️ You have to set up **rpc provider 🌐** for trade network for which you will call encode.
 
-If you don't want to execute transaction instantly (e.g. if you use SDK in the server-side), you can get full transaction data 
-to pass it to the transaction when you need to send it, you can use `instantTrade.encode` method.
+If you don't want to execute transaction instantly (e.g. if you use SDK on server-side), you can get full transaction data 
+to pass it to the transaction when you need to send it.
 
-**instantTrade.encode method parameters:**
+**Method parameters:**
 
 | Parameter | Type                       | Description                                                                                                      |
 |-----------|----------------------------|------------------------------------------------------------------------------------------------------------------|
@@ -722,17 +725,17 @@ to pass it to the transaction when you need to send it, you can use `instantTrad
 
 **EncodeTransactionOptions description:**
 
-| Option      | Type     | Description                                                                                                                                                                                                                            | Default                                                                                                                                |
-|-------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| fromAddress | `string` | Not needed for uniswapV3-like and 0x trades, but required for uniswapV2-like and 1inch trades. Address of account which will executes swap transaction by encoded data. This address must has enough allowance to successfully encode. | Not set.                                                                                                                               |
-| gasPrice?   | `string` | Specifies gas price **in wei** for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing.                                                                                                  | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
-| gasLimit?   | `string` | Specifies gas limit for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing.                                                                                                             | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+| Option      | Type     | Description                                                                                                                                                                                                                           | Default                                                                                                                                |
+|-------------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| fromAddress | `string` | Not needed for uniswapV3-like and 0x trades, but required for uniswapV2-like and 1inch trades. Address of account which will execute swap transaction by encoded data. This address must has enough allowance to successfully encode. | Not set.                                                                                                                               |
+| gasPrice?   | `string` | Specifies gas price **in wei** for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing.                                                                                                 | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+| gasLimit?   | `string` | Specifies gas limit for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing.                                                                                                            | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
 
 **Returns** `Promise<TransactionConfig>` -- web3 transaction structure to send. 
 
 ---
 
-#### instantTrade.needApprove method
+### instantTrade.needApprove method
 
 ```typescript
 instantTrade.needApprove(): Promise<boolean>
@@ -742,13 +745,13 @@ instantTrade.needApprove(): Promise<boolean>
 > ℹ️️ You have to set up **rpc provider 🌐** for trade network for which you will call needApprove.
 
 Swap method will automatically call approve if needed, but you can use methods pair `needApprove`-`approve` 
-if you want to know if approve is needed before execute swap to show user double button, or swap stages in UI.
+if you want to know if approve is needed before executing swap.
 
-**instantTrade.needApprove Returns** `Promise<boolean>` -- True if approve required, that is user has not enough allowance. Otherwise false.
+**Returns** `Promise<boolean>` -- `true` if approve required, that is user has not enough allowance. Otherwise, `false`.
 
 ---
 
-#### instantTrade.approve method
+### instantTrade.approve method
 
 ```typescript
 instantTrade.approve(options?: BasicTransactionOptions): Promise<TransactionReceipt>
@@ -756,9 +759,9 @@ instantTrade.approve(options?: BasicTransactionOptions): Promise<TransactionRece
 
 > ℹ️️ You have to set up **wallet provider 👛** for network in which you will execute trade swap.
 
-Use `approve` if you want to show swap stages in UI after allowance check via `needApprove` method.
+Sends transaction to approve tokens for user.
 
-**instantTrade.approve method parameters:**
+**Method parameters:**
 
 | Parameter | Type                      | Description                     |
 |-----------|---------------------------|---------------------------------|
@@ -776,17 +779,17 @@ Use `approve` if you want to show swap stages in UI after allowance check via `n
 
 ---
 
-#### instantTrade.type readonly field
+### instantTrade.type readonly field
 
 ```typescript
 readonly instantTrade.type: TradeType
 ```
 
-Instant trade type (like `TRADE_TYPE.UNISWAP_V2`, `TRADE_TYPE.QUICK_SWAP`, ...).
+Instant trade type (like `TRADE_TYPE.UNISWAP_V2`, `TRADE_TYPE.QUICK_SWAP`, etc.). Check `TRADE_TYPE` interface to see all providers.
 
 ---
 
-#### instantTrade.from readonly field
+### instantTrade.from readonly field
 
 ```typescript
 readonly instantTrade.from: PriceTokenAmount
@@ -796,7 +799,7 @@ Token to sell with price in USD per 1 token unit and selling amount.
 
 ---
 
-#### instantTrade.to readonly field
+### instantTrade.to readonly field
 
 ```typescript
 readonly instantTrade.to: PriceTokenAmount
@@ -806,7 +809,17 @@ Token to buy with price in USD per 1 token unit and estimated get amount (not to
 
 ---
 
-#### instantTrade.gasFeeInfo mutable field
+### instantTrade.toTokenAmountMin getter
+
+```typescript
+instantTrade.toTokenAmountMin: PriceTokenAmount
+```
+
+Minimum amount of tokens that user can get. Is same as `instantTrade.to`, but amount less than `instantTrade.to` by `(instantTrade.slippageTolerance * 100)` percent.
+
+---
+
+### instantTrade.gasFeeInfo mutable field
 
 ```typescript
 instantTrade.gasFeeInfo: GasFeeInfo | null
@@ -829,7 +842,7 @@ Can be changed: just modify gasFeeInfo field.
 
 ---
 
-#### instantTrade.slippageTolerance mutable field
+### instantTrade.slippageTolerance mutable field
 
 ```typescript
 instantTrade.slippageTolerance: number
@@ -839,18 +852,7 @@ Swap slippage in range 0 to 1. Defines minimum amount that you can get after swa
 
 ---
 
-#### instantTrade.toTokenAmountMin getter
-
-```typescript
-instantTrade.toTokenAmountMin: PriceTokenAmount
-```
-
-Is same as `instantTrade.to`, but amount less than `instantTrade.to` by `(instantTrade.slippageTolerance * 100)` percent.
-
-
----
-
-#### instantTrade.deadlineMinutes mutable field
+### instantTrade.deadlineMinutes mutable field
 
 ```typescript
 instantTrade.deadlineMinutes: number
@@ -862,7 +864,7 @@ Transaction deadline in minutes (countdown from the transaction sending date). C
 
 ---
 
-#### instantTrade.path readonly field
+### instantTrade.path readonly field
 
 ```typescript
 instantTrade.path: ReadonlyArray<Token>
@@ -872,11 +874,12 @@ instantTrade.path: ReadonlyArray<Token>
 
 Swap path. E.g. if you change ETH to LINK path might be [ETH, USDT, LINK].
 Path elements is `Token`, so you can get address, symbol and other properties of each element.
-If you sell, or get native coin (like ETH, BNB, MATIC, ...) in swap, `path[0]` or `path[path.length -1]` **won't** be wrapped tokens like WETH, but will be native tokens. 
+If you sell, or get native coin (like ETH, BNB, MATIC, etc.) in swap, `path[0]` or `path[path.length -1]` **won't** be wrapped tokens like WETH, but will be native tokens. 
 
 ---
 
-#### isUniswapV2LikeTrade function
+### isUniswapV2LikeTrade function
+
 ```typescript
 function isUniswapV2LikeTrade(trade: InstantTrade): trade is UniswapV2AbstractTrade
 ```
@@ -903,7 +906,8 @@ List of uniswapV2LikeTrades/Providers:
 
 ---
 
-#### isUniswapV3LikeTrade function
+### isUniswapV3LikeTrade function
+
 ```typescript
 function isUniswapV3LikeTrade(trade: InstantTrade): trade is UniSwapV3Trade
 ```
@@ -911,46 +915,62 @@ function isUniswapV3LikeTrade(trade: InstantTrade): trade is UniSwapV3Trade
 Type guard checks that trade is UniSwapV3Trade. Use it to parse result of `sdk.instantTrades.calculateTrade` and
 show specific UniSwapV3 trade data, or use its specific methods. 
 
-List of uniswapV2LikeTrades/Providers:
-- UniSwapV3
-- (Algebra and UniSwapV3 Polygon soon!)
+List of uniswapV3LikeTrades/Providers:
+- UniSwapV3 Ethereum
+- UniSwapV3 Polygon
+- UniSwapV3 Arbitrum
 
 --- 
 
-#### isOneInchLikeTrade function
+### isOneInchLikeTrade function
+
 ```typescript
 function isOneInchLikeTrade(trade: InstantTrade): trade is OneinchTrade
 ```
 
 Type guard checks that trade is OneinchTrade. Use it to parse result of `sdk.instantTrades.calculateTrade` and
-show specific OneinchTrade trade data, or use its specific methods.
+show specific Oneinch trade data, or use its specific methods.
 
 List of OneinchTrade/Providers:
 - OneInch Ethereum
 - OneInch Bsc
 - OneInch Polygon
+- OneInch Avalanche
+- OneInch Arbitrum
 
 --- 
 
-#### isZrxLikeTradeLikeTrade function
+### isZrxLikeTradeLikeTrade function
+
 ```typescript
 function isZrxLikeTradeLikeTrade(trade: InstantTrade): trade is ZrxTrade
 ```
 
 Type guard checks that trade is 0x Trade. Use it to parse result of `sdk.instantTrades.calculateTrade` and
-show specific 0x Trade trade data, or use its specific methods.
+show specific 0x trade data, or use its specific methods.
 
-List of OneinchTrade/Providers:
+List of ZrxTrade/Providers:
 - 0x Ethereum
-- (other blockchains for 0x soon!)
 
 --- 
 
-### Cross Chain Manager
+### isAlgebraTrade function
 
-> ⚠️ **Danger:** Currently, Cross Chain Manager uses dev-mode contracts. Its' logic is the same as of prod-mode contracts, but settings (such as minimum amount of tokens to sell) are different.
+```typescript
+function isAlgebraTrade(trade: InstantTrade): trade is AlgebraTrade
+```
 
-#### sdk.crossChain.calculateTrade method
+Type guard checks that trade is Algebra Trade. Use it to parse result of `sdk.instantTrades.calculateTrade` and
+show specific Algebra trade data, or use its specific methods.
+
+List of AlgebraTrade/Providers:
+- Algebra
+
+--- 
+
+## Cross Chain Manager
+
+### crossChain.calculateTrade method
 
 ```typescript
 sdk.crossChain.calculateTrade(
@@ -973,32 +993,32 @@ sdk.crossChain.calculateTrade(
 
 > ℹ️️ You have to set up **rpc provider 🌐** for network in which you will calculate trade.
 
-Method calculates [WrappedCrossChainTrade](#wrapped-cross-chain-trade).
+Method calculates [WrappedCrossChainTrade](#wrapped-cross-chain-trade), which contains best cross chain provider with estimated output amount.
 
-**sdk.crossChain.calculateTrade method parameters:**
+**Method parameters:**
 
-| Parameter  | Type                                                               | Description                                      |
-|------------|--------------------------------------------------------------------|--------------------------------------------------|
-| fromToken  | `Token`  &#124; `{ address: string; blockchain: BLOCKCHAIN_NAME;}` | Token to sell.                                   |
-| fromAmount | `string` &#124; `number`                                           | Amount in token units (**not in wei!**) to swap. |
-| toToken    | `Token`  &#124; `{ address: string; blockchain: BLOCKCHAIN_NAME;}` | Token to get.                                    |
-| options?   | `CrossChainOptions`                                                | Swap calculation options.                        |
+| Parameter  | Type                                                               | Description                                     |
+|------------|--------------------------------------------------------------------|-------------------------------------------------|
+| fromToken  | `Token`  &#124; `{ address: string; blockchain: BLOCKCHAIN_NAME;}` | Token to sell.                                  |
+| fromAmount | `string` &#124; `number`                                           | Amount in token units (**not in wei**) to swap. |
+| toToken    | `Token`  &#124; `{ address: string; blockchain: BLOCKCHAIN_NAME;}` | Token to get.                                   |
+| options?   | `CrossChainOptions`                                                | Swap calculation options.                       |
 
 **CrossChainOptions description:**
 
-| Option                | Type                            | Description                                                                                                                       | Default                  |
-|-----------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|--------------------------|
-| fromSlippageTolerance | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount after swap in **first blockchain** (for Celer and Rubic).                   | 0.02                     |
-| toSlippageTolerance   | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap in **second blockchain** (for Celer and Rubic). | 0.02                     |
-| slippageTolerance     | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap (for Symbiosis).                                | 0.04                     |
-| fromAddress           | `string`                        | User wallet address to calculate trade for (for Symbiosis).                                                                       | Connected wallet address |
-| deadline              | `number`                        | Deadline of the trade in minutes (for Symbiosis).                                                                                 | 20                       |
-| gasCalculation        | `'enabled'` &#124; `'disabled'` | Disables or enables gas limit and gas price calclation.                                                                           | 'enabled'                |
-| disabledProviders     | `CrossChainTradeType[]`         | Disables passed providers.                                                                                                        | []                       |
+| Option                | Type                            | Description                                                                                                                       | Default                   |
+|-----------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|---------------------------|
+| fromSlippageTolerance | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount after swap in **first blockchain** (for Celer and Rubic).                   | 0.02                      |
+| toSlippageTolerance   | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap in **second blockchain** (for Celer and Rubic). | 0.02                      |
+| slippageTolerance     | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap (for Symbiosis).                                | 0.04                      |
+| fromAddress           | `string`                        | User wallet address to calculate trade for (for Symbiosis).                                                                       | Connected wallet address. |
+| deadline              | `number`                        | Deadline of the trade in minutes (for Symbiosis).                                                                                 | 20                        |
+| gasCalculation        | `'enabled'` &#124; `'disabled'` | Disables or enables calculation of gas limit and gas price.                                                                       | 'enabled'                 |
+| disabledProviders     | `CrossChainTradeType[]`         | Disables passed providers.                                                                                                        | []                        |
 
 ---
 
-### Wrapped Cross Chain Trade
+## Wrapped Cross Chain Trade
 
 ```typescript
 interface WrappedCrossChainTrade {
@@ -1008,16 +1028,16 @@ interface WrappedCrossChainTrade {
 }
 ```
 
-Wraps cross chain trade and possible min max amount errors. If `minAmountError` or `maxAmountError` are not empty, then you must display an error, because [`swap`](#crosschaintradeswap-method) method will return error.
+Wraps best calculated cross chain trade and possible min max amount errors. If `minAmountError` or `maxAmountError` are not undefined, then you must display an error, because [`swap`](#crosschaintradeswap-method) method will return error.
 
 ---
 
-### Cross Chain Trade
+## Cross Chain Trade
 
-Stores information about trade and provides method to make swap.
-Extends to types: `CelerCrossChainTrade`, `RubicCrossChainTrade`, `SymbiosisCrossChainTrade`.
+Stores information about trade and provides method to make swap or encode.
+Extends to classes: `CelerCrossChainTrade`, `RubicCrossChainTrade`, `SymbiosisCrossChainTrade`.
 
-#### crossChainTrade.swap method
+### crossChainTrade.swap method
 
 ```typescript
 crossChainTrade.swap(options?: SwapTransactionOptions): Promise<TransactionReceipt>
@@ -1029,7 +1049,7 @@ Method checks balance, network id correctness, cross-chain contracts state and e
 A transaction confirmation window will open in the connected user's wallet.
 If user has not enough allowance, the method will automatically send approve transaction before swap transaction.
 
-**crossChainTrade.swap method parameters:**
+**Method parameters:**
 
 | Parameter | Type                     | Description                          |
 |-----------|--------------------------|--------------------------------------|
@@ -1048,23 +1068,51 @@ If user has not enough allowance, the method will automatically send approve tra
 
 ---
 
-#### crossChainTrade.needApprove method
+### crossChainTrade.encode method
+
+```typescript
+crossChainTrade.encode(options?: EncodeTransactionOptions): Promise<TransactionConfig>
+```
+
+> ℹ️️ You have to set up **rpc provider 🌐** for trade network for which you will call encode.
+
+If you don't want to execute transaction instantly (e.g. if you use SDK on server-side), you can get full transaction data
+to pass it to the transaction when you need to send it.
+
+**Method parameters:**
+
+| Parameter | Type                       | Description                                                                                                      |
+|-----------|----------------------------|------------------------------------------------------------------------------------------------------------------|
+| options   | `EncodeTransactionOptions` | Additional options. Optional for uniswapV3-like and 0x trades, but required for uniswapV2-like and 1inch trades. |
+
+**EncodeTransactionOptions description:**
+
+| Option      | Type     | Description                                                                                                                            | Default                                                                                                                                |
+|-------------|----------|----------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| fromAddress | `string` | Address of account which will execute swap transaction by encoded data. This address must has enough allowance to successfully encode. | Not set.                                                                                                                               |
+| gasPrice?   | `string` | Specifies gas price **in wei** for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing.  | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+| gasLimit?   | `string` | Specifies gas limit for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing.             | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+
+**Returns** `Promise<TransactionConfig>` -- web3 transaction structure to send.
+
+---
+
+### crossChainTrade.needApprove method
 
 ```typescript
 crossChainTrade.needApprove(): Promise<boolean>
 ```
 
-
 > ℹ️️ You have to set up **rpc provider 🌐** for trade network for which you will call needApprove.
 
 Swap method will automatically call approve if needed, but you can use methods pair `needApprove`-`approve`
-if you want to know if approve is needed before execute swap to show user double button, or swap stages in UI.
+if you want to know if approve is needed before execute swap.
 
-**crossChainTrade.needApprove Returns** `Promise<boolean>` -- True if approve is required, that is user doesn't have enough allowance. Otherwise, false.
+**Returns** `Promise<boolean>` -- `true` if approve is required, that is user doesn't have enough allowance. Otherwise, `false`.
 
 ---
 
-#### crossChainTrade.approve method
+### crossChainTrade.approve method
 
 ```typescript
 crossChainTrade.approve(options?: BasicTransactionOptions): Promise<TransactionReceipt>
@@ -1072,7 +1120,7 @@ crossChainTrade.approve(options?: BasicTransactionOptions): Promise<TransactionR
 
 > ℹ️️ You have to set up **wallet provider 👛** for network in which you will execute trade swap.
 
-Use `approve` if you want to show swap stages in UI after allowance check via `needApprove` method.
+Sends transaction to approve tokens for user.
 
 **crossChainTrade.approve method parameters:**
 
@@ -1092,7 +1140,7 @@ Use `approve` if you want to show swap stages in UI after allowance check via `n
 
 ---
 
-#### crossChainTrade.from readonly field
+### crossChainTrade.from readonly field
 
 ```typescript
 readonly crossChainTrade.from: PriceTokenAmount
@@ -1102,27 +1150,27 @@ Token to sell with price in USD per 1 token unit and selling amount.
 
 ---
 
-#### crossChainTrade.to readonly field
+### crossChainTrade.to readonly field
 
 ```typescript
 readonly crossChainTrade.to: PriceTokenAmount
 ```
 
-Token to buy with price in USD per 1 token unit and estimated output amount.
+Token to buy with price in USD per 1 token unit and estimated output amount (not to be confused with `crossChainTrade.toTokenAmountMin`).
 
 ---
 
-#### crossChainTrade.toTokenAmountMin readonly field
+### crossChainTrade.toTokenAmountMin readonly field
 
 ```typescript
 readonly crossChainTrade.to: PriceTokenAmount
 ```
 
-Is same as `crossChainTrade.to`, but amount less than `crossChainTrade.to` by `(toSlippageTolerance * 100)` percent.
+Minimum amount of tokens that user can get. Is same as `crossChainTrade.to`, but amount less than `crossChainTrade.to` by `(toSlippageTolerance * 100)` percent.
 
 ---
 
-#### crossChainTrade.estimatedGas getter
+### crossChainTrade.estimatedGas getter
 
 ```typescript
 crossChainTrade.estimateGas(): GasFeeInfo | null
@@ -1132,11 +1180,9 @@ Gets gasFee, that is gasLimit * gasPrice. Equals `null` if gas couldn't be calcu
 
 ---
 
-### Celer Cross Chain Trade and Rubic Cross Chain Trade
+### crossChainTrade.priceImpactData getter
 
-Extend `CrossChainTrade` class.
-
-#### crossChainTrade.priceImpactData getter
+> ⚠️ Is available only in Celer and Rubic trades.
 
 ```typescript
 crossChainTrade.priceImpactData(): {
@@ -1149,11 +1195,9 @@ Returns price impact in first and second blockchains, based on tokens usd prices
 
 ---
 
-### Symbiosis Cross Chain Trade
+### crossChainTrade.priceImpact readonly field
 
-Extends `CrossChainTrade` class.
-
-#### crossChainTrade.priceImpact readonly field
+> ⚠️ Is available only in Symbiosis trade.
 
 ```typescript
 crossChainTrade.priceImpact: number
@@ -1163,30 +1207,30 @@ Returns overall price impact, based on symbiosis api.
 
 ---
 
-### Cross Chain Symbiosis Manager
+## Cross Chain Symbiosis Manager
 
-Contains methods to work with pending user trades and revert them.
+Contains methods to work with pending user's trades and revert them.
 
-#### crossChainSymbiosisManager.getUserTrades method
+### crossChainSymbiosisManager.getUserTrades method
 
 ```typescript
-crossChainSymbiosisManager.getUserTrades(fromAddress?: string): Promise<PendingRequest[]>
+sdk.crossChainSymbiosisManager.getUserTrades(fromAddress?: string): Promise<PendingRequest[]>
 ```
 
-Returns pending request for `fromAddress` if provided, otherwise for connected wallet address.
+Returns pending trades for `fromAddress` if provided, otherwise for connected wallet address.
 
 ---
 
-#### crossChainSymbiosisManager.revertTrade method
+### crossChainSymbiosisManager.revertTrade method
 
 ```typescript
-crossChainSymbiosisManager.revertTrade(
+sdk.crossChainSymbiosisManager.revertTrade(
         revertTransactionHash: string,
         options?: SwapTransactionOptions
 ): Promise<string | never>
 ```
 
-Reverts trade, which transaction hash is `revertTransactionHash` for connected wallet address.
+Sends transaction to revert trade, which transaction hash is `revertTransactionHash` for connected wallet address.
 
 **SwapTransactionOptions description:**
 
@@ -1198,9 +1242,10 @@ Reverts trade, which transaction hash is `revertTransactionHash` for connected w
 
 ---
 
-### Tokens Manager
+## Tokens Manager
 
-#### tokensManager.createTokenFromStruct method
+### tokensManager.createTokenFromStruct method
+
 ```typescript
 tokensManager.createTokenFromStruct(tokenStruct: TokenStruct): Token
 ```
@@ -1209,35 +1254,39 @@ Creates `Token` instance by full token data struct.
 
 ---
 
-#### tokensManager.createToken method
+### tokensManager.createToken method
+
 ```typescript
 tokensManager.createToken(tokenBaseStruct: TokenBaseStruct): Promise<Token>
 ```
 
-Fetches token data and creates `Token` by token address and token blockchain. 
+Fetches token data and creates `Token` by token's address and blockchain. 
 
 ---
 
-#### tokensManager.createTokensFromStructs method
+### tokensManager.createTokensFromStructs method
+
 ```typescript
 tokensManager.createTokensFromStructs(tokensStructs: TokenStruct[]): Token[]
 ```
 
-Same as `tokensManager.createTokenFromStruct` for multiple token structs.
+Same as `tokensManager.createTokenFromStruct` for multiple tokens structs.
 
 ---
 
-#### tokensManager.createTokens method
+### tokensManager.createTokens method
+
 ```typescript
 tokensManager.createTokens(addresses: string[], blockchain: BLOCKCHAIN_NAME): Promise<Token[]>
 ```
 
-Same as `tokensManager.createToken` for multiple token structs. But using multicall for data fetching, so makes only one rpc request.
+Same as `tokensManager.createToken` for multiple tokens structs. But using multicall for data fetching, so makes only one rpc request.
 Use this method to crate tokens list instead of `Promise.all` and `tokensManager.createToken`.
 
 ---
 
-#### tokensManager.createPriceTokenFromStruct method
+### tokensManager.createPriceTokenFromStruct method
+
 ```typescript
 tokensManager.createPriceTokenFromStruct(priceTokenStruct: PriceTokenStruct): PriceToken
 ```
@@ -1246,7 +1295,8 @@ Creates price token from full price token struct including price.
 
 ---
 
-#### tokensManager.createPriceToken method
+### tokensManager.createPriceToken method
+
 ```typescript
 tokensManager.createPriceToken(token: TokenBaseStruct | TokenStruct): Promise<PriceToken>
 ```
@@ -1255,7 +1305,8 @@ Creates price token from full token struct (without price) or from token address
 
 ---
 
-#### tokensManager.createPriceTokenAmountFromStruct method
+### tokensManager.createPriceTokenAmountFromStruct method
+
 ```typescript
 tokensManager.createPriceTokenAmountFromStruct(priceTokenAmountStruct: PriceTokenAmountStruct): PriceTokenAmount
 ```
@@ -1264,7 +1315,8 @@ Creates price token amount from full price token amount struct.
 
 ---
 
-#### tokensManager.createPriceTokenAmount method
+### tokensManager.createPriceTokenAmount method
+
 ```typescript
 tokensManager.createPriceTokenAmount(
     priceTokenAmountStruct:
@@ -1277,9 +1329,10 @@ Creates price token amount from token struct (without price) and amount or from 
 
 ---
 
-### Token
+## Token
 
-#### token fields
+### token fields
+
 ```typescript
 readonly blockchain: BLOCKCHAIN_NAME;
 
@@ -1294,21 +1347,29 @@ readonly decimals: number;
 
 ---
 
-#### token.isNative method
-Use `token.isNative` to detect native coins like ETH, BNB, MATIC, ... instead of comparing token address with 0x000...0.
+### token.isNative getter
+
+```typescript
+token.isNative(): boolean
+```
+
+Use `token.isNative` to detect native coins like ETH, BNB, MATIC, etc.
 
 ---
 
-#### token.isEqualTo method
+### token.isEqualTo method
+
 ```typescript
 token.isEqualTo(token: TokenBaseStruct): boolean
 ```
+
 Use it to check that two tokens have equal blockchains and addresses (in any case: lower/upper/mixed).
-Token is TokenBaseStruct so you can pass Token instance to `token.isEqualTo`.
+Token is `TokenBaseStruct`, so you can pass Token instance to `token.isEqualTo`.
 
 ---
 
-#### token.clone method
+### token.clone method
+
 ```typescript
 token.clone(replaceStruct?: Partial<TokenStruct>): Token
 ```
@@ -1317,20 +1378,32 @@ Use it to deep clone token object and replace some properties.
 
 ---
 
-### PriceToken 
+## PriceToken
+
 Extends `Token`.
 
-#### priceToken.price getter
-Returns last set token price as `BigNumber`.
+### priceToken.price getter
+
+```typescript
+priceToken.price(): BigNumber
+```
+
+Returns last set token price.
 
 ---
 
-#### priceToken.asStruct getter
+### priceToken.asStruct getter
+
+```typescript
+priceToken.asStruct(): PriceTokenStruct
+```
+
 Serializes priceToken and its price to struct object.
 
 ---
 
-#### priceToken.getAndUpdateTokenPrice method
+### priceToken.getAndUpdateTokenPrice method
+
 ```typescript
 priceToken.getAndUpdateTokenPrice(): Promise<BigNumber>
 ```
@@ -1339,7 +1412,8 @@ Fetches current token price and saves it into token.
 
 ---
 
-#### priceToken.cloneAndCreate
+### priceToken.cloneAndCreate
+
 ```typescript
 priceToken.cloneAndCreate(tokenStruct?: Partial<PriceTokenStruct>): Promise<PriceToken>
 ```
@@ -1348,25 +1422,42 @@ Same as `token.clone` but fetches new price for new `PriceToken`.
 
 ---
 
-### PriceTokenAmount
+## PriceTokenAmount
+
 Extends `PriceToken`.
 
-#### priceTokenAmount.weiAmount getter
-Returns saved token amount in wei as `BigNumber` (weiAmount = tokenAmount * (10 ** token.decimals)).
+### priceTokenAmount.weiAmount getter
+
+```typescript
+priceTokenAmount.weiAmount(): BigNumber
+```
+
+Returns saved token amount in wei (weiAmount = tokenAmount * (10 ** token.decimals)).
 
 ---
 
-#### priceTokenAmount.stringWeiAmount getter
+### priceTokenAmount.stringWeiAmount getter
+
+```typescript
+priceTokenAmount.stringWeiAmount(): string
+```
+
 Returns saved token amount in wei as string.
 
 ---
 
-#### priceTokenAmount.tokenAmount getter
-Returns saved token amount in human-readable token units as `BigNumber` (tokenAmount = weiAmount / (10 ** token.decimals)).
+### priceTokenAmount.tokenAmount getter
+
+```typescript
+priceTokenAmount.tokenAmount(): BigNumber
+```
+
+Returns saved token amount in human-readable token units (tokenAmount = weiAmount / (10 ** token.decimals)).
 
 ---
 
-#### priceTokenAmount.weiAmountMinusSlippage method
+### priceTokenAmount.weiAmountMinusSlippage method
+
 ```typescript
 priceTokenAmount.weiAmountMinusSlippage(slippage: number): BigNumber
 ```
@@ -1375,7 +1466,8 @@ Returns wei amount decreased by (1 - slippage) times. Slippage is in range from 
 
 ---
 
-#### priceTokenAmount.weiAmountPlusSlippage method
+### priceTokenAmount.weiAmountPlusSlippage method
+
 ```typescript
 priceTokenAmount.weiAmountPlusSlippage(slippage: number): BigNumber
 ```
@@ -1384,7 +1476,8 @@ Returns wei amount increased by (1 - slippage) times. Slippage is in range from 
 
 ---
 
-#### priceTokenAmount.calculatePriceImpactPercent method
+### priceTokenAmount.calculatePriceImpactPercent method
+
 ```typescript
 calculatePriceImpactPercent(toToken: PriceTokenAmount): number | null
 ```
