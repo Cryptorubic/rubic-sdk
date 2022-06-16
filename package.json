@@ -96,7 +96,7 @@
     "ts-loader": "^9.3.0",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "tscpaths": "^0.0.9",
-    "typedoc": "^0.22.15",
+    "typedoc": "^0.22.17",
     "typescript": "^4.7.2",
     "webpack": "^5.65.0",
     "webpack-bundle-analyzer": "^4.5.0",

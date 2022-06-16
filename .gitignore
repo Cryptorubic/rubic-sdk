@@ -10,3 +10,5 @@
 /cache/
 /scripts/node.log
 /docker-compose.yml
+
+/docs/
