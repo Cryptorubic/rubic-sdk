@@ -5,13 +5,13 @@ import {
     Web3Public,
     Web3Pure
 } from 'src/core';
-import { GasData } from '@features/cross-chain/models/gas-data';
-import { Injector } from '@core/sdk/injector';
+import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
+import { Injector } from '@rsdk-core/sdk/injector';
 import BigNumber from 'bignumber.js';
 import { EncodeTransactionOptions, SwapTransactionOptions } from 'src/features';
 import { UnnecessaryApprove, WalletNotConnectedError, WrongNetworkError } from 'src/common';
 import { TransactionReceipt } from 'web3-eth';
-import { ContractParams } from '@features/cross-chain/models/contract-params';
+import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { TransactionConfig } from 'web3-core';
 
 export abstract class CrossChainTrade {

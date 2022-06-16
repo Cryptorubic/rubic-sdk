@@ -1,15 +1,15 @@
 import { CrossChainTrade, SwapTransactionOptions } from 'src/features';
 import { TransactionRequest } from '@ethersproject/providers';
 import { PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
-import { Injector } from '@core/sdk/injector';
-import { SYMBIOSIS_CONTRACT_ADDRESS } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
-import { SymbiosisCrossChainSupportedBlockchain } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { ContractParams } from '@features/cross-chain/models/contract-params';
-import { SYMBIOSIS_CONTRACT_ABI } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/contract-abi';
-import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { SYMBIOSIS_CONTRACT_ADDRESS } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
+import { SymbiosisCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
+import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
+import { SYMBIOSIS_CONTRACT_ABI } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-abi';
+import { NATIVE_TOKEN_ADDRESS } from '@rsdk-core/blockchain/constants/native-token-address';
 import { FailedToCheckForTransactionReceiptError } from 'src/common';
-import { GasData } from '@features/cross-chain/models/gas-data';
-import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
+import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
+import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import BigNumber from 'bignumber.js';
 
 export class SymbiosisCrossChainTrade extends CrossChainTrade {

@@ -59,7 +59,8 @@ export abstract class ZrxAbstractProvider extends InstantTradeProvider {
                 weiAmount: new BigNumber(apiTradeData.buyAmount)
             }),
             slippageTolerance: fullOptions.slippageTolerance,
-            apiTradeData
+            apiTradeData,
+            path: [] // @TODO;
         };
         if (fullOptions.gasCalculation === 'disabled') {
             return new ZrxTrade(tradeStruct);

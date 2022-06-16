@@ -5,7 +5,7 @@ import { defaultFantomProviderConfiguration } from '@rsdk-features/instant-trade
 import { defaultBscProviderConfiguration } from '@rsdk-features/instant-trades/dexes/bsc/default-constants';
 import { defaultPolygonProviderConfiguration } from '@rsdk-features/instant-trades/dexes/polygon/default-constants';
 import { defaultAvalancheProviderConfiguration } from '@rsdk-features/instant-trades/dexes/avalanche/default-constants';
-import { defaultArbitrumProviderConfiguration } from '@features/instant-trades/dexes/arbitrum/default-constants';
+import { defaultArbitrumProviderConfiguration } from '@rsdk-features/instant-trades/dexes/arbitrum/default-constants';
 
 export const wrappedNative: Record<CelerCrossChainSupportedBlockchain, string> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: defaultEthereumProviderConfiguration.wethAddress,

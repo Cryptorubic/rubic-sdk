@@ -5,10 +5,10 @@ import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amoun
 import {
     CelerCrossChainSupportedBlockchain,
     celerCrossChainSupportedBlockchains
-} from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
-import { getCelerCrossChainContract } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contracts';
-import { RequiredCrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
-import { CelerCrossChainTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade';
+} from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
+import { getCelerCrossChainContract } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contracts';
+import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
+import { CelerCrossChainTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade';
 import BigNumber from 'bignumber.js';
 import { compareAddresses, LowSlippageError, notNull } from 'src/common';
 import { EstimateAmtResponse } from '@rsdk-features/cross-chain/providers/celer-trade-provider/models/estimate-amount-response';
@@ -19,8 +19,8 @@ import { CelerItCrossChainContractTrade } from '@rsdk-features/cross-chain/provi
 import { CelerDirectCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
 import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 import { wrappedNative } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/wrapped-native';
-import { CelerRubicCrossChainTradeProvider } from '@features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
-import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { CelerRubicCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
+import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 
 export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(

@@ -23,10 +23,15 @@ import { UniswapV3AlgebraRoute } from '@rsdk-features/instant-trades/dexes/commo
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
 import { getFromToTokensAmountsByExact } from '@rsdk-features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
+import { AbiItem } from 'web3-utils';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
 > extends InstantTradeProvider {
+    protected abstract readonly contractAbi: AbiItem[];
+
+    protected abstract readonly contractAddress: string;
+
     protected abstract readonly InstantTradeClass: UniswapV3TradeClass<T> | typeof AlgebraTrade;
 
     protected abstract readonly quoterController: UniswapV3AlgebraQuoterController;
@@ -180,7 +185,9 @@ export abstract class UniswapV3AlgebraAbstractProvider<
                 exact,
                 weiAmount,
                 options,
-                routes
+                routes,
+                this.contractAbi,
+                this.contractAddress
             );
 
             const calculatedProfits: UniswapV3AlgebraCalculatedInfoWithProfit[] = routes.map(
@@ -220,7 +227,9 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             exact,
             weiAmount,
             options,
-            route
+            route,
+            this.contractAbi,
+            this.contractAddress
         );
         return {
             route,

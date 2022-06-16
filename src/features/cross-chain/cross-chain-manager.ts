@@ -13,7 +13,7 @@ import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from 'src/features';
 import { SwapManagerCrossChainCalculationOptions } from '@rsdk-features/cross-chain/models/swap-manager-cross-chain-options';
 import pTimeout from '@rsdk-common/utils/p-timeout';
 import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
-import { hasLengthAtLeast } from '@features/instant-trades/utils/type-guards';
+import { hasLengthAtLeast } from '@rsdk-features/instant-trades/utils/type-guards';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import BigNumber from 'bignumber.js';
 import { SymbiosisCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
@@ -28,7 +28,7 @@ export class CrossChainManager {
 
     private static readonly defaultDeadline = 20;
 
-    private tradeProviders: CcrTypedTradeProviders = [
+    public readonly tradeProviders: CcrTypedTradeProviders = [
         RubicCrossChainTradeProvider,
         CelerCrossChainTradeProvider,
         SymbiosisCrossChainTradeProvider

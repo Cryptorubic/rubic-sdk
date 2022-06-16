@@ -18,6 +18,7 @@ import {
 } from '@rsdk-features/instant-trades/models/gas-params';
 import { Cache } from 'src/common';
 import { TradeType } from 'src/features';
+import { Token } from 'src/core';
 
 export abstract class InstantTrade {
     public abstract readonly from: PriceTokenAmount;
@@ -33,6 +34,8 @@ export abstract class InstantTrade {
     protected readonly web3Public: Web3Public;
 
     public abstract get type(): TradeType;
+
+    public abstract path: ReadonlyArray<Token>;
 
     public get toTokenAmountMin(): PriceTokenAmount {
         const weiAmountOutMin = this.to.weiAmountMinusSlippage(this.slippageTolerance);

@@ -16,9 +16,9 @@ import { CelerCrossChainContractData } from '@rsdk-features/cross-chain/provider
 import {
     celerSourceTransitTokenFeeMultiplier,
     celerTargetTransitTokenFeeMultiplier
-} from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-fee-multipliers';
-import { CelerCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
-import { CelerItCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
+} from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-fee-multipliers';
+import { CelerCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
+import { CelerItCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
 
 export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
     public static async getGasData(

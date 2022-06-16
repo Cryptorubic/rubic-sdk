@@ -1,5 +1,5 @@
 import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
-import { Cache, RubicSdkError } from 'src/common';
+import { RubicSdkError } from 'src/common';
 import {
     EncodeTransactionOptions,
     GasFeeInfo,
@@ -36,27 +36,6 @@ export interface UniswapV3AlgebraTradeStruct {
 }
 
 export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
-    protected static get contractAbi(): AbiItem[] {
-        // see  https://github.com/microsoft/TypeScript/issues/34516
-        // @ts-ignore
-        const instance = new this();
-        if (!instance.contractAbi) {
-            throw new RubicSdkError('Trying to read abstract class field');
-        }
-        return instance.contractAbi;
-    }
-
-    @Cache
-    protected static get contractAddress(): string {
-        // see  https://github.com/microsoft/TypeScript/issues/34516
-        // @ts-ignore
-        const instance = new this();
-        if (!instance.contractAddress) {
-            throw new RubicSdkError('Trying to read abstract class field');
-        }
-        return instance.contractAddress;
-    }
-
     public static get type(): TradeType {
         throw new RubicSdkError(`Static TRADE_TYPE getter is not implemented by ${this.name}`);
     }
@@ -67,7 +46,9 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         exact: Exact,
         weiAmount: BigNumber,
         options: Required<SwapOptions>,
-        route: UniswapV3AlgebraRoute
+        route: UniswapV3AlgebraRoute,
+        contractAbi: AbiItem[],
+        contractAddress: string
     ): Promise<BigNumber> {
         const { from, to } = getFromToTokensAmountsByExact(
             fromToken,
@@ -84,8 +65,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         if (walletAddress && estimateGasParams.callData) {
             const web3Public = Injector.web3PublicService.getWeb3Public(from.blockchain);
             const estimatedGas = await web3Public.getEstimatedGas(
-                this.contractAbi,
-                this.contractAddress,
+                contractAbi,
+                contractAddress,
                 estimateGasParams.callData.contractMethod,
                 estimateGasParams.callData.params,
                 walletAddress,
@@ -105,7 +86,9 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         exact: Exact,
         weiAmount: BigNumber,
         options: Required<SwapOptions>,
-        routes: UniswapV3AlgebraRoute[]
+        routes: UniswapV3AlgebraRoute[],
+        contractAbi: AbiItem[],
+        contractAddress: string
     ): Promise<BigNumber[]> {
         const routesEstimateGasParams = routes.map(route => {
             const { from, to } = getFromToTokensAmountsByExact(
@@ -128,8 +111,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         ) {
             const web3Public = Injector.web3PublicService.getWeb3Public(fromToken.blockchain);
             const estimatedGasLimits = await web3Public.batchEstimatedGas(
-                this.contractAbi,
-                this.contractAddress,
+                contractAbi,
+                contractAddress,
                 walletAddress,
                 routesEstimateGasParams.map(estimateGasParams => estimateGasParams.callData)
             );

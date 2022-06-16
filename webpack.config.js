@@ -27,7 +27,12 @@ module.exports = function(env, argv) {
                 process: 'process/browser'
             }),
             new webpack.SourceMapDevToolPlugin({
-                filename: "[file].map",
+                test: [/\.ts$/],
+                exclude: 'vendor',
+                filename: "app.[hash].js.map",
+                append: "//# sourceMappingURL=[url]",
+                moduleFilenameTemplate: '[resource-path]',
+                fallbackModuleFilenameTemplate: '[resource-path]',
             }),
         ],
         resolve: {
@@ -53,23 +58,16 @@ module.exports = function(env, argv) {
     },
         output: {
             filename: 'rubic-sdk.min.js',
-                path: path.resolve(__dirname, 'dist'),
-                library: 'RubicSDK',
-                clean: true
+            path: path.resolve(__dirname, 'dist'),
+            library: 'RubicSDK',
+            clean: true
         },
-        optimization: {
-            minimizer: [new TerserPlugin({
-                extractComments: false,
-                terserOptions: {
-                    compress: isProduction
-                }
-            })],
-        },
-        devtool: isProduction ? 'source-map' : 'eval',
-        mode: isProduction ? 'production' : 'development',
-        watchOptions: {
-            aggregateTimeout: 1000
-            // ignored: ['**/node_modules', '**/__tests__', '**/dist', '**/lib', '**/scripts', '**/docs'],
-        }
+        // optimization: {
+        //     minimizer: [new TerserPlugin({
+        //         extractComments: false
+        //     })],
+        // },
+        devtool: 'source-map',
+        mode: 'development',
     }
 };

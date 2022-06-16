@@ -1,13 +1,18 @@
-import { UniswapV2AbstractTrade } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
-import { OneinchTrade } from '@features/instant-trades/dexes/common/oneinch-common/oneinch-trade';
-import { ZrxTrade } from '@features/instant-trades/dexes/common/zrx-common/zrx-trade';
-import { InstantTrade } from '@features/instant-trades/instant-trade';
-import { UniswapV3AbstractTrade } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
-import { AlgebraTrade } from '@features/instant-trades/dexes/polygon/algebra/algebra-trade';
-import { OneinchAbstractProvider, UniswapV2AbstractProvider } from 'src/features';
-import { UniswapV3AbstractProvider } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-provider';
-import { AlgebraProvider } from '@features/instant-trades/dexes/polygon/algebra/algebra-provider';
-import { CrossChainSupportedInstantTradeProvider } from '@features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
+import { UniswapV2AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { OneinchTrade } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/oneinch-trade';
+import { ZrxTrade } from '@rsdk-features/instant-trades/dexes/common/zrx-common/zrx-trade';
+import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
+import { UniswapV3AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
+import { AlgebraTrade } from '@rsdk-features/instant-trades/dexes/polygon/algebra/algebra-trade';
+import {
+    OneinchAbstractProvider,
+    TRADE_TYPE,
+    TradeType,
+    UniswapV2AbstractProvider
+} from 'src/features';
+import { UniswapV3AbstractProvider } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-provider';
+import { AlgebraProvider } from '@rsdk-features/instant-trades/dexes/polygon/algebra/algebra-provider';
+import { CrossChainSupportedInstantTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
 
 export function isUniswapV2LikeTrade(trade: InstantTrade): trade is UniswapV2AbstractTrade {
     return trade instanceof UniswapV2AbstractTrade;

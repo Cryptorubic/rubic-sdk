@@ -346,7 +346,7 @@ export class Web3Private {
                     gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                 })
             });
-            return await this.executeContractMethod(
+            return this.executeContractMethod(
                 contractAddress,
                 contractAbi,
                 methodName,

@@ -99,8 +99,7 @@ export class InstantTradesManager {
     private async calculateTradeFromTokens(
         from: PriceTokenAmount,
         to: PriceToken,
-        options: RequiredSwapManagerCalculationOptions,
-        test?: number
+        options: RequiredSwapManagerCalculationOptions
     ): Promise<Array<InstantTrade | InstantTradeError>> {
         const { timeout, disabledProviders, ...providersOptions } = options;
         const providers = Object.entries(this.blockchainTradeProviders[from.blockchain]).filter(
@@ -110,7 +109,7 @@ export class InstantTradesManager {
         if (!providers.length) {
             throw new RubicSdkError(`There are no providers for ${from.blockchain} blockchain`);
         }
-        console.log(providers, 123, 456, 789, test);
+
         const calculationPromises = providers.map(async ([type, provider]) => {
             try {
                 const providerSpecificOptions = {

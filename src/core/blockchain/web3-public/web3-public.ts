@@ -23,7 +23,7 @@ import BigNumber from 'bignumber.js';
 import { Method } from 'web3-core-method';
 import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
 import { AbiItem } from 'web3-utils';
-import { BlockTransactionString } from 'web3-eth';
+import { BlockTransactionString, TransactionReceipt } from 'web3-eth';
 import { InsufficientFundsError } from '@rsdk-common/errors/swap/insufficient-funds.error';
 import { HttpClient } from '@rsdk-common/models/http-client';
 import { DefaultHttpClient } from '@rsdk-common/http/default-http-client';
@@ -234,6 +234,14 @@ export class Web3Public {
         const gasLimit = new BigNumber(receipt.gasUsed);
 
         return gasPrice.multipliedBy(gasLimit);
+    }
+
+    /**
+     * @description gets mined transaction gas fee in Ether
+     * @param hash transaction hash
+     */
+    public async getTransactionReceipt(hash: string): Promise<TransactionReceipt> {
+        return this.web3.eth.getTransactionReceipt(hash);
     }
 
     /**

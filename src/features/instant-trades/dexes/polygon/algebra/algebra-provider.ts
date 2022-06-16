@@ -6,8 +6,16 @@ import { AlgebraTrade } from '@rsdk-features/instant-trades/dexes/polygon/algebr
 import { ALGEBRA_V3_PROVIDER_CONFIGURATION } from '@rsdk-features/instant-trades/dexes/polygon/algebra/constants/provider-configuration';
 import { UniswapV3AlgebraTradeStruct } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 import { AlgebraRoute } from '@rsdk-features/instant-trades/dexes/polygon/algebra/models/algebra-route';
+import {
+    ALGEBRA_SWAP_ROUTER_CONTRACT_ABI,
+    ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS
+} from 'src/features/instant-trades/dexes/polygon/algebra/constants/swap-router-contract-data';
 
 export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider<AlgebraTrade> {
+    protected readonly contractAddress = ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS;
+
+    protected readonly contractAbi = ALGEBRA_SWAP_ROUTER_CONTRACT_ABI;
+
     public readonly blockchain = BLOCKCHAIN_NAME.POLYGON;
 
     protected readonly InstantTradeClass = AlgebraTrade;
