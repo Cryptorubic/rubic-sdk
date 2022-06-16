@@ -1,22 +1,22 @@
-import { Token } from '@core/blockchain/tokens/token';
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { notNull } from '@common/utils/object';
-import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { RubicSdkError } from '@common/errors/rubic-sdk.error';
-import { combineOptions } from '@common/utils/options';
-import { getPriceTokensFromInputTokens } from '@common/utils/tokens';
-import { Mutable } from '@common/utils/types/mutable';
-import { CelerCrossChainTradeProvider } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade-provider';
-import { CcrTypedTradeProviders } from '@features/cross-chain/models/typed-trade-provider';
+import { Token } from '@rsdk-core/blockchain/tokens/token';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { notNull } from '@rsdk-common/utils/object';
+import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
+import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
+import { combineOptions } from '@rsdk-common/utils/options';
+import { getPriceTokensFromInputTokens } from '@rsdk-common/utils/tokens';
+import { Mutable } from '@rsdk-common/utils/types/mutable';
+import { CelerCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade-provider';
+import { CcrTypedTradeProviders } from '@rsdk-features/cross-chain/models/typed-trade-provider';
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from 'src/features';
-import { SwapManagerCrossChainCalculationOptions } from '@features/cross-chain/models/swap-manager-cross-chain-options';
-import pTimeout from '@common/utils/p-timeout';
-import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
+import { SwapManagerCrossChainCalculationOptions } from '@rsdk-features/cross-chain/models/swap-manager-cross-chain-options';
+import pTimeout from '@rsdk-common/utils/p-timeout';
+import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
 import { hasLengthAtLeast } from '@features/instant-trades/utils/type-guards';
-import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import BigNumber from 'bignumber.js';
-import { SymbiosisCrossChainTradeProvider } from '@features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
+import { SymbiosisCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
 import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 
 type RequiredSwapManagerCalculationOptions = Required<SwapManagerCrossChainCalculationOptions>;
@@ -90,7 +90,7 @@ export class CrossChainManager {
         to: PriceToken,
         options: RequiredSwapManagerCalculationOptions
     ): Promise<WrappedCrossChainTrade> {
-        const trades = await this.calculateTradeFromTokens(from, to, this.getFullOptions(options));
+        const trades = await this.calculateTradeFromTokens(from, to, options);
         if (!hasLengthAtLeast(trades, 1)) {
             throw new Error('[RUBIC SDK] Trades array has to be defined');
         }

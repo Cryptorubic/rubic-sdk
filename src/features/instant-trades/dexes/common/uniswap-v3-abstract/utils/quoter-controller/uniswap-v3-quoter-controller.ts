@@ -2,29 +2,29 @@ import BigNumber from 'bignumber.js';
 import {
     FeeAmount,
     LiquidityPool
-} from '@features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
-import { compareAddresses } from '@common/utils/blockchain';
-import { Web3Public } from '@core/blockchain/web3-public/web3-public';
-import { MethodData } from '@core/blockchain/web3-public/models/method-data';
+} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
+import { compareAddresses } from '@rsdk-common/utils/blockchain';
+import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
+import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
 import {
     FACTORY_CONTRACT_ABI,
     FACTORY_CONTRACT_ADDRESS
-} from '@features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/factory-contract-data';
-import { notNull } from '@common/utils/object';
-import { UniswapV3Route } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
-import { Token } from '@core/blockchain/tokens/token';
-import { Cache } from '@common/decorators/cache.decorator';
+} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/factory-contract-data';
+import { notNull } from '@rsdk-common/utils/object';
+import { UniswapV3Route } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
+import { Token } from '@rsdk-core/blockchain/tokens/token';
+import { Cache } from '@rsdk-common/decorators/cache.decorator';
 import {
     QUOTER_CONTRACT_ABI,
     QUOTER_CONTRACT_ADDRESS
-} from '@features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/quoter-contract-data';
+} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/quoter-contract-data';
 
-import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
-import { Injector } from '@core/sdk/injector';
-import { UniswapV3RouterConfiguration } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
-import { UniswapV3AlgebraQuoterController } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
-import { Exact } from '@features/instant-trades/models/exact';
+import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { UniswapV3RouterConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
+import { UniswapV3AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
+import { Exact } from '@rsdk-features/instant-trades/models/exact';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];

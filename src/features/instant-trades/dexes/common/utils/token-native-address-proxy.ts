@@ -1,4 +1,4 @@
-import { Token } from '@core/blockchain/tokens/token';
+import { Token } from '@rsdk-core/blockchain/tokens/token';
 
 export function createTokenNativeAddressProxy<T extends Token>(
     token: T,

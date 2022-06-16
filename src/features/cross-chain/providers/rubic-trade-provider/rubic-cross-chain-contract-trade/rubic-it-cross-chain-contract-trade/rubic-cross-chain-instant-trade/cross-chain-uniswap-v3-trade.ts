@@ -1,13 +1,13 @@
 import { Web3Pure } from 'src/core';
-import { CrossChainInstantTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/cross-chain-instant-trade';
-import { UniswapV3AbstractTrade } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
-import { UniswapV3QuoterController } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
+import { CrossChainInstantTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/cross-chain-instant-trade';
+import { UniswapV3AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
+import { UniswapV3QuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
 import { compareAddresses } from 'src/common';
-import { v3LikeCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/v3-like-celer-swap-info';
-import { UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
-import { DestinationCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
-import { SwapVersion } from '@features/cross-chain/providers/common/celer-rubic/models/provider-type.enum';
-import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
+import { v3LikeCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/v3-like-celer-swap-info';
+import { UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
+import { DestinationCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
+import { SwapVersion } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/provider-type.enum';
+import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 
 export class CrossChainUniswapV3Trade implements CrossChainInstantTrade {
     readonly defaultDeadline = 999999999999999;

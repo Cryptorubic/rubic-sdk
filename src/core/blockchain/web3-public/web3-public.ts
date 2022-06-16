@@ -1,33 +1,33 @@
-import { Cache } from '@common/decorators/cache.decorator';
-import { ConditionalResult } from '@common/decorators/models/conditional-result';
-import { HealthcheckError } from '@common/errors/blockchain/healthcheck.error';
-import { TimeoutError } from '@common/errors/utils/timeout.error';
-import pTimeout from '@common/utils/p-timeout';
-import { ERC20_TOKEN_ABI } from '@core/blockchain/constants/erc-20-abi';
+import { Cache } from '@rsdk-common/decorators/cache.decorator';
+import { ConditionalResult } from '@rsdk-common/decorators/models/conditional-result';
+import { HealthcheckError } from '@rsdk-common/errors/blockchain/healthcheck.error';
+import { TimeoutError } from '@rsdk-common/errors/utils/timeout.error';
+import pTimeout from '@rsdk-common/utils/p-timeout';
+import { ERC20_TOKEN_ABI } from '@rsdk-core/blockchain/constants/erc-20-abi';
 import {
     HEALTHCHECK,
     isBlockchainHealthcheckAvailable
-} from '@core/blockchain/constants/healthcheck';
-import { nativeTokensList } from '@core/blockchain/constants/native-tokens';
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
-import { MULTICALL_ABI } from '@core/blockchain/web3-public/constants/multicall-abi';
-import { MULTICALL_ADDRESSES } from '@core/blockchain/web3-public/constants/multicall-addresses';
-import { BatchCall } from '@core/blockchain/web3-public/models/batch-call';
-import { Call } from '@core/blockchain/web3-public/models/call';
-import { ContractMulticallResponse } from '@core/blockchain/web3-public/models/contract-multicall-response';
-import { MulticallResponse } from '@core/blockchain/web3-public/models/multicall-response';
-import { RpcResponse } from '@core/blockchain/web3-public/models/rpc-response';
-import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
+} from '@rsdk-core/blockchain/constants/healthcheck';
+import { nativeTokensList } from '@rsdk-core/blockchain/constants/native-tokens';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { MULTICALL_ABI } from '@rsdk-core/blockchain/web3-public/constants/multicall-abi';
+import { MULTICALL_ADDRESSES } from '@rsdk-core/blockchain/web3-public/constants/multicall-addresses';
+import { BatchCall } from '@rsdk-core/blockchain/web3-public/models/batch-call';
+import { Call } from '@rsdk-core/blockchain/web3-public/models/call';
+import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public/models/contract-multicall-response';
+import { MulticallResponse } from '@rsdk-core/blockchain/web3-public/models/multicall-response';
+import { RpcResponse } from '@rsdk-core/blockchain/web3-public/models/rpc-response';
+import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
 import Web3 from 'web3';
 import BigNumber from 'bignumber.js';
 import { Method } from 'web3-core-method';
 import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
 import { AbiItem } from 'web3-utils';
 import { BlockTransactionString } from 'web3-eth';
-import { InsufficientFundsError } from '@common/errors/swap/insufficient-funds.error';
-import { HttpClient } from '@common/models/http-client';
-import { DefaultHttpClient } from '@common/http/default-http-client';
-import { MethodData } from '@core/blockchain/web3-public/models/method-data';
+import { InsufficientFundsError } from '@rsdk-common/errors/swap/insufficient-funds.error';
+import { HttpClient } from '@rsdk-common/models/http-client';
+import { DefaultHttpClient } from '@rsdk-common/http/default-http-client';
+import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
 
 type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 

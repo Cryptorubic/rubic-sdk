@@ -1,5 +1,5 @@
-import { HttpClient } from '@common/models/http-client';
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
+import { HttpClient } from '@rsdk-common/models/http-client';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import Web3 from 'web3';
 import { provider } from 'web3-core';
 
@@ -13,7 +13,7 @@ export interface Configuration {
 export interface RpcProvider {
     readonly mainRpc: string;
     readonly spareRpc?: string;
-    readonly mainPrcTimeout?: number;
+    readonly mainRpcTimeout?: number;
     readonly healthCheckTimeout?: number;
 }
 

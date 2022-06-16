@@ -8,8 +8,9 @@ export { OneinchAbstractProvider } from './dexes/common/oneinch-common/oneinch-a
 export { ZrxAbstractProvider } from './dexes/common/zrx-common/zrx-abstract-provider';
 export { InstantTradesManager } from './instant-trades-manager';
 export { SwapTransactionOptions } from './models/swap-transaction-options';
-export { EncodeTransactionOptions } from '@features/instant-trades/models/encode-transaction-options';
+export { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';
 export { GasFeeInfo } from './models/gas-fee-info';
 export { SwapCalculationOptions } from './models/swap-calculation-options';
 export { TRADE_TYPE, TradeType } from './models/trade-type';
 export { TypedTradeProviders } from './models/typed-trade-provider';
+export { InstantTradeError } from './models/instant-trade-error';

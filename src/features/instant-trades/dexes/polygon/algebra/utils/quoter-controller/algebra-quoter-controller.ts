@@ -1,18 +1,18 @@
 import { BLOCKCHAIN_NAME, PriceToken, Web3Public } from 'src/core';
-import { MethodData } from '@core/blockchain/web3-public/models/method-data';
-import { AlgebraRoute } from '@features/instant-trades/dexes/polygon/algebra/models/algebra-route';
+import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
+import { AlgebraRoute } from '@rsdk-features/instant-trades/dexes/polygon/algebra/models/algebra-route';
 import { notNull } from 'src/common';
 import BigNumber from 'bignumber.js';
-import { ContractMulticallResponse } from '@core/blockchain/web3-public/models/contract-multicall-response';
+import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public/models/contract-multicall-response';
 import {
     QUOTER_CONTRACT_ABI,
     QUOTER_CONTRACT_ADDRESS
-} from '@features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/constants/quoter-contract-data';
-import { Injector } from '@core/sdk/injector';
-import { ROUTER_TOKENS } from '@features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/constants/router-tokens';
-import { Token } from '@core/blockchain/tokens/token';
-import { UniswapV3AlgebraQuoterController } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
-import { Exact } from '@features/instant-trades/models/exact';
+} from '@rsdk-features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/constants/quoter-contract-data';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { ROUTER_TOKENS } from '@rsdk-features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/constants/router-tokens';
+import { Token } from '@rsdk-core/blockchain/tokens/token';
+import { UniswapV3AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
+import { Exact } from '@rsdk-features/instant-trades/models/exact';
 
 interface GetQuoterMethodsDataOptions {
     routesTokens: Token[];

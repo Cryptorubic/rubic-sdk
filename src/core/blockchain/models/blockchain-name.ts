@@ -8,7 +8,9 @@ export const BLOCKCHAIN_NAME = {
     HARMONY: 'HARMONY',
     ARBITRUM: 'ARBITRUM',
     AURORA: 'AURORA',
-    TELOS: 'TELOS'
+    TELOS: 'TELOS',
+    SOLANA: 'SOLANA',
+    NEAR: 'NEAR'
 } as const;
 
 export type BlockchainName = typeof BLOCKCHAIN_NAME[keyof typeof BLOCKCHAIN_NAME];

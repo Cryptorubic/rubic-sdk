@@ -1,11 +1,11 @@
-import { crossChainTradeProvidersData } from '@features/cross-chain/constants/cross-chain-trade-providers-data';
+import { crossChainTradeProvidersData } from '@rsdk-features/cross-chain/constants/cross-chain-trade-providers-data';
 import {
     CelerCrossChainSupportedBlockchain,
     celerCrossChainSupportedBlockchains
-} from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
-import { celerCrossChainContractsAddresses } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contracts-addresses';
-import { CelerCrossChainContractData } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
-import { rubicCrossChainContractsAddresses } from '@features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contracts-addresses';
+} from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
+import { celerCrossChainContractsAddresses } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contracts-addresses';
+import { CelerCrossChainContractData } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
+import { rubicCrossChainContractsAddresses } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contracts-addresses';
 
 const celerCrossChainContracts: Record<
     CelerCrossChainSupportedBlockchain,

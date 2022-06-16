@@ -1,18 +1,21 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk.error';
-import { WalletNotConnectedError } from '@common/errors/swap/wallet-not-connected.error';
-import { WrongNetworkError } from '@common/errors/swap/wrong-network.error';
-import { BasicTransactionOptions } from '@core/blockchain/models/basic-transaction-options';
-import { TransactionOptions } from '@core/blockchain/models/transaction-options';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { Injector } from '@core/sdk/injector';
-import { EncodeTransactionOptions } from '@features/instant-trades/models/encode-transaction-options';
-import { GasFeeInfo } from '@features/instant-trades/models/gas-fee-info';
-import { SwapTransactionOptions } from '@features/instant-trades/models/swap-transaction-options';
+import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
+import { WalletNotConnectedError } from '@rsdk-common/errors/swap/wallet-not-connected.error';
+import { WrongNetworkError } from '@rsdk-common/errors/swap/wrong-network.error';
+import { BasicTransactionOptions } from '@rsdk-core/blockchain/models/basic-transaction-options';
+import { TransactionOptions } from '@rsdk-core/blockchain/models/transaction-options';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';
+import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
+import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
-import { Web3Public } from '@core/blockchain/web3-public/web3-public';
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
-import { OptionsGasParams, TransactionGasParams } from '@features/instant-trades/models/gas-params';
+import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import {
+    OptionsGasParams,
+    TransactionGasParams
+} from '@rsdk-features/instant-trades/models/gas-params';
 import { Cache } from 'src/common';
 import { TradeType } from 'src/features';
 

@@ -65,3 +65,15 @@ export function hasLengthAtLeast<T extends readonly unknown[], L extends number>
 ): arr is T & LengthAtLeast<T, L> {
     return arr.length >= len;
 }
+
+export function isOneInch(type: TradeType): boolean {
+    const oneInchTypes = [
+        TRADE_TYPE.ONE_INCH_AVALANCHE,
+        TRADE_TYPE.ONE_INCH_FANTOM,
+        TRADE_TYPE.ONE_INCH_ARBITRUM,
+        TRADE_TYPE.ONE_INCH_POLYGON,
+        TRADE_TYPE.ONE_INCH_ETHEREUM,
+        TRADE_TYPE.ONE_INCH_BSC
+    ];
+    return oneInchTypes.some(el => el === type);
+}

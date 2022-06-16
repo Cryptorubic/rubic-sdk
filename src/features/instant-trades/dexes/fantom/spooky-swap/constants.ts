@@ -1,5 +1,5 @@
-import { UniswapV2ProviderConfiguration } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
-import { defaultFantomProviderConfiguration } from '@features/instant-trades/dexes/fantom/default-constants';
+import { UniswapV2ProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { defaultFantomProviderConfiguration } from '@rsdk-features/instant-trades/dexes/fantom/default-constants';
 
 export const SPOOKY_SWAP_CONTRACT_ADDRESS = '0xF491e7B69E4244ad4002BC14e878a34207E38c29';
 

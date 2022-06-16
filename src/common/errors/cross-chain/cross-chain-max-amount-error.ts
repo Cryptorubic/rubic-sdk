@@ -1,4 +1,4 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk.error';
+import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import BigNumber from 'bignumber.js';
 
 export class CrossChainMaxAmountError extends RubicSdkError {

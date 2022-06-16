@@ -1,25 +1,25 @@
-import { InsufficientLiquidityError } from '@common/errors/swap/insufficient-liquidity.error';
-import { notNull } from '@common/utils/object';
-import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { Token } from '@core/blockchain/tokens/token';
-import { BatchCall } from '@core/blockchain/web3-public/models/batch-call';
-import { Web3Public } from '@core/blockchain/web3-public/web3-public';
-import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
-import { Injector } from '@core/sdk/injector';
-import { SwapCalculationOptions } from '@features/instant-trades/models/swap-calculation-options';
+import { InsufficientLiquidityError } from '@rsdk-common/errors/swap/insufficient-liquidity.error';
+import { notNull } from '@rsdk-common/utils/object';
+import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { Token } from '@rsdk-core/blockchain/tokens/token';
+import { BatchCall } from '@rsdk-core/blockchain/web3-public/models/batch-call';
+import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
+import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { SwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
 import {
     UniswapCalculatedInfo,
     UniswapCalculatedInfoWithProfit
-} from '@features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
-import { UniswapRoute } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-route';
-import { UniswapV2ProviderConfiguration } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
-import { UniswapV2TradeClass } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-class';
-import { UniswapV2AbstractTrade } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+} from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
+import { UniswapRoute } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-route';
+import { UniswapV2ProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { UniswapV2TradeClass } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-class';
+import { UniswapV2AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
 import { Cache } from 'src/common';
-import { Exact } from '@features/instant-trades/models/exact';
-import { hasLengthAtLeast } from '@features/instant-trades/utils/type-guards';
+import { Exact } from '@rsdk-features/instant-trades/models/exact';
+import { hasLengthAtLeast } from '@rsdk-features/instant-trades/utils/type-guards';
 
 export interface PathFactoryStruct {
     readonly from: PriceToken;

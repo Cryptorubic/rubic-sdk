@@ -1,10 +1,10 @@
-import { WrongChainIdError } from '@common/errors/provider/wrong-chain-id.error';
-import { RubicSdkError } from '@common/errors/rubic-sdk.error';
-import { BlockchainsInfo } from '@core/blockchain/blockchains-info';
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
-import { WalletConnectionConfiguration } from '@core/blockchain/models/wallet-connection-configuration';
-import { Web3Private } from '@core/blockchain/web3-private/web3-private';
-import { WalletProvider } from '@core/sdk/models/configuration';
+import { WrongChainIdError } from '@rsdk-common/errors/provider/wrong-chain-id.error';
+import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
+import { BlockchainsInfo } from '@rsdk-core/blockchain/blockchains-info';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { WalletConnectionConfiguration } from '@rsdk-core/blockchain/models/wallet-connection-configuration';
+import { Web3Private } from '@rsdk-core/blockchain/web3-private/web3-private';
+import { WalletProvider } from '@rsdk-core/sdk/models/configuration';
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { provider } from 'web3-core';

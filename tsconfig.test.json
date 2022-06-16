@@ -36,9 +36,9 @@
         "./node_modules/*"
       ],
       "src/*": ["./src/*"],
-      "@core/*": ["./src/core/*"],
-      "@common/*": ["./src/common/*"],
-      "@features/*": ["./src/features/*"],
+      "@rsdk-core/*": ["./src/core/*"],
+      "@rsdk-common/*": ["./src/common/*"],
+      "@rsdk-features/*": ["./src/features/*"],
       "__tests__/*": ["./__tests__/*"]
     },
     "allowJs": true

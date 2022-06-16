@@ -1,9 +1,9 @@
 import {
     UniswapV2AbstractTrade,
     UniswapV2TradeStruct
-} from '@features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+} from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { TRADE_TYPE, TradeType } from 'src/features';
-import { TRISOLARIS_AURORA_CONTRACT_ADDRESS } from '@features/instant-trades/dexes/aurora/trisolaris-aurora/constants';
+import { TRISOLARIS_AURORA_CONTRACT_ADDRESS } from '@rsdk-features/instant-trades/dexes/aurora/trisolaris-aurora/constants';
 
 export class TrisolarisAuroraTrade extends UniswapV2AbstractTrade {
     public static get type(): TradeType {

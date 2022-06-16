@@ -1,7 +1,7 @@
 import { BLOCKCHAIN_NAME } from 'src/core';
 import { SpiritSwapProvider } from 'src/features/instant-trades/dexes/fantom/spirit-swap/spirit-swap-provider';
 import { SpiritSwapTrade } from 'src/features/instant-trades/dexes/fantom/spirit-swap/spirit-swap-trade';
-import { SPIRIT_SWAP_PROVIDER_CONFIGURATION } from '@features/instant-trades/dexes/fantom/spirit-swap/constants';
+import { SPIRIT_SWAP_PROVIDER_CONFIGURATION } from '@rsdk-features/instant-trades/dexes/fantom/spirit-swap/constants';
 
 export const spiritSwapFantomProviderSpec = () => {
     let spiritSwapProvider: SpiritSwapProvider;

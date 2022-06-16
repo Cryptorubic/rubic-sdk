@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_NAME, BlockchainName } from '@core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 
 export const MULTICALL_ADDRESSES: Record<BlockchainName, string> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
@@ -11,4 +11,7 @@ export const MULTICALL_ADDRESSES: Record<BlockchainName, string> = {
     [BLOCKCHAIN_NAME.ARBITRUM]: '0x80C7DD17B01855a6D2347444a0FCC36136a314de',
     [BLOCKCHAIN_NAME.AURORA]: '0xe0e3887b158F7F9c80c835a61ED809389BC08d1b',
     [BLOCKCHAIN_NAME.TELOS]: '0x53dC7535028e2fcaCa0d847AD108b9240C0801b1'
+    [BLOCKCHAIN_NAME.TELOS]: '0x53dC7535028e2fcaCa0d847AD108b9240C0801b1',
+    [BLOCKCHAIN_NAME.SOLANA]: '@TODO',
+    [BLOCKCHAIN_NAME.NEAR]: '@TODO',
 };

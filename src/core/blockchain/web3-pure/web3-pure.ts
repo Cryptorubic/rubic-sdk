@@ -1,10 +1,10 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk.error';
-import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
+import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
+import { NATIVE_TOKEN_ADDRESS } from '@rsdk-core/blockchain/constants/native-token-address';
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { TransactionConfig } from 'web3-core';
 import { toChecksumAddress, isAddress, toWei, fromWei, AbiItem, fromAscii } from 'web3-utils';
-import { TransactionGasParams } from '@features/instant-trades/models/gas-params';
+import { TransactionGasParams } from '@rsdk-features/instant-trades/models/gas-params';
 
 export class Web3Pure {
     public static readonly ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';

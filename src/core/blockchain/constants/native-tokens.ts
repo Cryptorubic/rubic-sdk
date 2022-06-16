@@ -1,6 +1,6 @@
-import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
-import { BLOCKCHAIN_NAME, BlockchainName } from '@core/blockchain/models/blockchain-name';
-import { TokenStruct } from '@core/blockchain/tokens/token';
+import { NATIVE_TOKEN_ADDRESS } from '@rsdk-core/blockchain/constants/native-token-address';
+import { BLOCKCHAIN_NAME, BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { TokenStruct } from '@rsdk-core/blockchain/tokens/token';
 
 export type NativeTokensList = Record<BlockchainName, Omit<TokenStruct, 'blockchain'>>;
 
@@ -63,6 +63,18 @@ export const nativeTokensList: NativeTokensList = {
         address: NATIVE_TOKEN_ADDRESS,
         name: 'TLOS',
         symbol: 'TLOS',
+        decimals: 24
+    },
+    [BLOCKCHAIN_NAME.SOLANA]: {
+        address: '@TODO SOLANA',
+        name: 'Solana',
+        symbol: 'SOL',
+        decimals: 24
+    },
+    [BLOCKCHAIN_NAME.NEAR]: {
+        address: '@TODO NEAR',
+        name: 'NEAR',
+        symbol: 'NEAR',
         decimals: 24
     }
 };

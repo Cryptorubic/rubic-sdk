@@ -1,4 +1,4 @@
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 
 export interface TokenBaseStruct {
     address: string;

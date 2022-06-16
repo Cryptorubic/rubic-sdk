@@ -1,9 +1,9 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk.error';
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
-import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
-import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
-import { Injector } from '@core/sdk/injector';
-import { compareAddresses } from '@common/utils/blockchain';
+import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { TokenBaseStruct } from '@rsdk-core/blockchain/models/token-base-struct';
+import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { compareAddresses } from '@rsdk-common/utils/blockchain';
 
 export type TokenStruct = {
     blockchain: BlockchainName;

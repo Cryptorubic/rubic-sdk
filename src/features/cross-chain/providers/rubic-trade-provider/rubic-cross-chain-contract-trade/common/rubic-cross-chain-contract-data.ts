@@ -1,12 +1,12 @@
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
-import { Cache } from '@common/decorators/cache.decorator';
-import { Token } from '@core/blockchain/tokens/token';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { Cache } from '@rsdk-common/decorators/cache.decorator';
+import { Token } from '@rsdk-core/blockchain/tokens/token';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import BigNumber from 'bignumber.js';
-import { BlockchainsInfo } from '@core/blockchain/blockchains-info';
-import { rubicCrossChainContractAbi } from '@features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contract-abi';
-import { ProviderData } from '@features/cross-chain/models/provider-data';
-import { CrossChainContractData } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
+import { BlockchainsInfo } from '@rsdk-core/blockchain/blockchains-info';
+import { rubicCrossChainContractAbi } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contract-abi';
+import { ProviderData } from '@rsdk-features/cross-chain/models/provider-data';
+import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 
 /**
  * Class to work with readable methods of cross-chain contract.

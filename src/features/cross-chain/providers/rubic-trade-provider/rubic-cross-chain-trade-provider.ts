@@ -3,7 +3,7 @@ import { getRubicCrossChainContract } from '@features/cross-chain/providers/rubi
 import {
     RubicCrossChainSupportedBlockchain,
     rubicCrossChainSupportedBlockchains
-} from '@features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
+} from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
 import { compareAddresses, notNull } from 'src/common';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
 import { BlockchainName } from 'src/core';
