@@ -50,7 +50,7 @@ export class CrossChainManager {
     constructor(private readonly providerAddress: string) {}
 
     /**
-     * Calculates best cross chain trade, based on course.
+     * Calculates best cross chain trade, based on calculated courses.
      * @param fromToken Token to sell.
      * @param fromAmount Amount to sell.
      * @param toToken Token to get.

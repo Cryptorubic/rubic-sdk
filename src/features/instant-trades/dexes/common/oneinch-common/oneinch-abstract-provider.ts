@@ -68,6 +68,12 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         return response.address;
     }
 
+    /**
+     * Calculates input amount, based on amount, user wants to get.
+     * @param from Token to sell.
+     * @param to Token to get with output amount.
+     * @param options Additional options.
+     */
     public async calculateExactOutputAmount(
         from: PriceToken,
         to: PriceTokenAmount,

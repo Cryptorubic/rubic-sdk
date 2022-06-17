@@ -28,14 +28,14 @@ export abstract class CrossChainTrade {
     public abstract readonly type: CrossChainTradeType;
 
     /**
-     * Token to get with output amount.
-     */
-    public abstract readonly to: PriceTokenAmount;
-
-    /**
      * Token to sell with input amount.
      */
     public abstract readonly from: PriceTokenAmount;
+
+    /**
+     * Token to get with output amount.
+     */
+    public abstract readonly to: PriceTokenAmount;
 
     /**
      * Gas fee info in source blockchain.

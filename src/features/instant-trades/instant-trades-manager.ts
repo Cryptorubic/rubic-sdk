@@ -26,6 +26,9 @@ export type RequiredSwapManagerCalculationOptions = MarkRequired<
     'timeout' | 'disabledProviders'
 >;
 
+/**
+ * Contains methods to calculate instant trades.
+ */
 export class InstantTradesManager {
     public static readonly defaultCalculationTimeout = 3_000;
 
@@ -56,6 +59,9 @@ export class InstantTradesManager {
         return acc;
     }, {} as Mutable<TypedTradeProviders>);
 
+    /**
+     * List of all instant trade providers, combined by blockchains.
+     */
     public readonly blockchainTradeProviders: Readonly<
         Record<BlockchainName, Partial<TypedTradeProviders>>
     > = Object.entries(this.tradeProviders).reduce(
@@ -66,6 +72,14 @@ export class InstantTradesManager {
         {} as Record<BlockchainName, Partial<TypedTradeProviders>>
     );
 
+    /**
+     * Calculates instant trades.
+     * @param fromToken Token to sell.
+     * @param fromAmount Amount to sell.
+     * @param toToken Token to get.
+     * @param options Additional options.
+     * @returns List of calculated instant trades.
+     */
     public async calculateTrade(
         fromToken:
             | Token

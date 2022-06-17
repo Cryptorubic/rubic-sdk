@@ -45,6 +45,12 @@ export abstract class UniswapV2AbstractProvider<
         return this.calculateDifficultTrade(from, to, from.weiAmount, 'input', options);
     }
 
+    /**
+     * Calculates trade, based on amount, user wants to get.
+     * @param from Token to sell.
+     * @param to Token to get with output amount.
+     * @param options Additional options.
+     */
     public async calculateExactOutput(
         from: PriceToken,
         to: PriceTokenAmount,
@@ -53,6 +59,12 @@ export abstract class UniswapV2AbstractProvider<
         return this.calculateDifficultTrade(from, to, to.weiAmount, 'output', options);
     }
 
+    /**
+     * Calculates input amount, based on amount, user wants to get.
+     * @param from Token to sell.
+     * @param to Token to get with output amount.
+     * @param options Additional options.
+     */
     public async calculateExactOutputAmount(
         from: PriceToken,
         to: PriceTokenAmount,

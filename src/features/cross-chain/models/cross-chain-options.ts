@@ -1,11 +1,13 @@
 export interface CrossChainOptions {
     /**
      * Slippage in source network (for Celer and Rubic).
+     * Takes value from 0 to 1.
      */
     fromSlippageTolerance?: number;
 
     /**
      * Slippage in target network (for Celer and Rubic).
+     * Takes value from 0 to 1.
      */
     toSlippageTolerance?: number;
 
@@ -26,6 +28,7 @@ export interface CrossChainOptions {
 
     /**
      * Overall slippage (for Symbiosis).
+     * Takes value from 0 to 1.
      */
     slippageTolerance?: number;
 
