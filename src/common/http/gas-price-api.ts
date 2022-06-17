@@ -6,6 +6,9 @@ import BigNumber from 'bignumber.js';
 import { HttpClient } from '@common/models/http-client';
 import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
 
+/**
+ * Uses different api or web3 to retrieve current gas price.
+ */
 export class GasPriceApi {
     /**
      * Gas price request interval in seconds.
@@ -15,9 +18,8 @@ export class GasPriceApi {
     constructor(private readonly httpClient: HttpClient) {}
 
     /**
-     * Gas price in Wei for selected blockchain.
+     * Gets gas price in Wei for selected blockchain.
      * @param blockchain Blockchain to get gas price from.
-     * @return Promise<BigNumber> Average gas price in Wei.
      */
     public getGasPrice(blockchain: BlockchainName): Promise<string> {
         if (blockchain === BLOCKCHAIN_NAME.ETHEREUM) {
@@ -27,9 +29,8 @@ export class GasPriceApi {
     }
 
     /**
-     * Gas price in Eth units for selected blockchain.
+     * Gets gas price in Eth units for selected blockchain.
      * @param blockchain Blockchain to get gas price from.
-     * @return Promise<BigNumber> Average gas price in Eth units.
      */
     public async getGasPriceInEthUnits(blockchain: BlockchainName): Promise<BigNumber> {
         return Web3Pure.fromWei(await this.getGasPrice(blockchain));
@@ -37,7 +38,7 @@ export class GasPriceApi {
 
     /**
      * Gets Ethereum gas price from different APIs, sorted by priority.
-     * @return Promise<BigNumber> Average gas price in Wei.
+     * @returns Average gas price in Wei.
      */
     @Cache({
         maxAge: GasPriceApi.requestInterval
@@ -66,8 +67,8 @@ export class GasPriceApi {
     }
 
     /**
-     * Gets Avalanche gas price.
-     * @return Promise<BigNumber> Average gas price in Wei.
+     * Gets gas price from web3.
+     * @returns Average gas price in Wei.
      */
     @Cache({
         maxAge: GasPriceApi.requestInterval

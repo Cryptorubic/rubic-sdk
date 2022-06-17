@@ -3,7 +3,6 @@ export { Web3Public } from './blockchain/web3-public/web3-public';
 export { Web3Private } from './blockchain/web3-private/web3-private';
 export { Web3Pure } from './blockchain/web3-pure/web3-pure';
 export { BlockchainsInfo } from './blockchain/blockchains-info';
-export { blockchains } from './blockchain/constants/blockchains';
 export { BlockchainName, BLOCKCHAIN_NAME } from './blockchain/models/blockchain-name';
 
 export type { Token } from './blockchain/tokens/token';

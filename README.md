@@ -58,6 +58,7 @@
     - [to](#crosschaintradeto-readonly-field)
     - [toTokenAmountMin](#crosschaintradetotokenamountmin-readonly-field)
     - [estimatedGas](#crosschaintradeestimatedgas-getter)
+    - [type](#crosschaintradeestimatedgas-getter)
     - [priceImpactData](#crosschaintradepriceimpactdata-getter)
     - [priceImpact readonly](#crosschaintradepriceimpact-readonly-field)
   - [Cross Chain Symbiosis Manager](#cross-chain-symbiosis-manager)
@@ -1006,15 +1007,15 @@ Method calculates [WrappedCrossChainTrade](#wrapped-cross-chain-trade), which co
 
 **CrossChainOptions description:**
 
-| Option                | Type                            | Description                                                                                                                       | Default                   |
-|-----------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|---------------------------|
-| fromSlippageTolerance | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount after swap in **first blockchain** (for Celer and Rubic).                   | 0.02                      |
-| toSlippageTolerance   | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap in **second blockchain** (for Celer and Rubic). | 0.02                      |
-| slippageTolerance     | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap (for Symbiosis).                                | 0.04                      |
-| fromAddress           | `string`                        | User wallet address to calculate trade for (for Symbiosis).                                                                       | Connected wallet address. |
-| deadline              | `number`                        | Deadline of the trade in minutes (for Symbiosis).                                                                                 | 20                        |
-| gasCalculation        | `'enabled'` &#124; `'disabled'` | Disables or enables calculation of gas limit and gas price.                                                                       | 'enabled'                 |
-| disabledProviders     | `CrossChainTradeType[]`         | Disables passed providers.                                                                                                        | []                        |
+| Option                | Type                            | Description                                                                                                                                                                 | Default                   |
+|-----------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
+| fromSlippageTolerance | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount after swap in **first blockchain** (for Celer and Rubic).                                                             | 0.02                      |
+| toSlippageTolerance   | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap in **second blockchain** (for Celer and Rubic).                                           | 0.02                      |
+| slippageTolerance     | `number`                        | Swap slippage in range 0 to 1. Defines minimum amount that you can get after swap (for Symbiosis).                                                                          | 0.04                      |
+| fromAddress           | `string`                        | User wallet address to calculate trade for (necessary for Symbiosis). You can use fake address to get output amount, but you must recalculate trade when user is connected. | Connected wallet address. |
+| deadline              | `number`                        | Deadline of the trade in minutes (for Symbiosis).                                                                                                                           | 20                        |
+| gasCalculation        | `'enabled'` &#124; `'disabled'` | Disables or enables calculation of gas limit and gas price.                                                                                                                 | 'enabled'                 |
+| disabledProviders     | `CrossChainTradeType[]`         | Disables passed providers.                                                                                                                                                  | []                        |
 
 ---
 
@@ -1177,6 +1178,16 @@ crossChainTrade.estimateGas(): GasFeeInfo | null
 ```
 
 Gets gasFee, that is gasLimit * gasPrice. Equals `null` if gas couldn't be calculated.
+
+---
+
+### crossChainTrade.type readonly field
+
+```typescript
+crossChainTrade.type: CrossChainTradeType
+```
+
+Cross-chain trade type (`CROSS_CHAIN_TRADE_TYPE.CELER`, `CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS`, `CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS`). Check `CROSS_CHAIN_TRADE_TYPE` interface to see all providers.
 
 ---
 

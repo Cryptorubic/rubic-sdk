@@ -23,6 +23,9 @@ type SupportedBlockchain = typeof supportedBlockchains[number];
 
 const API_BASE_URL = 'https://api.coingecko.com/api/v3/';
 
+/**
+ * Works with coingecko api to get tokens prices in usd.
+ */
 export class CoingeckoApi {
     private static isSupportedBlockchain(
         blockchain: BlockchainName

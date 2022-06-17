@@ -8,18 +8,39 @@ import {
 import { GasData } from '@features/cross-chain/models/gas-data';
 import { Injector } from '@core/sdk/injector';
 import BigNumber from 'bignumber.js';
-import { EncodeTransactionOptions, SwapTransactionOptions } from 'src/features';
+import {
+    CrossChainTradeType,
+    EncodeTransactionOptions,
+    SwapTransactionOptions
+} from 'src/features';
 import { UnnecessaryApprove, WalletNotConnectedError, WrongNetworkError } from 'src/common';
 import { TransactionReceipt } from 'web3-eth';
 import { ContractParams } from '@features/cross-chain/models/contract-params';
 import { TransactionConfig } from 'web3-core';
 
+/**
+ * Abstract class for all cross chain providers' trades.
+ */
 export abstract class CrossChainTrade {
+    /**
+     * Type of calculated cross chain trade.
+     */
+    public abstract readonly type: CrossChainTradeType;
+
+    /**
+     * Token to get with output amount.
+     */
     public abstract readonly to: PriceTokenAmount;
 
+    /**
+     * Token to sell with input amount.
+     */
     public abstract readonly from: PriceTokenAmount;
 
-    protected abstract readonly gasData: GasData | null;
+    /**
+     * Gas fee info in source blockchain.
+     */
+    public abstract readonly gasData: GasData | null;
 
     protected abstract readonly fromWeb3Public: Web3Public;
 
@@ -29,6 +50,9 @@ export abstract class CrossChainTrade {
         return Injector.web3Private.address;
     }
 
+    /**
+     * Gets gas fee in source blockchain.
+     */
     public get estimatedGas(): BigNumber | null {
         if (!this.gasData) {
             return null;
@@ -38,10 +62,18 @@ export abstract class CrossChainTrade {
 
     protected constructor(protected readonly providerAddress: string) {}
 
+    /**
+     * Sends swap transaction with connected wallet.
+     * If user has not enough allowance, then approve transaction will be called first.
+     * @param options Transaction options.
+     */
     public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
 
     protected abstract getContractParams(fromAddress?: string): Promise<ContractParams>;
 
+    /**
+     * Returns true, if allowance is not enough.
+     */
     public async needApprove(): Promise<boolean> {
         this.checkWalletConnected();
 
@@ -57,6 +89,10 @@ export abstract class CrossChainTrade {
         return this.from.weiAmount.gt(allowance);
     }
 
+    /**
+     * Sends approve transaction with connected wallet.
+     * @param options Transaction options.
+     */
     public async approve(options: BasicTransactionOptions): Promise<TransactionReceipt> {
         if (!(await this.needApprove())) {
             throw new UnnecessaryApprove();
@@ -95,6 +131,10 @@ export abstract class CrossChainTrade {
         );
     }
 
+    /**
+     * Builds transaction config, with encoded data.
+     * @param options Encode transaction options.
+     */
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         const { gasLimit, gasPrice } = options;
 

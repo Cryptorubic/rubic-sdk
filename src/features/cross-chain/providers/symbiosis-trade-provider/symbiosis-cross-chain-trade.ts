@@ -1,4 +1,4 @@
-import { SwapTransactionOptions } from 'src/features';
+import { CROSS_CHAIN_TRADE_TYPE, SwapTransactionOptions } from 'src/features';
 import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
 import { TransactionRequest } from '@ethersproject/providers';
 import { PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
@@ -64,13 +64,15 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         }
     }
 
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
+
     public readonly from: PriceTokenAmount;
 
     public readonly to: PriceTokenAmount;
 
     public readonly priceImpact: number;
 
-    protected readonly gasData: GasData | null;
+    public readonly gasData: GasData | null;
 
     private readonly transactionRequest: TransactionRequest;
 

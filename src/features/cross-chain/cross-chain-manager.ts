@@ -27,8 +27,11 @@ import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/r
 
 type RequiredSwapManagerCalculationOptions = Required<SwapManagerCrossChainCalculationOptions>;
 
+/**
+ * Contains method to calculate best cross chain trade.
+ */
 export class CrossChainManager {
-    public static readonly defaultCalculationTimeout = 360_000;
+    private static readonly defaultCalculationTimeout = 15_000;
 
     private static readonly defaultSlippageTolerance = 0.02;
 
@@ -46,6 +49,14 @@ export class CrossChainManager {
 
     constructor(private readonly providerAddress: string) {}
 
+    /**
+     * Calculates best cross chain trade, based on course.
+     * @param fromToken Token to sell.
+     * @param fromAmount Amount to sell.
+     * @param toToken Token to get.
+     * @param options Additional options.
+     * @returns Wrapped cross chain trade, with possible min or max amount errors.
+     */
     public async calculateTrade(
         fromToken:
             | Token
@@ -60,7 +71,7 @@ export class CrossChainManager {
                   address: string;
                   blockchain: BlockchainName;
               },
-        options?: SwapManagerCrossChainCalculationOptions
+        options?: Omit<SwapManagerCrossChainCalculationOptions, 'providerAddress'>
     ): Promise<WrappedCrossChainTrade> {
         if (toToken instanceof Token && fromToken.blockchain === toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be different.');
