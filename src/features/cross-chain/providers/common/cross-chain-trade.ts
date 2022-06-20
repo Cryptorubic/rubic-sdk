@@ -13,7 +13,7 @@ import {
     EncodeTransactionOptions,
     SwapTransactionOptions
 } from 'src/features';
-import { UnnecessaryApprove, WalletNotConnectedError, WrongNetworkError } from 'src/common';
+import { UnnecessaryApproveError, WalletNotConnectedError, WrongNetworkError } from 'src/common';
 import { TransactionReceipt } from 'web3-eth';
 import { ContractParams } from '@features/cross-chain/models/contract-params';
 import { TransactionConfig } from 'web3-core';
@@ -95,7 +95,7 @@ export abstract class CrossChainTrade {
      */
     public async approve(options: BasicTransactionOptions): Promise<TransactionReceipt> {
         if (!(await this.needApprove())) {
-            throw new UnnecessaryApprove();
+            throw new UnnecessaryApproveError();
         }
 
         this.checkWalletConnected();

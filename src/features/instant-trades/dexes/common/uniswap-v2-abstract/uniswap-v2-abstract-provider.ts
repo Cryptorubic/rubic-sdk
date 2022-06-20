@@ -18,8 +18,10 @@ import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 export abstract class UniswapV2AbstractProvider<
     T extends UniswapV2AbstractTrade = UniswapV2AbstractTrade
 > extends InstantTradeProvider {
+    /** @internal */
     public abstract readonly InstantTradeClass: UniswapV2TradeClass<T>;
 
+    /** @internal */
     public abstract readonly providerSettings: UniswapV2ProviderConfiguration;
 
     public get type(): TradeType {
@@ -73,6 +75,14 @@ export abstract class UniswapV2AbstractProvider<
         return (await this.calculateExactOutput(from, to, options)).from.tokenAmount;
     }
 
+    /**
+     * Calculates instant trade.
+     * @param from Token to sell.
+     * @param to Token to get.
+     * @param weiAmount Amount to sell or to get in wei.
+     * @param exact Defines, whether to call 'exactInput' or 'exactOutput' method.
+     * @param options Additional options.
+     */
     public async calculateDifficultTrade(
         from: PriceToken,
         to: PriceToken,

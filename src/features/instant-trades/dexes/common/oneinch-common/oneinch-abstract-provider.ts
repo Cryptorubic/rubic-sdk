@@ -204,7 +204,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
 
     /**
      * Extracts tokens path from oneInch api response.
-     * @return Promise<Token[]> Tokens array, used in the route.
+     * @returns Promise<Token[]> Tokens array, used in the route.
      */
     private async extractPath(
         fromToken: Token,

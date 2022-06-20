@@ -17,7 +17,11 @@ import { LowSlippageDeflationaryTokenError, RubicSdkError } from 'src/common';
 import { TOKEN_WITH_FEE_ERRORS } from '@features/cross-chain/constants/token-with-fee-errors';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
 
+/**
+ * Calculated Rubic cross chain trade.
+ */
 export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
+    /** @internal */
     public static async getGasData(
         fromTrade: CrossChainContractTrade,
         toTrade: CrossChainContractTrade,

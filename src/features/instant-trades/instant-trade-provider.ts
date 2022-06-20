@@ -31,7 +31,7 @@ export abstract class InstantTradeProvider {
         return Injector.web3PublicService.getWeb3Public(this.blockchain);
     }
     /**
-     * Calculates best instant trade, based on course.
+     * Calculates instant trade.
      * @param from Token to sell with input amount.
      * @param to Token to get.
      * @param options Additional options.

@@ -12,7 +12,11 @@ import { GasData } from '@features/cross-chain/models/gas-data';
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 import BigNumber from 'bignumber.js';
 
+/**
+ * Calculated Symbiosis cross chain trade.
+ */
 export class SymbiosisCrossChainTrade extends CrossChainTrade {
+    /** @internal */
     public static async getGasData(
         from: PriceTokenAmount,
         to: PriceTokenAmount,
@@ -70,6 +74,9 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
 
     public readonly to: PriceTokenAmount;
 
+    /**
+     * Overall price impact, fetched from symbiosis api.
+     */
     public readonly priceImpact: number;
 
     public readonly gasData: GasData | null;

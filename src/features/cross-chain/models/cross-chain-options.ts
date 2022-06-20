@@ -17,6 +17,7 @@ export interface CrossChainOptions {
     gasCalculation?: 'enabled' | 'disabled';
 
     /**
+     * @internal
      * Integrator address.
      */
     providerAddress?: string;
