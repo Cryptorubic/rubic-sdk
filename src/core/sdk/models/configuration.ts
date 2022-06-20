@@ -3,6 +3,9 @@ import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import Web3 from 'web3';
 import { provider } from 'web3-core';
 
+/**
+ * Main sdk configuration.
+ */
 export interface Configuration {
     /**
      * Rpc data to connect to blockchains you will use.

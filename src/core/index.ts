@@ -4,6 +4,7 @@ export { Web3Private } from './blockchain/web3-private/web3-private';
 export { Web3Pure } from './blockchain/web3-pure/web3-pure';
 export { BlockchainsInfo } from './blockchain/blockchains-info';
 export { BlockchainName, BLOCKCHAIN_NAME } from './blockchain/models/blockchain-name';
+export { Configuration, RpcProvider, WalletProvider } from './sdk/models/configuration';
 
 export type { Token } from './blockchain/tokens/token';
 export type { PriceToken } from './blockchain/tokens/price-token';
@@ -12,5 +13,3 @@ export type { BasicTransactionOptions } from './blockchain/models/basic-transact
 export type { Blockchain } from './blockchain/models/blockchain';
 export type { TokenBaseStruct } from './blockchain/models/token-base-struct';
 export type { TransactionOptions } from './blockchain/models/transaction-options';
-export type { WalletConnectionConfiguration } from './blockchain/models/wallet-connection-configuration';
-export { Configuration, RpcProvider, WalletProvider } from './sdk/models/configuration';
