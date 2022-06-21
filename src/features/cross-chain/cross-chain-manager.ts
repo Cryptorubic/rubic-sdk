@@ -51,6 +51,24 @@ export class CrossChainManager {
 
     /**
      * Calculates best cross chain trade, based on calculated courses.
+     *
+     * @example
+     * ```ts
+     * const fromBlockchain = BLOCKCHAIN_NAME.ETHEREUM;
+     * // ETH
+     * const fromTokenAddress = '0x0000000000000000000000000000000000000000';
+     * const fromAmount = 1;
+     * const toBlockchain = BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN;
+     * // BUSD
+     * const toTokenAddress = '0xe9e7cea3dedca5984780bafc599bd69add087d56';
+     *
+     * const trade = await sdk.crossChain.calculateTrade(
+     *     { blockchain: fromBlockchain, address: fromTokenAddress },
+     *     fromAmount,
+     *     { blockchain: toBlockchain, address: toTokenAddress }
+     * );
+     * ```
+     *
      * @param fromToken Token to sell.
      * @param fromAmount Amount to sell.
      * @param toToken Token to get.

@@ -74,6 +74,27 @@ export class InstantTradesManager {
 
     /**
      * Calculates instant trades.
+     *
+     * @example
+     * ```ts
+     * const blockchain = BLOCKCHAIN_NAME.ETHEREUM;
+     * // ETH
+     * const fromTokenAddress = '0x0000000000000000000000000000000000000000';
+     * const fromAmount = 1;
+     * // USDT
+     * const toTokenAddress = '0xdac17f958d2ee523a2206206994597c13d831ec7';
+     *
+     * const trades = await sdk.instantTrades.calculateTrade(
+     *     { blockchain, address: fromTokenAddress },
+     *     fromAmount,
+     *     toTokenAddress
+     * );
+     *
+     * Object.entries(trades).forEach(([tradeType, trade]) =>
+     *     console.log(tradeType, `to amount: ${trade.to.tokenAmount.toFormat(3)}`)
+     * )
+     * ```
+     *
      * @param fromToken Token to sell.
      * @param fromAmount Amount to sell.
      * @param toToken Token to get.

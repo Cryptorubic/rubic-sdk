@@ -65,6 +65,13 @@ export abstract class CrossChainTrade {
     /**
      * Sends swap transaction with connected wallet.
      * If user has not enough allowance, then approve transaction will be called first.
+     *
+     * @example
+     * ```ts
+     * const onConfirm = (hash: string) => console.log(hash);
+     * const receipt = await trade.swap({ onConfirm });
+     * ```
+     *
      * @param options Transaction options.
      */
     public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;

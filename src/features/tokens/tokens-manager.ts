@@ -23,6 +23,19 @@ export class TokensManager {
 
     /**
      * Fetches token data and creates {@link Token} by token's address and blockchain.
+     *
+     * @example
+     * ```ts
+     * const token = await sdk.tokens.createToken({
+     *     blockchain: BLOCKCHAIN_NAME.ETHEREUM,
+     *     address:  '0xdac17f958d2ee523a2206206994597c13d831ec7'
+     * });
+     *
+     * console.log(token.symbol); // USDT
+     * console.log(token.name); // Tether USD
+     * console.log(token.decimals); // 6
+     * ```
+     *
      * @param tokenBaseStruct Base token's structure.
      */
     public createToken(tokenBaseStruct: TokenBaseStruct): Promise<Token> {
@@ -57,6 +70,17 @@ export class TokensManager {
 
     /**
      * Creates {@link PriceToken} from full token structure (without price) or from token address and blockchain.
+     *
+     * @example
+     * ```ts
+     * const token = await sdk.tokens.createPriceToken({
+     *     blockchain: BLOCKCHAIN_NAME.ETHEREUM,
+     *     address:  '0xdac17f958d2ee523a2206206994597c13d831ec7'
+     * });
+     *
+     * console.log(token.price.toFormat(2)); // 1.00
+     * ```
+     *
      * @param token Full or base token's structure.
      */
     public createPriceToken(token: TokenBaseStruct | TokenStruct): Promise<PriceToken> {
@@ -79,6 +103,19 @@ export class TokensManager {
     /**
      * Creates {@link PriceTokenAmount} from full token structure (without price) or
      * from token address and blockchain.
+     *
+     * @example
+     * ```ts
+     * const token = await sdk.tokens.createPriceTokenAmount({
+     *     blockchain: BLOCKCHAIN_NAME.ETHEREUM,
+     *     address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+     *     tokenAmount: new BigNumber(1)
+     * });
+     *
+     * console.log(token.tokenAmount.toNumber()); // 1
+     * console.log(token.stringWeiAmount); // 1000000
+     * ```
+     *
      * @param priceTokenAmountStruct Full or base token's structure with amount.
      */
     public createPriceTokenAmount(

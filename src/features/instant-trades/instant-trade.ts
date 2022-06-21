@@ -142,6 +142,13 @@ export abstract class InstantTrade {
     /**
      * Sends swap transaction with connected wallet.
      * If user has not enough allowance, then approve transaction will be called first.
+     *
+     * @example
+     * ```ts
+     * const onConfirm = (hash: string) => console.log(hash);
+     * const receipt = await trades[TRADE_TYPE.UNISWAP_V2].swap({ onConfirm });
+     * ```
+     *
      * @param options Transaction options.
      */
     public abstract swap(options?: SwapTransactionOptions): Promise<TransactionReceipt>;
