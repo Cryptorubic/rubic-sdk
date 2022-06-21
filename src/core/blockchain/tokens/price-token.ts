@@ -5,7 +5,14 @@ import BigNumber from 'bignumber.js';
 
 export type PriceTokenStruct = ConstructorParameters<typeof Token>[number] & { price: BigNumber };
 
+/**
+ * Contains token structure with price in usd per 1 unit.
+ */
 export class PriceToken extends Token {
+    /**
+     * Creates PriceToken based on token's address and blockchain.
+     * @param tokenBaseStruct Base token structure.
+     */
     public static async createToken(tokenBaseStruct: TokenBaseStruct): Promise<PriceToken> {
         const { coingeckoApi } = Injector;
 
@@ -16,6 +23,10 @@ export class PriceToken extends Token {
         return new PriceToken({ ...results[0], price: results[1] });
     }
 
+    /**
+     * Creates PriceToken, fetching token's price.
+     * @param token Token structure.
+     */
     public static async createFromToken(token: TokenStruct): Promise<PriceToken> {
         const { coingeckoApi } = Injector;
 
@@ -30,6 +41,9 @@ export class PriceToken extends Token {
         return this._price;
     }
 
+    /**
+     * Serializes priceToken and its price to struct object.
+     */
     public get asStruct(): PriceTokenStruct {
         return {
             ...this,
@@ -42,6 +56,9 @@ export class PriceToken extends Token {
         this._price = tokenStruct.price;
     }
 
+    /**
+     * Fetches current token price and saves it into token.
+     */
     public async getAndUpdateTokenPrice(): Promise<BigNumber> {
         await this.updateTokenPrice();
         return this.price;
@@ -52,6 +69,9 @@ export class PriceToken extends Token {
         this._price = await coingeckoApi.getTokenPrice({ ...this });
     }
 
+    /**
+     * Clones token with fetching new price.
+     */
     public async cloneAndCreate(tokenStruct?: Partial<PriceTokenStruct>): Promise<PriceToken> {
         const { coingeckoApi } = Injector;
 

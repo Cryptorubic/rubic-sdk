@@ -3,16 +3,19 @@ import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-ad
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { TransactionConfig } from 'web3-core';
-import { toChecksumAddress, isAddress, toWei, fromWei, AbiItem, fromAscii } from 'web3-utils';
+import { toChecksumAddress, isAddress, AbiItem, fromAscii } from 'web3-utils';
 import { TransactionGasParams } from '@features/instant-trades/models/gas-params';
 
+/**
+ * Contains common methods, connected with web3, e.g. wei conversion, encoding data, etc.
+ */
 export class Web3Pure {
     public static readonly ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
     private static web3Eth = new Web3().eth;
 
     /**
-     * @description gets address of native coin {@link NATIVE_TOKEN_ADDRESS}
+     * Gets address of native coin {@link NATIVE_TOKEN_ADDRESS}.
      */
     static get nativeTokenAddress(): string {
         return NATIVE_TOKEN_ADDRESS;
@@ -35,26 +38,26 @@ export class Web3Pure {
     }
 
     /**
-     * @description convert amount from Ether to Wei units
-     * @param amount amount to convert
-     * @param [decimals=18] token decimals
+     * Converts amount from Ether to Wei units.
+     * @param amount Amount to convert.
+     * @param decimals Token decimals.
      */
     static toWei(amount: BigNumber | string | number, decimals = 18): string {
         return new BigNumber(amount || 0).times(new BigNumber(10).pow(decimals)).toFixed(0);
     }
 
     /**
-     * @description convert amount from Wei to Ether units
-     * @param amountInWei amount to convert
-     * @param [decimals=18] token decimals
+     * Converts amount from Wei to Ether units.
+     * @param amountInWei Amount to convert.
+     * @param decimals Token decimals.
      */
     static fromWei(amountInWei: BigNumber | string | number, decimals = 18): BigNumber {
         return new BigNumber(amountInWei).div(new BigNumber(10).pow(decimals));
     }
 
     /**
-     * @description convert address to bytes32 format
-     * @param address address to convert
+     * Converts address to bytes32 format.
+     * @param address Address to convert.
      */
     static addressToBytes32(address: string): string {
         if (address.slice(0, 2) !== '0x' || address.length !== 42) {
@@ -66,45 +69,32 @@ export class Web3Pure {
     }
 
     /**
-     * @description convert address to checksum format
-     * @param address address to convert
+     * Converts address to checksum format.
+     * @param address Address to convert.
      */
     static toChecksumAddress(address: string): string {
         return toChecksumAddress(address);
     }
 
     /**
-     * @description checks if a given address is a valid Ethereum address
-     * @param address the address to check validity
+     * Checks if a given address is a valid Ethereum address.
+     * @param address The address to check validity of.
      */
     static isAddressCorrect(address: string): boolean {
         return isAddress(address);
     }
 
     /**
-     * @description converts Eth amount into Wei
-     * @param value to convert in Eth
-     */
-    static ethToWei(value: string | BigNumber): string {
-        return toWei(value.toString(), 'ether');
-    }
-
-    /**
-     * @description converts Wei amount into Eth
-     * @param value to convert in Wei
-     */
-    static weiToEth(value: string | BigNumber): string {
-        return fromWei(value.toString(), 'ether');
-    }
-
-    /**
-     * @description checks if address is Ether native address
-     * @param address address to check
+     * Checks if address is Ether native address.
+     * @param address Address to check.
      */
     static isNativeAddress = (address: string): boolean => {
         return address === NATIVE_TOKEN_ADDRESS;
     };
 
+    /**
+     * Returns transaction config with encoded data.
+     */
     static encodeMethodCall(
         contractAddress: string,
         contractAbi: AbiItem[],
@@ -129,7 +119,7 @@ export class Web3Pure {
      * @param contractAbi The JSON interface object of a function.
      * @param methodName Method name to encode.
      * @param methodArguments Parameters to encode.
-     * @return string An ABI encoded function call. Means function signature + parameters.
+     * @returns An ABI encoded function call. Means function signature + parameters.
      */
     public static encodeFunctionCall(
         contractAbi: AbiItem[],
@@ -144,7 +134,7 @@ export class Web3Pure {
     }
 
     /**
-     * @description Converts ascii address to bytes32 format
+     * Converts ascii address to bytes32 format.
      * @param address Address to convert.
      */
     public static asciiToBytes32(address: string): string {

@@ -68,6 +68,12 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         return response.address;
     }
 
+    /**
+     * Calculates input amount, based on amount, user wants to get.
+     * @param from Token to sell.
+     * @param to Token to get with output amount.
+     * @param options Additional options.
+     */
     public async calculateExactOutputAmount(
         from: PriceToken,
         to: PriceTokenAmount,
@@ -198,7 +204,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
 
     /**
      * Extracts tokens path from oneInch api response.
-     * @return Promise<Token[]> Tokens array, used in the route.
+     * @returns Promise<Token[]> Tokens array, used in the route.
      */
     private async extractPath(
         fromToken: Token,

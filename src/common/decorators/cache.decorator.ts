@@ -126,6 +126,9 @@ function CacheBuilder(cacheConfig: CacheConfig): DecoratorSignature {
     };
 }
 
+/**
+ * Decorator, used to cache calculated result of functions.
+ */
 export function Cache(cacheConfigOrTarget: CacheConfig): DecoratorSignature;
 export function Cache<T>(
     cacheConfigOrTarget: Object,

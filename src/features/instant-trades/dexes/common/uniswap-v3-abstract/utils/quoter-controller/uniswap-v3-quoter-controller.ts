@@ -45,7 +45,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
      * toHex(fee_i) must be of length 6, so leading zeroes are added.
      * @param pools Liquidity pools, included in route.
      * @param initialTokenAddress From token address.
-     * @return string Encoded string.
+     * @returns string Encoded string.
      */
     @Cache
     public static getEncodedPoolsPath(pools: LiquidityPool[], initialTokenAddress: string): string {

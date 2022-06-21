@@ -31,7 +31,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         );
     }
 
-    public type = CROSS_CHAIN_TRADE_TYPE.CELER;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
 
     protected contracts = getCelerCrossChainContract;
 

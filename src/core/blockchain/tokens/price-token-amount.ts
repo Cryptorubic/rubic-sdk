@@ -17,7 +17,14 @@ export type PriceTokenAmountStruct = ConstructorParameters<typeof PriceToken>[nu
 export type PriceTokenAmountBaseStruct = TokenBaseStruct &
     ({ weiAmount: BigNumber } | { tokenAmount: BigNumber });
 
+/**
+ * Contains token structure with price and amount.
+ */
 export class PriceTokenAmount extends PriceToken {
+    /**
+     * Creates PriceTokenAmount based on token's address and blockchain.
+     * @param tokenAmountBaseStruct Base token structure with amount.
+     */
     public static async createToken(
         tokenAmountBaseStruct: PriceTokenAmountBaseStruct
     ): Promise<PriceTokenAmount> {
@@ -28,6 +35,10 @@ export class PriceTokenAmount extends PriceToken {
         });
     }
 
+    /**
+     * Creates PriceTokenAmount, fetching token's price.
+     * @param tokenAmount Token structure with amount.
+     */
     public static async createFromToken(
         tokenAmount: TokenStruct & ({ weiAmount: BigNumber } | { tokenAmount: BigNumber })
     ): Promise<PriceTokenAmount> {
@@ -40,18 +51,30 @@ export class PriceTokenAmount extends PriceToken {
 
     private readonly _weiAmount: BigNumber;
 
+    /**
+     * Gets set amount in wei.
+     */
     get weiAmount(): BigNumber {
         return new BigNumber(this._weiAmount);
     }
 
+    /**
+     * Gets set amount in wei and converted to string.
+     */
     get stringWeiAmount(): string {
         return this._weiAmount.toFixed(0);
     }
 
+    /**
+     * Gets set amount with decimals.
+     */
     get tokenAmount(): BigNumber {
         return new BigNumber(this._weiAmount).div(new BigNumber(10).pow(this.decimals));
     }
 
+    /**
+     * Serializes priceTokenAmount to struct object.
+     */
     public get asStructWithAmount(): PriceTokenAmountStruct {
         return {
             ...this,
@@ -71,10 +94,18 @@ export class PriceTokenAmount extends PriceToken {
         }
     }
 
+    /**
+     * Returns wei amount decreased by (1 - slippage) times.
+     * @param slippage Slippage in range from 0 to 1.
+     */
     public weiAmountMinusSlippage(slippage: number): BigNumber {
         return new BigNumber(this._weiAmount).multipliedBy(new BigNumber(1).minus(slippage));
     }
 
+    /**
+     * Returns wei amount increased by (1 - slippage) times.
+     * @param slippage Slippage in range from 0 to 1.
+     */
     public weiAmountPlusSlippage(slippage: number): BigNumber {
         return new BigNumber(this._weiAmount).multipliedBy(new BigNumber(1).plus(slippage));
     }
@@ -94,6 +125,11 @@ export class PriceTokenAmount extends PriceToken {
         return new PriceTokenAmount({ ...this, ...tokenStruct });
     }
 
+    /**
+     * Calculates trade price impact percent if instance token is selling token, and parameter is buying token.
+     * If selling usd amount is less than buying usd amount, returns 0.
+     * @param toToken Token to buy.
+     */
     public calculatePriceImpactPercent(toToken: PriceTokenAmount): number | null {
         if (
             !this.price ||
