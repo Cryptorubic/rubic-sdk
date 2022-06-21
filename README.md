@@ -2,10 +2,9 @@
 
 ![build status](https://github.com/Cryptorubic/rubic-sdk/actions/workflows/ci-master.yml/badge.svg) [![license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/Cryptorubic/rubic-sdk/blob/main/LICENSE)
 
+[Latest API Documentation](https://cryptorubic.github.io/rubic-sdk)
+
 ## Table of contents
-- [Description](#description)
-  - [Supported DEX-es](#supported-dex-es)
-  - [Multi-Chain swaps supported blockchains](#multi-chain-swaps-supported-blockchains)
 - [Installation](#installation)
   - [Installation with cdn](#installation-with-cdn)
   - [Installation with npm and webpack](#installation-with-npm-and-webpack-react-)
@@ -90,52 +89,6 @@
       - [weiAmountMinusSlippage](#pricetokenamountweiamountminusslippage-method)
       - [weiAmountPlusSlippage](#pricetokenamountweiamountplusslippage-method)
       - [calculatePriceImpactPercent](#pricetokenamountcalculatepriceimpactpercent-method)
-
-## Description
-In dApps a lot of business logic is often concentrated on the frontend for interacting with the blockchain. This SDK is built on the basis of [Rubic](https://github.com/Cryptorubic/rubic-app) multichain DeFi frontend part. SDK is a library for interacting with various dexes, as well as Rubic cross-chain swaps. It also includes a number of utilities useful when working with Ethereum.
-
-### Supported DEX-es
-
-- Ethereum
-    - [Uniswap V2](https://uniswap.org/)
-    - [Uniswap V3](https://uniswap.org/)
-    - [Sushiswap](https://sushi.com/)
-    - [1inch](https://app.1inch.io/)
-    - [0x](https://0x.org/)
-- Binance Smart Chain
-    - [Pancake Swap](https://pancakeswap.finance/)
-    - [Sushiswap](https://sushi.com/)
-    - [1inch](https://app.1inch.io/)
-- Polygon
-    - [Quick Swap](https://quickswap.exchange/)
-    - [Sushiswap](https://sushi.com/)
-    - [1inch](https://app.1inch.io/)
-    - [Uniswap V3](https://uniswap.org/)
-    - [Algebra](https://app.algebra.finance/)
-- Avalanche
-    - [Joe](https://traderjoexyz.com/#/home)
-    - [Pangolin](https://app.pangolin.exchange/#/swap)
-    - [Sushiswap](https://sushi.com/)
-- Fantom
-    - [Spirit Swap](https://swap.spiritswap.finance/)
-    - [Spooky Swap](https://spookyswap.finance/)
-    - [Sushiswap](https://sushi.com/)
-- Moonriver
-    - [Solarbeam](https://solarbeam.io/exchange/swap)
-    - [Sushiswap](https://sushi.com/)
-- Harmony
-    - [Sushiswap](https://sushi.com/)
-    - [Viper Swap](https://viperswap.one/)
-- Arbitrum
-  - [Uniswap V3](https://uniswap.org/)
-  - [Sushiswap](https://sushi.com/)
-  - [1inch](https://app.1inch.io/)
-- Aurora
-  - [Wanna Swap](https://wannaswap.finance/exchange/swap)
-  - [Trisolaris](https://www.trisolaris.io/)
-
-### Multi-Chain swaps supported blockchains
-Ethereum, Binance Smart Chain, Polygon, Avalanche, Fantom, Moonriver, Harmony, Aurora, Arbitrum
 
 ## Installation
 ### Installation with cdn

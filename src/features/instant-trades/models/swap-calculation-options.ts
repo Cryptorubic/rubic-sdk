@@ -1,5 +1,8 @@
 import { SwapOptions } from '@features/instant-trades/models/swap-options';
 
+/**
+ * Stores options for calculating trade.
+ */
 export interface SwapCalculationOptions extends SwapOptions {
     /**
      * Disabled or enables gas fee calculation.

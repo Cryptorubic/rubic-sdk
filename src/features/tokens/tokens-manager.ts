@@ -14,7 +14,7 @@ import BigNumber from 'bignumber.js';
  */
 export class TokensManager {
     /**
-     * Creates {@type Token} instance by full token data struct.
+     * Creates {@link Token} instance by full token data struct.
      * @param tokenStruct Full token's structure.
      */
     public createTokenFromStruct(tokenStruct: TokenStruct): Token {
@@ -22,7 +22,7 @@ export class TokensManager {
     }
 
     /**
-     * Fetches token data and creates {@type Token} by token's address and blockchain.
+     * Fetches token data and creates {@link Token} by token's address and blockchain.
      * @param tokenBaseStruct Base token's structure.
      */
     public createToken(tokenBaseStruct: TokenBaseStruct): Promise<Token> {
@@ -48,7 +48,7 @@ export class TokensManager {
     }
 
     /**
-     * Creates {@type PriceToken} from full price token struct including price.
+     * Creates {@link PriceToken} from full price token struct including price.
      * @param priceTokenStruct Full price token structure.
      */
     public createPriceTokenFromStruct(priceTokenStruct: PriceTokenStruct): PriceToken {
@@ -56,7 +56,7 @@ export class TokensManager {
     }
 
     /**
-     * Creates {@type PriceToken} from full token structure (without price) or from token address and blockchain.
+     * Creates {@link PriceToken} from full token structure (without price) or from token address and blockchain.
      * @param token Full or base token's structure.
      */
     public createPriceToken(token: TokenBaseStruct | TokenStruct): Promise<PriceToken> {
@@ -67,7 +67,7 @@ export class TokensManager {
     }
 
     /**
-     * Creates {@type PriceTokenAmount} from full price token struct including price.
+     * Creates {@link PriceTokenAmount} from full price token struct including price.
      * @param priceTokenAmountStruct Full price token amount structure.
      */
     public createPriceTokenAmountFromStruct(
@@ -77,7 +77,7 @@ export class TokensManager {
     }
 
     /**
-     * Creates {@type PriceTokenAmount} from full token structure (without price) or
+     * Creates {@link PriceTokenAmount} from full token structure (without price) or
      * from token address and blockchain.
      * @param priceTokenAmountStruct Full or base token's structure with amount.
      */

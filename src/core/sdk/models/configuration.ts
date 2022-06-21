@@ -33,6 +33,9 @@ export interface Configuration {
     readonly providerAddress?: string;
 }
 
+/**
+ * Stores information about rpc in certain blockchain.
+ */
 export interface RpcProvider {
     /**
      * Rpc link. Copy it from your rpc provider (like Infura, Quicknode, Getblock, Moralis, etc.) website.
@@ -59,9 +62,12 @@ export interface RpcProvider {
     readonly healthCheckTimeout?: number;
 }
 
+/**
+ * Stores wallet core and information about current user, used to make `send` transactions.
+ */
 export interface WalletProvider {
     /**
-     * Wallet provider.
+     * Core provider.
      */
     readonly core: provider | Web3;
 
