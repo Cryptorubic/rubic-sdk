@@ -32,7 +32,7 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
      * Converts algebra route to encoded bytes string to pass it to contract.
      * Structure of encoded string: '0x${tokenAddress_0}${tokenAddress_1}...${tokenAddress_n}.
      * @param path Symbol tokens, included in route.
-     * @return string Encoded string.
+     * @returns string Encoded string.
      */
     public static getEncodedPath(path: Token[]): string {
         const encodedPath = path.reduce(

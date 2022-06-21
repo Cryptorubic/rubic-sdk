@@ -13,7 +13,14 @@ export type TokenStruct = {
     decimals: number;
 };
 
+/**
+ * Contains main token's fields.
+ */
 export class Token {
+    /**
+     * Creates Token based on token's address and blockchain.
+     * @param tokenBaseStruct Base token structure.
+     */
     public static async createToken(tokenBaseStruct: TokenBaseStruct): Promise<Token> {
         const web3Public = Injector.web3PublicService.getWeb3Public(tokenBaseStruct.blockchain);
         const tokenInfo = await web3Public.callForTokenInfo(tokenBaseStruct.address);
@@ -30,6 +37,9 @@ export class Token {
         });
     }
 
+    /**
+     * Creates array of Tokens based on tokens' addresses and blockchain.
+     */
     public static async createTokens(
         tokensAddresses: string[] | ReadonlyArray<string>,
         blockchain: BlockchainName
@@ -61,6 +71,9 @@ export class Token {
         });
     }
 
+    /**
+     * Maps provided tokens to their addresses.
+     */
     public static tokensToAddresses(tokens: Token[]): string[] {
         return tokens.map(token => token.address);
     }

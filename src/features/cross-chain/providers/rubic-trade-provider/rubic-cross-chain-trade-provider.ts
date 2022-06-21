@@ -27,7 +27,7 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         );
     }
 
-    public type = CROSS_CHAIN_TRADE_TYPE.RUBIC;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.RUBIC;
 
     protected readonly contracts = getRubicCrossChainContract;
 

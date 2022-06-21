@@ -1,13 +1,13 @@
-name: Tests and build
+name: Documentation generation
 
 on:
-  pull_request:
+  push:
     branches:
       - master
 
 jobs:
   lint:
-    name: Check code base before merge to master
+    name: Generate docs and push to github pages
     runs-on: ubuntu-latest
 
     steps:
@@ -28,11 +28,11 @@ jobs:
       - name: Set up dependencies
         run: yarn
 
-      - name: Run lint
-        run: yarn lint
+      - name: Generate docs
+        run: yarn docs
 
-      - name: Compile lib
-        run: yarn compile
-
-      - name: Build bundle
-        run: yarn build
+      - name: Deploy Github Page
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs

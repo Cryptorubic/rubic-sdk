@@ -1,3 +1,6 @@
+/**
+ * List of instant trade types.
+ */
 export const TRADE_TYPE = {
     UNISWAP_V2: 'UNISWAP_V2',
     SUSHI_SWAP_ETHEREUM: 'SUSHI_SWAP_ETHEREUM',
@@ -32,4 +35,7 @@ export const TRADE_TYPE = {
     ONE_INCH_AVALANCHE: 'ONE_INCH_AVALANCHE'
 } as const;
 
+/**
+ * Instant trade type.
+ */
 export type TradeType = keyof typeof TRADE_TYPE;

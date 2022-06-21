@@ -1,3 +1,3 @@
 export { compareAddresses } from './blockchain';
-export { tryExecute, tryExecuteAsync } from './functions';
+export { SuccessfulCall, ErrorCall, tryExecute, tryExecuteAsync } from './functions';
 export { cloneObject, notNull } from './object';

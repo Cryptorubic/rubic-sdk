@@ -5,7 +5,7 @@ import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 
 export abstract class CrossChainTradeProvider {
-    public abstract type: CrossChainTradeType;
+    public abstract readonly type: CrossChainTradeType;
 
     public abstract calculate(
         from: PriceTokenAmount,

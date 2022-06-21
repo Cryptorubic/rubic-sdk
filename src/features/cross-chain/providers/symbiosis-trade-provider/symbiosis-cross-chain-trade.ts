@@ -1,4 +1,4 @@
-import { SwapTransactionOptions } from 'src/features';
+import { CROSS_CHAIN_TRADE_TYPE, SwapTransactionOptions } from 'src/features';
 import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
 import { TransactionRequest } from '@ethersproject/providers';
 import { PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
@@ -12,7 +12,11 @@ import { GasData } from '@features/cross-chain/models/gas-data';
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 import BigNumber from 'bignumber.js';
 
+/**
+ * Calculated Symbiosis cross chain trade.
+ */
 export class SymbiosisCrossChainTrade extends CrossChainTrade {
+    /** @internal */
     public static async getGasData(
         from: PriceTokenAmount,
         to: PriceTokenAmount,
@@ -64,13 +68,18 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         }
     }
 
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
+
     public readonly from: PriceTokenAmount;
 
     public readonly to: PriceTokenAmount;
 
+    /**
+     * Overall price impact, fetched from symbiosis api.
+     */
     public readonly priceImpact: number;
 
-    protected readonly gasData: GasData | null;
+    public readonly gasData: GasData | null;
 
     private readonly transactionRequest: TransactionRequest;
 

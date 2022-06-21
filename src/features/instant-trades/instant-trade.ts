@@ -16,21 +16,42 @@ import { OptionsGasParams, TransactionGasParams } from '@features/instant-trades
 import { Cache } from 'src/common';
 import { TradeType } from 'src/features';
 
+/**
+ * Abstract class for all instant trade providers' trades.
+ */
 export abstract class InstantTrade {
+    /**
+     * Token to sell with input amount.
+     */
     public abstract readonly from: PriceTokenAmount;
 
+    /**
+     * Token to get with output amount.
+     */
     public abstract readonly to: PriceTokenAmount;
 
+    /**
+     * Gas fee info, including gas limit and gas price.
+     */
     public abstract gasFeeInfo: GasFeeInfo | null;
 
+    /**
+     * Slippage tolerance. Can be mutated after calculation, except for Zrx.
+     */
     public abstract slippageTolerance: number;
 
     protected abstract contractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
     protected readonly web3Public: Web3Public;
 
+    /**
+     * Type of instant trade provider.
+     */
     public abstract get type(): TradeType;
 
+    /**
+     * Minimum amount of output token user can get.
+     */
     public get toTokenAmountMin(): PriceTokenAmount {
         const weiAmountOutMin = this.to.weiAmountMinusSlippage(this.slippageTolerance);
         return new PriceTokenAmount({ ...this.to.asStruct, weiAmount: weiAmountOutMin });
@@ -40,6 +61,9 @@ export abstract class InstantTrade {
         return Injector.web3Private.address;
     }
 
+    /**
+     * Price impact, based on tokens' usd prices.
+     */
     @Cache
     public get priceImpact(): number | null {
         return this.from.calculatePriceImpactPercent(this.to);
@@ -49,6 +73,9 @@ export abstract class InstantTrade {
         this.web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
     }
 
+    /**
+     * Returns true, if allowance is not enough.
+     */
     public async needApprove(fromAddress?: string): Promise<boolean> {
         if (!fromAddress) {
             this.checkWalletConnected();
@@ -66,6 +93,10 @@ export abstract class InstantTrade {
         return allowance.lt(this.from.weiAmount);
     }
 
+    /**
+     * Sends approve transaction with connected wallet.
+     * @param options Transaction options.
+     */
     public async approve(options?: BasicTransactionOptions): Promise<TransactionReceipt> {
         const needApprove = await this.needApprove();
 
@@ -108,8 +139,24 @@ export abstract class InstantTrade {
         );
     }
 
+    /**
+     * Sends swap transaction with connected wallet.
+     * If user has not enough allowance, then approve transaction will be called first.
+     *
+     * @example
+     * ```ts
+     * const onConfirm = (hash: string) => console.log(hash);
+     * const receipt = await trades[TRADE_TYPE.UNISWAP_V2].swap({ onConfirm });
+     * ```
+     *
+     * @param options Transaction options.
+     */
     public abstract swap(options?: SwapTransactionOptions): Promise<TransactionReceipt>;
 
+    /**
+     * Builds transaction config, with encoded data.
+     * @param options Encode transaction options.
+     */
     public abstract encode(options: EncodeTransactionOptions): Promise<TransactionConfig>;
 
     protected async checkWalletState(): Promise<void> {
