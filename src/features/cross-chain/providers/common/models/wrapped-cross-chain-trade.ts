@@ -1,8 +1,8 @@
-import BigNumber from 'bignumber.js';
-import { CrossChainTrade } from 'src/features';
+import { CrossChainTrade, CrossChainTradeType } from 'src/features';
+import { RubicSdkError } from 'src/common';
 
 export interface WrappedCrossChainTrade {
     trade: CrossChainTrade | null;
-    minAmountError?: BigNumber;
-    maxAmountError?: BigNumber;
+    tradeType: CrossChainTradeType;
+    error?: RubicSdkError;
 }

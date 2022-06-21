@@ -19,7 +19,6 @@ import {
 import { SwapManagerCrossChainCalculationOptions } from '@features/cross-chain/models/swap-manager-cross-chain-options';
 import pTimeout from '@common/utils/p-timeout';
 import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
-import { hasLengthAtLeast } from '@features/instant-trades/utils/type-guards';
 import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import BigNumber from 'bignumber.js';
 import { SymbiosisCrossChainTradeProvider } from '@features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
@@ -50,7 +49,9 @@ export class CrossChainManager {
     constructor(private readonly providerAddress: string) {}
 
     /**
-     * Calculates best cross chain trade, based on calculated courses.
+     * Calculates cross chain trades and sorts them by exchange courses.
+     * Wrapped trade object may contain error, but sometimes course can be
+     * calculated even with thrown error (e.g. min/max amount error).
      *
      * @example
      * ```ts
@@ -62,18 +63,28 @@ export class CrossChainManager {
      * // BUSD
      * const toTokenAddress = '0xe9e7cea3dedca5984780bafc599bd69add087d56';
      *
-     * const trade = await sdk.crossChain.calculateTrade(
+     * const wrappedTrades = await sdk.crossChain.calculateTrade(
      *     { blockchain: fromBlockchain, address: fromTokenAddress },
      *     fromAmount,
      *     { blockchain: toBlockchain, address: toTokenAddress }
      * );
+     *
+     * wrappedTrades.forEach(wrappedTrade => {
+     *    if (wrappedTrade.trade) {
+     *        console.log(wrappedTrade.tradeType, `to amount: ${wrappedTrade.trade.to.tokenAmount.toFormat(3)}`));
+     *    }
+     *    if (wrappedTrade.error) {
+     *        console.error(wrappedTrade.tradeType, 'error: wrappedTrade.error');
+     *    }
+     * });
+     *
      * ```
      *
      * @param fromToken Token to sell.
      * @param fromAmount Amount to sell.
      * @param toToken Token to get.
      * @param options Additional options.
-     * @returns Wrapped cross chain trade, with possible min or max amount errors.
+     * @returns Array of sorted wrapped cross chain trades with possible errors.
      */
     public async calculateTrade(
         fromToken:
@@ -90,7 +101,7 @@ export class CrossChainManager {
                   blockchain: BlockchainName;
               },
         options?: Omit<SwapManagerCrossChainCalculationOptions, 'providerAddress'>
-    ): Promise<WrappedCrossChainTrade> {
+    ): Promise<WrappedCrossChainTrade[]> {
         if (toToken instanceof Token && fromToken.blockchain === toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be different.');
         }
@@ -124,56 +135,23 @@ export class CrossChainManager {
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredSwapManagerCalculationOptions
-    ): Promise<WrappedCrossChainTrade> {
+    ): Promise<WrappedCrossChainTrade[]> {
         const wrappedTrades = await this.calculateTradeFromTokens(
             from,
             to,
             this.getFullOptions(options)
         );
-        if (!hasLengthAtLeast(wrappedTrades, 1)) {
-            throw new Error('[RUBIC SDK] Trades array has to be defined');
-        }
 
         const transitTokenAmount = (
             wrappedTrades.find(wrappedTrade => wrappedTrade.trade instanceof CelerCrossChainTrade)
                 ?.trade as CelerCrossChainTrade
         )?.fromTrade.toToken.tokenAmount;
-        const sortedTrades = wrappedTrades.sort((firstTrade, secondTrade) => {
+        return wrappedTrades.sort((firstTrade, secondTrade) => {
             const firstTradeAmount = this.getProviderRatio(firstTrade.trade, transitTokenAmount);
             const secondTradeAmount = this.getProviderRatio(secondTrade.trade, transitTokenAmount);
 
             return firstTradeAmount.comparedTo(secondTradeAmount);
         });
-
-        const filteredTrades = sortedTrades.filter(
-            trade => !trade?.minAmountError && !trade?.maxAmountError
-        );
-        if (filteredTrades.length) {
-            return {
-                trade: filteredTrades[0]!.trade!
-            };
-        }
-
-        let minAmountError: BigNumber | undefined;
-        let maxAmountError: BigNumber | undefined;
-        sortedTrades.forEach(trade => {
-            if (trade.minAmountError) {
-                minAmountError = minAmountError
-                    ? BigNumber.min(minAmountError, trade.minAmountError)
-                    : trade.minAmountError;
-            }
-            if (trade.maxAmountError) {
-                maxAmountError = maxAmountError
-                    ? BigNumber.max(maxAmountError, trade.maxAmountError)
-                    : trade.maxAmountError;
-            }
-        });
-
-        return {
-            trade: sortedTrades[0].trade,
-            minAmountError,
-            maxAmountError
-        };
     }
 
     private getProviderRatio(trade: CrossChainTrade | null, transitTokenAmount: BigNumber) {
@@ -219,7 +197,15 @@ export class CrossChainManager {
         const calculationPromises = providers.map(async ([type, provider]) => {
             try {
                 const calculation = provider.calculate(from, to, providersOptions);
-                return await pTimeout(calculation, timeout);
+                const wrappedTrade = await pTimeout(calculation, timeout);
+                if (!wrappedTrade) {
+                    return null;
+                }
+
+                return {
+                    ...wrappedTrade,
+                    tradeType: provider.type
+                };
             } catch (e) {
                 console.debug(
                     `[RUBIC_SDK] Trade calculation error occurred for ${type} trade provider.`,
@@ -230,7 +216,7 @@ export class CrossChainManager {
         });
         const results = (await Promise.all(calculationPromises)).filter(notNull);
         if (!results?.length) {
-            throw new Error('[RUBIC_SDK] No success providers calculation for the trade.');
+            throw new RubicSdkError('No success providers calculation for the trade');
         }
         return results;
     }

@@ -942,12 +942,13 @@ sdk.crossChain.calculateTrade(
               blockchain: BLOCKCHAIN_NAME;
             },
         options?: CrossChainOptions
-): Promise<WrappedCrossChainTrade>
+): Promise<WrappedCrossChainTrade[]>
 ```
 
 > ℹ️️ You have to set up **rpc provider 🌐** for network in which you will calculate trade.
 
-Method calculates [WrappedCrossChainTrade](#wrapped-cross-chain-trade), which contains best cross chain provider with estimated output amount.
+Method calculates array of [WrappedCrossChainTrade](#wrapped-cross-chain-trade), sorted by exchange courses.
+First element of array is trade with best course.
 
 **Method parameters:**
 
@@ -977,12 +978,12 @@ Method calculates [WrappedCrossChainTrade](#wrapped-cross-chain-trade), which co
 ```typescript
 interface WrappedCrossChainTrade {
     trade: CrossChainTrade | null;
-    minAmountError?: BigNumber;
-    maxAmountError?: BigNumber;
+    tradeType: CrossChainTradeType;
+    error?: RubicSdkError;
 }
 ```
 
-Wraps best calculated cross chain trade and possible min max amount errors. If `minAmountError` or `maxAmountError` are not undefined, then you must display an error, because [`swap`](#crosschaintradeswap-method) method will return error.
+Wraps best calculated cross chain trade and possible error. If `error` field is not undefined, then you must display an error, because [`swap`](#crosschaintradeswap-method) method will return error.
 
 ---
 
