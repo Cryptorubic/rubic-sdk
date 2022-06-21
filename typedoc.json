@@ -3,5 +3,5 @@
   "excludeInternal": true,
   "excludePrivate": true,
   "excludeProtected": true,
-  "out": "doc"
+  "out": "docs"
 }
