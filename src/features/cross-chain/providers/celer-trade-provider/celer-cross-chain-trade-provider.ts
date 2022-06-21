@@ -165,7 +165,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             } catch (err: unknown) {
                 return {
                     trade,
-                    error: err as RubicSdkError
+                    error: this.parseError(err)
                 };
             }
 
@@ -175,7 +175,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         } catch (err: unknown) {
             return {
                 trade: null,
-                error: err as RubicSdkError
+                error: this.parseError(err)
             };
         }
     }

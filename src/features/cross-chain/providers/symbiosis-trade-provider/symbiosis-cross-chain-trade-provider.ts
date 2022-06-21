@@ -143,9 +143,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 )
             };
         } catch (err: unknown) {
-            let rubicSdkError = new RubicSdkError(
-                (err as Error)?.message || 'Cannot calculate Symbiosis trade'
-            );
+            let rubicSdkError = this.parseError(err);
 
             if (err instanceof SymbiosisError && err.message) {
                 rubicSdkError = await this.checkMinMaxErrors(err, from);

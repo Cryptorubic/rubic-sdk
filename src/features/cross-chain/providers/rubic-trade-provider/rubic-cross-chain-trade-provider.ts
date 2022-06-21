@@ -4,7 +4,7 @@ import {
     RubicCrossChainSupportedBlockchain,
     rubicCrossChainSupportedBlockchains
 } from '@features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
-import { compareAddresses, notNull, RubicSdkError } from 'src/common';
+import { compareAddresses, notNull } from 'src/common';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
 import { BlockchainName } from 'src/core';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
@@ -115,7 +115,7 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             } catch (err: unknown) {
                 return {
                     trade,
-                    error: err as RubicSdkError
+                    error: this.parseError(err)
                 };
             }
 
@@ -125,7 +125,7 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         } catch (err: unknown) {
             return {
                 trade: null,
-                error: err as RubicSdkError
+                error: this.parseError(err)
             };
         }
     }
