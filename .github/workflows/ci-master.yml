@@ -37,8 +37,8 @@ jobs:
       - name: Build bundle
         run: yarn build
 
-#      - name: Set up env.js
-#        run: node ./scripts/build-env.js --eth ${{ secrets.ETH_RPC }} --bsc ${{ secrets.BSC_RPC }} --polygon ${{ secrets.POLYGON_RPC }}
-#
-#      - name: Run tests
-#        run: yarn test
+      - name: Deploy Github Page
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
