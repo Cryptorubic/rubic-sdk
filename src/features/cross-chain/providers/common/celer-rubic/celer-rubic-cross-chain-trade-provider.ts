@@ -46,6 +46,7 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
     ): Promise<{
         toTransitTokenAmount: BigNumber;
         transitFeeToken: PriceTokenAmount;
+        feeInPercents: number;
     }> {
         const feeInPercents = await this.contracts(toBlockchain).getFeeInPercents(contract);
         const transitFeeToken = new PriceTokenAmount({
@@ -57,7 +58,8 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
 
         return {
             toTransitTokenAmount,
-            transitFeeToken
+            transitFeeToken,
+            feeInPercents
         };
     }
 

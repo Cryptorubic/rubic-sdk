@@ -26,6 +26,8 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
 
     public readonly itType: { from: TradeType; to: TradeType };
 
+    private readonly feeInPercents: number;
+
     public static async getGasData(
         fromTrade: CrossChainContractTrade,
         toTrade: CrossChainContractTrade,
@@ -46,7 +48,8 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
                         toTrade,
                         cryptoFeeToken,
                         transitFeeToken: {} as PriceTokenAmount,
-                        gasData: null
+                        gasData: null,
+                        feeInPercents: 0
                     },
                     EMPTY_ADDRESS,
                     maxSlippage
@@ -106,12 +109,14 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
             cryptoFeeToken: PriceTokenAmount;
             transitFeeToken: PriceTokenAmount;
             gasData: GasData | null;
+            feeInPercents: number;
         },
         providerAddress: string,
         private readonly maxSlippage: number
     ) {
         super(providerAddress);
 
+        this.feeInPercents = crossChainTrade.feeInPercents;
         this.fromTrade = crossChainTrade.fromTrade;
         this.toTrade = crossChainTrade.toTrade;
         this.gasData = crossChainTrade.gasData;

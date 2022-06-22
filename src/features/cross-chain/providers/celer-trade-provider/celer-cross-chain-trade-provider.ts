@@ -93,12 +93,13 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             celerSlippage
         );
 
-        const { toTransitTokenAmount, transitFeeToken } = await this.getToTransitTokenAmount(
-            toBlockchain,
-            fromTrade.fromToken,
-            estimateTransitAmountWithSlippage,
-            fromTrade.contract
-        );
+        const { toTransitTokenAmount, transitFeeToken, feeInPercents } =
+            await this.getToTransitTokenAmount(
+                toBlockchain,
+                fromTrade.fromToken,
+                estimateTransitAmountWithSlippage,
+                fromTrade.contract
+            );
 
         const toTransit = new PriceTokenAmount({
             ...toTransitToken.asStruct,
@@ -138,7 +139,8 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                 toTrade,
                 cryptoFeeToken,
                 transitFeeToken,
-                gasData
+                gasData,
+                feeInPercents
             },
             providerAddress,
             Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())

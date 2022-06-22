@@ -22,6 +22,8 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
 
     public readonly itType: { from: TradeType; to: TradeType };
 
+    public readonly feeInPercents: number;
+
     public static async getGasData(
         fromTrade: CrossChainContractTrade,
         toTrade: CrossChainContractTrade,
@@ -42,7 +44,8 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
                         toTrade,
                         cryptoFeeToken,
                         transitFeeToken: {} as PriceTokenAmount,
-                        gasData: null
+                        gasData: null,
+                        feeInPercents: 0
                     },
                     EMPTY_ADDRESS
                 ).getContractParams();
@@ -101,10 +104,13 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
             cryptoFeeToken: PriceTokenAmount;
             transitFeeToken: PriceTokenAmount;
             gasData: GasData | null;
+            feeInPercents: number;
         },
         providerAddress: string
     ) {
         super(providerAddress);
+
+        this.feeInPercents = crossChainTrade.feeInPercents;
         this.fromTrade = crossChainTrade.fromTrade;
         this.toTrade = crossChainTrade.toTrade;
         this.gasData = crossChainTrade.gasData;
