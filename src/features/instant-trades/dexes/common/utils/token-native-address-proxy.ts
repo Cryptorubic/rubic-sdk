@@ -25,12 +25,12 @@ export function createTokenNativeAddressProxyInPathStartAndEnd<T extends Token>(
     if (!path?.[0]) {
         throw new Error('');
     }
-    const tokenAddress = path[path.length - 1];
-    if (!tokenAddress) {
+    const token = path[path.length - 1];
+    if (!token) {
         throw new Error('[RUBIC SDK] Token has to be defined.');
     }
 
     return [createTokenNativeAddressProxy(path[0], wrappedNativeAddress)]
         .concat(path.slice(1, path.length - 1))
-        .concat(createTokenNativeAddressProxy(tokenAddress, wrappedNativeAddress));
+        .concat(createTokenNativeAddressProxy(token, wrappedNativeAddress));
 }

@@ -22,9 +22,15 @@ import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/
 import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import BigNumber from 'bignumber.js';
 import { SymbiosisCrossChainTradeProvider } from '@features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
+import { MarkRequired } from 'ts-essentials';
+import { RequiredCrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
 import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 
-type RequiredSwapManagerCalculationOptions = Required<SwapManagerCrossChainCalculationOptions>;
+type RequiredSwapManagerCalculationOptions = MarkRequired<
+    SwapManagerCrossChainCalculationOptions,
+    'timeout' | 'disabledProviders'
+> &
+    RequiredCrossChainOptions;
 
 /**
  * Contains method to calculate best cross chain trade.
@@ -118,7 +124,7 @@ export class CrossChainManager {
     private getFullOptions(
         options?: SwapManagerCrossChainCalculationOptions
     ): RequiredSwapManagerCalculationOptions {
-        return combineOptions(options, {
+        return combineOptions<RequiredSwapManagerCalculationOptions>(options, {
             fromSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
             toSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
             gasCalculation: 'enabled',
@@ -126,8 +132,7 @@ export class CrossChainManager {
             timeout: CrossChainManager.defaultCalculationTimeout,
             providerAddress: this.providerAddress,
             slippageTolerance: CrossChainManager.defaultSlippageTolerance * 2,
-            deadline: CrossChainManager.defaultDeadline,
-            fromAddress: ''
+            deadline: CrossChainManager.defaultDeadline
         });
     }
 
