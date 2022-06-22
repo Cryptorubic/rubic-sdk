@@ -96,7 +96,7 @@ export const blockchains: ReadonlyArray<Blockchain> = [
         id: 1313161554,
         name: BLOCKCHAIN_NAME.AURORA,
         nativeCoin: new Token({
-            blockchain: BLOCKCHAIN_NAME.ARBITRUM,
+            blockchain: BLOCKCHAIN_NAME.AURORA,
             address: NATIVE_TOKEN_ADDRESS,
             name: 'aETH',
             symbol: 'aETH',
