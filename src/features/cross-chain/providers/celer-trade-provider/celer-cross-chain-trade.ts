@@ -19,8 +19,13 @@ import {
 } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-fee-multipliers';
 import { CelerCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
 import { CelerItCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
+import { CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
 
 export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
+
+    public readonly itType: { from: TradeType; to: TradeType };
+
     public static async getGasData(
         fromTrade: CrossChainContractTrade,
         toTrade: CrossChainContractTrade,
@@ -125,6 +130,11 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
             ...this.toTrade.toToken.asStruct,
             weiAmount: this.toTrade.toToken.weiAmount.dividedBy(1 - fromSlippage).dp(0)
         });
+
+        this.itType = {
+            from: crossChainTrade.fromTrade.provider.type,
+            to: crossChainTrade.toTrade.provider.type
+        };
 
         this.toTokenAmountMin = this.toTrade.toTokenAmountMin;
     }

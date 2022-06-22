@@ -8,7 +8,6 @@ import { OneinchQuoteRequest } from '@rsdk-features/instant-trades/dexes/common/
 import { OneinchQuoteResponse } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-quote-response';
 import { OneinchSwapRequest } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-request';
 import { OneinchSwapResponse } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-response';
-import { OneinchTokensResponse } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-tokens-response';
 import { getOneinchApiBaseUrl } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/utils';
 import BigNumber from 'bignumber.js';
 
@@ -46,21 +45,6 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         return getOneinchApiBaseUrl(this.blockchain);
     }
 
-    private async getSupportedTokensByBlockchain(): Promise<string[]> {
-        if (this.supportedTokens.length) {
-            return this.supportedTokens;
-        }
-
-        const oneinchTokensResponse: OneinchTokensResponse = await this.httpClient.get(
-            `${this.apiBaseUrl}/tokens`
-        );
-        this.supportedTokens = Object.keys(oneinchTokensResponse.tokens).map(tokenAddress =>
-            tokenAddress.toLowerCase()
-        );
-
-        return this.supportedTokens;
-    }
-
     private async loadContractAddress(): Promise<string> {
         const response = await this.httpClient.get<{
             address: string;
@@ -85,14 +69,6 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
 
         const fromTokenClone = createTokenNativeAddressProxy(from, oneinchApiParams.nativeAddress);
         const toTokenClone = createTokenNativeAddressProxy(toToken, oneinchApiParams.nativeAddress);
-
-        const supportedTokensAddresses = await this.getSupportedTokensByBlockchain();
-        if (
-            !supportedTokensAddresses.includes(fromTokenClone.address.toLowerCase()) ||
-            !supportedTokensAddresses.includes(toTokenClone.address.toLowerCase())
-        ) {
-            throw new RubicSdkError("Oneinch doesn't support this tokens");
-        }
 
         const [contractAddress, { toTokenAmountInWei, estimatedGas, path, data }] =
             await Promise.all([

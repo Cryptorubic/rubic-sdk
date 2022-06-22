@@ -40,7 +40,7 @@ type OneinchTradeStruct = {
 };
 
 export class OneinchTrade extends InstantTrade {
-    private static readonly oneInchTradeTypes = {
+    public static readonly oneInchTradeTypes = {
         [BLOCKCHAIN_NAME.ETHEREUM]: TRADE_TYPE.ONE_INCH_ETHEREUM,
         [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: TRADE_TYPE.ONE_INCH_BSC,
         [BLOCKCHAIN_NAME.POLYGON]: TRADE_TYPE.ONE_INCH_POLYGON,

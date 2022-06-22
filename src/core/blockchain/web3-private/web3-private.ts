@@ -83,7 +83,7 @@ export class Web3Private {
                 return new Error(errorMessage);
             }
         } catch {}
-        return err;
+        return err?.message ? new Error(err.message) : err;
     }
 
     /**

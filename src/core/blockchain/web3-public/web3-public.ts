@@ -457,7 +457,7 @@ export class Web3Public {
 
         const amountAbsolute = Web3Pure.toWei(amount, token.decimals);
         if (balance.lt(amountAbsolute)) {
-            throw new InsufficientFundsError(amount.toFixed(0));
+            throw new InsufficientFundsError(token.symbol, balance.toString(), amountAbsolute);
         }
     }
 

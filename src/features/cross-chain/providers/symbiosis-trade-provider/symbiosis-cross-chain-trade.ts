@@ -1,4 +1,10 @@
-import { CrossChainTrade, SwapTransactionOptions } from 'src/features';
+import {
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTrade,
+    OneinchTrade,
+    SwapTransactionOptions,
+    TradeType
+} from 'src/features';
 import { TransactionRequest } from '@ethersproject/providers';
 import { PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import { Injector } from '@rsdk-core/sdk/injector';
@@ -13,6 +19,10 @@ import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import BigNumber from 'bignumber.js';
 
 export class SymbiosisCrossChainTrade extends CrossChainTrade {
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
+
+    public readonly itType: { from: TradeType; to: TradeType };
+
     public static async getGasData(
         from: PriceTokenAmount,
         to: PriceTokenAmount,
@@ -31,7 +41,10 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
                         from,
                         to,
                         transactionRequest,
-                        gasData: null
+                        gasData: null,
+                        fee: new BigNumber(NaN),
+                        priceImpact: '',
+                        feeSymbol: ''
                     },
                     EMPTY_ADDRESS
                 ).getContractParams();
@@ -63,6 +76,12 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         }
     }
 
+    public readonly feeSymbol: string;
+
+    public readonly fee: BigNumber;
+
+    public readonly priceImpact: string;
+
     public readonly from: PriceTokenAmount;
 
     public readonly to: PriceTokenAmount;
@@ -87,6 +106,9 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             to: PriceTokenAmount;
             transactionRequest: TransactionRequest;
             gasData: GasData | null;
+            priceImpact: string;
+            fee: BigNumber;
+            feeSymbol: string;
         },
         providerAddress: string
     ) {
@@ -96,6 +118,22 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         this.to = crossChainTrade.to;
         this.transactionRequest = crossChainTrade.transactionRequest;
         this.gasData = crossChainTrade.gasData;
+
+        this.feeSymbol = crossChainTrade.feeSymbol;
+        this.fee = crossChainTrade.fee;
+        this.priceImpact = crossChainTrade.priceImpact;
+
+        const fromInchBlockchain = crossChainTrade.from.blockchain;
+        const toInchBlockchain = crossChainTrade.to.blockchain;
+
+        this.itType = {
+            from: OneinchTrade.oneInchTradeTypes[
+                fromInchBlockchain as keyof typeof OneinchTrade.oneInchTradeTypes
+            ],
+            to: OneinchTrade.oneInchTradeTypes[
+                toInchBlockchain as keyof typeof OneinchTrade.oneInchTradeTypes
+            ]
+        };
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
     }
