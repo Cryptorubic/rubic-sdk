@@ -48,7 +48,7 @@
     - [isAlgebraTrade](#isalgebratrade-function)
   - [Cross Chain Manager](#cross-chain-manager)
     - [calculateTrade](#crosschaincalculatetrade-method)
-  - [Wrapped Cross Chain Trade](#wrapped-cross-chain-trade)
+    - [wrappedCrossChainTrade](#wrappedcrosschaintrade-interface)
   - [Cross Chain Trade](#cross-chain-trade)
     - [swap](#crosschaintradeswap-method)
     - [needApprove](#crosschaintradeneedapprove-method)
@@ -962,7 +962,7 @@ sdk.crossChain.calculateTrade(
 
 > ℹ️️ You have to set up **rpc provider 🌐** for network in which you will calculate trade.
 
-Method calculates array of [WrappedCrossChainTrade](#wrapped-cross-chain-trade), sorted by exchange courses.
+Method calculates array of [WrappedCrossChainTrade](#wrappedcrosschaintrade-interface), sorted by exchange courses.
 First element of array is trade with best course.
 
 **Method parameters:**
@@ -988,7 +988,7 @@ First element of array is trade with best course.
 
 ---
 
-## Wrapped Cross Chain Trade
+### WrappedCrossChainTrade interface
 
 ```typescript
 interface WrappedCrossChainTrade {
@@ -998,7 +998,7 @@ interface WrappedCrossChainTrade {
 }
 ```
 
-Wraps best calculated cross chain trade and possible error. If `error` field is not undefined, then you must display an error, because [`swap`](#crosschaintradeswap-method) method will return error.
+Wraps calculated cross chain trade and possible error. If `error` field is not undefined, then you must display an error, because [`swap`](#crosschaintradeswap-method) method will return error.
 
 ---
 
