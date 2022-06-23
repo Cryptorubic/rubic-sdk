@@ -137,7 +137,8 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                         to,
                         transactionRequest,
                         gasData,
-                        priceImpact: parseFloat(priceImpact.toFixed())
+                        priceImpact: parseFloat(priceImpact.toFixed()),
+                        slippage: options.slippageTolerance
                     },
                     options.providerAddress
                 )

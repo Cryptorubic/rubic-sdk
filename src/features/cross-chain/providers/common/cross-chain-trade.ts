@@ -38,6 +38,11 @@ export abstract class CrossChainTrade {
     public abstract readonly to: PriceTokenAmount;
 
     /**
+     * Minimum amount of output token user will get.
+     */
+    public abstract readonly toTokenAmountMin: BigNumber;
+
+    /**
      * Gas fee info in source blockchain.
      */
     public abstract readonly gasData: GasData | null;
