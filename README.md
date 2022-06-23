@@ -59,7 +59,10 @@
     - [estimatedGas](#crosschaintradeestimatedgas-getter)
     - [type](#crosschaintradeestimatedgas-getter)
     - [priceImpactData](#crosschaintradepriceimpactdata-getter)
-    - [priceImpact readonly](#crosschaintradepriceimpact-readonly-field)
+    - [priceImpact](#crosschaintradepriceimpact-readonly-field)
+    - [isCelerCrossChainTrade](#iscelercrosschaintrade-function)
+    - [isRubicCrossChainTrade](#isrubiccrosschaintrade-function)
+    - [isSymbiosisCrossChainTrade](#issymbiosiscrosschaintrade-function)
   - [Cross Chain Symbiosis Manager](#cross-chain-symbiosis-manager)
     - [getUserTrades](#crosschainsymbiosismanagergetusertrades-method)
     - [revertTrade](#crosschainsymbiosismanagerreverttrade-method)
@@ -245,6 +248,7 @@
         fromAmount,
         toTokenAddress
     );
+    const bestTrade = trades[0];
     
     // explore trades info
     Object.entries(trades).forEach(([tradeType, trade]) =>
@@ -595,7 +599,7 @@ sdk.instantTrades.calculateTrade(
 
 > ℹ️️ You have to set up **rpc provider 🌐** for network in which you will calculate trade.
 
-Method calculates instant trades parameters and estimated output amount.
+Method calculates instant trades and sorts them by output amount. First element of the array is trade with best course.
 
 **Method parameters:**
 
@@ -659,12 +663,13 @@ If user has not enough allowance, the method will automatically send approve tra
 
 **SwapTransactionOptions description:**
 
-| Option     | Type                     | Description                                                                                                                           | Default                                                                                                                                |
-|------------|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| onConfirm? | `(hash: string) => void` | Callback that will be called after the user signs swap transaction.                                                                   | Not set.                                                                                                                               |
-| onApprove? | `(hash: string) => void` | Callback that will be called after the user signs approve transaction. If user has enough allowance, this callback won't be called.   | Not set.                                                                                                                               |
-| gasPrice?  | `string`                 | Specifies gas price **in wei** for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing. | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
-| gasLimit?  | `string`                 | Specifies gas limit for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing.            | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+| Option           | Type                     | Description                                                                                                                           | Default                                                                                                                                |
+|------------------|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| onConfirm?       | `(hash: string) => void` | Callback that will be called after the user signs swap transaction.                                                                   | Not set.                                                                                                                               |
+| onApprove?       | `(hash: string) => void` | Callback that will be called after the user signs approve transaction. If user has enough allowance, this callback won't be called.   | Not set.                                                                                                                               |
+| gasPrice?        | `string`                 | Specifies gas price **in wei** for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing. | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+| gasLimit?        | `string`                 | Specifies gas limit for **swap** transaction. Set this parameter only if you know exactly what you are doing.                         | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+| approveGasLimit? | `string`                 | Specifies gas limit for **approve** transaction. Set this parameter only if you know exactly what you are doing.                      | Calculates automatically by user's wallet.                                                                                             |
 
 **Returns** `Promise<TransactionReceipt>` -- swap transaction receipt. Promise will be resolved, when swap transaction gets to block.
 
@@ -1022,12 +1027,13 @@ If user has not enough allowance, the method will automatically send approve tra
 
 **SwapTransactionOptions description:**
 
-| Option     | Type                     | Description                                                                                                                           | Default                                                                                                                                |
-|------------|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| onConfirm? | `(hash: string) => void` | Callback that will be called after the user signs swap transaction.                                                                   | Not set.                                                                                                                               |
-| onApprove? | `(hash: string) => void` | Callback that will be called after the user signs approve transaction. If user has enough allowance, this callback won't be called.   | Not set.                                                                                                                               |
-| gasPrice?  | `string`                 | Specifies gas price **in wei** for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing. | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
-| gasLimit?  | `string`                 | Specifies gas limit for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing.            | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet. |
+| Option           | Type                     | Description                                                                                                                           | Default                                                                                                                                    |
+|------------------|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| onConfirm?       | `(hash: string) => void` | Callback that will be called after the user signs swap transaction.                                                                   | Not set.                                                                                                                                   |
+| onApprove?       | `(hash: string) => void` | Callback that will be called after the user signs approve transaction. If user has enough allowance, this callback won't be called.   | Not set.                                                                                                                                   |
+| gasPrice?        | `string`                 | Specifies gas price **in wei** for **swap and approve** transactions. Set this parameter only if you know exactly what you are doing. | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet.     |
+| gasLimit?        | `string`                 | Specifies gas limit for **swap** transaction. Set this parameter only if you know exactly what you are doing.                         | The value obtained during the calculation of the trade. If value wasn't calculated, it will calculates automatically by user's wallet.     |
+| approveGasLimit? | `string`                 | Specifies gas limit for **approve** transaction. Set this parameter only if you know exactly what you are doing.                      | Calculates automatically by user's wallet.                                                                                                 |
 
 **Returns** `Promise<TransactionReceipt>` -- swap transaction receipt **in first blockchain**. Promise will be resolved, when swap transaction gets to block.
 
@@ -1179,6 +1185,39 @@ crossChainTrade.priceImpact: number
 ```
 
 Returns overall price impact, based on symbiosis api.
+
+--- 
+
+### isCelerCrossChainTrade function
+
+```typescript
+function isCelerCrossChainTrade(trade: CrossChainTrade): trade is CelerCrossChainTrade
+```
+
+Type guard checks that trade is Celer Trade. Use it to parse result of `sdk.crossChain.calculateTrade` and
+show specific Celer trade data, or use its specific methods.
+
+--- 
+
+### isRubicCrossChainTrade function
+
+```typescript
+function isRubicCrossChainTrade(trade: CrossChainTrade): trade is RubicCrossChainTrade
+```
+
+Type guard checks that trade is Rubic Trade. Use it to parse result of `sdk.crossChain.calculateTrade` and
+show specific Rubic trade data, or use its specific methods.
+
+--- 
+
+### isSymbiosisCrossChainTrade function
+
+```typescript
+function isSymbiosisCrossChainTrade(trade: CrossChainTrade): trade is SymbiosisCrossChainTrade
+```
+
+Type guard checks that trade is Symbiosis Trade. Use it to parse result of `sdk.crossChain.calculateTrade` and
+show specific Symbiosis trade data, or use its specific methods.
 
 ---
 
