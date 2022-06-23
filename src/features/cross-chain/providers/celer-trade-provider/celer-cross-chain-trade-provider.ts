@@ -99,6 +99,9 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                 toTransitToken,
                 celerSlippage
             );
+            if (estimateTransitAmountWithSlippage.lte(0)) {
+                await this.checkMinMaxAmountsErrors(fromTrade);
+            }
 
             const { toTransitTokenAmount, transitFeeToken } = await this.getToTransitTokenAmount(
                 toBlockchain,
