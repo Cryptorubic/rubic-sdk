@@ -14,8 +14,8 @@ import { MinMaxAmounts } from '@features/cross-chain/models/min-max-amounts';
 import { PriceToken } from '@core/blockchain/tokens/price-token';
 import { ItCalculatedTrade } from '@features/cross-chain/providers/common/celer-rubic/models/it-calculated-trade';
 import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
-import { CrossChainMinAmountError } from '@common/errors/cross-chain/cross-chain-min-amount-error';
-import { CrossChainMaxAmountError } from '@common/errors/cross-chain/cross-chain-max-amount-error';
+import { CrossChainMinAmountError } from '@common/errors/cross-chain/cross-chain-min-amount.error';
+import { CrossChainMaxAmountError } from '@common/errors/cross-chain/cross-chain-max-amount.error';
 
 export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeProvider {
     protected abstract contracts(blockchain: BlockchainName): CrossChainContractData;
@@ -103,28 +103,26 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
         const fromContract = this.contracts(fromBlockchain);
         const fromTransitToken = await fromContract.getTransitToken(fromToken);
 
-        const getAmount = async (type: 'min' | 'max'): Promise<BigNumber> => {
-            const fromTransitTokenAmountAbsolute = await fromContract.getMinOrMaxTransitTokenAmount(
-                type,
-                fromTransitToken.address
-            );
-            const fromTransitTokenAmount = Web3Pure.fromWei(
-                fromTransitTokenAmountAbsolute,
+        const [minTransitAmountAbsolute, maxTransitAmountAbsolute] =
+            await fromContract.getMinMaxTransitTokenAmounts(fromTransitToken.address);
+
+        const getAmount = (type: 'min' | 'max'): BigNumber => {
+            const fromTransitAmount = Web3Pure.fromWei(
+                type === 'min' ? minTransitAmountAbsolute : maxTransitAmountAbsolute,
                 fromTransitToken.decimals
             );
 
             if (type === 'min') {
                 if (slippageTolerance) {
-                    return fromTransitTokenAmount.dividedBy(1 - slippageTolerance);
+                    return fromTransitAmount.dividedBy(1 - slippageTolerance);
                 }
             }
-            return fromTransitTokenAmount;
+            return fromTransitAmount;
         };
 
-        const [minAmount, maxAmount] = await Promise.all([getAmount('min'), getAmount('max')]);
         return {
-            minAmount,
-            maxAmount
+            minAmount: getAmount('min'),
+            maxAmount: getAmount('max')
         };
     }
 

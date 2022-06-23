@@ -1,6 +1,6 @@
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 
 /**
- * Thrown, when token cannot be swapped with provided options.
+ * Thrown, when slippage tolerance is too low for selected token.
  */
 export class LowSlippageError extends RubicSdkError {}

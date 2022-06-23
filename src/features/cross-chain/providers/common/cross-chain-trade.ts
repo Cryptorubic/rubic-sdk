@@ -38,6 +38,11 @@ export abstract class CrossChainTrade {
     public abstract readonly to: PriceTokenAmount;
 
     /**
+     * Minimum amount of output token user will get.
+     */
+    public abstract readonly toTokenAmountMin: BigNumber;
+
+    /**
      * Gas fee info in source blockchain.
      */
     public abstract readonly gasData: GasData | null;
@@ -126,7 +131,7 @@ export abstract class CrossChainTrade {
 
         const txOptions: TransactionOptions = {
             onTransactionHash: options?.onApprove,
-            gas: options?.gasLimit || undefined,
+            gas: options?.approveGasLimit || undefined,
             gasPrice: options?.gasPrice || undefined
         };
 

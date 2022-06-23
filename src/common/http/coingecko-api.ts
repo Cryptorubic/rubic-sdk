@@ -87,12 +87,12 @@ export class CoingeckoApi {
                 ),
                 3_000
             );
-            const amount = response?.[coingeckoId]?.usd;
-            if (!amount) {
-                throw new Error('[RUBIC SDK] Coingecko amoun has to be defined.');
+            const price = response?.[coingeckoId]?.usd;
+            if (!price) {
+                throw new RubicSdkError('Coingecko price is not defined');
             }
 
-            return new BigNumber(amount);
+            return new BigNumber(price);
         } catch (err: unknown) {
             if (err instanceof TimeoutError) {
                 console.debug('[RUBIC SDK]: Timeout Error. Coingecko cannot retrieve token price');

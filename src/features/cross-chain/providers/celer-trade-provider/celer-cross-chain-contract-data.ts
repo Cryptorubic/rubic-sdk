@@ -40,16 +40,23 @@ export class CelerCrossChainContractData extends CrossChainContractData {
         );
     }
 
-    public getMinOrMaxTransitTokenAmount(
-        type: 'min' | 'max',
-        tokenAddress: string
-    ): Promise<string> {
-        return this.web3Public.callContractMethod(
-            this.address,
-            celerCrossChainContractAbi,
-            type === 'min' ? 'minSwapAmount' : 'maxSwapAmount',
-            { methodArguments: [tokenAddress] }
-        );
+    public async getMinMaxTransitTokenAmounts(tokenAddress: string): Promise<[string, string]> {
+        return (
+            await this.web3Public.multicallContractMethods<[string]>(
+                this.address,
+                celerCrossChainContractAbi,
+                [
+                    {
+                        methodName: 'minSwapAmount',
+                        methodArguments: [tokenAddress]
+                    },
+                    {
+                        methodName: 'maxSwapAmount',
+                        methodArguments: [tokenAddress]
+                    }
+                ]
+            )
+        ).map(result => result.output![0] as string) as [string, string];
     }
 
     @Cache

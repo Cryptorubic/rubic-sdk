@@ -4,6 +4,7 @@ import { Web3Pure } from 'src/core';
 import { CrossChainContractData } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 import { RubicCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-cross-chain-contract-trade';
 import { RubicCrossChainSupportedBlockchain } from '@features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
+import { RubicSdkError } from 'src/common';
 
 export class RubicDirectCrossChainContractTrade extends RubicCrossChainContractTrade {
     public readonly fromToken: PriceTokenAmount;
@@ -36,7 +37,7 @@ export class RubicDirectCrossChainContractTrade extends RubicCrossChainContractT
         const swapTokenWithFee = false;
 
         if (!methodArguments?.[0]) {
-            throw new Error('[RUBIC SDK] Method arguments array length has to be bigget than 0.');
+            throw new RubicSdkError('Method arguments array length has to be bigger than 0');
         }
 
         methodArguments[0].push(exactTokensForTokens, swapTokenWithFee);

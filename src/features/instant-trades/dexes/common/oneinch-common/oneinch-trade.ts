@@ -51,7 +51,7 @@ export class OneinchTrade extends InstantTrade {
             from
         } as OneinchTradeStruct).needApprove();
         if (needApprove) {
-            throw new Error('need approve');
+            throw new RubicSdkError('Approve is needed');
         }
     }
 

@@ -10,6 +10,7 @@ import {
 } from '@features/instant-trades/utils/type-guards';
 import { celerCrossChainContractAbi } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import { CelerCrossChainContractData } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
+import { RubicSdkError } from 'src/common';
 
 export abstract class CelerCrossChainContractTrade extends CrossChainContractTrade {
     protected constructor(
@@ -71,7 +72,7 @@ export abstract class CelerCrossChainContractTrade extends CrossChainContractTra
             return nativeIn ? CelerSwapMethod.SWAP_V3_NATIVE : CelerSwapMethod.SWAP_V3;
         }
 
-        throw new Error('[RUBIC SDK]: Unknown swap method.');
+        throw new RubicSdkError('Unknown swap method');
     }
 
     public abstract getCelerSourceTrade(): unknown[] | unknown;

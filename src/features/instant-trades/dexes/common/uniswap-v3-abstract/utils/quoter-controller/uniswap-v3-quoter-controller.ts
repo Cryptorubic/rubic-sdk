@@ -25,6 +25,7 @@ import { Injector } from '@core/sdk/injector';
 import { UniswapV3RouterConfiguration } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
 import { UniswapV3AlgebraQuoterController } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 import { Exact } from '@features/instant-trades/models/exact';
+import { RubicSdkError } from 'src/common';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
@@ -228,7 +229,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
             .map((poolAddress, index) => {
                 const poolMethodArguments = getPoolsMethodArguments?.[index];
                 if (!poolMethodArguments) {
-                    throw new Error('[RUBIC SDK] Method arguments for pool have to be defined.');
+                    throw new RubicSdkError('Method arguments array for pool has to be defined');
                 }
                 if (!Web3Pure.isZeroAddress(poolAddress)) {
                     return new LiquidityPool(
@@ -283,7 +284,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
                     .map((result, index) => {
                         const pool = quoterMethodsData?.[index];
                         if (!pool) {
-                            throw new Error('[RUBIC SDK] Pool has to be defined');
+                            throw new RubicSdkError('Pool has to be defined');
                         }
                         if (result.success) {
                             return {
