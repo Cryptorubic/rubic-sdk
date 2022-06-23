@@ -21,6 +21,7 @@ import { CrossChainContractData } from '@features/cross-chain/providers/common/c
 import { wrappedNative } from '@features/cross-chain/providers/celer-trade-provider/constants/wrapped-native';
 import { CelerRubicCrossChainTradeProvider } from '@features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
 import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { LowToSlippageError } from '@common/errors/cross-chain/low-to-slippage.error';
 
 export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -86,9 +87,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             const toSlippageTolerance = toSlippage - celerSlippage;
 
             if (toSlippageTolerance < 0) {
-                throw new RubicSdkError(
-                    'Increase `toSlippageTolerance` field to calculate Celer cross chain trade'
-                );
+                throw new LowToSlippageError();
             }
 
             const estimateTransitAmountWithSlippage = await this.fetchCelerAmount(
