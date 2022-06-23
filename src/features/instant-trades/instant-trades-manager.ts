@@ -111,7 +111,7 @@ export class InstantTradesManager {
         options?: SwapManagerCalculationOptions
     ): Promise<InstantTrade[]> {
         if (toToken instanceof Token && fromToken.blockchain !== toToken.blockchain) {
-            throw new RubicSdkError('Blockchains of from and to tokens must be same.');
+            throw new RubicSdkError('Blockchains of from and to tokens must be same');
         }
 
         const { from, to } = await getPriceTokensFromInputTokens(

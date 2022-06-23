@@ -129,7 +129,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
                 (route, index) => {
                     const estimatedGas = gasLimits[index];
                     if (!estimatedGas) {
-                        throw new RubicSdkError('Estimated gas has to be defined.');
+                        throw new RubicSdkError('Estimated gas has to be defined');
                     }
                     const gasFeeInUsd = estimatedGas.multipliedBy(gasPriceInUsd);
                     let profit: BigNumber;
