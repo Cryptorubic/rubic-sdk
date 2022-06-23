@@ -103,28 +103,26 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
         const fromContract = this.contracts(fromBlockchain);
         const fromTransitToken = await fromContract.getTransitToken(fromToken);
 
-        const getAmount = async (type: 'min' | 'max'): Promise<BigNumber> => {
-            const fromTransitTokenAmountAbsolute = await fromContract.getMinOrMaxTransitTokenAmount(
-                type,
-                fromTransitToken.address
-            );
-            const fromTransitTokenAmount = Web3Pure.fromWei(
-                fromTransitTokenAmountAbsolute,
+        const [minTransitAmountAbsolute, maxTransitAmountAbsolute] =
+            await fromContract.getMinMaxTransitTokenAmounts(fromTransitToken.address);
+
+        const getAmount = (type: 'min' | 'max'): BigNumber => {
+            const fromTransitAmount = Web3Pure.fromWei(
+                type === 'min' ? minTransitAmountAbsolute : maxTransitAmountAbsolute,
                 fromTransitToken.decimals
             );
 
             if (type === 'min') {
                 if (slippageTolerance) {
-                    return fromTransitTokenAmount.dividedBy(1 - slippageTolerance);
+                    return fromTransitAmount.dividedBy(1 - slippageTolerance);
                 }
             }
-            return fromTransitTokenAmount;
+            return fromTransitAmount;
         };
 
-        const [minAmount, maxAmount] = await Promise.all([getAmount('min'), getAmount('max')]);
         return {
-            minAmount,
-            maxAmount
+            minAmount: getAmount('min'),
+            maxAmount: getAmount('max')
         };
     }
 

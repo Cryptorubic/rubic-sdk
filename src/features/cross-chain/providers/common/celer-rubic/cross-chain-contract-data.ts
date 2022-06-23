@@ -38,8 +38,5 @@ export abstract class CrossChainContractData {
 
     public abstract getMaxGasPrice(): Promise<BigNumber>;
 
-    public abstract getMinOrMaxTransitTokenAmount(
-        type: 'min' | 'max',
-        tokenAddress?: string
-    ): Promise<string>;
+    public abstract getMinMaxTransitTokenAmounts(tokenAddress?: string): Promise<[string, string]>;
 }
