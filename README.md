@@ -300,11 +300,21 @@ Steps 1. and 2. is the same. You can use single sdk instance for instant trades 
     const toBlockchain = BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN;
     const toTokenAddress = '0xe9e7cea3dedca5984780bafc599bd69add087d56'; // BUSD
     
-    const trade = await sdk.crossChain.calculateTrade(
+    const wrappedTrades = await sdk.crossChain.calculateTrade(
         { blockchain: fromBlockchain, address: fromTokenAddress }, 
         fromAmount,
         { blockchain: toBlockchain, address: toTokenAddress }
     );
+    const bestTrade = wrappedTrades[0];
+   
+    Object.entries(wrappedTrades).forEach((wrappedTrade) => {
+        if (wrappedTrade.trade) {
+            console.log(wrappedTrade.tradeType, `to amount: ${wrappedTrade.trade.to.tokenAmount.toFormat(3)}`);
+        }
+        if (wrappedTrade.error) {
+            console.log(wrappedTrade.tradeType, `error: ${wrappedTrade.error}`);
+        }
+    }) 
     ```
 
 Step 4. is the same.
@@ -942,12 +952,13 @@ sdk.crossChain.calculateTrade(
               blockchain: BLOCKCHAIN_NAME;
             },
         options?: CrossChainOptions
-): Promise<WrappedCrossChainTrade>
+): Promise<WrappedCrossChainTrade[]>
 ```
 
 > ℹ️️ You have to set up **rpc provider 🌐** for network in which you will calculate trade.
 
-Method calculates [WrappedCrossChainTrade](#wrapped-cross-chain-trade), which contains best cross chain provider with estimated output amount.
+Method calculates array of [WrappedCrossChainTrade](#wrapped-cross-chain-trade), sorted by exchange courses.
+First element of array is trade with best course.
 
 **Method parameters:**
 
@@ -977,12 +988,12 @@ Method calculates [WrappedCrossChainTrade](#wrapped-cross-chain-trade), which co
 ```typescript
 interface WrappedCrossChainTrade {
     trade: CrossChainTrade | null;
-    minAmountError?: BigNumber;
-    maxAmountError?: BigNumber;
+    tradeType: CrossChainTradeType;
+    error?: RubicSdkError;
 }
 ```
 
-Wraps best calculated cross chain trade and possible min max amount errors. If `minAmountError` or `maxAmountError` are not undefined, then you must display an error, because [`swap`](#crosschaintradeswap-method) method will return error.
+Wraps best calculated cross chain trade and possible error. If `error` field is not undefined, then you must display an error, because [`swap`](#crosschaintradeswap-method) method will return error.
 
 ---
 

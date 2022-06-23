@@ -1,3 +1,5 @@
+import { MarkRequired } from 'ts-essentials';
+
 export interface CrossChainOptions {
     /**
      * Slippage in source network (for Celer and Rubic).
@@ -39,4 +41,11 @@ export interface CrossChainOptions {
     fromAddress?: string;
 }
 
-export type RequiredCrossChainOptions = Required<CrossChainOptions>;
+export type RequiredCrossChainOptions = MarkRequired<
+    CrossChainOptions,
+    | 'fromSlippageTolerance'
+    | 'toSlippageTolerance'
+    | 'slippageTolerance'
+    | 'deadline'
+    | 'providerAddress'
+>;

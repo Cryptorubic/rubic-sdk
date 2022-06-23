@@ -7,7 +7,7 @@ import {
     TradeType
 } from 'src/features';
 import { AbiItem } from 'web3-utils';
-import { PriceToken, Token, Web3Pure } from 'src/core';
+import { BlockchainName, PriceToken, Token, Web3Pure } from 'src/core';
 import { SwapOptions } from '@features/instant-trades/models/swap-options';
 import BigNumber from 'bignumber.js';
 import { Injector } from '@core/sdk/injector';
@@ -25,6 +25,7 @@ import {
 } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/constants/estimated-gas';
 import { Exact } from '@features/instant-trades/models/exact';
 import { getFromToTokensAmountsByExact } from '@features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
+import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
 
 export interface UniswapV3AlgebraTradeStruct {
     from: PriceTokenAmount;
@@ -36,10 +37,13 @@ export interface UniswapV3AlgebraTradeStruct {
 }
 
 export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
-    protected static get contractAbi(): AbiItem[] {
+    protected static contractAbi(blockchain: BlockchainName): AbiItem[] {
         // see  https://github.com/microsoft/TypeScript/issues/34516
         // @ts-ignore
-        const instance = new this();
+        const instance = new this({
+            from: { blockchain },
+            route: { path: [{ address: NATIVE_TOKEN_ADDRESS }] }
+        });
         if (!instance.contractAbi) {
             throw new RubicSdkError('Trying to read abstract class field');
         }
@@ -47,10 +51,13 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
     }
 
     @Cache
-    protected static get contractAddress(): string {
+    protected static contractAddress(blockchain: BlockchainName): string {
         // see  https://github.com/microsoft/TypeScript/issues/34516
         // @ts-ignore
-        const instance = new this();
+        const instance = new this({
+            from: { blockchain },
+            route: { path: [{ address: NATIVE_TOKEN_ADDRESS }] }
+        });
         if (!instance.contractAddress) {
             throw new RubicSdkError('Trying to read abstract class field');
         }
@@ -84,8 +91,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         if (walletAddress && estimateGasParams.callData) {
             const web3Public = Injector.web3PublicService.getWeb3Public(from.blockchain);
             const estimatedGas = await web3Public.getEstimatedGas(
-                this.contractAbi,
-                this.contractAddress,
+                this.contractAbi(from.blockchain),
+                this.contractAddress(from.blockchain),
                 estimateGasParams.callData.contractMethod,
                 estimateGasParams.callData.params,
                 walletAddress,
@@ -128,8 +135,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         ) {
             const web3Public = Injector.web3PublicService.getWeb3Public(fromToken.blockchain);
             const estimatedGasLimits = await web3Public.batchEstimatedGas(
-                this.contractAbi,
-                this.contractAddress,
+                this.contractAbi(fromToken.blockchain),
+                this.contractAddress(fromToken.blockchain),
                 walletAddress,
                 routesEstimateGasParams.map(estimateGasParams => estimateGasParams.callData)
             );
