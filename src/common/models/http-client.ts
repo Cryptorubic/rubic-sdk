@@ -7,7 +7,7 @@ export interface HttpClient {
         url: string,
         options?: {
             headers?: {
-                [header: string]: string | string[];
+                [header: string]: string;
             };
             params?: {
                 [param: string]:

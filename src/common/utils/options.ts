@@ -1,7 +1,7 @@
 export function combineOptions<T extends object>(
     options: Partial<T> | undefined,
-    defaultOptions: Required<T>
-): Required<T> {
+    defaultOptions: T
+): T {
     return {
         ...defaultOptions,
         ...options

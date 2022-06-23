@@ -19,7 +19,6 @@ import { UniswapV3TradeProviders } from '@features/instant-trades/constants/unis
 import { OneInchTradeProviders } from '@features/instant-trades/constants/one-inch-trade-providers';
 import { ZrxTradeProviders } from '@features/instant-trades/constants/zrx-trade-providers';
 import { AlgebraTradeProviders } from '@features/instant-trades/constants/algebra-trade-providers';
-import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 
 export type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCalculationOptions,
@@ -35,15 +34,13 @@ export class InstantTradesManager {
     private static getFullOptions(
         options?: SwapManagerCalculationOptions
     ): RequiredSwapManagerCalculationOptions {
-        return combineOptions<SwapManagerCalculationOptions>(options, {
+        return combineOptions<RequiredSwapManagerCalculationOptions>(options, {
             timeout: InstantTradesManager.defaultCalculationTimeout,
             disabledProviders: [],
             gasCalculation: 'calculate',
             disableMultihops: false,
             slippageTolerance: 0.02,
-            deadlineMinutes: 20,
-            wrappedAddress: EMPTY_ADDRESS,
-            fromAddress: ''
+            deadlineMinutes: 20
         });
     }
 
