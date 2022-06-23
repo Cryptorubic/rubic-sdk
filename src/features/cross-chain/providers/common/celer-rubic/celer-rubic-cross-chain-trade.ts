@@ -4,12 +4,12 @@ import { Cache, CrossChainIsUnavailableError, MaxGasPriceOverflowError } from 's
 import { CrossChainContractTrade } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import { Injector } from '@core/sdk/injector';
 import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
-import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
+import { EncodeCrossChainTrade } from '@features/cross-chain/providers/common/encode-cross-chain-trade';
 
 /**
  * Contains common for Celer and Rubic trades methods and fields.
  */
-export abstract class CelerRubicCrossChainTrade extends CrossChainTrade {
+export abstract class CelerRubicCrossChainTrade extends EncodeCrossChainTrade {
     /**
      * Gets price impact in source and target blockchains, based on tokens usd prices.
      */

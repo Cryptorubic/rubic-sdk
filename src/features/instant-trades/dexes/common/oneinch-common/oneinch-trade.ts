@@ -153,17 +153,16 @@ export class OneinchTrade extends InstantTrade {
             const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, apiTradeData);
 
             const transactionOptions = {
+                value: this.nativeSupportedFrom.isNative
+                    ? this.nativeSupportedFrom.stringWeiAmount
+                    : '0',
                 onTransactionHash: options.onConfirm,
                 data: apiTradeData.tx.data,
                 gas,
                 gasPrice
             };
 
-            return Injector.web3Private.trySendTransaction(
-                apiTradeData.tx.to,
-                this.nativeSupportedFrom.isNative ? this.nativeSupportedFrom.stringWeiAmount : '0',
-                transactionOptions
-            );
+            return Injector.web3Private.trySendTransaction(apiTradeData.tx.to, transactionOptions);
         } catch (err) {
             this.specifyError(err);
             throw new RubicSdkError(err.message || err.toString());

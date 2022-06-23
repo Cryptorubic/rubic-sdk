@@ -125,27 +125,25 @@ export class Web3Private {
     /**
      * Tries to send Eth in transaction and resolve the promise when the transaction is included in the block or rejects the error.
      * @param toAddress Eth receiver address.
-     * @param value Native token amount in wei.
      * @param [options] Additional options.
      * @returns Transaction receipt.
      */
     public async trySendTransaction(
         toAddress: string,
-        value: BigNumber | string,
         options: TransactionOptions = {}
     ): Promise<TransactionReceipt> {
         try {
             await this.web3.eth.call({
                 from: this.address,
                 to: toAddress,
-                value: Web3Private.stringifyAmount(value),
+                value: Web3Private.stringifyAmount(options.value || 0),
                 ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                 ...(options.gasPrice && {
                     gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                 }),
                 ...(options.data && { data: options.data })
             });
-            return await this.sendTransaction(toAddress, value, options);
+            return await this.sendTransaction(toAddress, options);
         } catch (err: unknown) {
             console.error('Tokens transfer error', err);
             throw Web3Private.parseError(err as Web3Error);
@@ -155,13 +153,11 @@ export class Web3Private {
     /**
      * Sends Eth in transaction and resolve the promise when the transaction is included in the block.
      * @param toAddress Eth receiver address.
-     * @param value Native token amount in wei.
      * @param [options] Additional options.
      * @returns Transaction receipt.
      */
     public async sendTransaction(
         toAddress: string,
-        value: BigNumber | string,
         options: TransactionOptions = {}
     ): Promise<TransactionReceipt> {
         return new Promise((resolve, reject) => {
@@ -169,7 +165,7 @@ export class Web3Private {
                 .sendTransaction({
                     from: this.address,
                     to: toAddress,
-                    value: Web3Private.stringifyAmount(value),
+                    value: Web3Private.stringifyAmount(options.value || 0),
                     ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                     ...(options.gasPrice && {
                         gasPrice: Web3Private.stringifyAmount(options.gasPrice)

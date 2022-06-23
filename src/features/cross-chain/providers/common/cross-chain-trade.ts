@@ -8,15 +8,10 @@ import {
 import { GasData } from '@features/cross-chain/models/gas-data';
 import { Injector } from '@core/sdk/injector';
 import BigNumber from 'bignumber.js';
-import {
-    CrossChainTradeType,
-    EncodeTransactionOptions,
-    SwapTransactionOptions
-} from 'src/features';
 import { UnnecessaryApproveError, WalletNotConnectedError, WrongNetworkError } from 'src/common';
 import { TransactionReceipt } from 'web3-eth';
-import { ContractParams } from '@features/cross-chain/models/contract-params';
-import { TransactionConfig } from 'web3-core';
+import { CrossChainTradeType } from '@features/cross-chain/models/cross-chain-trade-type';
+import { SwapTransactionOptions } from '@features/instant-trades/models/swap-transaction-options';
 
 /**
  * Abstract class for all cross chain providers' trades.
@@ -76,8 +71,6 @@ export abstract class CrossChainTrade {
      */
     public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
 
-    protected abstract getContractParams(fromAddress?: string): Promise<ContractParams>;
-
     /**
      * Returns true, if allowance is not enough.
      */
@@ -135,29 +128,6 @@ export abstract class CrossChainTrade {
             this.fromContractAddress,
             'infinity',
             txOptions
-        );
-    }
-
-    /**
-     * Builds transaction config, with encoded data.
-     * @param options Encode transaction options.
-     */
-    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
-        const { gasLimit, gasPrice } = options;
-
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams(options.fromAddress);
-
-        return Web3Pure.encodeMethodCall(
-            contractAddress,
-            contractAbi,
-            methodName,
-            methodArguments,
-            value,
-            {
-                gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
-                gasPrice: gasPrice || this.gasData?.gasPrice.toFixed()
-            }
         );
     }
 

@@ -24,6 +24,8 @@ import BigNumber from 'bignumber.js';
 import { SymbiosisCrossChainTradeProvider } from '@features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
 import { MarkRequired } from 'ts-essentials';
 import { RequiredCrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
+import { ViaCrossChainTradeProvider } from '@features/cross-chain/providers/via-trade-provider/via-cross-chain-trade-provider';
+import { ViaCrossChainTrade } from '@features/cross-chain/providers/via-trade-provider/via-cross-chain-trade';
 import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
@@ -36,7 +38,7 @@ type RequiredSwapManagerCalculationOptions = MarkRequired<
  * Contains method to calculate best cross chain trade.
  */
 export class CrossChainManager {
-    private static readonly defaultCalculationTimeout = 15_000;
+    private static readonly defaultCalculationTimeout = 60_000;
 
     private static readonly defaultSlippageTolerance = 0.02;
 
@@ -45,7 +47,8 @@ export class CrossChainManager {
     private tradeProviders: CcrTypedTradeProviders = [
         RubicCrossChainTradeProvider,
         CelerCrossChainTradeProvider,
-        SymbiosisCrossChainTradeProvider
+        SymbiosisCrossChainTradeProvider,
+        ViaCrossChainTradeProvider
     ].reduce((acc, ProviderClass) => {
         const provider = new ProviderClass();
         acc[provider.type] = provider;
@@ -165,6 +168,10 @@ export class CrossChainManager {
         }
 
         if (trade instanceof SymbiosisCrossChainTrade) {
+            return transitTokenAmount.dividedBy(trade.to.tokenAmount);
+        }
+
+        if (trade instanceof ViaCrossChainTrade) {
             return transitTokenAmount.dividedBy(trade.to.tokenAmount);
         }
 

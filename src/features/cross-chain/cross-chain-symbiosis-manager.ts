@@ -48,16 +48,13 @@ export class CrossChainSymbiosisManager {
         };
 
         try {
-            await Injector.web3Private.trySendTransaction(
-                transactionRequest.to!,
-                new BigNumber(transactionRequest.value?.toString() || 0),
-                {
-                    data: transactionRequest.data!.toString(),
-                    onTransactionHash,
-                    gas: gasLimit,
-                    gasPrice
-                }
-            );
+            await Injector.web3Private.trySendTransaction(transactionRequest.to!, {
+                value: new BigNumber(transactionRequest.value?.toString() || 0),
+                data: transactionRequest.data!.toString(),
+                onTransactionHash,
+                gas: gasLimit,
+                gasPrice
+            });
 
             return transactionHash!;
         } catch (err) {
