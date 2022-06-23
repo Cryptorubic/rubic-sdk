@@ -4,7 +4,7 @@ import { Injector } from '@core/sdk/injector';
 import { PendingRequest } from 'symbiosis-js-sdk/dist/crosschain/pending';
 import BigNumber from 'bignumber.js';
 import { SwapTransactionOptions } from 'src/features';
-import { FailedToCheckForTransactionReceiptError } from 'src/common';
+import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common';
 
 export class CrossChainSymbiosisManager {
     private readonly symbiosis = new Symbiosis(getSymbiosisConfig(), 'rubic');
@@ -16,7 +16,7 @@ export class CrossChainSymbiosisManager {
     public getUserTrades(fromAddress?: string): Promise<PendingRequest[]> {
         fromAddress ||= this.walletAddress;
         if (!fromAddress) {
-            throw new Error('From address or wallet address must not be empty');
+            throw new RubicSdkError('`fromAddress` parameter or wallet address must not be empty');
         }
 
         return this.symbiosis.getPendingRequests(fromAddress);
@@ -33,7 +33,7 @@ export class CrossChainSymbiosisManager {
         );
 
         if (!request) {
-            throw new Error('[RUBIC SDK] No request with provided transaction hash');
+            throw new RubicSdkError('No request with provided transaction hash');
         }
 
         const { transactionRequest } = await this.symbiosis.newRevertPending(request).revert();

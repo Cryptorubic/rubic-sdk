@@ -9,6 +9,7 @@ import { oneinchApiParams } from '@features/instant-trades/dexes/common/oneinch-
 import { wrappedNative } from '@features/cross-chain/providers/celer-trade-provider/constants/wrapped-native';
 import { CelerCrossChainSupportedBlockchain } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
+import { RubicSdkError } from 'src/common';
 
 export class CrossChainOneinchTrade implements CrossChainInstantTrade {
     readonly defaultDeadline = 999999999999999;
@@ -17,7 +18,7 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
 
     public getFirstPath(): string {
         if (!this.instantTrade.path?.[0]) {
-            throw new Error('[RUBIC SDK] Instant trade path has to be defined.');
+            throw new RubicSdkError('Instant trade path has to be defined');
         }
         return this.instantTrade.path[0].address;
     }
@@ -32,14 +33,14 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
     ): Promise<void> {
         const { data } = await this.instantTrade.encode({ fromAddress: walletAddress });
         if (!methodArguments?.[0]) {
-            throw new Error('[RUBIC SDK] Method arguments have to be defined.');
+            throw new RubicSdkError('Method arguments array must not be empty');
         }
         methodArguments[0].push(data);
     }
 
     public getCelerSourceObject(slippage: number): InchCelerSwapInfo {
         if (!this.instantTrade.transactionData) {
-            throw new Error(`[RUBIC SDK] Can't estimate 1inch trade.`);
+            throw new RubicSdkError(`Can't estimate 1inch trade`);
         }
         const dex = this.instantTrade.contractAddress;
         const [tokenIn, ...restPath] = this.instantTrade.path.map(token => token.address);
@@ -49,7 +50,7 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
             .blockchain as CelerCrossChainSupportedBlockchain;
         const firstToken = isOneInchNative ? wrappedNative[fromBlockchain] : tokenIn;
         if (!firstToken) {
-            throw new Error('[RUBIC SDK] First token has to be defined');
+            throw new RubicSdkError('First token has to be defined');
         }
 
         const path = [firstToken, restPath.at(-1) as string];

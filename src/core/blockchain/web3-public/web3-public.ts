@@ -27,6 +27,7 @@ import { InsufficientFundsError } from '@common/errors/swap/insufficient-funds.e
 import { HttpClient } from '@common/models/http-client';
 import { DefaultHttpClient } from '@common/http/default-http-client';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
+import { RubicSdkError } from 'src/common';
 
 type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 
@@ -342,7 +343,7 @@ export class Web3Public {
             }
         ]);
         if (!results?.[0]) {
-            throw new Error('[RUBIC SDK] Cant perform multicall or request data is empty.');
+            throw new RubicSdkError('Cant perform multicall or request data is empty');
         }
         return results[0];
     }
@@ -377,7 +378,7 @@ export class Web3Public {
                 )!.outputs!;
                 const output = outputs[outputIndex];
                 if (!output) {
-                    throw new Error('[RUBIC SDK] Output has to be defined');
+                    throw new RubicSdkError('Output has to be defined');
                 }
 
                 outputIndex++;
@@ -441,7 +442,7 @@ export class Web3Public {
         return tokenFieldsResults.reduce((acc, field, index) => {
             const fieldName = tokenFields[index];
             if (!fieldName) {
-                throw new Error('[RUBIC SDK] Field name has to be defined.');
+                throw new RubicSdkError('Field name has to be defined');
             }
             return { ...acc, [fieldName]: field };
         }, {} as Record<SupportedTokenField, string>);

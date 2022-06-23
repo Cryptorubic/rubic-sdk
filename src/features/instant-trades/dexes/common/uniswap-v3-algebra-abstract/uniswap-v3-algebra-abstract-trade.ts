@@ -199,11 +199,11 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
     }
 
     private get defaultEstimatedGas(): BigNumber {
-        const estimateGas = DEFAULT_ESTIMATED_GAS[this.path.length - 2];
-        if (!estimateGas) {
-            throw new Error('[RUBIC SDK] Estimate gas has to be defined.');
+        const estimatedGas = DEFAULT_ESTIMATED_GAS[this.path.length - 2];
+        if (!estimatedGas) {
+            throw new RubicSdkError('Default estimated gas has to be defined');
         }
-        return estimateGas.plus(this.to.isNative ? WETH_TO_ETH_ESTIMATED_GAS : 0);
+        return estimatedGas.plus(this.to.isNative ? WETH_TO_ETH_ESTIMATED_GAS : 0);
     }
 
     protected constructor(tradeStruct: UniswapV3AlgebraTradeStruct) {

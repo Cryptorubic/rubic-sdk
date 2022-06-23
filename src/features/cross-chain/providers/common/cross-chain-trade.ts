@@ -126,7 +126,7 @@ export abstract class CrossChainTrade {
 
         const txOptions: TransactionOptions = {
             onTransactionHash: options?.onApprove,
-            gas: options?.gasLimit || undefined,
+            gas: options?.approveGasLimit || undefined,
             gasPrice: options?.gasPrice || undefined
         };
 

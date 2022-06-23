@@ -10,7 +10,7 @@ import { getCelerCrossChainContract } from '@features/cross-chain/providers/cele
 import { RequiredCrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
 import { CelerCrossChainTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade';
 import BigNumber from 'bignumber.js';
-import { compareAddresses, LowSlippageError, notNull, RubicSdkError } from 'src/common';
+import { compareAddresses, notNull, RubicSdkError } from 'src/common';
 import { EstimateAmtResponse } from '@features/cross-chain/providers/celer-trade-provider/models/estimate-amount-response';
 import { Injector } from '@core/sdk/injector';
 import { CelerCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
@@ -86,7 +86,9 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             const toSlippageTolerance = toSlippage - celerSlippage;
 
             if (toSlippageTolerance < 0) {
-                throw new LowSlippageError();
+                throw new RubicSdkError(
+                    'Increase `toSlippageTolerance` field to calculate Celer cross chain trade'
+                );
             }
 
             const estimateTransitAmountWithSlippage = await this.fetchCelerAmount(

@@ -1,7 +1,6 @@
 import { Cache } from '@common/decorators/cache.decorator';
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { LowSlippageDeflationaryTokenError } from '@common/errors/swap/low-slippage-deflationary-token.error';
-import { LowSlippageError } from '@common/errors/swap/low-slippage.error';
 import { tryExecuteAsync } from '@common/utils/functions';
 import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
@@ -284,7 +283,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             return this.supportedFeeSwapMethod;
         }
 
-        throw new LowSlippageError();
+        throw this.parseError(regularMethodResult.error);
     }
 
     private getSwapParametersByMethod(
@@ -342,7 +341,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         const gasLimitAmount =
             constructor.defaultEstimatedGasInfo[methodName]?.[transitTokensNumber];
         if (!gasLimitAmount) {
-            throw new Error('[RUBIC SDK] Gas limit has to be defined.');
+            throw new RubicSdkError('Gas limit has to be defined');
         }
 
         const gasLimit = gasLimitAmount.toFixed(0);
