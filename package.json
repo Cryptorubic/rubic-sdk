@@ -60,7 +60,7 @@
   },
   "dependencies": {
     "assert": "^2.0.0",
-    "axios": "^0.27.2",
+    "axios": "^0.26.1",
     "bignumber.js": "^9.0.1",
     "ethers": "^5.6.8",
     "symbiosis-js-sdk": "^2.6.5",
