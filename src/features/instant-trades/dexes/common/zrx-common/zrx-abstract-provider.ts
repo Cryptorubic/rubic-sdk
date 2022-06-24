@@ -60,7 +60,7 @@ export abstract class ZrxAbstractProvider extends InstantTradeProvider {
             }),
             slippageTolerance: fullOptions.slippageTolerance,
             apiTradeData,
-            path: [] // @TODO;
+            path: [from, to]
         };
         if (fullOptions.gasCalculation === 'disabled') {
             return new ZrxTrade(tradeStruct);

@@ -55,7 +55,7 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
 
         const secondToken = restPath?.pop();
         if (!secondToken) {
-            throw new Error('[RUBIC SDK] First token has to be defined');
+            throw new RubicSdkError('Second token has to be defined');
         }
 
         const path = [firstToken, secondToken];

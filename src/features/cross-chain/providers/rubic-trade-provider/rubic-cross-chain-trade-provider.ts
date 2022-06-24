@@ -77,12 +77,12 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             );
 
             const { toTransitTokenAmount, transitFeeToken, feeInPercents } =
-            await this.getToTransitTokenAmount(
-                toBlockchain,
-                fromTrade.fromToken,
-                fromTrade.toTokenAmountMin,
-                fromTrade.contract
-            );
+                await this.getToTransitTokenAmount(
+                    toBlockchain,
+                    fromTrade.fromToken,
+                    fromTrade.toTokenAmountMin,
+                    fromTrade.contract
+                );
 
             const toTrade = await this.calculateBestTrade(
                 toBlockchain,
@@ -107,10 +107,10 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                     cryptoFeeToken,
                     transitFeeToken,
                     gasData,
-                feeInPercents
-            },
-            providerAddress
-        );
+                    feeInPercents
+                },
+                providerAddress
+            );
 
             try {
                 await this.checkMinMaxAmountsErrors(fromTrade);
