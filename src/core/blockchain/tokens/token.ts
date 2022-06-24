@@ -58,7 +58,7 @@ export class Token {
 
             const address = tokensAddresses?.[index];
             if (!address) {
-                throw new RubicSdkError('[RUBIC SDK] Address has to be defined.');
+                throw new RubicSdkError('Address has to be defined');
             }
 
             return new Token({

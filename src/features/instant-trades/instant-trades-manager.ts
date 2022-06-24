@@ -70,7 +70,7 @@ export class InstantTradesManager {
     );
 
     /**
-     * Calculates instant trades.
+     * Calculates instant trades, sorted by output amount.
      *
      * @example
      * ```ts
@@ -86,6 +86,7 @@ export class InstantTradesManager {
      *     fromAmount,
      *     toTokenAddress
      * );
+     * const bestTrade = trades[0];
      *
      * Object.entries(trades).forEach(([tradeType, trade]) =>
      *     console.log(tradeType, `to amount: ${trade.to.tokenAmount.toFormat(3)}`)
@@ -110,7 +111,7 @@ export class InstantTradesManager {
         options?: SwapManagerCalculationOptions
     ): Promise<InstantTrade[]> {
         if (toToken instanceof Token && fromToken.blockchain !== toToken.blockchain) {
-            throw new RubicSdkError('Blockchains of from and to tokens must be same.');
+            throw new RubicSdkError('Blockchains of from and to tokens must be same');
         }
 
         const { from, to } = await getPriceTokensFromInputTokens(
@@ -153,6 +154,8 @@ export class InstantTradesManager {
         });
 
         const results = await Promise.all(calculationPromises);
-        return results.filter(notNull);
+        return results
+            .filter(notNull)
+            .sort((tradeA, tradeB) => tradeA.to.tokenAmount.comparedTo(tradeB.to.tokenAmount));
     }
 }

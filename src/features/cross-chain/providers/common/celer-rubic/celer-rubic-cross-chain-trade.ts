@@ -1,5 +1,4 @@
 import { PriceTokenAmount, Web3Public } from 'src/core';
-import BigNumber from 'bignumber.js';
 import { Cache, CrossChainIsUnavailableError, MaxGasPriceOverflowError } from 'src/common';
 import { CrossChainContractTrade } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import { Injector } from '@core/sdk/injector';
@@ -37,11 +36,6 @@ export abstract class CelerRubicCrossChainTrade extends EncodeCrossChainTrade {
      * Wrapped instant trade in target blockchain.
      */
     public abstract readonly toTrade: CrossChainContractTrade;
-
-    /**
-     * Minimum amount of output token user will get.
-     */
-    public abstract readonly toTokenAmountMin: BigNumber;
 
     /**
      * Native token in source blockchain, taken as fee.

@@ -77,6 +77,7 @@ export class CrossChainManager {
      *     fromAmount,
      *     { blockchain: toBlockchain, address: toTokenAddress }
      * );
+     * const bestTrade = wrappedTrades[0];
      *
      * wrappedTrades.forEach(wrappedTrade => {
      *    if (wrappedTrade.trade) {

@@ -17,7 +17,7 @@ import { UniswapV2ProviderConfiguration } from '@features/instant-trades/dexes/c
 import { UniswapV2TradeClass } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-class';
 import { UniswapV2AbstractTrade } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
-import { Cache } from 'src/common';
+import { Cache, RubicSdkError } from 'src/common';
 import { Exact } from '@features/instant-trades/models/exact';
 import { hasLengthAtLeast } from '@features/instant-trades/utils/type-guards';
 
@@ -97,7 +97,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
         if (this.options.gasCalculation === 'disabled') {
             if (!hasLengthAtLeast(routes, 1)) {
-                throw new Error('[RUBIC SDK] Routes array length has to be bigger than 0');
+                throw new RubicSdkError('Routes array length has to be bigger than 0');
             }
             return {
                 route: routes[0]
@@ -129,7 +129,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
                 (route, index) => {
                     const estimatedGas = gasLimits[index];
                     if (!estimatedGas) {
-                        throw new Error('[RUBIC SDK] Estimated gas has to be defined.');
+                        throw new RubicSdkError('Estimated gas has to be defined');
                     }
                     const gasFeeInUsd = estimatedGas.multipliedBy(gasPriceInUsd);
                     let profit: BigNumber;
@@ -157,7 +157,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             );
 
             if (!sortedByProfitRoutes?.[0]) {
-                throw new Error('[RUBIC SDK] Profit routes array length has to be bigger than 0.');
+                throw new RubicSdkError('Profit routes array length has to be bigger than 0');
             }
 
             return sortedByProfitRoutes[0];
@@ -168,7 +168,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         if (this.walletAddress) {
             const callData = this.getGasRequests(routes.slice(0, 1))[0];
             if (!callData) {
-                throw new Error('[RUBIC SDK] Call data has to be defined.');
+                throw new RubicSdkError('Call data has to be defined');
             }
             const estimatedGas = await this.web3Public.getEstimatedGas(
                 this.InstantTradeClass.contractAbi,
@@ -184,7 +184,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         }
 
         if (!routes?.[0]) {
-            throw new Error('[RUBIC SDK] Routes length has to be bigger than 0.');
+            throw new RubicSdkError('Routes length has to be bigger than 0');
         }
 
         return {
@@ -274,13 +274,13 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
             const numberAmount = this.exact === 'input' ? amounts[amounts.length - 1] : amounts[0];
             if (!numberAmount) {
-                throw new Error('[RUBIC SDK] Amount has to be defined.');
+                throw new RubicSdkError('Amount has to be defined');
             }
             const outputAbsoluteAmount = new BigNumber(numberAmount);
 
             const path = routesPaths?.[index];
             if (!path) {
-                throw new Error('[RUBIC SDK] Path has to be defined.');
+                throw new RubicSdkError('Path has to be defined');
             }
 
             return { outputAbsoluteAmount, path };

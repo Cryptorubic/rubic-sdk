@@ -5,6 +5,7 @@ import {
 } from '@features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
 import { crossChainTradeProvidersData } from '@features/cross-chain/constants/cross-chain-trade-providers-data';
 import { rubicCrossChainContractsAddresses } from '@features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contracts-addresses';
+import { RubicSdkError } from 'src/common';
 
 const rubicCrossChainContracts: Record<
     RubicCrossChainSupportedBlockchain,
@@ -24,7 +25,7 @@ export function getRubicCrossChainContract(
 
     const pureProvidersData = crossChainTradeProvidersData[blockchain];
     if (!pureProvidersData) {
-        throw new Error('[RUBIC SDK] Providers data has to be defined.');
+        throw new RubicSdkError('Providers data has to be defined');
     }
     const contractAddress = rubicCrossChainContractsAddresses[blockchain];
     const providersData = pureProvidersData.map(providerData => ({

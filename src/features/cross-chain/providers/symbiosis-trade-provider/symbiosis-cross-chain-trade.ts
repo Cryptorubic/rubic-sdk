@@ -36,7 +36,8 @@ export class SymbiosisCrossChainTrade extends EncodeCrossChainTrade {
                         to,
                         transactionRequest,
                         gasData: null,
-                        priceImpact: 0
+                        priceImpact: 0,
+                        slippage: 0
                     },
                     EMPTY_ADDRESS
                 ).getContractParams();
@@ -74,6 +75,8 @@ export class SymbiosisCrossChainTrade extends EncodeCrossChainTrade {
 
     public readonly to: PriceTokenAmount;
 
+    public readonly toTokenAmountMin: BigNumber;
+
     /**
      * Overall price impact, fetched from symbiosis api.
      */
@@ -100,6 +103,7 @@ export class SymbiosisCrossChainTrade extends EncodeCrossChainTrade {
             transactionRequest: TransactionRequest;
             gasData: GasData | null;
             priceImpact: number;
+            slippage: number;
         },
         providerAddress: string
     ) {
@@ -110,6 +114,8 @@ export class SymbiosisCrossChainTrade extends EncodeCrossChainTrade {
         this.transactionRequest = crossChainTrade.transactionRequest;
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
+
+        this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
     }

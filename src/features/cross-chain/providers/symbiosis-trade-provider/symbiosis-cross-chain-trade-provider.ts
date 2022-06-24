@@ -28,8 +28,8 @@ import { OneinchPolygonProvider } from '@features/instant-trades/dexes/polygon/o
 import { OneinchAvalancheProvider } from '@features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
 import { getSymbiosisConfig } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
-import { CrossChainMinAmountError } from '@common/errors/cross-chain/cross-chain-min-amount-error';
-import { CrossChainMaxAmountError } from '@common/errors/cross-chain/cross-chain-max-amount-error';
+import { CrossChainMinAmountError } from '@common/errors/cross-chain/cross-chain-min-amount.error';
+import { CrossChainMaxAmountError } from '@common/errors/cross-chain/cross-chain-max-amount.error';
 import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
@@ -137,7 +137,8 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                         to,
                         transactionRequest,
                         gasData,
-                        priceImpact: parseFloat(priceImpact.toFixed())
+                        priceImpact: parseFloat(priceImpact.toFixed()),
+                        slippage: options.slippageTolerance
                     },
                     options.providerAddress
                 )

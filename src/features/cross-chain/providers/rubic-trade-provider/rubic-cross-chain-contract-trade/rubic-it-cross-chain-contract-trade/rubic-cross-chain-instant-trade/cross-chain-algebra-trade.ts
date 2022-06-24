@@ -7,6 +7,7 @@ import { v3LikeCelerSwapInfo } from '@features/cross-chain/providers/celer-trade
 import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
 import { SwapVersion } from '@features/cross-chain/providers/common/celer-rubic/models/provider-type.enum';
 import { ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS } from '@features/instant-trades/dexes/polygon/algebra/constants/swap-router-contract-data';
+import { RubicSdkError } from 'src/common';
 
 export class CrossChainAlgebraTrade implements CrossChainInstantTrade {
     readonly defaultDeadline = 999999999999999;
@@ -25,7 +26,7 @@ export class CrossChainAlgebraTrade implements CrossChainInstantTrade {
         const exactTokensForTokens = true;
 
         if (!methodArguments?.[0]) {
-            throw new Error('[RUBIC SDK] Wrong method arguments. Arguments array is unknown.');
+            throw new RubicSdkError('Method arguments array must not be empty');
         }
 
         methodArguments[0].push(exactTokensForTokens);

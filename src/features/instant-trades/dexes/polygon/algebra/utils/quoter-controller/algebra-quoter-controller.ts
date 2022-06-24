@@ -1,7 +1,7 @@
 import { BLOCKCHAIN_NAME, PriceToken, Web3Public } from 'src/core';
 import { MethodData } from '@core/blockchain/web3-public/models/method-data';
 import { AlgebraRoute } from '@features/instant-trades/dexes/polygon/algebra/models/algebra-route';
-import { notNull } from 'src/common';
+import { notNull, RubicSdkError } from 'src/common';
 import BigNumber from 'bignumber.js';
 import { ContractMulticallResponse } from '@core/blockchain/web3-public/models/contract-multicall-response';
 import {
@@ -132,7 +132,7 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
                 if (result.success) {
                     const quoter = quoterMethodsData?.[index];
                     if (!quoter) {
-                        throw new Error('[RUBIC SDK] Quoter has to be defined.');
+                        throw new RubicSdkError('Quoter has to be defined');
                     }
                     return {
                         outputAbsoluteAmount: new BigNumber(result.output![0]),
