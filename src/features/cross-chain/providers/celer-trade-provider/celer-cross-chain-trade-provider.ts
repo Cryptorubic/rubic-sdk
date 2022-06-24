@@ -10,7 +10,7 @@ import { getCelerCrossChainContract } from '@features/cross-chain/providers/cele
 import { RequiredCrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
 import { CelerCrossChainTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade';
 import BigNumber from 'bignumber.js';
-import { compareAddresses, LowSlippageError, notNull, RubicSdkError } from 'src/common';
+import { compareAddresses, notNull, RubicSdkError } from 'src/common';
 import { EstimateAmtResponse } from '@features/cross-chain/providers/celer-trade-provider/models/estimate-amount-response';
 import { Injector } from '@core/sdk/injector';
 import { CelerCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
@@ -21,6 +21,7 @@ import { CrossChainContractData } from '@features/cross-chain/providers/common/c
 import { wrappedNative } from '@features/cross-chain/providers/celer-trade-provider/constants/wrapped-native';
 import { CelerRubicCrossChainTradeProvider } from '@features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
 import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { LowToSlippageError } from '@common/errors/cross-chain/low-to-slippage.error';
 
 export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -86,7 +87,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             const toSlippageTolerance = toSlippage - celerSlippage;
 
             if (toSlippageTolerance < 0) {
-                throw new LowSlippageError();
+                throw new LowToSlippageError();
             }
 
             const estimateTransitAmountWithSlippage = await this.fetchCelerAmount(
@@ -97,6 +98,9 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                 toTransitToken,
                 celerSlippage
             );
+            if (estimateTransitAmountWithSlippage.lte(0)) {
+                await this.checkMinMaxAmountsErrors(fromTrade);
+            }
 
             const { toTransitTokenAmount, transitFeeToken } = await this.getToTransitTokenAmount(
                 toBlockchain,

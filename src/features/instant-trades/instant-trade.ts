@@ -15,6 +15,7 @@ import { BlockchainName } from '@core/blockchain/models/blockchain-name';
 import { OptionsGasParams, TransactionGasParams } from '@features/instant-trades/models/gas-params';
 import { Cache } from 'src/common';
 import { TradeType } from 'src/features';
+import { parseError } from '@common/utils/errors';
 
 /**
  * Abstract class for all instant trade providers' trades.
@@ -127,7 +128,7 @@ export abstract class InstantTrade {
 
         const txOptions: TransactionOptions = {
             onTransactionHash: options?.onApprove,
-            gas: options?.gasLimit || undefined,
+            gas: options?.approveGasLimit || undefined,
             gasPrice: options?.gasPrice || undefined
         };
 
@@ -179,5 +180,9 @@ export abstract class InstantTrade {
 
     protected getGasParams(options: OptionsGasParams): TransactionGasParams {
         return { gas: options?.gasLimit, gasPrice: options?.gasPrice };
+    }
+
+    protected parseError(err: unknown): RubicSdkError {
+        return parseError(err, 'Cannot calculate instant trade');
     }
 }

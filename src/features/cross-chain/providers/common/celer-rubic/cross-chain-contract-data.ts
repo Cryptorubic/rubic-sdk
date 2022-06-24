@@ -3,6 +3,7 @@ import { ProviderData } from '@features/cross-chain/models/provider-data';
 import { Injector } from '@core/sdk/injector';
 import { BlockchainName, PriceToken, PriceTokenAmount, Token, Web3Public } from 'src/core';
 import BigNumber from 'bignumber.js';
+import { RubicSdkError } from 'src/common';
 
 export abstract class CrossChainContractData {
     protected readonly web3Public: Web3Public;
@@ -18,7 +19,7 @@ export abstract class CrossChainContractData {
     public getProvider(providerIndex: number): CrossChainSupportedInstantTradeProvider {
         const provider = this.providersData?.[providerIndex]?.provider;
         if (!provider) {
-            throw new Error('[RUBIC SDK] Provider has to be defined.');
+            throw new RubicSdkError('Provider has to be defined');
         }
         return provider;
     }
@@ -37,8 +38,5 @@ export abstract class CrossChainContractData {
 
     public abstract getMaxGasPrice(): Promise<BigNumber>;
 
-    public abstract getMinOrMaxTransitTokenAmount(
-        type: 'min' | 'max',
-        tokenAddress?: string
-    ): Promise<string>;
+    public abstract getMinMaxTransitTokenAmounts(tokenAddress?: string): Promise<[string, string]>;
 }

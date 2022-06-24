@@ -9,7 +9,7 @@ import {
     UniswapV3AlgebraCalculatedInfo,
     UniswapV3AlgebraCalculatedInfoWithProfit
 } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-calculated-info';
-import { InsufficientLiquidityError } from 'src/common';
+import { InsufficientLiquidityError, RubicSdkError } from 'src/common';
 import { UniswapV3AlgebraQuoterController } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 import { UniswapV3AlgebraProviderConfiguration } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-provider-configuration';
 import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
@@ -199,7 +199,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
                 (route, index) => {
                     const estimatedGas = estimatedGasLimits[index];
                     if (!estimatedGas) {
-                        throw new Error('[RUBIC SDK] Estimate gas has have to be defined.');
+                        throw new RubicSdkError('Estimated gas has have to be defined');
                     }
                     const gasFeeInUsd = gasPriceInUsd!.multipliedBy(estimatedGas);
                     const profit = Web3Pure.fromWei(route.outputAbsoluteAmount, to.decimals)
@@ -216,7 +216,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
 
             const sortedRoutes = calculatedProfits.sort((a, b) => b.profit.comparedTo(a.profit))[0];
             if (!sortedRoutes) {
-                throw new Error('[RUBIC SDK] Sorted routes have to be defined.');
+                throw new RubicSdkError('Sorted routes have to be defined');
             }
 
             return sortedRoutes;
@@ -224,7 +224,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
 
         const route = routes[0];
         if (!route) {
-            throw new Error('[RUBIC SDK] Route has to be defined.');
+            throw new RubicSdkError('Route has to be defined');
         }
         const estimatedGas = await this.InstantTradeClass.estimateGasLimitForRoute(
             from,

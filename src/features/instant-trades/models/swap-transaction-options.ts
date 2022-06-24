@@ -15,12 +15,18 @@ export interface SwapTransactionOptions {
     onApprove?: (hash: string | null) => void;
 
     /**
-     * Transaction gas limit.
+     * Transaction gas price.
      */
     gasPrice?: string;
 
     /**
-     * Transaction gas price.
+     * Swap transaction gas limit.
      */
     gasLimit?: string;
+
+    /**
+     * Approve transaction gas limit.
+     * Will be used for approve transaction, if it is called before swap.
+     */
+    approveGasLimit?: string;
 }
