@@ -205,6 +205,14 @@ export class Web3Public {
     }
 
     /**
+     * Gets mined transaction
+     * @param hash transaction hash
+     */
+    public async getTransactionReceipt(hash: string): Promise<TransactionReceipt> {
+        return this.web3.eth.getTransactionReceipt(hash);
+    }
+
+    /**
      * Gets a transaction by hash in several attempts.
      * @param hash Hash of the target transaction.
      * @param attempt Current attempt number.

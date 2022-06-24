@@ -328,6 +328,40 @@ export class Web3Private {
     }
 
     /**
+     * Executes method of smart-contract and resolve the promise without waiting for the transaction to be included in the block.
+     * @param contractAddress Address of smart-contract which method is to be executed.
+     * @param contractAbi Abi of smart-contract which method is to be executed.
+     * @param methodName Executing method name.
+     * @param methodArguments Executing method arguments.
+     * @param options Additional options.
+     */
+    public executeContractMethodWithOnHashResolve(
+        contractAddress: string,
+        contractAbi: AbiItem[],
+        methodName: string,
+        methodArguments: unknown[],
+        options: TransactionOptions = {}
+    ): Promise<unknown> {
+        const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
+
+        return new Promise((resolve, reject) => {
+            contract.methods[methodName](...methodArguments)
+                .send({
+                    from: this.address,
+                    ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
+                    ...(options.gasPrice && {
+                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
+                    })
+                })
+                .on('transactionHash', resolve)
+                .on('error', (err: Web3Error) => {
+                    console.error(`Tokens approve error. ${err}`);
+                    reject(Web3Private.parseError(err));
+                });
+        });
+    }
+
+    /**
      * Removes approval for token.
      * @param tokenAddress Address of the smart-contract corresponding to the token.
      * @param spenderAddress Wallet or contract address to approve.

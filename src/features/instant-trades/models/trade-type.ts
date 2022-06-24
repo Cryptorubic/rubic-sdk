@@ -52,7 +52,16 @@ export const TRADE_TYPE = {
 
     // Telos
     SUSHI_SWAP_TELOS: 'SUSHI_SWAP_TELOS',
-    ZAPPY: 'ZAPPY'
+    ZAPPY: 'ZAPPY',
+
+    // Solana
+    RAYDIUM: 'RAYDIUM',
+
+    // Near
+    REF_FINANCE: 'REF_FINANCE',
+
+    // Other
+    WRAPPED: 'WRAPPED'
 } as const;
 
 /**
