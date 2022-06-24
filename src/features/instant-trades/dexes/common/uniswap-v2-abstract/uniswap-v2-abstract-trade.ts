@@ -45,6 +45,7 @@ export type UniswapV2TradeStruct = {
 };
 
 export abstract class UniswapV2AbstractTrade extends InstantTrade {
+    /** @internal */
     @Cache
     public static getContractAddress(blockchain: BlockchainName): string {
         // see https://github.com/microsoft/TypeScript/issues/34516
@@ -63,10 +64,13 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         throw new RubicSdkError(`Static TRADE_TYPE getter is not implemented by ${this.name}`);
     }
 
+    /** @internal */
     public static readonly contractAbi: AbiItem[] = defaultUniswapV2Abi;
 
+    /** @internal */
     public static readonly swapMethods: ExactInputOutputSwapMethodsList = SWAP_METHOD;
 
+    /** @internal */
     public static readonly defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
 
     public static callForRoutes(
@@ -84,6 +88,9 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         );
     }
 
+    /**
+     * Deadline for transaction in minutes.
+     */
     public deadlineMinutes: number;
 
     public slippageTolerance: number;
@@ -94,16 +101,29 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     public gasFeeInfo: GasFeeInfo | null;
 
+    /**
+     * Path, through which tokens will be converted.
+     */
     public readonly path: ReadonlyArray<Token>;
 
+    /**
+     * @internal
+     * Path with wrapped native address.
+     */
     public readonly wrappedPath: ReadonlyArray<Token>;
 
+    /**
+     * Defines, whether to call 'exactInput' or 'exactOutput' method.
+     */
     public readonly exact: Exact;
 
     public get type(): TradeType {
         return (this.constructor as typeof UniswapV2AbstractTrade).type;
     }
 
+    /**
+     * Updates parameters in swap options.
+     */
     public set settings(value: { deadlineMinutes?: number; slippageTolerance?: number }) {
         this.deadlineMinutes = value.deadlineMinutes || this.deadlineMinutes;
         this.slippageTolerance = value.slippageTolerance || this.slippageTolerance;
@@ -191,7 +211,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         if (await this.needApprove(options.fromAddress)) {
-            throw new RubicSdkError('To use `encode` function, token must be approved for wallet.');
+            throw new RubicSdkError('To use `encode` function, token must be approved for wallet');
         }
         try {
             await this.web3Public.checkBalance(
@@ -200,7 +220,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
                 options.fromAddress
             );
         } catch (_err) {
-            throw new RubicSdkError('To use `encode` function, wallet must have enough balance.');
+            throw new RubicSdkError('To use `encode` function, wallet must have enough balance');
         }
 
         const methodName = await this.getMethodName(options, options.fromAddress);
@@ -264,7 +284,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             return this.supportedFeeSwapMethod;
         }
 
-        throw new LowSlippageError();
+        throw this.parseError(regularMethodResult.error);
     }
 
     private getSwapParametersByMethod(
@@ -302,10 +322,12 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         ]) as Parameters<InstanceType<typeof Web3Public>['callContractMethod']>;
     }
 
+    /** @internal */
     public getEstimatedGasCallData(): BatchCall {
         return this.estimateGasForAnyToAnyTrade();
     }
 
+    /** @internal */
     public getDefaultEstimatedGas(): BigNumber {
         const transitTokensNumber = this.wrappedPath.length - 2;
         let methodName: keyof DefaultEstimatedGas = 'tokensToTokens';
@@ -320,7 +342,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         const gasLimitAmount =
             constructor.defaultEstimatedGasInfo[methodName]?.[transitTokensNumber];
         if (!gasLimitAmount) {
-            throw new Error('[RUBIC SDK] Gas limit has to be defined.');
+            throw new RubicSdkError('Gas limit has to be defined');
         }
 
         const gasLimit = gasLimitAmount.toFixed(0);

@@ -52,6 +52,12 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         return response.address;
     }
 
+    /**
+     * Calculates input amount, based on amount, user wants to get.
+     * @param from Token to sell.
+     * @param to Token to get with output amount.
+     * @param options Additional options.
+     */
     public async calculateExactOutputAmount(
         from: PriceToken,
         to: PriceTokenAmount,
@@ -174,7 +180,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
 
     /**
      * Extracts tokens path from oneInch api response.
-     * @return Promise<Token[]> Tokens array, used in the route.
+     * @returns Promise<Token[]> Tokens array, used in the route.
      */
     private async extractPath(
         fromToken: Token,
@@ -183,7 +189,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
     ): Promise<Token[]> {
         const addressesPath = oneInchTrade.protocols[0].map(protocol => {
             if (!protocol?.[0]) {
-                throw new Error('[RUBIC SDK] Protocol[0] has to be defined.');
+                throw new RubicSdkError('Protocol array must not be empty');
             }
             return protocol[0].toTokenAddress;
         });
@@ -201,7 +207,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
 
             const token = tokensPathWithoutNative[tokensPathWithoutNativeIndex];
             if (!token) {
-                throw new Error('[RUBIC SDK] Token has to be defined.');
+                throw new RubicSdkError('Token has to be defined');
             }
 
             tokensPathWithoutNativeIndex++;

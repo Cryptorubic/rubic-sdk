@@ -126,6 +126,9 @@ function CacheBuilder(cacheConfig: CacheConfig): DecoratorSignature {
     };
 }
 
+/**
+ * Decorator, used to cache calculated result of functions.
+ */
 export function Cache(cacheConfigOrTarget: CacheConfig): DecoratorSignature;
 export function Cache<T>(
     cacheConfigOrTarget: Object,
@@ -147,7 +150,7 @@ export function Cache<T>(
     // decorator called as @Cache
 
     if (!descriptor) {
-        throw new RubicSdkError('Descriptor is undefined.');
+        throw new RubicSdkError('Descriptor is undefined');
     }
     return CacheBuilder(defaultCacheConfig)<T>(cacheConfigOrTarget, propertyKey, descriptor);
 }
@@ -163,7 +166,7 @@ export function PConditionalCache<T>(
 ): TypedPropertyDescriptor<T> | void {
     const originalMethod = descriptor.value;
     if (!originalMethod) {
-        throw new RubicSdkError('Descriptor value is undefined.');
+        throw new RubicSdkError('Descriptor value is undefined');
     }
 
     const storage = new WeakMap<Function, Map<string, unknown>>();

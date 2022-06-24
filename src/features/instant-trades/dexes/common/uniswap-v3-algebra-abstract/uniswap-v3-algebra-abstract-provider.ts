@@ -9,7 +9,7 @@ import {
     UniswapV3AlgebraCalculatedInfo,
     UniswapV3AlgebraCalculatedInfoWithProfit
 } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-calculated-info';
-import { InsufficientLiquidityError } from 'src/common';
+import { InsufficientLiquidityError, RubicSdkError } from 'src/common';
 import { UniswapV3AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 import { UniswapV3AlgebraProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-provider-configuration';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
@@ -64,6 +64,12 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         return this.calculateDifficultTrade(from, toToken, 'input', from.weiAmount, options);
     }
 
+    /**
+     * Calculates trade, based on amount, user wants to get.
+     * @param fromToken Token to sell.
+     * @param to Token to get with output amount.
+     * @param options Additional options.
+     */
     public async calculateExactOutput(
         fromToken: PriceToken,
         to: PriceTokenAmount,
@@ -72,6 +78,12 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         return this.calculateDifficultTrade(fromToken, to, 'output', to.weiAmount, options);
     }
 
+    /**
+     * Calculates input amount, based on amount, user wants to get.
+     * @param fromToken Token to sell.
+     * @param to Token to get with output amount.
+     * @param options Additional options.
+     */
     public async calculateExactOutputAmount(
         fromToken: PriceToken,
         to: PriceTokenAmount,
@@ -194,7 +206,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
                 (route, index) => {
                     const estimatedGas = estimatedGasLimits[index];
                     if (!estimatedGas) {
-                        throw new Error('[RUBIC SDK] Estimate gas has have to be defined.');
+                        throw new RubicSdkError('Estimated gas has have to be defined');
                     }
                     const gasFeeInUsd = gasPriceInUsd!.multipliedBy(estimatedGas);
                     const profit = Web3Pure.fromWei(route.outputAbsoluteAmount, to.decimals)
@@ -211,7 +223,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
 
             const sortedRoutes = calculatedProfits.sort((a, b) => b.profit.comparedTo(a.profit))[0];
             if (!sortedRoutes) {
-                throw new Error('[RUBIC SDK] Sorted routes have to be defined.');
+                throw new RubicSdkError('Sorted routes have to be defined');
             }
 
             return sortedRoutes;
@@ -219,7 +231,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
 
         const route = routes[0];
         if (!route) {
-            throw new Error('[RUBIC SDK] Route has to be defined.');
+            throw new RubicSdkError('Route has to be defined');
         }
         const estimatedGas = await this.InstantTradeClass.estimateGasLimitForRoute(
             from,

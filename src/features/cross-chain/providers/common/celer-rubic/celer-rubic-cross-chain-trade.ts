@@ -1,14 +1,17 @@
 import { PriceTokenAmount, Web3Public } from 'src/core';
-import BigNumber from 'bignumber.js';
 import { Cache, CrossChainIsUnavailableError, MaxGasPriceOverflowError } from 'src/common';
 import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
 
+/**
+ * Contains common for Celer and Rubic trades methods and fields.
+ */
 export abstract class CelerRubicCrossChainTrade extends CrossChainTrade {
-    public abstract readonly toTokenAmountMin: BigNumber;
-
+    /**
+     * Gets price impact in source and target blockchains, based on tokens usd prices.
+     */
     @Cache
     public get priceImpactData(): {
         priceImpactFrom: number | null;
@@ -24,11 +27,25 @@ export abstract class CelerRubicCrossChainTrade extends CrossChainTrade {
         };
     }
 
-    protected abstract readonly fromTrade: CrossChainContractTrade;
+    /**
+     * Wrapped instant trade in source blockchain.
+     */
+    public abstract readonly fromTrade: CrossChainContractTrade;
 
-    protected abstract readonly toTrade: CrossChainContractTrade;
+    /**
+     * Wrapped instant trade in target blockchain.
+     */
+    public abstract readonly toTrade: CrossChainContractTrade;
 
-    protected abstract readonly cryptoFeeToken: PriceTokenAmount;
+    /**
+     * Native token in source blockchain, taken as fee.
+     */
+    public abstract readonly cryptoFeeToken: PriceTokenAmount;
+
+    /**
+     * Transit token in source blockchain, taken as fee.
+     */
+    public abstract readonly transitFeeToken: PriceTokenAmount;
 
     protected abstract readonly toWeb3Public: Web3Public;
 

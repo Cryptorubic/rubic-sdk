@@ -10,24 +10,62 @@ import { InstantTradesManager } from '@rsdk-features/instant-trades/instant-trad
 import { TokensManager } from '@rsdk-features/tokens/tokens-manager';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { BlockchainName } from 'src/core';
+import { CrossChainSymbiosisManager } from '@features/cross-chain/cross-chain-symbiosis-manager';
 
+/**
+ * Base class to work with sdk.
+ */
 export class SDK {
+    /**
+     * Instant trades manager object. Use it to calculate and create instant trades.
+     */
     public readonly instantTrades: InstantTradesManager;
 
+    /**
+     * Cross-chain trades manager object. Use it to calculate and create cross-chain trades.
+     */
     public readonly crossChain: CrossChainManager;
 
+    /**
+     * Cross-chain symbiosis manager object. Use it to get pending trades in symbiosis and revert them.
+     */
+    public readonly crossChainSymbiosisManager: CrossChainSymbiosisManager;
+
+    /**
+     * Tokens manager object. Use it to fetch and store tokens data.
+     */
     public readonly tokens = new TokensManager();
 
+    /**
+     * Can be used to get `Web3Public` instance by blockchain name to get public information from blockchain.
+     */
     public readonly web3PublicService = Injector.web3PublicService;
 
+    /**
+     * Can be used to send transactions and execute smart contracts methods.
+     */
     public readonly web3Private = Injector.web3Private;
 
+    /**
+     * Use it to get gas price information.
+     */
     public readonly gasPriceApi = Injector.gasPriceApi;
 
+    /**
+     * Use it to get crypto price information.
+     */
     public readonly cryptoPriceApi = Injector.coingeckoApi;
 
+    /**
+     * @internal
+     * Stores currently set rpc providers for each blockchain.
+     */
     public static rpcList: Partial<Record<BlockchainName, RpcProvider>>;
 
+    /**
+     * Creates new sdk instance. Changes dependencies of all sdk entities according
+     * to new configuration (even for entities created with other previous sdk instances).
+     */
     public static async createSDK(configuration: Configuration): Promise<SDK> {
         this.rpcList = configuration.rpcProviders;
 
@@ -62,8 +100,12 @@ export class SDK {
     private constructor(providerAddress: string) {
         this.instantTrades = new InstantTradesManager();
         this.crossChain = new CrossChainManager(providerAddress);
+        this.crossChainSymbiosisManager = new CrossChainSymbiosisManager();
     }
 
+    /**
+     * Updates sdk configuration and sdk entities dependencies.
+     */
     public async updateConfiguration(configuration: Configuration): Promise<void> {
         const [web3PublicService, web3Private, httpClient] = await Promise.all([
             SDK.createWeb3PublicService(configuration),

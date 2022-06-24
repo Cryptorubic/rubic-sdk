@@ -4,6 +4,7 @@ import { v2LikeCelerSwap } from '@rsdk-features/cross-chain/providers/celer-trad
 import { UniswapV2AbstractTrade } from 'src/features';
 import { DestinationCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
 import { SwapVersion } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/provider-type.enum';
+import { RubicSdkError } from 'src/common';
 
 export class CrossChainUniswapV2Trade implements CrossChainInstantTrade {
     readonly defaultDeadline = 999999999999999;
@@ -26,7 +27,7 @@ export class CrossChainUniswapV2Trade implements CrossChainInstantTrade {
         const exactTokensForTokens = true;
 
         if (!methodArguments?.[0]) {
-            throw new Error('[RUBIC SDK] Method arguments[0] has to be defined');
+            throw new RubicSdkError('Method arguments must not be empty');
         }
 
         methodArguments[0].push(exactTokensForTokens);

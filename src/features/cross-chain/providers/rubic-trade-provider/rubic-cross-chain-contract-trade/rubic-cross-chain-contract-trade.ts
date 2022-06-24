@@ -7,6 +7,7 @@ import { crossChainContractAbiV3 } from '@rsdk-features/cross-chain/providers/ru
 import { crossChainContractAbiInch } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/cross-chain-contract-abi-inch';
 import { BlockchainName, Web3Pure } from 'src/core';
 import { RubicCrossChainContractData } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/rubic-cross-chain-contract-data';
+import { RubicSdkError } from 'src/common';
 
 enum TO_OTHER_BLOCKCHAIN_SWAP_METHOD {
     SWAP_TOKENS = 'swapTokensToOtherBlockchain',
@@ -122,7 +123,7 @@ export abstract class RubicCrossChainContractTrade extends CrossChainContractTra
         );
 
         if (!methodArguments?.[0]) {
-            throw new Error('[RUBIC SDK] Method arguments have to be defined.');
+            throw new RubicSdkError('Method arguments array has to be defined');
         }
 
         methodArguments[0].push(swapToUserMethodSignature);

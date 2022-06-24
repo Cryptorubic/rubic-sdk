@@ -81,12 +81,23 @@ export class RubicCrossChainContractData extends CrossChainContractData {
         });
     }
 
-    public getMinOrMaxTransitTokenAmount(type: 'min' | 'max'): Promise<string> {
-        return this.web3Public.callContractMethod(
-            this.address,
-            rubicCrossChainContractAbi,
-            type === 'min' ? 'minTokenAmount' : 'maxTokenAmount'
-        );
+    public async getMinMaxTransitTokenAmounts(): Promise<[string, string]> {
+        return (
+            await this.web3Public.multicallContractMethods<[string]>(
+                this.address,
+                rubicCrossChainContractAbi,
+                [
+                    {
+                        methodName: 'minTokenAmount',
+                        methodArguments: []
+                    },
+                    {
+                        methodName: 'maxTokenAmount',
+                        methodArguments: []
+                    }
+                ]
+            )
+        ).map(result => result.output![0] as string) as [string, string];
     }
 
     public isPaused(): Promise<boolean> {

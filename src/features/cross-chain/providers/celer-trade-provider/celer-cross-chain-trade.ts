@@ -21,13 +21,18 @@ import { CelerCrossChainContractTrade } from '@rsdk-features/cross-chain/provide
 import { CelerItCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
 import { CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
 
+/**
+ * Calculated Celer cross chain trade.
+ */
 export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
+    /** @internal */
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
 
     public readonly itType: { from: TradeType; to: TradeType };
 
     private readonly feeInPercents: number;
 
+    /** @internal */
     public static async getGasData(
         fromTrade: CrossChainContractTrade,
         toTrade: CrossChainContractTrade,
@@ -82,7 +87,9 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         }
     }
 
-    private readonly transitFeeToken: PriceTokenAmount;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
+
+    public readonly transitFeeToken: PriceTokenAmount;
 
     public readonly from: PriceTokenAmount;
 
@@ -151,6 +158,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         await Promise.all([
             this.checkContractsState(),
             this.checkToBlockchainGasPrice(),
+            this.checkToContractBalance(),
             this.checkUserBalance()
         ]);
     }

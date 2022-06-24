@@ -14,13 +14,14 @@ import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swa
 import { Web3Pure } from 'src/core';
 
 /**
- * Class containing methods for executing the functions of contracts and sending transactions in order to change the state of the blockchain.
+ * Class containing methods for executing the functions of contracts
+ * and sending transactions in order to change the state of the blockchain.
  * To get information from the blockchain use {@link Web3Public}.
  */
 export class Web3Private {
     /**
-     * @description converts number, string or BigNumber value to integer string
-     * @param amount value to convert
+     * Converts number, string or BigNumber value to integer string.
+     * @param amount Value to convert.
      */
     private static stringifyAmount(amount: number | string | BigNumber): string {
         const bnAmount = new BigNumber(amount);
@@ -34,35 +35,35 @@ export class Web3Private {
     private readonly APPROVE_GAS_LIMIT = 60_000;
 
     /**
-     * @description instance of web3, initialized with ethereum wallet, e.g. Metamask, WalletConnect
+     * Instance of web3, initialized with ethereum wallet, e.g. Metamask, WalletConnect.
      */
     private readonly web3: Web3;
 
     /**
-     * @description current wallet provider address
+     * Current wallet provider address.
      */
     public get address(): string {
         return this.walletConnectionConfiguration.address;
     }
 
     /**
-     * @description current wallet blockchainName
+     * Current wallet blockchain name.
      */
     public get blockchainName(): string {
         return this.walletConnectionConfiguration.blockchainName;
     }
 
     /**
-     * @param walletConnectionConfiguration provider that implements {@link WalletConnectionConfiguration} interface.
-     * The provider must contain an instance of web3, initialized with ethereum wallet, e.g. Metamask, WalletConnect
+     * @param walletConnectionConfiguration Provider that implements {@link WalletConnectionConfiguration} interface.
+     * The provider must contain an instance of web3, initialized with ethereum wallet, e.g. Metamask, WalletConnect.
      */
     constructor(private readonly walletConnectionConfiguration: WalletConnectionConfiguration) {
         this.web3 = walletConnectionConfiguration.web3;
     }
 
     /**
-     * @description parse web3 error by its code
-     * @param err web3 error to parse
+     * Parses web3 error by its code.
+     * @param err Web3 error to parse.
      */
     private static parseError(err: Web3Error): RubicSdkError {
         if (err.message.includes('Transaction has been reverted by the EVM')) {
@@ -87,13 +88,12 @@ export class Web3Private {
     }
 
     /**
-     * @description sends ERC-20 tokens and resolve the promise when the transaction is included in the block
-     * @param contractAddress address of the smart-contract corresponding to the token
-     * @param toAddress token receiver address
-     * @param amount integer tokens amount to send (pre-multiplied by 10 ** decimals)
-     * @param [options] additional options
-     * @param [options.onTransactionHash] callback to execute when transaction enters the mempool
-     * @return transaction receipt
+     * Sends ERC-20 tokens and resolves the promise when the transaction is included in the block.
+     * @param contractAddress Address of the smart-contract corresponding to the token.
+     * @param toAddress Token receiver address.
+     * @param amount Integer tokens amount to send in wei.
+     * @param [options] Additional options.
+     * @returns Transaction receipt.
      */
     public async transferTokens(
         contractAddress: string,
@@ -123,53 +123,11 @@ export class Web3Private {
     }
 
     /**
-     * @description sends ERC-20 tokens and resolve the promise without waiting for the transaction to be included in the block
-     * @param contractAddress address of the smart-contract corresponding to the token
-     * @param toAddress token receiver address
-     * @param amount integer tokens amount to send (pre-multiplied by 10 ** decimals)
-     * @param [options] additional options
-     * @param [options.onTransactionHash] callback to execute when transaction enters the mempool
-     * @return transaction hash
-     */
-    public async transferTokensWithOnHashResolve(
-        contractAddress: string,
-        toAddress: string,
-        amount: string | BigNumber,
-        options: TransactionOptions = {}
-    ): Promise<string> {
-        const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI as AbiItem[], contractAddress);
-
-        return new Promise((resolve, reject) => {
-            contract.methods
-                .transfer(toAddress, Web3Private.stringifyAmount(amount))
-                .send({
-                    from: this.address,
-                    ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
-                    ...(options.gasPrice && {
-                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                    })
-                })
-                .on('transactionHash', (hash: string) => resolve(hash))
-                .on('error', (err: Web3Error) => {
-                    console.error(`Tokens transfer error. ${err}`);
-                    reject(Web3Private.parseError(err));
-                });
-        });
-    }
-
-    /**
-     * @description tries to send Eth in transaction and resolve the promise when the transaction is included in the block or rejects the error
-     * @param toAddress Eth receiver address
-     * @param value amount in Eth units
-     * @param [options] additional options
-     * @param [options.onTransactionHash] callback to execute when transaction enters the mempool
-     * @param [options.inWei = false] boolean flag for determining the input parameter "value" in Wei
-     * @param [options.data] data for calling smart contract methods.
-     *    Use this field only if you are receiving data from a third-party api.
-     *    When manually calling contract methods, use executeContractMethod()
-     * @param [options.gas] transaction gas limit in absolute gas units
-     * @param [options.gasPrice] price of gas unit in wei
-     * @return transaction receipt
+     * Tries to send Eth in transaction and resolve the promise when the transaction is included in the block or rejects the error.
+     * @param toAddress Eth receiver address.
+     * @param value Native token amount in wei.
+     * @param [options] Additional options.
+     * @returns Transaction receipt.
      */
     public async trySendTransaction(
         toAddress: string,
@@ -195,18 +153,11 @@ export class Web3Private {
     }
 
     /**
-     * @description sends Eth in transaction and resolve the promise when the transaction is included in the block
-     * @param toAddress Eth receiver address
-     * @param value amount in Eth units
-     * @param [options] additional options
-     * @param [options.onTransactionHash] callback to execute when transaction enters the mempool
-     * @param [options.inWei = false] boolean flag for determining the input parameter "value" in Wei
-     * @param [options.data] data for calling smart contract methods.
-     *    Use this field only if you are receiving data from a third-party api.
-     *    When manually calling contract methods, use executeContractMethod()
-     * @param [options.gas] transaction gas limit in absolute gas units
-     * @param [options.gasPrice] price of gas unit in wei
-     * @return transaction receipt
+     * Sends Eth in transaction and resolve the promise when the transaction is included in the block.
+     * @param toAddress Eth receiver address.
+     * @param value Native token amount in wei.
+     * @param [options] Additional options.
+     * @returns Transaction receipt.
      */
     public async sendTransaction(
         toAddress: string,
@@ -235,46 +186,12 @@ export class Web3Private {
     }
 
     /**
-     * @description sends Eth in transaction and resolve the promise without waiting for the transaction to be included in the block
-     * @param toAddress Eth receiver address
-     * @param value amount in Eth units
-     * @param [options] additional options
-     * @param [options.inWei = false] boolean flag for determining the input parameter "value" in Wei
-     * @return transaction hash
-     */
-    public async sendTransactionWithOnHashResolve(
-        toAddress: string,
-        value: string | BigNumber,
-        options: TransactionOptions = {}
-    ): Promise<string> {
-        return new Promise((resolve, reject) => {
-            this.web3.eth
-                .sendTransaction({
-                    from: this.address,
-                    to: toAddress,
-                    value: Web3Private.stringifyAmount(value),
-                    ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
-                    ...(options.gasPrice && {
-                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                    }),
-                    ...(options.data && { data: options.data })
-                })
-                .on('transactionHash', hash => resolve(hash))
-                .on('error', err => {
-                    console.error(`Tokens transfer error. ${err}`);
-                    reject(Web3Private.parseError(err as Web3Error));
-                });
-        });
-    }
-
-    /**
-     * @description executes approve method in ERC-20 token contract
-     * @param tokenAddress address of the smart-contract corresponding to the token
-     * @param spenderAddress wallet or contract address to approve
-     * @param value integer value to approve (pre-multiplied by 10 ** decimals)
-     * @param [options] additional options
-     * @param [options.onTransactionHash] callback to execute when transaction enters the mempool
-     * @return approval transaction receipt
+     * Executes approve method in ERC-20 token contract.
+     * @param tokenAddress Address of the smart-contract corresponding to the token.
+     * @param spenderAddress Wallet or contract address to approve.
+     * @param value Token amount to approve in wei.
+     * @param [options] Additional options.
+     * @returns Approval transaction receipt.
      */
     public async approveTokens(
         tokenAddress: string,
@@ -317,15 +234,13 @@ export class Web3Private {
     }
 
     /**
-     * @description tries to execute method of smart-contract and resolve the promise when the transaction is included in the block or rejects the error
-     * @param contractAddress address of smart-contract which method is to be executed
-     * @param contractAbi abi of smart-contract which method is to be executed
-     * @param methodName executing method name
-     * @param methodArguments executing method arguments
-     * @param [options] additional options
-     * @param [options.value] amount in Wei amount to be attached to the transaction
-     * @param [options.gas] gas limit to be attached to the transaction
-     * @param allowError Check error and decides to execute contact if it needed.
+     * Tries to execute method of smart-contract and resolve the promise when the transaction is included in the block or rejects the error.
+     * @param contractAddress Address of smart-contract which method is to be executed.
+     * @param contractAbi Abi of smart-contract which method is to be executed.
+     * @param methodName Method name to execute.
+     * @param methodArguments Method arguments.
+     * @param [options] Additional options.
+     * @param allowError Check error and decides to execute contact if error is allowed.
      */
     public async tryExecuteContractMethod(
         contractAddress: string,
@@ -372,15 +287,13 @@ export class Web3Private {
     }
 
     /**
-     * @description executes method of smart-contract and resolve the promise when the transaction is included in the block
-     * @param contractAddress address of smart-contract which method is to be executed
-     * @param contractAbi abi of smart-contract which method is to be executed
-     * @param methodName executing method name
-     * @param methodArguments executing method arguments
-     * @param [options] additional options
-     * @param [options.onTransactionHash] callback to execute when transaction enters the mempool
-     * @param [options.value] amount in Wei amount to be attached to the transaction
-     * @return smart-contract method returned value
+     * Executes method of smart-contract and resolve the promise when the transaction is included in the block.
+     * @param contractAddress Address of smart-contract which method is to be executed.
+     * @param contractAbi Abi of smart-contract which method is to be executed.
+     * @param methodName Method name to execute.
+     * @param methodArguments Method arguments.
+     * @param [options] Additional options.
+     * @returns Smart-contract method returned value.
      */
     public async executeContractMethod(
         contractAddress: string,
@@ -415,46 +328,9 @@ export class Web3Private {
     }
 
     /**
-     * @description executes method of smart-contract and resolve the promise without waiting for the transaction to be included in the block
-     * @param contractAddress address of smart-contract which method is to be executed
-     * @param contractAbi abi of smart-contract which method is to be executed
-     * @param methodName executing method name
-     * @param methodArguments executing method arguments
-     * @param [options] additional options
-     * @param [options.onTransactionHash] callback to execute when transaction enters the mempool
-     * @param [options.value] amount in Wei amount to be attached to the transaction
-     * @return smart-contract method returned value
-     */
-    public executeContractMethodWithOnHashResolve(
-        contractAddress: string,
-        contractAbi: AbiItem[],
-        methodName: string,
-        methodArguments: unknown[],
-        options: TransactionOptions = {}
-    ): Promise<unknown> {
-        const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
-
-        return new Promise((resolve, reject) => {
-            contract.methods[methodName](...methodArguments)
-                .send({
-                    from: this.address,
-                    ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
-                    ...(options.gasPrice && {
-                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                    })
-                })
-                .on('transactionHash', resolve)
-                .on('error', (err: Web3Error) => {
-                    console.error(`Tokens approve error. ${err}`);
-                    reject(Web3Private.parseError(err));
-                });
-        });
-    }
-
-    /**
-     * @description removes approval for token use
-     * @param tokenAddress tokenAddress address of the smart-contract corresponding to the token
-     * @param spenderAddress wallet or contract address to approve
+     * Removes approval for token.
+     * @param tokenAddress Address of the smart-contract corresponding to the token.
+     * @param spenderAddress Wallet or contract address to approve.
      */
     public async unApprove(
         tokenAddress: string,

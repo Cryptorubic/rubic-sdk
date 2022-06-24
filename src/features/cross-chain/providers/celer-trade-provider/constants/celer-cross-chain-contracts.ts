@@ -6,6 +6,7 @@ import {
 import { celerCrossChainContractsAddresses } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contracts-addresses';
 import { CelerCrossChainContractData } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
 import { rubicCrossChainContractsAddresses } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contracts-addresses';
+import { RubicSdkError } from 'src/common';
 
 const celerCrossChainContracts: Record<
     CelerCrossChainSupportedBlockchain,
@@ -27,7 +28,7 @@ export function getCelerCrossChainContract(
     const swapContractAddress = celerCrossChainContractsAddresses[blockchain];
     const mainContractAddress = rubicCrossChainContractsAddresses[blockchain];
     if (!pureProvidersData) {
-        throw new Error('[RUBIC SDK] Cross-Chain trade providers data has to be defined.');
+        throw new RubicSdkError('Cross-Chain trade providers data has to be defined');
     }
     const providersData = pureProvidersData.map(providerData => ({
         // @ts-ignore Can't create instance of abstract class.

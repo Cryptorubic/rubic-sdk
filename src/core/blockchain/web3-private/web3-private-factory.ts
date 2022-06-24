@@ -53,7 +53,7 @@ export class Web3PrivateFactory {
 
     constructor(
         private readonly core: provider | Web3,
-        private readonly walletAddrrss: string,
+        private readonly walletAddress: string,
         private readonly chainId: number
     ) {}
 
@@ -95,7 +95,7 @@ export class Web3PrivateFactory {
             throw new RubicSdkError('Web3 is not initialized');
         }
 
-        this.address = this.web3.utils.toChecksumAddress(this.walletAddrrss);
+        this.address = this.web3.utils.toChecksumAddress(this.walletAddress);
     }
 
     private createWeb3PrivateInstance(): Web3Private {

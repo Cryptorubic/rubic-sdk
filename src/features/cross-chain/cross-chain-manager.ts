@@ -17,12 +17,21 @@ import { hasLengthAtLeast } from '@rsdk-features/instant-trades/utils/type-guard
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import BigNumber from 'bignumber.js';
 import { SymbiosisCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
+import { MarkRequired } from 'ts-essentials';
+import { RequiredCrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
 import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 
-type RequiredSwapManagerCalculationOptions = Required<SwapManagerCrossChainCalculationOptions>;
+type RequiredSwapManagerCalculationOptions = MarkRequired<
+    SwapManagerCrossChainCalculationOptions,
+    'timeout' | 'disabledProviders'
+> &
+    RequiredCrossChainOptions;
 
+/**
+ * Contains method to calculate best cross chain trade.
+ */
 export class CrossChainManager {
-    public static readonly defaultCalculationTimeout = 360_000;
+    private static readonly defaultCalculationTimeout = 15_000;
 
     private static readonly defaultSlippageTolerance = 0.02;
 
@@ -40,6 +49,45 @@ export class CrossChainManager {
 
     constructor(private readonly providerAddress: string) {}
 
+    /**
+     * Calculates cross chain trades and sorts them by exchange courses.
+     * Wrapped trade object may contain error, but sometimes course can be
+     * calculated even with thrown error (e.g. min/max amount error).
+     *
+     * @example
+     * ```ts
+     * const fromBlockchain = BLOCKCHAIN_NAME.ETHEREUM;
+     * // ETH
+     * const fromTokenAddress = '0x0000000000000000000000000000000000000000';
+     * const fromAmount = 1;
+     * const toBlockchain = BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN;
+     * // BUSD
+     * const toTokenAddress = '0xe9e7cea3dedca5984780bafc599bd69add087d56';
+     *
+     * const wrappedTrades = await sdk.crossChain.calculateTrade(
+     *     { blockchain: fromBlockchain, address: fromTokenAddress },
+     *     fromAmount,
+     *     { blockchain: toBlockchain, address: toTokenAddress }
+     * );
+     * const bestTrade = wrappedTrades[0];
+     *
+     * wrappedTrades.forEach(wrappedTrade => {
+     *    if (wrappedTrade.trade) {
+     *        console.log(wrappedTrade.tradeType, `to amount: ${wrappedTrade.trade.to.tokenAmount.toFormat(3)}`));
+     *    }
+     *    if (wrappedTrade.error) {
+     *        console.error(wrappedTrade.tradeType, 'error: wrappedTrade.error');
+     *    }
+     * });
+     *
+     * ```
+     *
+     * @param fromToken Token to sell.
+     * @param fromAmount Amount to sell.
+     * @param toToken Token to get.
+     * @param options Additional options.
+     * @returns Array of sorted wrapped cross chain trades with possible errors.
+     */
     public async calculateTrade(
         fromToken:
             | Token
@@ -54,8 +102,8 @@ export class CrossChainManager {
                   address: string;
                   blockchain: BlockchainName;
               },
-        options?: SwapManagerCrossChainCalculationOptions
-    ): Promise<WrappedCrossChainTrade> {
+        options?: Omit<SwapManagerCrossChainCalculationOptions, 'providerAddress'>
+    ): Promise<WrappedCrossChainTrade[]> {
         if (toToken instanceof Token && fromToken.blockchain === toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be different.');
         }
@@ -72,7 +120,7 @@ export class CrossChainManager {
     private getFullOptions(
         options?: SwapManagerCrossChainCalculationOptions
     ): RequiredSwapManagerCalculationOptions {
-        return combineOptions(options, {
+        return combineOptions<RequiredSwapManagerCalculationOptions>(options, {
             fromSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
             toSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
             gasCalculation: 'enabled',
@@ -80,8 +128,7 @@ export class CrossChainManager {
             timeout: CrossChainManager.defaultCalculationTimeout,
             providerAddress: this.providerAddress,
             slippageTolerance: CrossChainManager.defaultSlippageTolerance * 2,
-            deadline: CrossChainManager.defaultDeadline,
-            fromAddress: ''
+            deadline: CrossChainManager.defaultDeadline
         });
     }
 
@@ -89,48 +136,37 @@ export class CrossChainManager {
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredSwapManagerCalculationOptions
-    ): Promise<WrappedCrossChainTrade> {
-        const trades = await this.calculateTradeFromTokens(from, to, options);
-        if (!hasLengthAtLeast(trades, 1)) {
-            throw new Error('[RUBIC SDK] Trades array has to be defined');
-        }
+    ): Promise<WrappedCrossChainTrade[]> {
+        const wrappedTrades = await this.calculateTradeFromTokens(
+            from,
+            to,
+            this.getFullOptions(options)
+        );
 
-        const sortedTrades = trades.sort((firstTrade, secondTrade) => {
-            const firstTradeAmount = firstTrade.trade?.to?.tokenAmount || new BigNumber(0);
-            const secondTradeAmount = secondTrade.trade?.to?.tokenAmount || new BigNumber(0);
+        const transitTokenAmount = (
+            wrappedTrades.find(wrappedTrade => wrappedTrade.trade instanceof CelerCrossChainTrade)
+                ?.trade as CelerCrossChainTrade
+        )?.fromTrade.toToken.tokenAmount;
+        return wrappedTrades.sort((firstTrade, secondTrade) => {
+            const firstTradeAmount = this.getProviderRatio(firstTrade.trade, transitTokenAmount);
+            const secondTradeAmount = this.getProviderRatio(secondTrade.trade, transitTokenAmount);
 
             return firstTradeAmount.comparedTo(secondTradeAmount);
         });
+    }
 
-        const filteredTrades = sortedTrades.filter(
-            trade => !trade?.minAmountError && !trade?.maxAmountError
-        );
-        if (filteredTrades.length) {
-            return {
-                trade: filteredTrades[0]!.trade!
-            };
+    private getProviderRatio(trade: CrossChainTrade | null, transitTokenAmount: BigNumber) {
+        if (!trade) {
+            return new BigNumber(Infinity);
         }
 
-        let minAmountError: BigNumber | undefined;
-        let maxAmountError: BigNumber | undefined;
-        sortedTrades.forEach(trade => {
-            if (trade.minAmountError) {
-                minAmountError = minAmountError
-                    ? BigNumber.min(minAmountError, trade.minAmountError)
-                    : trade.minAmountError;
-            }
-            if (trade.maxAmountError) {
-                maxAmountError = maxAmountError
-                    ? BigNumber.max(maxAmountError, trade.maxAmountError)
-                    : trade.maxAmountError;
-            }
-        });
+        if (trade instanceof SymbiosisCrossChainTrade) {
+            return transitTokenAmount.dividedBy(trade.to.tokenAmount);
+        }
 
-        return {
-            trade: sortedTrades[0].trade,
-            minAmountError,
-            maxAmountError
-        };
+        return transitTokenAmount
+            .plus((trade as CelerCrossChainTrade).cryptoFeeToken.price)
+            .dividedBy(trade.to.tokenAmount);
     }
 
     private async calculateTradeFromTokens(
@@ -162,7 +198,15 @@ export class CrossChainManager {
         const calculationPromises = providers.map(async ([type, provider]) => {
             try {
                 const calculation = provider.calculate(from, to, providersOptions);
-                return await pTimeout(calculation, timeout);
+                const wrappedTrade = await pTimeout(calculation, timeout);
+                if (!wrappedTrade) {
+                    return null;
+                }
+
+                return {
+                    ...wrappedTrade,
+                    tradeType: provider.type
+                };
             } catch (e) {
                 console.debug(
                     `[RUBIC_SDK] Trade calculation error occurred for ${type} trade provider.`,
@@ -173,7 +217,7 @@ export class CrossChainManager {
         });
         const results = (await Promise.all(calculationPromises)).filter(notNull);
         if (!results?.length) {
-            throw new Error('[RUBIC_SDK] No success providers calculation for the trade.');
+            throw new RubicSdkError('No success providers calculation for the trade');
         }
         return results;
     }

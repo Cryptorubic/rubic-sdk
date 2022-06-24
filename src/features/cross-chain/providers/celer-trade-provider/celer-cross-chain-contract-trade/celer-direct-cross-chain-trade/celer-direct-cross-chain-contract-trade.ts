@@ -8,6 +8,7 @@ import { DestinationCelerSwapInfo } from '@rsdk-features/cross-chain/providers/c
 import { SwapVersion } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/provider-type.enum';
 import { BridgeCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/bridge-celer-swap-info';
 import { CelerCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
+import { RubicSdkError } from 'src/common';
 
 export class CelerDirectCrossChainContractTrade extends CelerCrossChainContractTrade {
     public readonly fromToken: PriceTokenAmount;
@@ -40,7 +41,7 @@ export class CelerDirectCrossChainContractTrade extends CelerCrossChainContractT
         const swapTokenWithFee = false;
 
         if (!methodArguments?.[0]) {
-            throw new Error('[RUBIC SDK] Wrong method arguments. Arguments array is unknown.');
+            throw new RubicSdkError('Method arguments array must not be empty');
         }
 
         methodArguments[0].push(exactTokensForTokens, swapTokenWithFee);

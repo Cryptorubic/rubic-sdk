@@ -1,7 +1,7 @@
 import { UniswapV3Route } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
 import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
 import { UniswapV3QuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
-import { Cache, compareAddresses } from 'src/common';
+import { Cache, compareAddresses, RubicSdkError } from 'src/common';
 import { Token } from '@rsdk-core/blockchain/tokens/token';
 import {
     UniswapV3AlgebraAbstractTrade,
@@ -32,7 +32,7 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
     public get path(): ReadonlyArray<Token> {
         const initialPool = this.route.poolsPath[0];
         if (!initialPool) {
-            throw new Error('[RUBIC SDK] Initial pool has to be defined.');
+            throw new RubicSdkError('Initial pool has to be defined');
         }
         const path: Token[] = [
             compareAddresses(initialPool.token0.address, this.route.initialTokenAddress)
@@ -40,14 +40,16 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
                 : initialPool.token1
         ];
 
-        const lasToken = path[path.length - 1];
-        if (!lasToken) {
-            throw new Error('[RUBIC SDK] Last token has to be defined.');
+        const lastToken = path[path.length - 1];
+        if (!lastToken) {
+            throw new RubicSdkError('Last token has to be defined');
         }
 
         this.route.poolsPath.forEach(pool => {
             path.push(
-                !compareAddresses(pool.token0.address, lasToken.address) ? pool.token0 : pool.token1
+                !compareAddresses(pool.token0.address, lastToken.address)
+                    ? pool.token0
+                    : pool.token1
             );
         });
 
@@ -71,7 +73,7 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
 
             const pool = this.route.poolsPath[0];
             if (!pool) {
-                throw new Error('[RUBIC SDK] Initial pool has to be defined.');
+                throw new RubicSdkError('Initial pool has to be defined');
             }
             const toTokenAddress = compareAddresses(
                 pool.token0.address,
@@ -81,7 +83,7 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
                 : pool.token0.address;
 
             if (!this.route?.poolsPath?.[0]) {
-                throw new Error('[RUBIC SDK] PoolsPath[0] has to be defined.');
+                throw new RubicSdkError('PoolsPath[0] has to be defined');
             }
 
             return {

@@ -2,7 +2,7 @@ import { Web3Pure } from 'src/core';
 import { CrossChainInstantTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/cross-chain-instant-trade';
 import { UniswapV3AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
 import { UniswapV3QuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
-import { compareAddresses } from 'src/common';
+import { compareAddresses, RubicSdkError } from 'src/common';
 import { v3LikeCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/v3-like-celer-swap-info';
 import { UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
 import { DestinationCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
@@ -49,7 +49,7 @@ export class CrossChainUniswapV3Trade implements CrossChainInstantTrade {
         const exactTokensForTokens = true;
 
         if (!methodArguments?.[0]) {
-            throw new Error('[RUBIC SDK] Method arguments[0] has to be defined');
+            throw new RubicSdkError('[RUBIC SDK] Method arguments array must not be empty');
         }
 
         methodArguments[0].push(exactTokensForTokens);

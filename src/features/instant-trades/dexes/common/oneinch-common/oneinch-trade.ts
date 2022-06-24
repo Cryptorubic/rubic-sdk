@@ -49,6 +49,7 @@ export class OneinchTrade extends InstantTrade {
         [BLOCKCHAIN_NAME.AVALANCHE]: TRADE_TYPE.ONE_INCH_AVALANCHE
     } as const;
 
+    /** @internal */
     public static async checkIfNeedApproveAndThrowError(
         from: PriceTokenAmount
     ): Promise<void | never> {
@@ -56,12 +57,13 @@ export class OneinchTrade extends InstantTrade {
             from
         } as OneinchTradeStruct).needApprove();
         if (needApprove) {
-            throw new Error('need approve');
+            throw new RubicSdkError('Approve is needed');
         }
     }
 
     private readonly httpClient = Injector.httpClient;
 
+    /** @internal */
     public readonly contractAddress: string;
 
     public readonly from: PriceTokenAmount;
@@ -70,7 +72,7 @@ export class OneinchTrade extends InstantTrade {
 
     private readonly nativeSupportedFrom: PriceTokenAmount;
 
-    public readonly nativeSupportedTo: PriceTokenAmount;
+    private readonly nativeSupportedTo: PriceTokenAmount;
 
     public gasFeeInfo: GasFeeInfo | null;
 
@@ -78,10 +80,18 @@ export class OneinchTrade extends InstantTrade {
 
     private readonly disableMultihops: boolean;
 
+    /**
+     * Path, through which tokens will be converted.
+     */
     public readonly path: ReadonlyArray<Token>;
 
+    /**
+     * @internal
+     * Path with wrapped native address.
+     */
     public readonly wrappedPath: ReadonlyArray<Token>;
 
+    /** @internal */
     public readonly transactionData: string | null;
 
     public get type(): TradeType {

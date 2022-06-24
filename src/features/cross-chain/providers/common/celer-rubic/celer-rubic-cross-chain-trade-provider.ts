@@ -15,6 +15,8 @@ import { MinMaxAmounts } from '@rsdk-features/cross-chain/models/min-max-amounts
 import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
 import { ItCalculatedTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/it-calculated-trade';
 import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
+import { CrossChainMinAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-min-amount.error';
+import { CrossChainMaxAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-max-amount.error';
 
 export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeProvider {
     protected abstract contracts(blockchain: BlockchainName): CrossChainContractData;
@@ -65,7 +67,7 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
 
     protected async checkMinMaxAmountsErrors(
         fromTrade: CrossChainContractTrade
-    ): Promise<MinMaxAmountsErrors> {
+    ): Promise<void | never> {
         const slippageTolerance =
             fromTrade instanceof RubicItCrossChainContractTrade ? fromTrade.slippage : undefined;
         const { minAmount: minTransitTokenAmount, maxAmount: maxTransitTokenAmount } =
@@ -84,9 +86,7 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
             if (!minAmount?.isFinite()) {
                 throw new InsufficientLiquidityError();
             }
-            return {
-                minAmount
-            };
+            throw new CrossChainMinAmountError(minAmount, fromTrade.fromToken);
         }
 
         if (fromTransitTokenAmount.gt(maxTransitTokenAmount)) {
@@ -94,12 +94,8 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
                 fromTrade,
                 maxTransitTokenAmount
             );
-            return {
-                maxAmount
-            };
+            throw new CrossChainMaxAmountError(maxAmount, fromTrade.fromToken);
         }
-
-        return {};
     }
 
     protected async getMinMaxTransitTokenAmounts(
@@ -110,28 +106,26 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
         const fromContract = this.contracts(fromBlockchain);
         const fromTransitToken = await fromContract.getTransitToken(fromToken);
 
-        const getAmount = async (type: 'min' | 'max'): Promise<BigNumber> => {
-            const fromTransitTokenAmountAbsolute = await fromContract.getMinOrMaxTransitTokenAmount(
-                type,
-                fromTransitToken.address
-            );
-            const fromTransitTokenAmount = Web3Pure.fromWei(
-                fromTransitTokenAmountAbsolute,
+        const [minTransitAmountAbsolute, maxTransitAmountAbsolute] =
+            await fromContract.getMinMaxTransitTokenAmounts(fromTransitToken.address);
+
+        const getAmount = (type: 'min' | 'max'): BigNumber => {
+            const fromTransitAmount = Web3Pure.fromWei(
+                type === 'min' ? minTransitAmountAbsolute : maxTransitAmountAbsolute,
                 fromTransitToken.decimals
             );
 
             if (type === 'min') {
                 if (slippageTolerance) {
-                    return fromTransitTokenAmount.dividedBy(1 - slippageTolerance);
+                    return fromTransitAmount.dividedBy(1 - slippageTolerance);
                 }
             }
-            return fromTransitTokenAmount;
+            return fromTransitAmount;
         };
 
-        const [minAmount, maxAmount] = await Promise.all([getAmount('min'), getAmount('max')]);
         return {
-            minAmount,
-            maxAmount
+            minAmount: getAmount('min'),
+            maxAmount: getAmount('max')
         };
     }
 
@@ -185,12 +179,12 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
     ): Promise<CrossChainContractTrade>;
 
     protected async checkContractsState(
-        fromTrade: CrossChainContractTrade,
-        toTrade: CrossChainContractTrade
+        fromContract: CrossChainContractData,
+        toContract: CrossChainContractData
     ): Promise<void> {
         const [sourceContractPaused, targetContractPaused] = await Promise.all([
-            fromTrade.contract.isPaused(),
-            toTrade.contract.isPaused()
+            fromContract.isPaused(),
+            toContract.isPaused()
         ]);
 
         if (sourceContractPaused || targetContractPaused) {

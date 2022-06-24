@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { AbiItem } from 'web3-utils';
 import { BlockchainName } from 'src/core';
-import { Cache } from 'src/common';
+import { Cache, RubicSdkError } from 'src/common';
 import { ProviderData } from '@rsdk-features/cross-chain/models/provider-data';
 import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 import { CrossChainSupportedInstantTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
@@ -20,7 +20,7 @@ export abstract class CrossChainContractTrade {
     public get provider(): CrossChainSupportedInstantTradeProvider {
         const provider = this.contract.providersData?.[this.providerIndex]?.provider;
         if (!provider) {
-            throw new Error('[RUBIC SDK] Provider has to be defined.');
+            throw new RubicSdkError('Provider has to be defined');
         }
         return provider;
     }
@@ -29,7 +29,7 @@ export abstract class CrossChainContractTrade {
     protected get providerData(): ProviderData {
         const providersData = this.contract.providersData?.[this.providerIndex];
         if (!providersData) {
-            throw new Error('[RUBIC SDK] Providers data has to be defined.');
+            throw new RubicSdkError('Providers data has to be defined');
         }
         return providersData;
     }

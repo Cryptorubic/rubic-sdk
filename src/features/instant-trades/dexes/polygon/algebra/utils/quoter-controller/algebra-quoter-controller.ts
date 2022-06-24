@@ -1,7 +1,7 @@
 import { BLOCKCHAIN_NAME, PriceToken, Web3Public } from 'src/core';
 import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
 import { AlgebraRoute } from '@rsdk-features/instant-trades/dexes/polygon/algebra/models/algebra-route';
-import { notNull } from 'src/common';
+import { notNull, RubicSdkError } from 'src/common';
 import BigNumber from 'bignumber.js';
 import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public/models/contract-multicall-response';
 import {
@@ -32,7 +32,7 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
      * Converts algebra route to encoded bytes string to pass it to contract.
      * Structure of encoded string: '0x${tokenAddress_0}${tokenAddress_1}...${tokenAddress_n}.
      * @param path Symbol tokens, included in route.
-     * @return string Encoded string.
+     * @returns string Encoded string.
      */
     public static getEncodedPath(path: Token[]): string {
         const encodedPath = path.reduce(
@@ -132,7 +132,7 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
                 if (result.success) {
                     const quoter = quoterMethodsData?.[index];
                     if (!quoter) {
-                        throw new Error('[RUBIC SDK] Quoter has to be defined.');
+                        throw new RubicSdkError('Quoter has to be defined');
                     }
                     return {
                         outputAbsoluteAmount: new BigNumber(result.output![0]),

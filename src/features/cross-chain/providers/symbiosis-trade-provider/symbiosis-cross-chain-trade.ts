@@ -18,11 +18,15 @@ import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import BigNumber from 'bignumber.js';
 
+/**
+ * Calculated Symbiosis cross chain trade.
+ */
 export class SymbiosisCrossChainTrade extends CrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
 
     public readonly itType: { from: TradeType; to: TradeType };
 
+    /** @internal */
     public static async getGasData(
         from: PriceTokenAmount,
         to: PriceTokenAmount,
@@ -42,6 +46,8 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
                         to,
                         transactionRequest,
                         gasData: null,
+                        priceImpact: 0,
+                        slippage: 0,
                         fee: new BigNumber(NaN),
                         priceImpact: '',
                         feeSymbol: ''
@@ -86,7 +92,14 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
 
     public readonly to: PriceTokenAmount;
 
-    protected readonly gasData: GasData | null;
+    public readonly toTokenAmountMin: BigNumber;
+
+    /**
+     * Overall price impact, fetched from symbiosis api.
+     */
+    public readonly priceImpact: number;
+
+    public readonly gasData: GasData | null;
 
     private readonly transactionRequest: TransactionRequest;
 
@@ -106,6 +119,8 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             to: PriceTokenAmount;
             transactionRequest: TransactionRequest;
             gasData: GasData | null;
+            priceImpact: number;
+            slippage: number;
             priceImpact: string;
             fee: BigNumber;
             feeSymbol: string;
@@ -118,6 +133,9 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         this.to = crossChainTrade.to;
         this.transactionRequest = crossChainTrade.transactionRequest;
         this.gasData = crossChainTrade.gasData;
+        this.priceImpact = crossChainTrade.priceImpact;
+
+        this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
 
         this.feeSymbol = crossChainTrade.feeSymbol;
         this.fee = crossChainTrade.fee;
@@ -188,10 +206,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
                 contractAddress,
                 contractAbi,
                 methodName: 'SymbiosisCallWithNative',
-                methodArguments: [
-                    this.providerAddress || NATIVE_TOKEN_ADDRESS,
-                    this.transactionRequest.data
-                ],
+                methodArguments: [this.providerAddress, this.transactionRequest.data],
                 value: this.from.stringWeiAmount
             };
         }
@@ -203,7 +218,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             methodArguments: [
                 this.from.address,
                 this.from.stringWeiAmount,
-                NATIVE_TOKEN_ADDRESS,
+                this.providerAddress,
                 this.transactionRequest.data
             ],
             value: '0'

@@ -1,4 +1,5 @@
 import { Token } from '@rsdk-core/blockchain/tokens/token';
+import { RubicSdkError } from 'src/common';
 
 export function createTokenNativeAddressProxy<T extends Token>(
     token: T,
@@ -23,14 +24,14 @@ export function createTokenNativeAddressProxyInPathStartAndEnd<T extends Token>(
     wrappedNativeAddress: string
 ): ReadonlyArray<T> {
     if (!path?.[0]) {
-        throw new Error('');
+        throw new RubicSdkError('Path cannot be empty');
     }
-    const tokenAddress = path[path.length - 1];
-    if (!tokenAddress) {
-        throw new Error('[RUBIC SDK] Token has to be defined.');
+    const token = path[path.length - 1];
+    if (!token) {
+        throw new RubicSdkError("Path's tokens has to be defined");
     }
 
     return [createTokenNativeAddressProxy(path[0], wrappedNativeAddress)]
         .concat(path.slice(1, path.length - 1))
-        .concat(createTokenNativeAddressProxy(tokenAddress, wrappedNativeAddress));
+        .concat(createTokenNativeAddressProxy(token, wrappedNativeAddress));
 }

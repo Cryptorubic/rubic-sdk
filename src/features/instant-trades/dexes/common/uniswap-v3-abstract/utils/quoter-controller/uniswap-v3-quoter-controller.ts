@@ -25,6 +25,7 @@ import { Injector } from '@rsdk-core/sdk/injector';
 import { UniswapV3RouterConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
 import { UniswapV3AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
+import { RubicSdkError } from 'src/common';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
@@ -45,7 +46,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
      * toHex(fee_i) must be of length 6, so leading zeroes are added.
      * @param pools Liquidity pools, included in route.
      * @param initialTokenAddress From token address.
-     * @return string Encoded string.
+     * @returns string Encoded string.
      */
     @Cache
     public static getEncodedPoolsPath(pools: LiquidityPool[], initialTokenAddress: string): string {
@@ -228,7 +229,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
             .map((poolAddress, index) => {
                 const poolMethodArguments = getPoolsMethodArguments?.[index];
                 if (!poolMethodArguments) {
-                    throw new Error('[RUBIC SDK] Method arguments for pool have to be defined.');
+                    throw new RubicSdkError('Method arguments array for pool has to be defined');
                 }
                 if (!Web3Pure.isZeroAddress(poolAddress)) {
                     return new LiquidityPool(
@@ -283,7 +284,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
                     .map((result, index) => {
                         const pool = quoterMethodsData?.[index];
                         if (!pool) {
-                            throw new Error('[RUBIC SDK] Pool has to be defined');
+                            throw new RubicSdkError('Pool has to be defined');
                         }
                         if (result.success) {
                             return {

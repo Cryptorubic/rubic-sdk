@@ -4,7 +4,7 @@ import {
     RubicCrossChainSupportedBlockchain,
     rubicCrossChainSupportedBlockchains
 } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
-import { compareAddresses, notNull } from 'src/common';
+import { compareAddresses, notNull, RubicSdkError } from 'src/common';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
 import { BlockchainName } from 'src/core';
 import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
@@ -27,7 +27,7 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         );
     }
 
-    public type = CROSS_CHAIN_TRADE_TYPE.RUBIC;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.RUBIC;
 
     protected readonly contracts = getRubicCrossChainContract;
 
@@ -39,7 +39,7 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<WrappedCrossChainTrade | null> {
+    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = to.blockchain;
         if (
@@ -63,15 +63,20 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         const { fromSlippageTolerance, toSlippageTolerance, gasCalculation, providerAddress } =
             options;
 
-        const fromTrade = await this.calculateBestTrade(
-            fromBlockchain,
-            from,
-            fromTransitToken,
-            fromSlippageTolerance
-        );
-        const minMaxErrors = await this.checkMinMaxAmountsErrors(fromTrade);
+        try {
+            await this.checkContractsState(
+                this.contracts(fromBlockchain),
+                this.contracts(toBlockchain)
+            );
 
-        const { toTransitTokenAmount, transitFeeToken, feeInPercents } =
+            const fromTrade = await this.calculateBestTrade(
+                fromBlockchain,
+                from,
+                fromTransitToken,
+                fromSlippageTolerance
+            );
+
+            const { toTransitTokenAmount, transitFeeToken, feeInPercents } =
             await this.getToTransitTokenAmount(
                 toBlockchain,
                 fromTrade.fromToken,
@@ -79,38 +84,52 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                 fromTrade.contract
             );
 
-        const toTrade = await this.calculateBestTrade(
-            toBlockchain,
-            new PriceTokenAmount({ ...toTransitToken.asStruct, tokenAmount: toTransitTokenAmount }),
-            to,
-            toSlippageTolerance
-        );
+            const toTrade = await this.calculateBestTrade(
+                toBlockchain,
+                new PriceTokenAmount({
+                    ...toTransitToken.asStruct,
+                    tokenAmount: toTransitTokenAmount
+                }),
+                to,
+                toSlippageTolerance
+            );
 
-        await this.checkContractsState(fromTrade, toTrade);
+            const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
+            const gasData =
+                gasCalculation === 'enabled'
+                    ? await RubicCrossChainTrade.getGasData(fromTrade, toTrade, cryptoFeeToken)
+                    : null;
 
-        const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
-        const gasData =
-            gasCalculation === 'enabled'
-                ? await RubicCrossChainTrade.getGasData(fromTrade, toTrade, cryptoFeeToken)
-                : null;
-
-        const trade = new RubicCrossChainTrade(
-            {
-                fromTrade,
-                toTrade,
-                cryptoFeeToken,
-                transitFeeToken,
-                gasData,
+            const trade = new RubicCrossChainTrade(
+                {
+                    fromTrade,
+                    toTrade,
+                    cryptoFeeToken,
+                    transitFeeToken,
+                    gasData,
                 feeInPercents
             },
             providerAddress
         );
 
-        return {
-            trade,
-            minAmountError: minMaxErrors.minAmount,
-            maxAmountError: minMaxErrors.maxAmount
-        };
+            try {
+                await this.checkMinMaxAmountsErrors(fromTrade);
+            } catch (err: unknown) {
+                return {
+                    trade,
+                    error: this.parseError(err)
+                };
+            }
+
+            return {
+                trade
+            };
+        } catch (err: unknown) {
+            return {
+                trade: null,
+                error: this.parseError(err)
+            };
+        }
     }
 
     protected async calculateBestTrade(
@@ -168,7 +187,7 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         });
 
         if (!bestTrade) {
-            throw new Error('[RUBIC SDK] Best trade has to be defined.');
+            throw new RubicSdkError('Best trade has to be defined');
         }
 
         return new RubicItCrossChainContractTrade(

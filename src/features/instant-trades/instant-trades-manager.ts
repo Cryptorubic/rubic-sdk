@@ -28,21 +28,22 @@ export type RequiredSwapManagerCalculationOptions = MarkRequired<
     'timeout' | 'disabledProviders'
 >;
 
+/**
+ * Contains methods to calculate instant trades.
+ */
 export class InstantTradesManager {
     public static readonly defaultCalculationTimeout = 3_000;
 
     private static getFullOptions(
         options?: SwapManagerCalculationOptions
     ): RequiredSwapManagerCalculationOptions {
-        return combineOptions<SwapManagerCalculationOptions>(options, {
+        return combineOptions<RequiredSwapManagerCalculationOptions>(options, {
             timeout: InstantTradesManager.defaultCalculationTimeout,
             disabledProviders: [],
             gasCalculation: 'calculate',
             disableMultihops: false,
             slippageTolerance: 0.02,
-            deadlineMinutes: 20,
-            wrappedAddress: EMPTY_ADDRESS,
-            fromAddress: ''
+            deadlineMinutes: 20
         });
     }
 
@@ -58,6 +59,9 @@ export class InstantTradesManager {
         return acc;
     }, {} as Mutable<TypedTradeProviders>);
 
+    /**
+     * List of all instant trade providers, combined by blockchains.
+     */
     public readonly blockchainTradeProviders: Readonly<
         Record<BlockchainName, Partial<TypedTradeProviders>>
     > = Object.entries(this.tradeProviders).reduce(
@@ -68,6 +72,36 @@ export class InstantTradesManager {
         {} as Record<BlockchainName, Partial<TypedTradeProviders>>
     );
 
+    /**
+     * Calculates instant trades, sorted by output amount.
+     *
+     * @example
+     * ```ts
+     * const blockchain = BLOCKCHAIN_NAME.ETHEREUM;
+     * // ETH
+     * const fromTokenAddress = '0x0000000000000000000000000000000000000000';
+     * const fromAmount = 1;
+     * // USDT
+     * const toTokenAddress = '0xdac17f958d2ee523a2206206994597c13d831ec7';
+     *
+     * const trades = await sdk.instantTrades.calculateTrade(
+     *     { blockchain, address: fromTokenAddress },
+     *     fromAmount,
+     *     toTokenAddress
+     * );
+     * const bestTrade = trades[0];
+     *
+     * Object.entries(trades).forEach(([tradeType, trade]) =>
+     *     console.log(tradeType, `to amount: ${trade.to.tokenAmount.toFormat(3)}`)
+     * )
+     * ```
+     *
+     * @param fromToken Token to sell.
+     * @param fromAmount Amount to sell.
+     * @param toToken Token to get.
+     * @param options Additional options.
+     * @returns List of calculated instant trades.
+     */
     public async calculateTrade(
         fromToken:
             | Token
@@ -80,7 +114,7 @@ export class InstantTradesManager {
         options?: SwapManagerCalculationOptions
     ): Promise<Array<InstantTrade | InstantTradeError>> {
         if (toToken instanceof Token && fromToken.blockchain !== toToken.blockchain) {
-            throw new RubicSdkError('Blockchains of from and to tokens must be same.');
+            throw new RubicSdkError('Blockchains of from and to tokens must be same');
         }
 
         const { from, to } = await getPriceTokensFromInputTokens(
@@ -131,6 +165,9 @@ export class InstantTradesManager {
             }
         });
 
-        return Promise.all(calculationPromises);
+        const results = await Promise.all(calculationPromises);
+        return results
+            .filter(notNull)
+            .sort((tradeA, tradeB) => tradeA.to.tokenAmount.comparedTo(tradeB.to.tokenAmount));
     }
 }

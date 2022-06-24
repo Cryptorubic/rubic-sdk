@@ -7,7 +7,7 @@ import {
     TradeType
 } from 'src/features';
 import { AbiItem } from 'web3-utils';
-import { PriceToken, Token, Web3Pure } from 'src/core';
+import { BlockchainName, PriceToken, Token, Web3Pure } from 'src/core';
 import { SwapOptions } from '@rsdk-features/instant-trades/models/swap-options';
 import BigNumber from 'bignumber.js';
 import { Injector } from '@rsdk-core/sdk/injector';
@@ -25,6 +25,7 @@ import {
 } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/constants/estimated-gas';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
 import { getFromToTokensAmountsByExact } from '@rsdk-features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
+import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
 
 export interface UniswapV3AlgebraTradeStruct {
     from: PriceTokenAmount;
@@ -65,8 +66,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         if (walletAddress && estimateGasParams.callData) {
             const web3Public = Injector.web3PublicService.getWeb3Public(from.blockchain);
             const estimatedGas = await web3Public.getEstimatedGas(
-                contractAbi,
-                contractAddress,
+                contractAbi(from.blockchain),
+                contractAddress(from.blockchain),
                 estimateGasParams.callData.contractMethod,
                 estimateGasParams.callData.params,
                 walletAddress,
@@ -111,8 +112,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         ) {
             const web3Public = Injector.web3PublicService.getWeb3Public(fromToken.blockchain);
             const estimatedGasLimits = await web3Public.batchEstimatedGas(
-                contractAbi,
-                contractAddress,
+                contractAbi(fromToken.blockchain),
+                contractAddress(fromToken.blockchain),
                 walletAddress,
                 routesEstimateGasParams.map(estimateGasParams => estimateGasParams.callData)
             );
@@ -175,11 +176,11 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
     }
 
     private get defaultEstimatedGas(): BigNumber {
-        const estimateGas = DEFAULT_ESTIMATED_GAS[this.path.length - 2];
-        if (!estimateGas) {
-            throw new Error('[RUBIC SDK] Estimate gas has to be defined.');
+        const estimatedGas = DEFAULT_ESTIMATED_GAS[this.path.length - 2];
+        if (!estimatedGas) {
+            throw new RubicSdkError('Default estimated gas has to be defined');
         }
-        return estimateGas.plus(this.to.isNative ? WETH_TO_ETH_ESTIMATED_GAS : 0);
+        return estimatedGas.plus(this.to.isNative ? WETH_TO_ETH_ESTIMATED_GAS : 0);
     }
 
     protected constructor(tradeStruct: UniswapV3AlgebraTradeStruct) {
