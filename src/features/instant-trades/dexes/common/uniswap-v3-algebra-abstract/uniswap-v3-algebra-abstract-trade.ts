@@ -7,7 +7,7 @@ import {
     TradeType
 } from 'src/features';
 import { AbiItem } from 'web3-utils';
-import { BlockchainName, PriceToken, Token, Web3Pure } from 'src/core';
+import { PriceToken, Token, Web3Pure } from 'src/core';
 import { SwapOptions } from '@rsdk-features/instant-trades/models/swap-options';
 import BigNumber from 'bignumber.js';
 import { Injector } from '@rsdk-core/sdk/injector';
@@ -25,7 +25,6 @@ import {
 } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/constants/estimated-gas';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
 import { getFromToTokensAmountsByExact } from '@rsdk-features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
-import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
 
 export interface UniswapV3AlgebraTradeStruct {
     from: PriceTokenAmount;
@@ -66,8 +65,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         if (walletAddress && estimateGasParams.callData) {
             const web3Public = Injector.web3PublicService.getWeb3Public(from.blockchain);
             const estimatedGas = await web3Public.getEstimatedGas(
-                contractAbi(from.blockchain),
-                contractAddress(from.blockchain),
+                contractAbi,
+                contractAddress,
                 estimateGasParams.callData.contractMethod,
                 estimateGasParams.callData.params,
                 walletAddress,
@@ -112,8 +111,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         ) {
             const web3Public = Injector.web3PublicService.getWeb3Public(fromToken.blockchain);
             const estimatedGasLimits = await web3Public.batchEstimatedGas(
-                contractAbi(fromToken.blockchain),
-                contractAddress(fromToken.blockchain),
+                contractAbi,
+                contractAddress,
                 walletAddress,
                 routesEstimateGasParams.map(estimateGasParams => estimateGasParams.callData)
             );

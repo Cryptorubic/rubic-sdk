@@ -18,10 +18,10 @@ import { UniswapV3TradeProviders } from '@rsdk-features/instant-trades/constants
 import { OneInchTradeProviders } from '@rsdk-features/instant-trades/constants/one-inch-trade-providers';
 import { ZrxTradeProviders } from '@rsdk-features/instant-trades/constants/zrx-trade-providers';
 import { AlgebraTradeProviders } from '@rsdk-features/instant-trades/constants/algebra-trade-providers';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { InstantTradeError } from 'src/features/instant-trades/models/instant-trade-error';
 import { isOneInch } from 'src/features/instant-trades/utils/type-guards';
 import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
+import { notNull } from 'src/common';
 
 export type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCalculationOptions,
@@ -166,8 +166,17 @@ export class InstantTradesManager {
         });
 
         const results = await Promise.all(calculationPromises);
-        return results
-            .filter(notNull)
-            .sort((tradeA, tradeB) => tradeA.to.tokenAmount.comparedTo(tradeB.to.tokenAmount));
+        return results.filter(notNull).sort((tradeA, tradeB) => {
+            if (tradeA instanceof InstantTrade || tradeB instanceof InstantTrade) {
+                if (tradeA instanceof InstantTrade && tradeB instanceof InstantTrade) {
+                    return tradeA.to.tokenAmount.comparedTo(tradeB.to.tokenAmount);
+                }
+                if (tradeA instanceof InstantTrade) {
+                    return 1;
+                }
+                return -1;
+            }
+            return 0;
+        });
     }
 }

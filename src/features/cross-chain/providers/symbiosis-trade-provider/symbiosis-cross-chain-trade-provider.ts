@@ -27,9 +27,9 @@ import { OneinchBscProvider } from '@rsdk-features/instant-trades/dexes/bsc/onei
 import { OneinchPolygonProvider } from '@rsdk-features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
 import { OneinchAvalancheProvider } from '@rsdk-features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
 import { getSymbiosisConfig } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
-import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
-import { CrossChainMinAmountError } from '@common/errors/cross-chain/cross-chain-min-amount.error';
-import { CrossChainMaxAmountError } from '@common/errors/cross-chain/cross-chain-max-amount.error';
+import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
+import { CrossChainMinAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-min-amount.error';
+import { CrossChainMaxAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-max-amount.error';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
@@ -110,7 +110,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
 
             const swapping = this.symbiosis.newSwapping();
 
-            const { tokenAmountOut, transactionRequest, priceImpact } = await swapping.exactIn(
+            const { tokenAmountOut, transactionRequest, priceImpact, fee } = await swapping.exactIn(
                 tokenAmountIn,
                 tokenOut,
                 fromAddress,
@@ -140,8 +140,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                         priceImpact: parseFloat(priceImpact.toFixed()),
                         slippage: options.slippageTolerance,
                         fee: new BigNumber(fee.toFixed()),
-                        feeSymbol: String(fee.token.symbol),
-                        priceImpact: priceImpact.toFixed()
+                        feeSymbol: String(fee.token.symbol)
                     },
                     options.providerAddress
                 )

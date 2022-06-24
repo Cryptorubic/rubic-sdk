@@ -52,8 +52,6 @@ export abstract class CrossChainTrade {
 
     protected abstract get fromContractAddress(): string;
 
-    public abstract readonly type: CrossChainTradeType;
-
     public abstract readonly itType: { from: TradeType; to: TradeType };
 
     protected get walletAddress(): string {

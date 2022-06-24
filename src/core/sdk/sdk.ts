@@ -10,7 +10,7 @@ import { InstantTradesManager } from '@rsdk-features/instant-trades/instant-trad
 import { TokensManager } from '@rsdk-features/tokens/tokens-manager';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { BlockchainName } from 'src/core';
-import { CrossChainSymbiosisManager } from '@features/cross-chain/cross-chain-symbiosis-manager';
+import { CrossChainSymbiosisManager } from '@rsdk-features/cross-chain/cross-chain-symbiosis-manager';
 
 /**
  * Base class to work with sdk.

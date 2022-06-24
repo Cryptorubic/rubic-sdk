@@ -10,7 +10,6 @@ import { RubicItCrossChainContractTrade } from '@rsdk-features/cross-chain/provi
 import BigNumber from 'bignumber.js';
 import { CrossChainSupportedInstantTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { MinMaxAmountsErrors } from '@rsdk-features/cross-chain/models/min-max-amounts-errors';
 import { MinMaxAmounts } from '@rsdk-features/cross-chain/models/min-max-amounts';
 import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
 import { ItCalculatedTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/it-calculated-trade';

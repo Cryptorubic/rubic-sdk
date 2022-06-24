@@ -1,6 +1,6 @@
 import { Symbiosis } from 'symbiosis-js-sdk';
-import { getSymbiosisConfig } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
-import { Injector } from '@core/sdk/injector';
+import { getSymbiosisConfig } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
+import { Injector } from '@rsdk-core/sdk/injector';
 import { PendingRequest } from 'symbiosis-js-sdk/dist/crosschain/pending';
 import BigNumber from 'bignumber.js';
 import { SwapTransactionOptions } from 'src/features';

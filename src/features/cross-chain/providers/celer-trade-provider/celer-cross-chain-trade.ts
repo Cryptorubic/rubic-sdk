@@ -87,8 +87,6 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         }
     }
 
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
-
     public readonly transitFeeToken: PriceTokenAmount;
 
     public readonly from: PriceTokenAmount;

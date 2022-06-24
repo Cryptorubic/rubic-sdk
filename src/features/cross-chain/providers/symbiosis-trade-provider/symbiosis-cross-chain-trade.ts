@@ -12,7 +12,6 @@ import { SYMBIOSIS_CONTRACT_ADDRESS } from '@rsdk-features/cross-chain/providers
 import { SymbiosisCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { SYMBIOSIS_CONTRACT_ABI } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-abi';
-import { NATIVE_TOKEN_ADDRESS } from '@rsdk-core/blockchain/constants/native-token-address';
 import { FailedToCheckForTransactionReceiptError } from 'src/common';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
@@ -49,7 +48,6 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
                         priceImpact: 0,
                         slippage: 0,
                         fee: new BigNumber(NaN),
-                        priceImpact: '',
                         feeSymbol: ''
                     },
                     EMPTY_ADDRESS
@@ -86,8 +84,6 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
 
     public readonly fee: BigNumber;
 
-    public readonly priceImpact: string;
-
     public readonly from: PriceTokenAmount;
 
     public readonly to: PriceTokenAmount;
@@ -121,7 +117,6 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             gasData: GasData | null;
             priceImpact: number;
             slippage: number;
-            priceImpact: string;
             fee: BigNumber;
             feeSymbol: string;
         },

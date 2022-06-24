@@ -21,7 +21,7 @@ import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/com
 import { wrappedNative } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/wrapped-native';
 import { CelerRubicCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
-import { LowToSlippageError } from '@common/errors/cross-chain/low-to-slippage.error';
+import { LowToSlippageError } from '@rsdk-common/errors/cross-chain/low-to-slippage.error';
 
 export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -103,12 +103,12 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             }
 
             const { toTransitTokenAmount, transitFeeToken, feeInPercents } =
-            await this.getToTransitTokenAmount(
-                toBlockchain,
-                fromTrade.fromToken,
-                estimateTransitAmountWithSlippage,
-                fromTrade.contract
-            );
+                await this.getToTransitTokenAmount(
+                    toBlockchain,
+                    fromTrade.fromToken,
+                    estimateTransitAmountWithSlippage,
+                    fromTrade.contract
+                );
 
             const toTransit = new PriceTokenAmount({
                 ...toTransitToken.asStruct,
@@ -160,11 +160,11 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                     cryptoFeeToken,
                     transitFeeToken,
                     gasData,
-                feeInPercents
-            },
-            providerAddress,
-            Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
-        );
+                    feeInPercents
+                },
+                providerAddress,
+                Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
+            );
 
             try {
                 await this.checkMinMaxAmountsErrors(fromTrade);

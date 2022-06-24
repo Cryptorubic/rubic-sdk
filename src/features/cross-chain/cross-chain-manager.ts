@@ -9,16 +9,21 @@ import { getPriceTokensFromInputTokens } from '@rsdk-common/utils/tokens';
 import { Mutable } from '@rsdk-common/utils/types/mutable';
 import { CelerCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade-provider';
 import { CcrTypedTradeProviders } from '@rsdk-features/cross-chain/models/typed-trade-provider';
-import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from 'src/features';
+import {
+    CelerCrossChainTrade,
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTrade,
+    CrossChainTradeType,
+    SymbiosisCrossChainTrade
+} from 'src/features';
 import { SwapManagerCrossChainCalculationOptions } from '@rsdk-features/cross-chain/models/swap-manager-cross-chain-options';
 import pTimeout from '@rsdk-common/utils/p-timeout';
 import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
-import { hasLengthAtLeast } from '@rsdk-features/instant-trades/utils/type-guards';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import BigNumber from 'bignumber.js';
 import { SymbiosisCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
 import { MarkRequired } from 'ts-essentials';
-import { RequiredCrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
+import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
 import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<

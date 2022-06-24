@@ -18,7 +18,7 @@ import {
 } from '@rsdk-features/instant-trades/models/gas-params';
 import { Cache } from 'src/common';
 import { TradeType } from 'src/features';
-import { parseError } from '@common/utils/errors';
+import { parseError } from '@rsdk-common/utils/errors';
 import { Token } from 'src/core';
 
 /**
