@@ -80,7 +80,9 @@ export class CelerDirectCrossChainContractTrade extends CelerCrossChainContractT
     ): Promise<unknown[]> {
         const receiver = toContractTrade.contract.address || walletAddress;
         const tokenInAmountAbsolute = this.fromToken.stringWeiAmount;
-        const targetChainId = BlockchainsInfo.getBlockchainByName(this.toToken.blockchain).id;
+        const targetChainId = BlockchainsInfo.getBlockchainByName(
+            toContractTrade.toToken.blockchain
+        ).id;
         const source = this.getCelerSourceTrade();
         const destination = toContractTrade.getCelerDestionationTrade(providerAddress);
 
