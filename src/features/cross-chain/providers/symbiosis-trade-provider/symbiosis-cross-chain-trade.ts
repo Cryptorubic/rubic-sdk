@@ -1,10 +1,10 @@
 import {
     CROSS_CHAIN_TRADE_TYPE,
-    CrossChainTrade,
     OneinchTrade,
     SwapTransactionOptions,
     TradeType
 } from 'src/features';
+import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
 import { TransactionRequest } from '@ethersproject/providers';
 import { PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import { Injector } from '@rsdk-core/sdk/injector';

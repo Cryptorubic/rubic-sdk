@@ -125,7 +125,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                     TRADE_TYPE.ONE_INCH_ETHEREUM,
                     TRADE_TYPE.ONE_INCH_POLYGON,
                     TRADE_TYPE.ONE_INCH_AVALANCHE,
-                    TRADE_TYPE.ONE_INCH_ARBITRUM
+                    TRADE_TYPE.ONE_INCH_FANTOM
                 ]
             );
 
