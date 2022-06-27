@@ -12,6 +12,7 @@ import { WalletConnectionConfiguration } from '@rsdk-core/blockchain/models/wall
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swap/failed-to-check-for-transaction-receipt.error';
 import { Web3Pure } from 'src/core';
+import { LowSlippageError } from 'src/common';
 
 /**
  * Class containing methods for executing the functions of contracts
@@ -68,6 +69,9 @@ export class Web3Private {
     private static parseError(err: Web3Error): RubicSdkError {
         if (err.message.includes('Transaction has been reverted by the EVM')) {
             return new TransactionRevertedError();
+        }
+        if (err.message.includes('execution reverted: UNIV3R: min return')) {
+            return new LowSlippageError();
         }
         if (err.message.includes('Failed to check for transaction receipt')) {
             return new FailedToCheckForTransactionReceiptError();
