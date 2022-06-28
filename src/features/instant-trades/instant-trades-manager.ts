@@ -156,6 +156,6 @@ export class InstantTradesManager {
         const results = await Promise.all(calculationPromises);
         return results
             .filter(notNull)
-            .sort((tradeA, tradeB) => tradeA.to.tokenAmount.comparedTo(tradeB.to.tokenAmount));
+            .sort((tradeA, tradeB) => tradeB.to.tokenAmount.comparedTo(tradeA.to.tokenAmount));
     }
 }
