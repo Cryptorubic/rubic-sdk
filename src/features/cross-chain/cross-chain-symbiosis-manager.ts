@@ -10,7 +10,7 @@ import { getSymbiosisConfig } from '@rsdk-features/cross-chain/providers/symbios
 import { Injector } from '@rsdk-core/sdk/injector';
 import BigNumber from 'bignumber.js';
 import { SwapTransactionOptions } from 'src/features';
-import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common';
+import { RubicSdkError } from 'src/common';
 import { BlockchainName, BlockchainsInfo, Token } from 'src/core';
 import { TransactionReceipt as EthersReceipt, Log as EthersLog } from '@ethersproject/providers';
 import { TransactionReceipt } from 'web3-eth';
@@ -66,7 +66,7 @@ export class CrossChainSymbiosisManager {
     public async revertTrade(
         revertTransactionHash: string,
         options: SwapTransactionOptions = {}
-    ): Promise<string | never> {
+    ): Promise<TransactionReceipt> {
         const pendingRequest = await this.getUserTrades();
         const request = pendingRequest.find(
             pendingRequest =>
@@ -80,33 +80,22 @@ export class CrossChainSymbiosisManager {
         const { transactionRequest } = await this.symbiosis.newRevertPending(request).revert();
 
         const { onConfirm, gasLimit, gasPrice } = options;
-        let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
                 onConfirm(hash);
             }
-            transactionHash = hash;
         };
 
-        try {
-            await Injector.web3Private.trySendTransaction(
-                transactionRequest.to!,
-                new BigNumber(transactionRequest.value?.toString() || 0),
-                {
-                    data: transactionRequest.data!.toString(),
-                    onTransactionHash,
-                    gas: gasLimit,
-                    gasPrice
-                }
-            );
-
-            return transactionHash!;
-        } catch (err) {
-            if (err instanceof FailedToCheckForTransactionReceiptError) {
-                return transactionHash!;
+        return Injector.web3Private.trySendTransaction(
+            transactionRequest.to!,
+            new BigNumber(transactionRequest.value?.toString() || 0),
+            {
+                data: transactionRequest.data!.toString(),
+                onTransactionHash,
+                gas: gasLimit,
+                gasPrice
             }
-            throw err;
-        }
+        );
     }
 
     private getDirection(chainIdIn: ChainId, chainIdOut: ChainId): 'burn' | 'mint' {
