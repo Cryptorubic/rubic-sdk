@@ -1,12 +1,17 @@
-import { ChainId, CHAINS_PRIORITY, Symbiosis, Token as SymbiosisToken } from 'symbiosis-js-sdk';
+import {
+    ChainId,
+    CHAINS_PRIORITY,
+    Symbiosis,
+    Token as SymbiosisToken,
+    PendingRequest,
+    WaitForComplete
+} from 'symbiosis-js-sdk';
 import { getSymbiosisConfig } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
 import { Injector } from '@rsdk-core/sdk/injector';
-import { PendingRequest } from 'symbiosis-js-sdk/dist/crosschain/pending';
 import BigNumber from 'bignumber.js';
 import { SwapTransactionOptions } from 'src/features';
 import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common';
 import { BlockchainName, BlockchainsInfo, Token } from 'src/core';
-import { WaitForComplete } from 'symbiosis-js-sdk/dist/crosschain/waitForComplete';
 import { TransactionReceipt as EthersReceipt, Log as EthersLog } from '@ethersproject/providers';
 import { TransactionReceipt } from 'web3-eth';
 
