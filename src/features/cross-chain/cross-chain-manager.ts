@@ -152,6 +152,10 @@ export class CrossChainManager {
             wrappedTrades.find(wrappedTrade => wrappedTrade.trade instanceof CelerCrossChainTrade)
                 ?.trade as CelerCrossChainTrade
         )?.fromTrade.toToken.tokenAmount;
+
+        if (!transitTokenAmount) {
+            return wrappedTrades.sort(tradeA => (tradeA?.trade ? -1 : 1));
+        }
         return wrappedTrades.sort((firstTrade, secondTrade) => {
             const firstTradeAmount = this.getProviderRatio(firstTrade.trade, transitTokenAmount);
             const secondTradeAmount = this.getProviderRatio(secondTrade.trade, transitTokenAmount);
@@ -161,7 +165,7 @@ export class CrossChainManager {
     }
 
     private getProviderRatio(trade: CrossChainTrade | null, transitTokenAmount: BigNumber) {
-        if (!trade) {
+        if (!trade || !transitTokenAmount) {
             return new BigNumber(Infinity);
         }
 

@@ -99,30 +99,26 @@ export class CelerCrossChainContractData extends CrossChainContractData {
         return celerTransitTokens[blockchain].address;
     }
 
-    public async getFeeInPercents(fromContract: CrossChainContractData): Promise<number> {
-        const numOfFromBlockchain = await fromContract.getNumOfBlockchain();
+    public async getFeeInPercents(): Promise<number> {
         const feeAbsolute = await this.web3Public.callContractMethod(
-            this.mainContractAddress,
-            rubicCrossChainContractAbi,
-            'feeAmountOfBlockchain',
-            {
-                methodArguments: [numOfFromBlockchain]
-            }
+            this.address,
+            celerCrossChainContractAbi,
+            'feeRubic'
         );
-        return parseInt(feeAbsolute) / 10000;
+        return Number(feeAbsolute) / 10000;
     }
 
     public async getCryptoFeeToken(
         toContract: CelerCrossChainContractData
     ): Promise<PriceTokenAmount> {
-        const numOfToBlockchain = await toContract.getNumOfBlockchain();
+        const numOfToBlockchain = BlockchainsInfo.getBlockchainByName(toContract.blockchain).id;
         const feeAmount = new BigNumber(
             await this.web3Public.callContractMethod(
-                this.mainContractAddress,
-                rubicCrossChainContractAbi,
-                'blockchainCryptoFee',
+                this.address,
+                celerCrossChainContractAbi,
+                'dstCryptoFee',
                 {
-                    methodArguments: [numOfToBlockchain]
+                    methodArguments: [String(numOfToBlockchain)]
                 }
             )
         );

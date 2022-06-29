@@ -226,8 +226,12 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             fromTransitToken,
             slippage
         );
+        const finalAmount = Web3Pure.fromWei(
+            estimate.estimated_receive_amt,
+            toTransitToken.decimals
+        );
 
-        return Web3Pure.fromWei(estimate.estimated_receive_amt, toTransitToken.decimals);
+        return finalAmount.gt(0) ? finalAmount : new BigNumber(0);
     }
 
     private async fetchCelerEstimate(

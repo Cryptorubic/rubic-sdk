@@ -48,7 +48,10 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
                         priceImpact: 0,
                         slippage: 0,
                         fee: new BigNumber(NaN),
-                        feeSymbol: ''
+                        feeSymbol: '',
+                        feePercent: 0,
+                        networkFee: new BigNumber(NaN),
+                        networkFeeSymbol: ''
                     },
                     EMPTY_ADDRESS
                 ).getContractParams();
@@ -90,6 +93,12 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
 
     public readonly toTokenAmountMin: BigNumber;
 
+    public readonly networkFee: BigNumber;
+
+    public readonly networkFeeSymbol: string;
+
+    public readonly feePercent: number;
+
     /**
      * Overall price impact, fetched from symbiosis api.
      */
@@ -119,6 +128,9 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             slippage: number;
             fee: BigNumber;
             feeSymbol: string;
+            feePercent: number;
+            networkFee: BigNumber;
+            networkFeeSymbol: string;
         },
         providerAddress: string
     ) {
@@ -132,6 +144,9 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
 
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
 
+        this.feePercent = crossChainTrade.feePercent;
+        this.networkFee = crossChainTrade.networkFee;
+        this.networkFeeSymbol = crossChainTrade.networkFeeSymbol;
         this.feeSymbol = crossChainTrade.feeSymbol;
         this.fee = crossChainTrade.fee;
         this.priceImpact = crossChainTrade.priceImpact;

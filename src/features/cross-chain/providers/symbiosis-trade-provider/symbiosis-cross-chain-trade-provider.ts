@@ -110,7 +110,12 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
 
             const swapping = this.symbiosis.newSwapping();
 
-            const { tokenAmountOut, transactionRequest, priceImpact, fee } = await swapping.exactIn(
+            const {
+                tokenAmountOut,
+                transactionRequest,
+                priceImpact,
+                fee: transitTokenFee
+            } = await swapping.exactIn(
                 tokenAmountIn,
                 tokenOut,
                 fromAddress,
@@ -139,8 +144,11 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                         gasData,
                         priceImpact: parseFloat(priceImpact.toFixed()),
                         slippage: options.slippageTolerance,
-                        fee: new BigNumber(fee.toFixed()),
-                        feeSymbol: String(fee.token.symbol)
+                        fee: from.tokenAmount.minus(fromAmountWithoutFee),
+                        feeSymbol: from.symbol,
+                        feePercent,
+                        networkFee: new BigNumber(transitTokenFee.toFixed()),
+                        networkFeeSymbol: transitTokenFee.token.symbol || ''
                     },
                     options.providerAddress
                 )

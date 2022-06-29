@@ -34,7 +34,7 @@ export abstract class CrossChainContractData {
         toContract: CrossChainContractData
     ): Promise<PriceTokenAmount>;
 
-    public abstract getFeeInPercents(fromContract: CrossChainContractData): Promise<number>;
+    public abstract getFeeInPercents(fromContract?: CrossChainContractData): Promise<number>;
 
     public abstract getMaxGasPrice(): Promise<BigNumber>;
 
