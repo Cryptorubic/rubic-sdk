@@ -95,7 +95,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 .dividedBy(100);
             const tokenAmountIn = new SymbiosisTokenAmount(
                 tokenIn,
-                Web3Pure.toWei(fromAmountWithoutFee, tokenIn.decimals)
+                Web3Pure.toWei(fromAmountWithoutFee, tokenIn.decimals, 1)
             );
 
             const tokenOut = new SymbiosisToken({

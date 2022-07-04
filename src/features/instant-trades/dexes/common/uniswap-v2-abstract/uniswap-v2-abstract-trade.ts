@@ -1,7 +1,6 @@
 import { Cache } from '@rsdk-common/decorators/cache.decorator';
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { LowSlippageDeflationaryTokenError } from '@rsdk-common/errors/swap/low-slippage-deflationary-token.error';
-import { LowSlippageError } from '@rsdk-common/errors/swap/low-slippage.error';
 import { tryExecuteAsync } from '@rsdk-common/utils/functions';
 import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
@@ -194,9 +193,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
         await this.checkWalletState();
-
         await this.checkAllowanceAndApprove(options);
-
         return this.createAnyToAnyTrade(options);
     }
 

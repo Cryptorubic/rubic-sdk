@@ -41,9 +41,16 @@ export class Web3Pure {
      * Converts amount from Ether to Wei units.
      * @param amount Amount to convert.
      * @param decimals Token decimals.
+     * @param roundingMode BigNumberRoundingMode.
      */
-    static toWei(amount: BigNumber | string | number, decimals = 18): string {
-        return new BigNumber(amount || 0).times(new BigNumber(10).pow(decimals)).toFixed(0);
+    static toWei(
+        amount: BigNumber | string | number,
+        decimals = 18,
+        roundingMode?: BigNumber.RoundingMode
+    ): string {
+        return new BigNumber(amount || 0)
+            .times(new BigNumber(10).pow(decimals))
+            .toFixed(0, roundingMode);
     }
 
     /**

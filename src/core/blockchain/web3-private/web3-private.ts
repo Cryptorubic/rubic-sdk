@@ -63,7 +63,7 @@ export class Web3Private {
     }
 
     /**
-     * Parses web3 error by its code.
+     * Parses web3 error by its code or message.
      * @param err Web3 error to parse.
      */
     private static parseError(err: Web3Error): RubicSdkError {
@@ -150,8 +150,11 @@ export class Web3Private {
                 ...(options.data && { data: options.data })
             });
             return await this.sendTransaction(toAddress, value, options);
-        } catch (err: unknown) {
-            console.error('Tokens transfer error', err);
+        } catch (err) {
+            console.error('Call tokens transfer error', err);
+            if (this.shouldIgnoreError(err)) {
+                return await this.sendTransaction(toAddress, value, options);
+            }
             throw Web3Private.parseError(err as Web3Error);
         }
     }
@@ -275,8 +278,8 @@ export class Web3Private {
                     gas: options.gas || Web3Pure.calculateGasMargin(gas, 1.15)
                 }
             );
-        } catch (err: unknown) {
-            if (allowError && allowError(err as Web3Error)) {
+        } catch (err) {
+            if ((allowError && allowError(err as Web3Error)) || this.shouldIgnoreError(err)) {
                 return this.executeContractMethod(
                     contractAddress,
                     contractAbi,
@@ -375,5 +378,16 @@ export class Web3Private {
         spenderAddress: string
     ): Promise<TransactionReceipt> {
         return this.approveTokens(tokenAddress, spenderAddress, new BigNumber(0));
+    }
+
+    private shouldIgnoreError(error: Web3Error): boolean {
+        const ignoreCallErrors = [
+            'execution reverted: TransferHelper: TRANSFER_FROM_FAILED',
+            'STF',
+            'execution reverted: ERC20: transfer amount exceeds allowance',
+            'Anyswaperc20: request exceed allowance'
+        ];
+
+        return ignoreCallErrors.some(err => error?.message.includes(err));
     }
 }
