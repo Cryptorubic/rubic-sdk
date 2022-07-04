@@ -151,8 +151,9 @@ export class Web3Private {
             });
             return await this.sendTransaction(toAddress, value, options);
         } catch (err) {
-            console.error('Call tokens transfer error', err);
-            if (this.shouldIgnoreError(err)) {
+            console.debug('Call tokens transfer error', err);
+            const shouldIgnore = this.shouldIgnoreError(err);
+            if (shouldIgnore) {
                 return await this.sendTransaction(toAddress, value, options);
             }
             throw Web3Private.parseError(err as Web3Error);
@@ -385,9 +386,15 @@ export class Web3Private {
             'execution reverted: TransferHelper: TRANSFER_FROM_FAILED',
             'STF',
             'execution reverted: ERC20: transfer amount exceeds allowance',
-            'Anyswaperc20: request exceed allowance'
+            'Anyswaperc20: request exceed allowance',
+            'gas required exceeds allowance',
+            'execution reverted: SafeERC20: low-level call failed'
         ];
 
-        return ignoreCallErrors.some(err => error?.message.includes(err));
+        const test = ignoreCallErrors.some(err =>
+            error?.message?.toLowerCase().includes(err.toLowerCase())
+        );
+        console.log(test);
+        return test;
     }
 }
