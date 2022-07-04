@@ -25,12 +25,11 @@ import { CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
  * Calculated Celer cross chain trade.
  */
 export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
-    /** @internal */
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
 
     public readonly itType: { from: TradeType; to: TradeType };
 
-    private readonly feeInPercents: number;
+    public readonly feeInPercents: number;
 
     /** @internal */
     public static async getGasData(
@@ -117,7 +116,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
             feeInPercents: number;
         },
         providerAddress: string,
-        private readonly maxSlippage: number
+        public readonly maxSlippage: number
     ) {
         super(providerAddress);
 
@@ -189,17 +188,6 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
                     gasPrice,
                     value,
                     onTransactionHash
-                },
-                err => {
-                    const includesErrCode = err?.message?.includes('-32000');
-                    const allowedErrors = [
-                        'insufficient funds for transfer',
-                        'insufficient funds for gas * price + value'
-                    ];
-                    const includesPhrase = allowedErrors.some(error =>
-                        err?.message?.includes(error)
-                    );
-                    return includesErrCode && includesPhrase;
                 }
             );
 
@@ -252,7 +240,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         };
     }
 
-    private async calculateSwapValue(amountIn: BigNumber, data: unknown[]): Promise<number> {
+    protected async calculateSwapValue(amountIn: BigNumber, data: unknown[]): Promise<number> {
         const contract = this.fromTrade.contract as CelerCrossChainContractData;
         const { isNative } = this.fromTrade.fromToken;
         const isBridge = this.fromTrade.fromToken.isEqualTo(this.fromTrade.toToken);
