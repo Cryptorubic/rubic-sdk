@@ -1,4 +1,4 @@
-import { SymbiosisCrossChainSupportedBlockchain } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
+import { SymbiosisCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { BLOCKCHAIN_NAME } from 'src/core';
 
 export const SYMBIOSIS_CONTRACT_ADDRESS: Record<SymbiosisCrossChainSupportedBlockchain, string> = {

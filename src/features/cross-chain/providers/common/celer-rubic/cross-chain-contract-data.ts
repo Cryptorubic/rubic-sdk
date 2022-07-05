@@ -1,6 +1,6 @@
-import { CrossChainSupportedInstantTradeProvider } from '@features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
-import { ProviderData } from '@features/cross-chain/models/provider-data';
-import { Injector } from '@core/sdk/injector';
+import { CrossChainSupportedInstantTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
+import { ProviderData } from '@rsdk-features/cross-chain/models/provider-data';
+import { Injector } from '@rsdk-core/sdk/injector';
 import { BlockchainName, PriceToken, PriceTokenAmount, Token, Web3Public } from 'src/core';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common';
@@ -34,7 +34,7 @@ export abstract class CrossChainContractData {
         toContract: CrossChainContractData
     ): Promise<PriceTokenAmount>;
 
-    public abstract getFeeInPercents(fromContract: CrossChainContractData): Promise<number>;
+    public abstract getFeeInPercents(fromContract?: CrossChainContractData): Promise<number>;
 
     public abstract getMaxGasPrice(): Promise<BigNumber>;
 

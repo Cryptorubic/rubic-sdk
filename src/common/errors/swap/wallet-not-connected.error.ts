@@ -1,7 +1,12 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk.error';
+import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 
 /**
  * Thrown, when method, which requires connected wallet, is called without
  * wallet being connected.
  */
-export class WalletNotConnectedError extends RubicSdkError {}
+export class WalletNotConnectedError extends RubicSdkError {
+    constructor() {
+        super();
+        Object.setPrototypeOf(this, WalletNotConnectedError.prototype);
+    }
+}

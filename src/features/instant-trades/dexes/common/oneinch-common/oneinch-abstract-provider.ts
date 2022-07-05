@@ -1,22 +1,21 @@
-import { combineOptions } from '@common/utils/options';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { Token } from '@core/blockchain/tokens/token';
-import { Injector } from '@core/sdk/injector';
-import { oneinchApiParams } from '@features/instant-trades/dexes/common/oneinch-common/constants';
-import { RubicSdkError } from '@common/errors/rubic-sdk.error';
-import { OneinchQuoteRequest } from '@features/instant-trades/dexes/common/oneinch-common/models/oneinch-quote-request';
-import { OneinchQuoteResponse } from '@features/instant-trades/dexes/common/oneinch-common/models/oneinch-quote-response';
-import { OneinchSwapRequest } from '@features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-request';
-import { OneinchSwapResponse } from '@features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-response';
-import { OneinchTokensResponse } from '@features/instant-trades/dexes/common/oneinch-common/models/oneinch-tokens-response';
-import { getOneinchApiBaseUrl } from '@features/instant-trades/dexes/common/oneinch-common/utils';
+import { combineOptions } from '@rsdk-common/utils/options';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { Token } from '@rsdk-core/blockchain/tokens/token';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { oneinchApiParams } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/constants';
+import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
+import { OneinchQuoteRequest } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-quote-request';
+import { OneinchQuoteResponse } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-quote-response';
+import { OneinchSwapRequest } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-request';
+import { OneinchSwapResponse } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-response';
+import { getOneinchApiBaseUrl } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/utils';
 import BigNumber from 'bignumber.js';
 
-import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { OneinchTrade } from '@features/instant-trades/dexes/common/oneinch-common/oneinch-trade';
-import { InstantTradeProvider } from '@features/instant-trades/instant-trade-provider';
-import { SwapCalculationOptions } from '@features/instant-trades/models/swap-calculation-options';
-import { createTokenNativeAddressProxy } from '@features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
+import { OneinchTrade } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/oneinch-trade';
+import { InstantTradeProvider } from '@rsdk-features/instant-trades/instant-trade-provider';
+import { SwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
+import { createTokenNativeAddressProxy } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { Cache } from 'src/common';
 import { BlockchainsInfo } from 'src/core';
 
@@ -44,21 +43,6 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
     @Cache
     private get apiBaseUrl(): string {
         return getOneinchApiBaseUrl(this.blockchain);
-    }
-
-    private async getSupportedTokensByBlockchain(): Promise<string[]> {
-        if (this.supportedTokens.length) {
-            return this.supportedTokens;
-        }
-
-        const oneinchTokensResponse: OneinchTokensResponse = await this.httpClient.get(
-            `${this.apiBaseUrl}/tokens`
-        );
-        this.supportedTokens = Object.keys(oneinchTokensResponse.tokens).map(tokenAddress =>
-            tokenAddress.toLowerCase()
-        );
-
-        return this.supportedTokens;
     }
 
     private async loadContractAddress(): Promise<string> {
@@ -91,14 +75,6 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
 
         const fromTokenClone = createTokenNativeAddressProxy(from, oneinchApiParams.nativeAddress);
         const toTokenClone = createTokenNativeAddressProxy(toToken, oneinchApiParams.nativeAddress);
-
-        const supportedTokensAddresses = await this.getSupportedTokensByBlockchain();
-        if (
-            !supportedTokensAddresses.includes(fromTokenClone.address.toLowerCase()) ||
-            !supportedTokensAddresses.includes(toTokenClone.address.toLowerCase())
-        ) {
-            throw new RubicSdkError("Oneinch doesn't support this tokens");
-        }
 
         const [contractAddress, { toTokenAmountInWei, estimatedGas, path, data }] =
             await Promise.all([

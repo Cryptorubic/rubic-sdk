@@ -1,10 +1,10 @@
-import pTimeout from '@common/utils/p-timeout';
-import { BLOCKCHAIN_NAME, BlockchainName } from '@core/blockchain/models/blockchain-name';
-import { Injector } from '@core/sdk/injector';
+import pTimeout from '@rsdk-common/utils/p-timeout';
+import { BLOCKCHAIN_NAME, BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { Injector } from '@rsdk-core/sdk/injector';
 import { Cache } from 'src/common';
 import BigNumber from 'bignumber.js';
-import { HttpClient } from '@common/models/http-client';
-import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
+import { HttpClient } from '@rsdk-common/models/http-client';
+import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
 
 /**
  * Uses different api or web3 to retrieve current gas price.

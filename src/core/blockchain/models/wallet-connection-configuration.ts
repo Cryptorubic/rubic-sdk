@@ -1,4 +1,4 @@
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import Web3 from 'web3';
 
 export interface WalletConnectionConfiguration {

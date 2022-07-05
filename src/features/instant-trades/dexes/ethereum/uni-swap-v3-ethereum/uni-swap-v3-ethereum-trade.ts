@@ -2,7 +2,7 @@ import { TRADE_TYPE, TradeType } from 'src/features';
 import {
     UniswapV3AbstractTrade,
     UniswapV3TradeStruct
-} from '@features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
+} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
 
 export class UniSwapV3EthereumTrade extends UniswapV3AbstractTrade {
     public static get type(): TradeType {

@@ -1,15 +1,15 @@
-import { CrossChainContractTrade } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import { BlockchainName } from 'src/core';
 import { AbiItem } from 'web3-utils';
-import { CelerSwapMethod } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-swap-methods';
+import { CelerSwapMethod } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-swap-methods';
 import {
     isAlgebraProvider,
     isOneInchLikeProvider,
     isUniswapV2LikeProvider,
     isUniswapV3LikeProvider
-} from '@features/instant-trades/utils/type-guards';
-import { celerCrossChainContractAbi } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
-import { CelerCrossChainContractData } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
+} from '@rsdk-features/instant-trades/utils/type-guards';
+import { celerCrossChainContractAbi } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
+import { CelerCrossChainContractData } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
+import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import { RubicSdkError } from 'src/common';
 
 export abstract class CelerCrossChainContractTrade extends CrossChainContractTrade {
