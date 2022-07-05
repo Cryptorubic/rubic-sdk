@@ -1,8 +1,8 @@
 import {
     UniswapV2AbstractTrade,
     UniswapV2TradeStruct
-} from '@features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
-import { SUSHI_SWAP_MOONRIVER_CONTRACT_ADDRESS } from '@features/instant-trades/dexes/moonriver/sushi-swap-moonriver/constants';
+} from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { SUSHI_SWAP_MOONRIVER_CONTRACT_ADDRESS } from '@rsdk-features/instant-trades/dexes/moonriver/sushi-swap-moonriver/constants';
 import { TRADE_TYPE, TradeType } from 'src/features';
 
 export class SushiSwapMoonriverTrade extends UniswapV2AbstractTrade {

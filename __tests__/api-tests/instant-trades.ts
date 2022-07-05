@@ -1,5 +1,5 @@
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
-import { SDK } from '@core/sdk/sdk';
+import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { SDK } from '@rsdk-core/sdk/sdk';
 import { minimalConfiguration } from '../utils/configuration';
 
 export const instantTradesApiSpec = () =>

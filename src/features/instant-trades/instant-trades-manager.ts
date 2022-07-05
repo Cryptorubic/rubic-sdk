@@ -1,24 +1,26 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk.error';
-import { notNull } from '@common/utils/object';
-import { combineOptions } from '@common/utils/options';
-import pTimeout from '@common/utils/p-timeout';
-import { Mutable } from '@common/utils/types/mutable';
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
-import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { Token } from '@core/blockchain/tokens/token';
-import { InstantTradeProvider } from '@features/instant-trades/instant-trade-provider';
-import { SwapManagerCalculationOptions } from '@features/instant-trades/models/swap-manager-calculation-options';
-import { TradeType } from '@features/instant-trades/models/trade-type';
-import { TypedTradeProviders } from '@features/instant-trades/models/typed-trade-provider';
+import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
+import { combineOptions } from '@rsdk-common/utils/options';
+import pTimeout from '@rsdk-common/utils/p-timeout';
+import { Mutable } from '@rsdk-common/utils/types/mutable';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { Token } from '@rsdk-core/blockchain/tokens/token';
+import { InstantTradeProvider } from '@rsdk-features/instant-trades/instant-trade-provider';
+import { SwapManagerCalculationOptions } from '@rsdk-features/instant-trades/models/swap-manager-calculation-options';
+import { TradeType } from '@rsdk-features/instant-trades/models/trade-type';
+import { TypedTradeProviders } from '@rsdk-features/instant-trades/models/typed-trade-provider';
 import { InstantTrade } from 'src/features';
 import { MarkRequired } from 'ts-essentials';
-import { getPriceTokensFromInputTokens } from '@common/utils/tokens';
-import { UniswapV2TradeProviders } from '@features/instant-trades/constants/uniswap-v2-trade-providers';
-import { UniswapV3TradeProviders } from '@features/instant-trades/constants/uniswap-v3-trade-providers';
-import { OneInchTradeProviders } from '@features/instant-trades/constants/one-inch-trade-providers';
-import { ZrxTradeProviders } from '@features/instant-trades/constants/zrx-trade-providers';
-import { AlgebraTradeProviders } from '@features/instant-trades/constants/algebra-trade-providers';
+import { getPriceTokensFromInputTokens } from '@rsdk-common/utils/tokens';
+import { UniswapV2TradeProviders } from '@rsdk-features/instant-trades/constants/uniswap-v2-trade-providers';
+import { UniswapV3TradeProviders } from '@rsdk-features/instant-trades/constants/uniswap-v3-trade-providers';
+import { OneInchTradeProviders } from '@rsdk-features/instant-trades/constants/one-inch-trade-providers';
+import { ZrxTradeProviders } from '@rsdk-features/instant-trades/constants/zrx-trade-providers';
+import { AlgebraTradeProviders } from '@rsdk-features/instant-trades/constants/algebra-trade-providers';
+import { InstantTradeError } from 'src/features/instant-trades/models/instant-trade-error';
+import { isOneInch } from 'src/features/instant-trades/utils/type-guards';
+import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
 
 export type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCalculationOptions,
@@ -109,7 +111,7 @@ export class InstantTradesManager {
         fromAmount: string | number,
         toToken: Token | string,
         options?: SwapManagerCalculationOptions
-    ): Promise<InstantTrade[]> {
+    ): Promise<Array<InstantTrade | InstantTradeError>> {
         if (toToken instanceof Token && fromToken.blockchain !== toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be same');
         }
@@ -131,7 +133,7 @@ export class InstantTradesManager {
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredSwapManagerCalculationOptions
-    ): Promise<InstantTrade[]> {
+    ): Promise<Array<InstantTrade | InstantTradeError>> {
         const { timeout, disabledProviders, ...providersOptions } = options;
         const providers = Object.entries(this.blockchainTradeProviders[from.blockchain]).filter(
             ([type]) => !disabledProviders.includes(type as TradeType)
@@ -143,19 +145,37 @@ export class InstantTradesManager {
 
         const calculationPromises = providers.map(async ([type, provider]) => {
             try {
-                return await pTimeout(provider.calculate(from, to, providersOptions), timeout);
+                const providerSpecificOptions = {
+                    ...providersOptions,
+                    wrappedAddress: isOneInch(type)
+                        ? oneinchApiParams.nativeAddress
+                        : providersOptions.wrappedAddress
+                };
+                return await pTimeout(
+                    provider.calculate(from, to, providerSpecificOptions),
+                    timeout
+                );
             } catch (e) {
                 console.debug(
                     `[RUBIC_SDK] Trade calculation error occurred for ${type} trade provider.`,
                     e
                 );
-                return null;
+                return { type, error: e };
             }
         });
 
         const results = await Promise.all(calculationPromises);
-        return results
-            .filter(notNull)
-            .sort((tradeA, tradeB) => tradeB.to.tokenAmount.comparedTo(tradeA.to.tokenAmount));
+        return results.sort((tradeA, tradeB) => {
+            if (tradeA instanceof InstantTrade || tradeB instanceof InstantTrade) {
+                if (tradeA instanceof InstantTrade && tradeB instanceof InstantTrade) {
+                    return tradeA.to.tokenAmount.comparedTo(tradeB.to.tokenAmount);
+                }
+                if (tradeA instanceof InstantTrade) {
+                    return 1;
+                }
+                return -1;
+            }
+            return 0;
+        });
     }
 }

@@ -1,9 +1,9 @@
 import { PriceTokenAmount, Web3Public } from 'src/core';
 import { Cache, CrossChainIsUnavailableError, MaxGasPriceOverflowError } from 'src/common';
-import { CrossChainContractTrade } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
-import { Injector } from '@core/sdk/injector';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
-import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
+import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
 
 /**
  * Contains common for Celer and Rubic trades methods and fields.

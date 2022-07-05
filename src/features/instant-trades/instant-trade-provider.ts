@@ -1,14 +1,14 @@
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
-import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { InstantTrade } from '@features/instant-trades/instant-trade';
-import { SwapCalculationOptions } from '@features/instant-trades/models/swap-calculation-options';
-import { Web3Public } from '@core/blockchain/web3-public/web3-public';
-import { Injector } from '@core/sdk/injector';
-import { GasPriceInfo } from '@features/instant-trades/models/gas-price-info';
-import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
+import { SwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
+import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { GasPriceInfo } from '@rsdk-features/instant-trades/models/gas-price-info';
+import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
 import BigNumber from 'bignumber.js';
-import { GasFeeInfo } from '@features/instant-trades/models/gas-fee-info';
+import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
 import { TradeType } from 'src/features';
 
 /**

@@ -1,10 +1,10 @@
-import { RubicCrossChainContractData } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/rubic-cross-chain-contract-data';
+import { RubicCrossChainContractData } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/rubic-cross-chain-contract-data';
 import {
     RubicCrossChainSupportedBlockchain,
     rubicCrossChainSupportedBlockchains
-} from '@features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
-import { crossChainTradeProvidersData } from '@features/cross-chain/constants/cross-chain-trade-providers-data';
-import { rubicCrossChainContractsAddresses } from '@features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contracts-addresses';
+} from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
+import { crossChainTradeProvidersData } from '@rsdk-features/cross-chain/constants/cross-chain-trade-providers-data';
+import { rubicCrossChainContractsAddresses } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contracts-addresses';
 import { RubicSdkError } from 'src/common';
 
 const rubicCrossChainContracts: Record<

@@ -1,10 +1,10 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk.error';
-import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
+import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
+import { NATIVE_TOKEN_ADDRESS } from '@rsdk-core/blockchain/constants/native-token-address';
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { TransactionConfig } from 'web3-core';
 import { toChecksumAddress, isAddress, AbiItem, fromAscii } from 'web3-utils';
-import { TransactionGasParams } from '@features/instant-trades/models/gas-params';
+import { TransactionGasParams } from '@rsdk-features/instant-trades/models/gas-params';
 
 /**
  * Contains common methods, connected with web3, e.g. wei conversion, encoding data, etc.
@@ -41,9 +41,16 @@ export class Web3Pure {
      * Converts amount from Ether to Wei units.
      * @param amount Amount to convert.
      * @param decimals Token decimals.
+     * @param roundingMode BigNumberRoundingMode.
      */
-    static toWei(amount: BigNumber | string | number, decimals = 18): string {
-        return new BigNumber(amount || 0).times(new BigNumber(10).pow(decimals)).toFixed(0);
+    static toWei(
+        amount: BigNumber | string | number,
+        decimals = 18,
+        roundingMode?: BigNumber.RoundingMode
+    ): string {
+        return new BigNumber(amount || 0)
+            .times(new BigNumber(10).pow(decimals))
+            .toFixed(0, roundingMode);
     }
 
     /**

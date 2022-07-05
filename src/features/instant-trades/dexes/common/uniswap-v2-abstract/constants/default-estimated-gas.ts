@@ -1,4 +1,4 @@
-import { DefaultEstimatedGas } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
+import { DefaultEstimatedGas } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
 import BigNumber from 'bignumber.js';
 
 export const defaultEstimatedGas: DefaultEstimatedGas = {

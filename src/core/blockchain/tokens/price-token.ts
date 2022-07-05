@@ -1,6 +1,6 @@
-import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
-import { Token, TokenStruct } from '@core/blockchain/tokens/token';
-import { Injector } from '@core/sdk/injector';
+import { TokenBaseStruct } from '@rsdk-core/blockchain/models/token-base-struct';
+import { Token, TokenStruct } from '@rsdk-core/blockchain/tokens/token';
+import { Injector } from '@rsdk-core/sdk/injector';
 import BigNumber from 'bignumber.js';
 
 export type PriceTokenStruct = ConstructorParameters<typeof Token>[number] & { price: BigNumber };

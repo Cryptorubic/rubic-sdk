@@ -7,7 +7,7 @@ import { PriceToken } from 'src/core/blockchain/tokens/price-token';
 import { QuickSwapProvider } from 'src/features/instant-trades/dexes/polygon/quick-swap/quick-swap-provider';
 import { QuickSwapTrade } from 'src/features/instant-trades/dexes/polygon/quick-swap/quick-swap-trade';
 import { QUICK_SWAP_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/polygon/quick-swap/constants';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.POLYGON];
 

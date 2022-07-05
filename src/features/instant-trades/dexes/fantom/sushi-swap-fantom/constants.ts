@@ -1,4 +1,4 @@
-import { defaultFantomProviderConfiguration } from '@features/instant-trades/dexes/fantom/default-constants';
+import { defaultFantomProviderConfiguration } from '@rsdk-features/instant-trades/dexes/fantom/default-constants';
 
 export const SUSHI_SWAP_FANTOM_CONTRACT_ADDRESS = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
 

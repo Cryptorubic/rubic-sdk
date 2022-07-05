@@ -1,5 +1,5 @@
 import { Web3Public } from 'src/core';
-import { messageBusContractAbi } from '@features/cross-chain/providers/celer-trade-provider/celer-message-bus-controller/constants/message-bus-contract-abi';
+import { messageBusContractAbi } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-message-bus-controller/constants/message-bus-contract-abi';
 
 export class CellerMessageBusController {
     constructor(private readonly web3Public: Web3Public) {}

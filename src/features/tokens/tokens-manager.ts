@@ -1,12 +1,12 @@
-import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
-import { PriceToken, PriceTokenStruct } from '@core/blockchain/tokens/price-token';
+import { TokenBaseStruct } from '@rsdk-core/blockchain/models/token-base-struct';
+import { PriceToken, PriceTokenStruct } from '@rsdk-core/blockchain/tokens/price-token';
 import {
     PriceTokenAmount,
     PriceTokenAmountBaseStruct,
     PriceTokenAmountStruct
-} from '@core/blockchain/tokens/price-token-amount';
-import { Token, TokenStruct } from '@core/blockchain/tokens/token';
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
+} from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { Token, TokenStruct } from '@rsdk-core/blockchain/tokens/token';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import BigNumber from 'bignumber.js';
 
 /**

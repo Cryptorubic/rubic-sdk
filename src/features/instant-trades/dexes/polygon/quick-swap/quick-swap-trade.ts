@@ -1,8 +1,8 @@
 import {
     UniswapV2AbstractTrade,
     UniswapV2TradeStruct
-} from '@features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
-import { QUICK_SWAP_CONTRACT_ADDRESS } from '@features/instant-trades/dexes/polygon/quick-swap/constants';
+} from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { QUICK_SWAP_CONTRACT_ADDRESS } from '@rsdk-features/instant-trades/dexes/polygon/quick-swap/constants';
 import { TRADE_TYPE, TradeType } from 'src/features';
 
 export class QuickSwapTrade extends UniswapV2AbstractTrade {

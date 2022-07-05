@@ -4,8 +4,8 @@ import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
-import { UniSwapV3PolygonProvider } from '@features/instant-trades/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
+import { UniSwapV3PolygonProvider } from '@rsdk-features/instant-trades/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
+import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.POLYGON];
 

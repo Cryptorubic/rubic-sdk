@@ -1,6 +1,6 @@
 import { PriceToken } from 'src/core';
-import { UniswapV3AlgebraRoute } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
-import { Exact } from '@features/instant-trades/models/exact';
+import { UniswapV3AlgebraRoute } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
+import { Exact } from '@rsdk-features/instant-trades/models/exact';
 
 export interface UniswapV3AlgebraQuoterController {
     /**

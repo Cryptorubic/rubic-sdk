@@ -1,20 +1,25 @@
-import { Injector } from '@core/sdk/injector';
-import { InstantTrade } from '@features/instant-trades/instant-trade';
-import { SwapTransactionOptions } from '@features/instant-trades/models/swap-transaction-options';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
+import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
 import { TRADE_TYPE, TradeType } from 'src/features';
 import { TransactionReceipt } from 'web3-eth';
-import { ZrxQuoteResponse } from '@features/instant-trades/dexes/common/zrx-common/models/zrx-types';
-import { OptionsGasParams, TransactionGasParams } from '@features/instant-trades/models/gas-params';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { GasFeeInfo } from '@features/instant-trades/models/gas-fee-info';
-import { EncodeTransactionOptions } from '@features/instant-trades/models/encode-transaction-options';
+import { ZrxQuoteResponse } from '@rsdk-features/instant-trades/dexes/common/zrx-common/models/zrx-types';
+import {
+    OptionsGasParams,
+    TransactionGasParams
+} from '@rsdk-features/instant-trades/models/gas-params';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
+import { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';
 import { TransactionConfig } from 'web3-core';
+import { Token } from 'src/core';
 
 interface ZrxTradeStruct {
     from: PriceTokenAmount;
     to: PriceTokenAmount;
     slippageTolerance: number;
     apiTradeData: ZrxQuoteResponse;
+    path: ReadonlyArray<Token>;
     gasFeeInfo?: GasFeeInfo;
 }
 
@@ -34,6 +39,8 @@ export class ZrxTrade extends InstantTrade {
 
     protected readonly contractAddress: string;
 
+    public readonly path: ReadonlyArray<Token>;
+
     public get type(): TradeType {
         return TRADE_TYPE.ZRX_ETHEREUM;
     }
@@ -47,6 +54,7 @@ export class ZrxTrade extends InstantTrade {
         this.slippageTolerance = tradeStruct.slippageTolerance;
         this.apiTradeData = tradeStruct.apiTradeData;
         this.contractAddress = this.apiTradeData.to;
+        this.path = tradeStruct.path;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
