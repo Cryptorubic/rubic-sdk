@@ -13,6 +13,7 @@ import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swap/failed-to-check-for-transaction-receipt.error';
 import { Web3Pure } from 'src/core';
 import { LowSlippageError } from 'src/common';
+import { parseError } from 'src/common/utils/errors';
 
 /**
  * Class containing methods for executing the functions of contracts
@@ -88,7 +89,7 @@ export class Web3Private {
                 return new Error(errorMessage);
             }
         } catch {}
-        return err?.message ? new Error(err.message) : err;
+        return parseError(err);
     }
 
     /**
