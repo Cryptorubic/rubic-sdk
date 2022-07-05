@@ -21,7 +21,6 @@ import { AlgebraTradeProviders } from '@rsdk-features/instant-trades/constants/a
 import { InstantTradeError } from 'src/features/instant-trades/models/instant-trade-error';
 import { isOneInch } from 'src/features/instant-trades/utils/type-guards';
 import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
-import { notNull } from 'src/common';
 
 export type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCalculationOptions,
@@ -166,7 +165,7 @@ export class InstantTradesManager {
         });
 
         const results = await Promise.all(calculationPromises);
-        return results.filter(notNull).sort((tradeA, tradeB) => {
+        return results.sort((tradeA, tradeB) => {
             if (tradeA instanceof InstantTrade || tradeB instanceof InstantTrade) {
                 if (tradeA instanceof InstantTrade && tradeB instanceof InstantTrade) {
                     return tradeA.to.tokenAmount.comparedTo(tradeB.to.tokenAmount);
