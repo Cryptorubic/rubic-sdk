@@ -38,7 +38,7 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
         methodArguments[0].push(data);
     }
 
-    public getCelerSourceObject(slippage: number): InchCelerSwapInfo {
+    public getCelerSourceObject(): InchCelerSwapInfo {
         if (!this.instantTrade.transactionData) {
             throw new RubicSdkError(`Can't estimate 1inch trade`);
         }
@@ -60,9 +60,7 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
 
         const path = [firstToken, secondToken];
 
-        const amountOutMinimum = this.instantTrade.toTokenAmountMin
-            .weiAmountMinusSlippage(slippage)
-            .toFixed(0);
+        const amountOutMinimum = this.instantTrade.toTokenAmountMin.tokenAmount.toFixed(0);
 
         return { dex, path, data: this.instantTrade.transactionData, amountOutMinimum };
     }
