@@ -21,10 +21,10 @@ import pTimeout from '@rsdk-common/utils/p-timeout';
 import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import BigNumber from 'bignumber.js';
-import { SymbiosisCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
 import { MarkRequired } from 'ts-essentials';
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
-import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
+import { RubicCrossChainTradeProvider } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
+import { SymbiosisCrossChainTradeProvider } from 'src/features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
 import { LifiCrossChainTradeProvider } from './providers/lifi-trade-provider/lifi-cross-chain-trade-provider';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
@@ -37,7 +37,7 @@ type RequiredSwapManagerCalculationOptions = MarkRequired<
  * Contains method to calculate best cross chain trade.
  */
 export class CrossChainManager {
-    private static readonly defaultCalculationTimeout = 15_000;
+    private static readonly defaultCalculationTimeout = 20_000;
 
     private static readonly defaultSlippageTolerance = 0.02;
 

@@ -1,33 +1,28 @@
-import { Injector } from '@core/sdk/injector';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { GasData } from '@features/cross-chain/models/gas-data';
-import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/failed-to-check-for-transaction-receipt.error';
 import BigNumber from 'bignumber.js';
-import { Web3Public } from 'src/core';
-import { CROSS_CHAIN_TRADE_TYPE, CrossChainTrade } from 'src/features';
-import LIFI, { Route } from '@lifinance/sdk';
+import { PriceTokenAmount, Web3Public } from 'src/core';
+import {
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTrade,
+    SwapTransactionOptions,
+    TradeType
+} from 'src/features';
+import { Route } from '@lifinance/sdk';
+import { Injector } from 'src/core/sdk/injector';
+import { FailedToCheckForTransactionReceiptError } from 'src/common';
+import {
+    lifiContractAbi,
+    lifiContractAddress
+} from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
+import { GasData } from 'src/features/cross-chain/models/gas-data';
+import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 
 /**
  * Calculated Celer cross chain trade.
  */
 export class LifiCrossChainTrade extends CrossChainTrade {
-    public get fromContractAddress() {
-        // @TODO add address
-        return '';
-    }
-
-    public async getContractParams() {
-        // @TODO add params
-        return {
-            contractAddress: '',
-            contractAbi: [],
-            methodName: '',
-            methodArguments: [],
-            value: '0'
-        };
-    }
-
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
+
+    private readonly httpClient = Injector.httpClient;
 
     public readonly from: PriceTokenAmount;
 
@@ -39,9 +34,17 @@ export class LifiCrossChainTrade extends CrossChainTrade {
 
     protected readonly fromWeb3Public: Web3Public;
 
-    private readonly lifi = new LIFI();
-
     private readonly route: Route;
+
+    // @TODO update
+    public readonly itType: { from: TradeType; to: TradeType } = {
+        from: 'ONE_INCH_ARBITRUM',
+        to: 'ONE_INCH_ARBITRUM'
+    };
+
+    public get fromContractAddress() {
+        return lifiContractAddress;
+    }
 
     constructor(
         crossChainTrade: {
@@ -71,50 +74,36 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         await Promise.all([this.checkUserBalance()]);
     }
 
-    public async swap(): Promise<string | never> {
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
-        // await this.checkAllowanceAndApprove(options);
+        await this.checkAllowanceAndApprove(options);
 
-        // const { onConfirm, gasLimit, gasPrice } = options;
+        const { onConfirm, gasLimit, gasPrice } = options;
 
-        // const { contractAddress, contractAbi, methodName, methodArguments, value } =
-        //     await this.getContractParams();
+        const { contractAddress, contractAbi, methodName, methodArguments, value } =
+            await this.getContractParams();
 
         let transactionHash: string;
         try {
-            const { signer } = Injector.web3Private;
-            await this.lifi.executeRoute(signer, this.route);
+            const onTransactionHash = (hash: string) => {
+                if (onConfirm) {
+                    onConfirm(hash);
+                }
+                transactionHash = hash;
+            };
 
-            // const onTransactionHash = (hash: string) => {
-            //     if (onConfirm) {
-            //         onConfirm(hash);
-            //     }
-            //     transactionHash = hash;
-            // };
-
-            // await Injector.web3Private.tryExecuteContractMethod(
-            //     contractAddress,
-            //     contractAbi,
-            //     methodName,
-            //     methodArguments,
-            //     {
-            //         gas: gasLimit,
-            //         gasPrice,
-            //         value,
-            //         onTransactionHash
-            //     },
-            //     err => {
-            //         const includesErrCode = err?.message?.includes('-32000');
-            //         const allowedErrors = [
-            //             'insufficient funds for transfer',
-            //             'insufficient funds for gas * price + value'
-            //         ];
-            //         const includesPhrase = allowedErrors.some(error =>
-            //             err?.message?.includes(error)
-            //         );
-            //         return includesErrCode && includesPhrase;
-            //     }
-            // );
+            await Injector.web3Private.tryExecuteContractMethod(
+                contractAddress,
+                contractAbi,
+                methodName,
+                methodArguments,
+                {
+                    gas: gasLimit,
+                    gasPrice,
+                    value,
+                    onTransactionHash
+                }
+            );
 
             return transactionHash!;
         } catch (err) {
@@ -123,5 +112,55 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             }
             throw err;
         }
+    }
+
+    public async getContractParams() {
+        const methodName = 'lifiCall';
+
+        const data = await this.getSwapData();
+        const methodArguments = [this.from.address, this.from.stringWeiAmount, EMPTY_ADDRESS, data];
+
+        const value = this.from.isNative ? this.from.stringWeiAmount : '0';
+
+        return {
+            contractAddress: lifiContractAddress,
+            contractAbi: lifiContractAbi,
+            methodName,
+            methodArguments,
+            value
+        };
+    }
+
+    private async getSwapData(): Promise<string> {
+        const firstStep = this.route.steps[0]!;
+        const step = {
+            ...firstStep,
+            action: {
+                ...firstStep.action,
+                fromAddress: this.walletAddress,
+                toAddress: this.walletAddress
+            },
+            execution: {
+                status: 'NOT_STARTED',
+                process: [
+                    {
+                        message: 'Preparing transaction.',
+                        startedAt: Date.now(),
+                        status: 'STARTED',
+                        type: 'CROSS_CHAIN'
+                    }
+                ]
+            }
+        };
+
+        const swapResponse: {
+            transactionRequest: {
+                data: string;
+            };
+        } = await this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
+            ...step
+        });
+
+        return swapResponse.transactionRequest.data;
     }
 }

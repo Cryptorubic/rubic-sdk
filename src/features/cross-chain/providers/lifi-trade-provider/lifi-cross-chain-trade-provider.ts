@@ -1,17 +1,21 @@
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
-import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
-import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { RequiredCrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
-import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
-import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
+import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
+import BigNumber from 'bignumber.js';
 import {
     LifiCrossChainSupportedBlockchain,
     lifiCrossChainSupportedBlockchains
-} from '@features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
+} from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 import LIFI, { RouteOptions } from '@lifinance/sdk';
-import { LifiCrossChainTrade } from '@features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade';
-import BigNumber from 'bignumber.js';
+import { LifiCrossChainTrade } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade';
+import { Injector } from 'src/core/sdk/injector';
+import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
+import {
+    lifiContractAbi,
+    lifiContractAddress
+} from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
+import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 
 export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -40,9 +44,13 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
             return null;
         }
 
+        const feePercent = await this.getFeePercent(fromBlockchain);
+        const tokenAmountIn = from.weiAmount.multipliedBy(1 - feePercent).toFixed(0, 1);
+
         const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
-            order: 'RECOMMENDED'
+            order: 'RECOMMENDED',
+            allowSwitchChain: false
         };
 
         const fromChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id;
@@ -50,7 +58,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
 
         const routesRequest = {
             fromChainId,
-            fromAmount: from.stringWeiAmount,
+            fromAmount: tokenAmountIn,
             fromTokenAddress: from.address,
             toChainId,
             toTokenAddress: to.address,
@@ -81,5 +89,17 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
                 options.providerAddress
             )
         };
+    }
+
+    private async getFeePercent(fromBlockchain: BlockchainName): Promise<number> {
+        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+
+        return (
+            (await web3PublicService.callContractMethod<number>(
+                lifiContractAddress,
+                lifiContractAbi,
+                'RubicFee'
+            )) / 1_000_000
+        );
     }
 }

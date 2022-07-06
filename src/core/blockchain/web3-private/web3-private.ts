@@ -14,8 +14,6 @@ import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swa
 import { Web3Pure } from 'src/core';
 import { LowSlippageError } from 'src/common';
 import { parseError } from 'src/common/utils/errors';
-import { ethers, Signer } from 'ethers';
-import { ExternalProvider, JsonRpcFetchFunc } from '@ethersproject/providers/src.ts/web3-provider';
 
 /**
  * Class containing methods for executing the functions of contracts
@@ -55,12 +53,6 @@ export class Web3Private {
      */
     public get blockchainName(): string {
         return this.walletConnectionConfiguration.blockchainName;
-    }
-
-    public get signer(): Signer {
-        return new ethers.providers.Web3Provider(
-            this.web3.currentProvider as ExternalProvider | JsonRpcFetchFunc
-        ).getSigner();
     }
 
     /**
