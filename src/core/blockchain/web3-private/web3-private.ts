@@ -12,6 +12,8 @@ import { WalletConnectionConfiguration } from '@core/blockchain/models/wallet-co
 import { RubicSdkError } from '@common/errors/rubic-sdk.error';
 import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/failed-to-check-for-transaction-receipt.error';
 import { Web3Pure } from 'src/core';
+import { ethers, Signer } from 'ethers';
+import { ExternalProvider, JsonRpcFetchFunc } from '@ethersproject/providers/src.ts/web3-provider';
 
 /**
  * Class containing methods for executing the functions of contracts
@@ -51,6 +53,12 @@ export class Web3Private {
      */
     public get blockchainName(): string {
         return this.walletConnectionConfiguration.blockchainName;
+    }
+
+    public get signer(): Signer {
+        return new ethers.providers.Web3Provider(
+            this.web3.currentProvider as ExternalProvider | JsonRpcFetchFunc
+        ).getSigner();
     }
 
     /**
