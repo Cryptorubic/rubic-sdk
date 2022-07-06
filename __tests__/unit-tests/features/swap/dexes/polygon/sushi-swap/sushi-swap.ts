@@ -7,7 +7,7 @@ import BigNumber from 'bignumber.js';
 import { SushiSwapPolygonProvider } from 'src/features/instant-trades/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
 import { SushiSwapPolygonTrade } from 'src/features/instant-trades/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-trade';
 import { SUSHI_SWAP_POLYGON_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/polygon/sushi-swap-polygon/constants';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.POLYGON];
 

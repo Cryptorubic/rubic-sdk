@@ -1,7 +1,12 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk.error';
+import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 
 /**
  * @internal
  * Thrown, when provider does not support provided blockchain.
  */
-export class NotSupportedBlockchain extends RubicSdkError {}
+export class NotSupportedBlockchain extends RubicSdkError {
+    constructor() {
+        super();
+        Object.setPrototypeOf(this, NotSupportedBlockchain.prototype);
+    }
+}

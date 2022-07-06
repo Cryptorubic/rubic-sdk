@@ -1,14 +1,14 @@
-import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
+import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
 import { CROSS_CHAIN_TRADE_TYPE, OneinchAbstractProvider } from 'src/features';
 import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
-import { RequiredCrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
+import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
 
 import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
-} from '@features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
+} from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { compareAddresses, CrossChainIsUnavailableError, RubicSdkError } from 'src/common';
-import { Injector } from '@core/sdk/injector';
+import { Injector } from '@rsdk-core/sdk/injector';
 import {
     ErrorCode,
     Symbiosis,
@@ -17,20 +17,20 @@ import {
     Error as SymbiosisError
 } from 'symbiosis-js-sdk';
 import BigNumber from 'bignumber.js';
-import { SymbiosisCrossChainTrade } from '@features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { SYMBIOSIS_CONTRACT_ABI } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/contract-abi';
-import { SYMBIOSIS_CONTRACT_ADDRESS } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
-import { celerTransitTokens } from '@features/cross-chain/providers/celer-trade-provider/constants/celer-transit-tokens';
-import { OneinchEthereumProvider } from '@features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
-import { OneinchBscProvider } from '@features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
-import { OneinchPolygonProvider } from '@features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
-import { OneinchAvalancheProvider } from '@features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
-import { getSymbiosisConfig } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
-import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
-import { CrossChainMinAmountError } from '@common/errors/cross-chain/cross-chain-min-amount.error';
-import { CrossChainMaxAmountError } from '@common/errors/cross-chain/cross-chain-max-amount.error';
-import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { SymbiosisCrossChainTrade } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { SYMBIOSIS_CONTRACT_ABI } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-abi';
+import { SYMBIOSIS_CONTRACT_ADDRESS } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
+import { celerTransitTokens } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-transit-tokens';
+import { OneinchEthereumProvider } from '@rsdk-features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
+import { OneinchBscProvider } from '@rsdk-features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
+import { OneinchPolygonProvider } from '@rsdk-features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
+import { OneinchAvalancheProvider } from '@rsdk-features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
+import { getSymbiosisConfig } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
+import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
+import { CrossChainMinAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-min-amount.error';
+import { CrossChainMaxAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-max-amount.error';
+import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -95,7 +95,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 .dividedBy(100);
             const tokenAmountIn = new SymbiosisTokenAmount(
                 tokenIn,
-                Web3Pure.toWei(fromAmountWithoutFee, tokenIn.decimals)
+                Web3Pure.toWei(fromAmountWithoutFee, tokenIn.decimals, 1)
             );
 
             const tokenOut = new SymbiosisToken({
@@ -110,7 +110,12 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
 
             const swapping = this.symbiosis.newSwapping();
 
-            const { tokenAmountOut, transactionRequest, priceImpact } = await swapping.exactIn(
+            const {
+                tokenAmountOut,
+                transactionRequest,
+                priceImpact,
+                fee: transitTokenFee
+            } = await swapping.exactIn(
                 tokenAmountIn,
                 tokenOut,
                 fromAddress,
@@ -138,7 +143,12 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                         transactionRequest,
                         gasData,
                         priceImpact: parseFloat(priceImpact.toFixed()),
-                        slippage: options.slippageTolerance
+                        slippage: options.slippageTolerance,
+                        fee: from.tokenAmount.minus(fromAmountWithoutFee),
+                        feeSymbol: from.symbol,
+                        feePercent,
+                        networkFee: new BigNumber(transitTokenFee.toFixed()),
+                        networkFeeSymbol: transitTokenFee.token.symbol || ''
                     },
                     options.providerAddress
                 )

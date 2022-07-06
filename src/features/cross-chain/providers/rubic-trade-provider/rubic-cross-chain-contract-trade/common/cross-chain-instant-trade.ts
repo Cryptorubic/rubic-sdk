@@ -1,5 +1,5 @@
-import { DestinationCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
-import { SourceCelerSwapInfo } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/source-celer-swap-info';
+import { DestinationCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
+import { SourceCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/source-celer-swap-info';
 
 export interface CrossChainInstantTrade {
     readonly defaultDeadline: number;
@@ -14,10 +14,7 @@ export interface CrossChainInstantTrade {
         swapTokenWithFee?: boolean
     ): Promise<void>;
 
-    getCelerSourceObject(slippage: number): SourceCelerSwapInfo;
+    getCelerSourceObject(): SourceCelerSwapInfo;
 
-    getCelerDestinationObject(
-        slippage: number,
-        integratorAddress: string
-    ): DestinationCelerSwapInfo;
+    getCelerDestinationObject(integratorAddress: string): DestinationCelerSwapInfo;
 }

@@ -71,6 +71,13 @@ export const celerCrossChainContractAbi: AbiItem[] = [
     },
     {
         inputs: [],
+        name: 'feeRubic',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function'
+    },
+    {
+        inputs: [],
         name: 'getSupportedDEXes',
         outputs: [{ internalType: 'address[]', name: 'dexes', type: 'address[]' }],
         stateMutability: 'view',

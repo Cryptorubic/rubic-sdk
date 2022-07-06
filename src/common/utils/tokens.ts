@@ -1,9 +1,9 @@
-import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
-import { Token } from '@core/blockchain/tokens/token';
-import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
+import { TokenBaseStruct } from '@rsdk-core/blockchain/models/token-base-struct';
+import { Token } from '@rsdk-core/blockchain/tokens/token';
+import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import BigNumber from 'bignumber.js';
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 
 export async function getPriceTokensFromInputTokens(
     from:

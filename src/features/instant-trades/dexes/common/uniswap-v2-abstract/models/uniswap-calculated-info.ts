@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { UniswapRoute } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-route';
+import { UniswapRoute } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-route';
 
 export interface UniswapCalculatedInfo {
     route: UniswapRoute;

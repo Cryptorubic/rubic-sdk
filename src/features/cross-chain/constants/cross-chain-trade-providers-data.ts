@@ -1,35 +1,37 @@
-import { UniSwapV2EthereumProvider } from '@features/instant-trades/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-provider';
-import { SushiSwapEthereumProvider } from '@features/instant-trades/dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider';
-import { UniSwapV3EthereumProvider } from '@features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
-import { OneinchEthereumProvider } from '@features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
-import { PancakeSwapProvider } from '@features/instant-trades/dexes/bsc/pancake-swap/pancake-swap-provider';
-import { SushiSwapBscProvider } from '@features/instant-trades/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
-import { OneinchBscProvider } from '@features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
-import { QuickSwapProvider } from '@features/instant-trades/dexes/polygon/quick-swap/quick-swap-provider';
-import { SushiSwapPolygonProvider } from '@features/instant-trades/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
-import { UniSwapV3PolygonProvider } from '@features/instant-trades/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
-import { AlgebraProvider } from '@features/instant-trades/dexes/polygon/algebra/algebra-provider';
-import { OneinchPolygonProvider } from '@features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
-import { PangolinProvider } from '@features/instant-trades/dexes/avalanche/pangolin/pangolin-provider';
-import { JoeProvider } from '@features/instant-trades/dexes/avalanche/joe/joe-provider';
-import { SushiSwapAvalancheProvider } from '@features/instant-trades/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
-import { SolarbeamProvider } from '@features/instant-trades/dexes/moonriver/solarbeam/solarbeam-provider';
-import { SushiSwapMoonriverProvider } from '@features/instant-trades/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
-import { SpookySwapProvider } from '@features/instant-trades/dexes/fantom/spooky-swap/spooky-swap-provider';
-import { SpiritSwapProvider } from '@features/instant-trades/dexes/fantom/spirit-swap/spirit-swap-provider';
-import { SushiSwapFantomProvider } from '@features/instant-trades/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-provider';
-import { SushiSwapHarmonyProvider } from '@features/instant-trades/dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-provider';
-import { ViperSwapHarmonyProvider } from '@features/instant-trades/dexes/harmony/viper-swap-harmony/viper-swap-harmony-provider';
-import { SushiSwapArbitrumProvider } from '@features/instant-trades/dexes/arbitrum/sushi-swap-arbitrum/sushi-swap-arbitrum-provider';
-import { UniSwapV3ArbitrumProvider } from '@features/instant-trades/dexes/arbitrum/uni-swap-v3-arbitrum/uni-swap-v3-arbitrum-provider';
-import { OneinchArbitrumProvider } from '@features/instant-trades/dexes/arbitrum/oneinch-arbitrum/oneinch-arbitrum-provider';
-import { TrisolarisAuroraProvider } from '@features/instant-trades/dexes/aurora/trisolaris-aurora/trisolaris-aurora-provider';
-import { WannaSwapAuroraProvider } from '@features/instant-trades/dexes/aurora/wanna-swap-aurora/wanna-swap-aurora-provider';
+import { UniSwapV2EthereumProvider } from '@rsdk-features/instant-trades/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-provider';
+import { SushiSwapEthereumProvider } from '@rsdk-features/instant-trades/dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider';
+import { UniSwapV3EthereumProvider } from '@rsdk-features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
+import { OneinchEthereumProvider } from '@rsdk-features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
+import { PancakeSwapProvider } from '@rsdk-features/instant-trades/dexes/bsc/pancake-swap/pancake-swap-provider';
+import { SushiSwapBscProvider } from '@rsdk-features/instant-trades/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
+import { OneinchBscProvider } from '@rsdk-features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
+import { QuickSwapProvider } from '@rsdk-features/instant-trades/dexes/polygon/quick-swap/quick-swap-provider';
+import { SushiSwapPolygonProvider } from '@rsdk-features/instant-trades/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
+import { UniSwapV3PolygonProvider } from '@rsdk-features/instant-trades/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
+import { AlgebraProvider } from '@rsdk-features/instant-trades/dexes/polygon/algebra/algebra-provider';
+import { OneinchPolygonProvider } from '@rsdk-features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
+import { PangolinProvider } from '@rsdk-features/instant-trades/dexes/avalanche/pangolin/pangolin-provider';
+import { JoeProvider } from '@rsdk-features/instant-trades/dexes/avalanche/joe/joe-provider';
+import { SushiSwapAvalancheProvider } from '@rsdk-features/instant-trades/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
+import { SolarbeamProvider } from '@rsdk-features/instant-trades/dexes/moonriver/solarbeam/solarbeam-provider';
+import { SushiSwapMoonriverProvider } from '@rsdk-features/instant-trades/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
+import { SpookySwapProvider } from '@rsdk-features/instant-trades/dexes/fantom/spooky-swap/spooky-swap-provider';
+import { SpiritSwapProvider } from '@rsdk-features/instant-trades/dexes/fantom/spirit-swap/spirit-swap-provider';
+import { SushiSwapFantomProvider } from '@rsdk-features/instant-trades/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-provider';
+import { SushiSwapHarmonyProvider } from '@rsdk-features/instant-trades/dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-provider';
+import { ViperSwapHarmonyProvider } from '@rsdk-features/instant-trades/dexes/harmony/viper-swap-harmony/viper-swap-harmony-provider';
+import { SushiSwapArbitrumProvider } from '@rsdk-features/instant-trades/dexes/arbitrum/sushi-swap-arbitrum/sushi-swap-arbitrum-provider';
+import { UniSwapV3ArbitrumProvider } from '@rsdk-features/instant-trades/dexes/arbitrum/uni-swap-v3-arbitrum/uni-swap-v3-arbitrum-provider';
+import { OneinchArbitrumProvider } from '@rsdk-features/instant-trades/dexes/arbitrum/oneinch-arbitrum/oneinch-arbitrum-provider';
+import { TrisolarisAuroraProvider } from '@rsdk-features/instant-trades/dexes/aurora/trisolaris-aurora/trisolaris-aurora-provider';
+import { WannaSwapAuroraProvider } from '@rsdk-features/instant-trades/dexes/aurora/wanna-swap-aurora/wanna-swap-aurora-provider';
 import { DeepReadonly } from 'ts-essentials';
 import { InstantTradeProvider } from 'src/features';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
-import { SushiSwapTelosProvider } from '@features/instant-trades/dexes/telos/sushi-swap-telos/sushi-swap-telos-provider';
-import { ZappyProvider } from '@features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
+import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { SushiSwapTelosProvider } from '@rsdk-features/instant-trades/dexes/telos/sushi-swap-telos/sushi-swap-telos-provider';
+import { ZappyProvider } from '@rsdk-features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
+import { OneinchFantomProvider } from 'src/features/instant-trades/dexes/fantom/oneinch-fantom/oneinch-fantom-provider';
+import { OneinchAvalancheProvider } from 'src/features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
 
 /**
  * Stores contracts info.
@@ -106,6 +108,10 @@ export const crossChainTradeProvidersData: DeepReadonly<
         {
             ProviderClass: SushiSwapAvalancheProvider,
             methodSuffix: ''
+        },
+        {
+            ProviderClass: OneinchAvalancheProvider,
+            methodSuffix: 'Inch'
         }
     ],
     [BLOCKCHAIN_NAME.MOONRIVER]: [
@@ -130,6 +136,10 @@ export const crossChainTradeProvidersData: DeepReadonly<
         {
             ProviderClass: SushiSwapFantomProvider,
             methodSuffix: '2'
+        },
+        {
+            ProviderClass: OneinchFantomProvider,
+            methodSuffix: 'Inch'
         }
     ],
     [BLOCKCHAIN_NAME.HARMONY]: [

@@ -1,30 +1,30 @@
-import { Cache } from '@common/decorators/cache.decorator';
-import { RubicSdkError } from '@common/errors/rubic-sdk.error';
-import { LowSlippageDeflationaryTokenError } from '@common/errors/swap/low-slippage-deflationary-token.error';
-import { tryExecuteAsync } from '@common/utils/functions';
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { Token } from '@core/blockchain/tokens/token';
-import { Web3Private } from '@core/blockchain/web3-private/web3-private';
-import { BatchCall } from '@core/blockchain/web3-public/models/batch-call';
-import { ContractMulticallResponse } from '@core/blockchain/web3-public/models/contract-multicall-response';
-import { Web3Public } from '@core/blockchain/web3-public/web3-public';
-import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
-import { createTokenNativeAddressProxyInPathStartAndEnd } from '@features/instant-trades/dexes/common/utils/token-native-address-proxy';
-import { GasFeeInfo } from '@features/instant-trades/models/gas-fee-info';
-import { Injector } from '@core/sdk/injector';
-import { InstantTrade } from '@features/instant-trades/instant-trade';
-import { SwapTransactionOptions } from '@features/instant-trades/models/swap-transaction-options';
-import { defaultEstimatedGas } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/constants/default-estimated-gas';
+import { Cache } from '@rsdk-common/decorators/cache.decorator';
+import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
+import { LowSlippageDeflationaryTokenError } from '@rsdk-common/errors/swap/low-slippage-deflationary-token.error';
+import { tryExecuteAsync } from '@rsdk-common/utils/functions';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { Token } from '@rsdk-core/blockchain/tokens/token';
+import { Web3Private } from '@rsdk-core/blockchain/web3-private/web3-private';
+import { BatchCall } from '@rsdk-core/blockchain/web3-public/models/batch-call';
+import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public/models/contract-multicall-response';
+import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
+import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
+import { createTokenNativeAddressProxyInPathStartAndEnd } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
+import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
+import { defaultEstimatedGas } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/constants/default-estimated-gas';
 import {
     ExactInputOutputSwapMethodsList,
     RegularSwapMethod,
     SUPPORTING_FEE_SWAP_METHODS_MAPPING,
     SWAP_METHOD
-} from '@features/instant-trades/dexes/common/uniswap-v2-abstract/constants/SWAP_METHOD';
+} from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/constants/SWAP_METHOD';
 
-import { defaultUniswapV2Abi } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi';
-import { DefaultEstimatedGas } from '@features/instant-trades/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
+import { defaultUniswapV2Abi } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi';
+import { DefaultEstimatedGas } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
 import BigNumber from 'bignumber.js';
 import { EncodeTransactionOptions, TradeType } from 'src/features';
 import { TransactionConfig } from 'web3-core';
@@ -193,9 +193,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
         await this.checkWalletState();
-
         await this.checkAllowanceAndApprove(options);
-
         return this.createAnyToAnyTrade(options);
     }
 

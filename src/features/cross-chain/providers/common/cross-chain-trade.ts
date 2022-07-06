@@ -5,17 +5,18 @@ import {
     Web3Public,
     Web3Pure
 } from 'src/core';
-import { GasData } from '@features/cross-chain/models/gas-data';
-import { Injector } from '@core/sdk/injector';
+import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
+import { Injector } from '@rsdk-core/sdk/injector';
 import BigNumber from 'bignumber.js';
 import {
     CrossChainTradeType,
     EncodeTransactionOptions,
-    SwapTransactionOptions
+    SwapTransactionOptions,
+    TradeType
 } from 'src/features';
 import { UnnecessaryApproveError, WalletNotConnectedError, WrongNetworkError } from 'src/common';
 import { TransactionReceipt } from 'web3-eth';
-import { ContractParams } from '@features/cross-chain/models/contract-params';
+import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { TransactionConfig } from 'web3-core';
 
 /**
@@ -50,6 +51,8 @@ export abstract class CrossChainTrade {
     protected abstract readonly fromWeb3Public: Web3Public;
 
     protected abstract get fromContractAddress(): string;
+
+    public abstract readonly itType: { from: TradeType; to: TradeType };
 
     protected get walletAddress(): string {
         return Injector.web3Private.address;
