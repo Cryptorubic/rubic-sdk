@@ -54,12 +54,12 @@ export class CelerItCrossChainContractTrade extends CelerCrossChainContractTrade
     }
 
     public getCelerSourceTrade(): unknown[] | unknown {
-        return Object.values(this.crossChainInstantTrade.getCelerSourceObject(this.slippage));
+        return Object.values(this.crossChainInstantTrade.getCelerSourceObject());
     }
 
     public getCelerDestionationTrade(integratorAddress: string): unknown[] {
         return Object.values(
-            this.crossChainInstantTrade.getCelerDestinationObject(this.slippage, integratorAddress)
+            this.crossChainInstantTrade.getCelerDestinationObject(integratorAddress)
         );
     }
 

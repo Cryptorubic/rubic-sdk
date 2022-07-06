@@ -156,7 +156,6 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         await Promise.all([
             this.checkContractsState(),
             this.checkToBlockchainGasPrice(),
-            this.checkToContractBalance(),
             this.checkUserBalance()
         ]);
     }
