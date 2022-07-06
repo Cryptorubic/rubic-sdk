@@ -57,7 +57,9 @@
     "test": "cd ./scripts && bash test-runner.sh",
     "build:publish": "yarn compile && yarn build && npm publish --access public",
     "analyze": "webpack --profile --json > stats.json &&  webpack-bundle-analyzer stats.json",
-    "docs": "typedoc"
+    "docs": "typedoc",
+    "publish": "yarn publish --access public",
+    "publish:alpha": "yarn publish --access public --tag alpha"
   },
   "dependencies": {
     "assert": "^2.0.0",
