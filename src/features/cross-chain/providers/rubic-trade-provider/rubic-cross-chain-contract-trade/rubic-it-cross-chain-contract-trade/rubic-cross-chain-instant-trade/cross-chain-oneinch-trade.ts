@@ -60,7 +60,7 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
 
         const path = [firstToken, secondToken];
 
-        const amountOutMinimum = this.instantTrade.toTokenAmountMin.tokenAmount.toFixed(0);
+        const amountOutMinimum = this.instantTrade.toTokenAmountMin.stringWeiAmount;
 
         return { dex, path, data: this.instantTrade.transactionData, amountOutMinimum };
     }
