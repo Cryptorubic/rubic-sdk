@@ -145,10 +145,17 @@ export class CrossChainManager {
             this.getFullOptions(options)
         );
 
-        const fromTokenPrice = (
-            wrappedTrades.find(wrappedTrade => wrappedTrade.trade instanceof LifiCrossChainTrade)
-                ?.trade as LifiCrossChainTrade
-        )?.from.price;
+        const fromTokenPrice =
+            (
+                wrappedTrades.find(
+                    wrappedTrade => wrappedTrade.trade instanceof LifiCrossChainTrade
+                )?.trade as LifiCrossChainTrade
+            )?.from.price ||
+            (
+                wrappedTrades.find(
+                    wrappedTrade => wrappedTrade.trade instanceof CelerCrossChainTrade
+                )?.trade as CelerCrossChainTrade
+            )?.fromTrade.toToken.tokenAmount;
 
         if (!fromTokenPrice) {
             return wrappedTrades.sort(tradeA => (tradeA?.trade ? -1 : 1));
@@ -169,7 +176,9 @@ export class CrossChainManager {
         }
 
         if (trade instanceof CelerCrossChainTrade) {
-            return fromTokenPrice.plus(trade.cryptoFeeToken.price).dividedBy(trade.to.tokenAmount);
+            return fromTokenPrice
+                .plus(trade.cryptoFeeToken.price.multipliedBy(trade.cryptoFeeToken.tokenAmount))
+                .dividedBy(trade.to.tokenAmount);
         }
 
         return fromTokenPrice.dividedBy(trade.to.tokenAmount);

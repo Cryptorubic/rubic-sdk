@@ -140,7 +140,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         ).toToken.tokenAmount;
         cryptoFeeToken = new PriceTokenAmount({
             ...cryptoFeeToken.asStructWithAmount,
-            price: nativeTokenPrice
+            price: nativeTokenPrice.dividedBy(cryptoFeeToken.tokenAmount)
         });
 
         const gasData =
