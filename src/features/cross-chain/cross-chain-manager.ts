@@ -9,12 +9,7 @@ import { getPriceTokensFromInputTokens } from '@rsdk-common/utils/tokens';
 import { Mutable } from '@rsdk-common/utils/types/mutable';
 import { CelerCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade-provider';
 import { CcrTypedTradeProviders } from '@rsdk-features/cross-chain/models/typed-trade-provider';
-import {
-    CelerCrossChainTrade,
-    CROSS_CHAIN_TRADE_TYPE,
-    CrossChainTrade,
-    CrossChainTradeType
-} from 'src/features';
+import { CelerCrossChainTrade, CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from 'src/features';
 import { SwapManagerCrossChainCalculationOptions } from '@rsdk-features/cross-chain/models/swap-manager-cross-chain-options';
 import pTimeout from '@rsdk-common/utils/p-timeout';
 import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
@@ -159,15 +154,17 @@ export class CrossChainManager {
             return wrappedTrades.sort(tradeA => (tradeA?.trade ? -1 : 1));
         }
         return wrappedTrades.sort((firstTrade, secondTrade) => {
-            const firstTradeRatio = this.getProviderRatio(firstTrade.trade, fromTokenPrice);
-            const secondTradeRatio = this.getProviderRatio(secondTrade.trade, fromTokenPrice);
+            const firstTradeRatio = this.getProviderRatio(firstTrade, fromTokenPrice);
+            const secondTradeRatio = this.getProviderRatio(secondTrade, fromTokenPrice);
 
             return firstTradeRatio.comparedTo(secondTradeRatio);
         });
     }
 
-    private getProviderRatio(trade: CrossChainTrade | null, fromTokenPrice: BigNumber) {
-        if (!trade || !fromTokenPrice) {
+    private getProviderRatio(wrappedTrade: WrappedCrossChainTrade, fromTokenPrice: BigNumber) {
+        const { trade } = wrappedTrade;
+
+        if (!trade || !fromTokenPrice || wrappedTrade.error) {
             return new BigNumber(Infinity);
         }
 

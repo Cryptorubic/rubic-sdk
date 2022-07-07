@@ -94,12 +94,14 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         };
     }
 
-    private async getFeePercent(fromBlockchain: BlockchainName): Promise<number> {
+    private async getFeePercent(
+        fromBlockchain: LifiCrossChainSupportedBlockchain
+    ): Promise<number> {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 
         return (
             (await web3PublicService.callContractMethod<number>(
-                lifiContractAddress,
+                lifiContractAddress[fromBlockchain],
                 lifiContractAbi,
                 'RubicFee'
             )) / 1_000_000

@@ -15,6 +15,7 @@ import {
 } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
+import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 
 /**
  * Calculated Celer cross chain trade.
@@ -42,8 +43,8 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         to: 'ONE_INCH_ARBITRUM'
     };
 
-    public get fromContractAddress() {
-        return lifiContractAddress;
+    public get fromContractAddress(): string {
+        return lifiContractAddress[this.from.blockchain as LifiCrossChainSupportedBlockchain];
     }
 
     constructor(
@@ -123,7 +124,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         const value = this.from.isNative ? this.from.stringWeiAmount : '0';
 
         return {
-            contractAddress: lifiContractAddress,
+            contractAddress: this.fromContractAddress,
             contractAbi: lifiContractAbi,
             methodName,
             methodArguments,
