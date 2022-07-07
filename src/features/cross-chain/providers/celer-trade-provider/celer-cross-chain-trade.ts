@@ -30,7 +30,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
 
     public readonly itType: { from: TradeType; to: TradeType };
 
-    private readonly feeInPercents: number;
+    public readonly feeInPercents: number;
 
     /** @internal */
     public static async getGasData(
