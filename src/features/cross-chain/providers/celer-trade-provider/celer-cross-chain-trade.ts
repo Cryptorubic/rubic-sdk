@@ -188,17 +188,6 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
                     gasPrice,
                     value,
                     onTransactionHash
-                },
-                err => {
-                    const includesErrCode = err?.message?.includes('-32000');
-                    const allowedErrors = [
-                        'insufficient funds for transfer',
-                        'insufficient funds for gas * price + value'
-                    ];
-                    const includesPhrase = allowedErrors.some(error =>
-                        err?.message?.includes(error)
-                    );
-                    return includesErrCode && includesPhrase;
                 }
             );
 
