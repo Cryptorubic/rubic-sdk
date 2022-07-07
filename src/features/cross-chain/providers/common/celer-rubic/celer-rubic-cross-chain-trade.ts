@@ -47,6 +47,8 @@ export abstract class CelerRubicCrossChainTrade extends CrossChainTrade {
      */
     public abstract readonly transitFeeToken: PriceTokenAmount;
 
+    public abstract readonly feeInPercents: number;
+
     protected abstract readonly toWeb3Public: Web3Public;
 
     protected get fromContractAddress(): string {
