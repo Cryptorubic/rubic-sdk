@@ -13,8 +13,7 @@ import {
     CelerCrossChainTrade,
     CROSS_CHAIN_TRADE_TYPE,
     CrossChainTrade,
-    CrossChainTradeType,
-    SymbiosisCrossChainTrade
+    CrossChainTradeType
 } from 'src/features';
 import { SwapManagerCrossChainCalculationOptions } from '@rsdk-features/cross-chain/models/swap-manager-cross-chain-options';
 import pTimeout from '@rsdk-common/utils/p-timeout';
@@ -25,6 +24,7 @@ import { MarkRequired } from 'ts-essentials';
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
 import { RubicCrossChainTradeProvider } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 import { SymbiosisCrossChainTradeProvider } from 'src/features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
+import { LifiCrossChainTrade } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade';
 import { LifiCrossChainTradeProvider } from './providers/lifi-trade-provider/lifi-cross-chain-trade-provider';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
@@ -150,34 +150,32 @@ export class CrossChainManager {
             this.getFullOptions(options)
         );
 
-        const transitTokenAmount = (
-            wrappedTrades.find(wrappedTrade => wrappedTrade.trade instanceof CelerCrossChainTrade)
-                ?.trade as CelerCrossChainTrade
-        )?.fromTrade.toToken.tokenAmount;
+        const fromTokenPrice = (
+            wrappedTrades.find(wrappedTrade => wrappedTrade.trade instanceof LifiCrossChainTrade)
+                ?.trade as LifiCrossChainTrade
+        )?.from.price;
 
-        if (!transitTokenAmount) {
+        if (!fromTokenPrice) {
             return wrappedTrades.sort(tradeA => (tradeA?.trade ? -1 : 1));
         }
         return wrappedTrades.sort((firstTrade, secondTrade) => {
-            const firstTradeAmount = this.getProviderRatio(firstTrade.trade, transitTokenAmount);
-            const secondTradeAmount = this.getProviderRatio(secondTrade.trade, transitTokenAmount);
+            const firstTradeRatio = this.getProviderRatio(firstTrade.trade, fromTokenPrice);
+            const secondTradeRatio = this.getProviderRatio(secondTrade.trade, fromTokenPrice);
 
-            return firstTradeAmount.comparedTo(secondTradeAmount);
+            return firstTradeRatio.comparedTo(secondTradeRatio);
         });
     }
 
-    private getProviderRatio(trade: CrossChainTrade | null, transitTokenAmount: BigNumber) {
-        if (!trade || !transitTokenAmount) {
+    private getProviderRatio(trade: CrossChainTrade | null, fromTokenPrice: BigNumber) {
+        if (!trade || !fromTokenPrice) {
             return new BigNumber(Infinity);
         }
 
-        if (trade instanceof SymbiosisCrossChainTrade) {
-            return transitTokenAmount.dividedBy(trade.to.tokenAmount);
+        if (trade instanceof CelerCrossChainTrade) {
+            return fromTokenPrice.plus(trade.cryptoFeeToken.price).dividedBy(trade.to.tokenAmount);
         }
 
-        return transitTokenAmount
-            .plus((trade as CelerCrossChainTrade).cryptoFeeToken.price)
-            .dividedBy(trade.to.tokenAmount);
+        return fromTokenPrice.dividedBy(trade.to.tokenAmount);
     }
 
     private async calculateTradeFromTokens(

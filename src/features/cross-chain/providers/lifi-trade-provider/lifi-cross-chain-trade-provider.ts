@@ -77,7 +77,10 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         return {
             trade: new LifiCrossChainTrade(
                 {
-                    from,
+                    from: new PriceTokenAmount({
+                        ...from.asStructWithAmount,
+                        price: new BigNumber(bestRoute.fromAmountUSD)
+                    }),
                     to: new PriceTokenAmount({
                         ...to.asStruct,
                         weiAmount: new BigNumber(bestRoute.toAmount)
