@@ -4,9 +4,13 @@ import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amoun
 import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { RubicSdkError } from 'src/common';
-import { parseError } from '@rsdk-common/utils/errors';
+import { parseError } from 'src/common/utils/errors';
 
 export abstract class CrossChainTradeProvider {
+    public static parseError(err: unknown): RubicSdkError {
+        return parseError(err, 'Cannot calculate cross chain trade');
+    }
+
     public abstract readonly type: CrossChainTradeType;
 
     public abstract calculate(
@@ -14,8 +18,4 @@ export abstract class CrossChainTradeProvider {
         to: PriceToken,
         options: RequiredCrossChainOptions
     ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null>;
-
-    protected parseError(err: unknown): RubicSdkError {
-        return parseError(err, 'Cannot calculate cross chain trade');
-    }
 }

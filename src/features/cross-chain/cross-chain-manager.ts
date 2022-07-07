@@ -213,12 +213,16 @@ export class CrossChainManager {
                     ...wrappedTrade,
                     tradeType: provider.type
                 };
-            } catch (e) {
+            } catch (err: unknown) {
                 console.debug(
                     `[RUBIC_SDK] Trade calculation error occurred for ${type} trade provider.`,
-                    e
+                    err
                 );
-                return null;
+                return {
+                    trade: null,
+                    tradeType: provider.type,
+                    error: CrossChainTradeProvider.parseError(err)
+                };
             }
         });
         const results = (await Promise.all(calculationPromises)).filter(notNull);

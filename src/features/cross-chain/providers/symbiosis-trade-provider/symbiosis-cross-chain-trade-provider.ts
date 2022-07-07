@@ -154,7 +154,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 )
             };
         } catch (err: unknown) {
-            let rubicSdkError = this.parseError(err);
+            let rubicSdkError = CrossChainTradeProvider.parseError(err);
 
             if (err instanceof SymbiosisError && err.message) {
                 rubicSdkError = await this.checkMinMaxErrors(err, from);
