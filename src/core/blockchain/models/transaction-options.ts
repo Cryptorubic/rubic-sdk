@@ -15,9 +15,9 @@ export type TransactionOptions = {
     /**
      * Gas limit.
      */
-    gas?: BigNumber | string;
+    gas?: BigNumber | string | number;
 
-    gasPrice?: BigNumber | string;
+    gasPrice?: BigNumber | string | number;
 
     /**
      * Native token amount in wei.
