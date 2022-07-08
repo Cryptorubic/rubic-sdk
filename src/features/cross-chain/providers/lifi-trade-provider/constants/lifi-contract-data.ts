@@ -37,6 +37,16 @@ export const lifiContractAbi = [
         type: 'function'
     },
     {
+        inputs: [
+            { internalType: 'address', name: 'integrator', type: 'address' },
+            { internalType: 'bytes', name: 'data', type: 'bytes' }
+        ],
+        name: 'lifiCallWithNative',
+        outputs: [],
+        stateMutability: 'payable',
+        type: 'function'
+    },
+    {
         inputs: [],
         name: 'paused',
         outputs: [{ internalType: 'bool', name: '', type: 'bool' }],

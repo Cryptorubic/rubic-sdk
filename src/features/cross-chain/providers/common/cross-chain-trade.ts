@@ -52,7 +52,7 @@ export abstract class CrossChainTrade {
 
     protected abstract get fromContractAddress(): string;
 
-    public abstract readonly itType: { from: TradeType; to: TradeType };
+    public abstract readonly itType: { from: TradeType; to: TradeType } | undefined;
 
     protected get walletAddress(): string {
         return Injector.web3Private.address;

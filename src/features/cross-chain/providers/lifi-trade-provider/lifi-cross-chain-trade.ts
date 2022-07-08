@@ -1,11 +1,6 @@
 import BigNumber from 'bignumber.js';
-import { PriceTokenAmount, Web3Public } from 'src/core';
-import {
-    CROSS_CHAIN_TRADE_TYPE,
-    CrossChainTrade,
-    SwapTransactionOptions,
-    TradeType
-} from 'src/features';
+import { PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
+import { CROSS_CHAIN_TRADE_TYPE, CrossChainTrade, SwapTransactionOptions } from 'src/features';
 import { Route } from '@lifinance/sdk';
 import { Injector } from 'src/core/sdk/injector';
 import { FailedToCheckForTransactionReceiptError } from 'src/common';
@@ -14,13 +9,66 @@ import {
     lifiContractAddress
 } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
-import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
+import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
+import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 
 /**
  * Calculated Celer cross chain trade.
  */
 export class LifiCrossChainTrade extends CrossChainTrade {
+    /** @internal */
+    public static async getGasData(
+        from: PriceTokenAmount,
+        to: PriceTokenAmount,
+        route: Route
+    ): Promise<GasData | null> {
+        const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
+        const walletAddress = Injector.web3Private.address;
+        if (!walletAddress) {
+            return null;
+        }
+
+        try {
+            const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                await new LifiCrossChainTrade(
+                    {
+                        from,
+                        to,
+                        route,
+                        gasData: null,
+                        toTokenAmountMin: new BigNumber(0)
+                    },
+                    EMPTY_ADDRESS
+                ).getContractParams();
+
+            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+            const [gasLimit, gasPrice] = await Promise.all([
+                web3Public.getEstimatedGas(
+                    contractAbi,
+                    contractAddress,
+                    methodName,
+                    methodArguments,
+                    walletAddress,
+                    value
+                ),
+                new BigNumber(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+            ]);
+
+            if (!gasLimit?.isFinite()) {
+                return null;
+            }
+
+            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
+            return {
+                gasLimit: increasedGasLimit,
+                gasPrice
+            };
+        } catch (_err) {
+            return null;
+        }
+    }
+
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
 
     private readonly httpClient = Injector.httpClient;
@@ -37,11 +85,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
 
     private readonly route: Route;
 
-    // @TODO update
-    public readonly itType: { from: TradeType; to: TradeType } = {
-        from: 'ONE_INCH_ARBITRUM',
-        to: 'ONE_INCH_ARBITRUM'
-    };
+    public readonly itType = undefined;
 
     public get fromContractAddress(): string {
         return lifiContractAddress[this.from.blockchain as LifiCrossChainSupportedBlockchain];
@@ -116,10 +160,12 @@ export class LifiCrossChainTrade extends CrossChainTrade {
     }
 
     public async getContractParams() {
-        const methodName = 'lifiCall';
+        const methodName = this.from.isNative ? 'lifiCallWithNative' : 'lifiCall';
 
         const data = await this.getSwapData();
-        const methodArguments = [this.from.address, this.from.stringWeiAmount, EMPTY_ADDRESS, data];
+        const methodArguments = this.from.isNative
+            ? [this.providerAddress, data]
+            : [this.from.address, this.from.stringWeiAmount, this.providerAddress, data];
 
         const value = this.from.isNative ? this.from.stringWeiAmount : '0';
 

@@ -16,6 +16,10 @@ import {
     lifiContractAddress
 } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
+import { lifiConfig } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-config';
+import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
+
+import { CrossChainIsUnavailableError } from 'src/common';
 
 export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -28,15 +32,15 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
 
-    private readonly lifi = new LIFI();
+    private readonly lifi = new LIFI(lifiConfig);
 
     public async calculate(
         from: PriceTokenAmount,
-        to: PriceToken,
+        toToken: PriceToken,
         options: RequiredCrossChainOptions
     ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
         const fromBlockchain = from.blockchain;
-        const toBlockchain = to.blockchain;
+        const toBlockchain = toToken.blockchain;
         if (
             !LifiCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) ||
             !LifiCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
@@ -44,8 +48,13 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
             return null;
         }
 
-        const feePercent = await this.getFeePercent(fromBlockchain);
-        const tokenAmountIn = from.weiAmount.multipliedBy(1 - feePercent).toFixed(0, 1);
+        await this.checkContractState(fromBlockchain);
+
+        const feePercent = await this.getFeePercent(fromBlockchain, options.providerAddress);
+        const tokenAmountIn = from.weiAmount
+            .multipliedBy(100 - feePercent)
+            .dividedBy(100)
+            .toFixed(0, 1);
 
         const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
@@ -61,7 +70,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
             fromAmount: tokenAmountIn,
             fromTokenAddress: from.address,
             toChainId,
-            toTokenAddress: to.address,
+            toTokenAddress: toToken.address,
             options: routeOptions
         };
 
@@ -74,6 +83,15 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
             return null;
         }
 
+        const to = new PriceTokenAmount({
+            ...toToken.asStruct,
+            weiAmount: new BigNumber(bestRoute.toAmount)
+        });
+        const gasData =
+            options.gasCalculation === 'enabled'
+                ? await LifiCrossChainTrade.getGasData(from, to, bestRoute)
+                : null;
+
         return {
             trade: new LifiCrossChainTrade(
                 {
@@ -81,12 +99,9 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
                         ...from.asStructWithAmount,
                         price: new BigNumber(bestRoute.fromAmountUSD)
                     }),
-                    to: new PriceTokenAmount({
-                        ...to.asStruct,
-                        weiAmount: new BigNumber(bestRoute.toAmount)
-                    }),
+                    to,
                     route: bestRoute,
-                    gasData: null,
+                    gasData,
                     toTokenAmountMin: Web3Pure.fromWei(bestRoute.toAmountMin, to.decimals)
                 },
                 options.providerAddress
@@ -95,16 +110,44 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     }
 
     private async getFeePercent(
-        fromBlockchain: LifiCrossChainSupportedBlockchain
+        fromBlockchain: LifiCrossChainSupportedBlockchain,
+        providerAddress: string
     ): Promise<number> {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+
+        if (providerAddress !== EMPTY_ADDRESS) {
+            return (
+                (await web3PublicService.callContractMethod<number>(
+                    lifiContractAddress[fromBlockchain],
+                    lifiContractAbi,
+                    'integratorFee',
+                    {
+                        methodArguments: [providerAddress]
+                    }
+                )) / 10_000
+            );
+        }
 
         return (
             (await web3PublicService.callContractMethod<number>(
                 lifiContractAddress[fromBlockchain],
                 lifiContractAbi,
                 'RubicFee'
-            )) / 1_000_000
+            )) / 10_000
         );
+    }
+
+    private async checkContractState(fromBlockchain: LifiCrossChainSupportedBlockchain) {
+        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+
+        const isPaused = await web3PublicService.callContractMethod<number>(
+            lifiContractAddress[fromBlockchain],
+            lifiContractAbi,
+            'paused'
+        );
+
+        if (isPaused) {
+            throw new CrossChainIsUnavailableError();
+        }
     }
 }
