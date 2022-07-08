@@ -59,7 +59,10 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
             order: 'RECOMMENDED',
-            allowSwitchChain: false
+            allowSwitchChain: false,
+            bridges: {
+                deny: ['multichain']
+            }
         };
 
         const fromChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id;
@@ -82,6 +85,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         if (!bestRoute) {
             return null;
         }
+        console.log('Lifi bridge:', bestRoute.steps[0]?.tool);
 
         const to = new PriceTokenAmount({
             ...toToken.asStruct,
