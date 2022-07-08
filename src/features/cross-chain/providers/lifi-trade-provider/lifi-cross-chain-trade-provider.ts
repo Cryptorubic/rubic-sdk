@@ -16,7 +16,7 @@ import {
     lifiContractAddress
 } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
-import { lifiConfig } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-config';
+import { getLifiConfig } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-config';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 
 import { CrossChainIsUnavailableError } from 'src/common';
@@ -32,7 +32,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
 
-    private readonly lifi = new LIFI(lifiConfig);
+    private readonly lifi = new LIFI(getLifiConfig());
 
     public async calculate(
         from: PriceTokenAmount,
