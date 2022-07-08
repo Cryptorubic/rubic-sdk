@@ -62,7 +62,7 @@ export class ZrxTrade extends InstantTrade {
 
         await this.checkAllowanceAndApprove(options);
 
-        const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, this.apiTradeData);
+        const { gas, gasPrice } = this.getGasParams(options);
 
         return Injector.web3Private.trySendTransaction(
             this.apiTradeData.to,
@@ -77,7 +77,7 @@ export class ZrxTrade extends InstantTrade {
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
-        const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, this.apiTradeData);
+        const { gas, gasPrice } = this.getGasParams(options);
 
         return {
             to: this.apiTradeData.to,
@@ -88,13 +88,10 @@ export class ZrxTrade extends InstantTrade {
         };
     }
 
-    private getGasParamsFromApiTradeData(
-        options: OptionsGasParams,
-        apiTradeData: ZrxQuoteResponse
-    ): TransactionGasParams {
-        return this.getGasParams({
-            gasLimit: options.gasLimit || apiTradeData.gas,
-            gasPrice: options.gasPrice || apiTradeData.gasPrice
-        });
+    protected getGasParams(options: OptionsGasParams): TransactionGasParams {
+        return {
+            gas: options.gasLimit || this.gasFeeInfo?.gasLimit?.toFixed(),
+            gasPrice: options.gasPrice || this.gasFeeInfo?.gasPrice?.toFixed()
+        };
     }
 }
