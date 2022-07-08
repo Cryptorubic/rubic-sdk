@@ -4,10 +4,12 @@ import { BlockchainsInfo, SDK } from 'src/core';
 
 export function getLifiConfig(): ConfigUpdate {
     const rpcs = Object.fromEntries(
-        lifiCrossChainSupportedBlockchains.map(blockchain => [
-            BlockchainsInfo.getBlockchainByName(blockchain).id,
-            [SDK.rpcList[blockchain]!.mainRpc]
-        ])
+        lifiCrossChainSupportedBlockchains
+            .map(blockchain => [
+                BlockchainsInfo.getBlockchainByName(blockchain).id,
+                [SDK.rpcList[blockchain]?.mainRpc]
+            ])
+            .filter(rpcPair => Boolean(rpcPair[1]))
     );
 
     return {
