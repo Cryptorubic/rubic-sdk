@@ -275,7 +275,7 @@ export class CrossChainManager {
             return newTrade;
         }
 
-        return oldTradeRatio.comparedTo(newTradeRatio) ? newTrade : oldTrade;
+        return oldTradeRatio.comparedTo(newTradeRatio) ? oldTrade : newTrade;
     }
 
     private getFullOptions(
