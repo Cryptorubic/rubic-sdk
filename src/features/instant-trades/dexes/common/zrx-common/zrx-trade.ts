@@ -4,10 +4,6 @@ import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swa
 import { TRADE_TYPE, TradeType } from 'src/features';
 import { TransactionReceipt } from 'web3-eth';
 import { ZrxQuoteResponse } from '@rsdk-features/instant-trades/dexes/common/zrx-common/models/zrx-types';
-import {
-    OptionsGasParams,
-    TransactionGasParams
-} from '@rsdk-features/instant-trades/models/gas-params';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
 import { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';
@@ -85,13 +81,6 @@ export class ZrxTrade extends InstantTrade {
             value: this.apiTradeData.value,
             gas,
             gasPrice
-        };
-    }
-
-    protected getGasParams(options: OptionsGasParams): TransactionGasParams {
-        return {
-            gas: options.gasLimit || this.gasFeeInfo?.gasLimit?.toFixed(),
-            gasPrice: options.gasPrice || this.gasFeeInfo?.gasPrice?.toFixed()
         };
     }
 }

@@ -185,7 +185,10 @@ export abstract class InstantTrade {
     }
 
     protected getGasParams(options: OptionsGasParams): TransactionGasParams {
-        return { gas: options?.gasLimit, gasPrice: options?.gasPrice };
+        return {
+            gas: options.gasLimit || this.gasFeeInfo?.gasLimit?.toFixed(),
+            gasPrice: options.gasPrice || this.gasFeeInfo?.gasPrice?.toFixed()
+        };
     }
 
     protected parseError(err: unknown): RubicSdkError {
