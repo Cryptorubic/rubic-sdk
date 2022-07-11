@@ -221,7 +221,6 @@ export class CrossChainManager {
                         )
                     ),
                     fromPromise(
-                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         providers.map(([_type, trade]) => {
                             const promise = trade.calculate(from, to, providersOptions);
                             return pTimeout(promise, timeout);
@@ -250,8 +249,8 @@ export class CrossChainManager {
 
     /**
      * Choose the best provider between two trades.
-     * @param newTrade Old trade to compare.
-     * @param oldTrade New trade to compare
+     * @param newTrade New trade to compare.
+     * @param oldTrade Old trade to compare.
      */
     private chooseBestProvider(
         newTrade: WrappedTradeWithType,
@@ -265,8 +264,8 @@ export class CrossChainManager {
             return oldTrade;
         }
 
-        const oldTradeRatio = newTrade?.trade?.getTradeAmountRatio();
-        const newTradeRatio = oldTrade?.trade?.getTradeAmountRatio();
+        const oldTradeRatio = oldTrade?.trade?.getTradeAmountRatio();
+        const newTradeRatio = newTrade?.trade?.getTradeAmountRatio();
 
         if (!newTradeRatio) {
             return oldTrade;

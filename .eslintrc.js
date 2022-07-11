@@ -114,7 +114,8 @@ module.exports = {
                         vars: 'all',
                         args: 'all',
                         ignoreRestSiblings: false,
-                        argsIgnorePattern: '^_'
+                        argsIgnorePattern: '^_',
+                        destructuredArrayIgnorePattern: '^_'
                     }
                 ],
                 '@typescript-eslint/no-inferrable-types': 'off',
