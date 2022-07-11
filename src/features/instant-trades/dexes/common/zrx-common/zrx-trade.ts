@@ -4,10 +4,6 @@ import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swa
 import { TRADE_TYPE, TradeType } from 'src/features';
 import { TransactionReceipt } from 'web3-eth';
 import { ZrxQuoteResponse } from '@rsdk-features/instant-trades/dexes/common/zrx-common/models/zrx-types';
-import {
-    OptionsGasParams,
-    TransactionGasParams
-} from '@rsdk-features/instant-trades/models/gas-params';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
 import { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';
@@ -62,7 +58,7 @@ export class ZrxTrade extends InstantTrade {
 
         await this.checkAllowanceAndApprove(options);
 
-        const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, this.apiTradeData);
+        const { gas, gasPrice } = this.getGasParams(options);
 
         return Injector.web3Private.trySendTransaction(
             this.apiTradeData.to,
@@ -77,7 +73,7 @@ export class ZrxTrade extends InstantTrade {
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
-        const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, this.apiTradeData);
+        const { gas, gasPrice } = this.getGasParams(options);
 
         return {
             to: this.apiTradeData.to,
@@ -86,15 +82,5 @@ export class ZrxTrade extends InstantTrade {
             gas,
             gasPrice
         };
-    }
-
-    private getGasParamsFromApiTradeData(
-        options: OptionsGasParams,
-        apiTradeData: ZrxQuoteResponse
-    ): TransactionGasParams {
-        return this.getGasParams({
-            gasLimit: options.gasLimit || apiTradeData.gas,
-            gasPrice: options.gasPrice || apiTradeData.gasPrice
-        });
     }
 }
