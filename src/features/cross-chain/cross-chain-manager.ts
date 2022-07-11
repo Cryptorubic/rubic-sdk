@@ -24,17 +24,9 @@ import BigNumber from 'bignumber.js';
 import { SymbiosisCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
 import { MarkRequired } from 'ts-essentials';
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
-import {
-    BehaviorSubject,
-    from as fromPromise,
-    map,
-    merge,
-    mergeMap,
-    Observable,
-    of,
-    switchMap
-} from 'rxjs';
+import { from as fromPromise, map, merge, mergeMap, Observable, of, switchMap } from 'rxjs';
 import { CrossChainProviderData } from 'src/features/cross-chain/providers/common/models/cross-chain-provider-data';
+import { WrappedTradeWithType } from 'src/features/cross-chain/providers/common/models/wrapped-trade-with-type';
 import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
@@ -62,13 +54,6 @@ export class CrossChainManager {
         acc[provider.type] = provider;
         return acc;
     }, {} as Mutable<CcrTypedTradeProviders>);
-
-    private readonly _providerData$ = new BehaviorSubject<CrossChainProviderData>({
-        totalProviders: Object.keys(this.tradeProviders).length,
-        calculatedProviders: 0,
-        bestProvider: null,
-        allProviders: []
-    });
 
     constructor(private readonly providerAddress: string) {}
 
@@ -217,22 +202,28 @@ export class CrossChainManager {
                     );
                 }) as [CrossChainTradeType, CrossChainTradeProvider][];
 
-                this._providerData$.next({
+                const providerData: CrossChainProviderData = {
                     bestProvider: null,
                     totalProviders: providers.length,
                     calculatedProviders: -1,
                     allProviders: []
-                });
+                };
 
                 if (!providers.length) {
                     throw new RubicSdkError(`There are no providers for trade`);
                 }
 
                 const tradeObservable$ = merge(
-                    of(new Promise(resolve => resolve(null))),
+                    of(
+                        pTimeout(
+                            new Promise<WrappedTradeWithType>(resolve => resolve(null)),
+                            Infinity
+                        )
+                    ),
                     fromPromise(
-                        providers.map(trade => {
-                            const promise = trade[1].calculate(from, to, providersOptions);
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        providers.map(([_type, trade]) => {
+                            const promise = trade.calculate(from, to, providersOptions);
                             return pTimeout(promise, timeout);
                         })
                     )
@@ -241,24 +232,16 @@ export class CrossChainManager {
                 return tradeObservable$.pipe(
                     mergeMap(el => el),
                     map(wrappedTrade => {
-                        this._providerData$.next({
-                            ...this._providerData$.value,
-                            calculatedProviders: this._providerData$.value.calculatedProviders + 1,
-                            bestProvider: this.chooseBestProvider(
-                                wrappedTrade as unknown as WrappedCrossChainTrade,
-                                this._providerData$.value
-                                    .bestProvider as unknown as WrappedCrossChainTrade
-                            ),
-                            totalProviders: providers.length,
-                            allProviders: wrappedTrade
-                                ? [
-                                      ...this._providerData$.value.allProviders,
-                                      wrappedTrade as unknown as WrappedCrossChainTrade
-                                  ]
-                                : this._providerData$.value.allProviders
-                        });
+                        providerData.calculatedProviders += 1;
+                        providerData.bestProvider = this.chooseBestProvider(
+                            wrappedTrade,
+                            providerData.bestProvider
+                        );
+                        providerData.allProviders = wrappedTrade
+                            ? [...providerData.allProviders, wrappedTrade]
+                            : providerData.allProviders;
 
-                        return this._providerData$.value;
+                        return providerData;
                     })
                 );
             })
@@ -271,9 +254,9 @@ export class CrossChainManager {
      * @param oldTrade New trade to compare
      */
     private chooseBestProvider(
-        newTrade: WrappedCrossChainTrade,
-        oldTrade: WrappedCrossChainTrade
-    ): WrappedCrossChainTrade | null {
+        newTrade: WrappedTradeWithType,
+        oldTrade: WrappedTradeWithType
+    ): WrappedTradeWithType {
         if (!oldTrade) {
             return newTrade;
         }
