@@ -20,6 +20,7 @@ import { getLifiConfig } from 'src/features/cross-chain/providers/lifi-trade-pro
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { CrossChainIsUnavailableError } from 'src/common';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
+import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
 
 export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -33,6 +34,8 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
 
     private readonly lifi = new LIFI(getLifiConfig());
+
+    private readonly MIN_AMOUNT_USD = new BigNumber(30);
 
     public async calculate(
         from: PriceTokenAmount,
@@ -107,26 +110,37 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
                 ? await LifiCrossChainTrade.getGasData(from, to, bestRoute)
                 : null;
 
+        const trade = new LifiCrossChainTrade(
+            {
+                from: new PriceTokenAmount({
+                    ...from.asStructWithAmount,
+                    price: new BigNumber(bestRoute.fromAmountUSD).dividedBy(from.tokenAmount)
+                }),
+                to,
+                route: bestRoute,
+                gasData,
+                toTokenAmountMin: Web3Pure.fromWei(bestRoute.toAmountMin, to.decimals),
+                fee: new BigNumber(feeAmount),
+                feeSymbol: from.symbol,
+                feePercent,
+                networkFee,
+                networkFeeSymbol,
+                priceImpact
+            },
+            options.providerAddress
+        );
+
+        try {
+            this.checkMinError(from);
+        } catch (err) {
+            return {
+                trade,
+                error: err
+            };
+        }
+
         return {
-            trade: new LifiCrossChainTrade(
-                {
-                    from: new PriceTokenAmount({
-                        ...from.asStructWithAmount,
-                        price: new BigNumber(bestRoute.fromAmountUSD).dividedBy(from.tokenAmount)
-                    }),
-                    to,
-                    route: bestRoute,
-                    gasData,
-                    toTokenAmountMin: Web3Pure.fromWei(bestRoute.toAmountMin, to.decimals),
-                    fee: new BigNumber(feeAmount),
-                    feeSymbol: from.symbol,
-                    feePercent,
-                    networkFee,
-                    networkFeeSymbol,
-                    priceImpact
-                },
-                options.providerAddress
-            )
+            trade
         };
     }
 
@@ -183,6 +197,12 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
 
         if (isPaused) {
             throw new CrossChainIsUnavailableError();
+        }
+    }
+
+    private checkMinError(from: PriceTokenAmount): void | never {
+        if (from.price.multipliedBy(from.tokenAmount).lt(this.MIN_AMOUNT_USD)) {
+            throw new CrossChainMinAmountError(this.MIN_AMOUNT_USD, from);
         }
     }
 }
