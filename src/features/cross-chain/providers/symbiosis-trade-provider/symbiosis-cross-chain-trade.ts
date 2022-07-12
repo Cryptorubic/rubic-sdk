@@ -21,10 +21,6 @@ import BigNumber from 'bignumber.js';
  * Calculated Symbiosis cross chain trade.
  */
 export class SymbiosisCrossChainTrade extends CrossChainTrade {
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
-
-    public readonly itType: { from: TradeType; to: TradeType };
-
     /** @internal */
     public readonly transitAmount: BigNumber;
 
@@ -86,6 +82,10 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             return null;
         }
     }
+
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
+
+    public readonly itType: { from: TradeType; to: TradeType };
 
     public readonly feeSymbol: string;
 

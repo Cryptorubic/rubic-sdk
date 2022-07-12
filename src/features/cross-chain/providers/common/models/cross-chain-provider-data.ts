@@ -1,4 +1,4 @@
-import { WrappedTradeWithType } from 'src/features/cross-chain/providers/common/models/wrapped-trade-with-type';
+import { WrappedTradeOrNull } from 'src/features/cross-chain/providers/common/models/wrapped-trade-or-null';
 
 /**
  * Cross chain providers data.
@@ -7,7 +7,7 @@ export interface CrossChainProviderData {
     /**
      * Best cross chain provider wrapped trade or null in case of strong error.
      */
-    bestProvider: WrappedTradeWithType;
+    bestProvider: WrappedTradeOrNull;
 
     /**
      * Total amount of providers to calculate.
@@ -22,5 +22,5 @@ export interface CrossChainProviderData {
     /**
      * Array of all calculated providers.
      */
-    allProviders: ReadonlyArray<WrappedTradeWithType>;
+    allProviders: ReadonlyArray<WrappedTradeOrNull>;
 }

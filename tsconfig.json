@@ -41,7 +41,6 @@
       "@rsdk-common/*": ["src/common/*"],
       "@rsdk-features/*": ["src/features/*"]
     },
-    "skipLibCheck": true,
     "rootDir": "src",
     "allowJs": true,
     "skipLibCheck": true
