@@ -135,6 +135,18 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                     ? await SymbiosisCrossChainTrade.getGasData(from, to, transactionRequest)
                     : null;
 
+            const transitToken = celerTransitTokens[fromBlockchain];
+            const transitAmount = (
+                await this.oneInchService[fromBlockchain].calculate(
+                    from,
+                    new PriceTokenAmount({
+                        ...transitToken,
+                        price: new BigNumber(1),
+                        tokenAmount: new BigNumber(1)
+                    })
+                )
+            ).to.tokenAmount;
+
             return {
                 trade: new SymbiosisCrossChainTrade(
                     {
@@ -148,7 +160,8 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                         feeSymbol: from.symbol,
                         feePercent,
                         networkFee: new BigNumber(transitTokenFee.toFixed()),
-                        networkFeeSymbol: transitTokenFee.token.symbol || ''
+                        networkFeeSymbol: transitTokenFee.token.symbol || '',
+                        transitAmount
                     },
                     options.providerAddress
                 )
