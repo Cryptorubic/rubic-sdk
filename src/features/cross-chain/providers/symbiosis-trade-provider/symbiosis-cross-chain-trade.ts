@@ -26,6 +26,9 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
     public readonly itType: { from: TradeType; to: TradeType };
 
     /** @internal */
+    public readonly transitAmount: BigNumber;
+
+    /** @internal */
     public static async getGasData(
         from: PriceTokenAmount,
         to: PriceTokenAmount,
@@ -51,7 +54,8 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
                         feeSymbol: '',
                         feePercent: 0,
                         networkFee: new BigNumber(NaN),
-                        networkFeeSymbol: ''
+                        networkFeeSymbol: '',
+                        transitAmount: new BigNumber(NaN)
                     },
                     EMPTY_ADDRESS
                 ).getContractParams();
@@ -131,6 +135,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             feePercent: number;
             networkFee: BigNumber;
             networkFeeSymbol: string;
+            transitAmount: BigNumber;
         },
         providerAddress: string
     ) {
@@ -150,6 +155,8 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         this.feeSymbol = crossChainTrade.feeSymbol;
         this.fee = crossChainTrade.fee;
         this.priceImpact = crossChainTrade.priceImpact;
+
+        this.transitAmount = crossChainTrade.transitAmount;
 
         const fromInchBlockchain = crossChainTrade.from.blockchain;
         const toInchBlockchain = crossChainTrade.to.blockchain;
@@ -233,5 +240,9 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             ],
             value: '0'
         };
+    }
+
+    public getTradeAmountRatio(): BigNumber {
+        return this.transitAmount.dividedBy(this.to.tokenAmount);
     }
 }
