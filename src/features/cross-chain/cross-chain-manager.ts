@@ -19,10 +19,10 @@ import { MarkRequired } from 'ts-essentials';
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
 import { from as fromPromise, map, merge, mergeMap, Observable, of, switchMap } from 'rxjs';
 import { CrossChainProviderData } from 'src/features/cross-chain/providers/common/models/cross-chain-provider-data';
-import { WrappedTradeWithType } from 'src/features/cross-chain/providers/common/models/wrapped-trade-with-type';
-import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 import { SymbiosisCrossChainTradeProvider } from 'src/features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
 import { LifiCrossChainTrade } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade';
+import { WrappedTradeOrNull } from 'src/features/cross-chain/providers/common/models/wrapped-trade-or-null';
+import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 import { LifiCrossChainTradeProvider } from './providers/lifi-trade-provider/lifi-cross-chain-trade-provider';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
@@ -213,15 +213,31 @@ export class CrossChainManager {
                 const tradeObservable$ = merge(
                     of(
                         pTimeout(
-                            new Promise<WrappedTradeWithType>(resolve => resolve(null)),
+                            new Promise<WrappedTradeOrNull>(resolve => resolve(null)),
                             Infinity
                         )
                     ),
                     fromPromise(
-                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        providers.map(([_type, trade]) => {
+                        providers.map(async ([type, trade]) => {
                             const promise = trade.calculate(from, to, providersOptions);
-                            return pTimeout(promise, timeout);
+                            try {
+                                const wrappedTrade = await pTimeout(promise, timeout);
+
+                                if (!wrappedTrade) {
+                                    return null;
+                                }
+
+                                return {
+                                    ...wrappedTrade,
+                                    tradeType: type
+                                };
+                            } catch (err) {
+                                return {
+                                    trade: null,
+                                    tradeType: type,
+                                    error: err
+                                };
+                            }
                         })
                     )
                 );
@@ -251,9 +267,9 @@ export class CrossChainManager {
      * @param oldTrade Old trade to compare.
      */
     private chooseBestProvider(
-        newTrade: WrappedTradeWithType,
-        oldTrade: WrappedTradeWithType
-    ): WrappedTradeWithType {
+        newTrade: WrappedTradeOrNull,
+        oldTrade: WrappedTradeOrNull
+    ): WrappedTradeOrNull {
         if (!oldTrade) {
             return newTrade;
         }

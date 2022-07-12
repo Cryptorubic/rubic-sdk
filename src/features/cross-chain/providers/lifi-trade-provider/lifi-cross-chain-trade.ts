@@ -263,4 +263,8 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             'fixedCryptoFee'
         );
     }
+
+    public getTradeAmountRatio(): BigNumber {
+        return this.from.price.dividedBy(this.to.tokenAmount);
+    }
 }
