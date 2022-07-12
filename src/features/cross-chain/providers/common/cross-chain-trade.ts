@@ -188,4 +188,10 @@ export abstract class CrossChainTrade {
             this.walletAddress
         );
     }
+
+    /**
+     * @internal
+     * Gets ratio between transit usd amount and to token amount.
+     */
+    public abstract getTradeAmountRatio(): BigNumber;
 }
