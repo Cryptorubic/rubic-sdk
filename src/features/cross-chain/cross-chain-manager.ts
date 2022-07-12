@@ -125,7 +125,7 @@ export class CrossChainManager {
         return combineOptions<RequiredSwapManagerCalculationOptions>(options, {
             fromSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
             toSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
-            gasCalculation: 'enabled',
+            gasCalculation: 'disabled',
             disabledProviders: [],
             timeout: CrossChainManager.defaultCalculationTimeout,
             providerAddress: this.providerAddress,

@@ -18,8 +18,8 @@ import {
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { getLifiConfig } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-config';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
-
 import { CrossChainIsUnavailableError } from 'src/common';
+import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 
 export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -51,17 +51,18 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         await this.checkContractState(fromBlockchain);
 
         const feePercent = await this.getFeePercent(fromBlockchain, options.providerAddress);
-        const tokenAmountIn = from.weiAmount
-            .multipliedBy(100 - feePercent)
-            .dividedBy(100)
-            .toFixed(0, 1);
+        const fromAmountWithoutFee = from.tokenAmount.multipliedBy(100 - feePercent).dividedBy(100);
+        const tokenAmountIn = Web3Pure.toWei(fromAmountWithoutFee, from.decimals, 1);
+
+        const networkFee = await this.getNetworkFee(fromBlockchain);
+        const networkFeeSymbol = nativeTokensList[fromBlockchain].symbol;
 
         const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
             order: 'RECOMMENDED',
             allowSwitchChain: false,
             bridges: {
-                deny: ['multichain']
+                deny: ['multichain'] // @TODO remove after whitelisting
             }
         };
 
@@ -80,12 +81,18 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         const result = await this.lifi.getRoutes(routesRequest);
         const { routes } = result;
 
-        const bestRoute = routes[0];
+        const bestRoute = routes.find(route => !route.containsSwitchChain);
 
         if (!bestRoute) {
             return null;
         }
-        console.log('Lifi bridge:', bestRoute.steps[0]?.tool);
+
+        const { fromAmountUSD, toAmountUSD } = bestRoute;
+        const priceImpact = new BigNumber(fromAmountUSD)
+            .minus(toAmountUSD)
+            .dividedBy(fromAmountUSD)
+            .dp(2)
+            .toNumber();
 
         const to = new PriceTokenAmount({
             ...toToken.asStruct,
@@ -106,7 +113,13 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
                     to,
                     route: bestRoute,
                     gasData,
-                    toTokenAmountMin: Web3Pure.fromWei(bestRoute.toAmountMin, to.decimals)
+                    toTokenAmountMin: Web3Pure.fromWei(bestRoute.toAmountMin, to.decimals),
+                    fee: from.tokenAmount.minus(fromAmountWithoutFee),
+                    feeSymbol: from.symbol,
+                    feePercent,
+                    networkFee,
+                    networkFeeSymbol,
+                    priceImpact
                 },
                 options.providerAddress
             )
@@ -136,9 +149,22 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
             (await web3PublicService.callContractMethod<number>(
                 lifiContractAddress[fromBlockchain],
                 lifiContractAbi,
-                'RubicFee'
+                'RubicPlatformFee'
             )) / 10_000
         );
+    }
+
+    private async getNetworkFee(
+        fromBlockchain: LifiCrossChainSupportedBlockchain
+    ): Promise<BigNumber> {
+        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+        const weiAmount = await web3PublicService.callContractMethod(
+            lifiContractAddress[fromBlockchain],
+            lifiContractAbi,
+            'fixedCryptoFee'
+        );
+
+        return Web3Pure.fromWei(weiAmount);
     }
 
     private async checkContractState(fromBlockchain: LifiCrossChainSupportedBlockchain) {

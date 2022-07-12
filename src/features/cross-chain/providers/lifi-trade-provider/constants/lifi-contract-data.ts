@@ -4,7 +4,7 @@ import { BLOCKCHAIN_NAME } from 'src/core';
 
 export const lifiContractAddress: Record<LifiCrossChainSupportedBlockchain, string> = {
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: '0x5cc19C5Af9d3fec6E4df783de99cC128542Ff378',
-    [BLOCKCHAIN_NAME.POLYGON]: '0x43B4be965B07edb5ce1dBaC1c6f3653806F3EE40',
+    [BLOCKCHAIN_NAME.POLYGON]: '0x88888811411ec00bD6895C5BB7dC1DEe635557c9',
     [BLOCKCHAIN_NAME.AVALANCHE]: '0x93d5592dfb36495cf348a02491ff6f888abdcb9f',
     [BLOCKCHAIN_NAME.FANTOM]: '0xf5125f87aa6abd76c744859065e9db7c126fb337'
 };
@@ -12,7 +12,14 @@ export const lifiContractAddress: Record<LifiCrossChainSupportedBlockchain, stri
 export const lifiContractAbi = [
     {
         inputs: [],
-        name: 'RubicFee',
+        name: 'RubicPlatformFee',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function'
+    },
+    {
+        inputs: [],
+        name: 'fixedCryptoFee',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function'
@@ -26,20 +33,44 @@ export const lifiContractAbi = [
     },
     {
         inputs: [
-            { internalType: 'contract IERC20', name: 'inputToken', type: 'address' },
-            { internalType: 'uint256', name: 'totalInputAmount', type: 'uint256' },
-            { internalType: 'address', name: 'integrator', type: 'address' },
-            { internalType: 'bytes', name: 'data', type: 'bytes' }
+            {
+                components: [
+                    { internalType: 'address', name: 'srcInputToken', type: 'address' },
+                    { internalType: 'address', name: 'dstOutputToken', type: 'address' },
+                    { internalType: 'address', name: 'integrator', type: 'address' },
+                    { internalType: 'address', name: 'recipient', type: 'address' },
+                    { internalType: 'uint256', name: 'srcInputAmount', type: 'uint256' },
+                    { internalType: 'uint256', name: 'dstMinOutputAmount', type: 'uint256' },
+                    { internalType: 'uint256', name: 'dstChainID', type: 'uint256' }
+                ],
+                internalType: 'struct BridgeBase.BaseCrossChainParams',
+                name: '_params',
+                type: 'tuple'
+            },
+            { internalType: 'bytes', name: '_data', type: 'bytes' }
         ],
         name: 'lifiCall',
         outputs: [],
-        stateMutability: 'nonpayable',
+        stateMutability: 'payable',
         type: 'function'
     },
     {
         inputs: [
-            { internalType: 'address', name: 'integrator', type: 'address' },
-            { internalType: 'bytes', name: 'data', type: 'bytes' }
+            {
+                components: [
+                    { internalType: 'address', name: 'srcInputToken', type: 'address' },
+                    { internalType: 'address', name: 'dstOutputToken', type: 'address' },
+                    { internalType: 'address', name: 'integrator', type: 'address' },
+                    { internalType: 'address', name: 'recipient', type: 'address' },
+                    { internalType: 'uint256', name: 'srcInputAmount', type: 'uint256' },
+                    { internalType: 'uint256', name: 'dstMinOutputAmount', type: 'uint256' },
+                    { internalType: 'uint256', name: 'dstChainID', type: 'uint256' }
+                ],
+                internalType: 'struct BridgeBase.BaseCrossChainParams',
+                name: '_params',
+                type: 'tuple'
+            },
+            { internalType: 'bytes', name: '_data', type: 'bytes' }
         ],
         name: 'lifiCallWithNative',
         outputs: [],
