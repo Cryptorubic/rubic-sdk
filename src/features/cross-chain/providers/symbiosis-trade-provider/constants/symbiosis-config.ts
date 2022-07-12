@@ -2,7 +2,7 @@ import { BLOCKCHAIN_NAME, SDK } from 'src/core';
 
 export function getSymbiosisConfig() {
     return {
-        minSwapAmountInUsd: 50,
+        minSwapAmountInUsd: 30,
         maxSwapAmountInUsd: 5000000,
         advisor: {
             url: 'https://api.symbiosis.finance/calculations'
