@@ -22,6 +22,8 @@ import { CrossChainProviderData } from 'src/features/cross-chain/providers/commo
 import { SymbiosisCrossChainTradeProvider } from 'src/features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
 import { LifiCrossChainTrade } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade';
 import { WrappedTradeOrNull } from 'src/features/cross-chain/providers/common/models/wrapped-trade-or-null';
+import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
+import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
 import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 import { LifiCrossChainTradeProvider } from './providers/lifi-trade-provider/lifi-cross-chain-trade-provider';
 
@@ -270,11 +272,24 @@ export class CrossChainManager {
         newTrade: WrappedTradeOrNull,
         oldTrade: WrappedTradeOrNull
     ): WrappedTradeOrNull {
-        if (!oldTrade) {
+        if (
+            oldTrade?.error instanceof CrossChainMinAmountError &&
+            newTrade?.error instanceof CrossChainMinAmountError
+        ) {
+            return oldTrade.error.minAmount.lte(newTrade.error.minAmount) ? oldTrade : newTrade;
+        }
+        if (
+            oldTrade?.error instanceof CrossChainMaxAmountError &&
+            newTrade?.error instanceof CrossChainMaxAmountError
+        ) {
+            return oldTrade.error.maxAmount.gte(newTrade.error.maxAmount) ? oldTrade : newTrade;
+        }
+
+        if (!oldTrade || oldTrade.error) {
             return newTrade;
         }
 
-        if (!newTrade) {
+        if (!newTrade || newTrade.error) {
             return oldTrade;
         }
 
@@ -289,7 +304,7 @@ export class CrossChainManager {
             return newTrade;
         }
 
-        return oldTradeRatio.comparedTo(newTradeRatio) ? oldTrade : newTrade;
+        return oldTradeRatio.lte(newTradeRatio) ? oldTrade : newTrade;
     }
 
     private getFullOptions(

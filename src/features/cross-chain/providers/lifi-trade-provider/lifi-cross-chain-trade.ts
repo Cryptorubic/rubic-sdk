@@ -265,6 +265,9 @@ export class LifiCrossChainTrade extends CrossChainTrade {
     }
 
     public getTradeAmountRatio(): BigNumber {
-        return this.from.price.dividedBy(this.to.tokenAmount);
+        const fromCost = this.from.price
+            .multipliedBy(this.from.tokenAmount)
+            .plus(this.networkFee.gt(0) ? 1 : 0);
+        return fromCost.dividedBy(this.to.tokenAmount);
     }
 }
