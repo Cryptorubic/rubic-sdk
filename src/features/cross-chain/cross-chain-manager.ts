@@ -221,6 +221,7 @@ export class CrossChainManager {
                         )
                     ),
                     fromPromise(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         providers.map(([_type, trade]) => {
                             const promise = trade.calculate(from, to, providersOptions);
                             return pTimeout(promise, timeout);
