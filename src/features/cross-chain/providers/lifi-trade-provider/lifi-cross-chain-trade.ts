@@ -9,7 +9,6 @@ import {
     lifiContractAddress
 } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
-import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
@@ -107,7 +106,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
     public readonly priceImpact: number;
 
     public get fromContractAddress(): string {
-        return lifiContractAddress[this.from.blockchain as LifiCrossChainSupportedBlockchain];
+        return lifiContractAddress;
     }
 
     constructor(
@@ -169,7 +168,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
                 transactionHash = hash;
             };
 
-            await Injector.web3Private.tryExecuteContractMethod(
+            await Injector.web3Private.executeContractMethod(
                 contractAddress,
                 contractAbi,
                 methodName,

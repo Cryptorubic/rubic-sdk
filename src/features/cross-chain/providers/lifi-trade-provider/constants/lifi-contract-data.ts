@@ -1,13 +1,6 @@
 import { AbiItem } from 'web3-utils';
-import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
-import { BLOCKCHAIN_NAME } from 'src/core';
 
-export const lifiContractAddress: Record<LifiCrossChainSupportedBlockchain, string> = {
-    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: '0x5cc19C5Af9d3fec6E4df783de99cC128542Ff378',
-    [BLOCKCHAIN_NAME.POLYGON]: '0x88888811411ec00bD6895C5BB7dC1DEe635557c9',
-    [BLOCKCHAIN_NAME.AVALANCHE]: '0x93d5592dfb36495cf348a02491ff6f888abdcb9f',
-    [BLOCKCHAIN_NAME.FANTOM]: '0xf5125f87aa6abd76c744859065e9db7c126fb337'
-};
+export const lifiContractAddress = '0x1111115F592e50C3A08F68CC2EA0fB9daCCDE798';
 
 export const lifiContractAbi = [
     {
@@ -26,8 +19,13 @@ export const lifiContractAbi = [
     },
     {
         inputs: [{ internalType: 'address', name: '', type: 'address' }],
-        name: 'integratorFee',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        name: 'integratorToFeeInfo',
+        outputs: [
+            { internalType: 'bool', name: 'isIntegrator', type: 'bool' },
+            { internalType: 'uint32', name: 'tokenFee', type: 'uint32' },
+            { internalType: 'uint32', name: 'fixedCryptoShare', type: 'uint32' },
+            { internalType: 'uint32', name: 'RubicTokenShare', type: 'uint32' }
+        ],
         stateMutability: 'view',
         type: 'function'
     },
