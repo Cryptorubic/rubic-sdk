@@ -22,6 +22,7 @@ import { wrappedNative } from '@rsdk-features/cross-chain/providers/celer-trade-
 import { CelerRubicCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { LowToSlippageError } from '@rsdk-common/errors/cross-chain/low-to-slippage.error';
+import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 
 export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -63,127 +64,120 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
 
         const { gasCalculation, providerAddress, ...slippages } = options;
 
+        await this.checkContractsState(
+            this.contracts(fromBlockchain),
+            this.contracts(toBlockchain)
+        );
+
+        const fromTrade = await this.calculateBestTrade(
+            fromBlockchain,
+            from,
+            fromTransitToken,
+            slippages.fromSlippageTolerance
+        );
+
+        const celerSlippage = await this.fetchCelerSlippage(
+            fromBlockchain,
+            toBlockchain,
+            fromTrade.toTokenAmountMin,
+            fromTransitToken
+        );
+
+        const { fromSlippageTolerance, toSlippageTolerance: toSlippage } = slippages;
+        const toSlippageTolerance = toSlippage - celerSlippage;
+
+        if (toSlippageTolerance < 0) {
+            throw new LowToSlippageError();
+        }
+
+        const estimateTransitAmountWithSlippage = await this.fetchCelerAmount(
+            fromBlockchain,
+            toBlockchain,
+            fromTrade.toTokenAmountMin,
+            fromTransitToken,
+            toTransitToken,
+            celerSlippage
+        );
+        if (estimateTransitAmountWithSlippage.lte(0)) {
+            await this.checkMinMaxAmountsErrors(fromTrade);
+        }
+
+        const { toTransitTokenAmount, transitFeeToken, feeInPercents } =
+            await this.getToTransitTokenAmount(
+                toBlockchain,
+                fromTrade.fromToken,
+                estimateTransitAmountWithSlippage,
+                fromTrade.contract
+            );
+
+        const toTransit = new PriceTokenAmount({
+            ...toTransitToken.asStruct,
+            tokenAmount: toTransitTokenAmount
+        });
+        const toTrade = await this.calculateBestTrade(
+            toBlockchain,
+            toTransit,
+            to,
+            toSlippageTolerance,
+            [
+                TRADE_TYPE.ONE_INCH_ARBITRUM,
+                TRADE_TYPE.ONE_INCH_BSC,
+                TRADE_TYPE.ONE_INCH_ETHEREUM,
+                TRADE_TYPE.ONE_INCH_POLYGON,
+                TRADE_TYPE.ONE_INCH_AVALANCHE,
+                TRADE_TYPE.ONE_INCH_FANTOM
+            ]
+        );
+
+        let cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
+        const nativeTokenPrice = (
+            await this.getBestItContractTrade(
+                fromBlockchain,
+                cryptoFeeToken,
+                fromTransitToken,
+                fromSlippageTolerance
+            )
+        ).toToken.tokenAmount;
+        cryptoFeeToken = new PriceTokenAmount({
+            ...cryptoFeeToken.asStructWithAmount,
+            price: nativeTokenPrice.dividedBy(cryptoFeeToken.tokenAmount)
+        });
+
+        const gasData =
+            gasCalculation === 'enabled'
+                ? await CelerCrossChainTrade.getGasData(
+                      fromTrade,
+                      toTrade,
+                      cryptoFeeToken,
+                      Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
+                  )
+                : null;
+
+        const trade = new CelerCrossChainTrade(
+            {
+                fromTrade,
+                toTrade,
+                cryptoFeeToken,
+                transitFeeToken,
+                gasData,
+                feeInPercents
+            },
+            providerAddress,
+            Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
+        );
+
         try {
-            await this.checkContractsState(
-                this.contracts(fromBlockchain),
-                this.contracts(toBlockchain)
-            );
-
-            const fromTrade = await this.calculateBestTrade(
-                fromBlockchain,
-                from,
-                fromTransitToken,
-                slippages.fromSlippageTolerance
-            );
-
-            const celerSlippage = await this.fetchCelerSlippage(
-                fromBlockchain,
-                toBlockchain,
-                fromTrade.toTokenAmountMin,
-                fromTransitToken
-            );
-
-            const { fromSlippageTolerance, toSlippageTolerance: toSlippage } = slippages;
-            const toSlippageTolerance = toSlippage - celerSlippage;
-
-            if (toSlippageTolerance < 0) {
-                throw new LowToSlippageError();
-            }
-
-            const estimateTransitAmountWithSlippage = await this.fetchCelerAmount(
-                fromBlockchain,
-                toBlockchain,
-                fromTrade.toTokenAmountMin,
-                fromTransitToken,
-                toTransitToken,
-                celerSlippage
-            );
-            if (estimateTransitAmountWithSlippage.lte(0)) {
-                await this.checkMinMaxAmountsErrors(fromTrade);
-            }
-
-            const { toTransitTokenAmount, transitFeeToken, feeInPercents } =
-                await this.getToTransitTokenAmount(
-                    toBlockchain,
-                    fromTrade.fromToken,
-                    estimateTransitAmountWithSlippage,
-                    fromTrade.contract
-                );
-
-            const toTransit = new PriceTokenAmount({
-                ...toTransitToken.asStruct,
-                tokenAmount: toTransitTokenAmount
-            });
-            const toTrade = await this.calculateBestTrade(
-                toBlockchain,
-                toTransit,
-                to,
-                toSlippageTolerance,
-                [
-                    TRADE_TYPE.ONE_INCH_ARBITRUM,
-                    TRADE_TYPE.ONE_INCH_BSC,
-                    TRADE_TYPE.ONE_INCH_ETHEREUM,
-                    TRADE_TYPE.ONE_INCH_POLYGON,
-                    TRADE_TYPE.ONE_INCH_AVALANCHE,
-                    TRADE_TYPE.ONE_INCH_FANTOM
-                ]
-            );
-
-            let cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
-            const nativeTokenPrice = (
-                await this.getBestItContractTrade(
-                    fromBlockchain,
-                    cryptoFeeToken,
-                    fromTransitToken,
-                    fromSlippageTolerance
-                )
-            ).toToken.tokenAmount;
-            cryptoFeeToken = new PriceTokenAmount({
-                ...cryptoFeeToken.asStructWithAmount,
-                price: nativeTokenPrice
-            });
-
-            const gasData =
-                gasCalculation === 'enabled'
-                    ? await CelerCrossChainTrade.getGasData(
-                          fromTrade,
-                          toTrade,
-                          cryptoFeeToken,
-                          Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
-                      )
-                    : null;
-
-            const trade = new CelerCrossChainTrade(
-                {
-                    fromTrade,
-                    toTrade,
-                    cryptoFeeToken,
-                    transitFeeToken,
-                    gasData,
-                    feeInPercents
-                },
-                providerAddress,
-                Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
-            );
-
-            try {
-                await this.checkMinMaxAmountsErrors(fromTrade);
-            } catch (err: unknown) {
-                return {
-                    trade,
-                    error: this.parseError(err)
-                };
-            }
-
-            return {
-                trade
-            };
+            await this.checkMinMaxAmountsErrors(fromTrade);
         } catch (err: unknown) {
             return {
-                trade: null,
-                error: this.parseError(err)
+                trade,
+                error: CrossChainTradeProvider.parseError(err)
             };
         }
+
+        return {
+            trade
+        };
     }
 
     /**

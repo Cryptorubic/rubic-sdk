@@ -17,6 +17,7 @@ import { RubicItCrossChainContractTrade } from '@rsdk-features/cross-chain/provi
 import { ItCalculatedTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/it-calculated-trade';
 import { CelerRubicCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 
 export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -63,73 +64,66 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         const { fromSlippageTolerance, toSlippageTolerance, gasCalculation, providerAddress } =
             options;
 
-        try {
-            await this.checkContractsState(
-                this.contracts(fromBlockchain),
-                this.contracts(toBlockchain)
-            );
+        await this.checkContractsState(
+            this.contracts(fromBlockchain),
+            this.contracts(toBlockchain)
+        );
 
-            const fromTrade = await this.calculateBestTrade(
-                fromBlockchain,
-                from,
-                fromTransitToken,
-                fromSlippageTolerance
-            );
+        const fromTrade = await this.calculateBestTrade(
+            fromBlockchain,
+            from,
+            fromTransitToken,
+            fromSlippageTolerance
+        );
 
-            const { toTransitTokenAmount, transitFeeToken, feeInPercents } =
-                await this.getToTransitTokenAmount(
-                    toBlockchain,
-                    fromTrade.fromToken,
-                    fromTrade.toTokenAmountMin,
-                    fromTrade.contract
-                );
-
-            const toTrade = await this.calculateBestTrade(
+        const { toTransitTokenAmount, transitFeeToken, feeInPercents } =
+            await this.getToTransitTokenAmount(
                 toBlockchain,
-                new PriceTokenAmount({
-                    ...toTransitToken.asStruct,
-                    tokenAmount: toTransitTokenAmount
-                }),
-                to,
-                toSlippageTolerance
+                fromTrade.fromToken,
+                fromTrade.toTokenAmountMin,
+                fromTrade.contract
             );
 
-            const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
-            const gasData =
-                gasCalculation === 'enabled'
-                    ? await RubicCrossChainTrade.getGasData(fromTrade, toTrade, cryptoFeeToken)
-                    : null;
+        const toTrade = await this.calculateBestTrade(
+            toBlockchain,
+            new PriceTokenAmount({
+                ...toTransitToken.asStruct,
+                tokenAmount: toTransitTokenAmount
+            }),
+            to,
+            toSlippageTolerance
+        );
 
-            const trade = new RubicCrossChainTrade(
-                {
-                    fromTrade,
-                    toTrade,
-                    cryptoFeeToken,
-                    transitFeeToken,
-                    gasData,
-                    feeInPercents
-                },
-                providerAddress
-            );
+        const cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
+        const gasData =
+            gasCalculation === 'enabled'
+                ? await RubicCrossChainTrade.getGasData(fromTrade, toTrade, cryptoFeeToken)
+                : null;
 
-            try {
-                await this.checkMinMaxAmountsErrors(fromTrade);
-            } catch (err: unknown) {
-                return {
-                    trade,
-                    error: this.parseError(err)
-                };
-            }
+        const trade = new RubicCrossChainTrade(
+            {
+                fromTrade,
+                toTrade,
+                cryptoFeeToken,
+                transitFeeToken,
+                gasData,
+                feeInPercents
+            },
+            providerAddress
+        );
 
-            return {
-                trade
-            };
+        try {
+            await this.checkMinMaxAmountsErrors(fromTrade);
         } catch (err: unknown) {
             return {
-                trade: null,
-                error: this.parseError(err)
+                trade,
+                error: CrossChainTradeProvider.parseError(err)
             };
         }
+
+        return {
+            trade
+        };
     }
 
     protected async calculateBestTrade(
