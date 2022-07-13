@@ -168,7 +168,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
                 transactionHash = hash;
             };
 
-            await Injector.web3Private.executeContractMethod(
+            await Injector.web3Private.tryExecuteContractMethod(
                 contractAddress,
                 contractAbi,
                 methodName,

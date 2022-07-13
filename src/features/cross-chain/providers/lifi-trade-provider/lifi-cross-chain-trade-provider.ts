@@ -120,7 +120,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
                 route: bestRoute,
                 gasData,
                 toTokenAmountMin: Web3Pure.fromWei(bestRoute.toAmountMin, to.decimals),
-                fee: new BigNumber(feeAmount),
+                fee: Web3Pure.fromWei(feeAmount),
                 feeSymbol: from.symbol,
                 feePercent,
                 networkFee,
