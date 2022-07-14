@@ -10,7 +10,14 @@ export const BLOCKCHAIN_NAME = {
     AURORA: 'AURORA',
     TELOS: 'TELOS',
     SOLANA: 'SOLANA',
-    NEAR: 'NEAR'
+    NEAR: 'NEAR',
+    OPTIMISM: 'OPTIMISM',
+    CRONOS: 'CRONOS',
+    OKE_X_CHAIN: 'OKT',
+    GNOSIS: 'GNOSIS',
+    FUSE: 'FUSE',
+    MOONBEAM: 'MOONBEAM',
+    CELO: 'CELO'
 } as const;
 
 export type BlockchainName = typeof BLOCKCHAIN_NAME[keyof typeof BLOCKCHAIN_NAME];

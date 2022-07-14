@@ -18,6 +18,7 @@ import { SwapCalculationOptions } from '@rsdk-features/instant-trades/models/swa
 import { createTokenNativeAddressProxy } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { Cache } from 'src/common';
 import { BlockchainsInfo } from 'src/core';
+import { TRADE_TYPE, TradeType } from 'src/features';
 
 type OneinchSwapCalculationOptions = Omit<SwapCalculationOptions, 'deadlineMinutes'>;
 
@@ -34,7 +35,9 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
 
     protected readonly gasMargin = 1;
 
-    private supportedTokens: string[] = [];
+    public get type(): TradeType {
+        return TRADE_TYPE.ONE_INCH;
+    }
 
     private get walletAddress(): string {
         return Injector.web3Private.address;

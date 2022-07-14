@@ -45,7 +45,7 @@ export abstract class InstantTrade {
      */
     public abstract slippageTolerance: number;
 
-    protected abstract contractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
+    protected abstract readonly contractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
     protected readonly web3Public: Web3Public;
 
@@ -54,7 +54,7 @@ export abstract class InstantTrade {
      */
     public abstract get type(): TradeType;
 
-    public abstract path: ReadonlyArray<Token>;
+    public abstract readonly path: ReadonlyArray<Token>;
 
     /**
      * Minimum amount of output token user can get.

@@ -119,14 +119,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             toTransit,
             to,
             toSlippageTolerance,
-            [
-                TRADE_TYPE.ONE_INCH_ARBITRUM,
-                TRADE_TYPE.ONE_INCH_BSC,
-                TRADE_TYPE.ONE_INCH_ETHEREUM,
-                TRADE_TYPE.ONE_INCH_POLYGON,
-                TRADE_TYPE.ONE_INCH_AVALANCHE,
-                TRADE_TYPE.ONE_INCH_FANTOM
-            ]
+            [TRADE_TYPE.ONE_INCH]
         );
 
         let cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
