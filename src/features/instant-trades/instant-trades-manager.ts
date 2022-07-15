@@ -141,10 +141,6 @@ export class InstantTradesManager {
             ([type]) => !disabledProviders.includes(type as TradeType)
         ) as [TradeType, InstantTradeProvider][];
 
-        if (!providers.length) {
-            throw new RubicSdkError(`There are no providers for ${from.blockchain} blockchain`);
-        }
-
         const instantTradesPromise = Promise.all(
             providers.map(async ([type, provider]) => {
                 try {
