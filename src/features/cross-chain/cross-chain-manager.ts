@@ -24,6 +24,7 @@ import { LifiCrossChainTrade } from 'src/features/cross-chain/providers/lifi-tra
 import { WrappedTradeOrNull } from 'src/features/cross-chain/providers/common/models/wrapped-trade-or-null';
 import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
 import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
+import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade-provider';
 import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 import { LifiCrossChainTradeProvider } from './providers/lifi-trade-provider/lifi-cross-chain-trade-provider';
 
@@ -47,7 +48,8 @@ export class CrossChainManager {
         RubicCrossChainTradeProvider,
         CelerCrossChainTradeProvider,
         SymbiosisCrossChainTradeProvider,
-        LifiCrossChainTradeProvider
+        LifiCrossChainTradeProvider,
+        DebridgeCrossChainTradeProvider
     ].reduce((acc, ProviderClass) => {
         const provider = new ProviderClass();
         acc[provider.type] = provider;
