@@ -982,25 +982,25 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@lifinance/sdk@^1.0.0-beta.12":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@lifinance/sdk/-/sdk-1.0.1.tgz#ec93caa1cce5d20df7fdccfb0c885353fb09a2af"
-  integrity sha512-DImSmZdbIXv4YUeWLjfcVp3VhKLsRIF5F3DAEBMa015H0RSkf7/zMJ6y58uzlcCZpG4Bjpq/FYoOMNFmcXBj9A==
+"@lifi/sdk@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@lifi/sdk/-/sdk-1.0.2.tgz#c03e8d011dc153c12f970ae666c0696d6bc3fee0"
+  integrity sha512-EFl/qNnS9ZrrYLbQpsg9djaHpr6mobcyd4k6IjvqpeMU/Rn+sYgNA7OywRNFdYQ6aGnh+V4XyBpxEbmJkyLmRg==
   dependencies:
     "@ethersproject/abi" "^5.6.4"
     "@ethersproject/contracts" "^5.6.2"
-    "@lifinance/types" "^0.14.16"
+    "@lifi/types" "^1.1.0"
     axios "^0.27.2"
     bignumber.js "^9.0.1"
     eth-rpc-errors "^4.0.3"
     ethers "^5.6.9"
 
-"@lifinance/types@^0.14.16":
-  version "0.14.20"
-  resolved "https://registry.yarnpkg.com/@lifinance/types/-/types-0.14.20.tgz#a0e8421b0cf04d282e628517f018b2a9a0f87a19"
-  integrity sha512-fd7XyKWrx4HPfbIhgxbx8l8OPZ7d0hKOCxkQ0XFXMOpy1zafr80Bw7kiTcbpIOBCjgUQC71v76Hc0Oz5UrgbUw==
+"@lifi/types@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@lifi/types/-/types-1.1.0.tgz#5a3ab3617a26df3216a10b17a13ec3556525396b"
+  integrity sha512-ZmZFJ72+bv+vw+dSmQbhmM0sJAyhhYX9ksf2p5PlslPoeQvrhOMj/npUgt2JZz2XuVcx1dPpWrA6NPWFU/wgQQ==
   dependencies:
-    ethers "^5.6.6"
+    ethers "^5.6.9"
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -3795,7 +3795,7 @@ ethereumjs-wallet@^1.0.2:
     utf8 "^3.0.0"
     uuid "^8.3.2"
 
-ethers@^5.6.6, ethers@^5.6.8, ethers@^5.6.9:
+ethers@^5.6.8, ethers@^5.6.9:
   version "5.6.9"
   resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.6.9.tgz#4e12f8dfcb67b88ae7a78a9519b384c23c576a4d"
   integrity sha512-lMGC2zv9HC5EC+8r429WaWu3uWJUCgUCt8xxKCFqkrFuBDZXDYIdzDUECxzjf2BMF8IVBByY1EBoGSL3RTm8RA==

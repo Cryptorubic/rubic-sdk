@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import { CROSS_CHAIN_TRADE_TYPE, SwapTransactionOptions } from 'src/features';
-import { Route } from '@lifinance/sdk';
+import { Route } from '@lifi/sdk';
 import { Injector } from 'src/core/sdk/injector';
 import { FailedToCheckForTransactionReceiptError } from 'src/common';
 import {

@@ -5,7 +5,7 @@ import {
     LifiCrossChainSupportedBlockchain,
     lifiCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
-import LIFI, { RouteOptions } from '@lifinance/sdk';
+import LIFI, { RouteOptions } from '@lifi/sdk';
 import { LifiCrossChainTrade } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade';
 import { Injector } from 'src/core/sdk/injector';
 import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';

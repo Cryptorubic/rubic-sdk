@@ -8,7 +8,7 @@ import { InstantTrade } from 'src/features/instant-trades/instant-trade';
 import { PriceTokenAmount, Token } from 'src/core';
 import { TransactionReceipt } from 'web3-eth';
 import { Injector } from 'src/core/sdk/injector';
-import { Route } from '@lifinance/sdk';
+import { Route } from '@lifi/sdk';
 import { TransactionConfig } from 'web3-core';
 
 export class LifiTrade extends InstantTrade {

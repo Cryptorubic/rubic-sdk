@@ -1,7 +1,7 @@
 import { GasFeeInfo, TradeType } from 'src/features';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
 import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
-import LIFI, { RouteOptions, RoutesRequest, Step } from '@lifinance/sdk';
+import LIFI, { RouteOptions, RoutesRequest, Step } from '@lifi/sdk';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { combineOptions } from 'src/common/utils/options';
 import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
