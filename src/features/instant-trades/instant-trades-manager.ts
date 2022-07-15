@@ -199,6 +199,9 @@ export class InstantTradesManager {
     ): Promise<InstantTrade[]> {
         const disabledProviders = providers.concat(options.disabledProviders);
 
-        return this.lifiProvider.calculate(from, to, disabledProviders, options);
+        return this.lifiProvider.calculate(from, to, disabledProviders, {
+            slippageTolerance: options.slippageTolerance,
+            gasCalculation: options.gasCalculation === 'disabled' ? 'disabled' : 'calculate'
+        });
     }
 }

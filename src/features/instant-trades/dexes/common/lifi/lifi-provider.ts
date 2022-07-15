@@ -1,9 +1,8 @@
-import { GasFeeInfo, SwapCalculationOptions, TradeType } from 'src/features';
+import { GasFeeInfo, TradeType } from 'src/features';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
 import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
 import LIFI, { RouteOptions, RoutesRequest, Step } from '@lifinance/sdk';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
-import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { combineOptions } from 'src/common/utils/options';
 import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
 import { notNull } from 'src/common';
@@ -11,17 +10,14 @@ import { LifiTrade } from 'src/features/instant-trades/dexes/common/lifi/lifi-tr
 import BigNumber from 'bignumber.js';
 import { Injector } from 'src/core/sdk/injector';
 import { Token } from 'src/core/blockchain/tokens/token';
+import { LifiCalculationOptions } from 'src/features/instant-trades/dexes/common/lifi/models/lifi-calculation-options';
 
 export class LifiProvider {
     private readonly lifi = new LIFI();
 
-    private readonly defaultOptions: Required<SwapCalculationOptions> = {
+    private readonly defaultOptions: Required<LifiCalculationOptions> = {
         gasCalculation: 'calculate',
-        disableMultihops: false,
-        deadlineMinutes: 20,
-        slippageTolerance: 0.02,
-        wrappedAddress: EMPTY_ADDRESS,
-        fromAddress: ''
+        slippageTolerance: 0.02
     };
 
     constructor() {}
@@ -30,9 +26,9 @@ export class LifiProvider {
         from: PriceTokenAmount,
         toToken: PriceToken,
         disabledProviders: TradeType[],
-        options?: SwapCalculationOptions
+        options?: LifiCalculationOptions
     ): Promise<InstantTrade[]> {
-        const fullOptions: Required<SwapCalculationOptions> = combineOptions(
+        const fullOptions: Required<LifiCalculationOptions> = combineOptions(
             options,
             this.defaultOptions
         );

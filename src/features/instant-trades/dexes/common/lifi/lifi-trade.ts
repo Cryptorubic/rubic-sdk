@@ -18,9 +18,9 @@ export class LifiTrade extends InstantTrade {
 
     public readonly to: PriceTokenAmount;
 
-    public gasFeeInfo: GasFeeInfo | null;
+    public readonly gasFeeInfo: GasFeeInfo | null;
 
-    public slippageTolerance: number;
+    public readonly slippageTolerance: number;
 
     protected readonly contractAddress: string;
 
