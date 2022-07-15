@@ -10,5 +10,6 @@ export const lifiProviders: Record<string, TradeType> = {
     honeyswap: TRADE_TYPE.HONEY_SWAP,
     steallaswap: TRADE_TYPE.STELLA_SWAP,
     beamswap: TRADE_TYPE.BEAM_SWAP,
-    ubeswap: TRADE_TYPE.UBE_SWAP
+    ubeswap: TRADE_TYPE.UBE_SWAP,
+    jswap: TRADE_TYPE.J_SWAP
 };

@@ -11,6 +11,7 @@ export const TRADE_TYPE = {
     OPEN_OCEAN: 'OPEN_OCEAN',
     DODO: 'DODO',
     HONEY_SWAP: 'HONEY_SWAP',
+    J_SWAP: 'J_SWAP',
 
     // Ethereum
     UNISWAP_V2: 'UNISWAP_V2',
