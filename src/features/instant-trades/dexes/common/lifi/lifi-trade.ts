@@ -2,6 +2,7 @@ import {
     EncodeTransactionOptions,
     GasFeeInfo,
     SwapTransactionOptions,
+    TRADE_TYPE,
     TradeType
 } from 'src/features';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
@@ -10,8 +11,49 @@ import { TransactionReceipt } from 'web3-eth';
 import { Injector } from 'src/core/sdk/injector';
 import { Route } from '@lifi/sdk';
 import { TransactionConfig } from 'web3-core';
+import BigNumber from 'bignumber.js';
+
+interface LifiTransactionRequest {
+    data: string;
+    gasLimit: string;
+    gasPrice: string;
+}
 
 export class LifiTrade extends InstantTrade {
+    /** @internal */
+    public static async getGasData(
+        from: PriceTokenAmount,
+        to: PriceTokenAmount,
+        route: Route
+    ): Promise<{
+        gasLimit: BigNumber;
+        gasPrice: BigNumber;
+    } | null> {
+        try {
+            const transactionData = await new LifiTrade({
+                from,
+                to,
+                gasFeeInfo: null,
+                slippageTolerance: NaN,
+                contractAddress: '',
+                type: TRADE_TYPE.ONE_INCH,
+                path: [],
+                route
+            }).getTransactionData();
+
+            if (!transactionData.gasLimit || !transactionData.gasPrice) {
+                return null;
+            }
+
+            return {
+                gasLimit: new BigNumber(transactionData.gasLimit),
+                gasPrice: new BigNumber(transactionData.gasPrice)
+            };
+        } catch (_err) {
+            return null;
+        }
+    }
+
     private readonly httpClient = Injector.httpClient;
 
     public readonly from: PriceTokenAmount;
@@ -52,19 +94,31 @@ export class LifiTrade extends InstantTrade {
         this.route = tradeStruct.route;
     }
 
-    public async swap(options?: SwapTransactionOptions): Promise<TransactionReceipt> {
+    public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
         await this.checkWalletState();
 
         await this.checkAllowanceAndApprove(options);
 
         try {
-            const data = await this.getSwapData();
+            const {
+                data,
+                gasLimit: lifiGasLimit,
+                gasPrice: lifiGasPrice
+            } = await this.getTransactionData();
+
+            const { gas, gasPrice } = {
+                gas: options.gasLimit || lifiGasLimit,
+                gasPrice: options.gasPrice || lifiGasPrice
+            };
 
             return Injector.web3Private.trySendTransaction(
                 this.contractAddress,
                 this.from.isNative ? this.from.stringWeiAmount : '0',
                 {
-                    data
+                    data,
+                    gas,
+                    gasPrice,
+                    onTransactionHash: options.onConfirm
                 }
             );
         } catch (err) {
@@ -74,11 +128,19 @@ export class LifiTrade extends InstantTrade {
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         try {
-            const data = await this.getSwapData();
-            const { gas, gasPrice } = this.getGasParams(options);
+            const {
+                data,
+                gasLimit: lifiGasLimit,
+                gasPrice: lifiGasPrice
+            } = await this.getTransactionData();
+
+            const { gas, gasPrice } = {
+                gas: options.gasLimit || lifiGasLimit,
+                gasPrice: options.gasPrice || lifiGasPrice
+            };
 
             return {
-                data,
+                data: data!,
                 gas,
                 gasPrice
             };
@@ -87,7 +149,7 @@ export class LifiTrade extends InstantTrade {
         }
     }
 
-    private async getSwapData(): Promise<string> {
+    private async getTransactionData(): Promise<LifiTransactionRequest> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
@@ -110,13 +172,19 @@ export class LifiTrade extends InstantTrade {
         };
 
         const swapResponse: {
-            transactionRequest: {
-                data: string;
-            };
+            transactionRequest: LifiTransactionRequest;
         } = await this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
             ...step
         });
 
-        return swapResponse.transactionRequest.data;
+        const { transactionRequest } = swapResponse;
+        const gasLimit = parseInt(transactionRequest.gasLimit, 16).toString();
+        const gasPrice = parseInt(transactionRequest.gasPrice, 16).toString();
+
+        return {
+            data: transactionRequest.data,
+            gasLimit,
+            gasPrice
+        };
     }
 }

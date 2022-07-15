@@ -1,7 +1,7 @@
 import { GasFeeInfo, TradeType } from 'src/features';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
-import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
-import LIFI, { RouteOptions, RoutesRequest, Step } from '@lifi/sdk';
+import { BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
+import LIFI, { Route, RouteOptions, RoutesRequest, Step } from '@lifi/sdk';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { combineOptions } from 'src/common/utils/options';
 import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
@@ -84,7 +84,7 @@ export class LifiProvider {
                     const [gasFeeInfo, path] = await Promise.all([
                         fullOptions.gasCalculation === 'disabled'
                             ? null
-                            : this.getGasFeeInfo(step, from.blockchain),
+                            : this.getGasFeeInfo(from, to, route),
                         this.getPath(step, from, to)
                     ]);
 
@@ -104,19 +104,19 @@ export class LifiProvider {
     }
 
     private async getGasFeeInfo(
-        step: Step,
-        fromBlockchain: BlockchainName
+        from: PriceTokenAmount,
+        to: PriceTokenAmount,
+        route: Route
     ): Promise<GasFeeInfo | null> {
         try {
-            const gasLimit = step.estimate.gasCosts?.[0]?.limit;
-            if (!gasLimit) {
+            const gasData = await LifiTrade.getGasData(from, to, route);
+            if (!gasData) {
                 return null;
             }
 
-            const [gasPrice, nativeCoinPrice] = await Promise.all([
-                Injector.gasPriceApi.getGasPrice(fromBlockchain),
-                Injector.coingeckoApi.getNativeCoinPrice(fromBlockchain)
-            ]);
+            const { gasLimit, gasPrice } = gasData;
+
+            const nativeCoinPrice = await Injector.coingeckoApi.getNativeCoinPrice(from.blockchain);
 
             const gasPriceInEth = Web3Pure.fromWei(gasPrice);
             const gasPriceInUsd = gasPriceInEth.multipliedBy(nativeCoinPrice);
