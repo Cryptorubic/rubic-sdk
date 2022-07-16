@@ -100,16 +100,8 @@ export class LifiTrade extends InstantTrade {
         await this.checkAllowanceAndApprove(options);
 
         try {
-            const {
-                data,
-                gasLimit: lifiGasLimit,
-                gasPrice: lifiGasPrice
-            } = await this.getTransactionData();
-
-            const { gas, gasPrice } = {
-                gas: options.gasLimit || lifiGasLimit,
-                gasPrice: options.gasPrice || lifiGasPrice
-            };
+            const { data } = await this.getTransactionData();
+            const { gas, gasPrice } = this.getGasParams(options);
 
             return Injector.web3Private.trySendTransaction(
                 this.contractAddress,
@@ -128,16 +120,8 @@ export class LifiTrade extends InstantTrade {
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         try {
-            const {
-                data,
-                gasLimit: lifiGasLimit,
-                gasPrice: lifiGasPrice
-            } = await this.getTransactionData();
-
-            const { gas, gasPrice } = {
-                gas: options.gasLimit || lifiGasLimit,
-                gasPrice: options.gasPrice || lifiGasPrice
-            };
+            const { data } = await this.getTransactionData();
+            const { gas, gasPrice } = this.getGasParams(options);
 
             return {
                 data: data!,
@@ -179,7 +163,7 @@ export class LifiTrade extends InstantTrade {
 
         const { transactionRequest } = swapResponse;
         const gasLimit = parseInt(transactionRequest.gasLimit, 16).toString();
-        const gasPrice = parseInt(transactionRequest.gasPrice, 16).toString();
+        const gasPrice = (parseInt(transactionRequest.gasPrice, 16) * 10 ** 9).toString();
 
         return {
             data: transactionRequest.data,
