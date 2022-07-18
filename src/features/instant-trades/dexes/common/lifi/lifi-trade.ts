@@ -17,8 +17,8 @@ import { LifiSwapRequestError } from 'src/common/errors/swap/lifi-swap-request.e
 
 interface LifiTransactionRequest {
     data: string;
-    gasLimit: string;
-    gasPrice: string;
+    gasLimit?: string;
+    gasPrice?: string;
 }
 
 export class LifiTrade extends InstantTrade {
@@ -178,8 +178,10 @@ export class LifiTrade extends InstantTrade {
         });
 
         const { transactionRequest } = swapResponse;
-        const gasLimit = parseInt(transactionRequest.gasLimit, 16).toString();
-        const gasPrice = parseInt(transactionRequest.gasPrice, 16).toString();
+        const gasLimit =
+            transactionRequest.gasLimit && parseInt(transactionRequest.gasLimit, 16).toString();
+        const gasPrice =
+            transactionRequest.gasPrice && parseInt(transactionRequest.gasPrice, 16).toString();
 
         return {
             data: transactionRequest.data,
