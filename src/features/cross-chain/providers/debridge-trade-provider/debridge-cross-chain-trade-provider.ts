@@ -7,19 +7,18 @@ import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
 } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { RubicSdkError } from 'src/common';
+import { CrossChainIsUnavailableError, RubicSdkError } from 'src/common';
 import { Injector } from '@rsdk-core/sdk/injector';
-import BigNumber from 'bignumber.js';
 import { SymbiosisCrossChainTrade } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/debridge-cross-chain-supported-blockchain';
-import { DE_BRIDGE_CONTRACT_ABI } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-abi';
-import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-address';
 import { TransactionRequest } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-request';
 import { TransactionResponse } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
 import { DebridgeCrossChainTrade } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade';
+import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-address';
+import { DE_BRIDGE_CONTRACT_ABI } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-abi';
+import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 
 export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -60,10 +59,9 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                 );
             }
 
-            // await this.checkContractState(fromBlockchain);
+            await this.checkContractState(fromBlockchain);
 
-            const feePercent = 0.0015;
-            // const feePercent = await this.getFeePercent(fromBlockchain, options.providerAddress);
+            const feePercent = await this.getFeePercent(fromBlockchain, options.providerAddress);
             const fromAmountWithoutFee = from.tokenAmount
                 .multipliedBy(100 - feePercent)
                 .dividedBy(100);
@@ -89,26 +87,10 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                 }
             );
 
-            // const {
-            //     tokenAmountOut,
-            //     transactionRequest,
-            //     priceImpact,
-            //     fee: transitTokenFee
-            // } = await swapping.exactIn(
-            //     tokenAmountIn,
-            //     tokenOut,
-            //     fromAddress,
-            //     fromAddress,
-            //     fromAddress,
-            //     slippageTolerance,
-            //     deadline,
-            //     true
-            // );
-
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(
-                    estimation.dstChainTokenOut.minAmount,
+                    estimation.dstChainTokenOut.amount,
                     estimation.dstChainTokenOut.decimals
                 )
             });
@@ -119,7 +101,6 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                     : null;
 
             const transitToken = estimation.dstChainTokenIn;
-            // const transitAmount = estimation.dstChainTokenIn.amount;
 
             return {
                 trade: new DebridgeCrossChainTrade(
@@ -132,10 +113,13 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                         priceImpact: 0,
                         slippage: options.slippageTolerance,
                         fee: from.tokenAmount.minus(fromAmountWithoutFee),
-                        feeSymbol: estimation.dstChainTokenIn.symbol,
+                        feeSymbol: from.symbol,
                         feePercent,
-                        networkFee: new BigNumber(0),
-                        networkFeeSymbol: '',
+                        networkFee: Web3Pure.fromWei(
+                            estimation.executionFee.actualAmount,
+                            estimation.executionFee.token.decimals
+                        ),
+                        networkFeeSymbol: estimation.executionFee.token.symbol,
                         transitAmount: Web3Pure.fromWei(
                             transitToken.minAmount,
                             transitToken.decimals
@@ -169,7 +153,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                 (await web3PublicService.callContractMethod<number>(
                     DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain],
                     DE_BRIDGE_CONTRACT_ABI,
-                    'integratorFee',
+                    'availableIntegratorFee',
                     {
                         methodArguments: [providerAddress]
                     }
@@ -181,7 +165,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
             (await web3PublicService.callContractMethod<number>(
                 DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain],
                 DE_BRIDGE_CONTRACT_ABI,
-                'RubicFee'
+                'RubicPlatformFee'
             )) / 10000
         );
     }
@@ -242,17 +226,17 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     //     return amount.multipliedBy(1 - approximatePercentDifference);
     // }
 
-    // private async checkContractState(fromBlockchain: DeBridgeCrossChainSupportedBlockchain) {
-    //     const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-    //
-    //     const isPaused = await web3PublicService.callContractMethod<number>(
-    //         DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain],
-    //         DE_BRIDGE_CONTRACT_ABI,
-    //         'paused'
-    //     );
-    //
-    //     if (isPaused) {
-    //         throw new CrossChainIsUnavailableError();
-    //     }
-    // }
+    private async checkContractState(fromBlockchain: DeBridgeCrossChainSupportedBlockchain) {
+        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+
+        const isPaused = await web3PublicService.callContractMethod<number>(
+            DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain],
+            DE_BRIDGE_CONTRACT_ABI,
+            'paused'
+        );
+
+        if (isPaused) {
+            throw new CrossChainIsUnavailableError();
+        }
+    }
 }

@@ -8,14 +8,14 @@ import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cro
 import { TransactionRequest } from '@ethersproject/providers';
 import { PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import { Injector } from '@rsdk-core/sdk/injector';
-import { SYMBIOSIS_CONTRACT_ADDRESS } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
-import { SymbiosisCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
-import { SYMBIOSIS_CONTRACT_ABI } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-abi';
 import { FailedToCheckForTransactionReceiptError } from 'src/common';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import BigNumber from 'bignumber.js';
+import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-address';
+import { DE_BRIDGE_CONTRACT_ABI } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-abi';
+import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/debridge-cross-chain-supported-blockchain';
 
 /**
  * Calculated DeBridge cross chain trade.
@@ -30,7 +30,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
         to: PriceTokenAmount,
         transactionRequest: TransactionRequest
     ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
+        const fromBlockchain = from.blockchain as DeBridgeCrossChainSupportedBlockchain;
         const walletAddress = Injector.web3Private.address;
         if (!walletAddress) {
             return null;
@@ -83,7 +83,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.DEBRIDGE;
 
     public readonly itType: { from: TradeType; to: TradeType };
 
@@ -103,9 +103,6 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
 
     public readonly feePercent: number;
 
-    /**
-     * Overall price impact, fetched from symbiosis api.
-     */
     public readonly priceImpact: number;
 
     public readonly gasData: GasData | null;
@@ -114,12 +111,12 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
 
     protected readonly fromWeb3Public: Web3Public;
 
-    private get fromBlockchain(): SymbiosisCrossChainSupportedBlockchain {
-        return this.from.blockchain as SymbiosisCrossChainSupportedBlockchain;
+    private get fromBlockchain(): DeBridgeCrossChainSupportedBlockchain {
+        return this.from.blockchain as DeBridgeCrossChainSupportedBlockchain;
     }
 
     protected get fromContractAddress(): string {
-        return SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain];
+        return DE_BRIDGE_CONTRACT_ADDRESS[this.fromBlockchain];
     }
 
     constructor(
@@ -215,14 +212,14 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
     }
 
     protected async getContractParams(): Promise<ContractParams> {
-        const contractAddress = SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain];
-        const contractAbi = SYMBIOSIS_CONTRACT_ABI;
+        const contractAddress = DE_BRIDGE_CONTRACT_ADDRESS[this.fromBlockchain];
+        const contractAbi = DE_BRIDGE_CONTRACT_ABI;
 
         if (this.from.isNative) {
             return {
                 contractAddress,
                 contractAbi,
-                methodName: 'SymbiosisCallWithNative',
+                methodName: 'deBridgeCallCallWithNative',
                 methodArguments: [this.providerAddress, this.transactionRequest.data],
                 value: this.from.stringWeiAmount
             };
@@ -231,7 +228,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
         return {
             contractAddress,
             contractAbi,
-            methodName: 'SymbiosisCall',
+            methodName: 'deBridgeCall',
             methodArguments: [
                 this.from.address,
                 this.from.stringWeiAmount,
