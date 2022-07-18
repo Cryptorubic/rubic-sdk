@@ -179,7 +179,7 @@ export class LifiTrade extends InstantTrade {
 
         const { transactionRequest } = swapResponse;
         const gasLimit = parseInt(transactionRequest.gasLimit, 16).toString();
-        const gasPrice = (parseInt(transactionRequest.gasPrice, 16) * 10 ** 9).toString();
+        const gasPrice = parseInt(transactionRequest.gasPrice, 16).toString();
 
         return {
             data: transactionRequest.data,
