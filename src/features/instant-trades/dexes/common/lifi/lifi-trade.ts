@@ -6,12 +6,13 @@ import {
     TradeType
 } from 'src/features';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
-import { PriceTokenAmount, Token } from 'src/core';
+import { Token } from 'src/core';
 import { TransactionReceipt } from 'web3-eth';
 import { Injector } from 'src/core/sdk/injector';
 import { Route } from '@lifi/sdk';
 import { TransactionConfig } from 'web3-core';
 import BigNumber from 'bignumber.js';
+import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 
 interface LifiTransactionRequest {
     data: string;
@@ -38,7 +39,8 @@ export class LifiTrade extends InstantTrade {
                 contractAddress: '',
                 type: TRADE_TYPE.ONE_INCH,
                 path: [],
-                route
+                route,
+                toTokenWeiAmountMin: new BigNumber(NaN)
             }).getTransactionData();
 
             if (!transactionData.gasLimit || !transactionData.gasPrice) {
@@ -72,6 +74,12 @@ export class LifiTrade extends InstantTrade {
 
     private readonly route: Route;
 
+    private readonly _toTokenAmountMin: PriceTokenAmount;
+
+    public get toTokenAmountMin(): PriceTokenAmount {
+        return this._toTokenAmountMin;
+    }
+
     constructor(tradeStruct: {
         from: PriceTokenAmount;
         to: PriceTokenAmount;
@@ -81,11 +89,16 @@ export class LifiTrade extends InstantTrade {
         type: TradeType;
         path: ReadonlyArray<Token>;
         route: Route;
+        toTokenWeiAmountMin: BigNumber;
     }) {
         super(tradeStruct.from.blockchain);
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
+        this._toTokenAmountMin = new PriceTokenAmount({
+            ...this.to.asStruct,
+            weiAmount: tradeStruct.toTokenWeiAmountMin
+        });
         this.gasFeeInfo = tradeStruct.gasFeeInfo;
         this.slippageTolerance = tradeStruct.slippageTolerance;
         this.contractAddress = tradeStruct.contractAddress;

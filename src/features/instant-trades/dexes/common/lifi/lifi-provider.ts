@@ -96,7 +96,8 @@ export class LifiProvider {
                         contractAddress,
                         type,
                         path,
-                        route
+                        route,
+                        toTokenWeiAmountMin: new BigNumber(route.toAmountMin)
                     });
                 })
             )
