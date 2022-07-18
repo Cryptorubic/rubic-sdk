@@ -111,6 +111,10 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
             .dp(2)
             .toNumber();
 
+        from = new PriceTokenAmount({
+            ...from.asStructWithAmount,
+            price: new BigNumber(bestRoute.fromAmountUSD).dividedBy(from.tokenAmount)
+        });
         const to = new PriceTokenAmount({
             ...toToken.asStruct,
             weiAmount: new BigNumber(bestRoute.toAmount)
@@ -122,10 +126,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
 
         const trade = new LifiCrossChainTrade(
             {
-                from: new PriceTokenAmount({
-                    ...from.asStructWithAmount,
-                    price: new BigNumber(bestRoute.fromAmountUSD).dividedBy(from.tokenAmount)
-                }),
+                from,
                 to,
                 route: bestRoute,
                 gasData,
@@ -212,7 +213,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
 
     private checkMinError(from: PriceTokenAmount): void | never {
         if (from.price.multipliedBy(from.tokenAmount).lt(this.MIN_AMOUNT_USD)) {
-            throw new CrossChainMinAmountError(this.MIN_AMOUNT_USD, from);
+            throw new CrossChainMinAmountError(this.MIN_AMOUNT_USD, 'USDC');
         }
     }
 }
