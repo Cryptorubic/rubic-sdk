@@ -114,16 +114,15 @@ export class LifiTrade extends InstantTrade {
         await this.checkAllowanceAndApprove(options);
 
         try {
-            const { data } = await this.getTransactionData();
-            const { gas, gasPrice } = this.getGasParams(options);
+            const { data, gasLimit, gasPrice } = await this.getTransactionData();
 
             return Injector.web3Private.trySendTransaction(
                 this.contractAddress,
                 this.from.isNative ? this.from.stringWeiAmount : '0',
                 {
                     data,
-                    gas,
-                    gasPrice,
+                    gas: options.gasLimit || gasLimit,
+                    gasPrice: options.gasPrice || gasPrice,
                     onTransactionHash: options.onConfirm
                 }
             );
@@ -138,13 +137,12 @@ export class LifiTrade extends InstantTrade {
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         try {
-            const { data } = await this.getTransactionData();
-            const { gas, gasPrice } = this.getGasParams(options);
+            const { data, gasLimit, gasPrice } = await this.getTransactionData();
 
             return {
                 data: data!,
-                gas,
-                gasPrice
+                gas: options.gasLimit || gasLimit,
+                gasPrice: options.gasPrice || gasPrice
             };
         } catch (err) {
             throw this.parseError(err);
