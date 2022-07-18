@@ -59,6 +59,16 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         return Injector.web3Private.address;
     }
 
+    public isSupportedBlockchains(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName
+    ): boolean {
+        return (
+            SymbiosisCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
+            SymbiosisCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
+        );
+    }
+
     public async calculate(
         from: PriceTokenAmount,
         toToken: PriceToken,

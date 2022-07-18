@@ -37,6 +37,16 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
 
     protected contracts = getCelerCrossChainContract;
 
+    public isSupportedBlockchains(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName
+    ): boolean {
+        return (
+            CelerCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
+            CelerCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
+        );
+    }
+
     public async calculate(
         from: PriceTokenAmount,
         to: PriceToken,

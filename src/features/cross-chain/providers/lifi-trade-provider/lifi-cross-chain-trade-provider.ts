@@ -37,6 +37,16 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
 
     private readonly MIN_AMOUNT_USD = new BigNumber(30);
 
+    public isSupportedBlockchains(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName
+    ): boolean {
+        return (
+            LifiCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
+            LifiCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
+        );
+    }
+
     public async calculate(
         from: PriceTokenAmount,
         toToken: PriceToken,
