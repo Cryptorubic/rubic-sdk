@@ -13,6 +13,7 @@ import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
+import { LifiSwapRequestError } from 'src/common/errors/swap/lifi-swap-request.error';
 
 /**
  * Calculated Celer cross chain trade.
@@ -187,6 +188,11 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             if (err instanceof FailedToCheckForTransactionReceiptError) {
                 return transactionHash!;
             }
+
+            if (err.message.includes('Request failed with status code 500')) {
+                throw new LifiSwapRequestError();
+            }
+
             throw err;
         }
     }
