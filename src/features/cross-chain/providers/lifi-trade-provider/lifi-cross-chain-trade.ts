@@ -109,6 +109,8 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         return lifiContractAddress;
     }
 
+    public readonly subType: string | undefined;
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount;
@@ -132,6 +134,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         this.route = crossChainTrade.route;
         this.gasData = crossChainTrade.gasData;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
+        this.subType = this.route?.steps?.[0]?.tool;
 
         this.fee = crossChainTrade.fee;
         this.feeSymbol = crossChainTrade.feeSymbol;
