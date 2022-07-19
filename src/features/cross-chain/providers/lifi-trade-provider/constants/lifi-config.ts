@@ -13,6 +13,9 @@ export function getLifiConfig(): ConfigUpdate {
     );
 
     return {
-        rpcs
+        rpcs,
+        defaultRouteOptions: {
+            integrator: 'rubic'
+        }
     };
 }

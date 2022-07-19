@@ -15,6 +15,7 @@ import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { LifiSwapRequestError } from 'src/common/errors/swap/lifi-swap-request.error';
 import { LifiPairIsUnavailable } from 'src/common/errors/swap/lifi-pair-is-unavailable';
+import { RubicSdkError } from 'src/common';
 
 interface LifiTransactionRequest {
     data: string;
@@ -130,6 +131,10 @@ export class LifiTrade extends InstantTrade {
         } catch (err) {
             if (err.message.includes('Request failed with status code 500')) {
                 throw new LifiSwapRequestError();
+            }
+
+            if (err instanceof RubicSdkError) {
+                throw err;
             }
 
             throw new LifiPairIsUnavailable();
