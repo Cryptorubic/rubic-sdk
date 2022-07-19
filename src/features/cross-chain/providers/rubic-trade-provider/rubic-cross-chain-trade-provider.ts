@@ -36,6 +36,16 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         super();
     }
 
+    public isSupportedBlockchains(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName
+    ): boolean {
+        return (
+            RubicCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
+            RubicCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
+        );
+    }
+
     public async calculate(
         from: PriceTokenAmount,
         to: PriceToken,

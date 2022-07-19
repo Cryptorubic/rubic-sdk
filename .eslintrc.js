@@ -27,6 +27,7 @@ module.exports = {
                 'no-underscore-dangle': 'off',
                 'no-inferrable-types': 'off',
                 '@typescript-eslint/no-explicit-any': 2,
+                '@typescript-eslint/no-unused-vars': 'off',
                 'unused-imports/no-unused-imports': 'error',
                 'unused-imports/no-unused-vars': [
                     'error',
@@ -107,6 +108,7 @@ module.exports = {
                 'no-underscore-dangle': 'off',
                 'no-inferrable-types': 'off',
                 '@typescript-eslint/no-explicit-any': 2,
+                '@typescript-eslint/no-unused-vars': 'off',
                 'unused-imports/no-unused-imports': 'error',
                 'unused-imports/no-unused-vars': [
                     'error',

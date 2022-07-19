@@ -5,7 +5,7 @@ import {
     LifiCrossChainSupportedBlockchain,
     lifiCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
-import LIFI, { RouteOptions } from '@lifinance/sdk';
+import LIFI, { RouteOptions } from '@lifi/sdk';
 import { LifiCrossChainTrade } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade';
 import { Injector } from 'src/core/sdk/injector';
 import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
@@ -36,6 +36,16 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     private readonly lifi = new LIFI(getLifiConfig());
 
     private readonly MIN_AMOUNT_USD = new BigNumber(30);
+
+    public isSupportedBlockchains(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName
+    ): boolean {
+        return (
+            LifiCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
+            LifiCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
+        );
+    }
 
     public async calculate(
         from: PriceTokenAmount,
@@ -101,6 +111,10 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
             .dp(2)
             .toNumber();
 
+        from = new PriceTokenAmount({
+            ...from.asStructWithAmount,
+            price: new BigNumber(bestRoute.fromAmountUSD).dividedBy(from.tokenAmount)
+        });
         const to = new PriceTokenAmount({
             ...toToken.asStruct,
             weiAmount: new BigNumber(bestRoute.toAmount)
@@ -112,15 +126,12 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
 
         const trade = new LifiCrossChainTrade(
             {
-                from: new PriceTokenAmount({
-                    ...from.asStructWithAmount,
-                    price: new BigNumber(bestRoute.fromAmountUSD).dividedBy(from.tokenAmount)
-                }),
+                from,
                 to,
                 route: bestRoute,
                 gasData,
                 toTokenAmountMin: Web3Pure.fromWei(bestRoute.toAmountMin, to.decimals),
-                fee: Web3Pure.fromWei(feeAmount),
+                fee: Web3Pure.fromWei(feeAmount, from.decimals),
                 feeSymbol: from.symbol,
                 feePercent,
                 networkFee,
@@ -152,7 +163,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
 
         if (providerAddress !== EMPTY_ADDRESS) {
             const integratorInfo = await web3PublicService.callContractMethod<[boolean, number]>(
-                lifiContractAddress,
+                lifiContractAddress[fromBlockchain],
                 lifiContractAbi,
                 'integratorToFeeInfo',
                 {
@@ -166,7 +177,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
 
         return (
             (await web3PublicService.callContractMethod<number>(
-                lifiContractAddress,
+                lifiContractAddress[fromBlockchain],
                 lifiContractAbi,
                 'RubicPlatformFee'
             )) / 10_000
@@ -178,7 +189,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     ): Promise<BigNumber> {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
         const weiAmount = await web3PublicService.callContractMethod(
-            lifiContractAddress,
+            lifiContractAddress[fromBlockchain],
             lifiContractAbi,
             'fixedCryptoFee'
         );
@@ -190,7 +201,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 
         const isPaused = await web3PublicService.callContractMethod<number>(
-            lifiContractAddress,
+            lifiContractAddress[fromBlockchain],
             lifiContractAbi,
             'paused'
         );
@@ -202,7 +213,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
 
     private checkMinError(from: PriceTokenAmount): void | never {
         if (from.price.multipliedBy(from.tokenAmount).lt(this.MIN_AMOUNT_USD)) {
-            throw new CrossChainMinAmountError(this.MIN_AMOUNT_USD, from);
+            throw new CrossChainMinAmountError(this.MIN_AMOUNT_USD, 'USDC');
         }
     }
 }
