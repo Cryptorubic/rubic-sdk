@@ -13,7 +13,7 @@ export const BLOCKCHAIN_NAME = {
     NEAR: 'NEAR',
     OPTIMISM: 'OPTIMISM',
     CRONOS: 'CRONOS',
-    OKE_X_CHAIN: 'OKT',
+    OKE_X_CHAIN: 'OKX',
     GNOSIS: 'GNOSIS',
     FUSE: 'FUSE',
     MOONBEAM: 'MOONBEAM',
