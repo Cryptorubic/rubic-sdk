@@ -55,18 +55,19 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
             const fromAddress = options.fromAddress || this.walletAddress;
             if (!fromAddress) {
                 throw new RubicSdkError(
-                    'From address or wallet address must not be empty in Symbiosis'
+                    'From address or wallet address must not be empty in Debridge'
                 );
             }
 
             await this.checkContractState(fromBlockchain);
 
             const feePercent = await this.getFeePercent(fromBlockchain, options.providerAddress);
-            const fromAmountWithoutFee = from.tokenAmount
-                .multipliedBy(100 - feePercent)
-                .dividedBy(100);
-
-            const tokenAmountIn = Web3Pure.toWei(fromAmountWithoutFee, from.decimals, 1);
+            const feeAmount = Web3Pure.toWei(
+                from.tokenAmount.multipliedBy(feePercent).dividedBy(100),
+                from.decimals,
+                1
+            );
+            const tokenAmountIn = from.weiAmount.minus(feeAmount).toFixed(0);
 
             const slippageTolerance = options.slippageTolerance * 100;
 
@@ -112,7 +113,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                         // @TODO price impact
                         priceImpact: 0,
                         slippage: options.slippageTolerance,
-                        fee: from.tokenAmount.minus(fromAmountWithoutFee),
+                        fee: Web3Pure.fromWei(feeAmount),
                         feeSymbol: from.symbol,
                         feePercent,
                         networkFee: Web3Pure.fromWei(

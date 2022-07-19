@@ -6,9 +6,8 @@ import {
 } from 'src/features';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
 import { TransactionRequest } from '@ethersproject/providers';
-import { PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
+import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import { Injector } from '@rsdk-core/sdk/injector';
-import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { FailedToCheckForTransactionReceiptError } from 'src/common';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
@@ -211,32 +210,43 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    protected async getContractParams(): Promise<ContractParams> {
-        const contractAddress = DE_BRIDGE_CONTRACT_ADDRESS[this.fromBlockchain];
-        const contractAbi = DE_BRIDGE_CONTRACT_ABI;
+    public async getContractParams() {
+        const methodName = this.from.isNative ? 'providerCallNative' : 'providerCall';
 
-        if (this.from.isNative) {
-            return {
-                contractAddress,
-                contractAbi,
-                methodName: 'deBridgeCallCallWithNative',
-                methodArguments: [this.providerAddress, this.transactionRequest.data],
-                value: this.from.stringWeiAmount
-            };
-        }
+        const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
+        const methodArguments = [
+            [
+                this.from.address,
+                this.to.address,
+                this.providerAddress,
+                this.walletAddress,
+                this.from.stringWeiAmount,
+                Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
+                toChainId
+            ],
+            this.transactionRequest.data
+        ];
+
+        const networkFee = await this.getNetworkFee();
+        const value = new BigNumber(this.transactionRequest.value!.toString())
+            .plus(networkFee)
+            .toFixed(0);
 
         return {
-            contractAddress,
-            contractAbi,
-            methodName: 'deBridgeCall',
-            methodArguments: [
-                this.from.address,
-                this.from.stringWeiAmount,
-                this.providerAddress,
-                this.transactionRequest.data
-            ],
-            value: '0'
+            contractAddress: this.fromContractAddress,
+            contractAbi: DE_BRIDGE_CONTRACT_ABI,
+            methodName,
+            methodArguments,
+            value
         };
+    }
+
+    private getNetworkFee(): Promise<string> {
+        return this.fromWeb3Public.callContractMethod(
+            this.fromContractAddress,
+            DE_BRIDGE_CONTRACT_ABI,
+            'fixedCryptoFee'
+        );
     }
 
     public getTradeAmountRatio(): BigNumber {

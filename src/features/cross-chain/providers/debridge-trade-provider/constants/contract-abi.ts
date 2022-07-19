@@ -9,25 +9,10 @@ export const DE_BRIDGE_CONTRACT_ABI = [
         type: 'function'
     },
     {
-        inputs: [
-            { internalType: 'contract IERC20', name: 'inputToken', type: 'address' },
-            { internalType: 'uint256', name: 'totalInputAmount', type: 'uint256' },
-            { internalType: 'address', name: 'integrator', type: 'address' },
-            { internalType: 'bytes', name: 'data', type: 'bytes' }
-        ],
-        name: 'deBridgeCall',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function'
-    },
-    {
-        inputs: [
-            { internalType: 'address', name: 'integrator', type: 'address' },
-            { internalType: 'bytes', name: 'data', type: 'bytes' }
-        ],
-        name: 'deBridgeCallCallWithNative',
-        outputs: [],
-        stateMutability: 'payable',
+        inputs: [],
+        name: 'fixedCryptoFee',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
         type: 'function'
     },
     {
@@ -42,6 +27,52 @@ export const DE_BRIDGE_CONTRACT_ABI = [
         name: 'paused',
         outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'view',
+        type: 'function'
+    },
+    {
+        inputs: [
+            {
+                components: [
+                    { internalType: 'address', name: 'srcInputToken', type: 'address' },
+                    { internalType: 'address', name: 'dstOutputToken', type: 'address' },
+                    { internalType: 'address', name: 'integrator', type: 'address' },
+                    { internalType: 'address', name: 'recipient', type: 'address' },
+                    { internalType: 'uint256', name: 'srcInputAmount', type: 'uint256' },
+                    { internalType: 'uint256', name: 'dstMinOutputAmount', type: 'uint256' },
+                    { internalType: 'uint256', name: 'dstChainID', type: 'uint256' }
+                ],
+                internalType: 'struct BridgeBase.BaseCrossChainParams',
+                name: '_params',
+                type: 'tuple'
+            },
+            { internalType: 'bytes', name: '_data', type: 'bytes' }
+        ],
+        name: 'providerCall',
+        outputs: [],
+        stateMutability: 'payable',
+        type: 'function'
+    },
+    {
+        inputs: [
+            {
+                components: [
+                    { internalType: 'address', name: 'srcInputToken', type: 'address' },
+                    { internalType: 'address', name: 'dstOutputToken', type: 'address' },
+                    { internalType: 'address', name: 'integrator', type: 'address' },
+                    { internalType: 'address', name: 'recipient', type: 'address' },
+                    { internalType: 'uint256', name: 'srcInputAmount', type: 'uint256' },
+                    { internalType: 'uint256', name: 'dstMinOutputAmount', type: 'uint256' },
+                    { internalType: 'uint256', name: 'dstChainID', type: 'uint256' }
+                ],
+                internalType: 'struct BridgeBase.BaseCrossChainParams',
+                name: '_params',
+                type: 'tuple'
+            },
+            { internalType: 'bytes', name: '_data', type: 'bytes' }
+        ],
+        name: 'providerCallNative',
+        outputs: [],
+        stateMutability: 'payable',
         type: 'function'
     }
 ] as AbiItem[];
