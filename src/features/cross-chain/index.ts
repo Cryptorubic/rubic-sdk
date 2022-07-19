@@ -1,5 +1,5 @@
 export { CrossChainManager } from './cross-chain-manager';
-export { CrossChainSwapStatusManager } from './cross-chain-swap-status-manager';
+export { CrossChainStatusManager } from './cross-chain-status-manager';
 
 export { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 export { CelerRubicCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade';

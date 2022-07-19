@@ -3,5 +3,6 @@ export enum CrossChainTxStatus {
     SUCCESS,
     FAIL,
     FALLBACK,
-    UNKNOWN
+    UNKNOWN,
+    REVERT
 }
