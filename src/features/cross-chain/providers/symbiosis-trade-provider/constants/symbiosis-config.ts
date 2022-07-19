@@ -1,6 +1,7 @@
 import { BLOCKCHAIN_NAME, SDK } from 'src/core';
+import { Config } from 'symbiosis-js-sdk/dist/crosschain/types';
 
-export function getSymbiosisConfig() {
+export function getSymbiosisConfig(): Config {
     return {
         minSwapAmountInUsd: 30,
         maxSwapAmountInUsd: 5000000,
@@ -274,5 +275,5 @@ export function getSymbiosisConfig() {
                 blocksPerYear: 15768000
             }
         ]
-    };
+    } as unknown as Config;
 }

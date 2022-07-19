@@ -5,6 +5,7 @@ import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { RubicSdkError } from 'src/common';
 import { parseError } from 'src/common/utils/errors';
+import { BlockchainName } from 'src/core';
 
 export abstract class CrossChainTradeProvider {
     public static parseError(err: unknown): RubicSdkError {
@@ -12,6 +13,11 @@ export abstract class CrossChainTradeProvider {
     }
 
     public abstract readonly type: CrossChainTradeType;
+
+    public abstract isSupportedBlockchains(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName
+    ): boolean;
 
     public abstract calculate(
         from: PriceTokenAmount,

@@ -59,6 +59,16 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         return Injector.web3Private.address;
     }
 
+    public isSupportedBlockchains(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName
+    ): boolean {
+        return (
+            SymbiosisCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
+            SymbiosisCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
+        );
+    }
+
     public async calculate(
         from: PriceTokenAmount,
         toToken: PriceToken,
@@ -217,7 +227,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
             const minAmount = await this.getFromTokenAmount(from, transitTokenAmount, 'min');
 
-            return new CrossChainMinAmountError(minAmount, from);
+            return new CrossChainMinAmountError(minAmount, from.symbol);
         }
 
         if (err?.code === ErrorCode.AMOUNT_TOO_HIGH) {
@@ -225,7 +235,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
             const maxAmount = await this.getFromTokenAmount(from, transitTokenAmount, 'max');
 
-            return new CrossChainMaxAmountError(maxAmount, from);
+            return new CrossChainMaxAmountError(maxAmount, from.symbol);
         }
 
         return new RubicSdkError(err.message);

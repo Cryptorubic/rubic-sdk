@@ -1,6 +1,23 @@
 import { AbiItem } from 'web3-utils';
+import {
+    LifiCrossChainSupportedBlockchain,
+    lifiCrossChainSupportedBlockchains
+} from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
+import { BLOCKCHAIN_NAME } from 'src/core';
 
-export const lifiContractAddress = '0x1111115F592e50C3A08F68CC2EA0fB9daCCDE798';
+export const lifiContractAddress: Record<LifiCrossChainSupportedBlockchain, string> =
+    lifiCrossChainSupportedBlockchains.reduce((acc, blockchain) => {
+        if (blockchain === BLOCKCHAIN_NAME.GNOSIS) {
+            return {
+                ...acc,
+                [blockchain]: '0x6f5dA745bA65e8c42166934B55bA62Ef080FcAad'
+            };
+        }
+        return {
+            ...acc,
+            [blockchain]: '0x1111115F592e50C3A08F68CC2EA0fB9daCCDE798'
+        };
+    }, {} as Record<LifiCrossChainSupportedBlockchain, string>);
 
 export const lifiContractAbi = [
     {

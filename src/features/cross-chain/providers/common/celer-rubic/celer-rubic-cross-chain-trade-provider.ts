@@ -85,7 +85,7 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
             if (!minAmount?.isFinite()) {
                 throw new InsufficientLiquidityError();
             }
-            throw new CrossChainMinAmountError(minAmount, fromTrade.fromToken);
+            throw new CrossChainMinAmountError(minAmount, fromTrade.fromToken.symbol);
         }
 
         if (fromTransitTokenAmount.gt(maxTransitTokenAmount)) {
@@ -93,7 +93,7 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
                 fromTrade,
                 maxTransitTokenAmount
             );
-            throw new CrossChainMaxAmountError(maxAmount, fromTrade.fromToken);
+            throw new CrossChainMaxAmountError(maxAmount, fromTrade.fromToken.symbol);
         }
     }
 

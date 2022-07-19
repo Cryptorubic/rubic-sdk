@@ -8,7 +8,7 @@ import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amoun
 import { Token } from '@rsdk-core/blockchain/tokens/token';
 import { InstantTradeProvider } from '@rsdk-features/instant-trades/instant-trade-provider';
 import { SwapManagerCalculationOptions } from '@rsdk-features/instant-trades/models/swap-manager-calculation-options';
-import { TradeType } from '@rsdk-features/instant-trades/models/trade-type';
+import { TRADE_TYPE, TradeType } from '@rsdk-features/instant-trades/models/trade-type';
 import { TypedTradeProviders } from '@rsdk-features/instant-trades/models/typed-trade-provider';
 import { InstantTrade } from 'src/features';
 import { MarkRequired } from 'ts-essentials';
@@ -19,8 +19,9 @@ import { OneInchTradeProviders } from '@rsdk-features/instant-trades/constants/o
 import { ZrxTradeProviders } from '@rsdk-features/instant-trades/constants/zrx-trade-providers';
 import { AlgebraTradeProviders } from '@rsdk-features/instant-trades/constants/algebra-trade-providers';
 import { InstantTradeError } from 'src/features/instant-trades/models/instant-trade-error';
-import { isOneInch } from 'src/features/instant-trades/utils/type-guards';
 import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
+import { LifiProvider } from 'src/features/instant-trades/dexes/common/lifi/lifi-provider';
+import { blockchains } from 'src/core/blockchain/constants/blockchains';
 
 export type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCalculationOptions,
@@ -46,30 +47,31 @@ export class InstantTradesManager {
         });
     }
 
-    private tradeProviders: TypedTradeProviders = [
+    /**
+     * List of all instant trade providers, combined by blockchains.
+     */
+    public readonly tradeProviders: TypedTradeProviders = [
         ...UniswapV2TradeProviders,
         ...UniswapV3TradeProviders,
         ...OneInchTradeProviders,
         ...ZrxTradeProviders,
         ...AlgebraTradeProviders
-    ].reduce((acc, ProviderClass) => {
-        const provider = new ProviderClass();
-        acc[provider.type] = provider;
-        return acc;
-    }, {} as Mutable<TypedTradeProviders>);
-
-    /**
-     * List of all instant trade providers, combined by blockchains.
-     */
-    public readonly blockchainTradeProviders: Readonly<
-        Record<BlockchainName, Partial<TypedTradeProviders>>
-    > = Object.entries(this.tradeProviders).reduce(
-        (acc, [type, provider]) => ({
-            ...acc,
-            [provider.blockchain]: { ...acc[provider.blockchain], [type]: provider }
-        }),
-        {} as Record<BlockchainName, Partial<TypedTradeProviders>>
+    ].reduce(
+        (acc, ProviderClass) => {
+            const provider = new ProviderClass();
+            acc[provider.blockchain][provider.type] = provider;
+            return acc;
+        },
+        blockchains.reduce(
+            (acc, blockchain) => ({
+                ...acc,
+                [blockchain.name]: {}
+            }),
+            {} as Mutable<TypedTradeProviders>
+        )
     );
+
+    public readonly lifiProvider = new LifiProvider();
 
     /**
      * Calculates instant trades, sorted by output amount.
@@ -135,37 +137,47 @@ export class InstantTradesManager {
         options: RequiredSwapManagerCalculationOptions
     ): Promise<Array<InstantTrade | InstantTradeError>> {
         const { timeout, disabledProviders, ...providersOptions } = options;
-        const providers = Object.entries(this.blockchainTradeProviders[from.blockchain]).filter(
+        const providers = Object.entries(this.tradeProviders[from.blockchain]).filter(
             ([type]) => !disabledProviders.includes(type as TradeType)
         ) as [TradeType, InstantTradeProvider][];
 
-        if (!providers.length) {
-            throw new RubicSdkError(`There are no providers for ${from.blockchain} blockchain`);
-        }
+        const instantTradesPromise = Promise.all(
+            providers.map(async ([type, provider]) => {
+                try {
+                    const providerSpecificOptions = {
+                        ...providersOptions,
+                        wrappedAddress:
+                            type === TRADE_TYPE.ONE_INCH
+                                ? oneinchApiParams.nativeAddress
+                                : providersOptions.wrappedAddress
+                    };
+                    return await pTimeout(
+                        provider.calculate(from, to, providerSpecificOptions),
+                        timeout
+                    );
+                } catch (e) {
+                    console.debug(
+                        `[RUBIC_SDK] Trade calculation error occurred for ${type} trade provider.`,
+                        e
+                    );
+                    return { type, error: e };
+                }
+            })
+        );
+        const lifiTradesPromise = this.calculateLifiTrades(
+            from,
+            to,
+            providers.map(provider => provider[0]),
+            options
+        );
 
-        const calculationPromises = providers.map(async ([type, provider]) => {
-            try {
-                const providerSpecificOptions = {
-                    ...providersOptions,
-                    wrappedAddress: isOneInch(type)
-                        ? oneinchApiParams.nativeAddress
-                        : providersOptions.wrappedAddress
-                };
-                return await pTimeout(
-                    provider.calculate(from, to, providerSpecificOptions),
-                    timeout
-                );
-            } catch (e) {
-                console.debug(
-                    `[RUBIC_SDK] Trade calculation error occurred for ${type} trade provider.`,
-                    e
-                );
-                return { type, error: e };
-            }
-        });
+        const [instantTrades, lifiTrades] = await Promise.all([
+            instantTradesPromise,
+            lifiTradesPromise
+        ]);
+        const trades = instantTrades.concat(lifiTrades);
 
-        const results = await Promise.all(calculationPromises);
-        return results.sort((tradeA, tradeB) => {
+        return trades.sort((tradeA, tradeB) => {
             if (tradeA instanceof InstantTrade || tradeB instanceof InstantTrade) {
                 if (tradeA instanceof InstantTrade && tradeB instanceof InstantTrade) {
                     return tradeA.to.tokenAmount.comparedTo(tradeB.to.tokenAmount);
@@ -176,6 +188,20 @@ export class InstantTradesManager {
                 return -1;
             }
             return 0;
+        });
+    }
+
+    private async calculateLifiTrades(
+        from: PriceTokenAmount,
+        to: PriceToken,
+        providers: TradeType[],
+        options: RequiredSwapManagerCalculationOptions
+    ): Promise<InstantTrade[]> {
+        const disabledProviders = providers.concat(options.disabledProviders);
+
+        return this.lifiProvider.calculate(from, to, disabledProviders, {
+            slippageTolerance: options.slippageTolerance,
+            gasCalculation: options.gasCalculation === 'disabled' ? 'disabled' : 'calculate'
         });
     }
 }

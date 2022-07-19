@@ -140,7 +140,7 @@ export class Web3Private {
         options: TransactionOptions = {}
     ): Promise<TransactionReceipt> {
         try {
-            await this.web3.eth.call({
+            const gas = await this.web3.eth.estimateGas({
                 from: this.address,
                 to: toAddress,
                 value: Web3Private.stringifyAmount(value),
@@ -150,7 +150,10 @@ export class Web3Private {
                 }),
                 ...(options.data && { data: options.data })
             });
-            return await this.sendTransaction(toAddress, value, options);
+            return this.sendTransaction(toAddress, value, {
+                ...options,
+                gas: options.gas || Web3Pure.calculateGasMargin(gas, 1.15)
+            });
         } catch (err) {
             console.debug('Call tokens transfer error', err);
             const shouldIgnore = this.shouldIgnoreError(err);

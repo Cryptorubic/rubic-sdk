@@ -7,7 +7,7 @@ import { TRADE_TYPE, TradeType } from 'src/features';
 
 export class SushiSwapHarmonyTrade extends UniswapV2AbstractTrade {
     public static get type(): TradeType {
-        return TRADE_TYPE.SUSHI_SWAP_HARMONY;
+        return TRADE_TYPE.SUSHI_SWAP;
     }
 
     protected readonly contractAddress = SUSHI_SWAP_HARMONY_CONTRACT_ADDRESS;
