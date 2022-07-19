@@ -14,6 +14,7 @@ import { TransactionConfig } from 'web3-core';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { LifiSwapRequestError } from 'src/common/errors/swap/lifi-swap-request.error';
+import { LifiPairIsUnavailable } from 'src/common/errors/swap/lifi-pair-is-unavailable';
 
 interface LifiTransactionRequest {
     data: string;
@@ -116,7 +117,7 @@ export class LifiTrade extends InstantTrade {
         try {
             const { data, gasLimit, gasPrice } = await this.getTransactionData();
 
-            return Injector.web3Private.trySendTransaction(
+            return await Injector.web3Private.trySendTransaction(
                 this.contractAddress,
                 this.from.isNative ? this.from.stringWeiAmount : '0',
                 {
@@ -131,7 +132,7 @@ export class LifiTrade extends InstantTrade {
                 throw new LifiSwapRequestError();
             }
 
-            throw this.parseError(err);
+            throw new LifiPairIsUnavailable();
         }
     }
 
