@@ -15,6 +15,7 @@ import { CrossChainTxStatus } from './models/cross-chain-tx-status';
 import { LifiSwapStatus } from './providers/lifi-trade-provider/models/lifi-swap-status';
 import { SymbiosisSwapStatus } from './providers/symbiosis-trade-provider/models/symbiosis-swap-status';
 import { CrossChainTradeData } from './models/cross-chain-trade-data';
+import { RubicCrossChainSupportedBlockchain } from './providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
 
 interface SymbiosisApiResponse {
     status: {
@@ -333,7 +334,7 @@ export class CrossChainStatusManager {
                     .getWeb3Public(data.toBlockchain)
                     .callContractMethod(
                         rubicCrossChainContractsAddresses[
-                            data.toBlockchain as Exclude<BlockchainName, 'SOLANA' | 'NEAR'>
+                            data.toBlockchain as RubicCrossChainSupportedBlockchain
                         ],
                         PROCESSED_TRANSACTION_METHOD_ABI,
                         'processedTransactions',
