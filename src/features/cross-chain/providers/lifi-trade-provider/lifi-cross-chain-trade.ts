@@ -1,6 +1,11 @@
 import BigNumber from 'bignumber.js';
 import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
-import { CROSS_CHAIN_TRADE_TYPE, SwapTransactionOptions } from 'src/features';
+import {
+    CROSS_CHAIN_TRADE_TYPE,
+    SwapTransactionOptions,
+    TRADE_TYPE,
+    TradeType
+} from 'src/features';
 import { Route } from '@lifi/sdk';
 import { Injector } from 'src/core/sdk/injector';
 import { FailedToCheckForTransactionReceiptError } from 'src/common';
@@ -14,6 +19,7 @@ import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 import { LifiSwapRequestError } from 'src/common/errors/swap/lifi-swap-request.error';
+import { LiFiTradeSubtype } from 'src/features/cross-chain/providers/lifi-trade-provider/models/lifi-providers';
 
 /**
  * Calculated Celer cross chain trade.
@@ -45,7 +51,11 @@ export class LifiCrossChainTrade extends CrossChainTrade {
                         feePercent: 0,
                         networkFee: new BigNumber(0),
                         networkFeeSymbol: '',
-                        priceImpact: 0
+                        priceImpact: 0,
+                        itType: {
+                            from: TRADE_TYPE.ONE_INCH,
+                            to: TRADE_TYPE.ONE_INCH
+                        }
                     },
                     EMPTY_ADDRESS
                 ).getContractParams();
@@ -93,7 +103,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
 
     private readonly route: Route;
 
-    public readonly itType = undefined;
+    public readonly itType: { from: TradeType | undefined; to: TradeType | undefined };
 
     public readonly fee: BigNumber;
 
@@ -111,7 +121,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         return lifiContractAddress[this.from.blockchain as LifiCrossChainSupportedBlockchain];
     }
 
-    public readonly subType: string | undefined;
+    public readonly subType: LiFiTradeSubtype;
 
     constructor(
         crossChainTrade: {
@@ -126,6 +136,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             networkFee: BigNumber;
             networkFeeSymbol: string;
             priceImpact: number;
+            itType: { from: TradeType | undefined; to: TradeType | undefined };
         },
         providerAddress: string
     ) {
@@ -136,7 +147,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         this.route = crossChainTrade.route;
         this.gasData = crossChainTrade.gasData;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
-        this.subType = this.route?.steps?.[0]?.tool;
+        this.subType = this.route?.steps?.[0]?.tool as LiFiTradeSubtype;
 
         this.fee = crossChainTrade.fee;
         this.feeSymbol = crossChainTrade.feeSymbol;
@@ -144,6 +155,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         this.networkFee = crossChainTrade.networkFee;
         this.networkFeeSymbol = crossChainTrade.networkFeeSymbol;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.itType = crossChainTrade.itType;
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
     }
