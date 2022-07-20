@@ -94,24 +94,10 @@ export class CrossChainStatusManager {
 
     /**
      * Get cross-chain trade's source transaction status via receipt.
-     * @example
-     * ```ts
-     * const tradeData = {
-     *   fromBlockchain: BLOCKCHAIN_NAME.FANTOM,
-     *   toBlockchain: BLOCKCHAIN_NAME.BSC,
-     *   txTimestamp: 1658241570024,
-     *   srxTxHash: '0xd2263ca82ac0fce606cb75df27d7f0dc94909d41a58c37563bd6772496cb8924'
-     * };
-     * const srcTxReceipt = await Injector.web3PublicService
-     *    .getWeb3Public(tradeData.fromBlockchain)
-     *    .getTransactionReceipt(tradeData.srcTxHash);
-     * const sourceTransactionStatus = sdk.crossChainStatusManager.getSrcTxStatus(srcTxReceipt);
-     * console.log({ sourceTransactionStatus });
-     * ```
      * @param srcTxReceipt Transaction receipt.
      * @returns Cross-chain transaction status.
      */
-    public getSrcTxStatus(srcTxReceipt: TransactionReceipt | null): CrossChainTxStatus {
+    private getSrcTxStatus(srcTxReceipt: TransactionReceipt | null): CrossChainTxStatus {
         if (srcTxReceipt === null) {
             return CrossChainTxStatus.PENDING;
         }
@@ -126,35 +112,13 @@ export class CrossChainStatusManager {
     /**
      * Get destination transaction status based on source transaction status,
      * source transaction receipt, trade data and provider type.
-     * @example
-     * ```ts
-     * const tradeData = {
-     *   fromBlockchain: BLOCKCHAIN_NAME.FANTOM,
-     *   toBlockchain: BLOCKCHAIN_NAME.BSC,
-     *   txTimestamp: 1658241570024,
-     *   srxTxHash: '0xd2263ca82ac0fce606cb75df27d7f0dc94909d41a58c37563bd6772496cb8924'
-     * };
-     * const provider = CROSS_CHAIN_TRADE_TYPE.CELER;
-     * const srcTxReceipt = await Injector.web3PublicService
-     *    .getWeb3Public(tradeData.fromBlockchain)
-     *    .getTransactionReceipt(tradeData.srcTxHash);
-     * const srcTxStatus = sdk.crossChainStatusManager.getSrcTxStatus(srcTxReceipt);
-     *
-     * const destinationTransactionStatus = await sdk.crossChainStatusManager.getDstTxStatus(
-     *    srcTxStatus,
-     *    srcTxReceipt,
-     *    tradeData,
-     *    provider
-     * );
-     * console.log({ destinationTransactionStatus });
-     * ```
      * @param srcTxStatus Source transaction status.
      * @param srcTxReceipt Source transaction receipt.
      * @param tradeData Trade data.
      * @param provider Cross-chain trade type.
      * @returns Cross-chain transaction status.
      */
-    public async getDstTxStatus(
+    private async getDstTxStatus(
         srcTxStatus: CrossChainTxStatus,
         srcTxReceipt: TransactionReceipt,
         tradeData: CrossChainTradeData,
