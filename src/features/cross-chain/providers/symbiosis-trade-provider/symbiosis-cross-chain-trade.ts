@@ -1,7 +1,7 @@
 import {
     CROSS_CHAIN_TRADE_TYPE,
-    OneinchTrade,
     SwapTransactionOptions,
+    TRADE_TYPE,
     TradeType
 } from 'src/features';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
@@ -158,16 +158,9 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
 
         this.transitAmount = crossChainTrade.transitAmount;
 
-        const fromInchBlockchain = crossChainTrade.from.blockchain;
-        const toInchBlockchain = crossChainTrade.to.blockchain;
-
         this.itType = {
-            from: OneinchTrade.oneInchTradeTypes[
-                fromInchBlockchain as keyof typeof OneinchTrade.oneInchTradeTypes
-            ],
-            to: OneinchTrade.oneInchTradeTypes[
-                toInchBlockchain as keyof typeof OneinchTrade.oneInchTradeTypes
-            ]
+            from: TRADE_TYPE.ONE_INCH,
+            to: TRADE_TYPE.ONE_INCH
         };
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);

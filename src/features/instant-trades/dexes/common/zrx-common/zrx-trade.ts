@@ -38,7 +38,7 @@ export class ZrxTrade extends InstantTrade {
     public readonly path: ReadonlyArray<Token>;
 
     public get type(): TradeType {
-        return TRADE_TYPE.ZRX_ETHEREUM;
+        return TRADE_TYPE.ZRX;
     }
 
     constructor(tradeStruct: ZrxTradeStruct) {

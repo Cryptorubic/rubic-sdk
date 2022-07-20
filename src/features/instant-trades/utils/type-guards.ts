@@ -4,12 +4,7 @@ import { ZrxTrade } from '@rsdk-features/instant-trades/dexes/common/zrx-common/
 import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
 import { UniswapV3AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
 import { AlgebraTrade } from '@rsdk-features/instant-trades/dexes/polygon/algebra/algebra-trade';
-import {
-    OneinchAbstractProvider,
-    TRADE_TYPE,
-    TradeType,
-    UniswapV2AbstractProvider
-} from 'src/features';
+import { OneinchAbstractProvider, UniswapV2AbstractProvider } from 'src/features';
 import { UniswapV3AbstractProvider } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-provider';
 import { AlgebraProvider } from '@rsdk-features/instant-trades/dexes/polygon/algebra/algebra-provider';
 import { CrossChainSupportedInstantTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
@@ -69,16 +64,4 @@ export function hasLengthAtLeast<T extends readonly unknown[], L extends number>
     len: L
 ): arr is T & LengthAtLeast<T, L> {
     return arr.length >= len;
-}
-
-export function isOneInch(type: TradeType): boolean {
-    const oneInchTypes = [
-        TRADE_TYPE.ONE_INCH_AVALANCHE,
-        TRADE_TYPE.ONE_INCH_FANTOM,
-        TRADE_TYPE.ONE_INCH_ARBITRUM,
-        TRADE_TYPE.ONE_INCH_POLYGON,
-        TRADE_TYPE.ONE_INCH_ETHEREUM,
-        TRADE_TYPE.ONE_INCH_BSC
-    ];
-    return oneInchTypes.some(el => el === type);
 }

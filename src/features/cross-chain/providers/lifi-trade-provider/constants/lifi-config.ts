@@ -1,4 +1,4 @@
-import { ConfigUpdate } from '@lifinance/sdk';
+import { ConfigUpdate } from '@lifi/sdk';
 import { lifiCrossChainSupportedBlockchains } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 import { BlockchainsInfo, SDK } from 'src/core';
 
@@ -13,6 +13,9 @@ export function getLifiConfig(): ConfigUpdate {
     );
 
     return {
-        rpcs
+        rpcs,
+        defaultRouteOptions: {
+            integrator: 'rubic'
+        }
     };
 }

@@ -76,5 +76,47 @@ export const nativeTokensList: NativeTokensList = {
         name: 'NEAR',
         symbol: 'NEAR',
         decimals: 24
+    },
+    [BLOCKCHAIN_NAME.OPTIMISM]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.CRONOS]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'CRO',
+        symbol: 'CRO',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.OKE_X_CHAIN]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'OKT',
+        symbol: 'OKT',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.GNOSIS]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'xDAI',
+        symbol: 'xDAI',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.FUSE]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'FUSE',
+        symbol: 'FUSE',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.MOONBEAM]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'GLMR',
+        symbol: 'GLMR',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.CELO]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'CELO',
+        symbol: 'CELO',
+        decimals: 18
     }
 };

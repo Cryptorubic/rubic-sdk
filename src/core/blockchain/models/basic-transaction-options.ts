@@ -8,7 +8,7 @@ export type BasicTransactionOptions = {
     /**
      * Transaction gas limit.
      */
-    gasLimit?: string;
+    gas?: string;
 
     /**
      * Transaction gas price.
