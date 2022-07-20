@@ -9,3 +9,6 @@ export { SymbiosisCrossChainTrade } from './providers/symbiosis-trade-provider/s
 export { LifiCrossChainTrade } from './providers/lifi-trade-provider/lifi-cross-chain-trade';
 
 export { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from './models/cross-chain-trade-type';
+export { CrossChainTradeData } from './models/cross-chain-trade-data';
+export { CrossChainTxStatus } from './models/cross-chain-tx-status';
+export { CrossChainStatus } from './models/cross-chain-status';

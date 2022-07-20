@@ -1,8 +1,8 @@
 export enum CrossChainTxStatus {
-    PENDING,
-    SUCCESS,
-    FAIL,
-    FALLBACK,
-    UNKNOWN,
-    REVERT
+    PENDING = 'PENDING',
+    SUCCESS = 'SUCCESS',
+    FAIL = 'FAIL',
+    FALLBACK = 'FALLBACK',
+    REVERT = 'REVERT',
+    UNKNOWN = 'UNKNOWN'
 }

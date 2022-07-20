@@ -4,6 +4,6 @@ export interface CrossChainTradeData {
     fromBlockchain: BlockchainName;
     toBlockchain: BlockchainName;
     txTimestamp: number;
-    srcTxHash?: string;
-    bridgeType?: string;
+    srcTxHash: string;
+    lifiBridgeType?: string;
 }
