@@ -48,22 +48,22 @@ export class CrossChainStatusManager {
 
     /**
      * Returns cross-chain trade statuses on the source and target network.
-     * the result consists of the status of the source and target transactions.
+     * The result consists of the status of the source and target transactions.
      * @example
      * ```ts
      * const tradeData = {
-     *   fromBlockchain: BLOCKCHAIN_NAME.BSC,
-     *   toBlockchain: BLOCKCHAIN_NAME.POLYGON,
-     *   txTimestamp: 1658288356485,
-     *   srxTxHash: '1111'
+     *   fromBlockchain: BLOCKCHAIN_NAME.FANTOM,
+     *   toBlockchain: BLOCKCHAIN_NAME.BSC,
+     *   txTimestamp: 1658241570024,
+     *   srxTxHash: '0xd2263ca82ac0fce606cb75df27d7f0dc94909d41a58c37563bd6772496cb8924'
      * };
      * const provider = CROSS_CHAIN_TRADE_TYPE.CELER;
      * const crossChainStatus = await sdk.crossChainStatusManager.getCrossChainStatus(tradeData, provider);
      * console.log('Source transaction status', crossChainStatus.srcTxStatus);
      * console.log('Destination transaction status', crossChainStatus.dstTxStatus);
-     *```
+     * ```
      * @param data Data needed to calculate statuses.
-     * @param provider Cross-chain provider.
+     * @param provider Cross-chain trade type.
      * @returns Object with transaction statuses.
      */
     public async getCrossChainStatus(
@@ -97,10 +97,10 @@ export class CrossChainStatusManager {
      * @example
      * ```ts
      * const tradeData = {
-     *   fromBlockchain: BLOCKCHAIN_NAME.BSC,
-     *   toBlockchain: BLOCKCHAIN_NAME.POLYGON,
-     *   txTimestamp: 1658288356485,
-     *   srxTxHash: '1111'
+     *   fromBlockchain: BLOCKCHAIN_NAME.FANTOM,
+     *   toBlockchain: BLOCKCHAIN_NAME.BSC,
+     *   txTimestamp: 1658241570024,
+     *   srxTxHash: '0xd2263ca82ac0fce606cb75df27d7f0dc94909d41a58c37563bd6772496cb8924'
      * };
      * const srcTxReceipt = await Injector.web3PublicService
      *    .getWeb3Public(tradeData.fromBlockchain)
@@ -108,8 +108,8 @@ export class CrossChainStatusManager {
      * const sourceTransactionStatus = sdk.crossChainStatusManager.getSrcTxStatus(srcTxReceipt);
      * console.log({ sourceTransactionStatus });
      * ```
-     * @param srcTxReceipt Transaction receipt
-     * @returns Cross-chain transaction status
+     * @param srcTxReceipt Transaction receipt.
+     * @returns Cross-chain transaction status.
      */
     public getSrcTxStatus(srcTxReceipt: TransactionReceipt | null): CrossChainTxStatus {
         if (srcTxReceipt === null) {
@@ -129,10 +129,10 @@ export class CrossChainStatusManager {
      * @example
      * ```ts
      * const tradeData = {
-     *   fromBlockchain: BLOCKCHAIN_NAME.BSC,
-     *   toBlockchain: BLOCKCHAIN_NAME.POLYGON,
-     *   txTimestamp: 1658288356485,
-     *   srxTxHash: '1111'
+     *   fromBlockchain: BLOCKCHAIN_NAME.FANTOM,
+     *   toBlockchain: BLOCKCHAIN_NAME.BSC,
+     *   txTimestamp: 1658241570024,
+     *   srxTxHash: '0xd2263ca82ac0fce606cb75df27d7f0dc94909d41a58c37563bd6772496cb8924'
      * };
      * const provider = CROSS_CHAIN_TRADE_TYPE.CELER;
      * const srcTxReceipt = await Injector.web3PublicService
@@ -148,11 +148,11 @@ export class CrossChainStatusManager {
      * );
      * console.log({ destinationTransactionStatus });
      * ```
-     * @param srcTxStatus
-     * @param srcTxReceipt
-     * @param tradeData
-     * @param provider
-     * @returns
+     * @param srcTxStatus Source transaction status.
+     * @param srcTxReceipt Source transaction receipt.
+     * @param tradeData Trade data.
+     * @param provider Cross-chain trade type.
+     * @returns Cross-chain transaction status.
      */
     public async getDstTxStatus(
         srcTxStatus: CrossChainTxStatus,
@@ -174,7 +174,7 @@ export class CrossChainStatusManager {
     /**
      * Get Symbiosis trade dst transaction status.
      * @param data Trade data.
-     * @param srcTxReceipt Src transaction receipt.
+     * @param srcTxReceipt Source transaction receipt.
      * @returns Cross-chain transaction status.
      */
     private async getSymbiosisDstSwapStatus(
@@ -222,7 +222,7 @@ export class CrossChainStatusManager {
     /**
      * Get Li-fi trade dst transaction status.
      * @param data Trade data.
-     * @param srcTxReceipt Src transaction receipt.
+     * @param srcTxReceipt Source transaction receipt.
      * @returns Cross-chain transaction status.
      */
     private async getLifiDstSwapStatus(
@@ -271,7 +271,7 @@ export class CrossChainStatusManager {
     /**
      * Get Celer trade dst transaction status.
      * @param data Trade data.
-     * @param srcTxReceipt Src transaction receipt.
+     * @param srcTxReceipt Source transaction receipt.
      * @returns Cross-chain transaction status.
      */
     private async getCelerDstSwapStatus(
@@ -321,7 +321,7 @@ export class CrossChainStatusManager {
     /**
      * Get Rubic trade dst transaction status.
      * @param data Trade data.
-     * @param srcTxReceipt Src transaction receipt.
+     * @param srcTxReceipt Source transaction receipt.
      * @returns Cross-chain transaction status.
      */
     private async getRubicDstSwapStatus(
