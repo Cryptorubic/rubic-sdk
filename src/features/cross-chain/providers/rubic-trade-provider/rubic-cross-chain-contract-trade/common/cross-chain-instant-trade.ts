@@ -14,10 +14,7 @@ export interface CrossChainInstantTrade {
         swapTokenWithFee?: boolean
     ): Promise<void>;
 
-    getCelerSourceObject(slippage: number): SourceCelerSwapInfo;
+    getCelerSourceObject(): SourceCelerSwapInfo;
 
-    getCelerDestinationObject(
-        slippage: number,
-        integratorAddress: string
-    ): DestinationCelerSwapInfo;
+    getCelerDestinationObject(integratorAddress: string): DestinationCelerSwapInfo;
 }

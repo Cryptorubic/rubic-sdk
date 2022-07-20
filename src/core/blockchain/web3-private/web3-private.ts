@@ -13,6 +13,7 @@ import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swap/failed-to-check-for-transaction-receipt.error';
 import { Web3Pure } from 'src/core';
 import { LowSlippageError } from 'src/common';
+import { parseError } from 'src/common/utils/errors';
 
 /**
  * Class containing methods for executing the functions of contracts
@@ -63,7 +64,7 @@ export class Web3Private {
     }
 
     /**
-     * Parses web3 error by its code.
+     * Parses web3 error by its code or message.
      * @param err Web3 error to parse.
      */
     private static parseError(err: Web3Error): RubicSdkError {
@@ -88,7 +89,7 @@ export class Web3Private {
                 return new Error(errorMessage);
             }
         } catch {}
-        return err?.message ? new Error(err.message) : err;
+        return parseError(err);
     }
 
     /**
@@ -139,7 +140,7 @@ export class Web3Private {
         options: TransactionOptions = {}
     ): Promise<TransactionReceipt> {
         try {
-            await this.web3.eth.call({
+            const gas = await this.web3.eth.estimateGas({
                 from: this.address,
                 to: toAddress,
                 value: Web3Private.stringifyAmount(value),
@@ -149,9 +150,16 @@ export class Web3Private {
                 }),
                 ...(options.data && { data: options.data })
             });
-            return await this.sendTransaction(toAddress, value, options);
-        } catch (err: unknown) {
-            console.error('Tokens transfer error', err);
+            return this.sendTransaction(toAddress, value, {
+                ...options,
+                gas: options.gas || Web3Pure.calculateGasMargin(gas, 1.15)
+            });
+        } catch (err) {
+            console.debug('Call tokens transfer error', err);
+            const shouldIgnore = this.shouldIgnoreError(err);
+            if (shouldIgnore) {
+                return await this.sendTransaction(toAddress, value, options);
+            }
             throw Web3Private.parseError(err as Web3Error);
         }
     }
@@ -275,8 +283,8 @@ export class Web3Private {
                     gas: options.gas || Web3Pure.calculateGasMargin(gas, 1.15)
                 }
             );
-        } catch (err: unknown) {
-            if (allowError && allowError(err as Web3Error)) {
+        } catch (err) {
+            if ((allowError && allowError(err as Web3Error)) || this.shouldIgnoreError(err)) {
                 return this.executeContractMethod(
                     contractAddress,
                     contractAbi,
@@ -375,5 +383,22 @@ export class Web3Private {
         spenderAddress: string
     ): Promise<TransactionReceipt> {
         return this.approveTokens(tokenAddress, spenderAddress, new BigNumber(0));
+    }
+
+    private shouldIgnoreError(error: Web3Error): boolean {
+        const ignoreCallErrors = [
+            'execution reverted: TransferHelper: TRANSFER_FROM_FAILED',
+            'STF',
+            'execution reverted: ERC20: transfer amount exceeds allowance',
+            'Anyswaperc20: request exceed allowance',
+            'gas required exceeds allowance',
+            'execution reverted: SafeERC20: low-level call failed'
+        ];
+
+        const test = ignoreCallErrors.some(err =>
+            error?.message?.toLowerCase().includes(err.toLowerCase())
+        );
+        console.log(test);
+        return test;
     }
 }

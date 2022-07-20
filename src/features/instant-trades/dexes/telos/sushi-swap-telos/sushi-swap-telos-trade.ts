@@ -7,7 +7,7 @@ import { SUSHI_SWAP_TELOS_CONTRACT_ADDRESS } from '@rsdk-features/instant-trades
 
 export class SushiSwapTelosTrade extends UniswapV2AbstractTrade {
     public static get type(): TradeType {
-        return TRADE_TYPE.SUSHI_SWAP_TELOS;
+        return TRADE_TYPE.SUSHI_SWAP;
     }
 
     protected readonly contractAddress = SUSHI_SWAP_TELOS_CONTRACT_ADDRESS;

@@ -55,26 +55,19 @@ export class CrossChainUniswapV3Trade implements CrossChainInstantTrade {
         methodArguments[0].push(exactTokensForTokens);
     }
 
-    public getCelerSourceObject(slippage: number): v3LikeCelerSwapInfo {
+    public getCelerSourceObject(): v3LikeCelerSwapInfo {
         const dex = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS;
         const path = this.getFirstPath();
-        const amountOutMinimum = this.instantTrade.toTokenAmountMin
-            .weiAmountMinusSlippage(slippage)
-            .toFixed(0);
+        const amountOutMinimum = this.instantTrade.toTokenAmountMin.stringWeiAmount;
 
         return { dex, path, deadline: this.defaultDeadline, amountOutMinimum };
     }
 
-    public getCelerDestinationObject(
-        slippage: number,
-        integratorAddress: string
-    ): DestinationCelerSwapInfo {
+    public getCelerDestinationObject(integratorAddress: string): DestinationCelerSwapInfo {
         const dex = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS;
         const pathV3 = this.getFirstPath();
         const deadline = this.defaultDeadline;
-        const amountOutMinimum = this.instantTrade.toTokenAmountMin
-            .weiAmountMinusSlippage(slippage)
-            .toFixed(0);
+        const amountOutMinimum = this.instantTrade.toTokenAmountMin.stringWeiAmount;
 
         return {
             dex,

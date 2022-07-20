@@ -1,7 +1,7 @@
 import {
     CROSS_CHAIN_TRADE_TYPE,
-    OneinchTrade,
     SwapTransactionOptions,
+    TRADE_TYPE,
     TradeType
 } from 'src/features';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
@@ -21,9 +21,8 @@ import BigNumber from 'bignumber.js';
  * Calculated Symbiosis cross chain trade.
  */
 export class SymbiosisCrossChainTrade extends CrossChainTrade {
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
-
-    public readonly itType: { from: TradeType; to: TradeType };
+    /** @internal */
+    public readonly transitAmount: BigNumber;
 
     /** @internal */
     public static async getGasData(
@@ -51,7 +50,8 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
                         feeSymbol: '',
                         feePercent: 0,
                         networkFee: new BigNumber(NaN),
-                        networkFeeSymbol: ''
+                        networkFeeSymbol: '',
+                        transitAmount: new BigNumber(NaN)
                     },
                     EMPTY_ADDRESS
                 ).getContractParams();
@@ -82,6 +82,10 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             return null;
         }
     }
+
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
+
+    public readonly itType: { from: TradeType; to: TradeType };
 
     public readonly feeSymbol: string;
 
@@ -131,6 +135,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             feePercent: number;
             networkFee: BigNumber;
             networkFeeSymbol: string;
+            transitAmount: BigNumber;
         },
         providerAddress: string
     ) {
@@ -151,16 +156,11 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         this.fee = crossChainTrade.fee;
         this.priceImpact = crossChainTrade.priceImpact;
 
-        const fromInchBlockchain = crossChainTrade.from.blockchain;
-        const toInchBlockchain = crossChainTrade.to.blockchain;
+        this.transitAmount = crossChainTrade.transitAmount;
 
         this.itType = {
-            from: OneinchTrade.oneInchTradeTypes[
-                fromInchBlockchain as keyof typeof OneinchTrade.oneInchTradeTypes
-            ],
-            to: OneinchTrade.oneInchTradeTypes[
-                toInchBlockchain as keyof typeof OneinchTrade.oneInchTradeTypes
-            ]
+            from: TRADE_TYPE.ONE_INCH,
+            to: TRADE_TYPE.ONE_INCH
         };
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
@@ -233,5 +233,9 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             ],
             value: '0'
         };
+    }
+
+    public getTradeAmountRatio(): BigNumber {
+        return this.transitAmount.dividedBy(this.to.tokenAmount);
     }
 }

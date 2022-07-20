@@ -2,7 +2,6 @@ import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { WalletNotConnectedError } from '@rsdk-common/errors/swap/wallet-not-connected.error';
 import { WrongNetworkError } from '@rsdk-common/errors/swap/wrong-network.error';
 import { BasicTransactionOptions } from '@rsdk-core/blockchain/models/basic-transaction-options';
-import { TransactionOptions } from '@rsdk-core/blockchain/models/transaction-options';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';
@@ -11,12 +10,12 @@ import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swa
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import {
     OptionsGasParams,
     TransactionGasParams
 } from '@rsdk-features/instant-trades/models/gas-params';
-import { Cache } from 'src/common';
+import { Cache, UnnecessaryApproveError } from 'src/common';
 import { TradeType } from 'src/features';
 import { parseError } from '@rsdk-common/utils/errors';
 import { Token } from 'src/core';
@@ -45,7 +44,7 @@ export abstract class InstantTrade {
      */
     public abstract slippageTolerance: number;
 
-    protected abstract contractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
+    protected abstract readonly contractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
     protected readonly web3Public: Web3Public;
 
@@ -54,7 +53,7 @@ export abstract class InstantTrade {
      */
     public abstract get type(): TradeType;
 
-    public abstract path: ReadonlyArray<Token>;
+    public abstract readonly path: ReadonlyArray<Token>;
 
     /**
      * Minimum amount of output token user can get.
@@ -103,24 +102,33 @@ export abstract class InstantTrade {
     /**
      * Sends approve transaction with connected wallet.
      * @param options Transaction options.
+     * @param checkNeedApprove If true, first allowance is checked.
      */
-    public async approve(options?: BasicTransactionOptions): Promise<TransactionReceipt> {
-        const needApprove = await this.needApprove();
-
-        if (!needApprove) {
-            throw new RubicSdkError(
-                'You should check allowance via `needApprove` method before calling `approve`. Current allowance is enough for swap.'
-            );
+    public async approve(
+        options: BasicTransactionOptions,
+        checkNeedApprove = true
+    ): Promise<TransactionReceipt> {
+        if (checkNeedApprove) {
+            const needApprove = await this.needApprove();
+            if (!needApprove) {
+                throw new UnnecessaryApproveError();
+            }
         }
 
         this.checkWalletConnected();
         this.checkBlockchainCorrect();
 
+        const approveAmount =
+            this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ||
+            this.from.blockchain === BLOCKCHAIN_NAME.CRONOS
+                ? this.from.weiAmount
+                : 'infinity';
+
         return Injector.web3Private.approveTokens(
             this.from.address,
             this.contractAddress,
-            'infinity',
-            { ...options, gas: options?.gasLimit }
+            approveAmount,
+            options
         );
     }
 
@@ -132,18 +140,13 @@ export abstract class InstantTrade {
             return;
         }
 
-        const txOptions: TransactionOptions = {
+        const approveOptions: BasicTransactionOptions = {
             onTransactionHash: options?.onApprove,
             gas: options?.approveGasLimit || undefined,
             gasPrice: options?.gasPrice || undefined
         };
 
-        await Injector.web3Private.approveTokens(
-            this.from.address,
-            this.contractAddress,
-            'infinity',
-            txOptions
-        );
+        await this.approve(approveOptions, false);
     }
 
     /**
@@ -185,7 +188,10 @@ export abstract class InstantTrade {
     }
 
     protected getGasParams(options: OptionsGasParams): TransactionGasParams {
-        return { gas: options?.gasLimit, gasPrice: options?.gasPrice };
+        return {
+            gas: options.gasLimit || this.gasFeeInfo?.gasLimit?.toFixed(),
+            gasPrice: options.gasPrice || this.gasFeeInfo?.gasPrice?.toFixed()
+        };
     }
 
     protected parseError(err: unknown): RubicSdkError {

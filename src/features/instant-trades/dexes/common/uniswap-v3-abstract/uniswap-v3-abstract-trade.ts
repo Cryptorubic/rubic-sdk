@@ -14,6 +14,7 @@ import {
 } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
 import { createTokenNativeAddressProxyInPathStartAndEnd } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { Web3Pure } from 'src/core';
+import { TRADE_TYPE, TradeType } from 'src/features';
 
 export interface UniswapV3TradeStruct extends UniswapV3AlgebraTradeStruct {
     route: UniswapV3Route;
@@ -27,6 +28,10 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
     protected readonly unwrapWethMethodName = 'unwrapWETH9';
 
     public readonly route: UniswapV3Route;
+
+    public static get type(): TradeType {
+        return TRADE_TYPE.UNI_SWAP_V3;
+    }
 
     @Cache
     public get path(): ReadonlyArray<Token> {

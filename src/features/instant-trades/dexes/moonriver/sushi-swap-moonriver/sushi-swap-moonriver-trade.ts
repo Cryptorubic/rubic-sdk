@@ -7,7 +7,7 @@ import { TRADE_TYPE, TradeType } from 'src/features';
 
 export class SushiSwapMoonriverTrade extends UniswapV2AbstractTrade {
     public static get type(): TradeType {
-        return TRADE_TYPE.SUSHI_SWAP_MOONRIVER;
+        return TRADE_TYPE.SUSHI_SWAP;
     }
 
     protected readonly contractAddress = SUSHI_SWAP_MOONRIVER_CONTRACT_ADDRESS;

@@ -1,4 +1,4 @@
-import { TradeType } from 'src/features';
+import { TRADE_TYPE, TradeType } from 'src/features';
 import { UniswapV3QuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
 import { Cache } from 'src/common';
 import { UniswapV3AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
@@ -31,7 +31,7 @@ export abstract class UniswapV3AbstractProvider<
     }
 
     public get type(): TradeType {
-        return this.InstantTradeClass.type;
+        return TRADE_TYPE.UNI_SWAP_V3;
     }
 
     protected createTradeInstance(

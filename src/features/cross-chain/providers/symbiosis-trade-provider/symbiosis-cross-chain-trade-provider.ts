@@ -59,6 +59,16 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         return Injector.web3Private.address;
     }
 
+    public isSupportedBlockchains(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName
+    ): boolean {
+        return (
+            SymbiosisCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
+            SymbiosisCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
+        );
+    }
+
     public async calculate(
         from: PriceTokenAmount,
         toToken: PriceToken,
@@ -95,7 +105,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 .dividedBy(100);
             const tokenAmountIn = new SymbiosisTokenAmount(
                 tokenIn,
-                Web3Pure.toWei(fromAmountWithoutFee, tokenIn.decimals)
+                Web3Pure.toWei(fromAmountWithoutFee, tokenIn.decimals, 1)
             );
 
             const tokenOut = new SymbiosisToken({
@@ -135,6 +145,18 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                     ? await SymbiosisCrossChainTrade.getGasData(from, to, transactionRequest)
                     : null;
 
+            const transitToken = celerTransitTokens[fromBlockchain];
+            const transitAmount = (
+                await this.oneInchService[fromBlockchain].calculate(
+                    from,
+                    new PriceTokenAmount({
+                        ...transitToken,
+                        price: new BigNumber(1),
+                        tokenAmount: new BigNumber(1)
+                    })
+                )
+            ).to.tokenAmount;
+
             return {
                 trade: new SymbiosisCrossChainTrade(
                     {
@@ -148,13 +170,14 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                         feeSymbol: from.symbol,
                         feePercent,
                         networkFee: new BigNumber(transitTokenFee.toFixed()),
-                        networkFeeSymbol: transitTokenFee.token.symbol || ''
+                        networkFeeSymbol: transitTokenFee.token.symbol || '',
+                        transitAmount
                     },
                     options.providerAddress
                 )
             };
         } catch (err: unknown) {
-            let rubicSdkError = this.parseError(err);
+            let rubicSdkError = CrossChainTradeProvider.parseError(err);
 
             if (err instanceof SymbiosisError && err.message) {
                 rubicSdkError = await this.checkMinMaxErrors(err, from);
@@ -204,7 +227,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
             const minAmount = await this.getFromTokenAmount(from, transitTokenAmount, 'min');
 
-            return new CrossChainMinAmountError(minAmount, from);
+            return new CrossChainMinAmountError(minAmount, from.symbol);
         }
 
         if (err?.code === ErrorCode.AMOUNT_TOO_HIGH) {
@@ -212,7 +235,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
             const maxAmount = await this.getFromTokenAmount(from, transitTokenAmount, 'max');
 
-            return new CrossChainMaxAmountError(maxAmount, from);
+            return new CrossChainMaxAmountError(maxAmount, from.symbol);
         }
 
         return new RubicSdkError(err.message);

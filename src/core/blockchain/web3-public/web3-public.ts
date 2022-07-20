@@ -107,6 +107,14 @@ export class Web3Public {
     }
 
     /**
+     * Gets last block number.
+     * @returns Block number.
+     */
+    public async getBlockNumber(): Promise<number> {
+        return this.web3.eth.getBlockNumber();
+    }
+
+    /**
      * Gets account native or ERC-20 token balance in wei.
      * @param address Wallet address, whose balance you want to find out.
      * @param tokenAddress Address of the smart-contract corresponding to the token,

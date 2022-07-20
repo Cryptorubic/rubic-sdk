@@ -1,7 +1,7 @@
 import {
     BasicTransactionOptions,
+    BLOCKCHAIN_NAME,
     PriceTokenAmount,
-    TransactionOptions,
     Web3Public,
     Web3Pure
 } from 'src/core';
@@ -52,7 +52,7 @@ export abstract class CrossChainTrade {
 
     protected abstract get fromContractAddress(): string;
 
-    public abstract readonly itType: { from: TradeType; to: TradeType };
+    public abstract readonly itType: { from: TradeType; to: TradeType } | undefined;
 
     protected get walletAddress(): string {
         return Injector.web3Private.address;
@@ -107,19 +107,32 @@ export abstract class CrossChainTrade {
     /**
      * Sends approve transaction with connected wallet.
      * @param options Transaction options.
+     * @param checkNeedApprove If true, first allowance is checked.
      */
-    public async approve(options: BasicTransactionOptions): Promise<TransactionReceipt> {
-        if (!(await this.needApprove())) {
-            throw new UnnecessaryApproveError();
+    public async approve(
+        options: BasicTransactionOptions,
+        checkNeedApprove = true
+    ): Promise<TransactionReceipt> {
+        if (checkNeedApprove) {
+            const needApprove = await this.needApprove();
+            if (!needApprove) {
+                throw new UnnecessaryApproveError();
+            }
         }
 
         this.checkWalletConnected();
         this.checkBlockchainCorrect();
 
+        const approveAmount =
+            this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ||
+            this.from.blockchain === BLOCKCHAIN_NAME.CRONOS
+                ? this.from.weiAmount
+                : 'infinity';
+
         return Injector.web3Private.approveTokens(
             this.from.address,
             this.fromContractAddress,
-            'infinity',
+            approveAmount,
             options
         );
     }
@@ -132,18 +145,13 @@ export abstract class CrossChainTrade {
             return;
         }
 
-        const txOptions: TransactionOptions = {
+        const approveOptions: BasicTransactionOptions = {
             onTransactionHash: options?.onApprove,
-            gas: options?.approveGasLimit || undefined,
-            gasPrice: options?.gasPrice || undefined
+            gas: options?.approveGasLimit,
+            gasPrice: options?.gasPrice
         };
 
-        await Injector.web3Private.approveTokens(
-            this.from.address,
-            this.fromContractAddress,
-            'infinity',
-            txOptions
-        );
+        await this.approve(approveOptions, false);
     }
 
     /**
@@ -188,4 +196,10 @@ export abstract class CrossChainTrade {
             this.walletAddress
         );
     }
+
+    /**
+     * @internal
+     * Gets ratio between transit usd amount and to token amount.
+     */
+    public abstract getTradeAmountRatio(): BigNumber;
 }

@@ -4,6 +4,7 @@ import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/co
 import { Injector } from '@rsdk-core/sdk/injector';
 import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
+import BigNumber from 'bignumber.js';
 
 /**
  * Contains common for Celer and Rubic trades methods and fields.
@@ -46,6 +47,8 @@ export abstract class CelerRubicCrossChainTrade extends CrossChainTrade {
      * Transit token in source blockchain, taken as fee.
      */
     public abstract readonly transitFeeToken: PriceTokenAmount;
+
+    public abstract readonly feeInPercents: number;
 
     protected abstract readonly toWeb3Public: Web3Public;
 
@@ -90,5 +93,13 @@ export abstract class CelerRubicCrossChainTrade extends CrossChainTrade {
             this.fromTrade.fromToken.tokenAmount,
             this.toTrade.contract.address
         );
+    }
+
+    public getTradeAmountRatio(): BigNumber {
+        const transitTokenAmount = this.fromTrade.toToken.tokenAmount;
+        const cryptoFeeCost = this.cryptoFeeToken.price.multipliedBy(
+            this.cryptoFeeToken.tokenAmount
+        );
+        return transitTokenAmount.plus(cryptoFeeCost).dividedBy(this.to.tokenAmount);
     }
 }
