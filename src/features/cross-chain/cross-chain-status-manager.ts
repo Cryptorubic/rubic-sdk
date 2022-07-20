@@ -1,3 +1,4 @@
+/* eslint-disable no-debugger */
 import { TransactionReceipt } from 'web3-eth';
 import { BlockchainName, BlockchainsInfo } from 'src/core';
 import { Injector } from 'src/core/sdk/injector';
@@ -37,8 +38,6 @@ type getDstTxStatusFn = (
  * Contains methods for getting cross-chain trade statuses.
  */
 export class CrossChainStatusManager {
-    private readonly httpClient = Injector.httpClient;
-
     private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, getDstTxStatusFn> = {
         [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RUBIC]: this.getRubicDstSwapStatus,
@@ -152,7 +151,7 @@ export class CrossChainStatusManager {
                 const srcChainId = BlockchainsInfo.getBlockchainByName(data.fromBlockchain).id;
                 const {
                     status: { text: dstTxStatus }
-                } = await this.httpClient.get<SymbiosisApiResponse>(
+                } = await Injector.httpClient.get<SymbiosisApiResponse>(
                     `https://api.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${srcTxReceipt.transactionHash}`
                 );
 
@@ -204,8 +203,8 @@ export class CrossChainStatusManager {
                 toChain: BlockchainsInfo.getBlockchainByName(data.toBlockchain).id,
                 txHash: srcTxReceipt.transactionHash
             };
-            const { status } = await this.httpClient.get<{ status: LifiSwapStatus }>(
-                'https://li.quest/v1/',
+            const { status } = await Injector.httpClient.get<{ status: LifiSwapStatus }>(
+                'https://li.quest/v1/status',
                 { params }
             );
 
