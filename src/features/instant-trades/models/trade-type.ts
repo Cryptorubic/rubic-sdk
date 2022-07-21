@@ -44,6 +44,9 @@ export const TRADE_TYPE = {
     // Telos
     ZAPPY: 'ZAPPY',
 
+    // Cronos
+    CRONA_SWAP: 'CRONA_SWAP',
+
     // Moonbeam
     STELLA_SWAP: 'STELLA_SWAP',
     BEAM_SWAP: 'BEAM_SWAP',
