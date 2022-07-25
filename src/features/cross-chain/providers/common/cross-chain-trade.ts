@@ -52,7 +52,7 @@ export abstract class CrossChainTrade {
 
     protected abstract get fromContractAddress(): string;
 
-    public abstract readonly itType: { from: TradeType; to: TradeType } | undefined;
+    public abstract readonly itType: { from: TradeType | undefined; to: TradeType | undefined };
 
     protected get walletAddress(): string {
         return Injector.web3Private.address;
@@ -124,7 +124,10 @@ export abstract class CrossChainTrade {
         this.checkBlockchainCorrect();
 
         const approveAmount =
-            this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ? this.from.weiAmount : 'infinity';
+            this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ||
+            this.from.blockchain === BLOCKCHAIN_NAME.CRONOS
+                ? this.from.weiAmount
+                : 'infinity';
 
         return Injector.web3Private.approveTokens(
             this.from.address,

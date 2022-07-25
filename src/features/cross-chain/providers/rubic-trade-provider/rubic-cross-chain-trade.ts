@@ -16,13 +16,14 @@ import { ContractParams } from '@rsdk-features/cross-chain/models/contract-param
 import { LowSlippageDeflationaryTokenError, RubicSdkError } from 'src/common';
 import { TOKEN_WITH_FEE_ERRORS } from '@rsdk-features/cross-chain/constants/token-with-fee-errors';
 import { CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
+import { RubicDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade';
 /**
  * Calculated Rubic cross chain trade.
  */
 export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RUBIC;
 
-    public readonly itType: { from: TradeType; to: TradeType };
+    public readonly itType: { from: TradeType | undefined; to: TradeType | undefined };
 
     public readonly feeInPercents: number;
 
@@ -134,8 +135,14 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
         });
 
         this.itType = {
-            from: crossChainTrade.fromTrade.provider.type,
-            to: crossChainTrade.toTrade.provider.type
+            from:
+                crossChainTrade.fromTrade instanceof RubicDirectCrossChainContractTrade
+                    ? undefined
+                    : crossChainTrade.fromTrade.provider.type,
+            to:
+                crossChainTrade.toTrade instanceof RubicDirectCrossChainContractTrade
+                    ? undefined
+                    : crossChainTrade.toTrade.provider.type
         };
 
         this.toTokenAmountMin = this.toTrade.toTokenAmountMin;
