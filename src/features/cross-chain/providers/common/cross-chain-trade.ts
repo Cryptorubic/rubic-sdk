@@ -18,6 +18,7 @@ import { UnnecessaryApproveError, WalletNotConnectedError, WrongNetworkError } f
 import { TransactionReceipt } from 'web3-eth';
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { TransactionConfig } from 'web3-core';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 
 /**
  * Abstract class for all cross chain providers' trades.
@@ -54,8 +55,23 @@ export abstract class CrossChainTrade {
 
     public abstract readonly itType: { from: TradeType | undefined; to: TradeType | undefined };
 
+    /**
+     * Swap fee information.
+     */
+    public abstract readonly feeInfo: FeeInfo;
+
     protected get walletAddress(): string {
         return Injector.web3Private.address;
+    }
+
+    protected get networkFee(): BigNumber {
+        return new BigNumber(this.feeInfo.fixedFee.amount).plus(
+            this.feeInfo?.cryptoFee?.amount || 0
+        );
+    }
+
+    protected get methodName(): string {
+        return this.from.isNative ? 'routerCallNative' : 'routerCall';
     }
 
     /**

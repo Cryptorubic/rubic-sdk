@@ -1,9 +1,29 @@
 import { SymbiosisCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { BLOCKCHAIN_NAME } from 'src/core';
+import { UniversalContract } from '../../common/models/universal-contract';
 
-export const SYMBIOSIS_CONTRACT_ADDRESS: Record<SymbiosisCrossChainSupportedBlockchain, string> = {
-    [BLOCKCHAIN_NAME.ETHEREUM]: '0x2CF985a54a3fe6c2DfaBe2f58a9Aae8cEbc8dfd3',
-    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: '0xb1f691286fF2C0B3cA917D9cDe8C866C43CB5Eb8',
-    [BLOCKCHAIN_NAME.POLYGON]: '0x5Cc8F95d64d929B456ea0831e42280AF85481876',
-    [BLOCKCHAIN_NAME.AVALANCHE]: '0x454C144700B2f3348D204805A484130cD31F7002'
+export const SYMBIOSIS_CONTRACT_ADDRESS: Record<
+    SymbiosisCrossChainSupportedBlockchain,
+    UniversalContract
+> = {
+    [BLOCKCHAIN_NAME.ETHEREUM]: {
+        providerRouter: '0xB9E13785127BFfCc3dc970A55F6c7bF0844a3C15',
+        providerGateway: '0x03B7551EB0162c838a10c2437b60D1f5455b9554',
+        rubicRouter: '0xc296428642cd8E05D67edB9018EAd8f5B5c981BC'
+    },
+    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: {
+        providerRouter: '0x8D602356c7A6220CDE24BDfB4AB63EBFcb0a9b5d',
+        providerGateway: '0xe2faC824615538C3A9ae704c75582cD1AbdD7cdf',
+        rubicRouter: '0xc296428642cd8E05D67edB9018EAd8f5B5c981BC'
+    },
+    [BLOCKCHAIN_NAME.POLYGON]: {
+        providerRouter: '0x733D33FA01424F83E9C095af3Ece80Ed6fa565F1',
+        providerGateway: '0xF3273BD35e4Ad4fcd49DabDee33582b41Cbb9d77',
+        rubicRouter: '0xc296428642cd8E05D67edB9018EAd8f5B5c981BC'
+    },
+    [BLOCKCHAIN_NAME.AVALANCHE]: {
+        providerRouter: '0xE5E68630B5B759e6C701B70892AA8324b71e6e20',
+        providerGateway: '0x25821A21C2E3455967229cADCA9b6fdd4A80a40b',
+        rubicRouter: '0xc296428642cd8E05D67edB9018EAd8f5B5c981BC'
+    }
 };

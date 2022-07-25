@@ -9,22 +9,24 @@ import {
 import { Route } from '@lifi/sdk';
 import { Injector } from 'src/core/sdk/injector';
 import { FailedToCheckForTransactionReceiptError } from 'src/common';
-import {
-    lifiContractAbi,
-    lifiContractAddress
-} from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
+import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
 import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 import { LifiSwapRequestError } from 'src/common/errors/swap/lifi-swap-request.error';
+import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { LiFiTradeSubtype } from 'src/features/cross-chain/providers/lifi-trade-provider/models/lifi-providers';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { FeeInfo } from '../common/models/fee';
 
 /**
  * Calculated Celer cross chain trade.
  */
 export class LifiCrossChainTrade extends CrossChainTrade {
+    public readonly feeInfo: FeeInfo;
+
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount,
@@ -46,11 +48,11 @@ export class LifiCrossChainTrade extends CrossChainTrade {
                         route,
                         gasData: null,
                         toTokenAmountMin: new BigNumber(0),
-                        fee: new BigNumber(0),
-                        feeSymbol: '',
-                        feePercent: 0,
-                        networkFee: new BigNumber(0),
-                        networkFeeSymbol: '',
+                        feeInfo: {
+                            fixedFee: { amount: 0, tokenSymbol: '' },
+                            platformFee: { percent: 0, tokenSymbol: '' },
+                            cryptoFee: null
+                        },
                         priceImpact: 0,
                         itType: {
                             from: TRADE_TYPE.ONE_INCH,
@@ -105,20 +107,11 @@ export class LifiCrossChainTrade extends CrossChainTrade {
 
     public readonly itType: { from: TradeType | undefined; to: TradeType | undefined };
 
-    public readonly fee: BigNumber;
-
-    public readonly feeSymbol: string;
-
-    public readonly feePercent: number;
-
-    public readonly networkFee: BigNumber;
-
-    public readonly networkFeeSymbol: string;
-
     public readonly priceImpact: number;
 
     public get fromContractAddress(): string {
-        return lifiContractAddress[this.from.blockchain as LifiCrossChainSupportedBlockchain];
+        return lifiContractAddress[this.from.blockchain as LifiCrossChainSupportedBlockchain]
+            .rubicRouter;
     }
 
     public readonly subType: LiFiTradeSubtype;
@@ -130,11 +123,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             route: Route;
             gasData: GasData | null;
             toTokenAmountMin: BigNumber;
-            fee: BigNumber;
-            feeSymbol: string;
-            feePercent: number;
-            networkFee: BigNumber;
-            networkFeeSymbol: string;
+            feeInfo: FeeInfo;
             priceImpact: number;
             itType: { from: TradeType | undefined; to: TradeType | undefined };
         },
@@ -148,12 +137,8 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         this.gasData = crossChainTrade.gasData;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.subType = this.route?.steps?.[0]?.tool as LiFiTradeSubtype;
+        this.feeInfo = crossChainTrade.feeInfo;
 
-        this.fee = crossChainTrade.fee;
-        this.feeSymbol = crossChainTrade.feeSymbol;
-        this.feePercent = crossChainTrade.feePercent;
-        this.networkFee = crossChainTrade.networkFee;
-        this.networkFeeSymbol = crossChainTrade.networkFeeSymbol;
         this.priceImpact = crossChainTrade.priceImpact;
         this.itType = crossChainTrade.itType;
 
@@ -212,33 +197,37 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    public async getContractParams() {
-        const methodName = this.from.isNative ? 'lifiCallWithNative' : 'lifiCall';
-
+    public async getContractParams(): Promise<ContractParams> {
         const data = await this.getSwapData();
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
-        const methodArguments = [
-            [
-                this.from.address,
-                this.to.address,
-                this.providerAddress,
-                this.walletAddress,
-                this.from.stringWeiAmount,
-                Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
-                toChainId
-            ],
-            data
+        const fromContracts =
+            lifiContractAddress[this.from.blockchain as LifiCrossChainSupportedBlockchain];
+
+        const swapArguments = [
+            this.from.address,
+            this.from.stringWeiAmount,
+            toChainId,
+            this.to.address,
+            Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
+            this.walletAddress,
+            this.providerAddress,
+            fromContracts.providerRouter
         ];
 
-        const networkFee = await this.getNetworkFee();
-        const value = new BigNumber(this.from.isNative ? this.from.stringWeiAmount : '0')
-            .plus(networkFee)
+        const methodArguments: unknown[] = [swapArguments];
+        if (!this.from.isNative) {
+            methodArguments.push(fromContracts.providerGateway);
+        }
+        methodArguments.push(data);
+
+        const value = new BigNumber(this.feeInfo?.fixedFee?.amount || 0)
+            .plus(this.from.isNative ? this.from.stringWeiAmount : 0)
             .toFixed(0);
 
         return {
-            contractAddress: this.fromContractAddress,
-            contractAbi: lifiContractAbi,
-            methodName,
+            contractAddress: fromContracts.rubicRouter,
+            contractAbi: commonCrossChainAbi,
+            methodName: this.methodName,
             methodArguments,
             value
         };
@@ -277,18 +266,10 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         return swapResponse.transactionRequest.data;
     }
 
-    private getNetworkFee(): Promise<string> {
-        return this.fromWeb3Public.callContractMethod(
-            this.fromContractAddress,
-            lifiContractAbi,
-            'fixedCryptoFee'
-        );
-    }
-
     public getTradeAmountRatio(): BigNumber {
         const fromCost = this.from.price
             .multipliedBy(this.from.tokenAmount)
-            .plus(this.networkFee.gt(0) ? 1 : 0);
+            .plus(this.feeInfo.fixedFee.amount ? 1 : 0);
         return fromCost.dividedBy(this.to.tokenAmount);
     }
 }
