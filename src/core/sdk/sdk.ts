@@ -11,6 +11,7 @@ import { TokensManager } from '@rsdk-features/tokens/tokens-manager';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { BlockchainName } from 'src/core';
 import { CrossChainSymbiosisManager } from '@rsdk-features/cross-chain/cross-chain-symbiosis-manager';
+import { CrossChainStatusManager } from '@rsdk-features/cross-chain/cross-chain-status-manager';
 
 /**
  * Base class to work with sdk.
@@ -30,6 +31,11 @@ export class SDK {
      * Cross-chain symbiosis manager object. Use it to get pending trades in symbiosis and revert them.
      */
     public readonly crossChainSymbiosisManager: CrossChainSymbiosisManager;
+
+    /**
+     * Cross-chain status manager object. Use it to get trade statuses on source and target network.
+     */
+    public readonly crossChainStatusManager: CrossChainStatusManager;
 
     /**
      * Tokens manager object. Use it to fetch and store tokens data.
@@ -101,6 +107,7 @@ export class SDK {
         this.instantTrades = new InstantTradesManager();
         this.crossChain = new CrossChainManager(providerAddress);
         this.crossChainSymbiosisManager = new CrossChainSymbiosisManager();
+        this.crossChainStatusManager = new CrossChainStatusManager();
     }
 
     /**
