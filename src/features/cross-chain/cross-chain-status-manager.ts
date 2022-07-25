@@ -216,11 +216,11 @@ export class CrossChainStatusManager {
                 return CrossChainTxStatus.FAIL;
             }
 
-            if (
-                status === LifiSwapStatus.INVALID ||
-                status === LifiSwapStatus.NOT_FOUND ||
-                status === LifiSwapStatus.PENDING
-            ) {
+            if (status === LifiSwapStatus.INVALID) {
+                return CrossChainTxStatus.UNKNOWN;
+            }
+
+            if (status === LifiSwapStatus.NOT_FOUND || status === LifiSwapStatus.PENDING) {
                 return CrossChainTxStatus.PENDING;
             }
 
