@@ -163,7 +163,15 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                 cryptoFeeToken,
                 transitFeeToken,
                 gasData,
-                feeInPercents
+                feeInPercents,
+                feeInfo: {
+                    fixedFee: { amount: 0, tokenSymbol: '' },
+                    platformFee: { percent: feeInPercents, tokenSymbol: transitFeeToken.symbol },
+                    cryptoFee: {
+                        amount: cryptoFeeToken.tokenAmount.toNumber(),
+                        tokenSymbol: cryptoFeeToken.symbol
+                    }
+                }
             },
             providerAddress,
             Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
