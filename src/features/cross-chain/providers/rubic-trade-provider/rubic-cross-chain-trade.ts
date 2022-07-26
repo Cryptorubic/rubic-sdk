@@ -16,15 +16,19 @@ import { ContractParams } from '@rsdk-features/cross-chain/models/contract-param
 import { LowSlippageDeflationaryTokenError, RubicSdkError } from 'src/common';
 import { TOKEN_WITH_FEE_ERRORS } from '@rsdk-features/cross-chain/constants/token-with-fee-errors';
 import { CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
+import { RubicDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 /**
  * Calculated Rubic cross chain trade.
  */
 export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RUBIC;
 
-    public readonly itType: { from: TradeType; to: TradeType };
+    public readonly itType: { from: TradeType | undefined; to: TradeType | undefined };
 
     public readonly feeInPercents: number;
+
+    public readonly feeInfo: FeeInfo;
 
     /** @internal */
     public static async getGasData(
@@ -48,7 +52,12 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
                         cryptoFeeToken,
                         transitFeeToken: {} as PriceTokenAmount,
                         gasData: null,
-                        feeInPercents: 0
+                        feeInPercents: 0,
+                        feeInfo: {
+                            fixedFee: { amount: 0, tokenSymbol: '' },
+                            platformFee: { percent: 0, tokenSymbol: '' },
+                            cryptoFee: null
+                        }
                     },
                     EMPTY_ADDRESS
                 ).getContractParams();
@@ -108,6 +117,7 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
             transitFeeToken: PriceTokenAmount;
             gasData: GasData | null;
             feeInPercents: number;
+            feeInfo: FeeInfo;
         },
         providerAddress: string
     ) {
@@ -118,7 +128,7 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
         this.toTrade = crossChainTrade.toTrade;
         this.gasData = crossChainTrade.gasData;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
-
+        this.feeInfo = crossChainTrade.feeInfo;
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.fromTrade.blockchain);
         this.toWeb3Public = Injector.web3PublicService.getWeb3Public(this.toTrade.blockchain);
 
@@ -134,8 +144,14 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
         });
 
         this.itType = {
-            from: crossChainTrade.fromTrade.provider.type,
-            to: crossChainTrade.toTrade.provider.type
+            from:
+                crossChainTrade.fromTrade instanceof RubicDirectCrossChainContractTrade
+                    ? undefined
+                    : crossChainTrade.fromTrade.provider.type,
+            to:
+                crossChainTrade.toTrade instanceof RubicDirectCrossChainContractTrade
+                    ? undefined
+                    : crossChainTrade.toTrade.provider.type
         };
 
         this.toTokenAmountMin = this.toTrade.toTokenAmountMin;

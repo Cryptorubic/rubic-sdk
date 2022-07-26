@@ -13,6 +13,7 @@ import BigNumber from 'bignumber.js';
 import { ZrxTrade } from '@rsdk-features/instant-trades/dexes/common/zrx-common/zrx-trade';
 import { Cache } from 'src/common';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
+import { TRADE_TYPE, TradeType } from 'src/features';
 
 export abstract class ZrxAbstractProvider extends InstantTradeProvider {
     protected readonly gasMargin = 1.4;
@@ -24,6 +25,10 @@ export abstract class ZrxAbstractProvider extends InstantTradeProvider {
         wrappedAddress: EMPTY_ADDRESS,
         fromAddress: ''
     };
+
+    public get type(): TradeType {
+        return TRADE_TYPE.ZRX;
+    }
 
     @Cache
     private get apiBaseUrl(): string {

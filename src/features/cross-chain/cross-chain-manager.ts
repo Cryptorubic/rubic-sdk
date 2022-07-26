@@ -191,16 +191,12 @@ export class CrossChainManager {
                 const { disabledProviders, timeout, ...providersOptions } =
                     this.getFullOptions(options);
 
-                const providers = Object.entries(this.tradeProviders).filter(([type]) => {
+                const providers = Object.entries(this.tradeProviders).filter(([type, provider]) => {
                     if (disabledProviders.includes(type as CrossChainTradeType)) {
                         return false;
                     }
 
-                    return !(
-                        type === CROSS_CHAIN_TRADE_TYPE.RUBIC &&
-                        CelerCrossChainTradeProvider.isSupportedBlockchain(from.blockchain) &&
-                        CelerCrossChainTradeProvider.isSupportedBlockchain(to.blockchain)
-                    );
+                    return provider.isSupportedBlockchains(from.blockchain, to.blockchain);
                 }) as [CrossChainTradeType, CrossChainTradeProvider][];
 
                 const providerData: CrossChainProviderData = {
@@ -222,8 +218,8 @@ export class CrossChainManager {
                         )
                     ),
                     fromPromise(
-                        providers.map(async ([type, trade]) => {
-                            const promise = trade.calculate(from, to, providersOptions);
+                        providers.map(async ([type, provider]) => {
+                            const promise = provider.calculate(from, to, providersOptions);
                             try {
                                 const wrappedTrade = await pTimeout(promise, timeout);
 

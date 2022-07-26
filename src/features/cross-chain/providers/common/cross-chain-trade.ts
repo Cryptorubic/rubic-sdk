@@ -1,7 +1,7 @@
 import {
     BasicTransactionOptions,
+    BLOCKCHAIN_NAME,
     PriceTokenAmount,
-    TransactionOptions,
     Web3Public,
     Web3Pure
 } from 'src/core';
@@ -18,6 +18,7 @@ import { UnnecessaryApproveError, WalletNotConnectedError, WrongNetworkError } f
 import { TransactionReceipt } from 'web3-eth';
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { TransactionConfig } from 'web3-core';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 
 /**
  * Abstract class for all cross chain providers' trades.
@@ -52,10 +53,25 @@ export abstract class CrossChainTrade {
 
     protected abstract get fromContractAddress(): string;
 
-    public abstract readonly itType: { from: TradeType; to: TradeType } | undefined;
+    public abstract readonly itType: { from: TradeType | undefined; to: TradeType | undefined };
+
+    /**
+     * Swap fee information.
+     */
+    public abstract readonly feeInfo: FeeInfo;
 
     protected get walletAddress(): string {
         return Injector.web3Private.address;
+    }
+
+    protected get networkFee(): BigNumber {
+        return new BigNumber(this.feeInfo.fixedFee.amount).plus(
+            this.feeInfo?.cryptoFee?.amount || 0
+        );
+    }
+
+    protected get methodName(): string {
+        return this.from.isNative ? 'routerCallNative' : 'routerCall';
     }
 
     /**
@@ -107,19 +123,32 @@ export abstract class CrossChainTrade {
     /**
      * Sends approve transaction with connected wallet.
      * @param options Transaction options.
+     * @param checkNeedApprove If true, first allowance is checked.
      */
-    public async approve(options: BasicTransactionOptions): Promise<TransactionReceipt> {
-        if (!(await this.needApprove())) {
-            throw new UnnecessaryApproveError();
+    public async approve(
+        options: BasicTransactionOptions,
+        checkNeedApprove = true
+    ): Promise<TransactionReceipt> {
+        if (checkNeedApprove) {
+            const needApprove = await this.needApprove();
+            if (!needApprove) {
+                throw new UnnecessaryApproveError();
+            }
         }
 
         this.checkWalletConnected();
         this.checkBlockchainCorrect();
 
+        const approveAmount =
+            this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ||
+            this.from.blockchain === BLOCKCHAIN_NAME.CRONOS
+                ? this.from.weiAmount
+                : 'infinity';
+
         return Injector.web3Private.approveTokens(
             this.from.address,
             this.fromContractAddress,
-            'infinity',
+            approveAmount,
             options
         );
     }
@@ -132,18 +161,13 @@ export abstract class CrossChainTrade {
             return;
         }
 
-        const txOptions: TransactionOptions = {
+        const approveOptions: BasicTransactionOptions = {
             onTransactionHash: options?.onApprove,
-            gas: options?.approveGasLimit || undefined,
-            gasPrice: options?.gasPrice || undefined
+            gas: options?.approveGasLimit,
+            gasPrice: options?.gasPrice
         };
 
-        await Injector.web3Private.approveTokens(
-            this.from.address,
-            this.fromContractAddress,
-            'infinity',
-            txOptions
-        );
+        await this.approve(approveOptions, false);
     }
 
     /**

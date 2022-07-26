@@ -9,7 +9,6 @@ import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
 import { Injector } from '@rsdk-core/sdk/injector';
 import BigNumber from 'bignumber.js';
 import { Cache } from 'src/common';
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import { TransactionReceipt } from 'web3-eth';
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
@@ -40,15 +39,6 @@ type OneinchTradeStruct = {
 };
 
 export class OneinchTrade extends InstantTrade {
-    public static readonly oneInchTradeTypes = {
-        [BLOCKCHAIN_NAME.ETHEREUM]: TRADE_TYPE.ONE_INCH_ETHEREUM,
-        [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: TRADE_TYPE.ONE_INCH_BSC,
-        [BLOCKCHAIN_NAME.POLYGON]: TRADE_TYPE.ONE_INCH_POLYGON,
-        [BLOCKCHAIN_NAME.FANTOM]: TRADE_TYPE.ONE_INCH_FANTOM,
-        [BLOCKCHAIN_NAME.ARBITRUM]: TRADE_TYPE.ONE_INCH_ARBITRUM,
-        [BLOCKCHAIN_NAME.AVALANCHE]: TRADE_TYPE.ONE_INCH_AVALANCHE
-    } as const;
-
     /** @internal */
     public static async checkIfNeedApproveAndThrowError(
         from: PriceTokenAmount
@@ -95,9 +85,7 @@ export class OneinchTrade extends InstantTrade {
     public readonly transactionData: string | null;
 
     public get type(): TradeType {
-        return OneinchTrade.oneInchTradeTypes[
-            this.from.blockchain as keyof typeof OneinchTrade.oneInchTradeTypes
-        ];
+        return TRADE_TYPE.ONE_INCH;
     }
 
     @Cache

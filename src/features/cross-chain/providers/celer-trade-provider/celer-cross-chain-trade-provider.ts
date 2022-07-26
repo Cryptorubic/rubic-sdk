@@ -37,6 +37,16 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
 
     protected contracts = getCelerCrossChainContract;
 
+    public isSupportedBlockchains(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName
+    ): boolean {
+        return (
+            CelerCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
+            CelerCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
+        );
+    }
+
     public async calculate(
         from: PriceTokenAmount,
         to: PriceToken,
@@ -119,14 +129,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             toTransit,
             to,
             toSlippageTolerance,
-            [
-                TRADE_TYPE.ONE_INCH_ARBITRUM,
-                TRADE_TYPE.ONE_INCH_BSC,
-                TRADE_TYPE.ONE_INCH_ETHEREUM,
-                TRADE_TYPE.ONE_INCH_POLYGON,
-                TRADE_TYPE.ONE_INCH_AVALANCHE,
-                TRADE_TYPE.ONE_INCH_FANTOM
-            ]
+            [TRADE_TYPE.ONE_INCH]
         );
 
         let cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
@@ -160,7 +163,15 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                 cryptoFeeToken,
                 transitFeeToken,
                 gasData,
-                feeInPercents
+                feeInPercents,
+                feeInfo: {
+                    fixedFee: { amount: 0, tokenSymbol: '' },
+                    platformFee: { percent: feeInPercents, tokenSymbol: transitFeeToken.symbol },
+                    cryptoFee: {
+                        amount: cryptoFeeToken.tokenAmount.toNumber(),
+                        tokenSymbol: cryptoFeeToken.symbol
+                    }
+                }
             },
             providerAddress,
             Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())

@@ -36,6 +36,16 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         super();
     }
 
+    public isSupportedBlockchains(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName
+    ): boolean {
+        return (
+            RubicCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
+            RubicCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
+        );
+    }
+
     public async calculate(
         from: PriceTokenAmount,
         to: PriceToken,
@@ -107,7 +117,15 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                 cryptoFeeToken,
                 transitFeeToken,
                 gasData,
-                feeInPercents
+                feeInPercents,
+                feeInfo: {
+                    fixedFee: { amount: 0, tokenSymbol: '' },
+                    platformFee: { percent: feeInPercents, tokenSymbol: transitFeeToken.symbol },
+                    cryptoFee: {
+                        amount: cryptoFeeToken.tokenAmount.toNumber(),
+                        tokenSymbol: cryptoFeeToken.symbol
+                    }
+                }
             },
             providerAddress
         );
