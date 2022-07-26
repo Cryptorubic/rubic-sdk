@@ -119,7 +119,10 @@ export abstract class InstantTrade {
         this.checkBlockchainCorrect();
 
         const approveAmount =
-            this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ? this.from.weiAmount : 'infinity';
+            this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ||
+            this.from.blockchain === BLOCKCHAIN_NAME.CRONOS
+                ? this.from.weiAmount
+                : 'infinity';
 
         return Injector.web3Private.approveTokens(
             this.from.address,

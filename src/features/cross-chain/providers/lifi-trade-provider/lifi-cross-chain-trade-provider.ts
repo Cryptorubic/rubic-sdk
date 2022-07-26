@@ -21,6 +21,8 @@ import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { CrossChainIsUnavailableError } from 'src/common';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
+import { LifiStep } from '@lifi/types/dist/step';
+import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
 
 export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -124,6 +126,22 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
                 ? await LifiCrossChainTrade.getGasData(from, to, bestRoute)
                 : null;
 
+        const steps = (bestRoute.steps[0] as LifiStep).includedSteps;
+        const sourceDex =
+            steps?.[0] && steps[0].action.fromChainId === steps[0].action.toChainId
+                ? steps?.[0].tool
+                : undefined;
+
+        const [, ...stepsWithoutFirst] = steps;
+        const targetDex = stepsWithoutFirst.find(
+            provider => provider.action.fromChainId === provider.action.toChainId
+        )?.tool;
+
+        const itType = {
+            from: sourceDex ? lifiProviders[sourceDex] : undefined,
+            to: targetDex ? lifiProviders[targetDex] : undefined
+        };
+
         const trade = new LifiCrossChainTrade(
             {
                 from,
@@ -136,7 +154,8 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
                 feePercent,
                 networkFee,
                 networkFeeSymbol,
-                priceImpact
+                priceImpact,
+                itType
             },
             options.providerAddress
         );

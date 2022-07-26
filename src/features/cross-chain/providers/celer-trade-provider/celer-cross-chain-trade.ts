@@ -20,6 +20,7 @@ import {
 import { CelerCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
 import { CelerItCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
 import { CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
+import { CelerDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
 
 /**
  * Calculated Celer cross chain trade.
@@ -28,7 +29,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
     /** @internal */
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
 
-    public readonly itType: { from: TradeType; to: TradeType };
+    public readonly itType: { from: TradeType | undefined; to: TradeType | undefined };
 
     public readonly feeInPercents: number;
 
@@ -142,8 +143,14 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         });
 
         this.itType = {
-            from: crossChainTrade.fromTrade.provider.type,
-            to: crossChainTrade.toTrade.provider.type
+            from:
+                crossChainTrade.fromTrade instanceof CelerDirectCrossChainContractTrade
+                    ? undefined
+                    : crossChainTrade.fromTrade.provider.type,
+            to:
+                crossChainTrade.toTrade instanceof CelerDirectCrossChainContractTrade
+                    ? undefined
+                    : crossChainTrade.toTrade.provider.type
         };
 
         this.toTokenAmountMin = this.toTrade.toTokenAmountMin;
