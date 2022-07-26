@@ -7,7 +7,6 @@ import { RubicSdkError } from 'src/common';
 import { parseError } from 'src/common/utils/errors';
 import { BlockchainName } from 'src/core';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 import { Injector } from 'src/core/sdk/injector';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { AbiItem } from 'web3-utils';
@@ -43,7 +42,7 @@ export abstract class CrossChainTradeProvider {
      * @internal
      */
     protected async getFixedFee(
-        fromBlockchain: LifiCrossChainSupportedBlockchain,
+        fromBlockchain: BlockchainName,
         providerAddress: string,
         contractAddress: string,
         contractAbi: AbiItem[]
@@ -78,7 +77,7 @@ export abstract class CrossChainTradeProvider {
      * @internal
      */
     protected async getFeePercent(
-        fromBlockchain: LifiCrossChainSupportedBlockchain,
+        fromBlockchain: BlockchainName,
         providerAddress: string,
         contractAddress: string,
         contractAbi: AbiItem[]

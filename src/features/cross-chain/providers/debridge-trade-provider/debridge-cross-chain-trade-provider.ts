@@ -3,28 +3,27 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
 import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
 
-import {
-    SymbiosisCrossChainSupportedBlockchain,
-    symbiosisCrossChainSupportedBlockchains
-} from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { CrossChainIsUnavailableError, RubicSdkError } from 'src/common';
 import { Injector } from '@rsdk-core/sdk/injector';
-import { SymbiosisCrossChainTrade } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
-import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/debridge-cross-chain-supported-blockchain';
+import {
+    DeBridgeCrossChainSupportedBlockchain,
+    deBridgeCrossChainSupportedBlockchains
+} from 'src/features/cross-chain/providers/debridge-trade-provider/constants/debridge-cross-chain-supported-blockchain';
 import { TransactionRequest } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-request';
 import { TransactionResponse } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
 import { DebridgeCrossChainTrade } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade';
 import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-address';
-import { DE_BRIDGE_CONTRACT_ABI } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-abi';
-import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 
 export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
         blockchain: BlockchainName
-    ): blockchain is SymbiosisCrossChainSupportedBlockchain {
-        return symbiosisCrossChainSupportedBlockchains.some(
+    ): blockchain is DeBridgeCrossChainSupportedBlockchain {
+        return deBridgeCrossChainSupportedBlockchains.some(
             supportedBlockchain => supportedBlockchain === blockchain
         );
     }
@@ -35,6 +34,16 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
 
     protected get walletAddress(): string {
         return Injector.web3Private.address;
+    }
+
+    public isSupportedBlockchains(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName
+    ): boolean {
+        return (
+            DebridgeCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
+            DebridgeCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
+        );
     }
 
     public async calculate(
@@ -61,9 +70,10 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
 
             await this.checkContractState(fromBlockchain);
 
-            const feePercent = await this.getFeePercent(fromBlockchain, options.providerAddress);
+            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
+
             const feeAmount = Web3Pure.toWei(
-                from.tokenAmount.multipliedBy(feePercent).dividedBy(100),
+                from.tokenAmount.multipliedBy(feeInfo.platformFee.percent).dividedBy(100),
                 from.decimals,
                 1
             );
@@ -98,7 +108,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await SymbiosisCrossChainTrade.getGasData(from, to, tx)
+                    ? await DebridgeCrossChainTrade.getGasData(from, to, tx)
                     : null;
 
             const transitToken = estimation.dstChainTokenIn;
@@ -113,14 +123,13 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                         // @TODO price impact
                         priceImpact: 0,
                         slippage: options.slippageTolerance,
-                        fee: Web3Pure.fromWei(feeAmount),
-                        feeSymbol: from.symbol,
-                        feePercent,
-                        networkFee: Web3Pure.fromWei(
-                            estimation.executionFee.actualAmount,
-                            estimation.executionFee.token.decimals
-                        ),
-                        networkFeeSymbol: estimation.executionFee.token.symbol,
+                        feeInfo: {
+                            ...feeInfo,
+                            cryptoFee: {
+                                amount: Number(estimation.executionFee.actualAmount),
+                                tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                            }
+                        },
                         transitAmount: Web3Pure.fromWei(
                             transitToken.minAmount,
                             transitToken.decimals
@@ -132,10 +141,6 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
         } catch (err: unknown) {
             const rubicSdkError = CrossChainTradeProvider.parseError(err);
 
-            // if (err instanceof SymbiosisError && err.message) {
-            //     rubicSdkError = await this.checkMinMaxErrors(err, from);
-            // }
-
             return {
                 trade: null,
                 error: rubicSdkError
@@ -143,101 +148,44 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
         }
     }
 
-    private async getFeePercent(
-        fromBlockchain: DeBridgeCrossChainSupportedBlockchain,
-        providerAddress: string
-    ): Promise<number> {
-        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-
-        if (providerAddress !== EMPTY_ADDRESS) {
-            return (
-                (await web3PublicService.callContractMethod<number>(
-                    DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain],
-                    DE_BRIDGE_CONTRACT_ABI,
-                    'availableIntegratorFee',
-                    {
-                        methodArguments: [providerAddress]
-                    }
-                )) / 10000
-            );
-        }
-
-        return (
-            (await web3PublicService.callContractMethod<number>(
-                DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain],
-                DE_BRIDGE_CONTRACT_ABI,
-                'RubicPlatformFee'
-            )) / 10000
-        );
-    }
-
-    // private async checkMinMaxErrors(
-    //     err: SymbiosisError,
-    //     from: PriceTokenAmount
-    // ): Promise<RubicSdkError> {
-    //     if (err.code === ErrorCode.AMOUNT_TOO_LOW || err.code === ErrorCode.AMOUNT_LESS_THAN_FEE) {
-    //         const index = err.message!.lastIndexOf('$');
-    //         const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
-    //         const minAmount = await this.getFromTokenAmount(from, transitTokenAmount, 'min');
-    //
-    //         return new CrossChainMinAmountError(minAmount, from);
-    //     }
-    //
-    //     if (err?.code === ErrorCode.AMOUNT_TOO_HIGH) {
-    //         const index = err.message!.lastIndexOf('$');
-    //         const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
-    //         const maxAmount = await this.getFromTokenAmount(from, transitTokenAmount, 'max');
-    //
-    //         return new CrossChainMaxAmountError(maxAmount, from);
-    //     }
-    //
-    //     return new RubicSdkError(err.message);
-    // }
-
-    // private async getFromTokenAmount(
-    //     from: PriceTokenAmount,
-    //     transitTokenAmount: BigNumber,
-    //     type: 'min' | 'max'
-    // ): Promise<BigNumber> {
-    //     const blockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
-    //
-    //     const transitToken = celerTransitTokens[blockchain];
-    //     if (compareAddresses(from.address, transitToken.address)) {
-    //         return transitTokenAmount;
-    //     }
-    //
-    //     const amount = (
-    //         await this.oneInchService[blockchain].calculate(
-    //             new PriceTokenAmount({
-    //                 ...transitToken,
-    //                 price: new BigNumber(1),
-    //                 tokenAmount: transitTokenAmount
-    //             }),
-    //             from,
-    //             {
-    //                 gasCalculation: 'disabled'
-    //             }
-    //         )
-    //     ).to.tokenAmount;
-    //     const approximatePercentDifference = 0.1;
-    //
-    //     if (type === 'min') {
-    //         return amount.multipliedBy(1 + approximatePercentDifference);
-    //     }
-    //     return amount.multipliedBy(1 - approximatePercentDifference);
-    // }
-
     private async checkContractState(fromBlockchain: DeBridgeCrossChainSupportedBlockchain) {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 
         const isPaused = await web3PublicService.callContractMethod<number>(
-            DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain],
-            DE_BRIDGE_CONTRACT_ABI,
+            DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+            commonCrossChainAbi,
             'paused'
         );
 
         if (isPaused) {
             throw new CrossChainIsUnavailableError();
         }
+    }
+
+    protected async getFeeInfo(
+        fromBlockchain: DeBridgeCrossChainSupportedBlockchain,
+        providerAddress: string
+    ): Promise<FeeInfo> {
+        return {
+            fixedFee: {
+                amount: await this.getFixedFee(
+                    fromBlockchain,
+                    providerAddress,
+                    DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+                    commonCrossChainAbi
+                ),
+                tokenSymbol: nativeTokensList[fromBlockchain].symbol
+            },
+            platformFee: {
+                percent: await this.getFeePercent(
+                    fromBlockchain,
+                    providerAddress,
+                    DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+                    commonCrossChainAbi
+                ),
+                tokenSymbol: 'USDC'
+            },
+            cryptoFee: null
+        };
     }
 }

@@ -38,11 +38,14 @@ type getDstTxStatusFn = (
  * Contains methods for getting cross-chain trade statuses.
  */
 export class CrossChainStatusManager {
+    private readonly httpClient = Injector.httpClient;
+
     private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, getDstTxStatusFn> = {
         [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RUBIC]: this.getRubicDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus
     };
 
     /**
@@ -346,5 +349,30 @@ export class CrossChainStatusManager {
         }
 
         return receipt;
+    }
+
+    /**
+     * Get DeBridge trade dst transaction status.
+     * @param data Trade data.
+     * @param srcTxReceipt Source transaction receipt.
+     * @returns Cross-chain transaction status.
+     */
+    private async getDebridgeDstSwapStatus(
+        data: CrossChainTradeData,
+        srcTxReceipt: TransactionReceipt
+    ): Promise<CrossChainTxStatus> {
+        console.log(data, srcTxReceipt);
+        // const params = {
+        //     bridge: data.lifiBridgeType,
+        //     fromChain: BlockchainsInfo.getBlockchainByName(data.fromBlockchain).id,
+        //     toChain: BlockchainsInfo.getBlockchainByName(data.toBlockchain).id,
+        //     txHash: srcTxReceipt.transactionHash
+        // };
+        // const { status } = await Injector.httpClient.get<{ status: LifiSwapStatus }>(
+        //     'https://li.quest/v1/status',
+        //     { params }
+        // );
+
+        return CrossChainTxStatus.UNKNOWN;
     }
 }
