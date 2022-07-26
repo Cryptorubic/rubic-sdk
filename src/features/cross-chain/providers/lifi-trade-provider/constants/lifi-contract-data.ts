@@ -11,7 +11,7 @@ export const lifiContractAddress: Record<LifiCrossChainSupportedBlockchain, Univ
             [blockchain]: {
                 providerRouter: '0x362fa9d0bca5d19f743db50738345ce2b40ec99f',
                 providerGateway: '0x362fa9d0bca5d19f743db50738345ce2b40ec99f',
-                rubicRouter: '0xc296428642cd8E05D67edB9018EAd8f5B5c981BC'
+                rubicRouter: '0x3332241a5a4eCb4c28239A9731ad45De7f000333'
             }
         };
     }, {} as Record<LifiCrossChainSupportedBlockchain, UniversalContract>);
