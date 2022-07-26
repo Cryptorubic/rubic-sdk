@@ -17,8 +17,7 @@ export const BLOCKCHAIN_NAME = {
     GNOSIS: 'GNOSIS',
     FUSE: 'FUSE',
     MOONBEAM: 'MOONBEAM',
-    CELO: 'CELO',
-    HECO: 'HECO'
+    CELO: 'CELO'
 } as const;
 
 export type BlockchainName = typeof BLOCKCHAIN_NAME[keyof typeof BLOCKCHAIN_NAME];

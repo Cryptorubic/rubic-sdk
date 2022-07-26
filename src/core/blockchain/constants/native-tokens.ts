@@ -118,11 +118,5 @@ export const nativeTokensList: NativeTokensList = {
         name: 'CELO',
         symbol: 'CELO',
         decimals: 18
-    },
-    [BLOCKCHAIN_NAME.HECO]: {
-        address: NATIVE_TOKEN_ADDRESS,
-        name: 'HuobiToken',
-        symbol: 'HT',
-        decimals: 18
     }
 };
