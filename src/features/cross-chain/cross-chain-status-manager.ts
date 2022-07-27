@@ -373,23 +373,27 @@ export class CrossChainStatusManager {
         srcTxReceipt: TransactionReceipt
     ): Promise<CrossChainTxStatus> {
         const params = { filter: srcTxReceipt.transactionHash, filterType: 1 };
-        const { send, claim } = await Injector.httpClient.get<DeBridgeApiResponse>(
-            'https://api.debridge.finance/api/Transactions/GetFullSubmissionInfo',
-            { params }
-        );
+        try {
+            const { send, claim } = await Injector.httpClient.get<DeBridgeApiResponse>(
+                'https://api.debridge.finance/api/Transactions/GetFullSubmissionInfo',
+                { params }
+            );
 
-        if (claim && claim?.transactionHash) {
-            return CrossChainTxStatus.SUCCESS;
+            if (claim && claim?.transactionHash) {
+                return CrossChainTxStatus.SUCCESS;
+            }
+
+            if (claim && !claim?.transactionHash) {
+                return CrossChainTxStatus.FAIL;
+            }
+
+            if (!claim && (!send.isExecuted || send.confirmationsCount < 12)) {
+                return CrossChainTxStatus.PENDING;
+            }
+
+            return CrossChainTxStatus.UNKNOWN;
+        } catch {
+            return CrossChainTxStatus.UNKNOWN;
         }
-
-        if (claim && !claim?.transactionHash) {
-            return CrossChainTxStatus.FAIL;
-        }
-
-        if (!claim && (!send.isExecuted || send.confirmationsCount < 12)) {
-            return CrossChainTxStatus.PENDING;
-        }
-
-        return CrossChainTxStatus.UNKNOWN;
     }
 }
