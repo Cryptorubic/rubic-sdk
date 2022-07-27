@@ -49,7 +49,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
                         gasData: null,
                         toTokenAmountMin: new BigNumber(0),
                         feeInfo: {
-                            fixedFee: { amount: 0, tokenSymbol: '' },
+                            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
                             platformFee: { percent: 0, tokenSymbol: '' },
                             cryptoFee: null
                         },
@@ -220,9 +220,9 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         }
         methodArguments.push(data);
 
-        const value = new BigNumber(this.feeInfo?.fixedFee?.amount || 0)
-            .plus(this.from.isNative ? this.from.stringWeiAmount : 0)
-            .toFixed(0);
+        const sourceValue = this.from.isNative ? this.from.stringWeiAmount : '0';
+        const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
+        const value = new BigNumber(sourceValue).plus(fixedFee).toFixed(0);
 
         return {
             contractAddress: fromContracts.rubicRouter,

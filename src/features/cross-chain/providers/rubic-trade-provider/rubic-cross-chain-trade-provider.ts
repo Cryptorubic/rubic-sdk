@@ -119,10 +119,10 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                 gasData,
                 feeInPercents,
                 feeInfo: {
-                    fixedFee: { amount: 0, tokenSymbol: '' },
+                    fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
                     platformFee: { percent: feeInPercents, tokenSymbol: transitFeeToken.symbol },
                     cryptoFee: {
-                        amount: cryptoFeeToken.tokenAmount.toNumber(),
+                        amount: cryptoFeeToken.tokenAmount,
                         tokenSymbol: cryptoFeeToken.symbol
                     }
                 }

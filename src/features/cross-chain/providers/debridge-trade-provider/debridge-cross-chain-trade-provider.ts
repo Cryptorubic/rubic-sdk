@@ -18,6 +18,7 @@ import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/d
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
+import BigNumber from 'bignumber.js';
 
 export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -126,7 +127,11 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                         feeInfo: {
                             ...feeInfo,
                             cryptoFee: {
-                                amount: Number(estimation.executionFee.actualAmount),
+                                amount: Web3Pure.fromWei(
+                                    new BigNumber(tx.value).minus(
+                                        from.isNative ? from.stringWeiAmount : 0
+                                    )
+                                ),
                                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
                             }
                         },
@@ -168,11 +173,13 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     ): Promise<FeeInfo> {
         return {
             fixedFee: {
-                amount: await this.getFixedFee(
-                    fromBlockchain,
-                    providerAddress,
-                    DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-                    commonCrossChainAbi
+                amount: Web3Pure.fromWei(
+                    await this.getFixedFee(
+                        fromBlockchain,
+                        providerAddress,
+                        DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+                        commonCrossChainAbi
+                    )
                 ),
                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
             },

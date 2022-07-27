@@ -18,6 +18,17 @@ import { SymbiosisSwapStatus } from './providers/symbiosis-trade-provider/models
 import { CrossChainTradeData } from './models/cross-chain-trade-data';
 import { RubicCrossChainSupportedBlockchain } from './providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
 
+interface DeBridgeApiResponse {
+    claim: {
+        transactionHash?: string;
+    } | null;
+    send: {
+        isExecuted: boolean;
+        confirmationsCount: number;
+        transactionHash: string;
+    };
+}
+
 interface SymbiosisApiResponse {
     status: {
         code: string;
@@ -353,25 +364,31 @@ export class CrossChainStatusManager {
 
     /**
      * Get DeBridge trade dst transaction status.
-     * @param data Trade data.
+     * @param _data Trade data.
      * @param srcTxReceipt Source transaction receipt.
      * @returns Cross-chain transaction status.
      */
     private async getDebridgeDstSwapStatus(
-        data: CrossChainTradeData,
+        _data: CrossChainTradeData,
         srcTxReceipt: TransactionReceipt
     ): Promise<CrossChainTxStatus> {
-        console.log(data, srcTxReceipt);
-        // const params = {
-        //     bridge: data.lifiBridgeType,
-        //     fromChain: BlockchainsInfo.getBlockchainByName(data.fromBlockchain).id,
-        //     toChain: BlockchainsInfo.getBlockchainByName(data.toBlockchain).id,
-        //     txHash: srcTxReceipt.transactionHash
-        // };
-        // const { status } = await Injector.httpClient.get<{ status: LifiSwapStatus }>(
-        //     'https://li.quest/v1/status',
-        //     { params }
-        // );
+        const params = { filter: srcTxReceipt.transactionHash, filterType: 1 };
+        const { send, claim } = await Injector.httpClient.get<DeBridgeApiResponse>(
+            'https://api.debridge.finance/api/Transactions/GetFullSubmissionInfo',
+            { params }
+        );
+
+        if (claim && claim?.transactionHash) {
+            return CrossChainTxStatus.SUCCESS;
+        }
+
+        if (claim && !claim?.transactionHash) {
+            return CrossChainTxStatus.FAIL;
+        }
+
+        if (!claim && (!send.isExecuted || send.confirmationsCount < 12)) {
+            return CrossChainTxStatus.PENDING;
+        }
 
         return CrossChainTxStatus.UNKNOWN;
     }

@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js';
+
 /**
  * Transaction fee information.
  */
@@ -6,7 +8,7 @@ export interface FeeInfo {
      * Fixed crypto fee attached as additional value.
      */
     readonly fixedFee: {
-        readonly amount: number;
+        readonly amount: BigNumber;
         readonly tokenSymbol: string;
     };
     /**
@@ -20,7 +22,7 @@ export interface FeeInfo {
      * Crypto fee to pay swap in target network.
      */
     readonly cryptoFee: {
-        readonly amount: number;
+        readonly amount: BigNumber;
         readonly tokenSymbol: string;
     } | null;
 }
