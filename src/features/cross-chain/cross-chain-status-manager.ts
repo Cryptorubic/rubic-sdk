@@ -26,7 +26,7 @@ interface DeBridgeApiResponse {
         isExecuted: boolean;
         confirmationsCount: number;
         transactionHash: string;
-    };
+    } | null;
 }
 
 interface SymbiosisApiResponse {
@@ -374,10 +374,14 @@ export class CrossChainStatusManager {
     ): Promise<CrossChainTxStatus> {
         const params = { filter: srcTxReceipt.transactionHash, filterType: 1 };
         try {
-            const { send, claim } = await Injector.httpClient.get<DeBridgeApiResponse>(
+            const { send, claim } = await this.httpClient.get<DeBridgeApiResponse>(
                 'https://api.debridge.finance/api/Transactions/GetFullSubmissionInfo',
                 { params }
             );
+
+            if (!send) {
+                return CrossChainTxStatus.PENDING;
+            }
 
             if (claim && claim?.transactionHash) {
                 return CrossChainTxStatus.SUCCESS;

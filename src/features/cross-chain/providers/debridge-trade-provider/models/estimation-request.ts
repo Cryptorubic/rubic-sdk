@@ -42,9 +42,18 @@ export interface EstimationRequest {
      */
     readonly executionFeeTokenAddress?: string;
 
+    /**
+     * The estimated operator smart contract gas consumption.
+     */
     readonly dstBaseGasAmount?: number;
 
+    /**
+     * Affiliate fee percent.
+     */
     readonly affiliateFeePercent?: number;
 
+    /**
+     * Affiliate fee recipient address.
+     */
     readonly affiliateFeeRecipient?: string;
 }

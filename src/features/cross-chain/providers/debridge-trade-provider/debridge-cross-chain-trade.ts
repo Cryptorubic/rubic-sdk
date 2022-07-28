@@ -16,6 +16,7 @@ import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/d
 import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/debridge-cross-chain-supported-blockchain';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 
 /**
  * Calculated DeBridge cross chain trade.
@@ -184,7 +185,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    public async getContractParams() {
+    public async getContractParams(): Promise<ContractParams> {
         const { data } = await this.transactionRequest;
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
         const fromContracts =
