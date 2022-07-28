@@ -100,7 +100,10 @@ export abstract class CrossChainTrade {
      */
     public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
 
-    protected abstract getContractParams(fromAddress?: string): Promise<ContractParams>;
+    protected abstract getContractParams(options: {
+        fromAddress?: string;
+        receiverAddress?: string;
+    }): Promise<ContractParams>;
 
     /**
      * Returns true, if allowance is not enough.
@@ -178,7 +181,7 @@ export abstract class CrossChainTrade {
         const { gasLimit, gasPrice } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams(options.fromAddress);
+            await this.getContractParams({ fromAddress: options?.fromAddress });
 
         return Web3Pure.encodeMethodCall(
             contractAddress,

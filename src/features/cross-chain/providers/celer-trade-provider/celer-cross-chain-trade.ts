@@ -67,7 +67,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
                     },
                     EMPTY_ADDRESS,
                     maxSlippage
-                ).getContractParams();
+                ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasPrice] = await Promise.all([
@@ -184,7 +184,9 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         const { onConfirm, gasLimit, gasPrice } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams();
+            await this.getContractParams({
+                receiverAddress: options?.receiverAddress || this.walletAddress
+            });
 
         let transactionHash: string;
         try {
@@ -228,7 +230,12 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         throw err;
     }
 
-    protected async getContractParams(fromAddress?: string): Promise<ContractParams> {
+    protected async getContractParams(
+        options: {
+            fromAddress?: string;
+            receiverAddress?: string;
+        } = {}
+    ): Promise<ContractParams> {
         const fromTrade = this.fromTrade as CelerCrossChainContractTrade;
         const toTrade = this.toTrade as CelerCrossChainContractTrade;
 
@@ -238,10 +245,11 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
 
         const methodArguments = await fromTrade.getMethodArguments(
             toTrade,
-            fromAddress || this.walletAddress,
+            options?.fromAddress || this.walletAddress,
             this.providerAddress,
             {
-                maxSlippage: this.maxSlippage
+                maxSlippage: this.maxSlippage,
+                receiverAddress: options?.receiverAddress || this.walletAddress
             }
         );
 
@@ -268,20 +276,28 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         const cryptoFee = await contract.destinationCryptoFee(this.toTrade.blockchain);
         const feePerByte = await contract.celerFeePerByte(message, messageBusAddress);
         const feeBase = await contract.celerFeeBase(messageBusAddress);
+
+        const fixedFee = Web3Pure.toWei(this.feeInfo.fixedFee.amount);
+
         if (isNative) {
-            return amountIn.plus(feePerByte).plus(cryptoFee).plus(feeBase).toNumber();
+            return amountIn
+                .plus(feePerByte)
+                .plus(cryptoFee)
+                .plus(feeBase)
+                .plus(fixedFee)
+                .toNumber();
         }
 
         if (isBridge) {
             const adjustedFeeBase = Number(feeBase) * celerSourceTransitTokenFeeMultiplier;
-            return Number(feePerByte) + Number(cryptoFee) + adjustedFeeBase;
+            return Number(feePerByte) + Number(cryptoFee) + Number(fixedFee) + adjustedFeeBase;
         }
 
         if (isToTransit) {
             const adjustedFeeBase = Number(feePerByte) * celerTargetTransitTokenFeeMultiplier;
-            return Number(feeBase) + Number(cryptoFee) + adjustedFeeBase;
+            return Number(feeBase) + Number(cryptoFee) + Number(fixedFee) + adjustedFeeBase;
         }
 
-        return Number(feePerByte) + Number(cryptoFee) + Number(feeBase);
+        return Number(feePerByte) + Number(cryptoFee) + Number(feeBase) + Number(fixedFee);
     }
 }

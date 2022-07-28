@@ -43,7 +43,7 @@ export abstract class CrossChainTradeProvider {
      * @internal
      */
     protected async getFixedFee(
-        fromBlockchain: LifiCrossChainSupportedBlockchain,
+        fromBlockchain: BlockchainName,
         providerAddress: string,
         contractAddress: string,
         contractAbi: AbiItem[]

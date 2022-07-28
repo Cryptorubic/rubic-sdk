@@ -8,4 +8,5 @@ export interface DestinationCelerSwapInfo {
     pathV3: string | string[];
     deadline: number;
     amountOutMinimum: string;
+    receiverEOA: string;
 }

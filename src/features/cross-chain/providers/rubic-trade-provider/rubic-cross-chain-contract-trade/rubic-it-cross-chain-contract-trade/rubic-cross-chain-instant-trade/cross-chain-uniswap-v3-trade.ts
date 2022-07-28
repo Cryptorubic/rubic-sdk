@@ -63,7 +63,10 @@ export class CrossChainUniswapV3Trade implements CrossChainInstantTrade {
         return { dex, path, deadline: this.defaultDeadline, amountOutMinimum };
     }
 
-    public getCelerDestinationObject(integratorAddress: string): DestinationCelerSwapInfo {
+    public getCelerDestinationObject(
+        integratorAddress: string,
+        receiverAddress: string
+    ): DestinationCelerSwapInfo {
         const dex = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS;
         const pathV3 = this.getFirstPath();
         const deadline = this.defaultDeadline;
@@ -76,7 +79,8 @@ export class CrossChainUniswapV3Trade implements CrossChainInstantTrade {
             path: [EMPTY_ADDRESS],
             pathV3,
             deadline,
-            amountOutMinimum
+            amountOutMinimum,
+            receiverEOA: receiverAddress
         };
     }
 }

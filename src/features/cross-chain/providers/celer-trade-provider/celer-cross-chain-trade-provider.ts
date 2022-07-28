@@ -23,6 +23,9 @@ import { CelerRubicCrossChainTradeProvider } from '@rsdk-features/cross-chain/pr
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { LowToSlippageError } from '@rsdk-common/errors/cross-chain/low-to-slippage.error';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { celerCrossChainContractAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
+import { celerTransitTokens } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-transit-tokens';
 
 export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -164,14 +167,13 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                 transitFeeToken,
                 gasData,
                 feeInPercents,
-                feeInfo: {
-                    fixedFee: { amount: 0, tokenSymbol: '' },
-                    platformFee: { percent: feeInPercents, tokenSymbol: transitFeeToken.symbol },
-                    cryptoFee: {
-                        amount: cryptoFeeToken.tokenAmount.toNumber(),
-                        tokenSymbol: cryptoFeeToken.symbol
-                    }
-                }
+                feeInfo: await this.getCelerFeeInfo(
+                    feeInPercents,
+                    transitFeeToken,
+                    cryptoFeeToken,
+                    from,
+                    providerAddress
+                )
             },
             providerAddress,
             Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
@@ -365,5 +367,33 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             slippageTolerance,
             bestTrade.instantTrade
         );
+    }
+
+    private async getCelerFeeInfo(
+        feeInPercents: number,
+        transitFeeToken: PriceTokenAmount,
+        cryptoFeeToken: PriceTokenAmount,
+        from: PriceTokenAmount,
+        providerAddress: string
+    ): Promise<FeeInfo> {
+        const fromBlockchain = from.blockchain as CelerCrossChainSupportedBlockchain;
+        const contractAddress = this.contracts(fromBlockchain).address;
+        const fixedFee = {
+            amount: await this.getFixedFee(
+                fromBlockchain,
+                providerAddress,
+                contractAddress,
+                celerCrossChainContractAbi
+            ),
+            tokenSymbol: celerTransitTokens[fromBlockchain].symbol
+        };
+        return {
+            fixedFee,
+            platformFee: { percent: feeInPercents, tokenSymbol: transitFeeToken.symbol },
+            cryptoFee: {
+                amount: cryptoFeeToken.tokenAmount.toNumber(),
+                tokenSymbol: cryptoFeeToken.symbol
+            }
+        };
     }
 }

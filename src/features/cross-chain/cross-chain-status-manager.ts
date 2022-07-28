@@ -253,7 +253,7 @@ export class CrossChainStatusManager {
                             data.toBlockchain as CelerCrossChainSupportedBlockchain
                         ],
                         celerCrossChainContractAbi,
-                        'txStatusById',
+                        'processedTransactions',
                         {
                             methodArguments: [
                                 requestLog?.params?.find(param => param.name === 'id')?.value
