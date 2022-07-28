@@ -391,13 +391,9 @@ export class CrossChainStatusManager {
                 return CrossChainTxStatus.FAIL;
             }
 
-            if (!claim && (!send.isExecuted || send.confirmationsCount < 12)) {
-                return CrossChainTxStatus.PENDING;
-            }
-
-            return CrossChainTxStatus.UNKNOWN;
+            return CrossChainTxStatus.PENDING;
         } catch {
-            return CrossChainTxStatus.UNKNOWN;
+            return CrossChainTxStatus.PENDING;
         }
     }
 }
