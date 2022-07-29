@@ -194,7 +194,7 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
 
     protected async getFeeInfo(): Promise<FeeInfo> {
         return {
-            fixedFee: { amount: 0, tokenSymbol: '' },
+            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
             platformFee: { percent: 0, tokenSymbol: '' },
             cryptoFee: null
         };
