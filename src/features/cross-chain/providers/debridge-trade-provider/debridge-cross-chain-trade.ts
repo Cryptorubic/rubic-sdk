@@ -25,6 +25,8 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
     /** @internal */
     public readonly transitAmount: BigNumber;
 
+    private readonly cryptoFeeToken: PriceTokenAmount;
+
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount,
@@ -52,7 +54,8 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
                             platformFee: { percent: 0, tokenSymbol: '' },
                             cryptoFee: null
                         },
-                        transitAmount: new BigNumber(NaN)
+                        transitAmount: new BigNumber(NaN),
+                        cryptoFeeToken: from
                     },
                     EMPTY_ADDRESS
                 ).getContractParams();
@@ -122,6 +125,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
             slippage: number;
             feeInfo: FeeInfo;
             transitAmount: BigNumber;
+            cryptoFeeToken: PriceTokenAmount;
         },
         providerAddress: string
     ) {
@@ -136,6 +140,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
         this.feeInfo = crossChainTrade.feeInfo;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
 
         this.transitAmount = crossChainTrade.transitAmount;
 
@@ -225,8 +230,9 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
     }
 
     public getTradeAmountRatio(): BigNumber {
-        return this.transitAmount
-            .plus(this.feeInfo.cryptoFee?.amount || 0)
-            .dividedBy(this.to.tokenAmount);
+        const usdCryptoFee = this.cryptoFeeToken.price.multipliedBy(
+            this.cryptoFeeToken.tokenAmount
+        );
+        return this.transitAmount.plus(usdCryptoFee).dividedBy(this.to.tokenAmount);
     }
 }

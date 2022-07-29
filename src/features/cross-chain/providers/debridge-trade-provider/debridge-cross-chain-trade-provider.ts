@@ -114,6 +114,16 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
 
             const transitToken = estimation.dstChainTokenIn;
 
+            const cryptoFeeAmount = new BigNumber(tx.value).minus(
+                from.isNative ? from.stringWeiAmount : 0
+            );
+
+            const nativeToken = BlockchainsInfo.getBlockchainByName(fromBlockchain).nativeCoin;
+            const cryptoFeeToken = await PriceTokenAmount.createFromToken({
+                ...nativeToken,
+                weiAmount: cryptoFeeAmount
+            });
+
             return {
                 trade: new DebridgeCrossChainTrade(
                     {
@@ -127,18 +137,12 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                         feeInfo: {
                             ...feeInfo,
                             cryptoFee: {
-                                amount: Web3Pure.fromWei(
-                                    new BigNumber(tx.value).minus(
-                                        from.isNative ? from.stringWeiAmount : 0
-                                    )
-                                ),
+                                amount: Web3Pure.fromWei(cryptoFeeAmount),
                                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
                             }
                         },
-                        transitAmount: Web3Pure.fromWei(
-                            transitToken.minAmount,
-                            transitToken.decimals
-                        )
+                        transitAmount: Web3Pure.fromWei(transitToken.amount, transitToken.decimals),
+                        cryptoFeeToken
                     },
                     options.providerAddress
                 )
