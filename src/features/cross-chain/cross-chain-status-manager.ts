@@ -145,7 +145,7 @@ export class CrossChainStatusManager {
             return CrossChainTxStatus.PENDING;
         }
 
-        return await this.getDstTxStatusFnMap[provider](tradeData, srcTxReceipt);
+        return await this.getDstTxStatusFnMap[provider].call(this, tradeData, srcTxReceipt);
     }
 
     /**
