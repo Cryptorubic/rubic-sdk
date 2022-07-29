@@ -225,6 +225,8 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
     }
 
     public getTradeAmountRatio(): BigNumber {
-        return this.transitAmount.dividedBy(this.to.tokenAmount);
+        return this.transitAmount
+            .plus(this.feeInfo.cryptoFee?.amount || 0)
+            .dividedBy(this.to.tokenAmount);
     }
 }
