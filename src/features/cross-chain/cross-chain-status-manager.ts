@@ -18,6 +18,17 @@ import { SymbiosisSwapStatus } from './providers/symbiosis-trade-provider/models
 import { CrossChainTradeData } from './models/cross-chain-trade-data';
 import { RubicCrossChainSupportedBlockchain } from './providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
 
+interface DeBridgeApiResponse {
+    claim: {
+        transactionHash?: string;
+    } | null;
+    send: {
+        isExecuted: boolean;
+        confirmationsCount: number;
+        transactionHash: string;
+    } | null;
+}
+
 interface SymbiosisApiResponse {
     status: {
         code: string;
@@ -38,11 +49,14 @@ type getDstTxStatusFn = (
  * Contains methods for getting cross-chain trade statuses.
  */
 export class CrossChainStatusManager {
+    private readonly httpClient = Injector.httpClient;
+
     private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, getDstTxStatusFn> = {
         [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RUBIC]: this.getRubicDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus
     };
 
     /**
@@ -131,7 +145,7 @@ export class CrossChainStatusManager {
             return CrossChainTxStatus.PENDING;
         }
 
-        return await this.getDstTxStatusFnMap[provider](tradeData, srcTxReceipt);
+        return await this.getDstTxStatusFnMap[provider].call(this, tradeData, srcTxReceipt);
     }
 
     /**
@@ -346,5 +360,36 @@ export class CrossChainStatusManager {
         }
 
         return receipt;
+    }
+
+    /**
+     * Get DeBridge trade dst transaction status.
+     * @param _data Trade data.
+     * @param srcTxReceipt Source transaction receipt.
+     * @returns Cross-chain transaction status.
+     */
+    private async getDebridgeDstSwapStatus(
+        _data: CrossChainTradeData,
+        srcTxReceipt: TransactionReceipt
+    ): Promise<CrossChainTxStatus> {
+        try {
+            const params = { filter: srcTxReceipt.transactionHash, filterType: 1 };
+            const { send = null, claim = null } = await this.httpClient.get<DeBridgeApiResponse>(
+                'https://api.debridge.finance/api/Transactions/GetFullSubmissionInfo',
+                { params }
+            );
+
+            if (!send || !claim) {
+                return CrossChainTxStatus.PENDING;
+            }
+
+            if (claim?.transactionHash) {
+                return CrossChainTxStatus.SUCCESS;
+            }
+
+            return CrossChainTxStatus.FAIL;
+        } catch {
+            return CrossChainTxStatus.PENDING;
+        }
     }
 }

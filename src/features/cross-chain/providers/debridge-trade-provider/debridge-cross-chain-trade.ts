@@ -1,39 +1,39 @@
-import BigNumber from 'bignumber.js';
-import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import {
     CROSS_CHAIN_TRADE_TYPE,
     SwapTransactionOptions,
     TRADE_TYPE,
     TradeType
 } from 'src/features';
-import { Route } from '@lifi/sdk';
-import { Injector } from 'src/core/sdk/injector';
-import { FailedToCheckForTransactionReceiptError } from 'src/common';
-import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
-import { GasData } from 'src/features/cross-chain/models/gas-data';
-import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
-import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
-import { LifiSwapRequestError } from 'src/common/errors/swap/lifi-swap-request.error';
-import { ContractParams } from 'src/features/cross-chain/models/contract-params';
-import { LiFiTradeSubtype } from 'src/features/cross-chain/providers/lifi-trade-provider/models/lifi-providers';
+import { TransactionRequest } from '@ethersproject/providers';
+import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { FailedToCheckForTransactionReceiptError } from 'src/common';
+import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
+import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
+import BigNumber from 'bignumber.js';
+import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-address';
+import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/debridge-cross-chain-supported-blockchain';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
-import { FeeInfo } from '../common/models/fee';
+import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 
 /**
- * Calculated Celer cross chain trade.
+ * Calculated DeBridge cross chain trade.
  */
-export class LifiCrossChainTrade extends CrossChainTrade {
-    public readonly feeInfo: FeeInfo;
+export class DebridgeCrossChainTrade extends CrossChainTrade {
+    /** @internal */
+    public readonly transitAmount: BigNumber;
+
+    private readonly cryptoFeeToken: PriceTokenAmount;
 
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount,
         to: PriceTokenAmount,
-        route: Route
+        transactionRequest: TransactionRequest
     ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
+        const fromBlockchain = from.blockchain as DeBridgeCrossChainSupportedBlockchain;
         const walletAddress = Injector.web3Private.address;
         if (!walletAddress) {
             return null;
@@ -41,23 +41,21 @@ export class LifiCrossChainTrade extends CrossChainTrade {
 
         try {
             const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                await new LifiCrossChainTrade(
+                await new DebridgeCrossChainTrade(
                     {
                         from,
                         to,
-                        route,
+                        transactionRequest,
                         gasData: null,
-                        toTokenAmountMin: new BigNumber(0),
+                        priceImpact: 0,
+                        slippage: 0,
                         feeInfo: {
                             fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
                             platformFee: { percent: 0, tokenSymbol: '' },
                             cryptoFee: null
                         },
-                        priceImpact: 0,
-                        itType: {
-                            from: TRADE_TYPE.ONE_INCH,
-                            to: TRADE_TYPE.ONE_INCH
-                        }
+                        transitAmount: new BigNumber(NaN),
+                        cryptoFeeToken: from
                     },
                     EMPTY_ADDRESS
                 ).getContractParams();
@@ -89,9 +87,9 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.DEBRIDGE;
 
-    private readonly httpClient = Injector.httpClient;
+    public readonly itType: { from: TradeType; to: TradeType };
 
     public readonly from: PriceTokenAmount;
 
@@ -99,33 +97,35 @@ export class LifiCrossChainTrade extends CrossChainTrade {
 
     public readonly toTokenAmountMin: BigNumber;
 
+    public readonly priceImpact: number;
+
     public readonly gasData: GasData | null;
+
+    private readonly transactionRequest: TransactionRequest;
 
     protected readonly fromWeb3Public: Web3Public;
 
-    private readonly route: Route;
-
-    public readonly itType: { from: TradeType | undefined; to: TradeType | undefined };
-
-    public readonly priceImpact: number;
-
-    public get fromContractAddress(): string {
-        return lifiContractAddress[this.from.blockchain as LifiCrossChainSupportedBlockchain]
-            .rubicRouter;
+    private get fromBlockchain(): DeBridgeCrossChainSupportedBlockchain {
+        return this.from.blockchain as DeBridgeCrossChainSupportedBlockchain;
     }
 
-    public readonly subType: LiFiTradeSubtype;
+    protected get fromContractAddress(): string {
+        return DE_BRIDGE_CONTRACT_ADDRESS[this.fromBlockchain].rubicRouter;
+    }
+
+    public readonly feeInfo: FeeInfo;
 
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount;
             to: PriceTokenAmount;
-            route: Route;
+            transactionRequest: TransactionRequest;
             gasData: GasData | null;
-            toTokenAmountMin: BigNumber;
-            feeInfo: FeeInfo;
             priceImpact: number;
-            itType: { from: TradeType | undefined; to: TradeType | undefined };
+            slippage: number;
+            feeInfo: FeeInfo;
+            transitAmount: BigNumber;
+            cryptoFeeToken: PriceTokenAmount;
         },
         providerAddress: string
     ) {
@@ -133,14 +133,18 @@ export class LifiCrossChainTrade extends CrossChainTrade {
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
-        this.route = crossChainTrade.route;
+        this.transactionRequest = crossChainTrade.transactionRequest;
         this.gasData = crossChainTrade.gasData;
-        this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
-        this.subType = this.route?.steps?.[0]?.tool as LiFiTradeSubtype;
-        this.feeInfo = crossChainTrade.feeInfo;
-
         this.priceImpact = crossChainTrade.priceImpact;
-        this.itType = crossChainTrade.itType;
+
+        this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
+        this.feeInfo = crossChainTrade.feeInfo;
+        this.priceImpact = crossChainTrade.priceImpact;
+        this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
+
+        this.transitAmount = crossChainTrade.transitAmount;
+
+        this.itType = { from: TRADE_TYPE.ONE_INCH, to: TRADE_TYPE.ONE_INCH };
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
     }
@@ -149,7 +153,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         this.checkWalletConnected();
         this.checkBlockchainCorrect();
 
-        await Promise.all([this.checkUserBalance()]);
+        await this.checkUserBalance();
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -157,30 +161,24 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         await this.checkAllowanceAndApprove(options);
 
         const { onConfirm, gasLimit, gasPrice } = options;
-
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getContractParams();
 
         let transactionHash: string;
-        try {
-            const onTransactionHash = (hash: string) => {
-                if (onConfirm) {
-                    onConfirm(hash);
-                }
-                transactionHash = hash;
-            };
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
 
+        try {
             await Injector.web3Private.tryExecuteContractMethod(
                 contractAddress,
                 contractAbi,
                 methodName,
                 methodArguments,
-                {
-                    gas: gasLimit,
-                    gasPrice,
-                    value,
-                    onTransactionHash
-                }
+                { value, onTransactionHash, gas: gasLimit, gasPrice }
             );
 
             return transactionHash!;
@@ -188,20 +186,17 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             if (err instanceof FailedToCheckForTransactionReceiptError) {
                 return transactionHash!;
             }
-
-            if (err.message.includes('Request failed with status code 500')) {
-                throw new LifiSwapRequestError();
-            }
-
             throw err;
         }
     }
 
     public async getContractParams(): Promise<ContractParams> {
-        const data = await this.getSwapData();
+        const { data } = await this.transactionRequest;
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
         const fromContracts =
-            lifiContractAddress[this.from.blockchain as LifiCrossChainSupportedBlockchain];
+            DE_BRIDGE_CONTRACT_ADDRESS[
+                this.from.blockchain as DeBridgeCrossChainSupportedBlockchain
+            ];
 
         const swapArguments = [
             this.from.address,
@@ -221,8 +216,9 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         methodArguments.push(data);
 
         const sourceValue = this.from.isNative ? this.from.stringWeiAmount : '0';
+        const cryptoFee = Web3Pure.toWei(this.feeInfo?.cryptoFee?.amount || 0);
         const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
-        const value = new BigNumber(sourceValue).plus(fixedFee).toFixed(0);
+        const value = new BigNumber(sourceValue).plus(cryptoFee).plus(fixedFee).toFixed(0);
 
         return {
             contractAddress: fromContracts.rubicRouter,
@@ -233,41 +229,10 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         };
     }
 
-    private async getSwapData(): Promise<string> {
-        const firstStep = this.route.steps[0]!;
-        const step = {
-            ...firstStep,
-            action: {
-                ...firstStep.action,
-                fromAddress: this.walletAddress,
-                toAddress: this.walletAddress
-            },
-            execution: {
-                status: 'NOT_STARTED',
-                process: [
-                    {
-                        message: 'Preparing transaction.',
-                        startedAt: Date.now(),
-                        status: 'STARTED',
-                        type: 'CROSS_CHAIN'
-                    }
-                ]
-            }
-        };
-
-        const swapResponse: {
-            transactionRequest: {
-                data: string;
-            };
-        } = await this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
-            ...step
-        });
-
-        return swapResponse.transactionRequest.data;
-    }
-
     public getTradeAmountRatio(): BigNumber {
-        const fromCost = this.from.price.multipliedBy(this.from.tokenAmount);
-        return fromCost.dividedBy(this.to.tokenAmount);
+        const usdCryptoFee = this.cryptoFeeToken.price.multipliedBy(
+            this.cryptoFeeToken.tokenAmount
+        );
+        return this.transitAmount.plus(usdCryptoFee).dividedBy(this.to.tokenAmount);
     }
 }

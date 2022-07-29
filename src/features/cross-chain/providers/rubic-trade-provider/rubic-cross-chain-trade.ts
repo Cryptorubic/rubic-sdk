@@ -54,7 +54,7 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
                         gasData: null,
                         feeInPercents: 0,
                         feeInfo: {
-                            fixedFee: { amount: 0, tokenSymbol: '' },
+                            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
                             platformFee: { percent: 0, tokenSymbol: '' },
                             cryptoFee: null
                         }
