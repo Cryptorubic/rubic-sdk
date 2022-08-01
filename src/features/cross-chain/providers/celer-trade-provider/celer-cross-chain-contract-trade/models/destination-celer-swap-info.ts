@@ -2,11 +2,12 @@ import { SwapVersion } from '@rsdk-features/cross-chain/providers/common/celer-r
 
 export interface DestinationCelerSwapInfo {
     dex: string;
+    nativeOut: boolean;
+    receiverEOA: string;
     integrator: string;
     version: SwapVersion;
     path: string | string[];
     pathV3: string | string[];
     deadline: number;
     amountOutMinimum: string;
-    receiverEOA: string;
 }

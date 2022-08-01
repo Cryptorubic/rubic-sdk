@@ -74,13 +74,14 @@ export class CrossChainUniswapV3Trade implements CrossChainInstantTrade {
 
         return {
             dex,
+            nativeOut: this.instantTrade.to.isNative,
+            receiverEOA: receiverAddress,
             integrator: integratorAddress,
             version: SwapVersion.V3,
             path: [EMPTY_ADDRESS],
             pathV3,
             deadline,
-            amountOutMinimum,
-            receiverEOA: receiverAddress
+            amountOutMinimum
         };
     }
 }

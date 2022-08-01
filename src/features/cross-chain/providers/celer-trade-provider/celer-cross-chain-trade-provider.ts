@@ -391,7 +391,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             fixedFee,
             platformFee: { percent: feeInPercents, tokenSymbol: transitFeeToken.symbol },
             cryptoFee: {
-                amount: cryptoFeeToken.tokenAmount.toNumber(),
+                amount: cryptoFeeToken.tokenAmount,
                 tokenSymbol: cryptoFeeToken.symbol
             }
         };

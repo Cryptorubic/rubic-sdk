@@ -57,13 +57,14 @@ export class CelerDirectCrossChainContractTrade extends CelerCrossChainContractT
     public getCelerDestinationTrade(integratorAddress: string, receiverAddress: string): unknown[] {
         const trade: DestinationCelerSwapInfo = {
             dex: EMPTY_ADDRESS,
+            nativeOut: this.toToken.isNative,
+            receiverEOA: receiverAddress,
             integrator: integratorAddress,
             version: SwapVersion.BRIDGE,
             path: [this.toToken.address],
             pathV3: '0x',
             deadline: 0,
-            amountOutMinimum: '0',
-            receiverEOA: receiverAddress
+            amountOutMinimum: '0'
         };
         return Object.values(trade);
     }
