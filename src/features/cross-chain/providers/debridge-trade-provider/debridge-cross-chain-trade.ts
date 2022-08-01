@@ -5,7 +5,6 @@ import {
     TradeType
 } from 'src/features';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
-import { TransactionRequest } from '@ethersproject/providers';
 import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { FailedToCheckForTransactionReceiptError } from 'src/common';
@@ -17,6 +16,10 @@ import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
+import { TransactionRequest } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-request';
+import { BytesLike } from 'ethers';
+import { TransactionResponse } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
+import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade-provider';
 
 /**
  * Calculated DeBridge cross chain trade.
@@ -26,6 +29,8 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
     public readonly transitAmount: BigNumber;
 
     private readonly cryptoFeeToken: PriceTokenAmount;
+
+    private readonly transactionRequest: TransactionRequest;
 
     /** @internal */
     public static async getGasData(
@@ -100,8 +105,6 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
     public readonly priceImpact: number;
 
     public readonly gasData: GasData | null;
-
-    private readonly transactionRequest: TransactionRequest;
 
     protected readonly fromWeb3Public: Web3Public;
 
@@ -191,7 +194,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
     }
 
     public async getContractParams(): Promise<ContractParams> {
-        const { data } = await this.transactionRequest;
+        const data = await this.getTransactionRequest();
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
         const fromContracts =
             DE_BRIDGE_CONTRACT_ADDRESS[
@@ -234,5 +237,15 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
             this.cryptoFeeToken.tokenAmount
         );
         return this.transitAmount.plus(usdCryptoFee).dividedBy(this.to.tokenAmount);
+    }
+
+    private async getTransactionRequest(): Promise<BytesLike> {
+        const { tx } = await Injector.httpClient.get<TransactionResponse>(
+            DebridgeCrossChainTradeProvider.apiEndpoint,
+            {
+                params: this.transactionRequest as unknown as {}
+            }
+        );
+        return tx.data;
     }
 }
