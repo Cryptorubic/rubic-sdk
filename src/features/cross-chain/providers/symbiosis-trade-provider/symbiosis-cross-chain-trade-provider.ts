@@ -175,7 +175,10 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                         feeInfo: {
                             ...feeInfo,
                             cryptoFee: {
-                                amount: Number(transitTokenFee.toFixed()),
+                                amount: Web3Pure.fromWei(
+                                    transitTokenFee.toFixed(),
+                                    transitToken.decimals
+                                ),
                                 tokenSymbol: transitTokenFee.token.symbol || ''
                             }
                         },
@@ -275,11 +278,13 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     ): Promise<FeeInfo> {
         return {
             fixedFee: {
-                amount: await this.getFixedFee(
-                    fromBlockchain,
-                    providerAddress,
-                    SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-                    commonCrossChainAbi
+                amount: Web3Pure.fromWei(
+                    await this.getFixedFee(
+                        fromBlockchain,
+                        providerAddress,
+                        SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+                        commonCrossChainAbi
+                    )
                 ),
                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
             },
