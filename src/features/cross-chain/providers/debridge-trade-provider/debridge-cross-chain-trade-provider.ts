@@ -3,7 +3,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
 import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
 
-import { CrossChainIsUnavailableError, RubicSdkError } from 'src/common';
+import { CrossChainIsUnavailableError } from 'src/common';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
@@ -19,6 +19,7 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import BigNumber from 'bignumber.js';
+import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 
 export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -29,7 +30,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
         );
     }
 
-    private readonly apiEndpoint = 'https://deswap.debridge.finance/v1.0/transaction';
+    public static readonly apiEndpoint = 'https://deswap.debridge.finance/v1.0/transaction';
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.DEBRIDGE;
 
@@ -63,11 +64,6 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
 
         try {
             const fromAddress = options.fromAddress || this.walletAddress;
-            if (!fromAddress) {
-                throw new RubicSdkError(
-                    'From address or wallet address must not be empty in Debridge'
-                );
-            }
 
             await this.checkContractState(fromBlockchain);
 
@@ -89,11 +85,11 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                 slippage: slippageTolerance,
                 dstChainId: BlockchainsInfo.getBlockchainByName(toBlockchain).id,
                 dstChainTokenOut: toToken.address,
-                dstChainTokenOutRecipient: fromAddress
+                dstChainTokenOutRecipient: EMPTY_ADDRESS
             };
 
             const { tx, estimation } = await Injector.httpClient.get<TransactionResponse>(
-                this.apiEndpoint,
+                DebridgeCrossChainTradeProvider.apiEndpoint,
                 {
                     params: requestParams as unknown as {}
                 }
@@ -109,7 +105,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await DebridgeCrossChainTrade.getGasData(from, to, tx)
+                    ? await DebridgeCrossChainTrade.getGasData(from, to, requestParams)
                     : null;
 
             const transitToken = estimation.dstChainTokenIn;
@@ -129,7 +125,10 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                     {
                         from,
                         to,
-                        transactionRequest: tx,
+                        transactionRequest: {
+                            ...requestParams,
+                            dstChainTokenOutRecipient: fromAddress
+                        },
                         gasData,
                         // @TODO price impact
                         priceImpact: 0,
