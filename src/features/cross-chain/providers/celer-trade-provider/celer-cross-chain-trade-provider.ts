@@ -136,14 +136,22 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         );
 
         let cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
-        const nativeTokenPrice = (
-            await this.getBestItContractTrade(
-                fromBlockchain,
-                cryptoFeeToken,
-                fromTransitToken,
-                fromSlippageTolerance
-            )
-        ).toToken.tokenAmount;
+        let nativeTokenPrice = new BigNumber(0);
+
+        if (cryptoFeeToken.tokenAmount.gt(0)) {
+            nativeTokenPrice = (
+                await this.getBestItContractTrade(
+                    fromBlockchain,
+                    new PriceTokenAmount({
+                        ...cryptoFeeToken,
+                        tokenAmount: Web3Pure.fromWei('1'),
+                        price: new BigNumber(0)
+                    }),
+                    fromTransitToken,
+                    fromSlippageTolerance
+                )
+            ).toToken.tokenAmount;
+        }
         cryptoFeeToken = new PriceTokenAmount({
             ...cryptoFeeToken.asStructWithAmount,
             price: nativeTokenPrice.dividedBy(cryptoFeeToken.tokenAmount)
