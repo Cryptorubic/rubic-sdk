@@ -177,7 +177,7 @@ export class Web3Public {
 
     /**
      * Calculates the average price per unit of gas according to web3.
-     * @returns Average gas price in wei.
+     * @returns Average gas price in gWei.
      */
     public async getGasPrice(): Promise<string> {
         return this.web3.eth.getGasPrice();
