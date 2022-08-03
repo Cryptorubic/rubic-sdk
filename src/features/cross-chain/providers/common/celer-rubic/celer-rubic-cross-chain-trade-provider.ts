@@ -75,8 +75,10 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
             slippageTolerance,
             fromTrade.fromToken
         );
-        const minTransitTokenAmount = minAmount?.eq(0) ? new BigNumber(Infinity) : minAmount;
-        const maxTransitTokenAmount = maxAmount?.eq(0) ? new BigNumber(Infinity) : maxAmount;
+        const minTransitTokenAmount = minAmount?.eq(0) ? new BigNumber(0) : minAmount;
+        const maxTransitTokenAmount = maxAmount?.eq(0)
+            ? new BigNumber(Number.MAX_VALUE)
+            : maxAmount;
 
         const fromTransitTokenAmount = fromTrade.toToken.tokenAmount;
 

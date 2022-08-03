@@ -2,8 +2,9 @@
 import { TransactionReceipt } from 'web3-eth';
 import { BlockchainName, BlockchainsInfo } from 'src/core';
 import { Injector } from 'src/core/sdk/injector';
-import { CrossChainTradeType, CROSS_CHAIN_TRADE_TYPE } from './models/cross-chain-trade-type';
-import { decodeLogs } from './utils/decode-logs';
+import { celerCrossChainEventStatusesAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-event-statuses-abi';
+import { LogsDecoder } from 'src/features/cross-chain/utils/decode-logs';
+import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from './models/cross-chain-trade-type';
 import { celerCrossChainContractAbi } from './providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import { celerCrossChainContractsAddresses } from './providers/celer-trade-provider/constants/celer-cross-chain-contracts-addresses';
 import { CelerCrossChainSupportedBlockchain } from './providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
@@ -99,6 +100,10 @@ export class CrossChainStatusManager {
             data,
             provider
         );
+
+        if (dstTxStatus === CrossChainTxStatus.FAIL && srcTxStatus === CrossChainTxStatus.PENDING) {
+            crossChainStatus.srcTxStatus = CrossChainTxStatus.FAIL;
+        }
 
         crossChainStatus.dstTxStatus = dstTxStatus;
 
@@ -256,9 +261,22 @@ export class CrossChainStatusManager {
         srcTxReceipt: TransactionReceipt
     ): Promise<CrossChainTxStatus> {
         try {
-            const [requestLog] = decodeLogs(celerCrossChainContractAbi, srcTxReceipt).filter(
-                Boolean
-            ); // filter undecoded logs
+            // Filter undecoded logs.
+            const [requestLog] = LogsDecoder.decodeLogs(
+                celerCrossChainEventStatusesAbi,
+                srcTxReceipt
+            );
+            if (!requestLog) {
+                const eightHours = 60 * 60 * 1000 * 8;
+                if (!requestLog && Date.now() > data.txTimestamp + eightHours) {
+                    return CrossChainTxStatus.FAIL;
+                }
+                return CrossChainTxStatus.PENDING;
+            }
+            const eightHours = 60 * 60 * 1000 * 8;
+            if (!requestLog && Date.now() > data.txTimestamp + eightHours) {
+                return CrossChainTxStatus.FAIL;
+            }
             const dstTxStatus = Number(
                 await Injector.web3PublicService
                     .getWeb3Public(data.toBlockchain)
