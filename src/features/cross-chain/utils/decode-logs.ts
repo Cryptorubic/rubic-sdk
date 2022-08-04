@@ -149,15 +149,17 @@ export class LogsDecoder {
         const methodIds = LogsDecoder.constructMethodIds(abi);
         const logs = receipt.logs.filter(log => log.topics.length > 0);
 
-        return logs.map(logItem => {
-            const methodID = logItem?.topics?.[0]?.slice(2);
-            const method = methodIds[methodID as string];
+        return logs
+            .map(logItem => {
+                const methodID = logItem?.topics?.[0]?.slice(2);
+                const method = methodIds[methodID as string];
 
-            if (method) {
-                return LogsDecoder.decodeMethod(method, logItem);
-            }
+                if (method) {
+                    return LogsDecoder.decodeMethod(method, logItem);
+                }
 
-            return null;
-        });
+                return null;
+            })
+            .filter(Boolean);
     }
 }

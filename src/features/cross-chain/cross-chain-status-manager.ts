@@ -273,10 +273,6 @@ export class CrossChainStatusManager {
                 }
                 return CrossChainTxStatus.PENDING;
             }
-            const eightHours = 60 * 60 * 1000 * 8;
-            if (!requestLog && Date.now() > data.txTimestamp + eightHours) {
-                return CrossChainTxStatus.FAIL;
-            }
             const dstTxStatus = Number(
                 await Injector.web3PublicService
                     .getWeb3Public(data.toBlockchain)

@@ -4,60 +4,25 @@ export const celerCrossChainEventStatusesAbi: AbiItem[] = [
     {
         anonymous: false,
         inputs: [
-            { indexed: false, internalType: 'bytes32', name: 'id', type: 'bytes32' },
-            { indexed: false, internalType: 'uint64', name: 'dstChainId', type: 'uint64' },
-            { indexed: false, internalType: 'uint256', name: 'srcAmount', type: 'uint256' },
-            { indexed: false, internalType: 'address', name: 'srcToken', type: 'address' }
-        ],
-        name: 'BridgeRequestSent',
-        type: 'event'
-    },
-    {
-        anonymous: false,
-        inputs: [
-            { indexed: false, internalType: 'bytes32', name: 'id', type: 'bytes32' },
-            { indexed: false, internalType: 'uint256', name: 'dstAmount', type: 'uint256' },
+            { indexed: true, internalType: 'bytes32', name: 'id', type: 'bytes32' },
             {
+                components: [
+                    { internalType: 'address', name: 'srcInputToken', type: 'address' },
+                    { internalType: 'uint256', name: 'srcInputAmount', type: 'uint256' },
+                    { internalType: 'uint256', name: 'dstChainID', type: 'uint256' },
+                    { internalType: 'address', name: 'dstOutputToken', type: 'address' },
+                    { internalType: 'uint256', name: 'dstMinOutputAmount', type: 'uint256' },
+                    { internalType: 'address', name: 'recipient', type: 'address' },
+                    { internalType: 'address', name: 'integrator', type: 'address' },
+                    { internalType: 'address', name: 'router', type: 'address' }
+                ],
                 indexed: false,
-                internalType: 'enum SwapBase.SwapStatus',
-                name: 'status',
-                type: 'uint8'
+                internalType: 'struct BridgeBase.BaseCrossChainParams',
+                name: 'parameters',
+                type: 'tuple'
             }
         ],
-        name: 'SwapRequestDone',
-        type: 'event'
-    },
-    {
-        anonymous: false,
-        inputs: [
-            { indexed: false, internalType: 'bytes32', name: 'id', type: 'bytes32' },
-            { indexed: false, internalType: 'uint64', name: 'dstChainId', type: 'uint64' },
-            { indexed: false, internalType: 'uint256', name: 'srcAmount', type: 'uint256' },
-            { indexed: false, internalType: 'address', name: 'srcToken', type: 'address' }
-        ],
-        name: 'SwapRequestSentInch',
-        type: 'event'
-    },
-    {
-        anonymous: false,
-        inputs: [
-            { indexed: false, internalType: 'bytes32', name: 'id', type: 'bytes32' },
-            { indexed: false, internalType: 'uint64', name: 'dstChainId', type: 'uint64' },
-            { indexed: false, internalType: 'uint256', name: 'srcAmount', type: 'uint256' },
-            { indexed: false, internalType: 'address', name: 'srcToken', type: 'address' }
-        ],
-        name: 'SwapRequestSentV2',
-        type: 'event'
-    },
-    {
-        anonymous: false,
-        inputs: [
-            { indexed: false, internalType: 'bytes32', name: 'id', type: 'bytes32' },
-            { indexed: false, internalType: 'uint64', name: 'dstChainId', type: 'uint64' },
-            { indexed: false, internalType: 'uint256', name: 'srcAmount', type: 'uint256' },
-            { indexed: false, internalType: 'address', name: 'srcToken', type: 'address' }
-        ],
-        name: 'SwapRequestSentV3',
+        name: 'CrossChainRequestSent',
         type: 'event'
     }
 ];
