@@ -1,14 +1,15 @@
 import { PriceTokenAmount, Web3Public } from 'src/core';
 import { Cache, CrossChainIsUnavailableError, MaxGasPriceOverflowError } from 'src/common';
-import { CrossChainContractTrade } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
-import { Injector } from '@core/sdk/injector';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
-import { EncodeCrossChainTrade } from '@features/cross-chain/providers/common/encode-cross-chain-trade';
+import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
+import BigNumber from 'bignumber.js';
 
 /**
  * Contains common for Celer and Rubic trades methods and fields.
  */
-export abstract class CelerRubicCrossChainTrade extends EncodeCrossChainTrade {
+export abstract class CelerRubicCrossChainTrade extends CrossChainTrade {
     /**
      * Gets price impact in source and target blockchains, based on tokens usd prices.
      */
@@ -46,6 +47,8 @@ export abstract class CelerRubicCrossChainTrade extends EncodeCrossChainTrade {
      * Transit token in source blockchain, taken as fee.
      */
     public abstract readonly transitFeeToken: PriceTokenAmount;
+
+    public abstract readonly feeInPercents: number;
 
     protected abstract readonly toWeb3Public: Web3Public;
 
@@ -90,5 +93,13 @@ export abstract class CelerRubicCrossChainTrade extends EncodeCrossChainTrade {
             this.fromTrade.fromToken.tokenAmount,
             this.toTrade.contract.address
         );
+    }
+
+    public getTradeAmountRatio(): BigNumber {
+        const transitTokenAmount = this.fromTrade.toToken.tokenAmount;
+        const cryptoFeeCost = this.cryptoFeeToken.price.multipliedBy(
+            this.cryptoFeeToken.tokenAmount
+        );
+        return transitTokenAmount.plus(cryptoFeeCost).dividedBy(this.to.tokenAmount);
     }
 }

@@ -1,11 +1,15 @@
-import { OneinchEthereumProvider } from '@features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
-import { OneinchBscProvider } from '@features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
-import { OneinchPolygonProvider } from '@features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
-import { OneinchAvalancheProvider } from '@features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
+import { OneinchEthereumProvider } from '@rsdk-features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
+import { OneinchBscProvider } from '@rsdk-features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
+import { OneinchPolygonProvider } from '@rsdk-features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
+import { OneinchAvalancheProvider } from 'src/features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
+import { OneinchFantomProvider } from 'src/features/instant-trades/dexes/fantom/oneinch-fantom/oneinch-fantom-provider';
+import { OneinchArbitrumProvider } from 'src/features/instant-trades/dexes/arbitrum/oneinch-arbitrum/oneinch-arbitrum-provider';
 
 export const OneInchTradeProviders = [
     OneinchEthereumProvider,
     OneinchBscProvider,
     OneinchPolygonProvider,
-    OneinchAvalancheProvider
+    OneinchAvalancheProvider,
+    OneinchFantomProvider,
+    OneinchArbitrumProvider
 ] as const;

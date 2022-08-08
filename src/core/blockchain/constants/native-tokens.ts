@@ -1,6 +1,6 @@
-import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
-import { BLOCKCHAIN_NAME, BlockchainName } from '@core/blockchain/models/blockchain-name';
-import { TokenStruct } from '@core/blockchain/tokens/token';
+import { NATIVE_TOKEN_ADDRESS } from '@rsdk-core/blockchain/constants/native-token-address';
+import { BLOCKCHAIN_NAME, BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { TokenStruct } from '@rsdk-core/blockchain/tokens/token';
 
 export type NativeTokensList = Record<BlockchainName, Omit<TokenStruct, 'blockchain'>>;
 
@@ -64,5 +64,59 @@ export const nativeTokensList: NativeTokensList = {
         name: 'TLOS',
         symbol: 'TLOS',
         decimals: 24
+    },
+    [BLOCKCHAIN_NAME.SOLANA]: {
+        address: '@TODO SOLANA',
+        name: 'Solana',
+        symbol: 'SOL',
+        decimals: 24
+    },
+    [BLOCKCHAIN_NAME.NEAR]: {
+        address: '@TODO NEAR',
+        name: 'NEAR',
+        symbol: 'NEAR',
+        decimals: 24
+    },
+    [BLOCKCHAIN_NAME.OPTIMISM]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.CRONOS]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'CRO',
+        symbol: 'CRO',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.OKE_X_CHAIN]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'OKT',
+        symbol: 'OKT',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.GNOSIS]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'xDAI',
+        symbol: 'xDAI',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.FUSE]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'FUSE',
+        symbol: 'FUSE',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.MOONBEAM]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'GLMR',
+        symbol: 'GLMR',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.CELO]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'CELO',
+        symbol: 'CELO',
+        decimals: 18
     }
 };

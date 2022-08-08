@@ -1,16 +1,17 @@
-import { DefaultHttpClient } from '@common/http/default-http-client';
-import { HttpClient } from '@common/models/http-client';
-import { Web3Private } from '@core/blockchain/web3-private/web3-private';
-import { Web3PrivateFactory } from '@core/blockchain/web3-private/web3-private-factory';
-import { Web3PublicService } from '@core/blockchain/web3-public/web3-public-service';
-import { Injector } from '@core/sdk/injector';
-import { Configuration, RpcProvider } from '@core/sdk/models/configuration';
-import { CrossChainManager } from '@features/cross-chain/cross-chain-manager';
-import { InstantTradesManager } from '@features/instant-trades/instant-trades-manager';
-import { TokensManager } from '@features/tokens/tokens-manager';
-import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
+import { DefaultHttpClient } from '@rsdk-common/http/default-http-client';
+import { HttpClient } from '@rsdk-common/models/http-client';
+import { Web3Private } from '@rsdk-core/blockchain/web3-private/web3-private';
+import { Web3PrivateFactory } from '@rsdk-core/blockchain/web3-private/web3-private-factory';
+import { Web3PublicService } from '@rsdk-core/blockchain/web3-public/web3-public-service';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { Configuration, RpcProvider } from '@rsdk-core/sdk/models/configuration';
+import { CrossChainManager } from '@rsdk-features/cross-chain/cross-chain-manager';
+import { InstantTradesManager } from '@rsdk-features/instant-trades/instant-trades-manager';
+import { TokensManager } from '@rsdk-features/tokens/tokens-manager';
+import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { BlockchainName } from 'src/core';
-import { CrossChainSymbiosisManager } from '@features/cross-chain/cross-chain-symbiosis-manager';
+import { CrossChainSymbiosisManager } from '@rsdk-features/cross-chain/cross-chain-symbiosis-manager';
+import { CrossChainStatusManager } from '@rsdk-features/cross-chain/cross-chain-status-manager';
 
 /**
  * Base class to work with sdk.
@@ -30,6 +31,11 @@ export class SDK {
      * Cross-chain symbiosis manager object. Use it to get pending trades in symbiosis and revert them.
      */
     public readonly crossChainSymbiosisManager: CrossChainSymbiosisManager;
+
+    /**
+     * Cross-chain status manager object. Use it to get trade statuses on source and target network.
+     */
+    public readonly crossChainStatusManager: CrossChainStatusManager;
 
     /**
      * Tokens manager object. Use it to fetch and store tokens data.
@@ -101,6 +107,7 @@ export class SDK {
         this.instantTrades = new InstantTradesManager();
         this.crossChain = new CrossChainManager(providerAddress);
         this.crossChainSymbiosisManager = new CrossChainSymbiosisManager();
+        this.crossChainStatusManager = new CrossChainStatusManager();
     }
 
     /**

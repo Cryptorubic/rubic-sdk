@@ -1,7 +1,7 @@
-import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
-import { Blockchain } from '@core/blockchain/models/blockchain';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
-import { Token } from '@core/blockchain/tokens/token';
+import { NATIVE_TOKEN_ADDRESS } from '@rsdk-core/blockchain/constants/native-token-address';
+import { Blockchain } from '@rsdk-core/blockchain/models/blockchain';
+import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { Token } from '@rsdk-core/blockchain/tokens/token';
 
 export const blockchains: ReadonlyArray<Blockchain> = [
     {
@@ -111,6 +111,83 @@ export const blockchains: ReadonlyArray<Blockchain> = [
             address: NATIVE_TOKEN_ADDRESS,
             name: 'Telos EVM',
             symbol: 'TLOS',
+            decimals: 18
+        })
+    },
+    {
+        id: 10,
+        name: BLOCKCHAIN_NAME.OPTIMISM,
+        nativeCoin: new Token({
+            blockchain: BLOCKCHAIN_NAME.OPTIMISM,
+            address: NATIVE_TOKEN_ADDRESS,
+            name: 'ETH',
+            symbol: 'ETH',
+            decimals: 18
+        })
+    },
+    {
+        id: 25,
+        name: BLOCKCHAIN_NAME.CRONOS,
+        nativeCoin: new Token({
+            blockchain: BLOCKCHAIN_NAME.CRONOS,
+            address: NATIVE_TOKEN_ADDRESS,
+            name: 'CRO',
+            symbol: 'CRO',
+            decimals: 18
+        })
+    },
+    {
+        id: 66,
+        name: BLOCKCHAIN_NAME.OKE_X_CHAIN,
+        nativeCoin: new Token({
+            blockchain: BLOCKCHAIN_NAME.OKE_X_CHAIN,
+            address: NATIVE_TOKEN_ADDRESS,
+            name: 'OKT',
+            symbol: 'OKT',
+            decimals: 18
+        })
+    },
+    {
+        id: 100,
+        name: BLOCKCHAIN_NAME.GNOSIS,
+        nativeCoin: new Token({
+            blockchain: BLOCKCHAIN_NAME.GNOSIS,
+            address: NATIVE_TOKEN_ADDRESS,
+            name: 'xDAI',
+            symbol: 'xDAI',
+            decimals: 18
+        })
+    },
+    {
+        id: 122,
+        name: BLOCKCHAIN_NAME.FUSE,
+        nativeCoin: new Token({
+            blockchain: BLOCKCHAIN_NAME.FUSE,
+            address: NATIVE_TOKEN_ADDRESS,
+            name: 'FUSE',
+            symbol: 'FUSE',
+            decimals: 18
+        })
+    },
+    {
+        id: 1284,
+        name: BLOCKCHAIN_NAME.MOONBEAM,
+        nativeCoin: new Token({
+            blockchain: BLOCKCHAIN_NAME.MOONBEAM,
+            address: NATIVE_TOKEN_ADDRESS,
+            name: 'GLMR',
+            symbol: 'GLMR',
+            decimals: 18
+        })
+    },
+    {
+        id: 42220,
+        name: BLOCKCHAIN_NAME.CELO,
+        nativeCoin: new Token({
+            blockchain: BLOCKCHAIN_NAME.CELO,
+            address: NATIVE_TOKEN_ADDRESS,
+            name: 'CELO',
+            symbol: 'CELO',
             decimals: 18
         })
     }

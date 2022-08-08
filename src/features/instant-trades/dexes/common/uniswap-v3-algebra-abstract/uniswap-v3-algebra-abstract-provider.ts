@@ -1,32 +1,37 @@
-import { InstantTradeProvider } from '@features/instant-trades/instant-trade-provider';
+import { InstantTradeProvider } from '@rsdk-features/instant-trades/instant-trade-provider';
 import { PriceToken, Web3Pure } from 'src/core';
 import { SwapCalculationOptions } from 'src/features';
-import { combineOptions } from '@common/utils/options';
-import { createTokenNativeAddressProxy } from '@features/instant-trades/dexes/common/utils/token-native-address-proxy';
-import { GasPriceInfo } from '@features/instant-trades/models/gas-price-info';
+import { combineOptions } from '@rsdk-common/utils/options';
+import { createTokenNativeAddressProxy } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { GasPriceInfo } from '@rsdk-features/instant-trades/models/gas-price-info';
 import BigNumber from 'bignumber.js';
 import {
     UniswapV3AlgebraCalculatedInfo,
     UniswapV3AlgebraCalculatedInfoWithProfit
-} from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-calculated-info';
+} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-calculated-info';
 import { InsufficientLiquidityError, RubicSdkError } from 'src/common';
-import { UniswapV3AlgebraQuoterController } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
-import { UniswapV3AlgebraProviderConfiguration } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-provider-configuration';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
+import { UniswapV3AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
+import { UniswapV3AlgebraProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-provider-configuration';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import {
     UniswapV3AlgebraAbstractTrade,
     UniswapV3AlgebraTradeStruct
-} from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
-import { AlgebraTrade } from '@features/instant-trades/dexes/polygon/algebra/algebra-trade';
-import { UniswapV3TradeClass } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-class';
-import { UniswapV3AlgebraRoute } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
-import { Exact } from '@features/instant-trades/models/exact';
-import { getFromToTokensAmountsByExact } from '@features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
-import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
+} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
+import { AlgebraTrade } from '@rsdk-features/instant-trades/dexes/polygon/algebra/algebra-trade';
+import { UniswapV3TradeClass } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-class';
+import { UniswapV3AlgebraRoute } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
+import { Exact } from '@rsdk-features/instant-trades/models/exact';
+import { getFromToTokensAmountsByExact } from '@rsdk-features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
+import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
+import { AbiItem } from 'web3-utils';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
 > extends InstantTradeProvider {
+    protected abstract readonly contractAbi: AbiItem[];
+
+    protected abstract readonly contractAddress: string;
+
     protected abstract readonly InstantTradeClass: UniswapV3TradeClass<T> | typeof AlgebraTrade;
 
     protected abstract readonly quoterController: UniswapV3AlgebraQuoterController;
@@ -192,7 +197,9 @@ export abstract class UniswapV3AlgebraAbstractProvider<
                 exact,
                 weiAmount,
                 options,
-                routes
+                routes,
+                this.contractAbi,
+                this.contractAddress
             );
 
             const calculatedProfits: UniswapV3AlgebraCalculatedInfoWithProfit[] = routes.map(
@@ -232,7 +239,9 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             exact,
             weiAmount,
             options,
-            route
+            route,
+            this.contractAbi,
+            this.contractAddress
         );
         return {
             route,

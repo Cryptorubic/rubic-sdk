@@ -1,21 +1,32 @@
-import { CROSS_CHAIN_TRADE_TYPE, SwapTransactionOptions } from 'src/features';
+import {
+    CROSS_CHAIN_TRADE_TYPE,
+    SwapTransactionOptions,
+    TRADE_TYPE,
+    TradeType
+} from 'src/features';
+import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
 import { TransactionRequest } from '@ethersproject/providers';
-import { PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
-import { Injector } from '@core/sdk/injector';
-import { SYMBIOSIS_CONTRACT_ADDRESS } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
-import { SymbiosisCrossChainSupportedBlockchain } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { ContractParams } from '@features/cross-chain/models/contract-params';
-import { SYMBIOSIS_CONTRACT_ABI } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/contract-abi';
+import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { SYMBIOSIS_CONTRACT_ADDRESS } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
+import { SymbiosisCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
+import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { FailedToCheckForTransactionReceiptError } from 'src/common';
-import { GasData } from '@features/cross-chain/models/gas-data';
-import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
+import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
+import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import BigNumber from 'bignumber.js';
-import { EncodeCrossChainTrade } from '@features/cross-chain/providers/common/encode-cross-chain-trade';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 
 /**
  * Calculated Symbiosis cross chain trade.
  */
-export class SymbiosisCrossChainTrade extends EncodeCrossChainTrade {
+export class SymbiosisCrossChainTrade extends CrossChainTrade {
+    /** @internal */
+    public readonly transitAmount: BigNumber;
+
+    public readonly feeInfo: FeeInfo;
+
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount,
@@ -37,7 +48,13 @@ export class SymbiosisCrossChainTrade extends EncodeCrossChainTrade {
                         transactionRequest,
                         gasData: null,
                         priceImpact: 0,
-                        slippage: 0
+                        slippage: 0,
+                        feeInfo: {
+                            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
+                            platformFee: { percent: 0, tokenSymbol: '' },
+                            cryptoFee: null
+                        },
+                        transitAmount: new BigNumber(NaN)
                     },
                     EMPTY_ADDRESS
                 ).getContractParams();
@@ -71,6 +88,8 @@ export class SymbiosisCrossChainTrade extends EncodeCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
 
+    public readonly itType: { from: TradeType; to: TradeType };
+
     public readonly from: PriceTokenAmount;
 
     public readonly to: PriceTokenAmount;
@@ -93,7 +112,7 @@ export class SymbiosisCrossChainTrade extends EncodeCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain];
+        return SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain].rubicRouter;
     }
 
     constructor(
@@ -104,6 +123,8 @@ export class SymbiosisCrossChainTrade extends EncodeCrossChainTrade {
             gasData: GasData | null;
             priceImpact: number;
             slippage: number;
+            feeInfo: FeeInfo;
+            transitAmount: BigNumber;
         },
         providerAddress: string
     ) {
@@ -114,8 +135,16 @@ export class SymbiosisCrossChainTrade extends EncodeCrossChainTrade {
         this.transactionRequest = crossChainTrade.transactionRequest;
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
-
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
+        this.feeInfo = crossChainTrade.feeInfo;
+        this.priceImpact = crossChainTrade.priceImpact;
+
+        this.transitAmount = crossChainTrade.transitAmount;
+
+        this.itType = {
+            from: TRADE_TYPE.ONE_INCH,
+            to: TRADE_TYPE.ONE_INCH
+        };
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
     }
@@ -162,30 +191,39 @@ export class SymbiosisCrossChainTrade extends EncodeCrossChainTrade {
     }
 
     protected async getContractParams(): Promise<ContractParams> {
-        const contractAddress = SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain];
-        const contractAbi = SYMBIOSIS_CONTRACT_ABI;
+        const data = await this.transactionRequest.data;
+        const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
+        const swapArguments = [
+            this.from.address,
+            this.from.stringWeiAmount,
+            toChainId,
+            this.to.address,
+            Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
+            this.walletAddress,
+            this.providerAddress,
+            SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain].providerRouter
+        ];
 
-        if (this.from.isNative) {
-            return {
-                contractAddress,
-                contractAbi,
-                methodName: 'SymbiosisCallWithNative',
-                methodArguments: [this.providerAddress, this.transactionRequest.data],
-                value: this.from.stringWeiAmount
-            };
+        const methodArguments: unknown[] = [swapArguments];
+        if (!this.from.isNative) {
+            methodArguments.push(SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain].providerGateway);
         }
+        methodArguments.push(data);
+
+        const sourceValue = this.from.isNative ? this.from.stringWeiAmount : '0';
+        const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
+        const value = new BigNumber(sourceValue).plus(fixedFee).toFixed(0);
 
         return {
-            contractAddress,
-            contractAbi,
-            methodName: 'SymbiosisCall',
-            methodArguments: [
-                this.from.address,
-                this.from.stringWeiAmount,
-                this.providerAddress,
-                this.transactionRequest.data
-            ],
-            value: '0'
+            contractAddress: SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain].rubicRouter,
+            contractAbi: commonCrossChainAbi,
+            methodName: this.methodName,
+            methodArguments,
+            value
         };
+    }
+
+    public getTradeAmountRatio(): BigNumber {
+        return this.transitAmount.dividedBy(this.to.tokenAmount);
     }
 }

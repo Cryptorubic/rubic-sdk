@@ -1,5 +1,5 @@
-import { HttpClient } from '@common/models/http-client';
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
+import { HttpClient } from '@rsdk-common/models/http-client';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import Web3 from 'web3';
 import { provider } from 'web3-core';
 
@@ -50,7 +50,7 @@ export interface RpcProvider {
     /**
      * Specifies timeout in ms after which `mainRpc` will be replaced with `spareRpc` (if `spareRpc` is defined)
      */
-    readonly mainPrcTimeout?: number;
+    readonly mainRpcTimeout?: number;
 
     /**
      * Before the `mainRpc` link is applied to the sdk, all the `mainRpc` links

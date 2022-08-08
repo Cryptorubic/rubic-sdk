@@ -1,7 +1,7 @@
 import {
     UniswapV3RouterConfiguration,
     UniswapV3RouterLiquidityPool
-} from '@features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
+} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
 
 /**
  * Most popular tokens in uni v3 to use in a route.

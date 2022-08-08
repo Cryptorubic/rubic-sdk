@@ -1,6 +1,6 @@
 import { SushiSwapEthereumProvider } from 'src/features/instant-trades/dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider';
 import { SUSHI_SWAP_ETHEREUM_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/ethereum/sushi-swap-ethereum/constants';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
 
 export const sushiSwapProviderEthereumSpec = () => {
     let sushiSwapProvider: SushiSwapEthereumProvider;

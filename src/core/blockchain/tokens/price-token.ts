@@ -1,6 +1,6 @@
-import { TokenBaseStruct } from '@core/blockchain/models/token-base-struct';
-import { Token, TokenStruct } from '@core/blockchain/tokens/token';
-import { Injector } from '@core/sdk/injector';
+import { TokenBaseStruct } from '@rsdk-core/blockchain/models/token-base-struct';
+import { Token, TokenStruct } from '@rsdk-core/blockchain/tokens/token';
+import { Injector } from '@rsdk-core/sdk/injector';
 import BigNumber from 'bignumber.js';
 
 export type PriceTokenStruct = ConstructorParameters<typeof Token>[number] & { price: BigNumber };
@@ -17,7 +17,9 @@ export class PriceToken extends Token {
         const { coingeckoApi } = Injector;
 
         const tokenPromise = super.createToken(tokenBaseStruct);
-        const pricePromise = coingeckoApi.getTokenPrice(tokenBaseStruct);
+        const pricePromise = coingeckoApi
+            .getTokenPrice(tokenBaseStruct)
+            .catch(_err => new BigNumber(NaN));
         const results = await Promise.all([tokenPromise, pricePromise]);
 
         return new PriceToken({ ...results[0], price: results[1] });
@@ -30,7 +32,7 @@ export class PriceToken extends Token {
     public static async createFromToken(token: TokenStruct): Promise<PriceToken> {
         const { coingeckoApi } = Injector;
 
-        const price = await coingeckoApi.getTokenPrice(token);
+        const price = await coingeckoApi.getTokenPrice(token).catch(_err => new BigNumber(NaN));
 
         return new PriceToken({ ...token, price });
     }
@@ -66,7 +68,7 @@ export class PriceToken extends Token {
 
     private async updateTokenPrice(): Promise<void> {
         const { coingeckoApi } = Injector;
-        this._price = await coingeckoApi.getTokenPrice({ ...this });
+        this._price = await coingeckoApi.getTokenPrice({ ...this }).catch(_err => this._price);
     }
 
     /**
@@ -75,7 +77,7 @@ export class PriceToken extends Token {
     public async cloneAndCreate(tokenStruct?: Partial<PriceTokenStruct>): Promise<PriceToken> {
         const { coingeckoApi } = Injector;
 
-        const price = await coingeckoApi.getTokenPrice(this);
+        const price = await coingeckoApi.getTokenPrice(this).catch(_err => this._price);
 
         return new PriceToken({ ...this.asStruct, price, ...tokenStruct });
     }

@@ -1,30 +1,41 @@
-import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
-import { Injector } from '@core/sdk/injector';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { GasData } from '@features/cross-chain/models/gas-data';
-import { CrossChainIsUnavailableError } from '@common/errors/cross-chain/cross-chain-is-unavailable.error';
-import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/failed-to-check-for-transaction-receipt.error';
-import { InsufficientFundsGasPriceValueError } from '@common/errors/cross-chain/insufficient-funds-gas-price-value.error';
-import { SwapTransactionOptions } from '@features/instant-trades/models/swap-transaction-options';
+import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
+import { CrossChainIsUnavailableError } from '@rsdk-common/errors/cross-chain/cross-chain-is-unavailable.error';
+import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swap/failed-to-check-for-transaction-receipt.error';
+import { InsufficientFundsGasPriceValueError } from '@rsdk-common/errors/cross-chain/insufficient-funds-gas-price-value.error';
+import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
 import BigNumber from 'bignumber.js';
-import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
-import { CelerRubicCrossChainTrade } from '@features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade';
+import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
+import { CelerRubicCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade';
 import { Web3Public } from 'src/core';
-import { CrossChainContractTrade } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
-import { ContractParams } from '@features/cross-chain/models/contract-params';
-import { CelerCrossChainContractData } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
+import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
+import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
+import { CelerCrossChainContractData } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
 import {
     celerSourceTransitTokenFeeMultiplier,
     celerTargetTransitTokenFeeMultiplier
-} from '@features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-fee-multipliers';
-import { CelerCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
-import { CelerItCrossChainContractTrade } from '@features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
+} from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-fee-multipliers';
+import { CelerCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
+import { CelerItCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
+import { CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { CelerDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
 
 /**
  * Calculated Celer cross chain trade.
  */
 export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
+    /** @internal */
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
+
+    public readonly itType: { from: TradeType | undefined; to: TradeType | undefined };
+
+    public readonly feeInPercents: number;
+
+    public readonly feeInfo: FeeInfo;
+
     /** @internal */
     public static async getGasData(
         fromTrade: CrossChainContractTrade,
@@ -46,7 +57,13 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
                         toTrade,
                         cryptoFeeToken,
                         transitFeeToken: {} as PriceTokenAmount,
-                        gasData: null
+                        gasData: null,
+                        feeInPercents: 0,
+                        feeInfo: {
+                            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
+                            platformFee: { percent: 0, tokenSymbol: '' },
+                            cryptoFee: null
+                        }
                     },
                     EMPTY_ADDRESS,
                     maxSlippage
@@ -79,8 +96,6 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         }
     }
 
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
-
     public readonly transitFeeToken: PriceTokenAmount;
 
     public readonly from: PriceTokenAmount;
@@ -108,16 +123,20 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
             cryptoFeeToken: PriceTokenAmount;
             transitFeeToken: PriceTokenAmount;
             gasData: GasData | null;
+            feeInPercents: number;
+            feeInfo: FeeInfo;
         },
         providerAddress: string,
         private readonly maxSlippage: number
     ) {
         super(providerAddress);
 
+        this.feeInPercents = crossChainTrade.feeInPercents;
         this.fromTrade = crossChainTrade.fromTrade;
         this.toTrade = crossChainTrade.toTrade;
         this.gasData = crossChainTrade.gasData;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
+        this.feeInfo = crossChainTrade.feeInfo;
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.fromTrade.blockchain);
         this.toWeb3Public = Injector.web3PublicService.getWeb3Public(this.toTrade.blockchain);
@@ -133,6 +152,17 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
             weiAmount: this.toTrade.toToken.weiAmount.dividedBy(1 - fromSlippage).dp(0)
         });
 
+        this.itType = {
+            from:
+                crossChainTrade.fromTrade instanceof CelerDirectCrossChainContractTrade
+                    ? undefined
+                    : crossChainTrade.fromTrade.provider.type,
+            to:
+                crossChainTrade.toTrade instanceof CelerDirectCrossChainContractTrade
+                    ? undefined
+                    : crossChainTrade.toTrade.provider.type
+        };
+
         this.toTokenAmountMin = this.toTrade.toTokenAmountMin;
     }
 
@@ -143,7 +173,6 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         await Promise.all([
             this.checkContractsState(),
             this.checkToBlockchainGasPrice(),
-            this.checkToContractBalance(),
             this.checkUserBalance()
         ]);
     }
@@ -176,17 +205,6 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
                     gasPrice,
                     value,
                     onTransactionHash
-                },
-                err => {
-                    const includesErrCode = err?.message?.includes('-32000');
-                    const allowedErrors = [
-                        'insufficient funds for transfer',
-                        'insufficient funds for gas * price + value'
-                    ];
-                    const includesPhrase = allowedErrors.some(error =>
-                        err?.message?.includes(error)
-                    );
-                    return includesErrCode && includesPhrase;
                 }
             );
 

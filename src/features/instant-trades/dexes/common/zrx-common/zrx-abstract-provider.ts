@@ -1,18 +1,19 @@
-import { InstantTradeProvider } from '@features/instant-trades/instant-trade-provider';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { SwapCalculationOptions } from '@features/instant-trades/models/swap-calculation-options';
-import { PriceToken } from '@core/blockchain/tokens/price-token';
-import { createTokenNativeAddressProxy } from '@features/instant-trades/dexes/common/utils/token-native-address-proxy';
-import { zrxApiParams } from '@features/instant-trades/dexes/common/zrx-common/constants';
-import { ZrxQuoteRequest } from '@features/instant-trades/dexes/common/zrx-common/models/zrx-quote-request';
-import { Injector } from '@core/sdk/injector';
-import { ZrxQuoteResponse } from '@features/instant-trades/dexes/common/zrx-common/models/zrx-types';
-import { getZrxApiBaseUrl } from '@features/instant-trades/dexes/common/zrx-common/utils';
-import { ZrxSwapCalculationOptions } from '@features/instant-trades/dexes/common/zrx-common/models/zrx-swap-calculation-options';
+import { InstantTradeProvider } from '@rsdk-features/instant-trades/instant-trade-provider';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { SwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
+import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
+import { createTokenNativeAddressProxy } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { zrxApiParams } from '@rsdk-features/instant-trades/dexes/common/zrx-common/constants';
+import { ZrxQuoteRequest } from '@rsdk-features/instant-trades/dexes/common/zrx-common/models/zrx-quote-request';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { ZrxQuoteResponse } from '@rsdk-features/instant-trades/dexes/common/zrx-common/models/zrx-types';
+import { getZrxApiBaseUrl } from '@rsdk-features/instant-trades/dexes/common/zrx-common/utils';
+import { ZrxSwapCalculationOptions } from '@rsdk-features/instant-trades/dexes/common/zrx-common/models/zrx-swap-calculation-options';
 import BigNumber from 'bignumber.js';
-import { ZrxTrade } from '@features/instant-trades/dexes/common/zrx-common/zrx-trade';
+import { ZrxTrade } from '@rsdk-features/instant-trades/dexes/common/zrx-common/zrx-trade';
 import { Cache } from 'src/common';
-import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
+import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
+import { TRADE_TYPE, TradeType } from 'src/features';
 
 export abstract class ZrxAbstractProvider extends InstantTradeProvider {
     protected readonly gasMargin = 1.4;
@@ -24,6 +25,10 @@ export abstract class ZrxAbstractProvider extends InstantTradeProvider {
         wrappedAddress: EMPTY_ADDRESS,
         fromAddress: ''
     };
+
+    public get type(): TradeType {
+        return TRADE_TYPE.ZRX;
+    }
 
     @Cache
     private get apiBaseUrl(): string {
@@ -59,7 +64,8 @@ export abstract class ZrxAbstractProvider extends InstantTradeProvider {
                 weiAmount: new BigNumber(apiTradeData.buyAmount)
             }),
             slippageTolerance: fullOptions.slippageTolerance,
-            apiTradeData
+            apiTradeData,
+            path: [from, to]
         };
         if (fullOptions.gasCalculation === 'disabled') {
             return new ZrxTrade(tradeStruct);

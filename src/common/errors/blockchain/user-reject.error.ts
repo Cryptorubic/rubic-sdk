@@ -1,6 +1,11 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk.error';
+import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 
 /**
  * Thrown, when user cancels transaction.
  */
-export class UserRejectError extends RubicSdkError {}
+export class UserRejectError extends RubicSdkError {
+    constructor() {
+        super();
+        Object.setPrototypeOf(this, UserRejectError.prototype);
+    }
+}

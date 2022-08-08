@@ -1,18 +1,18 @@
 import {
     UniswapV3AlgebraAbstractTrade,
     UniswapV3AlgebraTradeStruct
-} from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
-import { AlgebraRoute } from '@features/instant-trades/dexes/polygon/algebra/models/algebra-route';
-import { MethodData } from '@core/blockchain/web3-public/models/method-data';
-import { AlgebraQuoterController } from '@features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/algebra-quoter-controller';
+} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
+import { AlgebraRoute } from '@rsdk-features/instant-trades/dexes/polygon/algebra/models/algebra-route';
+import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
+import { AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/algebra-quoter-controller';
 import { TRADE_TYPE, TradeType } from 'src/features';
 
 import {
     ALGEBRA_SWAP_ROUTER_CONTRACT_ABI,
     ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS
-} from '@features/instant-trades/dexes/polygon/algebra/constants/swap-router-contract-data';
+} from '@rsdk-features/instant-trades/dexes/polygon/algebra/constants/swap-router-contract-data';
 import { Token, Web3Pure } from 'src/core';
-import { createTokenNativeAddressProxyInPathStartAndEnd } from '@features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { createTokenNativeAddressProxyInPathStartAndEnd } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
 
 export interface AlgebraTradeStruct extends UniswapV3AlgebraTradeStruct {
     route: AlgebraRoute;

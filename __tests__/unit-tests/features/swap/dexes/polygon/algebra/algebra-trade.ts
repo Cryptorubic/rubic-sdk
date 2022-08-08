@@ -2,12 +2,12 @@ import { Chain } from '__tests__/utils/chain';
 import { mockInjector } from '__tests__/utils/mock-injector';
 import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
 import { Utils } from '__tests__/unit-tests/features/swap/utils/utils';
-import { Injector } from '@core/sdk/injector';
+import { Injector } from '@rsdk-core/sdk/injector';
 import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME, Web3Public } from 'src/core';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { PriceToken } from 'src/core/blockchain/tokens/price-token';
-import { AlgebraProvider } from '@features/instant-trades/dexes/polygon/algebra/algebra-provider';
+import { AlgebraProvider } from '@rsdk-features/instant-trades/dexes/polygon/algebra/algebra-provider';
 import fn = jest.fn;
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.POLYGON];

@@ -1,5 +1,5 @@
-import { InstantTrade } from '@features/instant-trades/instant-trade';
-import { Cache, RubicSdkError } from 'src/common';
+import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
+import { RubicSdkError } from 'src/common';
 import {
     EncodeTransactionOptions,
     GasFeeInfo,
@@ -7,25 +7,24 @@ import {
     TradeType
 } from 'src/features';
 import { AbiItem } from 'web3-utils';
-import { BlockchainName, PriceToken, Token, Web3Pure } from 'src/core';
-import { SwapOptions } from '@features/instant-trades/models/swap-options';
+import { PriceToken, Token, Web3Pure } from 'src/core';
+import { SwapOptions } from '@rsdk-features/instant-trades/models/swap-options';
 import BigNumber from 'bignumber.js';
-import { Injector } from '@core/sdk/injector';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { TransactionReceipt } from 'web3-eth';
-import { MethodData } from '@core/blockchain/web3-public/models/method-data';
-import { BatchCall } from '@core/blockchain/web3-public/models/batch-call';
+import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
+import { BatchCall } from '@rsdk-core/blockchain/web3-public/models/batch-call';
 import { TransactionConfig } from 'web3-core';
-import { UniswapV3AbstractTrade } from '@features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
-import { UniswapV3AlgebraRoute } from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
-import { deadlineMinutesTimestamp } from '@common/utils/options';
+import { UniswapV3AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
+import { UniswapV3AlgebraRoute } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
+import { deadlineMinutesTimestamp } from '@rsdk-common/utils/options';
 import {
     DEFAULT_ESTIMATED_GAS,
     WETH_TO_ETH_ESTIMATED_GAS
-} from '@features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/constants/estimated-gas';
-import { Exact } from '@features/instant-trades/models/exact';
-import { getFromToTokensAmountsByExact } from '@features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
-import { NATIVE_TOKEN_ADDRESS } from '@core/blockchain/constants/native-token-address';
+} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/constants/estimated-gas';
+import { Exact } from '@rsdk-features/instant-trades/models/exact';
+import { getFromToTokensAmountsByExact } from '@rsdk-features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
 
 export interface UniswapV3AlgebraTradeStruct {
     from: PriceTokenAmount;
@@ -37,33 +36,6 @@ export interface UniswapV3AlgebraTradeStruct {
 }
 
 export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
-    protected static contractAbi(blockchain: BlockchainName): AbiItem[] {
-        // see  https://github.com/microsoft/TypeScript/issues/34516
-        // @ts-ignore
-        const instance = new this({
-            from: { blockchain },
-            route: { path: [{ address: NATIVE_TOKEN_ADDRESS }] }
-        });
-        if (!instance.contractAbi) {
-            throw new RubicSdkError('Trying to read abstract class field');
-        }
-        return instance.contractAbi;
-    }
-
-    @Cache
-    protected static contractAddress(blockchain: BlockchainName): string {
-        // see  https://github.com/microsoft/TypeScript/issues/34516
-        // @ts-ignore
-        const instance = new this({
-            from: { blockchain },
-            route: { path: [{ address: NATIVE_TOKEN_ADDRESS }] }
-        });
-        if (!instance.contractAddress) {
-            throw new RubicSdkError('Trying to read abstract class field');
-        }
-        return instance.contractAddress;
-    }
-
     public static get type(): TradeType {
         throw new RubicSdkError(`Static TRADE_TYPE getter is not implemented by ${this.name}`);
     }
@@ -74,7 +46,9 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         exact: Exact,
         weiAmount: BigNumber,
         options: Required<SwapOptions>,
-        route: UniswapV3AlgebraRoute
+        route: UniswapV3AlgebraRoute,
+        contractAbi: AbiItem[],
+        contractAddress: string
     ): Promise<BigNumber> {
         const { from, to } = getFromToTokensAmountsByExact(
             fromToken,
@@ -91,8 +65,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         if (walletAddress && estimateGasParams.callData) {
             const web3Public = Injector.web3PublicService.getWeb3Public(from.blockchain);
             const estimatedGas = await web3Public.getEstimatedGas(
-                this.contractAbi(from.blockchain),
-                this.contractAddress(from.blockchain),
+                contractAbi,
+                contractAddress,
                 estimateGasParams.callData.contractMethod,
                 estimateGasParams.callData.params,
                 walletAddress,
@@ -112,7 +86,9 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         exact: Exact,
         weiAmount: BigNumber,
         options: Required<SwapOptions>,
-        routes: UniswapV3AlgebraRoute[]
+        routes: UniswapV3AlgebraRoute[],
+        contractAbi: AbiItem[],
+        contractAddress: string
     ): Promise<BigNumber[]> {
         const routesEstimateGasParams = routes.map(route => {
             const { from, to } = getFromToTokensAmountsByExact(
@@ -135,8 +111,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         ) {
             const web3Public = Injector.web3PublicService.getWeb3Public(fromToken.blockchain);
             const estimatedGasLimits = await web3Public.batchEstimatedGas(
-                this.contractAbi(fromToken.blockchain),
-                this.contractAddress(fromToken.blockchain),
+                contractAbi,
+                contractAddress,
                 walletAddress,
                 routesEstimateGasParams.map(estimateGasParams => estimateGasParams.callData)
             );

@@ -1,26 +1,35 @@
-import { Web3Pure } from '@core/blockchain/web3-pure/web3-pure';
-import { Injector } from '@core/sdk/injector';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { GasData } from '@features/cross-chain/models/gas-data';
-import { CrossChainIsUnavailableError } from '@common/errors/cross-chain/cross-chain-is-unavailable.error';
-import { FailedToCheckForTransactionReceiptError } from '@common/errors/swap/failed-to-check-for-transaction-receipt.error';
-import { InsufficientFundsGasPriceValueError } from '@common/errors/cross-chain/insufficient-funds-gas-price-value.error';
-import { SwapTransactionOptions } from '@features/instant-trades/models/swap-transaction-options';
+import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
+import { Injector } from '@rsdk-core/sdk/injector';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
+import { CrossChainIsUnavailableError } from '@rsdk-common/errors/cross-chain/cross-chain-is-unavailable.error';
+import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swap/failed-to-check-for-transaction-receipt.error';
+import { InsufficientFundsGasPriceValueError } from '@rsdk-common/errors/cross-chain/insufficient-funds-gas-price-value.error';
+import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
 import BigNumber from 'bignumber.js';
-import { RubicItCrossChainContractTrade } from '@features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
-import { EMPTY_ADDRESS } from '@core/blockchain/constants/empty-address';
-import { CelerRubicCrossChainTrade } from '@features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade';
+import { RubicItCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
+import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
+import { CelerRubicCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade';
 import { Web3Public } from 'src/core';
-import { CrossChainContractTrade } from '@features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
-import { ContractParams } from '@features/cross-chain/models/contract-params';
+import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
+import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { LowSlippageDeflationaryTokenError, RubicSdkError } from 'src/common';
-import { TOKEN_WITH_FEE_ERRORS } from '@features/cross-chain/constants/token-with-fee-errors';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
-
+import { TOKEN_WITH_FEE_ERRORS } from '@rsdk-features/cross-chain/constants/token-with-fee-errors';
+import { CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
+import { RubicDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 /**
  * Calculated Rubic cross chain trade.
  */
 export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.RUBIC;
+
+    public readonly itType: { from: TradeType | undefined; to: TradeType | undefined };
+
+    public readonly feeInPercents: number;
+
+    public readonly feeInfo: FeeInfo;
+
     /** @internal */
     public static async getGasData(
         fromTrade: CrossChainContractTrade,
@@ -42,7 +51,13 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
                         toTrade,
                         cryptoFeeToken,
                         transitFeeToken: {} as PriceTokenAmount,
-                        gasData: null
+                        gasData: null,
+                        feeInPercents: 0,
+                        feeInfo: {
+                            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
+                            platformFee: { percent: 0, tokenSymbol: '' },
+                            cryptoFee: null
+                        }
                     },
                     EMPTY_ADDRESS
                 ).getContractParams();
@@ -74,8 +89,6 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
         }
     }
 
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.RUBIC;
-
     public readonly transitFeeToken: PriceTokenAmount;
 
     public readonly from: PriceTokenAmount;
@@ -103,15 +116,19 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
             cryptoFeeToken: PriceTokenAmount;
             transitFeeToken: PriceTokenAmount;
             gasData: GasData | null;
+            feeInPercents: number;
+            feeInfo: FeeInfo;
         },
         providerAddress: string
     ) {
         super(providerAddress);
+
+        this.feeInPercents = crossChainTrade.feeInPercents;
         this.fromTrade = crossChainTrade.fromTrade;
         this.toTrade = crossChainTrade.toTrade;
         this.gasData = crossChainTrade.gasData;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
-
+        this.feeInfo = crossChainTrade.feeInfo;
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.fromTrade.blockchain);
         this.toWeb3Public = Injector.web3PublicService.getWeb3Public(this.toTrade.blockchain);
 
@@ -125,6 +142,17 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
             ...this.toTrade.toToken.asStruct,
             weiAmount: this.toTrade.toToken.weiAmount.dividedBy(1 - fromSlippage).dp(0)
         });
+
+        this.itType = {
+            from:
+                crossChainTrade.fromTrade instanceof RubicDirectCrossChainContractTrade
+                    ? undefined
+                    : crossChainTrade.fromTrade.provider.type,
+            to:
+                crossChainTrade.toTrade instanceof RubicDirectCrossChainContractTrade
+                    ? undefined
+                    : crossChainTrade.toTrade.provider.type
+        };
 
         this.toTokenAmountMin = this.toTrade.toTokenAmountMin;
     }

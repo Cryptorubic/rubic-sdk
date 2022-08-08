@@ -1,13 +1,13 @@
-import { SUSHI_SWAP_BSC_CONTRACT_ADDRESS } from '@features/instant-trades/dexes/bsc/sushi-swap-bsc/constants';
+import { SUSHI_SWAP_BSC_CONTRACT_ADDRESS } from '@rsdk-features/instant-trades/dexes/bsc/sushi-swap-bsc/constants';
 import {
     UniswapV2AbstractTrade,
     UniswapV2TradeStruct
-} from '@features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+} from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { TRADE_TYPE, TradeType } from 'src/features';
 
 export class SushiSwapBscTrade extends UniswapV2AbstractTrade {
     public static get type(): TradeType {
-        return TRADE_TYPE.SUSHI_SWAP_BSC;
+        return TRADE_TYPE.SUSHI_SWAP;
     }
 
     protected readonly contractAddress = SUSHI_SWAP_BSC_CONTRACT_ADDRESS;

@@ -1,9 +1,9 @@
-import { RubicSdkError } from '@common/errors/rubic-sdk.error';
-import { TimeoutError } from '@common/errors/utils/timeout.error';
-import pTimeout from '@common/utils/p-timeout';
-import { BlockchainName } from '@core/blockchain/models/blockchain-name';
-import { Web3Public } from '@core/blockchain/web3-public/web3-public';
-import { RpcProvider } from '@core/sdk/models/configuration';
+import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
+import { TimeoutError } from '@rsdk-common/errors/utils/timeout.error';
+import pTimeout from '@rsdk-common/utils/p-timeout';
+import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
+import { RpcProvider } from '@rsdk-core/sdk/models/configuration';
 import Web3 from 'web3';
 
 export class Web3PublicService {
@@ -78,7 +78,7 @@ export class Web3PublicService {
                             try {
                                 return await pTimeout(
                                     callMethod(),
-                                    rpcProvider.mainPrcTimeout ||
+                                    rpcProvider.mainRpcTimeout ||
                                         Web3PublicService.mainRpcDefaultTimeout
                                 );
                             } catch (e) {

@@ -1,29 +1,31 @@
-import { oneinchApiParams } from '@features/instant-trades/dexes/common/oneinch-common/constants';
-import { OneinchSwapResponse } from '@features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-response';
-import { getOneinchApiBaseUrl } from '@features/instant-trades/dexes/common/oneinch-common/utils';
+import { oneinchApiParams } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/constants';
+import { OneinchSwapResponse } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-response';
+import { getOneinchApiBaseUrl } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/utils';
 import {
     createTokenNativeAddressProxy,
     createTokenNativeAddressProxyInPathStartAndEnd
-} from '@features/instant-trades/dexes/common/utils/token-native-address-proxy';
-import { InstantTrade } from '@features/instant-trades/instant-trade';
-import { Injector } from '@core/sdk/injector';
+} from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
+import { Injector } from '@rsdk-core/sdk/injector';
 import BigNumber from 'bignumber.js';
 import { Cache } from 'src/common';
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import { TransactionReceipt } from 'web3-eth';
-import { RubicSdkError } from '@common/errors/rubic-sdk.error';
-import { InsufficientFundsOneinchError } from '@common/errors/swap/insufficient-funds-oneinch.error';
-import { blockchains } from '@core/blockchain/constants/blockchains';
-import { SwapTransactionOptions } from '@features/instant-trades/models/swap-transaction-options';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { GasFeeInfo } from '@features/instant-trades/models/gas-fee-info';
-import { Token } from '@core/blockchain/tokens/token';
+import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
+import { InsufficientFundsOneinchError } from '@rsdk-common/errors/swap/insufficient-funds-oneinch.error';
+import { blockchains } from '@rsdk-core/blockchain/constants/blockchains';
+import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
+import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
+import { Token } from '@rsdk-core/blockchain/tokens/token';
 import { TransactionConfig } from 'web3-core';
-import { LowSlippageError } from '@common/errors/swap/low-slippage.error';
-import { EncodeTransactionOptions } from '@features/instant-trades/models/encode-transaction-options';
-import { OptionsGasParams, TransactionGasParams } from '@features/instant-trades/models/gas-params';
-import { OneinchSwapRequest } from '@features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-request';
+import { LowSlippageError } from '@rsdk-common/errors/swap/low-slippage.error';
+import { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';
+import {
+    OptionsGasParams,
+    TransactionGasParams
+} from '@rsdk-features/instant-trades/models/gas-params';
+import { OneinchSwapRequest } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-request';
 
 type OneinchTradeStruct = {
     contractAddress: string;
@@ -37,12 +39,6 @@ type OneinchTradeStruct = {
 };
 
 export class OneinchTrade extends InstantTrade {
-    private static readonly oneInchTradeTypes = {
-        [BLOCKCHAIN_NAME.ETHEREUM]: TRADE_TYPE.ONE_INCH_ETHEREUM,
-        [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: TRADE_TYPE.ONE_INCH_BSC,
-        [BLOCKCHAIN_NAME.POLYGON]: TRADE_TYPE.ONE_INCH_POLYGON
-    } as const;
-
     /** @internal */
     public static async checkIfNeedApproveAndThrowError(
         from: PriceTokenAmount
@@ -89,9 +85,7 @@ export class OneinchTrade extends InstantTrade {
     public readonly transactionData: string | null;
 
     public get type(): TradeType {
-        return OneinchTrade.oneInchTradeTypes[
-            this.from.blockchain as keyof typeof OneinchTrade.oneInchTradeTypes
-        ];
+        return TRADE_TYPE.ONE_INCH;
     }
 
     @Cache
@@ -149,7 +143,10 @@ export class OneinchTrade extends InstantTrade {
         await this.checkAllowanceAndApprove(options);
 
         try {
-            const apiTradeData = await this.getTradeData();
+            const apiTradeData = await this.getTradeData().catch(err => {
+                throw new Error(err?.response?.data?.description || err.message);
+            });
+
             const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, apiTradeData);
 
             const transactionOptions = {
@@ -164,7 +161,10 @@ export class OneinchTrade extends InstantTrade {
 
             return Injector.web3Private.trySendTransaction(apiTradeData.tx.to, transactionOptions);
         } catch (err) {
-            this.specifyError(err);
+            const inchSpecificError = this.specifyError(err);
+            if (inchSpecificError) {
+                throw inchSpecificError;
+            }
             throw new RubicSdkError(err.message || err.toString());
         }
     }
@@ -180,7 +180,10 @@ export class OneinchTrade extends InstantTrade {
                 gasPrice
             };
         } catch (err) {
-            this.specifyError(err);
+            const inchSpecificError = this.specifyError(err);
+            if (inchSpecificError) {
+                throw inchSpecificError;
+            }
             throw new RubicSdkError(err.message || err.toString());
         }
     }
@@ -215,25 +218,33 @@ export class OneinchTrade extends InstantTrade {
     }
 
     private specifyError(err: {
-        error?: {
-            message?: string;
-            description?: string;
-        };
-    }): void | never {
-        if (err.error) {
-            if (err.error.message?.includes('cannot estimate')) {
-                const nativeToken = blockchains.find(
-                    el => el.name === this.nativeSupportedFrom.blockchain
-                )!.nativeCoin.symbol;
-                const message = `1inch sets increased costs on gas fee. For transaction enter less ${nativeToken} amount or top up your ${nativeToken} balance.`;
-                throw new RubicSdkError(message);
+        error?:
+            | {
+                  message?: string;
+                  description?: string;
+              }
+            | Error;
+    }): RubicSdkError | null {
+        const inchError = err?.error || err;
+
+        if (inchError) {
+            if ('message' in inchError) {
+                if (inchError.message?.includes('cannot estimate')) {
+                    const nativeToken = blockchains.find(
+                        el => el.name === this.nativeSupportedFrom.blockchain
+                    )!.nativeCoin.symbol;
+                    const message = `1inch sets increased costs on gas fee. For transaction enter less ${nativeToken} amount or top up your ${nativeToken} balance.`;
+                    return new RubicSdkError(message);
+                }
+                if (inchError.message?.includes('insufficient funds for transfer')) {
+                    return new InsufficientFundsOneinchError(this.from.blockchain);
+                }
             }
-            if (err.error.message?.includes('insufficient funds for transfer')) {
-                throw new InsufficientFundsOneinchError();
-            }
-            if (err.error.description?.includes('cannot estimate')) {
-                throw new LowSlippageError();
+            if ('description' in inchError && inchError.description?.includes('cannot estimate')) {
+                return new LowSlippageError();
             }
         }
+
+        return null;
     }
 }
