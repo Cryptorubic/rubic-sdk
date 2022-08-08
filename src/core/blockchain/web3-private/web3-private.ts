@@ -246,6 +246,61 @@ export class Web3Private {
     }
 
     /**
+     * Executes approve method in ERC-20 token contract with encoded transaction config.
+     * @param tokenAddress Address of the smart-contract corresponding to the token.
+     * @param spenderAddress Wallet or contract address to approve.
+     * @param value Token amount to approve in wei.
+     * @param [options] Additional options.
+     * @returns Approval transaction receipt.
+     */
+    public async encodedApprove(
+        tokenAddress: string,
+        spenderAddress: string,
+        value: BigNumber | 'infinity',
+        options: TransactionOptions = {}
+    ): Promise<TransactionReceipt> {
+        let rawValue: BigNumber;
+        if (value === 'infinity') {
+            rawValue = new BigNumber(2).pow(256).minus(1);
+        } else {
+            rawValue = value;
+        }
+        const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
+
+        let { gas } = options;
+        if (!gas) {
+            gas = await contract.methods.approve(spenderAddress, rawValue.toFixed(0)).estimateGas({
+                from: this.address
+            });
+        }
+        const encodedParams = Web3Pure.encodeMethodCall(
+            tokenAddress,
+            ERC20_TOKEN_ABI,
+            'approve',
+            [spenderAddress, rawValue.toFixed(0)],
+            undefined,
+            {
+                ...(gas && { gas: Web3Private.stringifyAmount(gas) }),
+                ...(options.gasPrice && {
+                    gasPrice: Web3Private.stringifyAmount(options.gasPrice)
+                })
+            }
+        );
+
+        return new Promise((resolve, reject) => {
+            contract.methods
+                .approve(spenderAddress, rawValue.toFixed(0))
+                .send({ from: this.address, ...encodedParams })
+                .on('transactionHash', options.onTransactionHash || (() => {}))
+                .on('receipt', resolve)
+                .on('error', (err: Web3Error) => {
+                    console.error(`Tokens approve error. ${err}`);
+                    reject(Web3Private.parseError(err));
+                });
+        });
+    }
+
+    /**
      * Tries to execute method of smart-contract and resolve the promise when the transaction is included in the block or rejects the error.
      * @param contractAddress Address of smart-contract which method is to be executed.
      * @param contractAbi Abi of smart-contract which method is to be executed.
