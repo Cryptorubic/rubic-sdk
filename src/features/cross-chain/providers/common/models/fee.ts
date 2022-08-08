@@ -11,6 +11,7 @@ export interface FeeInfo {
         readonly amount: BigNumber;
         readonly tokenSymbol: string;
     };
+
     /**
      * Platform fee which is percent from token in amount.
      */
@@ -18,6 +19,7 @@ export interface FeeInfo {
         readonly percent: number;
         readonly tokenSymbol: string;
     };
+
     /**
      * Crypto fee to pay swap in target network.
      */

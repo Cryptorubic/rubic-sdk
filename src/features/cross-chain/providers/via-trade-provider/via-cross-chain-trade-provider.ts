@@ -1,18 +1,18 @@
-import { CrossChainTradeProvider } from '@features/cross-chain/providers/common/cross-chain-trade-provider';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
-import { BlockchainName, BlockchainsInfo, PriceToken } from 'src/core';
-import { RequiredCrossChainOptions } from '@features/cross-chain/models/cross-chain-options';
-import { Injector } from '@core/sdk/injector';
-import BigNumber from 'bignumber.js';
-import { PriceTokenAmount } from '@core/blockchain/tokens/price-token-amount';
-import { WrappedCrossChainTrade } from '@features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import {
     ViaCrossChainSupportedBlockchain,
     viaCrossChainSupportedBlockchains
-} from '@features/cross-chain/providers/via-trade-provider/constants/via-cross-chain-supported-blockchain';
-import { ViaCrossChainTrade } from '@features/cross-chain/providers/via-trade-provider/via-cross-chain-trade';
-import { DEFAULT_API_KEY } from '@features/cross-chain/providers/via-trade-provider/constants/default-api-key';
-import Via from '@viaprotocol/router-sdk/src';
+} from 'src/features/cross-chain/providers/via-trade-provider/constants/via-cross-chain-supported-blockchain';
+import { Via } from '@viaprotocol/router-sdk';
+import { DEFAULT_API_KEY } from 'src/features/cross-chain/providers/via-trade-provider/constants/default-api-key';
+import { ViaCrossChainTrade } from 'src/features/cross-chain/providers/via-trade-provider/via-cross-chain-trade';
+import { BlockchainName, BlockchainsInfo, PriceToken, PriceTokenAmount } from 'src/core';
+import { Injector } from 'src/core/sdk/injector';
+import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
+import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
+import BigNumber from 'bignumber.js';
+import { FeeInfo } from '../common/models/fee';
 
 export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -90,8 +90,26 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
         } catch (err: unknown) {
             return {
                 trade: null,
-                error: this.parseError(err)
+                error: CrossChainTradeProvider.parseError(err)
             };
         }
+    }
+
+    public isSupportedBlockchains(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName
+    ): boolean {
+        return (
+            ViaCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
+            ViaCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
+        );
+    }
+
+    protected async getFeeInfo(): Promise<FeeInfo> {
+        return {
+            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
+            platformFee: { percent: 0, tokenSymbol: '' },
+            cryptoFee: null
+        };
     }
 }

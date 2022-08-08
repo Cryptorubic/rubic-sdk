@@ -1,20 +1,21 @@
-import { CROSS_CHAIN_TRADE_TYPE, SwapTransactionOptions } from 'src/features';
-import { CrossChainTrade } from '@features/cross-chain/providers/common/cross-chain-trade';
 import { BasicTransactionOptions, PriceTokenAmount, Web3Public } from 'src/core';
-import { Injector } from '@core/sdk/injector';
-import { SYMBIOSIS_CONTRACT_ADDRESS } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
-import { SymbiosisCrossChainSupportedBlockchain } from '@features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { FailedToCheckForTransactionReceiptError, UnnecessaryApproveError } from 'src/common';
-import { GasData } from '@features/cross-chain/models/gas-data';
-import BigNumber from 'bignumber.js';
-import { DEFAULT_API_KEY } from '@features/cross-chain/providers/via-trade-provider/constants/default-api-key';
-import { IRoute } from '@viaprotocol/router-sdk/src/types';
 import { TransactionReceipt } from 'web3-eth';
-import Via from '@viaprotocol/router-sdk/src';
+import { IRoute } from '@viaprotocol/router-sdk/dist/types';
+import { Via } from '@viaprotocol/router-sdk';
+import { FailedToCheckForTransactionReceiptError, UnnecessaryApproveError } from 'src/common';
+import { DEFAULT_API_KEY } from 'src/features/cross-chain/providers/via-trade-provider/constants/default-api-key';
+import { GasData } from 'src/features/cross-chain/models/gas-data';
+import { Injector } from 'src/core/sdk/injector';
+import {
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTrade,
+    SwapTransactionOptions,
+    TradeType
+} from 'src/features';
+import BigNumber from 'bignumber.js';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 
-/**
- * Calculated Symbiosis cross chain trade.
- */
 export class ViaCrossChainTrade extends CrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.VIA;
 
@@ -37,14 +38,26 @@ export class ViaCrossChainTrade extends CrossChainTrade {
 
     public readonly gasData: GasData | null;
 
+    public readonly feeInfo: FeeInfo = {
+        fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
+        platformFee: {
+            percent: 0,
+            tokenSymbol: ''
+        },
+        cryptoFee: null
+    };
+
+    public readonly itType: { from: TradeType | undefined; to: TradeType | undefined } = {
+        from: undefined,
+        to: undefined
+    };
+
+    public readonly toTokenAmountMin: BigNumber = new BigNumber(0);
+
     protected readonly fromWeb3Public: Web3Public;
 
-    private get fromBlockchain(): SymbiosisCrossChainSupportedBlockchain {
-        return this.from.blockchain as SymbiosisCrossChainSupportedBlockchain;
-    }
-
     protected get fromContractAddress(): string {
-        return SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain];
+        return '';
     }
 
     constructor(
@@ -98,7 +111,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
             numAction: 0
         });
 
-        return Injector.web3Private.trySendTransaction(transaction.to, {
+        return Injector.web3Private.trySendTransaction(transaction.to, '0', {
             data: transaction.data,
             ...options
         });
@@ -118,7 +131,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
             numAction: 0
         });
 
-        await Injector.web3Private.trySendTransaction(transaction.to, {
+        await Injector.web3Private.trySendTransaction(transaction.to, '0', {
             data: transaction.data,
             onTransactionHash: options?.onApprove,
             gas: options?.gasLimit || undefined,
@@ -155,13 +168,16 @@ export class ViaCrossChainTrade extends CrossChainTrade {
                 numAction: 0
             });
 
-            await Injector.web3Private.trySendTransaction(transaction.to, {
-                value: new BigNumber(transaction.value),
-                data: transaction.data,
-                onTransactionHash,
-                gas: gasLimit,
-                gasPrice
-            });
+            await Injector.web3Private.trySendTransaction(
+                transaction.to,
+                new BigNumber(transaction.value),
+                {
+                    data: transaction.data,
+                    onTransactionHash,
+                    gas: gasLimit,
+                    gasPrice
+                }
+            );
 
             return transactionHash!;
         } catch (err) {
@@ -170,5 +186,19 @@ export class ViaCrossChainTrade extends CrossChainTrade {
             }
             throw err;
         }
+    }
+
+    protected async getContractParams(): Promise<ContractParams> {
+        return {
+            contractAddress: this.fromContractAddress,
+            contractAbi: [],
+            methodName: '',
+            methodArguments: [],
+            value: '0'
+        };
+    }
+
+    public getTradeAmountRatio(): BigNumber {
+        return new BigNumber(0);
     }
 }

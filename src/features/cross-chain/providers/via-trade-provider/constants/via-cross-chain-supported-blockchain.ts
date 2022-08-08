@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_NAME } from '@core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core';
 
 export const viaCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,
