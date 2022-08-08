@@ -150,16 +150,17 @@ export class OneinchTrade extends InstantTrade {
             const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, apiTradeData);
 
             const transactionOptions = {
-                value: this.nativeSupportedFrom.isNative
-                    ? this.nativeSupportedFrom.stringWeiAmount
-                    : '0',
                 onTransactionHash: options.onConfirm,
                 data: apiTradeData.tx.data,
                 gas,
                 gasPrice
             };
 
-            return Injector.web3Private.trySendTransaction(apiTradeData.tx.to, transactionOptions);
+            return Injector.web3Private.trySendTransaction(
+                apiTradeData.tx.to,
+                this.nativeSupportedFrom.isNative ? this.nativeSupportedFrom.stringWeiAmount : '0',
+                transactionOptions
+            );
         } catch (err) {
             const inchSpecificError = this.specifyError(err);
             if (inchSpecificError) {

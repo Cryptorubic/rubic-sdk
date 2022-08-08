@@ -60,13 +60,16 @@ export class ZrxTrade extends InstantTrade {
 
         const { gas, gasPrice } = this.getGasParams(options);
 
-        return Injector.web3Private.trySendTransaction(this.apiTradeData.to, {
-            value: this.apiTradeData.value,
-            onTransactionHash: options.onConfirm,
-            data: this.apiTradeData.data,
-            gas,
-            gasPrice
-        });
+        return Injector.web3Private.trySendTransaction(
+            this.apiTradeData.to,
+            this.apiTradeData.value,
+            {
+                onTransactionHash: options.onConfirm,
+                data: this.apiTradeData.data,
+                gas,
+                gasPrice
+            }
+        );
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
