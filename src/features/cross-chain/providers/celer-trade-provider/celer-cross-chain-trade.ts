@@ -210,7 +210,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         throw err;
     }
 
-    protected async getContractParams(fromAddress?: string): Promise<ContractParams> {
+    public async getContractParams(fromAddress?: string): Promise<ContractParams> {
         const fromTrade = this.fromTrade as CelerCrossChainContractTrade;
         const toTrade = this.toTrade as CelerCrossChainContractTrade;
 

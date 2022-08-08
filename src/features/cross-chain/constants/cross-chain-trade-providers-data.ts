@@ -26,6 +26,12 @@ import { SushiSwapTelosProvider } from '@rsdk-features/instant-trades/dexes/telo
 import { ZappyProvider } from '@rsdk-features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
 import { OneinchFantomProvider } from 'src/features/instant-trades/dexes/fantom/oneinch-fantom/oneinch-fantom-provider';
 import { OneinchAvalancheProvider } from 'src/features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
+import { UniSwapV3PolygonProvider } from 'src/features/instant-trades/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
+import { SushiSwapBscProvider } from 'src/features/instant-trades/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
+import { OneinchBscProvider } from 'src/features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
+import { AlgebraProvider } from 'src/features/instant-trades/dexes/polygon/algebra/algebra-provider';
+import { OneinchPolygonProvider } from 'src/features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
+import { SushiSwapPolygonProvider } from 'src/features/instant-trades/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
 
 /**
  * Stores contracts info.
@@ -58,37 +64,37 @@ export const crossChainTradeProvidersData: DeepReadonly<
         {
             ProviderClass: PancakeSwapProvider,
             methodSuffix: ''
+        },
+        {
+            ProviderClass: SushiSwapBscProvider,
+            methodSuffix: '1'
+        },
+        {
+            ProviderClass: OneinchBscProvider,
+            methodSuffix: 'Inch'
         }
-        // {
-        //     ProviderClass: SushiSwapBscProvider,
-        //     methodSuffix: '1'
-        // },
-        // {
-        //     ProviderClass: OneinchBscProvider,
-        //     methodSuffix: 'Inch'
-        // }
     ],
     [BLOCKCHAIN_NAME.POLYGON]: [
         {
             ProviderClass: QuickSwapProvider,
             methodSuffix: ''
+        },
+        {
+            ProviderClass: SushiSwapPolygonProvider,
+            methodSuffix: '1'
+        },
+        {
+            ProviderClass: UniSwapV3PolygonProvider,
+            methodSuffix: 'V3'
+        },
+        {
+            ProviderClass: AlgebraProvider,
+            methodSuffix: 'ALGB'
+        },
+        {
+            ProviderClass: OneinchPolygonProvider,
+            methodSuffix: 'Inch'
         }
-        // {
-        //     ProviderClass: SushiSwapPolygonProvider,
-        //     methodSuffix: '1'
-        // },
-        // {
-        //     ProviderClass: UniSwapV3PolygonProvider,
-        //     methodSuffix: 'V3'
-        // },
-        // {
-        //     ProviderClass: AlgebraProvider,
-        //     methodSuffix: 'ALGB'
-        // },
-        // {
-        //     ProviderClass: OneinchPolygonProvider,
-        //     methodSuffix: 'Inch'
-        // }
     ],
     [BLOCKCHAIN_NAME.AVALANCHE]: [
         {

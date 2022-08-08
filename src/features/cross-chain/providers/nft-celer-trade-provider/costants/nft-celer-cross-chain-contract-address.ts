@@ -1,1 +1,0 @@
-export const nftCelerCrossChainContractAddress = '0xf5832CB86AFDB364dD617a1297e3B2148936B2d3';

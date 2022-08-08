@@ -84,7 +84,7 @@ export abstract class CrossChainTrade {
      */
     public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
 
-    protected abstract getContractParams(fromAddress?: string): Promise<ContractParams>;
+    public abstract getContractParams(fromAddress?: string): Promise<ContractParams>;
 
     /**
      * Returns true, if allowance is not enough.

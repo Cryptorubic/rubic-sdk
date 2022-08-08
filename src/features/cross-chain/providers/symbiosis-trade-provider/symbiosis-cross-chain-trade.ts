@@ -207,7 +207,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    protected async getContractParams(): Promise<ContractParams> {
+    public async getContractParams(): Promise<ContractParams> {
         const contractAddress = SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain];
         const contractAbi = SYMBIOSIS_CONTRACT_ABI;
 

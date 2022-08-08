@@ -44,7 +44,9 @@ export class SDK {
     /**
      * Can be used to send transactions and execute smart contracts methods.
      */
-    public readonly web3Private = Injector.web3Private;
+    public get web3Private(): Web3Private {
+        return Injector.web3Private;
+    }
 
     /**
      * Use it to get gas price information.
