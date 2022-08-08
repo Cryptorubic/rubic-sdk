@@ -14,6 +14,7 @@ import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swa
 import { Web3Pure } from 'src/core';
 import { LowSlippageError } from 'src/common';
 import { parseError } from 'src/common/utils/errors';
+import { TransactionConfig } from 'web3-core';
 
 /**
  * Class containing methods for executing the functions of contracts
@@ -246,25 +247,20 @@ export class Web3Private {
     }
 
     /**
-     * Executes approve method in ERC-20 token contract with encoded transaction config.
+     * Build encoded approve transaction config.
      * @param tokenAddress Address of the smart-contract corresponding to the token.
      * @param spenderAddress Wallet or contract address to approve.
      * @param value Token amount to approve in wei.
      * @param [options] Additional options.
-     * @returns Approval transaction receipt.
+     * @returns Encoded approve transaction config.
      */
-    public async encodedApprove(
+    public async encodeApprove(
         tokenAddress: string,
         spenderAddress: string,
         value: BigNumber | 'infinity',
         options: TransactionOptions = {}
-    ): Promise<TransactionReceipt> {
-        let rawValue: BigNumber;
-        if (value === 'infinity') {
-            rawValue = new BigNumber(2).pow(256).minus(1);
-        } else {
-            rawValue = value;
-        }
+    ): Promise<TransactionConfig> {
+        const rawValue = value === 'infinity' ? new BigNumber(2).pow(256).minus(1) : value;
         const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
 
         let { gas } = options;
@@ -273,7 +269,8 @@ export class Web3Private {
                 from: this.address
             });
         }
-        const encodedParams = Web3Pure.encodeMethodCall(
+
+        return Web3Pure.encodeMethodCall(
             tokenAddress,
             ERC20_TOKEN_ABI,
             'approve',
@@ -286,18 +283,6 @@ export class Web3Private {
                 })
             }
         );
-
-        return new Promise((resolve, reject) => {
-            contract.methods
-                .approve(spenderAddress, rawValue.toFixed(0))
-                .send({ from: this.address, ...encodedParams })
-                .on('transactionHash', options.onTransactionHash || (() => {}))
-                .on('receipt', resolve)
-                .on('error', (err: Web3Error) => {
-                    console.error(`Tokens approve error. ${err}`);
-                    reject(Web3Private.parseError(err));
-                });
-        });
     }
 
     /**
