@@ -60,7 +60,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
                         }
                     },
                     EMPTY_ADDRESS
-                ).getContractParams();
+                ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasPrice] = await Promise.all([
@@ -159,7 +159,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         const { onConfirm, gasLimit, gasPrice } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams();
+            await this.getContractParams(options);
 
         let transactionHash: string;
         try {
@@ -197,8 +197,8 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    public async getContractParams(): Promise<ContractParams> {
-        const data = await this.getSwapData();
+    public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
+        const data = await this.getSwapData(options?.receiverAddress);
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
         const fromContracts =
             lifiContractAddress[this.from.blockchain as LifiCrossChainSupportedBlockchain];
@@ -209,7 +209,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             toChainId,
             this.to.address,
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
-            this.walletAddress,
+            options?.receiverAddress || this.walletAddress,
             this.providerAddress,
             fromContracts.providerRouter
         ];
@@ -233,14 +233,14 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         };
     }
 
-    private async getSwapData(): Promise<string> {
+    private async getSwapData(receiverAddress?: string): Promise<string> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
             action: {
                 ...firstStep.action,
                 fromAddress: this.walletAddress,
-                toAddress: this.walletAddress
+                toAddress: receiverAddress || this.walletAddress
             },
             execution: {
                 status: 'NOT_STARTED',

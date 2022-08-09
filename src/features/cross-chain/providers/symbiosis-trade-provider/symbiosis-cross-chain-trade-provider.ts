@@ -126,7 +126,6 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
 
             const {
                 tokenAmountOut,
-                transactionRequest,
                 priceImpact,
                 fee: transitTokenFee
             } = await swapping.exactIn(
@@ -139,6 +138,17 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 deadline,
                 true
             );
+            const swapFunction = (receiver?: string) =>
+                swapping.exactIn(
+                    tokenAmountIn,
+                    tokenOut,
+                    fromAddress,
+                    receiver || fromAddress,
+                    fromAddress,
+                    slippageTolerance,
+                    deadline,
+                    true
+                );
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: new BigNumber(tokenAmountOut.toFixed())
@@ -146,7 +156,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await SymbiosisCrossChainTrade.getGasData(from, to, transactionRequest)
+                    ? await SymbiosisCrossChainTrade.getGasData(from, to)
                     : null;
 
             const transitToken = celerTransitTokens[fromBlockchain];
@@ -168,7 +178,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                     {
                         from,
                         to,
-                        transactionRequest,
+                        swapFunction,
                         gasData,
                         priceImpact: parseFloat(priceImpact.toFixed()),
                         slippage: options.slippageTolerance,

@@ -63,7 +63,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
                         cryptoFeeToken: from
                     },
                     EMPTY_ADDRESS
-                ).getContractParams();
+                ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasPrice] = await Promise.all([
@@ -165,7 +165,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
 
         const { onConfirm, gasLimit, gasPrice } = options;
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams();
+            await this.getContractParams(options);
 
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
@@ -193,8 +193,8 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    public async getContractParams(): Promise<ContractParams> {
-        const data = await this.getTransactionRequest();
+    public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
+        const data = await this.getTransactionRequest(options?.receiverAddress);
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
         const fromContracts =
             DE_BRIDGE_CONTRACT_ADDRESS[
@@ -207,7 +207,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
             toChainId,
             this.to.address,
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
-            this.walletAddress,
+            options?.receiverAddress || this.walletAddress,
             this.providerAddress,
             fromContracts.providerRouter
         ];
@@ -239,12 +239,15 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
         return this.transitAmount.plus(usdCryptoFee).dividedBy(this.to.tokenAmount);
     }
 
-    private async getTransactionRequest(): Promise<BytesLike> {
+    private async getTransactionRequest(receiverAddress?: string): Promise<BytesLike> {
+        const params = {
+            ...this.transactionRequest,
+            ...(receiverAddress && { dstChainTokenOutRecipient: receiverAddress })
+        };
+
         const { tx } = await Injector.httpClient.get<TransactionResponse>(
             DebridgeCrossChainTradeProvider.apiEndpoint,
-            {
-                params: this.transactionRequest as unknown as {}
-            }
+            { params }
         );
         return tx.data;
     }
