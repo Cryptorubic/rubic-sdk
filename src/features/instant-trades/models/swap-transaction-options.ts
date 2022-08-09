@@ -29,4 +29,9 @@ export interface SwapTransactionOptions {
      * Will be used for approve transaction, if it is called before swap.
      */
     approveGasLimit?: string;
+
+    /**
+     * Tokens receiver address.
+     */
+    receiverAddress?: string;
 }

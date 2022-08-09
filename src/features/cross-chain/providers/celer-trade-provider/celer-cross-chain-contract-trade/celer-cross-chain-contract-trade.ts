@@ -77,5 +77,8 @@ export abstract class CelerCrossChainContractTrade extends CrossChainContractTra
 
     public abstract getCelerSourceTrade(): unknown[] | unknown;
 
-    public abstract getCelerDestionationTrade(integratorAddress: string): unknown[];
+    public abstract getCelerDestinationTrade(
+        integratorAddress: string,
+        receiverAddress: string
+    ): unknown[];
 }

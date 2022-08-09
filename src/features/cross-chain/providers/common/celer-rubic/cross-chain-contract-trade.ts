@@ -51,6 +51,7 @@ export abstract class CrossChainContractTrade {
         options?: {
             swapTokenWithFee?: boolean;
             maxSlippage?: number;
+            receiverAddress?: string;
         }
     ): Promise<unknown[]>;
 

@@ -57,9 +57,12 @@ export class CelerItCrossChainContractTrade extends CelerCrossChainContractTrade
         return Object.values(this.crossChainInstantTrade.getCelerSourceObject());
     }
 
-    public getCelerDestionationTrade(integratorAddress: string): unknown[] {
+    public getCelerDestinationTrade(integratorAddress: string, receiverAddress: string): unknown[] {
         return Object.values(
-            this.crossChainInstantTrade.getCelerDestinationObject(integratorAddress)
+            this.crossChainInstantTrade.getCelerDestinationObject(
+                integratorAddress,
+                receiverAddress
+            )
         );
     }
 
@@ -85,15 +88,19 @@ export class CelerItCrossChainContractTrade extends CelerCrossChainContractTrade
         providerAddress: string,
         options: {
             maxSlippage: number;
+            receiverAddress: string;
         }
     ): Promise<unknown[]> {
-        const receiver = toContractTrade.contract.address || walletAddress || providerAddress;
+        const receiver = toContractTrade.contract.address || walletAddress;
         const tokenInAmountAbsolute = this.fromToken.stringWeiAmount;
         const targetChainId = BlockchainsInfo.getBlockchainByName(
             toContractTrade.toToken.blockchain
         ).id;
         const source = await this.getCelerSourceTrade();
-        const destination = toContractTrade.getCelerDestionationTrade(providerAddress);
+        const destination = toContractTrade.getCelerDestinationTrade(
+            providerAddress,
+            options.receiverAddress
+        );
 
         return [
             receiver,
