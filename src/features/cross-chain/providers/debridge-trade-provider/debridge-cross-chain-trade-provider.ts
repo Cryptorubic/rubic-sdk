@@ -32,6 +32,8 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
 
     public static readonly apiEndpoint = 'https://deswap.debridge.finance/v1.0/transaction';
 
+    private readonly deBridgeReferralCode = '4350';
+
     public readonly type = CROSS_CHAIN_TRADE_TYPE.DEBRIDGE;
 
     protected get walletAddress(): string {
@@ -85,7 +87,8 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                 slippage: slippageTolerance,
                 dstChainId: BlockchainsInfo.getBlockchainByName(toBlockchain).id,
                 dstChainTokenOut: toToken.address,
-                dstChainTokenOutRecipient: EMPTY_ADDRESS
+                dstChainTokenOutRecipient: EMPTY_ADDRESS,
+                referralCode: this.deBridgeReferralCode
             };
 
             const { tx, estimation } = await Injector.httpClient.get<TransactionResponse>(
