@@ -44,5 +44,12 @@ export const celerTransitTokens: Record<CelerCrossChainSupportedBlockchain, Toke
         name: 'USDC',
         symbol: 'USDC',
         decimals: 6
+    },
+    [BLOCKCHAIN_NAME.AURORA]: {
+        blockchain: BLOCKCHAIN_NAME.AURORA,
+        address: '0xb12bfca5a55806aaf64e99521918a4bf0fc40802',
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 6
     }
 };

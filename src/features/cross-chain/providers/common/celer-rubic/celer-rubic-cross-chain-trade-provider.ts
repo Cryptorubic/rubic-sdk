@@ -70,12 +70,16 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
     ): Promise<void | never> {
         const slippageTolerance =
             fromTrade instanceof RubicItCrossChainContractTrade ? fromTrade.slippage : undefined;
-        const { minAmount: minTransitTokenAmount, maxAmount: maxTransitTokenAmount } =
-            await this.getMinMaxTransitTokenAmounts(
-                fromTrade.blockchain,
-                slippageTolerance,
-                fromTrade.fromToken
-            );
+        const { minAmount, maxAmount } = await this.getMinMaxTransitTokenAmounts(
+            fromTrade.blockchain,
+            slippageTolerance,
+            fromTrade.fromToken
+        );
+        const minTransitTokenAmount = minAmount?.eq(0) ? new BigNumber(0) : minAmount;
+        const maxTransitTokenAmount = maxAmount?.eq(0)
+            ? new BigNumber(Number.MAX_VALUE)
+            : maxAmount;
+
         const fromTransitTokenAmount = fromTrade.toToken.tokenAmount;
 
         if (fromTransitTokenAmount.lt(minTransitTokenAmount)) {
