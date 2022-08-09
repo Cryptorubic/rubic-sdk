@@ -9,5 +9,6 @@
 /dist/
 /cache/
 /scripts/node.log
+stats.json
 
 /docs/

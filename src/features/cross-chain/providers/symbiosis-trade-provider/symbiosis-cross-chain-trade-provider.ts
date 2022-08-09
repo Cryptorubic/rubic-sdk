@@ -276,25 +276,27 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         providerAddress: string,
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
+        const fixedFeeAmount = await this.getFixedFee(
+            fromBlockchain,
+            providerAddress,
+            SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+            commonCrossChainAbi
+        );
+
+        const feePercent = await this.getFeePercent(
+            fromBlockchain,
+            providerAddress,
+            SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+            commonCrossChainAbi
+        );
+
         return {
             fixedFee: {
-                amount: Web3Pure.fromWei(
-                    await this.getFixedFee(
-                        fromBlockchain,
-                        providerAddress,
-                        SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-                        commonCrossChainAbi
-                    )
-                ),
+                amount: fixedFeeAmount,
                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
             },
             platformFee: {
-                percent: await this.getFeePercent(
-                    fromBlockchain,
-                    providerAddress,
-                    SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-                    commonCrossChainAbi
-                ),
+                percent: feePercent,
                 tokenSymbol: percentFeeToken.symbol
             },
             cryptoFee: null
