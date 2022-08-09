@@ -75,10 +75,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
             order: 'RECOMMENDED',
-            allowSwitchChain: false,
-            bridges: {
-                deny: ['multichain'] // @TODO remove after whitelisting
-            }
+            allowSwitchChain: false
         };
 
         const fromChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id;
