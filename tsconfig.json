@@ -33,14 +33,15 @@
     "outDir": "lib",
     "baseUrl": ".",
     "paths": {
-      "*": [
-        "./node_modules/*"
-      ],
       "src/*": ["./src/*"],
       "@rsdk-core/*": ["src/core/*"],
       "@rsdk-common/*": ["src/common/*"],
       "@rsdk-features/*": ["src/features/*"]
     },
+    "plugins": [
+      { "transform": "typescript-transform-paths" },
+      { "transform": "typescript-transform-paths", "afterDeclarations": true }
+    ],
     "rootDir": "src",
     "allowJs": true,
     "skipLibCheck": true
