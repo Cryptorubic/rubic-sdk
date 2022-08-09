@@ -12,7 +12,7 @@ import { WalletConnectionConfiguration } from '@rsdk-core/blockchain/models/wall
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swap/failed-to-check-for-transaction-receipt.error';
 import { Web3Pure } from 'src/core';
-import { LowSlippageError } from 'src/common';
+import { InsufficientFundsGasPriceValueError, LowSlippageError } from 'src/common';
 import { parseError } from 'src/common/utils/errors';
 
 /**
@@ -76,6 +76,9 @@ export class Web3Private {
         }
         if (err.message.includes('Failed to check for transaction receipt')) {
             return new FailedToCheckForTransactionReceiptError();
+        }
+        if (err.message.includes('Ok(OutOfFund)')) {
+            return new InsufficientFundsGasPriceValueError();
         }
         if (err.code === -32603) {
             return new LowGasError();
