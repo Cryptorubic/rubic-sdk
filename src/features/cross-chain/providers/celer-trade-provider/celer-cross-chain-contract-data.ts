@@ -33,7 +33,7 @@ export class CelerCrossChainContractData extends CrossChainContractData {
         return this.web3Public.callContractMethod(
             this.address,
             celerCrossChainContractAbi,
-            'dstCryptoFee',
+            'blockchainToGasFee',
             {
                 methodArguments: [String(destinationBlockchainId)]
             }
@@ -47,11 +47,11 @@ export class CelerCrossChainContractData extends CrossChainContractData {
                 celerCrossChainContractAbi,
                 [
                     {
-                        methodName: 'minSwapAmount',
+                        methodName: 'minTokenAmount',
                         methodArguments: [tokenAddress]
                     },
                     {
-                        methodName: 'maxSwapAmount',
+                        methodName: 'maxTokenAmount',
                         methodArguments: [tokenAddress]
                     }
                 ]
@@ -103,25 +103,15 @@ export class CelerCrossChainContractData extends CrossChainContractData {
         const feeAbsolute = await this.web3Public.callContractMethod(
             this.address,
             celerCrossChainContractAbi,
-            'feeRubic'
+            'RubicPlatformFee'
         );
-        return Number(feeAbsolute) / 10000;
+        return Number(feeAbsolute) / 10_000;
     }
 
     public async getCryptoFeeToken(
         toContract: CelerCrossChainContractData
     ): Promise<PriceTokenAmount> {
-        const numOfToBlockchain = BlockchainsInfo.getBlockchainByName(toContract.blockchain).id;
-        const feeAmount = new BigNumber(
-            await this.web3Public.callContractMethod(
-                this.address,
-                celerCrossChainContractAbi,
-                'dstCryptoFee',
-                {
-                    methodArguments: [String(numOfToBlockchain)]
-                }
-            )
-        );
+        const feeAmount = await this.destinationCryptoFee(toContract.blockchain);
         const nativeToken = BlockchainsInfo.getBlockchainByName(this.blockchain).nativeCoin;
         return PriceTokenAmount.createFromToken({
             ...nativeToken,

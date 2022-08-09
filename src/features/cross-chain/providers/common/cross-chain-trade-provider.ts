@@ -5,11 +5,12 @@ import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { RubicSdkError } from 'src/common';
 import { parseError } from 'src/common/utils/errors';
-import { BlockchainName } from 'src/core';
+import { BlockchainName, Web3Pure } from 'src/core';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { Injector } from 'src/core/sdk/injector';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { AbiItem } from 'web3-utils';
+import BigNumber from 'bignumber.js';
 
 export abstract class CrossChainTradeProvider {
     public static parseError(err: unknown): RubicSdkError {
@@ -46,7 +47,7 @@ export abstract class CrossChainTradeProvider {
         providerAddress: string,
         contractAddress: string,
         contractAbi: AbiItem[]
-    ): Promise<number> {
+    ): Promise<BigNumber> {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 
         if (providerAddress !== EMPTY_ADDRESS) {
@@ -56,14 +57,16 @@ export abstract class CrossChainTradeProvider {
                 methodArguments: [providerAddress]
             });
             if (integratorInfo[0]) {
-                return integratorInfo[4];
+                return Web3Pure.fromWei(integratorInfo[4]);
             }
         }
 
-        return await web3PublicService.callContractMethod<number>(
-            contractAddress,
-            contractAbi,
-            'fixedCryptoFee'
+        return Web3Pure.fromWei(
+            await web3PublicService.callContractMethod<number>(
+                contractAddress,
+                contractAbi,
+                'fixedCryptoFee'
+            )
         );
     }
 

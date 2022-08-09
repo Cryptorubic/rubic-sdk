@@ -179,13 +179,11 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     ): Promise<FeeInfo> {
         return {
             fixedFee: {
-                amount: Web3Pure.fromWei(
-                    await this.getFixedFee(
-                        fromBlockchain,
-                        providerAddress,
-                        DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-                        commonCrossChainAbi
-                    )
+                amount: await this.getFixedFee(
+                    fromBlockchain,
+                    providerAddress,
+                    DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+                    commonCrossChainAbi
                 ),
                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
             },
