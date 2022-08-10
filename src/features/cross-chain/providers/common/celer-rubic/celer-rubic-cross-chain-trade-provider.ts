@@ -16,6 +16,7 @@ import { ItCalculatedTrade } from '@rsdk-features/cross-chain/providers/common/c
 import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
 import { CrossChainMinAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-min-amount.error';
 import { CrossChainMaxAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-max-amount.error';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 
 export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeProvider {
     protected abstract contracts(blockchain: BlockchainName): CrossChainContractData;
@@ -69,12 +70,16 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
     ): Promise<void | never> {
         const slippageTolerance =
             fromTrade instanceof RubicItCrossChainContractTrade ? fromTrade.slippage : undefined;
-        const { minAmount: minTransitTokenAmount, maxAmount: maxTransitTokenAmount } =
-            await this.getMinMaxTransitTokenAmounts(
-                fromTrade.blockchain,
-                slippageTolerance,
-                fromTrade.fromToken
-            );
+        const { minAmount, maxAmount } = await this.getMinMaxTransitTokenAmounts(
+            fromTrade.blockchain,
+            slippageTolerance,
+            fromTrade.fromToken
+        );
+        const minTransitTokenAmount = minAmount?.eq(0) ? new BigNumber(0) : minAmount;
+        const maxTransitTokenAmount = maxAmount?.eq(0)
+            ? new BigNumber(Number.MAX_VALUE)
+            : maxAmount;
+
         const fromTransitTokenAmount = fromTrade.toToken.tokenAmount;
 
         if (fromTransitTokenAmount.lt(minTransitTokenAmount)) {
@@ -189,5 +194,13 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
         if (sourceContractPaused || targetContractPaused) {
             throw new CrossChainIsUnavailableError();
         }
+    }
+
+    protected async getFeeInfo(): Promise<FeeInfo> {
+        return {
+            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
+            platformFee: { percent: 0, tokenSymbol: '' },
+            cryptoFee: null
+        };
     }
 }

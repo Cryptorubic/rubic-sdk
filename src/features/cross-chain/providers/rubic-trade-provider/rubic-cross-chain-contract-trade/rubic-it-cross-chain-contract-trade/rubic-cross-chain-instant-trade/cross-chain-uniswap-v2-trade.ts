@@ -41,13 +41,18 @@ export class CrossChainUniswapV2Trade implements CrossChainInstantTrade {
         return { dex, path, deadline: this.defaultDeadline, amountOutMinimum };
     }
 
-    public getCelerDestinationObject(integratorAddress: string): DestinationCelerSwapInfo {
+    public getCelerDestinationObject(
+        integratorAddress: string,
+        receiverAddress: string
+    ): DestinationCelerSwapInfo {
         const dex = (this.instantTrade as unknown as { contractAddress: string }).contractAddress;
         const deadline = this.defaultDeadline;
         const amountOutMinimum = this.instantTrade.toTokenAmountMin.stringWeiAmount;
 
         return {
             dex,
+            nativeOut: this.instantTrade.to.isNative,
+            receiverEOA: receiverAddress,
             integrator: integratorAddress,
             version: SwapVersion.V2,
             path: this.getFirstPath(),

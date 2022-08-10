@@ -16,5 +16,8 @@ export interface CrossChainInstantTrade {
 
     getCelerSourceObject(): SourceCelerSwapInfo;
 
-    getCelerDestinationObject(integratorAddress: string): DestinationCelerSwapInfo;
+    getCelerDestinationObject(
+        integratorAddress: string,
+        receiverAddress: string
+    ): DestinationCelerSwapInfo;
 }

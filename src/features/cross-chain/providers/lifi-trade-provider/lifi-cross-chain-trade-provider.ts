@@ -11,16 +11,16 @@ import { Injector } from 'src/core/sdk/injector';
 import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
-import {
-    lifiContractAbi,
-    lifiContractAddress
-} from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
+import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { getLifiConfig } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-config';
-import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { CrossChainIsUnavailableError } from 'src/common';
-import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
+import { LifiStep } from '@lifi/types/dist/step';
+import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 
 export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -63,16 +63,14 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
 
         await this.checkContractState(fromBlockchain);
 
-        const feePercent = await this.getFeePercent(fromBlockchain, options.providerAddress);
+        const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+
         const feeAmount = Web3Pure.toWei(
-            from.tokenAmount.multipliedBy(feePercent).dividedBy(100),
+            from.tokenAmount.multipliedBy(feeInfo.platformFee.percent).dividedBy(100),
             from.decimals,
             1
         );
         const tokenAmountIn = from.weiAmount.minus(feeAmount).toFixed(0);
-
-        const networkFee = await this.getNetworkFee(fromBlockchain);
-        const networkFeeSymbol = nativeTokensList[fromBlockchain].symbol;
 
         const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
@@ -124,6 +122,22 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
                 ? await LifiCrossChainTrade.getGasData(from, to, bestRoute)
                 : null;
 
+        const steps = (bestRoute.steps[0] as LifiStep).includedSteps;
+        const sourceDex =
+            steps?.[0] && steps[0].action.fromChainId === steps[0].action.toChainId
+                ? steps?.[0].tool
+                : undefined;
+
+        const [, ...stepsWithoutFirst] = steps;
+        const targetDex = stepsWithoutFirst.find(
+            provider => provider.action.fromChainId === provider.action.toChainId
+        )?.tool;
+
+        const itType = {
+            from: sourceDex ? lifiProviders[sourceDex] : undefined,
+            to: targetDex ? lifiProviders[targetDex] : undefined
+        };
+
         const trade = new LifiCrossChainTrade(
             {
                 from,
@@ -131,12 +145,9 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
                 route: bestRoute,
                 gasData,
                 toTokenAmountMin: Web3Pure.fromWei(bestRoute.toAmountMin, to.decimals),
-                fee: Web3Pure.fromWei(feeAmount, from.decimals),
-                feeSymbol: from.symbol,
-                feePercent,
-                networkFee,
-                networkFeeSymbol,
-                priceImpact
+                feeInfo,
+                priceImpact,
+                itType
             },
             options.providerAddress
         );
@@ -155,54 +166,12 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         };
     }
 
-    private async getFeePercent(
-        fromBlockchain: LifiCrossChainSupportedBlockchain,
-        providerAddress: string
-    ): Promise<number> {
-        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-
-        if (providerAddress !== EMPTY_ADDRESS) {
-            const integratorInfo = await web3PublicService.callContractMethod<[boolean, number]>(
-                lifiContractAddress[fromBlockchain],
-                lifiContractAbi,
-                'integratorToFeeInfo',
-                {
-                    methodArguments: [providerAddress]
-                }
-            );
-            if (integratorInfo[0]) {
-                return integratorInfo[1] / 10_000;
-            }
-        }
-
-        return (
-            (await web3PublicService.callContractMethod<number>(
-                lifiContractAddress[fromBlockchain],
-                lifiContractAbi,
-                'RubicPlatformFee'
-            )) / 10_000
-        );
-    }
-
-    private async getNetworkFee(
-        fromBlockchain: LifiCrossChainSupportedBlockchain
-    ): Promise<BigNumber> {
-        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-        const weiAmount = await web3PublicService.callContractMethod(
-            lifiContractAddress[fromBlockchain],
-            lifiContractAbi,
-            'fixedCryptoFee'
-        );
-
-        return Web3Pure.fromWei(weiAmount);
-    }
-
     private async checkContractState(fromBlockchain: LifiCrossChainSupportedBlockchain) {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 
         const isPaused = await web3PublicService.callContractMethod<number>(
-            lifiContractAddress[fromBlockchain],
-            lifiContractAbi,
+            lifiContractAddress[fromBlockchain].rubicRouter,
+            commonCrossChainAbi,
             'paused'
         );
 
@@ -215,5 +184,33 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         if (from.price.multipliedBy(from.tokenAmount).lt(this.MIN_AMOUNT_USD)) {
             throw new CrossChainMinAmountError(this.MIN_AMOUNT_USD, 'USDC');
         }
+    }
+
+    protected async getFeeInfo(
+        fromBlockchain: LifiCrossChainSupportedBlockchain,
+        providerAddress: string,
+        percentFeeToken: PriceTokenAmount
+    ): Promise<FeeInfo> {
+        return {
+            fixedFee: {
+                amount: await this.getFixedFee(
+                    fromBlockchain,
+                    providerAddress,
+                    lifiContractAddress[fromBlockchain].rubicRouter,
+                    commonCrossChainAbi
+                ),
+                tokenSymbol: nativeTokensList[fromBlockchain].symbol
+            },
+            platformFee: {
+                percent: await this.getFeePercent(
+                    fromBlockchain,
+                    providerAddress,
+                    lifiContractAddress[fromBlockchain].rubicRouter,
+                    commonCrossChainAbi
+                ),
+                tokenSymbol: percentFeeToken.symbol
+            },
+            cryptoFee: null
+        };
     }
 }

@@ -19,7 +19,6 @@ import {
 import BigNumber from 'bignumber.js';
 import { SymbiosisCrossChainTrade } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { SYMBIOSIS_CONTRACT_ABI } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-abi';
 import { SYMBIOSIS_CONTRACT_ADDRESS } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
 import { celerTransitTokens } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-transit-tokens';
 import { OneinchEthereumProvider } from '@rsdk-features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
@@ -27,10 +26,12 @@ import { OneinchBscProvider } from '@rsdk-features/instant-trades/dexes/bsc/onei
 import { OneinchPolygonProvider } from '@rsdk-features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
 import { OneinchAvalancheProvider } from '@rsdk-features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
 import { getSymbiosisConfig } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { CrossChainMinAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-min-amount.error';
 import { CrossChainMaxAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-max-amount.error';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -99,14 +100,17 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 decimals: from.decimals,
                 isNative: from.isNative
             });
-            const feePercent = await this.getFeePercent(fromBlockchain, options.providerAddress);
-            const fromAmountWithoutFee = from.tokenAmount
-                .multipliedBy(100 - feePercent)
-                .dividedBy(100);
-            const tokenAmountIn = new SymbiosisTokenAmount(
-                tokenIn,
-                Web3Pure.toWei(fromAmountWithoutFee, tokenIn.decimals, 1)
+
+            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+
+            const feeAmount = Web3Pure.toWei(
+                from.tokenAmount.multipliedBy(feeInfo.platformFee.percent).dividedBy(100),
+                from.decimals,
+                1
             );
+            const tokenInWithFee = from.weiAmount.minus(feeAmount).toFixed(0);
+
+            const tokenAmountIn = new SymbiosisTokenAmount(tokenIn, tokenInWithFee);
 
             const tokenOut = new SymbiosisToken({
                 chainId: BlockchainsInfo.getBlockchainByName(toBlockchain).id,
@@ -146,16 +150,18 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                     : null;
 
             const transitToken = celerTransitTokens[fromBlockchain];
-            const transitAmount = (
-                await this.oneInchService[fromBlockchain].calculate(
-                    from,
-                    new PriceTokenAmount({
-                        ...transitToken,
-                        price: new BigNumber(1),
-                        tokenAmount: new BigNumber(1)
-                    })
-                )
-            ).to.tokenAmount;
+            const transitAmount = compareAddresses(from.address, transitToken.address)
+                ? from.tokenAmount
+                : (
+                      await this.oneInchService[fromBlockchain].calculate(
+                          from,
+                          new PriceTokenAmount({
+                              ...transitToken,
+                              price: new BigNumber(1),
+                              tokenAmount: new BigNumber(1)
+                          })
+                      )
+                  ).to.tokenAmount;
 
             return {
                 trade: new SymbiosisCrossChainTrade(
@@ -166,11 +172,16 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                         gasData,
                         priceImpact: parseFloat(priceImpact.toFixed()),
                         slippage: options.slippageTolerance,
-                        fee: from.tokenAmount.minus(fromAmountWithoutFee),
-                        feeSymbol: from.symbol,
-                        feePercent,
-                        networkFee: new BigNumber(transitTokenFee.toFixed()),
-                        networkFeeSymbol: transitTokenFee.token.symbol || '',
+                        feeInfo: {
+                            ...feeInfo,
+                            cryptoFee: {
+                                amount: Web3Pure.fromWei(
+                                    transitTokenFee.toFixed(),
+                                    transitToken.decimals
+                                ),
+                                tokenSymbol: transitTokenFee.token.symbol || ''
+                            }
+                        },
                         transitAmount
                     },
                     options.providerAddress
@@ -188,34 +199,6 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 error: rubicSdkError
             };
         }
-    }
-
-    private async getFeePercent(
-        fromBlockchain: SymbiosisCrossChainSupportedBlockchain,
-        providerAddress: string
-    ): Promise<number> {
-        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-
-        if (providerAddress !== EMPTY_ADDRESS) {
-            return (
-                (await web3PublicService.callContractMethod<number>(
-                    SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain],
-                    SYMBIOSIS_CONTRACT_ABI,
-                    'integratorFee',
-                    {
-                        methodArguments: [providerAddress]
-                    }
-                )) / 10000
-            );
-        }
-
-        return (
-            (await web3PublicService.callContractMethod<number>(
-                SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain],
-                SYMBIOSIS_CONTRACT_ABI,
-                'RubicFee'
-            )) / 10000
-        );
     }
 
     private async checkMinMaxErrors(
@@ -278,13 +261,45 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 
         const isPaused = await web3PublicService.callContractMethod<number>(
-            SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain],
-            SYMBIOSIS_CONTRACT_ABI,
+            SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+            commonCrossChainAbi,
             'paused'
         );
 
         if (isPaused) {
             throw new CrossChainIsUnavailableError();
         }
+    }
+
+    protected async getFeeInfo(
+        fromBlockchain: SymbiosisCrossChainSupportedBlockchain,
+        providerAddress: string,
+        percentFeeToken: PriceTokenAmount
+    ): Promise<FeeInfo> {
+        const fixedFeeAmount = await this.getFixedFee(
+            fromBlockchain,
+            providerAddress,
+            SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+            commonCrossChainAbi
+        );
+
+        const feePercent = await this.getFeePercent(
+            fromBlockchain,
+            providerAddress,
+            SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+            commonCrossChainAbi
+        );
+
+        return {
+            fixedFee: {
+                amount: fixedFeeAmount,
+                tokenSymbol: nativeTokensList[fromBlockchain].symbol
+            },
+            platformFee: {
+                percent: feePercent,
+                tokenSymbol: percentFeeToken.symbol
+            },
+            cryptoFee: null
+        };
     }
 }
