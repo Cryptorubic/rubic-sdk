@@ -126,7 +126,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
             feeInfo: FeeInfo;
         },
         providerAddress: string,
-        public readonly maxSlippage: number
+        private readonly maxSlippage: number
     ) {
         super(providerAddress);
 
@@ -264,7 +264,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         };
     }
 
-    protected async calculateSwapValue(amountIn: BigNumber, data: unknown[]): Promise<number> {
+    private async calculateSwapValue(amountIn: BigNumber, data: unknown[]): Promise<number> {
         const contract = this.fromTrade.contract as CelerCrossChainContractData;
         const { isNative } = this.fromTrade.fromToken;
         const isBridge = this.fromTrade.fromToken.isEqualTo(this.fromTrade.toToken);
