@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "2.8.6",
+  "version": "2.9.0",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -52,7 +52,7 @@
   "scripts": {
     "build": "webpack",
     "start": "webpack --watch",
-    "compile": "npx rimraf lib && tsc --project tsconfig.json && tsc-alias -p ./tsconfig.json && tscpaths -p ./tsconfig.json -s ./src -o ./lib",
+    "compile": "npx rimraf lib && tsc --project tsconfig.json && tscpaths -p ./tsconfig.json -s ./src -o ./lib",
     "lint": "eslint src __tests__",
     "test": "cd ./scripts && bash test-runner.sh",
     "build:publish": "yarn compile && yarn build && npm publish --access public",
@@ -101,7 +101,6 @@
     "ts-essentials": "^9.0.0",
     "ts-jest": "^28.0.5",
     "ts-loader": "^9.3.0",
-    "tsc-alias": "^1.7.0",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "tscpaths": "^0.0.9",
     "typedoc": "^0.22.17",
