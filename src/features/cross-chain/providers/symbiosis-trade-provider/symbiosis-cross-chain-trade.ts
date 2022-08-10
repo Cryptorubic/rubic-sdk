@@ -158,6 +158,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
+        CrossChainTrade.checkReceiverAddress(options?.receiverAddress);
 
         const { onConfirm, gasLimit, gasPrice } = options;
         const { contractAddress, contractAbi, methodName, methodArguments, value } =

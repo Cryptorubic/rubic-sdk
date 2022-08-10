@@ -19,7 +19,7 @@ import {
 } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-fee-multipliers';
 import { CelerCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
 import { CelerItCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
-import { CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
+import { CROSS_CHAIN_TRADE_TYPE, CrossChainTrade, TradeType } from 'src/features';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { CelerDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
 
@@ -180,6 +180,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
+        CrossChainTrade.checkReceiverAddress(options?.receiverAddress);
 
         const { onConfirm, gasLimit, gasPrice } = options;
 
