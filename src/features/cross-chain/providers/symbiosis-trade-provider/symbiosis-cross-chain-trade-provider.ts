@@ -144,7 +144,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                     tokenOut,
                     fromAddress,
                     receiver || fromAddress,
-                    fromAddress,
+                    receiver || fromAddress,
                     slippageTolerance,
                     deadline,
                     true
