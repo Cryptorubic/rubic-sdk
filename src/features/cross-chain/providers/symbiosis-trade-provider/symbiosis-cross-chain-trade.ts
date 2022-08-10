@@ -190,7 +190,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    protected async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
+    public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
         const exactIn = await this.getSwapExactIn(options?.receiverAddress);
         const { data } = exactIn.transactionRequest;
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;

@@ -5,10 +5,10 @@ export { Web3Pure } from './blockchain/web3-pure/web3-pure';
 export { BlockchainsInfo } from './blockchain/blockchains-info';
 export { BlockchainName, BLOCKCHAIN_NAME } from './blockchain/models/blockchain-name';
 export { Configuration, RpcProvider, WalletProvider } from './sdk/models/configuration';
+export { Token } from './blockchain/tokens/token';
+export { PriceToken } from './blockchain/tokens/price-token';
+export { PriceTokenAmount } from './blockchain/tokens/price-token-amount';
 
-export type { Token } from './blockchain/tokens/token';
-export type { PriceToken } from './blockchain/tokens/price-token';
-export type { PriceTokenAmount } from './blockchain/tokens/price-token-amount';
 export type { BasicTransactionOptions } from './blockchain/models/basic-transaction-options';
 export type { Blockchain } from './blockchain/models/blockchain';
 export type { TokenBaseStruct } from './blockchain/models/token-base-struct';

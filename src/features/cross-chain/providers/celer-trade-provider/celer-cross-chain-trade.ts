@@ -27,7 +27,6 @@ import { CelerDirectCrossChainContractTrade } from 'src/features/cross-chain/pro
  * Calculated Celer cross chain trade.
  */
 export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
-    /** @internal */
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
 
     public readonly itType: { from: TradeType | undefined; to: TradeType | undefined };
@@ -231,7 +230,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         throw err;
     }
 
-    protected async getContractParams(
+    public async getContractParams(
         options: {
             fromAddress?: string;
             receiverAddress?: string;
