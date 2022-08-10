@@ -5,7 +5,6 @@ import {
     TradeType
 } from 'src/features';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
-import { TransactionRequest } from '@ethersproject/providers';
 import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { SYMBIOSIS_CONTRACT_ADDRESS } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
@@ -17,6 +16,7 @@ import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import BigNumber from 'bignumber.js';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { SwapExactIn } from 'symbiosis-js-sdk/dist/crosschain/baseSwapping';
 
 /**
  * Calculated Symbiosis cross chain trade.
@@ -30,8 +30,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount,
-        to: PriceTokenAmount,
-        transactionRequest: TransactionRequest
+        to: PriceTokenAmount
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const walletAddress = Injector.web3Private.address;
@@ -45,7 +44,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
                     {
                         from,
                         to,
-                        transactionRequest,
+                        swapFunction: () => new Promise(resolve => resolve),
                         gasData: null,
                         priceImpact: 0,
                         slippage: 0,
@@ -57,7 +56,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
                         transitAmount: new BigNumber(NaN)
                     },
                     EMPTY_ADDRESS
-                ).getContractParams();
+                ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasPrice] = await Promise.all([
@@ -103,7 +102,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
 
     public readonly gasData: GasData | null;
 
-    private readonly transactionRequest: TransactionRequest;
+    private readonly getSwapExactIn: (receiver?: string) => SwapExactIn;
 
     protected readonly fromWeb3Public: Web3Public;
 
@@ -119,7 +118,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         crossChainTrade: {
             from: PriceTokenAmount;
             to: PriceTokenAmount;
-            transactionRequest: TransactionRequest;
+            swapFunction: (receiver?: string) => SwapExactIn;
             gasData: GasData | null;
             priceImpact: number;
             slippage: number;
@@ -132,7 +131,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
-        this.transactionRequest = crossChainTrade.transactionRequest;
+        this.getSwapExactIn = crossChainTrade.swapFunction;
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
@@ -159,10 +158,11 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
+        CrossChainTrade.checkReceiverAddress(options?.receiverAddress);
 
         const { onConfirm, gasLimit, gasPrice } = options;
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams();
+            await this.getContractParams(options);
 
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
@@ -190,8 +190,9 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    public async getContractParams(): Promise<ContractParams> {
-        const data = await this.transactionRequest.data;
+    public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
+        const exactIn = await this.getSwapExactIn(options?.receiverAddress);
+        const { data } = exactIn.transactionRequest;
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
         const swapArguments = [
             this.from.address,
@@ -199,7 +200,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             toChainId,
             this.to.address,
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
-            this.walletAddress,
+            options?.receiverAddress || this.walletAddress,
             this.providerAddress,
             SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain].providerRouter
         ];
