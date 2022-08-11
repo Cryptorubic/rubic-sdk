@@ -190,13 +190,11 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     ): Promise<FeeInfo> {
         return {
             fixedFee: {
-                amount: Web3Pure.fromWei(
-                    await this.getFixedFee(
-                        fromBlockchain,
-                        providerAddress,
-                        lifiContractAddress[fromBlockchain].rubicRouter,
-                        commonCrossChainAbi
-                    )
+                amount: await this.getFixedFee(
+                    fromBlockchain,
+                    providerAddress,
+                    lifiContractAddress[fromBlockchain].rubicRouter,
+                    commonCrossChainAbi
                 ),
                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
             },

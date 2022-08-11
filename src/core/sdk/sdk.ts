@@ -45,12 +45,16 @@ export class SDK {
     /**
      * Can be used to get `Web3Public` instance by blockchain name to get public information from blockchain.
      */
-    public readonly web3PublicService = Injector.web3PublicService;
+    public get web3PublicService(): Web3PublicService {
+        return Injector.web3PublicService;
+    }
 
     /**
      * Can be used to send transactions and execute smart contracts methods.
      */
-    public readonly web3Private = Injector.web3Private;
+    public get web3Private(): Web3Private {
+        return Injector.web3Private;
+    }
 
     /**
      * Use it to get gas price information.

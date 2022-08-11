@@ -2,122 +2,26 @@ import { AbiItem } from 'web3-utils';
 
 export const celerCrossChainContractAbi: AbiItem[] = [
     {
-        inputs: [
-            { internalType: 'address', name: '_messageBus', type: 'address' },
-            { internalType: 'address[]', name: '_supportedDEXes', type: 'address[]' },
-            { internalType: 'address', name: '_nativeWrap', type: 'address' }
-        ],
-        stateMutability: 'nonpayable',
-        type: 'constructor'
+        inputs: [],
+        name: 'RubicPlatformFee',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function'
     },
     {
-        anonymous: false,
-        inputs: [
-            { indexed: false, internalType: 'bytes32', name: 'id', type: 'bytes32' },
-            { indexed: false, internalType: 'uint64', name: 'dstChainId', type: 'uint64' },
-            { indexed: false, internalType: 'uint256', name: 'srcAmount', type: 'uint256' },
-            { indexed: false, internalType: 'address', name: 'srcToken', type: 'address' }
-        ],
-        name: 'BridgeRequestSent',
-        type: 'event'
+        inputs: [],
+        name: 'messageBus',
+        outputs: [{ internalType: 'address', name: '', type: 'address' }],
+        stateMutability: 'view',
+        type: 'function'
     },
     {
-        anonymous: false,
-        inputs: [{ indexed: false, internalType: 'address', name: 'messageBus', type: 'address' }],
-        name: 'MessageBusUpdated',
-        type: 'event'
+        inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        name: 'blockchainToGasFee',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function'
     },
-    {
-        anonymous: false,
-        inputs: [{ indexed: false, internalType: 'address', name: 'account', type: 'address' }],
-        name: 'Paused',
-        type: 'event'
-    },
-    {
-        anonymous: false,
-        inputs: [
-            { indexed: true, internalType: 'bytes32', name: 'role', type: 'bytes32' },
-            { indexed: true, internalType: 'bytes32', name: 'previousAdminRole', type: 'bytes32' },
-            { indexed: true, internalType: 'bytes32', name: 'newAdminRole', type: 'bytes32' }
-        ],
-        name: 'RoleAdminChanged',
-        type: 'event'
-    },
-    {
-        anonymous: false,
-        inputs: [
-            { indexed: true, internalType: 'bytes32', name: 'role', type: 'bytes32' },
-            { indexed: true, internalType: 'address', name: 'account', type: 'address' },
-            { indexed: true, internalType: 'address', name: 'sender', type: 'address' }
-        ],
-        name: 'RoleGranted',
-        type: 'event'
-    },
-    {
-        anonymous: false,
-        inputs: [
-            { indexed: true, internalType: 'bytes32', name: 'role', type: 'bytes32' },
-            { indexed: true, internalType: 'address', name: 'account', type: 'address' },
-            { indexed: true, internalType: 'address', name: 'sender', type: 'address' }
-        ],
-        name: 'RoleRevoked',
-        type: 'event'
-    },
-    {
-        anonymous: false,
-        inputs: [
-            { indexed: false, internalType: 'bytes32', name: 'id', type: 'bytes32' },
-            { indexed: false, internalType: 'uint256', name: 'dstAmount', type: 'uint256' },
-            {
-                indexed: false,
-                internalType: 'enum SwapBase.SwapStatus',
-                name: 'status',
-                type: 'uint8'
-            }
-        ],
-        name: 'SwapRequestDone',
-        type: 'event'
-    },
-    {
-        anonymous: false,
-        inputs: [
-            { indexed: false, internalType: 'bytes32', name: 'id', type: 'bytes32' },
-            { indexed: false, internalType: 'uint64', name: 'dstChainId', type: 'uint64' },
-            { indexed: false, internalType: 'uint256', name: 'srcAmount', type: 'uint256' },
-            { indexed: false, internalType: 'address', name: 'srcToken', type: 'address' }
-        ],
-        name: 'SwapRequestSentInch',
-        type: 'event'
-    },
-    {
-        anonymous: false,
-        inputs: [
-            { indexed: false, internalType: 'bytes32', name: 'id', type: 'bytes32' },
-            { indexed: false, internalType: 'uint64', name: 'dstChainId', type: 'uint64' },
-            { indexed: false, internalType: 'uint256', name: 'srcAmount', type: 'uint256' },
-            { indexed: false, internalType: 'address', name: 'srcToken', type: 'address' }
-        ],
-        name: 'SwapRequestSentV2',
-        type: 'event'
-    },
-    {
-        anonymous: false,
-        inputs: [
-            { indexed: false, internalType: 'bytes32', name: 'id', type: 'bytes32' },
-            { indexed: false, internalType: 'uint64', name: 'dstChainId', type: 'uint64' },
-            { indexed: false, internalType: 'uint256', name: 'srcAmount', type: 'uint256' },
-            { indexed: false, internalType: 'address', name: 'srcToken', type: 'address' }
-        ],
-        name: 'SwapRequestSentV3',
-        type: 'event'
-    },
-    {
-        anonymous: false,
-        inputs: [{ indexed: false, internalType: 'address', name: 'account', type: 'address' }],
-        name: 'Unpaused',
-        type: 'event'
-    },
-    { stateMutability: 'payable', type: 'fallback' },
     {
         inputs: [
             { internalType: 'address', name: '_receiver', type: 'address' },
@@ -127,6 +31,8 @@ export const celerCrossChainContractAbi: AbiItem[] = [
             {
                 components: [
                     { internalType: 'address', name: 'dex', type: 'address' },
+                    { internalType: 'bool', name: 'nativeOut', type: 'bool' },
+                    { internalType: 'address', name: 'receiverEOA', type: 'address' },
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'enum SwapBase.SwapVersion', name: 'version', type: 'uint8' },
                     { internalType: 'address[]', name: 'path', type: 'address[]' },
@@ -154,6 +60,8 @@ export const celerCrossChainContractAbi: AbiItem[] = [
             {
                 components: [
                     { internalType: 'address', name: 'dex', type: 'address' },
+                    { internalType: 'bool', name: 'nativeOut', type: 'bool' },
+                    { internalType: 'address', name: 'receiverEOA', type: 'address' },
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'enum SwapBase.SwapVersion', name: 'version', type: 'uint8' },
                     { internalType: 'address[]', name: 'path', type: 'address[]' },
@@ -173,137 +81,35 @@ export const celerCrossChainContractAbi: AbiItem[] = [
         type: 'function'
     },
     {
-        inputs: [{ internalType: 'address', name: '', type: 'address' }],
-        name: 'collectedFee',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function'
-    },
-    {
-        inputs: [{ internalType: 'uint64', name: '', type: 'uint64' }],
-        name: 'dstCryptoFee',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function'
-    },
-    {
-        inputs: [
-            { internalType: 'address', name: '_sender', type: 'address' },
-            { internalType: 'uint64', name: '_srcChainId', type: 'uint64' },
-            { internalType: 'bytes', name: '_message', type: 'bytes' },
-            { internalType: 'address', name: '_executor', type: 'address' }
-        ],
-        name: 'executeMessage',
-        outputs: [
-            { internalType: 'enum IMessageReceiverApp.ExecutionStatus', name: '', type: 'uint8' }
-        ],
-        stateMutability: 'payable',
-        type: 'function'
-    },
-    {
-        inputs: [
-            { internalType: 'address', name: '', type: 'address' },
-            { internalType: 'address', name: '_token', type: 'address' },
-            { internalType: 'uint256', name: '_amount', type: 'uint256' },
-            { internalType: 'uint64', name: '_srcChainId', type: 'uint64' },
-            { internalType: 'bytes', name: '_message', type: 'bytes' },
-            { internalType: 'address', name: '_executor', type: 'address' }
-        ],
-        name: 'executeMessageWithTransfer',
-        outputs: [
-            { internalType: 'enum IMessageReceiverApp.ExecutionStatus', name: '', type: 'uint8' }
-        ],
-        stateMutability: 'payable',
-        type: 'function'
-    },
-    {
-        inputs: [
-            { internalType: 'address', name: '', type: 'address' },
-            { internalType: 'address', name: '_token', type: 'address' },
-            { internalType: 'uint256', name: '_amount', type: 'uint256' },
-            { internalType: 'uint64', name: '_srcChainId', type: 'uint64' },
-            { internalType: 'bytes', name: '_message', type: 'bytes' },
-            { internalType: 'address', name: '_executor', type: 'address' }
-        ],
-        name: 'executeMessageWithTransferFallback',
-        outputs: [
-            { internalType: 'enum IMessageReceiverApp.ExecutionStatus', name: '', type: 'uint8' }
-        ],
-        stateMutability: 'payable',
-        type: 'function'
-    },
-    {
-        inputs: [
-            { internalType: 'address', name: '_token', type: 'address' },
-            { internalType: 'uint256', name: '_amount', type: 'uint256' },
-            { internalType: 'bytes', name: '_message', type: 'bytes' },
-            { internalType: 'address', name: '_executor', type: 'address' }
-        ],
-        name: 'executeMessageWithTransferRefund',
-        outputs: [
-            { internalType: 'enum IMessageReceiverApp.ExecutionStatus', name: '', type: 'uint8' }
-        ],
-        stateMutability: 'payable',
-        type: 'function'
-    },
-    {
         inputs: [],
-        name: 'feeRubic',
+        name: 'fixedCryptoFee',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function'
     },
     {
-        inputs: [],
-        name: 'getSupportedDEXes',
-        outputs: [{ internalType: 'address[]', name: 'dexes', type: 'address[]' }],
-        stateMutability: 'view',
-        type: 'function'
-    },
-    {
-        inputs: [
-            { internalType: 'address', name: '_token', type: 'address' },
-            { internalType: 'uint256', name: '_amount', type: 'uint256' }
+        inputs: [{ internalType: 'address', name: '', type: 'address' }],
+        name: 'integratorToFeeInfo',
+        outputs: [
+            { internalType: 'bool', name: 'isIntegrator', type: 'bool' },
+            { internalType: 'uint32', name: 'tokenFee', type: 'uint32' },
+            { internalType: 'uint32', name: 'RubicTokenShare', type: 'uint32' },
+            { internalType: 'uint32', name: 'RubicFixedCryptoShare', type: 'uint32' },
+            { internalType: 'uint128', name: 'fixedFeeAmount', type: 'uint128' }
         ],
-        name: 'integratorCollectFee',
-        outputs: [],
-        stateMutability: 'nonpayable',
+        stateMutability: 'view',
         type: 'function'
     },
     {
-        inputs: [
-            { internalType: 'address', name: '', type: 'address' },
-            { internalType: 'address', name: '', type: 'address' }
-        ],
-        name: 'integratorCollectedFee',
+        inputs: [{ internalType: 'address', name: '', type: 'address' }],
+        name: 'maxTokenAmount',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function'
     },
     {
         inputs: [{ internalType: 'address', name: '', type: 'address' }],
-        name: 'integratorFee',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function'
-    },
-    {
-        inputs: [{ internalType: 'address', name: '', type: 'address' }],
-        name: 'maxSwapAmount',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function'
-    },
-    {
-        inputs: [],
-        name: 'messageBus',
-        outputs: [{ internalType: 'address', name: '', type: 'address' }],
-        stateMutability: 'view',
-        type: 'function'
-    },
-    {
-        inputs: [{ internalType: 'address', name: '', type: 'address' }],
-        name: 'minSwapAmount',
+        name: 'minTokenAmount',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function'
@@ -317,26 +123,9 @@ export const celerCrossChainContractAbi: AbiItem[] = [
     },
     {
         inputs: [],
-        name: 'nonce',
-        outputs: [{ internalType: 'uint64', name: '', type: 'uint64' }],
-        stateMutability: 'view',
-        type: 'function'
-    },
-    {
-        inputs: [],
         name: 'paused',
         outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
         stateMutability: 'view',
-        type: 'function'
-    },
-    {
-        inputs: [
-            { internalType: 'address', name: '_token', type: 'address' },
-            { internalType: 'uint256', name: '_amount', type: 'uint256' }
-        ],
-        name: 'sweepTokens',
-        outputs: [],
-        stateMutability: 'nonpayable',
         type: 'function'
     },
     {
@@ -358,6 +147,8 @@ export const celerCrossChainContractAbi: AbiItem[] = [
             {
                 components: [
                     { internalType: 'address', name: 'dex', type: 'address' },
+                    { internalType: 'bool', name: 'nativeOut', type: 'bool' },
+                    { internalType: 'address', name: 'receiverEOA', type: 'address' },
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'enum SwapBase.SwapVersion', name: 'version', type: 'uint8' },
                     { internalType: 'address[]', name: 'path', type: 'address[]' },
@@ -395,6 +186,8 @@ export const celerCrossChainContractAbi: AbiItem[] = [
             {
                 components: [
                     { internalType: 'address', name: 'dex', type: 'address' },
+                    { internalType: 'bool', name: 'nativeOut', type: 'bool' },
+                    { internalType: 'address', name: 'receiverEOA', type: 'address' },
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'enum SwapBase.SwapVersion', name: 'version', type: 'uint8' },
                     { internalType: 'address[]', name: 'path', type: 'address[]' },
@@ -432,6 +225,8 @@ export const celerCrossChainContractAbi: AbiItem[] = [
             {
                 components: [
                     { internalType: 'address', name: 'dex', type: 'address' },
+                    { internalType: 'bool', name: 'nativeOut', type: 'bool' },
+                    { internalType: 'address', name: 'receiverEOA', type: 'address' },
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'enum SwapBase.SwapVersion', name: 'version', type: 'uint8' },
                     { internalType: 'address[]', name: 'path', type: 'address[]' },
@@ -469,6 +264,8 @@ export const celerCrossChainContractAbi: AbiItem[] = [
             {
                 components: [
                     { internalType: 'address', name: 'dex', type: 'address' },
+                    { internalType: 'bool', name: 'nativeOut', type: 'bool' },
+                    { internalType: 'address', name: 'receiverEOA', type: 'address' },
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'enum SwapBase.SwapVersion', name: 'version', type: 'uint8' },
                     { internalType: 'address[]', name: 'path', type: 'address[]' },
@@ -506,6 +303,8 @@ export const celerCrossChainContractAbi: AbiItem[] = [
             {
                 components: [
                     { internalType: 'address', name: 'dex', type: 'address' },
+                    { internalType: 'bool', name: 'nativeOut', type: 'bool' },
+                    { internalType: 'address', name: 'receiverEOA', type: 'address' },
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'enum SwapBase.SwapVersion', name: 'version', type: 'uint8' },
                     { internalType: 'address[]', name: 'path', type: 'address[]' },
@@ -543,6 +342,8 @@ export const celerCrossChainContractAbi: AbiItem[] = [
             {
                 components: [
                     { internalType: 'address', name: 'dex', type: 'address' },
+                    { internalType: 'bool', name: 'nativeOut', type: 'bool' },
+                    { internalType: 'address', name: 'receiverEOA', type: 'address' },
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'enum SwapBase.SwapVersion', name: 'version', type: 'uint8' },
                     { internalType: 'address[]', name: 'path', type: 'address[]' },
@@ -563,8 +364,14 @@ export const celerCrossChainContractAbi: AbiItem[] = [
     },
     {
         inputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
-        name: 'txStatusById',
-        outputs: [{ internalType: 'enum SwapBase.SwapStatus', name: '', type: 'uint8' }],
+        name: 'processedTransactions',
+        outputs: [
+            {
+                internalType: 'enum WithDestinationFunctionality.SwapStatus',
+                name: '',
+                type: 'uint8'
+            }
+        ],
         stateMutability: 'view',
         type: 'function'
     }

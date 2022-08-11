@@ -18,7 +18,8 @@ import {
 import { Cache, UnnecessaryApproveError } from 'src/common';
 import { TradeType } from 'src/features';
 import { parseError } from '@rsdk-common/utils/errors';
-import { Token } from 'src/core';
+import { Token, TransactionOptions } from 'src/core';
+import BigNumber from 'bignumber.js';
 
 /**
  * Abstract class for all instant trade providers' trades.
@@ -130,6 +131,23 @@ export abstract class InstantTrade {
             approveAmount,
             options
         );
+    }
+
+    /**
+     * Build encoded approve transaction config.
+     * @param tokenAddress Address of the smart-contract corresponding to the token.
+     * @param spenderAddress Wallet or contract address to approve.
+     * @param value Token amount to approve in wei.
+     * @param [options] Additional options.
+     * @returns Encoded approve transaction config.
+     */
+    public async encodeApprove(
+        tokenAddress: string,
+        spenderAddress: string,
+        value: BigNumber | 'infinity',
+        options: TransactionOptions = {}
+    ): Promise<TransactionConfig> {
+        return Injector.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
     }
 
     protected async checkAllowanceAndApprove(

@@ -130,7 +130,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
                 fromTokenAddress,
                 toTokenAddress: toToken.address,
                 amount: from.stringWeiAmount,
-                mainRouteParts: options.disableMultihops ? '1' : undefined
+                ...(options.disableMultihops && { mainRouteParts: '1' })
             }
         };
 

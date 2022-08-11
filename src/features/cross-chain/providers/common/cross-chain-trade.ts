@@ -2,6 +2,7 @@ import {
     BasicTransactionOptions,
     BLOCKCHAIN_NAME,
     PriceTokenAmount,
+    TransactionOptions,
     Web3Public,
     Web3Pure
 } from 'src/core';
@@ -19,11 +20,26 @@ import { TransactionReceipt } from 'web3-eth';
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { TransactionConfig } from 'web3-core';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { WrongReceiverAddressError } from 'src/common/errors/blockchain/wrong-receiver-address.error';
 
 /**
  * Abstract class for all cross chain providers' trades.
  */
 export abstract class CrossChainTrade {
+    /**
+     * Checks receiver address for correctness.
+     * @param receiverAddress
+     */
+    public static checkReceiverAddress(receiverAddress: string | undefined): void {
+        if (!receiverAddress) {
+            return;
+        }
+        if (Web3Pure.isAddressCorrect(receiverAddress)) {
+            return;
+        }
+        throw new WrongReceiverAddressError();
+    }
+
     /**
      * Type of calculated cross chain trade.
      */
@@ -100,7 +116,10 @@ export abstract class CrossChainTrade {
      */
     public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
 
-    protected abstract getContractParams(fromAddress?: string): Promise<ContractParams>;
+    public abstract getContractParams(options: {
+        fromAddress?: string;
+        receiverAddress?: string;
+    }): Promise<ContractParams>;
 
     /**
      * Returns true, if allowance is not enough.
@@ -153,6 +172,23 @@ export abstract class CrossChainTrade {
         );
     }
 
+    /**
+     * Build encoded approve transaction config.
+     * @param tokenAddress Address of the smart-contract corresponding to the token.
+     * @param spenderAddress Wallet or contract address to approve.
+     * @param value Token amount to approve in wei.
+     * @param [options] Additional options.
+     * @returns Encoded approve transaction config.
+     */
+    public async encodeApprove(
+        tokenAddress: string,
+        spenderAddress: string,
+        value: BigNumber | 'infinity',
+        options: TransactionOptions = {}
+    ): Promise<TransactionConfig> {
+        return Injector.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
+    }
+
     protected async checkAllowanceAndApprove(
         options?: Omit<SwapTransactionOptions, 'onConfirm'>
     ): Promise<void> {
@@ -178,7 +214,7 @@ export abstract class CrossChainTrade {
         const { gasLimit, gasPrice } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams(options.fromAddress);
+            await this.getContractParams({ fromAddress: options?.fromAddress });
 
         return Web3Pure.encodeMethodCall(
             contractAddress,
