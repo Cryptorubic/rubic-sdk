@@ -298,7 +298,7 @@ export class CrossChainStatusManager {
                 return CrossChainTxStatus.FAIL;
             }
 
-            if (dstTxStatus === CelerSwapStatus.SUCСESS) {
+            if (dstTxStatus === CelerSwapStatus.SUCCESS) {
                 return CrossChainTxStatus.SUCCESS;
             }
 
