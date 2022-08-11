@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import {
     CROSS_CHAIN_TRADE_TYPE,
+    Li_FI_TRADE_SUBTYPE,
     SwapTransactionOptions,
     TRADE_TYPE,
     TradeType
@@ -57,7 +58,8 @@ export class LifiCrossChainTrade extends CrossChainTrade {
                         itType: {
                             from: TRADE_TYPE.ONE_INCH,
                             to: TRADE_TYPE.ONE_INCH
-                        }
+                        },
+                        subType: Li_FI_TRADE_SUBTYPE.CONNEXT
                     },
                     EMPTY_ADDRESS
                 ).getContractParams({});
@@ -126,6 +128,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             feeInfo: FeeInfo;
             priceImpact: number;
             itType: { from: TradeType | undefined; to: TradeType | undefined };
+            subType: LiFiTradeSubtype;
         },
         providerAddress: string
     ) {
@@ -136,7 +139,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         this.route = crossChainTrade.route;
         this.gasData = crossChainTrade.gasData;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
-        this.subType = this.route?.steps?.[0]?.tool as LiFiTradeSubtype;
+        this.subType = crossChainTrade.subType;
         this.feeInfo = crossChainTrade.feeInfo;
 
         this.priceImpact = crossChainTrade.priceImpact;
