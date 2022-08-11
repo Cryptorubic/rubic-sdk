@@ -128,7 +128,6 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
 
             const {
                 tokenAmountOut,
-                transactionRequest,
                 priceImpact,
                 fee: transitTokenFee
             } = await swapping.exactIn(
@@ -141,6 +140,17 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 deadline,
                 true
             );
+            const swapFunction = (receiver?: string) =>
+                swapping.exactIn(
+                    tokenAmountIn,
+                    tokenOut,
+                    fromAddress,
+                    receiver || fromAddress,
+                    receiver || fromAddress,
+                    slippageTolerance,
+                    deadline,
+                    true
+                );
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: new BigNumber(tokenAmountOut.toFixed())
@@ -148,7 +158,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await SymbiosisCrossChainTrade.getGasData(from, to, transactionRequest)
+                    ? await SymbiosisCrossChainTrade.getGasData(from, to)
                     : null;
 
             const transitToken = symbiosisTransitTokens[fromBlockchain];
@@ -170,7 +180,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                     {
                         from,
                         to,
-                        transactionRequest,
+                        swapFunction,
                         gasData,
                         priceImpact: parseFloat(priceImpact.toFixed()),
                         slippage: options.slippageTolerance,
@@ -278,25 +288,27 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         providerAddress: string,
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
+        const fixedFeeAmount = await this.getFixedFee(
+            fromBlockchain,
+            providerAddress,
+            SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+            commonCrossChainAbi
+        );
+
+        const feePercent = await this.getFeePercent(
+            fromBlockchain,
+            providerAddress,
+            SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+            commonCrossChainAbi
+        );
+
         return {
             fixedFee: {
-                amount: Web3Pure.fromWei(
-                    await this.getFixedFee(
-                        fromBlockchain,
-                        providerAddress,
-                        SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-                        commonCrossChainAbi
-                    )
-                ),
+                amount: fixedFeeAmount,
                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
             },
             platformFee: {
-                percent: await this.getFeePercent(
-                    fromBlockchain,
-                    providerAddress,
-                    SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-                    commonCrossChainAbi
-                ),
+                percent: feePercent,
                 tokenSymbol: percentFeeToken.symbol
             },
             cryptoFee: null

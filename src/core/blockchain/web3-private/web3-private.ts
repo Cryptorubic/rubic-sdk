@@ -14,6 +14,7 @@ import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swa
 import { Web3Pure } from 'src/core';
 import { LowSlippageError } from 'src/common';
 import { parseError } from 'src/common/utils/errors';
+import { TransactionConfig } from 'web3-core';
 
 /**
  * Class containing methods for executing the functions of contracts
@@ -243,6 +244,45 @@ export class Web3Private {
                     reject(Web3Private.parseError(err));
                 });
         });
+    }
+
+    /**
+     * Build encoded approve transaction config.
+     * @param tokenAddress Address of the smart-contract corresponding to the token.
+     * @param spenderAddress Wallet or contract address to approve.
+     * @param value Token amount to approve in wei.
+     * @param [options] Additional options.
+     * @returns Encoded approve transaction config.
+     */
+    public async encodeApprove(
+        tokenAddress: string,
+        spenderAddress: string,
+        value: BigNumber | 'infinity',
+        options: TransactionOptions = {}
+    ): Promise<TransactionConfig> {
+        const rawValue = value === 'infinity' ? new BigNumber(2).pow(256).minus(1) : value;
+        const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
+
+        let { gas } = options;
+        if (!gas) {
+            gas = await contract.methods.approve(spenderAddress, rawValue.toFixed(0)).estimateGas({
+                from: this.address
+            });
+        }
+
+        return Web3Pure.encodeMethodCall(
+            tokenAddress,
+            ERC20_TOKEN_ABI,
+            'approve',
+            [spenderAddress, rawValue.toFixed(0)],
+            undefined,
+            {
+                ...(gas && { gas: Web3Private.stringifyAmount(gas) }),
+                ...(options.gasPrice && {
+                    gasPrice: Web3Private.stringifyAmount(options.gasPrice)
+                })
+            }
+        );
     }
 
     /**

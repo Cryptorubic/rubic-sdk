@@ -169,9 +169,12 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
         ]);
     }
 
-    protected async getContractParams(
-        fromAddress?: string,
-        swapTokenWithFee = false
+    public async getContractParams(
+        options: {
+            fromAddress?: string;
+            swapTokenWithFee?: boolean;
+            receiverAddress?: string;
+        } = {}
     ): Promise<ContractParams> {
         const { fromTrade, toTrade } = this;
 
@@ -181,10 +184,11 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
 
         const methodArguments = await fromTrade.getMethodArguments(
             toTrade,
-            fromAddress || this.walletAddress,
+            options?.fromAddress || this.walletAddress,
             this.providerAddress,
             {
-                swapTokenWithFee
+                swapTokenWithFee: options?.swapTokenWithFee || false,
+                receiverAddress: options?.receiverAddress || this.walletAddress
             }
         );
 
@@ -232,7 +236,7 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
         const { onConfirm, gasLimit, gasPrice } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams(this.walletAddress, swapTokenWithFee);
+            await this.getContractParams({ fromAddress: this.walletAddress, swapTokenWithFee });
 
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {

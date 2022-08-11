@@ -1,4 +1,9 @@
-import { CROSS_CHAIN_TRADE_TYPE, TRADE_TYPE, TradeType } from 'src/features';
+import {
+    CROSS_CHAIN_TRADE_TYPE,
+    TRADE_TYPE,
+    TradeType,
+    UniswapV2AbstractProvider
+} from 'src/features';
 import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
 import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
@@ -23,6 +28,13 @@ import { CelerRubicCrossChainTradeProvider } from '@rsdk-features/cross-chain/pr
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { LowToSlippageError } from '@rsdk-common/errors/cross-chain/low-to-slippage.error';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { celerCrossChainContractAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
+import { celerTransitTokens } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-transit-tokens';
+
+interface CelerCrossChainOptions extends RequiredCrossChainOptions {
+    isUniV2?: boolean;
+}
 
 export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -50,7 +62,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
     public async calculate(
         from: PriceTokenAmount,
         to: PriceToken,
-        options: RequiredCrossChainOptions
+        options: CelerCrossChainOptions
     ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = to.blockchain;
@@ -83,7 +95,8 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             fromBlockchain,
             from,
             fromTransitToken,
-            slippages.fromSlippageTolerance
+            slippages.fromSlippageTolerance,
+            options.isUniV2
         );
 
         const celerSlippage = await this.fetchCelerSlippage(
@@ -129,18 +142,27 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             toTransit,
             to,
             toSlippageTolerance,
+            options.isUniV2,
             [TRADE_TYPE.ONE_INCH]
         );
 
         let cryptoFeeToken = await fromTrade.contract.getCryptoFeeToken(toTrade.contract);
-        const nativeTokenPrice = (
-            await this.getBestItContractTrade(
-                fromBlockchain,
-                cryptoFeeToken,
-                fromTransitToken,
-                fromSlippageTolerance
-            )
-        ).toToken.tokenAmount;
+        let nativeTokenPrice = new BigNumber(0);
+
+        if (cryptoFeeToken.tokenAmount.gt(0)) {
+            nativeTokenPrice = (
+                await this.getBestItContractTrade(
+                    fromBlockchain,
+                    new PriceTokenAmount({
+                        ...cryptoFeeToken,
+                        tokenAmount: Web3Pure.fromWei('1'),
+                        price: new BigNumber(0)
+                    }),
+                    fromTransitToken,
+                    fromSlippageTolerance
+                )
+            ).toToken.tokenAmount;
+        }
         cryptoFeeToken = new PriceTokenAmount({
             ...cryptoFeeToken.asStructWithAmount,
             price: nativeTokenPrice.dividedBy(cryptoFeeToken.tokenAmount)
@@ -164,14 +186,13 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                 transitFeeToken,
                 gasData,
                 feeInPercents,
-                feeInfo: {
-                    fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
-                    platformFee: { percent: feeInPercents, tokenSymbol: transitFeeToken.symbol },
-                    cryptoFee: {
-                        amount: cryptoFeeToken.tokenAmount,
-                        tokenSymbol: cryptoFeeToken.symbol
-                    }
-                }
+                feeInfo: await this.getCelerFeeInfo(
+                    feeInPercents,
+                    transitFeeToken,
+                    cryptoFeeToken,
+                    from,
+                    providerAddress
+                )
             },
             providerAddress,
             Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())
@@ -273,6 +294,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         from: PriceTokenAmount,
         toToken: PriceToken,
         slippageTolerance: number,
+        isUniV2?: boolean,
         disabledProviders?: TradeType[]
     ): Promise<CelerCrossChainContractTrade> {
         if (compareAddresses(from.address, toToken.address)) {
@@ -289,6 +311,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             from,
             toToken,
             slippageTolerance,
+            isUniV2,
             disabledProviders
         );
     }
@@ -320,11 +343,13 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         from: PriceTokenAmount,
         toToken: PriceToken,
         slippageTolerance: number,
+        isUniV2?: boolean,
         disabledProviders?: TradeType[]
     ): Promise<CelerItCrossChainContractTrade> {
         const contract = this.contracts(blockchain);
         const promises: Promise<ItCalculatedTrade>[] = contract.providersData
             .filter(data => !disabledProviders?.some(provider => provider === data.provider.type))
+            .filter(data => !isUniV2 || data.provider instanceof UniswapV2AbstractProvider)
             .map(async (_, providerIndex) => {
                 return this.getItCalculatedTrade(
                     contract,
@@ -365,5 +390,33 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             slippageTolerance,
             bestTrade.instantTrade
         );
+    }
+
+    private async getCelerFeeInfo(
+        feeInPercents: number,
+        transitFeeToken: PriceTokenAmount,
+        cryptoFeeToken: PriceTokenAmount,
+        from: PriceTokenAmount,
+        providerAddress: string
+    ): Promise<FeeInfo> {
+        const fromBlockchain = from.blockchain as CelerCrossChainSupportedBlockchain;
+        const contractAddress = this.contracts(fromBlockchain).address;
+        const fixedFee = {
+            amount: await this.getFixedFee(
+                fromBlockchain,
+                providerAddress,
+                contractAddress,
+                celerCrossChainContractAbi
+            ),
+            tokenSymbol: celerTransitTokens[fromBlockchain].symbol
+        };
+        return {
+            fixedFee,
+            platformFee: { percent: feeInPercents, tokenSymbol: transitFeeToken.symbol },
+            cryptoFee: {
+                amount: cryptoFeeToken.tokenAmount,
+                tokenSymbol: cryptoFeeToken.symbol
+            }
+        };
     }
 }

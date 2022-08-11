@@ -3,13 +3,7 @@ import { SushiSwapEthereumProvider } from '@rsdk-features/instant-trades/dexes/e
 import { UniSwapV3EthereumProvider } from '@rsdk-features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
 import { OneinchEthereumProvider } from '@rsdk-features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
 import { PancakeSwapProvider } from '@rsdk-features/instant-trades/dexes/bsc/pancake-swap/pancake-swap-provider';
-import { SushiSwapBscProvider } from '@rsdk-features/instant-trades/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
-import { OneinchBscProvider } from '@rsdk-features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
 import { QuickSwapProvider } from '@rsdk-features/instant-trades/dexes/polygon/quick-swap/quick-swap-provider';
-import { SushiSwapPolygonProvider } from '@rsdk-features/instant-trades/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
-import { UniSwapV3PolygonProvider } from '@rsdk-features/instant-trades/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
-import { AlgebraProvider } from '@rsdk-features/instant-trades/dexes/polygon/algebra/algebra-provider';
-import { OneinchPolygonProvider } from '@rsdk-features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
 import { PangolinProvider } from '@rsdk-features/instant-trades/dexes/avalanche/pangolin/pangolin-provider';
 import { JoeProvider } from '@rsdk-features/instant-trades/dexes/avalanche/joe/joe-provider';
 import { SushiSwapAvalancheProvider } from '@rsdk-features/instant-trades/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
@@ -32,6 +26,12 @@ import { SushiSwapTelosProvider } from '@rsdk-features/instant-trades/dexes/telo
 import { ZappyProvider } from '@rsdk-features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
 import { OneinchFantomProvider } from 'src/features/instant-trades/dexes/fantom/oneinch-fantom/oneinch-fantom-provider';
 import { OneinchAvalancheProvider } from 'src/features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
+import { UniSwapV3PolygonProvider } from 'src/features/instant-trades/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
+import { SushiSwapBscProvider } from 'src/features/instant-trades/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
+import { OneinchBscProvider } from 'src/features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
+import { AlgebraProvider } from 'src/features/instant-trades/dexes/polygon/algebra/algebra-provider';
+import { OneinchPolygonProvider } from 'src/features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
+import { SushiSwapPolygonProvider } from 'src/features/instant-trades/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
 
 /**
  * Stores contracts info.
