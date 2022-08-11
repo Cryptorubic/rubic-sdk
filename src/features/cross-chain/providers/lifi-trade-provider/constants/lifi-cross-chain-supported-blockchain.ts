@@ -13,7 +13,8 @@ export const lifiCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.OKE_X_CHAIN,
     BLOCKCHAIN_NAME.GNOSIS,
     BLOCKCHAIN_NAME.FUSE,
-    BLOCKCHAIN_NAME.MOONBEAM
+    BLOCKCHAIN_NAME.MOONBEAM,
+    BLOCKCHAIN_NAME.CELO
 ] as const;
 
 export type LifiCrossChainSupportedBlockchain = typeof lifiCrossChainSupportedBlockchains[number];
