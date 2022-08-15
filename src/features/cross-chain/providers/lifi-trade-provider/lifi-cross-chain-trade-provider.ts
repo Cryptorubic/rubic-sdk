@@ -1,11 +1,11 @@
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
-import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
+import { CROSS_CHAIN_TRADE_TYPE, LiFiTradeSubtype, TradeType } from 'src/features';
+import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
 import BigNumber from 'bignumber.js';
 import {
     LifiCrossChainSupportedBlockchain,
     lifiCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
-import LIFI, { RouteOptions } from '@lifi/sdk';
+import LIFI, { Route, RouteOptions } from '@lifi/sdk';
 import { LifiCrossChainTrade } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade';
 import { Injector } from 'src/core/sdk/injector';
 import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
@@ -72,14 +72,20 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         );
         const tokenAmountIn = from.weiAmount.minus(feeAmount).toFixed(0);
 
-        const routeOptions: RouteOptions = {
+        let routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
             order: 'RECOMMENDED',
-            allowSwitchChain: false,
-            bridges: {
-                deny: ['multichain'] // @TODO remove after whitelisting
-            }
+            allowSwitchChain: false
         };
+        // @TODO remove after whitelisting
+        if (fromBlockchain === BLOCKCHAIN_NAME.CRONOS || toBlockchain === BLOCKCHAIN_NAME.CRONOS) {
+            routeOptions = {
+                ...routeOptions,
+                bridges: {
+                    deny: ['multichain']
+                }
+            };
+        }
 
         const fromChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id;
         const toChainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id;
@@ -122,21 +128,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
                 ? await LifiCrossChainTrade.getGasData(from, to, bestRoute)
                 : null;
 
-        const steps = (bestRoute.steps[0] as LifiStep).includedSteps;
-        const sourceDex =
-            steps?.[0] && steps[0].action.fromChainId === steps[0].action.toChainId
-                ? steps?.[0].tool
-                : undefined;
-
-        const [, ...stepsWithoutFirst] = steps;
-        const targetDex = stepsWithoutFirst.find(
-            provider => provider.action.fromChainId === provider.action.toChainId
-        )?.tool;
-
-        const itType = {
-            from: sourceDex ? lifiProviders[sourceDex] : undefined,
-            to: targetDex ? lifiProviders[targetDex] : undefined
-        };
+        const { itType, subType } = this.parseTradeTypes(bestRoute);
 
         const trade = new LifiCrossChainTrade(
             {
@@ -147,7 +139,8 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
                 toTokenAmountMin: Web3Pure.fromWei(bestRoute.toAmountMin, to.decimals),
                 feeInfo,
                 priceImpact,
-                itType
+                itType,
+                subType
             },
             options.providerAddress
         );
@@ -211,6 +204,37 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
                 tokenSymbol: percentFeeToken.symbol
             },
             cryptoFee: null
+        };
+    }
+
+    private parseTradeTypes(route: Route): {
+        subType: LiFiTradeSubtype;
+        itType: { from: TradeType | undefined; to: TradeType | undefined };
+    } {
+        const steps =
+            route.steps.length === 1 ? (route.steps[0] as LifiStep).includedSteps : route.steps;
+        const sourceDex =
+            steps?.[0] && steps[0].action.fromChainId === steps[0].action.toChainId
+                ? steps?.[0].toolDetails.name.toLowerCase()
+                : undefined;
+
+        const [, ...stepsWithoutFirst] = steps;
+        const targetDex = stepsWithoutFirst
+            .find(provider => provider.action.fromChainId === provider.action.toChainId)
+            ?.toolDetails.name.toLowerCase();
+
+        const subType = steps?.find(
+            provider => provider.action.fromChainId !== provider.action.toChainId
+        )?.tool as LiFiTradeSubtype;
+
+        const itType = {
+            from: sourceDex ? lifiProviders[sourceDex] : undefined,
+            to: targetDex ? lifiProviders[targetDex] : undefined
+        };
+
+        return {
+            subType,
+            itType
         };
     }
 }
