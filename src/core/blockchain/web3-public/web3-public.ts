@@ -28,6 +28,7 @@ import { HttpClient } from '@rsdk-common/models/http-client';
 import { DefaultHttpClient } from '@rsdk-common/http/default-http-client';
 import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
 import { RubicSdkError } from 'src/common';
+import { EventData } from 'web3-eth-contract';
 
 type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 
@@ -606,5 +607,23 @@ export class Web3Public {
             this.httpClient = await DefaultHttpClient.getInstance();
         }
         return this.httpClient;
+    }
+
+    public async getPastEvents(
+        contractAddress: string,
+        contractAbi: AbiItem[],
+        eventName: string,
+        options: {
+            blocksAmount: number;
+            toBlock: number | 'latest';
+        }
+    ): Promise<EventData[]> {
+        const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
+        const blockNumber =
+            options.toBlock === 'latest' ? await this.getBlockNumber() : options.toBlock;
+        return contract.getPastEvents(eventName, {
+            fromBlock: blockNumber - options.blocksAmount,
+            toBlock: blockNumber
+        });
     }
 }
