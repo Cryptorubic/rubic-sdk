@@ -8,16 +8,22 @@ import { ViaCrossChainTrade } from 'src/features/cross-chain/providers/via-trade
 import { BlockchainName, BlockchainsInfo, PriceToken, PriceTokenAmount, Web3Pure } from 'src/core';
 import { Injector } from 'src/core/sdk/injector';
 import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
-import { CROSS_CHAIN_TRADE_TYPE, TRADE_TYPE, TradeType } from 'src/features';
+import { BridgeType, CROSS_CHAIN_TRADE_TYPE, TRADE_TYPE, TradeType } from 'src/features';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
 import BigNumber from 'bignumber.js';
 import {
+    IActionStepTool,
     IGetRoutesRequestParams,
     IGetRoutesResponse,
     IRoute
 } from '@viaprotocol/router-sdk/dist/types';
 import { ItType } from 'src/features/cross-chain/models/it-type';
+import { bridges } from 'src/features/cross-chain/constants/bridge-type';
+
+interface ToolType extends IActionStepTool {
+    type: 'swap' | 'cross';
+}
 
 export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -121,6 +127,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 : null;
 
             const itType = this.parseItProviders(route);
+            const bridgeType = this.parseBridge(route);
 
             return {
                 trade: new ViaCrossChainTrade(
@@ -132,7 +139,8 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                         priceImpact: 0,
                         toTokenAmountMin,
                         cryptoFee,
-                        itType
+                        itType,
+                        bridgeType
                     },
                     options.providerAddress
                 )
@@ -146,11 +154,18 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
     }
 
     private parseItProviders(route: IRoute): ItType {
-        const firstItProvider = route.actions[0]?.steps.find(step => step.type === 'swap')?.tool
-            .name;
-        const secondItProvider = route.actions[0]?.steps
-            .reverse()
-            .find(step => step.type === 'swap')?.tool.name;
+        const steps = route.actions[0]?.steps;
+
+        const firstStep = steps?.[0];
+        const firstItProvider =
+            (firstStep?.tool as ToolType).type === 'swap' ? firstStep?.tool.name : undefined;
+
+        const lastStep = steps?.reverse()[0];
+        const secondItProvider =
+            steps?.length && steps.length > 1 && (lastStep?.tool as ToolType).type === 'swap'
+                ? lastStep?.tool.name
+                : undefined;
+
         return {
             from: this.parseTradeType(firstItProvider),
             to: this.parseTradeType(secondItProvider)
@@ -180,5 +195,16 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
             default:
                 return undefined;
         }
+    }
+
+    private parseBridge(route: IRoute): BridgeType {
+        const bridgeApi = route.actions[0]?.steps.find(
+            step => (step.tool as ToolType).type === 'cross'
+        )?.tool.name;
+        if (!bridgeApi) {
+            return undefined;
+        }
+
+        return bridges.find(bridge => bridge === bridgeApi.split(' ')[0]?.toLowerCase());
     }
 }

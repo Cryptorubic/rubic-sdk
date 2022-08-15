@@ -6,7 +6,12 @@ import { FailedToCheckForTransactionReceiptError, UnnecessaryApproveError } from
 import { DEFAULT_API_KEY } from 'src/features/cross-chain/providers/via-trade-provider/constants/default-api-key';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/sdk/injector';
-import { CROSS_CHAIN_TRADE_TYPE, CrossChainTrade, SwapTransactionOptions } from 'src/features';
+import {
+    BridgeType,
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTrade,
+    SwapTransactionOptions
+} from 'src/features';
 import BigNumber from 'bignumber.js';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
@@ -29,13 +34,15 @@ export class ViaCrossChainTrade extends CrossChainTrade {
 
     public readonly priceImpact: number;
 
+    public readonly toTokenAmountMin: BigNumber;
+
     public readonly gasData: GasData;
 
     public readonly feeInfo: FeeInfo;
 
     public readonly itType: ItType;
 
-    public readonly toTokenAmountMin: BigNumber;
+    public readonly bridgeType: BridgeType;
 
     protected readonly fromWeb3Public: Web3Public;
 
@@ -56,6 +63,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
                 tokenSymbol: string;
             } | null;
             itType: ItType;
+            bridgeType: BridgeType;
         },
         providerAddress: string
     ) {
@@ -73,6 +81,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         };
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.itType = crossChainTrade.itType;
+        this.bridgeType = crossChainTrade.bridgeType;
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
     }
