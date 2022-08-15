@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import {
     CROSS_CHAIN_TRADE_TYPE,
+    Li_FI_TRADE_SUBTYPE,
     SwapTransactionOptions,
     TRADE_TYPE,
     TradeType
@@ -57,10 +58,11 @@ export class LifiCrossChainTrade extends CrossChainTrade {
                         itType: {
                             from: TRADE_TYPE.ONE_INCH,
                             to: TRADE_TYPE.ONE_INCH
-                        }
+                        },
+                        subType: Li_FI_TRADE_SUBTYPE.CONNEXT
                     },
                     EMPTY_ADDRESS
-                ).getContractParams();
+                ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasPrice] = await Promise.all([
@@ -126,6 +128,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             feeInfo: FeeInfo;
             priceImpact: number;
             itType: { from: TradeType | undefined; to: TradeType | undefined };
+            subType: LiFiTradeSubtype;
         },
         providerAddress: string
     ) {
@@ -136,7 +139,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         this.route = crossChainTrade.route;
         this.gasData = crossChainTrade.gasData;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
-        this.subType = this.route?.steps?.[0]?.tool as LiFiTradeSubtype;
+        this.subType = crossChainTrade.subType;
         this.feeInfo = crossChainTrade.feeInfo;
 
         this.priceImpact = crossChainTrade.priceImpact;
@@ -155,11 +158,12 @@ export class LifiCrossChainTrade extends CrossChainTrade {
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
+        CrossChainTrade.checkReceiverAddress(options?.receiverAddress);
 
         const { onConfirm, gasLimit, gasPrice } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams();
+            await this.getContractParams(options);
 
         let transactionHash: string;
         try {
@@ -197,8 +201,8 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    public async getContractParams(): Promise<ContractParams> {
-        const data = await this.getSwapData();
+    public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
+        const data = await this.getSwapData(options?.receiverAddress);
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
         const fromContracts =
             lifiContractAddress[this.from.blockchain as LifiCrossChainSupportedBlockchain];
@@ -209,7 +213,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             toChainId,
             this.to.address,
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
-            this.walletAddress,
+            options?.receiverAddress || this.walletAddress,
             this.providerAddress,
             fromContracts.providerRouter
         ];
@@ -233,14 +237,14 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         };
     }
 
-    private async getSwapData(): Promise<string> {
+    private async getSwapData(receiverAddress?: string): Promise<string> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
             action: {
                 ...firstStep.action,
                 fromAddress: this.walletAddress,
-                toAddress: this.walletAddress
+                toAddress: receiverAddress || this.walletAddress
             },
             execution: {
                 status: 'NOT_STARTED',

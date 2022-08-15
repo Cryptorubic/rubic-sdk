@@ -20,11 +20,26 @@ import { TransactionReceipt } from 'web3-eth';
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { TransactionConfig } from 'web3-core';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { WrongReceiverAddressError } from 'src/common/errors/blockchain/wrong-receiver-address.error';
 
 /**
  * Abstract class for all cross chain providers' trades.
  */
 export abstract class CrossChainTrade {
+    /**
+     * Checks receiver address for correctness.
+     * @param receiverAddress
+     */
+    public static checkReceiverAddress(receiverAddress: string | undefined): void {
+        if (!receiverAddress) {
+            return;
+        }
+        if (Web3Pure.isAddressCorrect(receiverAddress)) {
+            return;
+        }
+        throw new WrongReceiverAddressError();
+    }
+
     /**
      * Type of calculated cross chain trade.
      */
@@ -101,7 +116,7 @@ export abstract class CrossChainTrade {
      */
     public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
 
-    protected abstract getContractParams(options: {
+    public abstract getContractParams(options: {
         fromAddress?: string;
         receiverAddress?: string;
     }): Promise<ContractParams>;

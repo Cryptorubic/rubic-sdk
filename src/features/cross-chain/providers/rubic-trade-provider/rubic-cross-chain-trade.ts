@@ -169,7 +169,7 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
         ]);
     }
 
-    protected async getContractParams(
+    public async getContractParams(
         options: {
             fromAddress?: string;
             swapTokenWithFee?: boolean;

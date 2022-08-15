@@ -1,4 +1,9 @@
-import { CROSS_CHAIN_TRADE_TYPE, TRADE_TYPE, TradeType } from 'src/features';
+import {
+    CROSS_CHAIN_TRADE_TYPE,
+    TRADE_TYPE,
+    TradeType,
+    UniswapV2AbstractProvider
+} from 'src/features';
 import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
 import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
@@ -27,6 +32,10 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { celerCrossChainContractAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import { celerTransitTokens } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-transit-tokens';
 
+interface CelerCrossChainOptions extends RequiredCrossChainOptions {
+    isUniV2?: boolean;
+}
+
 export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(
         blockchain: BlockchainName
@@ -53,7 +62,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
     public async calculate(
         from: PriceTokenAmount,
         to: PriceToken,
-        options: RequiredCrossChainOptions
+        options: CelerCrossChainOptions
     ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = to.blockchain;
@@ -86,7 +95,8 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             fromBlockchain,
             from,
             fromTransitToken,
-            slippages.fromSlippageTolerance
+            slippages.fromSlippageTolerance,
+            options.isUniV2
         );
 
         const celerSlippage = await this.fetchCelerSlippage(
@@ -132,6 +142,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             toTransit,
             to,
             toSlippageTolerance,
+            options.isUniV2,
             [TRADE_TYPE.ONE_INCH]
         );
 
@@ -283,6 +294,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         from: PriceTokenAmount,
         toToken: PriceToken,
         slippageTolerance: number,
+        isUniV2?: boolean,
         disabledProviders?: TradeType[]
     ): Promise<CelerCrossChainContractTrade> {
         if (compareAddresses(from.address, toToken.address)) {
@@ -299,6 +311,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             from,
             toToken,
             slippageTolerance,
+            isUniV2,
             disabledProviders
         );
     }
@@ -330,11 +343,13 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         from: PriceTokenAmount,
         toToken: PriceToken,
         slippageTolerance: number,
+        isUniV2?: boolean,
         disabledProviders?: TradeType[]
     ): Promise<CelerItCrossChainContractTrade> {
         const contract = this.contracts(blockchain);
         const promises: Promise<ItCalculatedTrade>[] = contract.providersData
             .filter(data => !disabledProviders?.some(provider => provider === data.provider.type))
+            .filter(data => !isUniV2 || data.provider instanceof UniswapV2AbstractProvider)
             .map(async (_, providerIndex) => {
                 return this.getItCalculatedTrade(
                     contract,
