@@ -78,10 +78,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
             allowSwitchChain: false
         };
         // @TODO remove after whitelisting
-        if (
-            fromBlockchain === BLOCKCHAIN_NAME.CRONOS ||
-            fromBlockchain === BLOCKCHAIN_NAME.OKE_X_CHAIN
-        ) {
+        if (fromBlockchain === BLOCKCHAIN_NAME.CRONOS || toBlockchain === BLOCKCHAIN_NAME.CRONOS) {
             routeOptions = {
                 ...routeOptions,
                 bridges: {
