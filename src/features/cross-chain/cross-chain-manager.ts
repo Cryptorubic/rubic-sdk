@@ -19,14 +19,10 @@ import { MarkRequired } from 'ts-essentials';
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
 import { from as fromPromise, map, merge, mergeMap, Observable, of, switchMap } from 'rxjs';
 import { CrossChainProviderData } from 'src/features/cross-chain/providers/common/models/cross-chain-provider-data';
-import { SymbiosisCrossChainTradeProvider } from 'src/features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
 import { LifiCrossChainTrade } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade';
 import { WrappedTradeOrNull } from 'src/features/cross-chain/providers/common/models/wrapped-trade-or-null';
 import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
 import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
-import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade-provider';
-import { RubicCrossChainTradeProvider } from './providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
-import { LifiCrossChainTradeProvider } from './providers/lifi-trade-provider/lifi-cross-chain-trade-provider';
 import { ViaCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/via-trade-provider/via-cross-chain-trade-provider';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
@@ -39,7 +35,7 @@ type RequiredSwapManagerCalculationOptions = MarkRequired<
  * Contains method to calculate best cross chain trade.
  */
 export class CrossChainManager {
-    private static readonly defaultCalculationTimeout = 20_000;
+    private static readonly defaultCalculationTimeout = 25_000;
 
     private static readonly defaultSlippageTolerance = 0.02;
 

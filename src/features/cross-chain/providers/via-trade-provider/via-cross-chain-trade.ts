@@ -6,15 +6,11 @@ import { FailedToCheckForTransactionReceiptError, UnnecessaryApproveError } from
 import { DEFAULT_API_KEY } from 'src/features/cross-chain/providers/via-trade-provider/constants/default-api-key';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/sdk/injector';
-import {
-    CROSS_CHAIN_TRADE_TYPE,
-    CrossChainTrade,
-    SwapTransactionOptions,
-    TradeType
-} from 'src/features';
+import { CROSS_CHAIN_TRADE_TYPE, CrossChainTrade, SwapTransactionOptions } from 'src/features';
 import BigNumber from 'bignumber.js';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
+import { ItType } from 'src/features/cross-chain/models/it-type';
 
 export class ViaCrossChainTrade extends CrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.VIA;
@@ -22,7 +18,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     private readonly via = new Via({
         apiKey: DEFAULT_API_KEY,
         url: 'https://router-api.via.exchange',
-        timeout: 30
+        timeout: 10_000
     });
 
     public readonly from: PriceTokenAmount;
@@ -31,28 +27,15 @@ export class ViaCrossChainTrade extends CrossChainTrade {
 
     private readonly route: IRoute;
 
-    /**
-     * Overall price impact, fetched from symbiosis api.
-     */
     public readonly priceImpact: number;
 
-    public readonly gasData: GasData | null;
+    public readonly gasData: GasData;
 
-    public readonly feeInfo: FeeInfo = {
-        fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
-        platformFee: {
-            percent: 0,
-            tokenSymbol: ''
-        },
-        cryptoFee: null
-    };
+    public readonly feeInfo: FeeInfo;
 
-    public readonly itType: { from: TradeType | undefined; to: TradeType | undefined } = {
-        from: undefined,
-        to: undefined
-    };
+    public readonly itType: ItType;
 
-    public readonly toTokenAmountMin: BigNumber = new BigNumber(0);
+    public readonly toTokenAmountMin: BigNumber;
 
     protected readonly fromWeb3Public: Web3Public;
 
@@ -65,8 +48,14 @@ export class ViaCrossChainTrade extends CrossChainTrade {
             from: PriceTokenAmount;
             to: PriceTokenAmount;
             route: IRoute;
-            gasData: GasData | null;
+            gasData: GasData;
             priceImpact: number;
+            toTokenAmountMin: BigNumber;
+            cryptoFee: {
+                amount: BigNumber;
+                tokenSymbol: string;
+            } | null;
+            itType: ItType;
         },
         providerAddress: string
     ) {
@@ -77,6 +66,13 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         this.route = crossChainTrade.route;
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.feeInfo = {
+            fixedFee: null,
+            platformFee: null,
+            cryptoFee: crossChainTrade.cryptoFee
+        };
+        this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
+        this.itType = crossChainTrade.itType;
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
     }
@@ -147,8 +143,8 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        await this.checkTradeErrors();
-        await this.checkAllowanceAndApprove(options);
+        // await this.checkTradeErrors();
+        // await this.checkAllowanceAndApprove(options);
 
         const { onConfirm, gasLimit, gasPrice } = options;
 
@@ -188,7 +184,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    protected async getContractParams(): Promise<ContractParams> {
+    public async getContractParams(): Promise<ContractParams> {
         return {
             contractAddress: this.fromContractAddress,
             contractAbi: [],

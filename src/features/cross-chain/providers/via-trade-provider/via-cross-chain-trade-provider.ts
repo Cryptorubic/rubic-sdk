@@ -5,14 +5,19 @@ import {
 import { Via } from '@viaprotocol/router-sdk';
 import { DEFAULT_API_KEY } from 'src/features/cross-chain/providers/via-trade-provider/constants/default-api-key';
 import { ViaCrossChainTrade } from 'src/features/cross-chain/providers/via-trade-provider/via-cross-chain-trade';
-import { BlockchainName, BlockchainsInfo, PriceToken, PriceTokenAmount } from 'src/core';
+import { BlockchainName, BlockchainsInfo, PriceToken, PriceTokenAmount, Web3Pure } from 'src/core';
 import { Injector } from 'src/core/sdk/injector';
 import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
+import { CROSS_CHAIN_TRADE_TYPE, TRADE_TYPE, TradeType } from 'src/features';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
 import BigNumber from 'bignumber.js';
-import { FeeInfo } from '../common/models/fee';
+import {
+    IGetRoutesRequestParams,
+    IGetRoutesResponse,
+    IRoute
+} from '@viaprotocol/router-sdk/dist/types';
+import { ItType } from 'src/features/cross-chain/models/it-type';
 
 export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -28,11 +33,21 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
     private readonly via = new Via({
         apiKey: DEFAULT_API_KEY,
         url: 'https://router-api.via.exchange',
-        timeout: 30_000
+        timeout: 25_000
     });
 
     protected get walletAddress(): string {
         return Injector.web3Private.address;
+    }
+
+    public isSupportedBlockchains(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName
+    ): boolean {
+        return (
+            ViaCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
+            ViaCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
+        );
     }
 
     public async calculate(
@@ -53,16 +68,34 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
             const fromChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id;
             const toChainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id;
 
-            const wrappedRoutes = await this.via.getRoutes({
+            const pages = await this.via.routesPages();
+            const params: IGetRoutesRequestParams = {
                 fromChainId,
                 fromTokenAddress: from.address,
                 fromAmount: parseInt(from.stringWeiAmount),
                 toChainId,
                 toTokenAddress: toToken.address,
                 fromAddress: options.fromAddress || this.walletAddress,
-                multiTx: true
-            });
-            const route = wrappedRoutes.routes[0];
+                multiTx: false,
+                limit: 1
+            };
+            const wrappedRoutes = await Promise.allSettled(
+                [...Array(pages)].map((_, i) =>
+                    this.via.getRoutes({
+                        ...params,
+                        offset: i + 1
+                    })
+                )
+            );
+            const route = (
+                wrappedRoutes.filter(
+                    wrappedRoute =>
+                        wrappedRoute.status === 'fulfilled' && wrappedRoute.value.routes.length
+                ) as PromiseFulfilledResult<IGetRoutesResponse>[]
+            )
+                .map(wrappedRoute => wrappedRoute.value.routes)
+                .flat()
+                .sort((a, b) => new BigNumber(a.toTokenAmount).comparedTo(b.toTokenAmount))[0];
 
             if (!route) {
                 return null;
@@ -72,8 +105,22 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 ...toToken.asStruct,
                 weiAmount: new BigNumber(route.toTokenAmount)
             });
+            const toTokenAmountMin = to.weiAmountMinusSlippage(route.slippage || 0);
 
             const gasData = options.gasCalculation === 'enabled' ? null : null;
+
+            const cryptoFeeAmount = Web3Pure.fromWei(
+                route.actions[0]?.additionalProviderFee?.amount.toString() || 0
+            );
+            const cryptoFeeSymbol = route.actions[0]?.additionalProviderFee?.token.symbol;
+            const cryptoFee = cryptoFeeSymbol
+                ? {
+                      amount: cryptoFeeAmount,
+                      tokenSymbol: cryptoFeeSymbol
+                  }
+                : null;
+
+            const itType = this.parseItProviders(route);
 
             return {
                 trade: new ViaCrossChainTrade(
@@ -82,7 +129,10 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                         to,
                         route,
                         gasData,
-                        priceImpact: 0
+                        priceImpact: 0,
+                        toTokenAmountMin,
+                        cryptoFee,
+                        itType
                     },
                     options.providerAddress
                 )
@@ -95,21 +145,40 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
         }
     }
 
-    public isSupportedBlockchains(
-        fromBlockchain: BlockchainName,
-        toBlockchain: BlockchainName
-    ): boolean {
-        return (
-            ViaCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
-            ViaCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
-        );
+    private parseItProviders(route: IRoute): ItType {
+        const firstItProvider = route.actions[0]?.steps.find(step => step.type === 'swap')?.tool
+            .name;
+        const secondItProvider = route.actions[0]?.steps
+            .reverse()
+            .find(step => step.type === 'swap')?.tool.name;
+        return {
+            from: this.parseTradeType(firstItProvider),
+            to: this.parseTradeType(secondItProvider)
+        };
     }
 
-    protected async getFeeInfo(): Promise<FeeInfo> {
-        return {
-            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
-            platformFee: { percent: 0, tokenSymbol: '' },
-            cryptoFee: null
-        };
+    private parseTradeType(type: string | undefined): TradeType | undefined {
+        if (!type) {
+            return undefined;
+        }
+
+        type = type.toUpperCase();
+        const foundType = Object.values(TRADE_TYPE).find(
+            tradeType => tradeType.split('_').join('') === type
+        );
+        if (foundType) {
+            return foundType;
+        }
+
+        switch (type) {
+            case 'DODOEX':
+                return TRADE_TYPE.DODO;
+            case 'TRADERJOE':
+                return TRADE_TYPE.JOE;
+            case 'UNISWAP':
+                return TRADE_TYPE.UNISWAP_V2;
+            default:
+                return undefined;
+        }
     }
 }

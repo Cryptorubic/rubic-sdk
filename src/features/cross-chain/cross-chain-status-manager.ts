@@ -57,7 +57,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.RUBIC]: this.getRubicDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.VIA]: this.getDebridgeDstSwapStatus // @TODO update
     };
 
     /**

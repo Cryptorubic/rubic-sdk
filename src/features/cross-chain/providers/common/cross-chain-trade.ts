@@ -12,8 +12,7 @@ import BigNumber from 'bignumber.js';
 import {
     CrossChainTradeType,
     EncodeTransactionOptions,
-    SwapTransactionOptions,
-    TradeType
+    SwapTransactionOptions
 } from 'src/features';
 import { UnnecessaryApproveError, WalletNotConnectedError, WrongNetworkError } from 'src/common';
 import { TransactionReceipt } from 'web3-eth';
@@ -21,6 +20,7 @@ import { ContractParams } from '@rsdk-features/cross-chain/models/contract-param
 import { TransactionConfig } from 'web3-core';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { WrongReceiverAddressError } from 'src/common/errors/blockchain/wrong-receiver-address.error';
+import { ItType } from 'src/features/cross-chain/models/it-type';
 
 /**
  * Abstract class for all cross chain providers' trades.
@@ -63,13 +63,13 @@ export abstract class CrossChainTrade {
     /**
      * Gas fee info in source blockchain.
      */
-    public abstract readonly gasData: GasData | null;
+    public abstract readonly gasData: GasData;
 
     protected abstract readonly fromWeb3Public: Web3Public;
 
     protected abstract get fromContractAddress(): string;
 
-    public abstract readonly itType: { from: TradeType | undefined; to: TradeType | undefined };
+    public abstract readonly itType: ItType;
 
     /**
      * Swap fee information.
@@ -81,8 +81,8 @@ export abstract class CrossChainTrade {
     }
 
     protected get networkFee(): BigNumber {
-        return new BigNumber(this.feeInfo.fixedFee.amount).plus(
-            this.feeInfo?.cryptoFee?.amount || 0
+        return new BigNumber(this.feeInfo.fixedFee?.amount || 0).plus(
+            this.feeInfo.cryptoFee?.amount || 0
         );
     }
 
