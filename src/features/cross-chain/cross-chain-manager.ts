@@ -24,6 +24,10 @@ import { WrappedTradeOrNull } from 'src/features/cross-chain/providers/common/mo
 import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
 import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
 import { ViaCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/via-trade-provider/via-cross-chain-trade-provider';
+import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade-provider';
+import { SymbiosisCrossChainTradeProvider } from 'src/features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
+import { LifiCrossChainTradeProvider } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade-provider';
+import { RubicCrossChainTradeProvider } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCrossChainCalculationOptions,
@@ -186,8 +190,7 @@ export class CrossChainManager {
         ).pipe(
             switchMap(tokens => {
                 const { from, to } = tokens;
-                const { disabledProviders, timeout, ...providersOptions } =
-                    this.getFullOptions(options);
+                const { disabledProviders, ...providersOptions } = this.getFullOptions(options);
 
                 const providers = Object.entries(this.tradeProviders).filter(([type, provider]) => {
                     if (disabledProviders.includes(type as CrossChainTradeType)) {
@@ -219,7 +222,10 @@ export class CrossChainManager {
                         providers.map(async ([type, provider]) => {
                             const promise = provider.calculate(from, to, providersOptions);
                             try {
-                                const wrappedTrade = await pTimeout(promise, timeout);
+                                const wrappedTrade = await pTimeout(
+                                    promise,
+                                    providersOptions.timeout
+                                );
 
                                 if (!wrappedTrade) {
                                     return null;
@@ -373,7 +379,7 @@ export class CrossChainManager {
         to: PriceToken,
         options: RequiredSwapManagerCalculationOptions
     ): Promise<WrappedCrossChainTrade[]> {
-        const { disabledProviders, timeout, ...providersOptions } = options;
+        const { disabledProviders, ...providersOptions } = options;
         const providers = Object.entries(this.tradeProviders).filter(([type]) => {
             if (disabledProviders.includes(type as CrossChainTradeType)) {
                 return false;
@@ -397,7 +403,7 @@ export class CrossChainManager {
         const calculationPromises = providers.map(async ([type, provider]) => {
             try {
                 const calculation = provider.calculate(from, to, providersOptions);
-                const wrappedTrade = await pTimeout(calculation, timeout);
+                const wrappedTrade = await pTimeout(calculation, providersOptions.timeout);
                 if (!wrappedTrade) {
                     return null;
                 }

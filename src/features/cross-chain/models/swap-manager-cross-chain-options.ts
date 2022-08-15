@@ -3,11 +3,6 @@ import { CrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain
 
 export interface SwapManagerCrossChainCalculationOptions extends CrossChainOptions {
     /**
-     * Timeout for each cross chain provider. Calculation for provider is cancelled, after timeout is passed.
-     */
-    readonly timeout?: number;
-
-    /**
      * An array of disabled cross chain providers.
      */
     readonly disabledProviders?: CrossChainTradeType[];

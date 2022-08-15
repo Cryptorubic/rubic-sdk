@@ -153,8 +153,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
                 await this.getBestItContractTrade(
                     fromBlockchain,
                     new PriceTokenAmount({
-                        ...cryptoFeeToken,
-                        tokenAmount: Web3Pure.fromWei('1'),
+                        ...cryptoFeeToken.asStructWithAmount,
                         price: new BigNumber(0)
                     }),
                     fromTransitToken,
