@@ -110,8 +110,19 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 return null;
             }
 
-            const bestRoute = await this.getBestRoute(fromBlockchain, toToken, routes);
+            const [fromTokenPrice, nativeTokenPrice] = await this.getTokensPrice(fromBlockchain, [
+                {
+                    address: from.address,
+                    price: from.price
+                },
+                { address: NATIVE_TOKEN_ADDRESS }
+            ]);
+            const bestRoute = await this.getBestRoute(toToken, nativeTokenPrice!, routes);
 
+            from = new PriceTokenAmount({
+                ...from.asStructWithAmount,
+                price: fromTokenPrice!
+            });
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 weiAmount: new BigNumber(bestRoute.toTokenAmount)
@@ -131,6 +142,13 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                   }
                 : null;
 
+            const nativeToken = BlockchainsInfo.getBlockchainByName(from.blockchain).nativeCoin;
+            const cryptoFeeToken = new PriceTokenAmount({
+                ...nativeToken,
+                price: nativeTokenPrice || new BigNumber(0),
+                tokenAmount: cryptoFeeAmount
+            });
+
             const itType = this.parseItProviders(bestRoute);
             const bridgeType = this.parseBridge(bestRoute);
 
@@ -141,9 +159,10 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                         to,
                         route: bestRoute,
                         gasData,
-                        priceImpact: 0,
+                        priceImpact: 0, // @TODO add price impact
                         toTokenAmountMin,
                         cryptoFee,
+                        cryptoFeeToken,
                         itType,
                         bridgeType
                     },
@@ -159,19 +178,11 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
     }
 
     private async getBestRoute(
-        fromBlockchain: BlockchainName,
         toToken: PriceToken,
+        nativeTokenPrice: BigNumber | null,
         routes: IRoute[]
     ): Promise<IRoute> {
-        const shouldCalculateNativeTokenPrice = routes.some(route =>
-            Boolean(route.actions[0]?.additionalProviderFee)
-        );
-        const [toTokenPrice, nativeTokenPrice] = await Promise.all([
-            this.getTokenPrice(toToken),
-            shouldCalculateNativeTokenPrice
-                ? this.getTokenPrice({ blockchain: fromBlockchain, address: NATIVE_TOKEN_ADDRESS })
-                : null
-        ]);
+        const toTokenPrice = (await this.getTokensPrice(toToken.blockchain, [toToken]))[0];
 
         const sortedRoutes = routes.sort((routeA, routeB) => {
             if (!toTokenPrice) {
@@ -193,13 +204,14 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
         return sortedRoutes[0]!;
     }
 
-    private getTokenPrice(token: {
-        blockchain: BlockchainName;
-        address: string;
-        price?: BigNumber;
-    }): Promise<BigNumber | null> {
-        const chainId = BlockchainsInfo.getBlockchainByName(token.blockchain).id;
-        const { address } = token;
+    private getTokensPrice(
+        blockchain: BlockchainName,
+        tokens: {
+            address: string;
+            price?: BigNumber;
+        }[]
+    ): Promise<(BigNumber | null)[]> {
+        const chainId = BlockchainsInfo.getBlockchainByName(blockchain).id;
 
         return Injector.httpClient
             .get<{ [chainId: number]: { [address: string]: { USD: number } } }>(
@@ -207,12 +219,14 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 {
                     params: {
                         chain: chainId,
-                        tokens_addresses: token.address
+                        tokens_addresses: tokens.map(token => token.address).join(',')
                     }
                 }
             )
-            .then(response => new BigNumber(response[chainId]![address]!.USD))
-            .catch(() => token.price || null);
+            .then(response =>
+                tokens.map(token => new BigNumber(response[chainId]![token.address]!.USD))
+            )
+            .catch(() => tokens.map(token => token.price || null));
     }
 
     private parseItProviders(route: IRoute): ItType {

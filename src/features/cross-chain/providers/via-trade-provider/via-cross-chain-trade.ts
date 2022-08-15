@@ -40,6 +40,8 @@ export class ViaCrossChainTrade extends CrossChainTrade {
 
     public readonly feeInfo: FeeInfo;
 
+    public readonly cryptoFeeToken: PriceTokenAmount;
+
     public readonly itType: ItType;
 
     public readonly bridgeType: BridgeType;
@@ -62,6 +64,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
                 amount: BigNumber;
                 tokenSymbol: string;
             } | null;
+            cryptoFeeToken: PriceTokenAmount;
             itType: ItType;
             bridgeType: BridgeType;
         },
@@ -74,12 +77,13 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         this.route = crossChainTrade.route;
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.feeInfo = {
             fixedFee: null,
             platformFee: null,
             cryptoFee: crossChainTrade.cryptoFee
         };
-        this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
+        this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.itType = crossChainTrade.itType;
         this.bridgeType = crossChainTrade.bridgeType;
 
@@ -152,8 +156,8 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        // await this.checkTradeErrors();
-        // await this.checkAllowanceAndApprove(options);
+        await this.checkTradeErrors();
+        await this.checkAllowanceAndApprove(options);
 
         const { onConfirm, gasLimit, gasPrice } = options;
 
@@ -204,6 +208,10 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     }
 
     public getTradeAmountRatio(): BigNumber {
-        return new BigNumber(0);
+        const fromCost = this.from.price.multipliedBy(this.from.tokenAmount);
+        const usdCryptoFee = this.cryptoFeeToken.price.multipliedBy(
+            this.cryptoFeeToken.tokenAmount
+        );
+        return fromCost.plus(usdCryptoFee).dividedBy(this.to.tokenAmount);
     }
 }
