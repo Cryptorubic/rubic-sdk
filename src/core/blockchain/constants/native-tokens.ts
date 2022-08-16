@@ -118,5 +118,11 @@ export const nativeTokensList: NativeTokensList = {
         name: 'CELO',
         symbol: 'CELO',
         decimals: 18
+    },
+    [BLOCKCHAIN_NAME.BOBA]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
     }
 };

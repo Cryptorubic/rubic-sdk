@@ -4,7 +4,8 @@ export const symbiosisCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,
     BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
     BLOCKCHAIN_NAME.POLYGON,
-    BLOCKCHAIN_NAME.AVALANCHE
+    BLOCKCHAIN_NAME.AVALANCHE,
+    BLOCKCHAIN_NAME.BOBA
 ] as const;
 
 export type SymbiosisCrossChainSupportedBlockchain =
