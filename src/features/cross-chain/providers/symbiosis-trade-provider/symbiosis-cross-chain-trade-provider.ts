@@ -33,6 +33,7 @@ import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { OolongSwapProvider } from 'src/features/instant-trades/dexes/boba/oolong-swap/oolong-swap-provider';
 import { symbiosisTransitTokens } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-transit-tokens';
+import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -87,13 +88,8 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         }
 
         try {
-            const fromAddress = options.fromAddress || this.walletAddress;
-            if (!fromAddress) {
-                throw new RubicSdkError(
-                    'From address or wallet address must not be empty in Symbiosis'
-                );
-            }
-
+            const fromAddress =
+                options.fromAddress || this.walletAddress || oneinchApiParams.nativeAddress;
             await this.checkContractState(fromBlockchain);
 
             const tokenIn = new SymbiosisToken({
@@ -140,13 +136,13 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 deadline,
                 true
             );
-            const swapFunction = (receiver?: string) =>
+            const swapFunction = (fromUserAddress: string, receiver?: string) =>
                 swapping.exactIn(
                     tokenAmountIn,
                     tokenOut,
-                    fromAddress,
-                    receiver || fromAddress,
-                    receiver || fromAddress,
+                    fromUserAddress,
+                    receiver || fromUserAddress,
+                    receiver || fromUserAddress,
                     slippageTolerance,
                     deadline,
                     true

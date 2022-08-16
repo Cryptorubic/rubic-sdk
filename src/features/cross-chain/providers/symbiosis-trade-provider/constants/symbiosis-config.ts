@@ -273,6 +273,82 @@ export function getSymbiosisConfig(): Config {
                 aavePoolDataProvider: '0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654',
                 creamComptroller: '0x20CA53E2395FA571798623F1cFBD11Fe2C114c24',
                 blocksPerYear: 15768000
+            },
+            {
+                id: 288,
+                rpc: 'https://mainnet.boba.network',
+                filterBlockOffset: 4900,
+                waitForBlocksCount: 0,
+                stables: [
+                    {
+                        name: 'USD Coin',
+                        address: '0x66a2A913e447d6b4BF33EFbec43aAeF87890FBbc',
+                        symbol: 'USDC',
+                        decimals: 6,
+                        chainId: 288,
+                        isStable: true,
+                        icons: {
+                            large: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png',
+                            small: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        address: '0x2f28Add68e59733D23D5F57d94c31fb965f835D0',
+                        symbol: 'sUSDC',
+                        decimals: 6,
+                        chainId: 288,
+                        chainFromId: 1,
+                        isStable: true,
+                        icons: {
+                            large: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png',
+                            small: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic BUSD',
+                        address: '0xf04d3A8Eb17B832Fbebf43610e94BdC4fD5Cf2dd',
+                        symbol: 'sBUSD',
+                        decimals: 18,
+                        chainId: 288,
+                        chainFromId: 56,
+                        isStable: true,
+                        icons: {
+                            large: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/BUSD-BD1/logo.png',
+                            small: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/binance/assets/BUSD-BD1/logo.png'
+                        }
+                    }
+                ],
+                nerves: [
+                    {
+                        address: '0xab0738320A21741f12797Ee921461C691673E276',
+                        tokens: [
+                            '0x66a2A913e447d6b4BF33EFbec43aAeF87890FBbc',
+                            '0x2f28Add68e59733D23D5F57d94c31fb965f835D0'
+                        ],
+                        decimals: [6, 6]
+                    },
+                    {
+                        address: '0xe0ddd7afC724BD4B320472B5C954c0abF8192344',
+                        tokens: [
+                            '0x66a2A913e447d6b4BF33EFbec43aAeF87890FBbc',
+                            '0xf04d3A8Eb17B832Fbebf43610e94BdC4fD5Cf2dd'
+                        ],
+                        decimals: [6, 18]
+                    }
+                ],
+                router: '0x17C83E2B96ACfb5190d63F5E46d93c107eC0b514',
+                dexFee: 30,
+                metaRouter: '0xd2B5945829D8254C40f63f476C9F02CF5762F8DF',
+                metaRouterGateway: '0x5ee04643fe2D63f364F77B38C41F15A54930f5C1',
+                bridge: '0xd5F0f8dB993D26F5df89E70a83d32b369DcCdaa0',
+                synthesis: '0xb80fDAA74dDA763a8A158ba85798d373A5E84d84',
+                portal: '0xD7F9989bE0d15319d13d6FA5d468211C89F0b147',
+                fabric: '0x947a0d452b40013190295a4151A090E1638Fb848',
+                multicallRouter: '0x506803495B1876FE1fA6Cd9dC65fB060057A4Cc3',
+                aavePool: '0x0000000000000000000000000000000000000000',
+                creamComptroller: '0x0000000000000000000000000000000000000000',
+                renGatewayRegistry: '0x0000000000000000000000000000000000000000'
             }
         ]
     } as unknown as Config;
