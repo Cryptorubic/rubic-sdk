@@ -1,5 +1,5 @@
 import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
-import { CROSS_CHAIN_TRADE_TYPE, OneinchAbstractProvider } from 'src/features';
+import { CROSS_CHAIN_TRADE_TYPE, InstantTradeProvider } from 'src/features';
 import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
 
@@ -20,7 +20,6 @@ import BigNumber from 'bignumber.js';
 import { SymbiosisCrossChainTrade } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { SYMBIOSIS_CONTRACT_ADDRESS } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
-import { celerTransitTokens } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-transit-tokens';
 import { OneinchEthereumProvider } from '@rsdk-features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
 import { OneinchBscProvider } from '@rsdk-features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
 import { OneinchPolygonProvider } from '@rsdk-features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
@@ -32,6 +31,9 @@ import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/com
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { OolongSwapProvider } from 'src/features/instant-trades/dexes/boba/oolong-swap/oolong-swap-provider';
+import { symbiosisTransitTokens } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-transit-tokens';
+import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -46,14 +48,15 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
 
     private readonly symbiosis = new Symbiosis(getSymbiosisConfig(), 'rubic');
 
-    private readonly oneInchService: Record<
+    private readonly onChainProviders: Record<
         SymbiosisCrossChainSupportedBlockchain,
-        OneinchAbstractProvider
+        InstantTradeProvider
     > = {
         [BLOCKCHAIN_NAME.ETHEREUM]: new OneinchEthereumProvider(),
         [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: new OneinchBscProvider(),
         [BLOCKCHAIN_NAME.POLYGON]: new OneinchPolygonProvider(),
-        [BLOCKCHAIN_NAME.AVALANCHE]: new OneinchAvalancheProvider()
+        [BLOCKCHAIN_NAME.AVALANCHE]: new OneinchAvalancheProvider(),
+        [BLOCKCHAIN_NAME.BOBA]: new OolongSwapProvider()
     };
 
     protected get walletAddress(): string {
@@ -85,13 +88,8 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         }
 
         try {
-            const fromAddress = options.fromAddress || this.walletAddress;
-            if (!fromAddress) {
-                throw new RubicSdkError(
-                    'From address or wallet address must not be empty in Symbiosis'
-                );
-            }
-
+            const fromAddress =
+                options.fromAddress || this.walletAddress || oneinchApiParams.nativeAddress;
             await this.checkContractState(fromBlockchain);
 
             const tokenIn = new SymbiosisToken({
@@ -138,13 +136,13 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 deadline,
                 true
             );
-            const swapFunction = (receiver?: string) =>
+            const swapFunction = (fromUserAddress: string, receiver?: string) =>
                 swapping.exactIn(
                     tokenAmountIn,
                     tokenOut,
-                    fromAddress,
-                    receiver || fromAddress,
-                    receiver || fromAddress,
+                    fromUserAddress,
+                    receiver || fromUserAddress,
+                    receiver || fromUserAddress,
                     slippageTolerance,
                     deadline,
                     true
@@ -159,11 +157,11 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                     ? await SymbiosisCrossChainTrade.getGasData(from, to)
                     : null;
 
-            const transitToken = celerTransitTokens[fromBlockchain];
+            const transitToken = symbiosisTransitTokens[fromBlockchain];
             const transitAmount = compareAddresses(from.address, transitToken.address)
                 ? from.tokenAmount
                 : (
-                      await this.oneInchService[fromBlockchain].calculate(
+                      await this.onChainProviders[fromBlockchain].calculate(
                           from,
                           new PriceTokenAmount({
                               ...transitToken,
@@ -185,10 +183,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                         feeInfo: {
                             ...feeInfo,
                             cryptoFee: {
-                                amount: Web3Pure.fromWei(
-                                    transitTokenFee.toFixed(),
-                                    transitToken.decimals
-                                ),
+                                amount: new BigNumber(transitTokenFee.toFixed()),
                                 tokenSymbol: transitTokenFee.token.symbol || ''
                             }
                         },
@@ -241,13 +236,13 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     ): Promise<BigNumber> {
         const blockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
 
-        const transitToken = celerTransitTokens[blockchain];
+        const transitToken = symbiosisTransitTokens[blockchain];
         if (compareAddresses(from.address, transitToken.address)) {
             return transitTokenAmount;
         }
 
         const amount = (
-            await this.oneInchService[blockchain].calculate(
+            await this.onChainProviders[blockchain].calculate(
                 new PriceTokenAmount({
                     ...transitToken,
                     price: new BigNumber(1),
