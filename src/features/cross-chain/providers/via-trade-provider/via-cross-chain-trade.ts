@@ -1,8 +1,7 @@
-import { BasicTransactionOptions, PriceTokenAmount, Web3Public } from 'src/core';
-import { TransactionReceipt } from 'web3-eth';
+import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import { IRoute } from '@viaprotocol/router-sdk/dist/types';
 import { Via } from '@viaprotocol/router-sdk';
-import { FailedToCheckForTransactionReceiptError, UnnecessaryApproveError } from 'src/common';
+import { FailedToCheckForTransactionReceiptError } from 'src/common';
 import { DEFAULT_API_KEY } from 'src/features/cross-chain/providers/via-trade-provider/constants/default-api-key';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/sdk/injector';
@@ -16,6 +15,8 @@ import BigNumber from 'bignumber.js';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { ItType } from 'src/features/cross-chain/models/it-type';
+import { providerRouter } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 
 export class ViaCrossChainTrade extends CrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.VIA;
@@ -49,7 +50,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     protected readonly fromWeb3Public: Web3Public;
 
     protected get fromContractAddress(): string {
-        return '';
+        return providerRouter;
     }
 
     constructor(
@@ -60,10 +61,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
             gasData: GasData;
             priceImpact: number;
             toTokenAmountMin: BigNumber;
-            cryptoFee: {
-                amount: BigNumber;
-                tokenSymbol: string;
-            } | null;
+            feeInfo: FeeInfo;
             cryptoFeeToken: PriceTokenAmount;
             itType: ItType;
             bridgeType: BridgeType;
@@ -78,74 +76,12 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
-        this.feeInfo = {
-            fixedFee: null,
-            platformFee: null,
-            cryptoFee: crossChainTrade.cryptoFee
-        };
+        this.feeInfo = crossChainTrade.feeInfo;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.itType = crossChainTrade.itType;
         this.bridgeType = crossChainTrade.bridgeType;
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
-    }
-
-    public async needApprove(): Promise<boolean> {
-        this.checkWalletConnected();
-
-        if (this.from.isNative) {
-            return false;
-        }
-
-        const allowance = await this.via.getAllowanceStatus({
-            owner: this.walletAddress,
-            routeId: this.route.routeId,
-            numAction: 0
-        });
-
-        return new BigNumber(allowance.value).lt(this.from.stringWeiAmount);
-    }
-
-    public async approve(options: BasicTransactionOptions): Promise<TransactionReceipt> {
-        if (!(await this.needApprove())) {
-            throw new UnnecessaryApproveError();
-        }
-
-        this.checkWalletConnected();
-        this.checkBlockchainCorrect();
-
-        const transaction = await this.via.buildApprovalTx({
-            owner: this.walletAddress,
-            routeId: this.route.routeId,
-            numAction: 0
-        });
-
-        return Injector.web3Private.trySendTransaction(transaction.to, '0', {
-            data: transaction.data,
-            ...options
-        });
-    }
-
-    protected async checkAllowanceAndApprove(
-        options?: Omit<SwapTransactionOptions, 'onConfirm'>
-    ): Promise<void> {
-        const needApprove = await this.needApprove();
-        if (!needApprove) {
-            return;
-        }
-
-        const transaction = await this.via.buildApprovalTx({
-            owner: this.walletAddress,
-            routeId: this.route.routeId,
-            numAction: 0
-        });
-
-        await Injector.web3Private.trySendTransaction(transaction.to, '0', {
-            data: transaction.data,
-            onTransactionHash: options?.onApprove,
-            gas: options?.gasLimit || undefined,
-            gasPrice: options?.gasPrice || undefined
-        });
     }
 
     protected async checkTradeErrors(): Promise<void | never> {
@@ -158,8 +94,12 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
+        CrossChainTrade.checkReceiverAddress(options?.receiverAddress);
 
         const { onConfirm, gasLimit, gasPrice } = options;
+
+        const { contractAddress, contractAbi, methodName, methodArguments, value } =
+            await this.getContractParams(options);
 
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
@@ -170,21 +110,16 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         };
 
         try {
-            const transaction = await this.via.buildTx({
-                routeId: this.route.routeId,
-                fromAddress: this.walletAddress,
-                receiveAddress: this.walletAddress,
-                numAction: 0
-            });
-
-            await Injector.web3Private.trySendTransaction(
-                transaction.to,
-                new BigNumber(transaction.value),
+            await Injector.web3Private.tryExecuteContractMethod(
+                contractAddress,
+                contractAbi,
+                methodName,
+                methodArguments,
                 {
-                    data: transaction.data,
-                    onTransactionHash,
                     gas: gasLimit,
-                    gasPrice
+                    gasPrice,
+                    value,
+                    onTransactionHash
                 }
             );
 
@@ -197,13 +132,46 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    public async getContractParams(): Promise<ContractParams> {
+    public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
+        const swapTransaction = await this.via.buildTx({
+            routeId: this.route.routeId,
+            fromAddress: this.walletAddress,
+            receiveAddress: this.walletAddress,
+            numAction: 0
+        });
+        const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
+        const swapArguments = [
+            this.from.address,
+            this.from.stringWeiAmount,
+            toChainId,
+            this.to.address,
+            Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
+            options?.receiverAddress || this.walletAddress,
+            this.providerAddress,
+            swapTransaction.to
+        ];
+
+        const methodArguments: unknown[] = [swapArguments];
+        if (!this.from.isNative) {
+            const approveTransaction = await this.via.buildApprovalTx({
+                owner: providerRouter,
+                routeId: this.route.routeId,
+                numAction: 0
+            });
+            methodArguments.push(approveTransaction.to);
+        }
+        methodArguments.push(swapTransaction.data);
+
+        const sourceValue = this.from.isNative ? this.from.stringWeiAmount : '0';
+        const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
+        const value = new BigNumber(sourceValue).plus(fixedFee).toFixed(0);
+
         return {
             contractAddress: this.fromContractAddress,
-            contractAbi: [],
-            methodName: '',
-            methodArguments: [],
-            value: '0'
+            contractAbi: commonCrossChainAbi,
+            methodName: this.methodName,
+            methodArguments,
+            value
         };
     }
 

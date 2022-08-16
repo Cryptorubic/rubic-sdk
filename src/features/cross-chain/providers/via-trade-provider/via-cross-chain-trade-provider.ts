@@ -21,6 +21,10 @@ import {
 import { ItType } from 'src/features/cross-chain/models/it-type';
 import { bridges } from 'src/features/cross-chain/constants/bridge-type';
 import { NATIVE_TOKEN_ADDRESS } from 'src/core/blockchain/constants/native-token-address';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
+import { providerRouter } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
 
 interface ToolType extends IActionStepTool {
     type: 'swap' | 'cross';
@@ -131,16 +135,18 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
 
             const gasData = options.gasCalculation === 'enabled' ? null : null;
 
-            const cryptoFeeAmount = Web3Pure.fromWei(
-                bestRoute.actions[0]?.additionalProviderFee?.amount.toString() || 0
-            );
-            const cryptoFeeSymbol = bestRoute.actions[0]?.additionalProviderFee?.token.symbol;
-            const cryptoFee = cryptoFeeSymbol
-                ? {
-                      amount: cryptoFeeAmount,
-                      tokenSymbol: cryptoFeeSymbol
-                  }
-                : null;
+            const additionalFee = bestRoute.actions[0]?.additionalProviderFee;
+            const cryptoFeeAmount = Web3Pure.fromWei(additionalFee?.amount.toString() || 0);
+            const cryptoFeeSymbol = additionalFee?.token.symbol;
+            const feeInfo = {
+                ...(await this.getFeeInfo(fromBlockchain, options.providerAddress, from)),
+                cryptoFee: additionalFee
+                    ? {
+                          amount: cryptoFeeAmount,
+                          tokenSymbol: cryptoFeeSymbol!
+                      }
+                    : null
+            };
 
             const nativeToken = BlockchainsInfo.getBlockchainByName(from.blockchain).nativeCoin;
             const cryptoFeeToken = new PriceTokenAmount({
@@ -161,7 +167,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                         gasData,
                         priceImpact: 0, // @TODO add price impact
                         toTokenAmountMin,
-                        cryptoFee,
+                        feeInfo,
                         cryptoFeeToken,
                         itType,
                         bridgeType
@@ -286,5 +292,33 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
         }
 
         return bridges.find(bridge => bridge === bridgeApi.split(' ')[0]?.toLowerCase());
+    }
+
+    protected override async getFeeInfo(
+        fromBlockchain: ViaCrossChainSupportedBlockchain,
+        providerAddress: string,
+        percentFeeToken: PriceTokenAmount
+    ): Promise<FeeInfo> {
+        return {
+            fixedFee: {
+                amount: await this.getFixedFee(
+                    fromBlockchain,
+                    providerAddress,
+                    providerRouter,
+                    commonCrossChainAbi
+                ),
+                tokenSymbol: nativeTokensList[fromBlockchain].symbol
+            },
+            platformFee: {
+                percent: await this.getFeePercent(
+                    fromBlockchain,
+                    providerAddress,
+                    providerRouter,
+                    commonCrossChainAbi
+                ),
+                tokenSymbol: percentFeeToken.symbol
+            },
+            cryptoFee: null
+        };
     }
 }
