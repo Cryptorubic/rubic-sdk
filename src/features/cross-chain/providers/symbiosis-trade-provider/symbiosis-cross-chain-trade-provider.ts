@@ -183,10 +183,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                         feeInfo: {
                             ...feeInfo,
                             cryptoFee: {
-                                amount: Web3Pure.fromWei(
-                                    transitTokenFee.toFixed(),
-                                    transitToken.decimals
-                                ),
+                                amount: new BigNumber(transitTokenFee.toFixed()),
                                 tokenSymbol: transitTokenFee.token.symbol || ''
                             }
                         },
