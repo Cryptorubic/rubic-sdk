@@ -1,5 +1,5 @@
 export const Li_FI_TRADE_SUBTYPE = {
-    CONNECT: 'connext',
+    CONNEXT: 'connext',
     HOP: 'hop',
     CELER_BRIDGE: 'cbridge',
     MULTICHAIN: 'multichain',
