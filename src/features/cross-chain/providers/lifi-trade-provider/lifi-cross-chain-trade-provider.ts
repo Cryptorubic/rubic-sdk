@@ -1,5 +1,5 @@
 import { CROSS_CHAIN_TRADE_TYPE, LiFiTradeSubtype, TradeType } from 'src/features';
-import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
+import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
 import BigNumber from 'bignumber.js';
 import {
     LifiCrossChainSupportedBlockchain,
@@ -72,20 +72,11 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         );
         const tokenAmountIn = from.weiAmount.minus(feeAmount).toFixed(0);
 
-        let routeOptions: RouteOptions = {
+        const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
             order: 'RECOMMENDED',
             allowSwitchChain: false
         };
-        // @TODO remove after whitelisting
-        if (fromBlockchain === BLOCKCHAIN_NAME.CRONOS || toBlockchain === BLOCKCHAIN_NAME.CRONOS) {
-            routeOptions = {
-                ...routeOptions,
-                bridges: {
-                    deny: ['multichain']
-                }
-            };
-        }
 
         const fromChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id;
         const toChainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id;
