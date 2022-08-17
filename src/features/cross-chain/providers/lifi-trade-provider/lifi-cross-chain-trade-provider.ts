@@ -203,15 +203,17 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         itType: { from: TradeType | undefined; to: TradeType | undefined };
     } {
         const steps =
-            route.steps.length === 1 ? (route.steps[0] as LifiStep).includedSteps : route.steps;
+            route.steps.length === 1 && (route.steps[0] as LifiStep).includedSteps
+                ? (route.steps[0] as LifiStep).includedSteps
+                : route.steps;
         const sourceDex =
             steps?.[0] && steps[0].action.fromChainId === steps[0].action.toChainId
                 ? steps?.[0].toolDetails.name.toLowerCase()
                 : undefined;
 
-        const [, ...stepsWithoutFirst] = steps;
-        const targetDex = stepsWithoutFirst
-            .find(provider => provider.action.fromChainId === provider.action.toChainId)
+        const targetDex = steps
+            ?.slice(1)
+            ?.find(provider => provider.action.fromChainId === provider.action.toChainId)
             ?.toolDetails.name.toLowerCase();
 
         const subType = steps?.find(
