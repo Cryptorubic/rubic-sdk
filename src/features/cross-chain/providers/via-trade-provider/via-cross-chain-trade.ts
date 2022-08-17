@@ -15,7 +15,7 @@ import BigNumber from 'bignumber.js';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { ItType } from 'src/features/cross-chain/models/it-type';
-import { providerRouter } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
+import { viaContractAddress } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 
 export class ViaCrossChainTrade extends CrossChainTrade {
@@ -50,7 +50,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     protected readonly fromWeb3Public: Web3Public;
 
     protected get fromContractAddress(): string {
-        return providerRouter;
+        return viaContractAddress;
     }
 
     constructor(
@@ -135,8 +135,8 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
         const swapTransaction = await this.via.buildTx({
             routeId: this.route.routeId,
-            fromAddress: providerRouter,
-            receiveAddress: providerRouter,
+            fromAddress: viaContractAddress,
+            receiveAddress: options?.receiverAddress || this.walletAddress,
             numAction: 0
         });
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
@@ -154,7 +154,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         const methodArguments: unknown[] = [swapArguments];
         if (!this.from.isNative) {
             const approveTransaction = await this.via.buildApprovalTx({
-                owner: providerRouter,
+                owner: viaContractAddress,
                 routeId: this.route.routeId,
                 numAction: 0
             });

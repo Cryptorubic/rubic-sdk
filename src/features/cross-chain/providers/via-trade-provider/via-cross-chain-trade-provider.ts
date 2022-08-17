@@ -24,7 +24,11 @@ import { NATIVE_TOKEN_ADDRESS } from 'src/core/blockchain/constants/native-token
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
-import { providerRouter } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
+import {
+    viaContractAbi,
+    viaContractAddress
+} from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
+import { compareAddresses, notNull } from 'src/common';
 
 interface ToolType extends IActionStepTool {
     type: 'swap' | 'cross';
@@ -90,7 +94,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 fromAmount: parseInt(from.stringWeiAmount),
                 toChainId,
                 toTokenAddress: toToken.address,
-                fromAddress: options.fromAddress || this.walletAddress,
+                fromAddress: viaContractAddress,
                 multiTx: false,
                 limit: 1
             };
@@ -110,7 +114,8 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
             )
                 .map(wrappedRoute => wrappedRoute.value.routes)
                 .flat();
-            if (!routes.length) {
+            const filteredRoutes = await this.getFilteredRoutes(fromBlockchain, via, routes);
+            if (!filteredRoutes.length) {
                 return null;
             }
 
@@ -121,7 +126,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 },
                 { address: NATIVE_TOKEN_ADDRESS }
             ]);
-            const bestRoute = await this.getBestRoute(toToken, nativeTokenPrice!, routes);
+            const bestRoute = await this.getBestRoute(toToken, nativeTokenPrice!, filteredRoutes);
 
             from = new PriceTokenAmount({
                 ...from.asStructWithAmount,
@@ -184,6 +189,49 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 error: CrossChainTradeProvider.parseError(err)
             };
         }
+    }
+
+    private async getFilteredRoutes(
+        fromBlockchain: BlockchainName,
+        via: Via,
+        routes: IRoute[]
+    ): Promise<IRoute[]> {
+        const whitelistedContracts = (
+            await Injector.web3PublicService
+                .getWeb3Public(fromBlockchain)
+                .callContractMethod<string[]>(
+                    viaContractAddress,
+                    viaContractAbi,
+                    'getAvailableRouters'
+                )
+        ).map(contract => contract.toLowerCase());
+
+        const whitelistedRoutes = await Promise.all(
+            routes.map(async route => {
+                try {
+                    const tx = await via.buildTx({
+                        routeId: route.routeId,
+                        fromAddress: viaContractAddress,
+                        receiveAddress: viaContractAddress,
+                        numAction: 0
+                    });
+                    if (
+                        whitelistedContracts.find(whitelistedContract =>
+                            compareAddresses(whitelistedContract, tx.to)
+                        )
+                    ) {
+                        return route;
+                    }
+
+                    console.debug('Not whitelisted address:', tx.to);
+                    return null;
+                } catch (err) {
+                    console.debug('buildTx error:', err);
+                    return null;
+                }
+            })
+        );
+        return whitelistedRoutes.filter(notNull);
     }
 
     private async getBestRoute(
@@ -307,7 +355,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 amount: await this.getFixedFee(
                     fromBlockchain,
                     providerAddress,
-                    providerRouter,
+                    viaContractAddress,
                     commonCrossChainAbi
                 ),
                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
@@ -316,7 +364,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 percent: await this.getFeePercent(
                     fromBlockchain,
                     providerAddress,
-                    providerRouter,
+                    viaContractAddress,
                     commonCrossChainAbi
                 ),
                 tokenSymbol: percentFeeToken.symbol
