@@ -24,7 +24,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     private readonly via = new Via({
         apiKey: DEFAULT_API_KEY,
         url: 'https://router-api.via.exchange',
-        timeout: 10_000
+        timeout: 25_000
     });
 
     public readonly from: PriceTokenAmount;
@@ -135,8 +135,8 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
         const swapTransaction = await this.via.buildTx({
             routeId: this.route.routeId,
-            fromAddress: this.walletAddress,
-            receiveAddress: this.walletAddress,
+            fromAddress: providerRouter,
+            receiveAddress: providerRouter,
             numAction: 0
         });
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;

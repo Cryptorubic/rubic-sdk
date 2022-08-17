@@ -131,7 +131,10 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 ...toToken.asStruct,
                 weiAmount: new BigNumber(bestRoute.toTokenAmount)
             });
-            const toTokenAmountMin = to.weiAmountMinusSlippage(bestRoute.slippage || 0);
+            const toTokenAmountMin = Web3Pure.fromWei(
+                to.weiAmountMinusSlippage((bestRoute.slippage || 0) / 100),
+                to.decimals
+            );
 
             const gasData = options.gasCalculation === 'enabled' ? null : null;
 
