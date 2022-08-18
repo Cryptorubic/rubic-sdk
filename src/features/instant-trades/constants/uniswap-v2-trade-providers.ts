@@ -20,6 +20,7 @@ import { TrisolarisAuroraProvider } from '@rsdk-features/instant-trades/dexes/au
 import { WannaSwapAuroraProvider } from '@rsdk-features/instant-trades/dexes/aurora/wanna-swap-aurora/wanna-swap-aurora-provider';
 import { SushiSwapTelosProvider } from 'src/features/instant-trades/dexes/telos/sushi-swap-telos/sushi-swap-telos-provider';
 import { ZappyProvider } from 'src/features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
+import { OolongSwapProvider } from 'src/features/instant-trades/dexes/boba/oolong-swap/oolong-swap-provider';
 
 export const UniswapV2TradeProviders = [
     // ethereum
@@ -53,5 +54,7 @@ export const UniswapV2TradeProviders = [
     WannaSwapAuroraProvider,
     // telos
     SushiSwapTelosProvider,
-    ZappyProvider
+    ZappyProvider,
+    // Boba
+    OolongSwapProvider
 ] as const;
