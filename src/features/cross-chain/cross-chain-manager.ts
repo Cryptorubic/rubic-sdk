@@ -9,7 +9,12 @@ import { getPriceTokensFromInputTokens } from '@rsdk-common/utils/tokens';
 import { Mutable } from '@rsdk-common/utils/types/mutable';
 import { CelerCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade-provider';
 import { CcrTypedTradeProviders } from '@rsdk-features/cross-chain/models/typed-trade-provider';
-import { CelerCrossChainTrade, CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from 'src/features';
+import {
+    CelerCrossChainTrade,
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTradeType,
+    RangoCrossChainTradeProvider
+} from 'src/features';
 import { SwapManagerCrossChainCalculationOptions } from '@rsdk-features/cross-chain/models/swap-manager-cross-chain-options';
 import pTimeout from '@rsdk-common/utils/p-timeout';
 import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
@@ -49,7 +54,8 @@ export class CrossChainManager {
         CelerCrossChainTradeProvider,
         SymbiosisCrossChainTradeProvider,
         LifiCrossChainTradeProvider,
-        DebridgeCrossChainTradeProvider
+        DebridgeCrossChainTradeProvider,
+        RangoCrossChainTradeProvider
     ].reduce((acc, ProviderClass) => {
         const provider = new ProviderClass();
         acc[provider.type] = provider;
@@ -312,7 +318,7 @@ export class CrossChainManager {
             fromSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
             toSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
             gasCalculation: 'disabled',
-            disabledProviders: [],
+            disabledProviders: ['RUBIC', 'CELER', 'LIFI', 'SYMBIOSIS', 'DEBRIDGE'],
             timeout: CrossChainManager.defaultCalculationTimeout,
             providerAddress: this.providerAddress,
             slippageTolerance: CrossChainManager.defaultSlippageTolerance * 2,

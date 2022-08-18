@@ -28,4 +28,9 @@ export interface CrossChainTradeData {
      * Li-fi bridge type.
      */
     lifiBridgeType?: string;
+
+    /**
+     * Rango request id
+     */
+    rangoRequestId?: string;
 }

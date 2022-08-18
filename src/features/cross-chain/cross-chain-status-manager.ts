@@ -4,6 +4,7 @@ import { BlockchainName, BlockchainsInfo } from 'src/core';
 import { Injector } from 'src/core/sdk/injector';
 import { celerCrossChainEventStatusesAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-event-statuses-abi';
 import { LogsDecoder } from 'src/features/cross-chain/utils/decode-logs';
+import { StatusResponse } from 'rango-sdk-basic/lib';
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from './models/cross-chain-trade-type';
 import { celerCrossChainContractAbi } from './providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import { celerCrossChainContractsAddresses } from './providers/celer-trade-provider/constants/celer-cross-chain-contracts-addresses';
@@ -18,6 +19,7 @@ import { LifiSwapStatus } from './providers/lifi-trade-provider/models/lifi-swap
 import { SymbiosisSwapStatus } from './providers/symbiosis-trade-provider/models/symbiosis-swap-status';
 import { CrossChainTradeData } from './models/cross-chain-trade-data';
 import { RubicCrossChainSupportedBlockchain } from './providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
+import { RANGO_API_KEY } from './providers/rango-trade-provider/constants/rango-api-key';
 
 interface DeBridgeApiResponse {
     claim: {
@@ -57,7 +59,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.RUBIC]: this.getRubicDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus
     };
 
     /**
@@ -151,6 +154,37 @@ export class CrossChainStatusManager {
         }
 
         return await this.getDstTxStatusFnMap[provider].call(this, tradeData, srcTxReceipt);
+    }
+
+    private async getRangoDstSwapStatus(
+        data: CrossChainTradeData,
+        _: TransactionReceipt
+    ): Promise<CrossChainTxStatus> {
+        const apiUrl = '';
+        const { rangoRequestId: requestId, srcTxHash: txId } = data;
+        const rangoTradeStatusResponse = await Injector.httpClient.get<StatusResponse>(apiUrl, {
+            params: { apiKey: RANGO_API_KEY, requestId: requestId as string, txId }
+        });
+
+        if (rangoTradeStatusResponse.output === null) {
+            return CrossChainTxStatus.PENDING;
+        }
+
+        const { type } = rangoTradeStatusResponse.output;
+
+        if (type === 'MIDDLE_ASSET_IN_SRC' || type === 'MIDDLE_ASSET_IN_DEST') {
+            return CrossChainTxStatus.FALLBACK;
+        }
+
+        if (type === 'REVERTED_TO_INPUT') {
+            return CrossChainTxStatus.REVERT;
+        }
+
+        if (type === 'DESIRED_OUTPUT') {
+            return CrossChainTxStatus.SUCCESS;
+        }
+
+        return CrossChainTxStatus.UNKNOWN;
     }
 
     /**

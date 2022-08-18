@@ -39,6 +39,11 @@ export interface CrossChainOptions {
      * Address to send transaction, otherwise connected wallet is used (necessary for Symbiosis).
      */
     fromAddress?: string;
+
+    /**
+     * Receiver address, otherwise connected wallet is used (necessary for Rango).
+     */
+    toAddress?: string;
 }
 
 export type RequiredCrossChainOptions = MarkRequired<

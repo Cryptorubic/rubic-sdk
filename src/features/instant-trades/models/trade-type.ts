@@ -15,6 +15,7 @@ export const TRADE_TYPE = {
 
     // Ethereum
     UNISWAP_V2: 'UNISWAP_V2',
+    AURORA_SWAP: 'AURORA_SWAP',
 
     // Bsc
     PANCAKE_SWAP: 'PANCAKE_SWAP',
@@ -46,6 +47,8 @@ export const TRADE_TYPE = {
 
     // Cronos
     CRONA_SWAP: 'CRONA_SWAP',
+    MM_FINANCE: 'MM_FINANCE',
+    VVS_FINANCE: 'VVS_FINANCE',
 
     // Moonbeam
     STELLA_SWAP: 'STELLA_SWAP',
@@ -54,17 +57,23 @@ export const TRADE_TYPE = {
     // Celo
     UBE_SWAP: 'UBE_SWAP',
 
+    // Fuse
+    VOLTAGE_SWAP: 'VOLTAGE_SWAP',
+
     // Boba
     OOLONG_SWAP: 'OOLONG_SWAP',
 
     // Solana
     RAYDIUM: 'RAYDIUM',
+    JUPITER: 'JUPITER',
 
     // Near
     REF_FINANCE: 'REF_FINANCE',
 
     // Other
-    WRAPPED: 'WRAPPED'
+    WRAPPED: 'WRAPPED',
+    ACROSS: 'ACROSS',
+    ANYSWAP: 'ANYSWAP'
 } as const;
 
 /**
