@@ -7,7 +7,6 @@ import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/sdk/injector';
 import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
 import { CrossChainIsUnavailableError, FailedToCheckForTransactionReceiptError } from 'src/common';
-import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import { CrossChainTrade } from '../common/cross-chain-trade';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { RANGO_CONTRACT_ADDRESSES } from './constants/contract-address';
@@ -144,18 +143,19 @@ export class RangoCrossChainTrade extends CrossChainTrade {
         }
         methodArguments.push(txData);
 
-        const fixedCryptoFee = Web3Pure.toWei(
-            this.feeInfo.fixedFee.amount,
-            nativeTokensList[this.fromBlockchain].decimals
-        );
-        const totalMsgValue = new BigNumber(parseInt(value || '0'))
-            .plus(fixedCryptoFee)
-            .toFixed(0, 0);
+        const sourceValue = this.from.isNative ? this.from.stringWeiAmount : '0';
+        const cryptoFee = Web3Pure.toWei(this.feeInfo?.cryptoFee?.amount || 0);
+        const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
+        const msgValue = new BigNumber(sourceValue)
+            .plus(cryptoFee)
+            .plus(fixedFee)
+            .plus(parseInt(value || '0'))
+            .toFixed(0);
 
-        console.log('message value', {
-            fixedCryptoFeeInWei: fixedCryptoFee,
-            value: parseInt(value || '0'),
-            sum: totalMsgValue
+        console.log('message value data', {
+            fee: { fixedFee, cryptoFee },
+            rangoValue: parseInt(value || '0'),
+            sum: msgValue
         });
 
         return {
@@ -163,21 +163,11 @@ export class RangoCrossChainTrade extends CrossChainTrade {
             contractAbi: commonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,
-            value: totalMsgValue
+            value: msgValue
         };
     }
 
-    protected async checkTradeErrors(): Promise<void> {
-        this.checkWalletConnected();
-        this.checkBlockchainCorrect();
-        await this.checkUserBalance();
-    }
-
-    public getTradeAmountRatio(): BigNumber {
-        return new BigNumber(1);
-    }
-
-    public async refetchTxData(): Promise<EvmTransaction> {
+    private async refetchTxData(): Promise<EvmTransaction> {
         try {
             const response = await this.rangoClientRef.swap({
                 from: {
@@ -202,8 +192,18 @@ export class RangoCrossChainTrade extends CrossChainTrade {
 
             return response.tx as EvmTransaction;
         } catch (error: unknown) {
-            console.log('Rango refetch tx data error:', error);
+            console.log('Rango refetch tx error:', error);
             throw new CrossChainIsUnavailableError();
         }
+    }
+
+    protected async checkTradeErrors(): Promise<void> {
+        this.checkWalletConnected();
+        this.checkBlockchainCorrect();
+        await this.checkUserBalance();
+    }
+
+    public getTradeAmountRatio(): BigNumber {
+        return new BigNumber(1);
     }
 }
