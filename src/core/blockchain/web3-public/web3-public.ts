@@ -28,6 +28,7 @@ import { HttpClient } from '@rsdk-common/models/http-client';
 import { DefaultHttpClient } from '@rsdk-common/http/default-http-client';
 import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
 import { RubicSdkError } from 'src/common';
+import { PendingTransaction } from 'src/core/blockchain/web3-public/models/pending-transaction';
 
 type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 
@@ -112,6 +113,30 @@ export class Web3Public {
      */
     public async getBlockNumber(): Promise<number> {
         return this.web3.eth.getBlockNumber();
+    }
+
+    /**
+     * Gets pending transaction by srcTxHash.
+     * @param srcTxHash Source Transaction Hash.
+     * @returns Pending transaction or undefined.
+     */
+    public async getPendingTransactionBySrcTxHash(
+        srcTxHash: string
+    ): Promise<PendingTransaction | undefined> {
+        const pendingTransactions = await this.web3.eth.getPendingTransactions();
+
+        return pendingTransactions.find(
+            pendingTransaction => pendingTransaction.hash === srcTxHash
+        );
+    }
+
+    /**
+     * Gets pending transaction by srcTxHash.
+     * @param address The address to get the numbers of transactions from.
+     * @returns Transaction Count.
+     */
+    public async getTransactionCountByUserAddress(address: string): Promise<number> {
+        return await this.web3.eth.getTransactionCount(address);
     }
 
     /**

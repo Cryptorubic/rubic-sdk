@@ -78,11 +78,13 @@ export class CrossChainStatusManager {
      * ```
      * @param data Data needed to calculate statuses.
      * @param provider Cross-chain trade type.
+     * @param address User Address.
      * @returns Object with transaction statuses.
      */
     public async getCrossChainStatus(
         data: CrossChainTradeData,
-        provider: CrossChainTradeType
+        provider: CrossChainTradeType,
+        address: string = ''
     ): Promise<CrossChainStatus> {
         const crossChainStatus: CrossChainStatus = {
             srcTxStatus: CrossChainTxStatus.UNKNOWN,
@@ -90,7 +92,12 @@ export class CrossChainStatusManager {
         };
         const { fromBlockchain, srcTxHash } = data;
         const srcTxReceipt = await this.getTxReceipt(fromBlockchain, srcTxHash as string);
-        const srcTxStatus = this.getSrcTxStatus(srcTxReceipt);
+        const srcTxStatus = await this.getSrcTxStatus(
+            srcTxReceipt,
+            data.srcTxHash,
+            data.fromBlockchain,
+            address
+        );
 
         crossChainStatus.srcTxStatus = srcTxStatus;
 
@@ -113,9 +120,29 @@ export class CrossChainStatusManager {
     /**
      * Get cross-chain trade's source transaction status via receipt.
      * @param srcTxReceipt Transaction receipt.
+     * @param srcTxHash Source Transaction Hash.
+     * @param fromBlockchain Source blockchain.
+     * @param address User Address.
      * @returns Cross-chain transaction status.
      */
-    private getSrcTxStatus(srcTxReceipt: TransactionReceipt | null): CrossChainTxStatus {
+    private async getSrcTxStatus(
+        srcTxReceipt: TransactionReceipt | null,
+        srcTxHash: string,
+        fromBlockchain: BlockchainName,
+        address: string
+    ): Promise<CrossChainTxStatus> {
+        const publicAdapter = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+        const pendingTransaction = await publicAdapter.getPendingTransactionBySrcTxHash(srcTxHash);
+        const transactionCount = await publicAdapter.getTransactionCountByUserAddress(address);
+
+        if (
+            pendingTransaction?.nonce !== undefined &&
+            address !== '' &&
+            pendingTransaction?.nonce < transactionCount
+        ) {
+            return CrossChainTxStatus.FAIL;
+        }
+
         if (srcTxReceipt === null) {
             return CrossChainTxStatus.PENDING;
         }
