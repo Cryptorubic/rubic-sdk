@@ -16,6 +16,5 @@ export const DE_BRIDGE_CONTRACT_ADDRESS: Record<
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: defaultContracts,
     [BLOCKCHAIN_NAME.POLYGON]: defaultContracts,
     [BLOCKCHAIN_NAME.AVALANCHE]: defaultContracts,
-    [BLOCKCHAIN_NAME.ARBITRUM]: defaultContracts,
-    [BLOCKCHAIN_NAME.FANTOM]: defaultContracts
+    [BLOCKCHAIN_NAME.ARBITRUM]: defaultContracts
 };
