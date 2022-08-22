@@ -2,7 +2,7 @@ import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/cor
 import { IRoute } from '@viaprotocol/router-sdk/dist/types';
 import { Via } from '@viaprotocol/router-sdk';
 import { FailedToCheckForTransactionReceiptError } from 'src/common';
-import { DEFAULT_API_KEY } from 'src/features/cross-chain/providers/via-trade-provider/constants/default-api-key';
+import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/sdk/injector';
 import {
@@ -23,11 +23,7 @@ import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
 export class ViaCrossChainTrade extends CrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.VIA;
 
-    private readonly via = new Via({
-        apiKey: DEFAULT_API_KEY,
-        url: 'https://router-api.via.exchange',
-        timeout: 25_000
-    });
+    private readonly via = new Via(VIA_DEFAULT_CONFIG);
 
     public readonly from: PriceTokenAmount;
 
@@ -53,6 +49,10 @@ export class ViaCrossChainTrade extends CrossChainTrade {
 
     protected get fromContractAddress(): string {
         return viaContractAddress;
+    }
+
+    public get uuid(): string {
+        return this.route.actions[0]!.uuid;
     }
 
     constructor(
@@ -124,6 +124,13 @@ export class ViaCrossChainTrade extends CrossChainTrade {
                     onTransactionHash
                 }
             );
+
+            await this.via.startRoute({
+                fromAddress: viaContractAddress,
+                toAddress: options?.receiverAddress || this.walletAddress,
+                routeId: this.route.routeId,
+                txHash: transactionHash!
+            });
 
             return transactionHash!;
         } catch (err) {

@@ -3,7 +3,7 @@ import {
     viaCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-cross-chain-supported-blockchain';
 import { Via } from '@viaprotocol/router-sdk';
-import { DEFAULT_API_KEY } from 'src/features/cross-chain/providers/via-trade-provider/constants/default-api-key';
+import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
 import { ViaCrossChainTrade } from 'src/features/cross-chain/providers/via-trade-provider/via-cross-chain-trade';
 import { BlockchainName, BlockchainsInfo, PriceToken, PriceTokenAmount, Web3Pure } from 'src/core';
 import { Injector } from 'src/core/sdk/injector';
@@ -45,11 +45,6 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.VIA;
 
-    private readonly viaConfig = {
-        apiKey: DEFAULT_API_KEY,
-        url: 'https://router-api.via.exchange'
-    };
-
     protected get walletAddress(): string {
         return Injector.web3Private.address;
     }
@@ -83,7 +78,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
             const toChainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id;
 
             const via = new Via({
-                ...this.viaConfig,
+                ...VIA_DEFAULT_CONFIG,
                 timeout: options.timeout
             });
 
