@@ -84,7 +84,7 @@ export class CrossChainStatusManager {
     public async getCrossChainStatus(
         data: CrossChainTradeData,
         provider: CrossChainTradeType,
-        address: string = ''
+        address?: string
     ): Promise<CrossChainStatus> {
         const crossChainStatus: CrossChainStatus = {
             srcTxStatus: CrossChainTxStatus.UNKNOWN,
@@ -96,6 +96,7 @@ export class CrossChainStatusManager {
             srcTxReceipt,
             data.srcTxHash,
             data.fromBlockchain,
+            data.txTimestamp,
             address
         );
 
@@ -122,6 +123,7 @@ export class CrossChainStatusManager {
      * @param srcTxReceipt Transaction receipt.
      * @param srcTxHash Source Transaction Hash.
      * @param fromBlockchain Source blockchain.
+     * @param txTimestamp Transaction Indexing Time Spent.
      * @param address User Address.
      * @returns Cross-chain transaction status.
      */
@@ -129,22 +131,32 @@ export class CrossChainStatusManager {
         srcTxReceipt: TransactionReceipt | null,
         srcTxHash: string,
         fromBlockchain: BlockchainName,
-        address: string
+        txTimestamp: number,
+        address?: string
     ): Promise<CrossChainTxStatus> {
-        const publicAdapter = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-        const pendingTransaction = await publicAdapter.getPendingTransactionBySrcTxHash(srcTxHash);
-        const transactionCount = await publicAdapter.getTransactionCountByUserAddress(address);
-
-        if (
-            pendingTransaction?.nonce !== undefined &&
-            address !== '' &&
-            pendingTransaction?.nonce < transactionCount
-        ) {
-            return CrossChainTxStatus.FAIL;
-        }
+        const fifteenMinutes = 1000;
+        const txIndexingTimeSpent = Date.now() > txTimestamp + fifteenMinutes;
 
         if (srcTxReceipt === null) {
             return CrossChainTxStatus.PENDING;
+        }
+
+        if (txIndexingTimeSpent && address && !srcTxReceipt.status) {
+            const publicAdapter = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+            const pendingTransaction = await publicAdapter.getPendingTransactionBySrcTxHash(
+                srcTxHash
+            );
+            const transactionCount = await publicAdapter.getTransactionCountByUserAddress(address);
+
+            console.log('Tx Indexing Time Spent', txIndexingTimeSpent);
+            console.log('Address', address);
+            console.log('!src Tx Receipt.status', !srcTxReceipt.status);
+            console.log('Pending Transaction', pendingTransaction);
+            console.log('Transaction Count', transactionCount);
+
+            if (pendingTransaction && pendingTransaction?.nonce < transactionCount) {
+                return CrossChainTxStatus.FAIL;
+            }
         }
 
         if (srcTxReceipt.status) {
