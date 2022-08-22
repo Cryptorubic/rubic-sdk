@@ -17,6 +17,8 @@ import { ContractParams } from 'src/features/cross-chain/models/contract-params'
 import { ItType } from 'src/features/cross-chain/models/it-type';
 import { viaContractAddress } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { MethodDecoder } from 'src/features/cross-chain/utils/decode-method';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
 
 export class ViaCrossChainTrade extends CrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.VIA;
@@ -158,7 +160,14 @@ export class ViaCrossChainTrade extends CrossChainTrade {
                 routeId: this.route.routeId,
                 numAction: 0
             });
-            methodArguments.push(approveTransaction.to);
+            const decodedData = MethodDecoder.decodeMethod(
+                ERC20_TOKEN_ABI.find(method => method.name === 'approve')!,
+                approveTransaction.data
+            );
+            const providerGateway = decodedData.params.find(
+                param => param.name === '_spender'
+            )!.value;
+            methodArguments.push(providerGateway);
         }
         methodArguments.push(swapTransaction.data);
 
