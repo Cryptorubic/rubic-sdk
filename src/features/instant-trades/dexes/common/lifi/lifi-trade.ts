@@ -13,7 +13,7 @@ import { Route } from '@lifi/sdk';
 import { TransactionConfig } from 'web3-core';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
-import { LifiSwapRequestError } from 'src/common/errors/swap/lifi-swap-request.error';
+import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { LifiPairIsUnavailable } from 'src/common/errors/swap/lifi-pair-is-unavailable';
 import { RubicSdkError } from 'src/common';
 
@@ -129,8 +129,8 @@ export class LifiTrade extends InstantTrade {
                 }
             );
         } catch (err) {
-            if (err.message.includes('Request failed with status code 500')) {
-                throw new LifiSwapRequestError();
+            if ([400, 500, 503].includes(err.code)) {
+                throw new SwapRequestError();
             }
 
             if (err instanceof RubicSdkError) {

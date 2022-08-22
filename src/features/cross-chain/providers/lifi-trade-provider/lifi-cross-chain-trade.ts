@@ -16,7 +16,7 @@ import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
-import { LifiSwapRequestError } from 'src/common/errors/swap/lifi-swap-request.error';
+import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { LiFiTradeSubtype } from 'src/features/cross-chain/providers/lifi-trade-provider/models/lifi-providers';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
@@ -193,8 +193,8 @@ export class LifiCrossChainTrade extends CrossChainTrade {
                 return transactionHash!;
             }
 
-            if (err.message.includes('Request failed with status code 500')) {
-                throw new LifiSwapRequestError();
+            if ([400, 500, 503].includes(err.code)) {
+                throw new SwapRequestError();
             }
 
             throw err;
