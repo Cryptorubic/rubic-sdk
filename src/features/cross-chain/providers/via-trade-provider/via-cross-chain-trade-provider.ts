@@ -319,6 +319,8 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
         }
 
         switch (type) {
+            case '0x':
+                return TRADE_TYPE.ZRX;
             case '1INCH':
                 return TRADE_TYPE.ONE_INCH;
             case '1SOL':
