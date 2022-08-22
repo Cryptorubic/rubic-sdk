@@ -5,7 +5,7 @@ import { RubicSdkError } from 'src/common';
  */
 export class LifiPairIsUnavailable extends RubicSdkError {
     constructor() {
-        super('The swap using this pair is currently unavaible. Please try again later.');
+        super('The swap using this pair is currently unavailable. Please try again later.');
         Object.setPrototypeOf(this, LifiPairIsUnavailable.prototype);
     }
 }
