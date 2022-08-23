@@ -7,10 +7,8 @@ export const RANGO_TRADE_SUBTYPE = {
     ARBITRUM_BRIDGE: 'Arbitrum Bridge',
     AVALANCHE_BRIDGE: 'Avalanche Bridge',
     OPENOCEAN: 'OpenOcean',
-    OSMOSIS: 'Osmosis',
     HOP: 'Hop',
     HYPHEN: 'Hyphen',
-    RAINBOW_BRIDGE: 'Rainbow Bridge',
     OPTIMISM_BRIDGE: 'Optimism Bridge',
     STARGATE: 'stargate'
 } as const;
