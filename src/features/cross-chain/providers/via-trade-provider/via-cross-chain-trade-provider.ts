@@ -29,6 +29,8 @@ import {
     viaContractAddress
 } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
 import { compareAddresses, notNull } from 'src/common';
+import { MethodDecoder } from 'src/features/cross-chain/utils/decode-method';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
 
 interface ToolType extends IActionStepTool {
     type: 'swap' | 'cross';
@@ -86,7 +88,8 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
             const params: IGetRoutesRequestParams = {
                 fromChainId,
                 fromTokenAddress: from.address,
-                fromAmount: parseInt(from.stringWeiAmount),
+                // `number` max value is less, than from wei amount
+                fromAmount: from.stringWeiAmount as unknown as number,
                 toChainId,
                 toTokenAddress: toToken.address,
                 fromAddress: viaContractAddress,
@@ -109,7 +112,12 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
             )
                 .map(wrappedRoute => wrappedRoute.value.routes)
                 .flat();
-            const filteredRoutes = await this.getFilteredRoutes(fromBlockchain, via, routes);
+            const filteredRoutes = await this.getFilteredRoutes(
+                fromBlockchain,
+                from.isNative,
+                via,
+                routes
+            );
             if (!filteredRoutes.length) {
                 return null;
             }
@@ -188,6 +196,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
 
     private async getFilteredRoutes(
         fromBlockchain: BlockchainName,
+        fromNative: boolean,
         via: Via,
         routes: IRoute[]
     ): Promise<IRoute[]> {
@@ -204,6 +213,8 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
         const whitelistedRoutes = await Promise.all(
             routes.map(async route => {
                 try {
+                    let whitelisted = true;
+
                     const tx = await via.buildTx({
                         routeId: route.routeId,
                         fromAddress: viaContractAddress,
@@ -211,15 +222,41 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                         numAction: 0
                     });
                     if (
-                        whitelistedContracts.find(whitelistedContract =>
+                        !whitelistedContracts.find(whitelistedContract =>
                             compareAddresses(whitelistedContract, tx.to)
                         )
                     ) {
-                        return route;
+                        console.debug('Not whitelisted providerRouter address:', tx.to);
+                        whitelisted = false;
                     }
 
-                    console.debug('Not whitelisted address:', tx.to);
-                    return null;
+                    if (!fromNative) {
+                        const approveTransaction = await via.buildApprovalTx({
+                            owner: viaContractAddress,
+                            routeId: route.routeId,
+                            numAction: 0
+                        });
+                        const decodedData = MethodDecoder.decodeMethod(
+                            ERC20_TOKEN_ABI.find(method => method.name === 'approve')!,
+                            approveTransaction.data
+                        );
+                        const providerGateway = decodedData.params.find(
+                            param => param.name === '_spender'
+                        )!.value;
+                        if (
+                            !whitelistedContracts.find(whitelistedContract =>
+                                compareAddresses(whitelistedContract, providerGateway)
+                            )
+                        ) {
+                            console.debug(
+                                'Not whitelisted providerGateway address:',
+                                providerGateway
+                            );
+                            whitelisted = false;
+                        }
+                    }
+
+                    return whitelisted ? route : null;
                 } catch (err) {
                     console.debug('buildTx error:', err);
                     return null;
