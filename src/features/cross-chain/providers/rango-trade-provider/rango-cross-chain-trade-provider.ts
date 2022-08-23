@@ -110,6 +110,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
             const { route, resultType } = await this.rango.swap(request);
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
+            const networkFee = route?.fee.find(item => item.name === 'Network Fee');
 
             if ((resultType === 'INPUT_LIMIT_ISSUE' || resultType === 'NO_ROUTE') && route) {
                 const { amountRestriction } = route;
@@ -145,11 +146,22 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                         from: fromToken,
                         to,
                         toTokenAmountMin: new BigNumber(route.outputAmount),
-                        feeInfo,
                         priceImpact: 0,
                         itType,
                         subType,
-                        slippageTolerance: options.slippageTolerance as number
+                        slippageTolerance: options.slippageTolerance as number,
+                        feeInfo: {
+                            ...feeInfo,
+                            cryptoFee: {
+                                amount: Web3Pure.fromWei(
+                                    networkFee?.amount || 0,
+                                    networkFee?.token.decimals
+                                ),
+                                tokenSymbol:
+                                    networkFee?.token.symbol ||
+                                    nativeTokensList[fromBlockchain].symbol
+                            }
+                        }
                     },
                     this.rango,
                     options.providerAddress || EMPTY_ADDRESS
