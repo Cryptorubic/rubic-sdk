@@ -1,13 +1,11 @@
 import BigNumber from 'bignumber.js';
 import {
-    EvmTransaction,
     MetaResponse,
     QuotePath,
     QuoteSimulationResult,
     RangoClient,
     SwapRequest
 } from 'rango-sdk-basic/lib';
-import { CrossChainIsUnavailableError } from 'src/common';
 import { BlockchainName, Web3Pure } from 'src/core';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { NATIVE_TOKEN_ADDRESS } from 'src/core/blockchain/constants/native-token-address';
@@ -83,35 +81,6 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
         }
     }
 
-    private parseTradeTypes(route: QuoteSimulationResult): {
-        subType: RangoTradeSubtype;
-        itType: { from: TradeType | undefined; to: TradeType | undefined };
-    } {
-        const { path, swapper } = route;
-
-        if (!path) {
-            return {
-                itType: { from: undefined, to: undefined },
-                subType: swapper.id as RangoTradeSubtype
-            };
-        }
-
-        const subType = path?.find(
-            item => item.swapperType === 'BRIDGE' || item.swapperType === 'AGGREGATOR'
-        )?.swapper?.id;
-
-        const dexes = path
-            .filter(item => item.swapperType === 'DEX')
-            .map((item: QuotePath) => item.swapper.id);
-
-        const itType = {
-            from: dexes[0] ? rangoProviders[dexes[0]] : undefined,
-            to: dexes[1] ? rangoProviders[dexes[1]] : undefined
-        };
-
-        return { itType, subType: subType as RangoTradeSubtype };
-    }
-
     public async calculate(
         fromToken: PriceTokenAmount,
         toToken: PriceTokenAmount,
@@ -130,21 +99,19 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
             return { trade: null };
         }
 
-        await this.checkContractState(fromBlockchain);
+        await this.checkContractState(
+            fromBlockchain,
+            RANGO_CONTRACT_ADDRESSES[fromBlockchain].rubicRouter
+        );
 
         const request = this.getRequestParams(fromToken, toToken, options);
 
         try {
-            const { route, resultType, tx } = await this.rango.swap(request);
+            const { route, resultType } = await this.rango.swap(request);
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-            const networkFee = route?.fee.find(item => item.name === 'Network Fee');
 
             if ((resultType === 'INPUT_LIMIT_ISSUE' || resultType === 'NO_ROUTE') && route) {
-                // if (error?.includes('Insufficient balance')) {
-                //     return { trade: null, error: new InsufficientFundsError() };
-                // }
-
                 const { amountRestriction } = route;
                 if (amountRestriction?.min && fromToken.weiAmount.lt(amountRestriction.min)) {
                     return {
@@ -178,32 +145,11 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                         from: fromToken,
                         to,
                         toTokenAmountMin: new BigNumber(route.outputAmount),
-                        feeInfo: {
-                            ...feeInfo,
-                            cryptoFee: {
-                                amount: Web3Pure.fromWei(
-                                    networkFee?.amount as string,
-                                    networkFee?.token.decimals
-                                ),
-                                tokenSymbol: networkFee?.token.symbol as string
-                            }
-                        },
+                        feeInfo,
                         priceImpact: 0,
                         itType,
                         subType,
-                        slippageTolerance: options.slippageTolerance as number,
-                        ...((tx as EvmTransaction)?.gasLimit
-                            ? {
-                                  gasData: {
-                                      gasLimit: new BigNumber(
-                                          parseInt((tx as EvmTransaction)?.gasLimit as string)
-                                      ),
-                                      gasPrice: new BigNumber(
-                                          (tx as EvmTransaction)?.gasPrice as string
-                                      )
-                                  }
-                              }
-                            : { gasData: null })
+                        slippageTolerance: options.slippageTolerance as number
                     },
                     this.rango,
                     options.providerAddress || EMPTY_ADDRESS
@@ -238,7 +184,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                 address: toToken.isNative ? null : toToken.address
             },
             amount: fromToken.weiAmount.toFixed(0),
-            disableEstimate: false,
+            disableEstimate: true,
             slippage: (options.slippageTolerance * 100).toString(),
             fromAddress,
             toAddress,
@@ -247,18 +193,33 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
         };
     }
 
-    private async checkContractState(fromBlockchain: RangoCrossChainSupportedBlockchain) {
-        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+    private parseTradeTypes(route: QuoteSimulationResult): {
+        subType: RangoTradeSubtype;
+        itType: { from: TradeType | undefined; to: TradeType | undefined };
+    } {
+        const { path, swapper } = route;
 
-        const isPaused = await web3PublicService.callContractMethod<number>(
-            RANGO_CONTRACT_ADDRESSES[fromBlockchain].rubicRouter,
-            commonCrossChainAbi,
-            'paused'
-        );
-
-        if (isPaused) {
-            throw new CrossChainIsUnavailableError();
+        if (!path) {
+            return {
+                itType: { from: undefined, to: undefined },
+                subType: swapper.id as RangoTradeSubtype
+            };
         }
+
+        const subType = path.find(
+            item => item.swapperType === 'BRIDGE' || item.swapperType === 'AGGREGATOR'
+        )?.swapper?.id;
+
+        const dexes = path
+            .filter(item => item.swapperType === 'DEX')
+            .map((item: QuotePath) => item.swapper.id);
+
+        const itType = {
+            from: dexes[0] ? rangoProviders[dexes[0]] : undefined,
+            to: dexes[1] ? rangoProviders[dexes[1]] : undefined
+        };
+
+        return { itType, subType: subType as RangoTradeSubtype };
     }
 
     protected async getFeeInfo(
