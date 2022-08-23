@@ -4,7 +4,7 @@ import { BlockchainName, BlockchainsInfo } from 'src/core';
 import { Injector } from 'src/core/sdk/injector';
 import { celerCrossChainEventStatusesAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-event-statuses-abi';
 import { LogsDecoder } from 'src/features/cross-chain/utils/decode-logs';
-import { StatusResponse } from 'rango-sdk-basic/lib';
+import { StatusResponse, TransactionStatus } from 'rango-sdk-basic/lib';
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from './models/cross-chain-trade-type';
 import { celerCrossChainContractAbi } from './providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import { celerCrossChainContractsAddresses } from './providers/celer-trade-provider/constants/celer-cross-chain-contracts-addresses';
@@ -160,28 +160,37 @@ export class CrossChainStatusManager {
         data: CrossChainTradeData,
         _: TransactionReceipt
     ): Promise<CrossChainTxStatus> {
-        const apiUrl = '';
         const { rangoRequestId: requestId, srcTxHash: txId } = data;
-        const rangoTradeStatusResponse = await Injector.httpClient.get<StatusResponse>(apiUrl, {
-            params: { apiKey: RANGO_API_KEY, requestId: requestId as string, txId }
-        });
+        const rangoTradeStatusResponse = await Injector.httpClient.get<StatusResponse>(
+            'https://api.rango.exchange/basic/status',
+            {
+                params: { apiKey: RANGO_API_KEY, requestId: requestId as string, txId }
+            }
+        );
 
-        if (rangoTradeStatusResponse.output === null) {
-            return CrossChainTxStatus.PENDING;
-        }
-
-        const { type } = rangoTradeStatusResponse.output;
-
-        if (type === 'MIDDLE_ASSET_IN_SRC' || type === 'MIDDLE_ASSET_IN_DEST') {
-            return CrossChainTxStatus.FALLBACK;
-        }
-
-        if (type === 'REVERTED_TO_INPUT') {
-            return CrossChainTxStatus.REVERT;
-        }
-
-        if (type === 'DESIRED_OUTPUT') {
+        if (rangoTradeStatusResponse.status === TransactionStatus.SUCCESS) {
             return CrossChainTxStatus.SUCCESS;
+        }
+
+        if (rangoTradeStatusResponse.status === TransactionStatus.FAILED) {
+            const type = rangoTradeStatusResponse?.output?.type;
+
+            if (type === 'MIDDLE_ASSET_IN_SRC' || type === 'MIDDLE_ASSET_IN_DEST') {
+                return CrossChainTxStatus.FALLBACK;
+            }
+
+            if (type === 'REVERTED_TO_INPUT') {
+                return CrossChainTxStatus.REVERT;
+            }
+
+            return CrossChainTxStatus.FAIL;
+        }
+
+        if (
+            rangoTradeStatusResponse.status === TransactionStatus.RUNNING ||
+            rangoTradeStatusResponse.status === null
+        ) {
+            return CrossChainTxStatus.PENDING;
         }
 
         return CrossChainTxStatus.UNKNOWN;

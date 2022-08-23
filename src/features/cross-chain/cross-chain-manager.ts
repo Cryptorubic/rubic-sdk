@@ -318,7 +318,7 @@ export class CrossChainManager {
             fromSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
             toSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
             gasCalculation: 'disabled',
-            disabledProviders: ['RUBIC', 'CELER', 'LIFI', 'SYMBIOSIS', 'DEBRIDGE'],
+            disabledProviders: options?.disabledProviders as CrossChainTradeType[],
             timeout: CrossChainManager.defaultCalculationTimeout,
             providerAddress: this.providerAddress,
             slippageTolerance: CrossChainManager.defaultSlippageTolerance * 2,
