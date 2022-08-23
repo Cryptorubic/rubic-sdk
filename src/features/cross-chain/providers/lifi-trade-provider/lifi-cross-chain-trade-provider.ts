@@ -1,5 +1,5 @@
 import { CROSS_CHAIN_TRADE_TYPE, LiFiTradeSubtype, TradeType } from 'src/features';
-import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
+import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
 import BigNumber from 'bignumber.js';
 import {
     LifiCrossChainSupportedBlockchain,
@@ -73,20 +73,11 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         );
         const tokenAmountIn = from.weiAmount.minus(feeAmount).toFixed(0);
 
-        let routeOptions: RouteOptions = {
+        const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
             order: 'RECOMMENDED',
             allowSwitchChain: false
         };
-        // @TODO remove after whitelisting
-        if (fromBlockchain === BLOCKCHAIN_NAME.CRONOS || toBlockchain === BLOCKCHAIN_NAME.CRONOS) {
-            routeOptions = {
-                ...routeOptions,
-                bridges: {
-                    deny: ['multichain']
-                }
-            };
-        }
 
         const fromChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id;
         const toChainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id;
@@ -199,15 +190,17 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         itType: { from: TradeType | undefined; to: TradeType | undefined };
     } {
         const steps =
-            route.steps.length === 1 ? (route.steps[0] as LifiStep).includedSteps : route.steps;
+            route.steps.length === 1 && (route.steps[0] as LifiStep).includedSteps
+                ? (route.steps[0] as LifiStep).includedSteps
+                : route.steps;
         const sourceDex =
             steps?.[0] && steps[0].action.fromChainId === steps[0].action.toChainId
                 ? steps?.[0].toolDetails.name.toLowerCase()
                 : undefined;
 
-        const [, ...stepsWithoutFirst] = steps;
-        const targetDex = stepsWithoutFirst
-            .find(provider => provider.action.fromChainId === provider.action.toChainId)
+        const targetDex = steps
+            ?.slice(1)
+            ?.find(provider => provider.action.fromChainId === provider.action.toChainId)
             ?.toolDetails.name.toLowerCase();
 
         const subType = steps?.find(
