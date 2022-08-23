@@ -111,7 +111,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                     ? await DebridgeCrossChainTrade.getGasData(from, to, requestParams)
                     : null;
 
-            const transitToken = estimation.dstChainTokenIn;
+            const transitToken = estimation.srcChainTokenOut;
 
             const cryptoFeeAmount = new BigNumber(tx.value).minus(
                 from.isNative ? from.stringWeiAmount : 0

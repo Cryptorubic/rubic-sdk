@@ -9,7 +9,13 @@ import { getPriceTokensFromInputTokens } from '@rsdk-common/utils/tokens';
 import { Mutable } from '@rsdk-common/utils/types/mutable';
 import { CelerCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade-provider';
 import { CcrTypedTradeProviders } from '@rsdk-features/cross-chain/models/typed-trade-provider';
-import { CelerCrossChainTrade, CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from 'src/features';
+import {
+    CelerCrossChainTrade,
+    CelerRubicCrossChainTrade,
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTradeType,
+    SymbiosisCrossChainTrade
+} from 'src/features';
 import { SwapManagerCrossChainCalculationOptions } from '@rsdk-features/cross-chain/models/swap-manager-cross-chain-options';
 import pTimeout from '@rsdk-common/utils/p-timeout';
 import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
@@ -28,6 +34,8 @@ import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/provid
 import { SymbiosisCrossChainTradeProvider } from 'src/features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
 import { LifiCrossChainTradeProvider } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade-provider';
 import { RubicCrossChainTradeProvider } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
+import { ViaCrossChainTrade } from 'src/features/cross-chain/providers/via-trade-provider/via-cross-chain-trade';
+import { DebridgeCrossChainTrade } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCrossChainCalculationOptions,
@@ -267,46 +275,68 @@ export class CrossChainManager {
 
     /**
      * Choose the best provider between two trades.
-     * @param newTrade New trade to compare.
-     * @param oldTrade Old trade to compare.
+     * @param newWrappedTrade New trade to compare.
+     * @param oldWrappedTrade Old trade to compare.
      */
     private chooseBestProvider(
-        newTrade: WrappedTradeOrNull,
-        oldTrade: WrappedTradeOrNull
+        newWrappedTrade: WrappedTradeOrNull,
+        oldWrappedTrade: WrappedTradeOrNull
     ): WrappedTradeOrNull {
         if (
-            oldTrade?.error instanceof CrossChainMinAmountError &&
-            newTrade?.error instanceof CrossChainMinAmountError
+            oldWrappedTrade?.error instanceof CrossChainMinAmountError &&
+            newWrappedTrade?.error instanceof CrossChainMinAmountError
         ) {
-            return oldTrade.error.minAmount.lte(newTrade.error.minAmount) ? oldTrade : newTrade;
+            return oldWrappedTrade.error.minAmount.lte(newWrappedTrade.error.minAmount)
+                ? oldWrappedTrade
+                : newWrappedTrade;
         }
         if (
-            oldTrade?.error instanceof CrossChainMaxAmountError &&
-            newTrade?.error instanceof CrossChainMaxAmountError
+            oldWrappedTrade?.error instanceof CrossChainMaxAmountError &&
+            newWrappedTrade?.error instanceof CrossChainMaxAmountError
         ) {
-            return oldTrade.error.maxAmount.gte(newTrade.error.maxAmount) ? oldTrade : newTrade;
+            return oldWrappedTrade.error.maxAmount.gte(newWrappedTrade.error.maxAmount)
+                ? oldWrappedTrade
+                : newWrappedTrade;
         }
 
-        if (!oldTrade || oldTrade.error) {
-            return newTrade;
+        if (!oldWrappedTrade || oldWrappedTrade.error) {
+            return newWrappedTrade;
         }
 
-        if (!newTrade || newTrade.error) {
-            return oldTrade;
+        if (!newWrappedTrade || newWrappedTrade.error) {
+            return oldWrappedTrade;
         }
 
-        const oldTradeRatio = oldTrade?.trade?.getTradeAmountRatio();
-        const newTradeRatio = newTrade?.trade?.getTradeAmountRatio();
+        const oldTrade = oldWrappedTrade.trade;
+        let fromUsd: BigNumber;
+        if (oldTrade instanceof CelerRubicCrossChainTrade) {
+            fromUsd = oldTrade.fromTrade.toToken.tokenAmount;
+        } else if (
+            oldTrade instanceof DebridgeCrossChainTrade ||
+            oldTrade instanceof SymbiosisCrossChainTrade
+        ) {
+            fromUsd = oldTrade.transitAmount;
+        } else if (
+            oldTrade instanceof LifiCrossChainTrade ||
+            oldTrade instanceof ViaCrossChainTrade
+        ) {
+            fromUsd = oldTrade.from.price.multipliedBy(oldTrade.from.tokenAmount);
+        } else {
+            throw new RubicSdkError('Not supported trade');
+        }
+
+        const oldTradeRatio = oldWrappedTrade?.trade?.getTradeAmountRatio(fromUsd);
+        const newTradeRatio = newWrappedTrade?.trade?.getTradeAmountRatio(fromUsd);
 
         if (!newTradeRatio) {
-            return oldTrade;
+            return oldWrappedTrade;
         }
 
         if (!oldTradeRatio) {
-            return newTrade;
+            return newWrappedTrade;
         }
 
-        return oldTradeRatio.lte(newTradeRatio) ? oldTrade : newTrade;
+        return oldTradeRatio.lte(newTradeRatio) ? oldWrappedTrade : newWrappedTrade;
     }
 
     private getFullOptions(

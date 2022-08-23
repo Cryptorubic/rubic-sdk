@@ -269,8 +269,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         return swapResponse.transactionRequest.data;
     }
 
-    public getTradeAmountRatio(): BigNumber {
-        const fromCost = this.from.price.multipliedBy(this.from.tokenAmount);
-        return fromCost.dividedBy(this.to.tokenAmount);
+    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
+        return fromUsd.dividedBy(this.to.tokenAmount);
     }
 }

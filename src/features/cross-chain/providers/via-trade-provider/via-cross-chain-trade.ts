@@ -191,11 +191,10 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         };
     }
 
-    public getTradeAmountRatio(): BigNumber {
-        const fromCost = this.from.price.multipliedBy(this.from.tokenAmount);
+    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         const usdCryptoFee = this.cryptoFeeToken.price.multipliedBy(
             this.cryptoFeeToken.tokenAmount
         );
-        return fromCost.plus(usdCryptoFee).dividedBy(this.to.tokenAmount);
+        return fromUsd.plus(usdCryptoFee).dividedBy(this.to.tokenAmount);
     }
 }

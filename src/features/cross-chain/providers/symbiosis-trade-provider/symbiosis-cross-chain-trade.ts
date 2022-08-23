@@ -224,7 +224,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         };
     }
 
-    public getTradeAmountRatio(): BigNumber {
-        return this.transitAmount.dividedBy(this.to.tokenAmount);
+    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
+        return fromUsd.dividedBy(this.to.tokenAmount);
     }
 }
