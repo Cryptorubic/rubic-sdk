@@ -19,6 +19,7 @@ import { viaContractAddress } from 'src/features/cross-chain/providers/via-trade
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { MethodDecoder } from 'src/features/cross-chain/utils/decode-method';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
+import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 
 export class ViaCrossChainTrade extends CrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.VIA;
@@ -125,18 +126,25 @@ export class ViaCrossChainTrade extends CrossChainTrade {
                 }
             );
 
-            await this.via.startRoute({
-                fromAddress: viaContractAddress,
-                toAddress: options?.receiverAddress || this.walletAddress,
-                routeId: this.route.routeId,
-                txHash: transactionHash!
-            });
+            try {
+                await this.via.startRoute({
+                    fromAddress: viaContractAddress,
+                    toAddress: options?.receiverAddress || this.walletAddress,
+                    routeId: this.route.routeId,
+                    txHash: transactionHash!
+                });
+            } catch {}
 
             return transactionHash!;
         } catch (err) {
             if (err instanceof FailedToCheckForTransactionReceiptError) {
                 return transactionHash!;
             }
+
+            if ([400, 500, 503].includes(err.code)) {
+                throw new SwapRequestError();
+            }
+
             throw err;
         }
     }
