@@ -1,5 +1,5 @@
 import { BridgeType, CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
-import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
+import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
 import BigNumber from 'bignumber.js';
 import {
     LifiCrossChainSupportedBlockchain,
