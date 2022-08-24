@@ -8,7 +8,6 @@ import {
 } from 'rango-sdk-basic/lib';
 import { BlockchainName, Web3Pure } from 'src/core';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { NATIVE_TOKEN_ADDRESS } from 'src/core/blockchain/constants/native-token-address';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import { Injector } from 'src/core/sdk/injector';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
@@ -17,6 +16,7 @@ import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-ch
 import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
 import { TradeType } from 'src/features/instant-trades';
 import { rangoProviders } from 'src/features/instant-trades/dexes/common/rango/constants/rango-providers';
+import { NATIVE_TOKEN_ADDRESS } from 'src/core/blockchain/constants/native-token-address';
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';
@@ -63,7 +63,8 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
 
     public isSupportedToken(token: PriceTokenAmount): boolean {
         if (this.meta) {
-            if (token.address === NATIVE_TOKEN_ADDRESS) {
+            const newLocal = token.address === NATIVE_TOKEN_ADDRESS;
+            if (newLocal) {
                 return true;
             }
 
@@ -76,27 +77,19 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
         return false;
     }
 
-    public async fetchRangoMetadata(): Promise<void> {
-        if (!this.meta) {
-            this.meta = await this.rango.meta();
-        }
-    }
-
     public async calculate(
         fromToken: PriceTokenAmount,
         toToken: PriceTokenAmount,
         options: RequiredCrossChainOptions
     ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
-        await this.fetchRangoMetadata();
-
         const fromBlockchain = fromToken.blockchain as RangoCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as RangoCrossChainSupportedBlockchain;
 
-        if (
-            !this.isSupportedBlockchains(fromBlockchain, toBlockchain) ||
-            !this.isSupportedToken(fromToken) ||
-            !this.isSupportedToken(toToken)
-        ) {
+        // if (!this.meta) {
+        //     this.meta = await this.rango.meta();
+        // }
+
+        if (!this.isSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return { trade: null };
         }
 
@@ -147,7 +140,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                         from: fromToken,
                         to,
                         toTokenAmountMin: new BigNumber(route.outputAmount),
-                        priceImpact: 0,
+                        priceImpact: fromToken.calculatePriceImpactPercent(toToken),
                         itType,
                         bridgeType,
                         slippageTolerance: options.slippageTolerance as number,

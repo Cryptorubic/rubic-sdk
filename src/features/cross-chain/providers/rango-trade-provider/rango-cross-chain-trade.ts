@@ -57,7 +57,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
             feeInfo: FeeInfo;
             itType: { from: TradeType | undefined; to: TradeType | undefined };
             bridgeType: BridgeType;
-            priceImpact: number;
+            priceImpact: number | null;
         },
         rangoClientRef: RangoClient,
         providerAddress: string
