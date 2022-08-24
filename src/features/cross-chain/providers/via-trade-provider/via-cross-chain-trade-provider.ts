@@ -24,13 +24,7 @@ import { NATIVE_TOKEN_ADDRESS } from 'src/core/blockchain/constants/native-token
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
-import {
-    viaContractAbi,
-    viaContractAddress
-} from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
-import { compareAddresses, notNull } from 'src/common';
-import { MethodDecoder } from 'src/features/cross-chain/utils/decode-method';
-import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
+import { viaContractAddress } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
 
 interface ToolType extends IActionStepTool {
     type: 'swap' | 'cross';
@@ -113,13 +107,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 .map(wrappedRoute => wrappedRoute.value.routes)
                 .flat()
                 .filter(route => this.parseBridge(route));
-            const filteredRoutes = await this.getFilteredRoutes(
-                fromBlockchain,
-                from.isNative,
-                via,
-                routes
-            );
-            if (!filteredRoutes.length) {
+            if (!routes.length) {
                 return null;
             }
 
@@ -130,7 +118,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 },
                 { address: NATIVE_TOKEN_ADDRESS }
             ]);
-            const bestRoute = await this.getBestRoute(toToken, nativeTokenPrice!, filteredRoutes);
+            const bestRoute = await this.getBestRoute(toToken, nativeTokenPrice!, routes);
 
             from = new PriceTokenAmount({
                 ...from.asStructWithAmount,
@@ -193,78 +181,6 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 error: CrossChainTradeProvider.parseError(err)
             };
         }
-    }
-
-    private async getFilteredRoutes(
-        fromBlockchain: BlockchainName,
-        fromNative: boolean,
-        via: Via,
-        routes: IRoute[]
-    ): Promise<IRoute[]> {
-        const whitelistedContracts = (
-            await Injector.web3PublicService
-                .getWeb3Public(fromBlockchain)
-                .callContractMethod<string[]>(
-                    viaContractAddress,
-                    viaContractAbi,
-                    'getAvailableRouters'
-                )
-        ).map(contract => contract.toLowerCase());
-
-        const whitelistedRoutes = await Promise.all(
-            routes.map(async route => {
-                try {
-                    let whitelisted = true;
-
-                    const tx = await via.buildTx({
-                        routeId: route.routeId,
-                        fromAddress: viaContractAddress,
-                        receiveAddress: viaContractAddress,
-                        numAction: 0
-                    });
-                    if (
-                        !whitelistedContracts.find(whitelistedContract =>
-                            compareAddresses(whitelistedContract, tx.to)
-                        )
-                    ) {
-                        console.debug('Not whitelisted providerRouter address:', tx.to);
-                        whitelisted = false;
-                    }
-
-                    if (!fromNative) {
-                        const approveTransaction = await via.buildApprovalTx({
-                            owner: viaContractAddress,
-                            routeId: route.routeId,
-                            numAction: 0
-                        });
-                        const decodedData = MethodDecoder.decodeMethod(
-                            ERC20_TOKEN_ABI.find(method => method.name === 'approve')!,
-                            approveTransaction.data
-                        );
-                        const providerGateway = decodedData.params.find(
-                            param => param.name === '_spender'
-                        )!.value;
-                        if (
-                            !whitelistedContracts.find(whitelistedContract =>
-                                compareAddresses(whitelistedContract, providerGateway)
-                            )
-                        ) {
-                            console.debug(
-                                'Not whitelisted providerGateway address:',
-                                providerGateway
-                            );
-                            whitelisted = false;
-                        }
-                    }
-
-                    return whitelisted ? route : null;
-                } catch (err) {
-                    console.debug('buildTx error:', err);
-                    return null;
-                }
-            })
-        );
-        return whitelistedRoutes.filter(notNull);
     }
 
     private async getBestRoute(
