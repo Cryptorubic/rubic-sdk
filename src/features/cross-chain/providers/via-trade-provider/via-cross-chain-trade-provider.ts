@@ -111,7 +111,8 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 ) as PromiseFulfilledResult<IGetRoutesResponse>[]
             )
                 .map(wrappedRoute => wrappedRoute.value.routes)
-                .flat();
+                .flat()
+                .filter(route => this.parseBridge(route));
             const filteredRoutes = await this.getFilteredRoutes(
                 fromBlockchain,
                 from.isNative,
@@ -167,7 +168,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
             });
 
             const itType = this.parseItProviders(bestRoute);
-            const bridgeType = this.parseBridge(bestRoute);
+            const bridgeType = this.parseBridge(bestRoute)!;
 
             return {
                 trade: new ViaCrossChainTrade(
@@ -368,7 +369,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
         }
     }
 
-    private parseBridge(route: IRoute): BridgeType {
+    private parseBridge(route: IRoute): BridgeType | undefined {
         const bridgeApi = route.actions[0]?.steps.find(
             step => (step.tool as ToolType).type === 'cross'
         )?.tool.name;

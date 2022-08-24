@@ -1,5 +1,5 @@
 import { BridgeType, CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
-import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
+import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
 import BigNumber from 'bignumber.js';
 import {
     LifiCrossChainSupportedBlockchain,
@@ -201,7 +201,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
 
     private parseTradeTypes(route: Route): {
         itType: { from: TradeType | undefined; to: TradeType | undefined };
-        bridgeType: BridgeType;
+        bridgeType: BridgeType | undefined;
     } {
         const steps =
             route.steps.length === 1 && (route.steps[0] as LifiStep).includedSteps

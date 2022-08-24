@@ -34,6 +34,6 @@ export const BRIDGE_TYPE = {
     YPOOL: 'ypool'
 } as const;
 
-export type BridgeType = typeof BRIDGE_TYPE[keyof typeof BRIDGE_TYPE] | undefined;
+export type BridgeType = typeof BRIDGE_TYPE[keyof typeof BRIDGE_TYPE];
 
 export const bridges = Object.values(BRIDGE_TYPE);

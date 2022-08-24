@@ -115,7 +115,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             .rubicRouter;
     }
 
-    public readonly bridgeType: BridgeType;
+    public readonly bridgeType: BridgeType | undefined;
 
     constructor(
         crossChainTrade: {
@@ -127,7 +127,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             feeInfo: FeeInfo;
             priceImpact: number;
             itType: { from: TradeType | undefined; to: TradeType | undefined };
-            bridgeType: BridgeType;
+            bridgeType: BridgeType | undefined;
         },
         providerAddress: string
     ) {
