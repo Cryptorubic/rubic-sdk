@@ -33,6 +33,7 @@ import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/provid
 import { SymbiosisCrossChainTradeProvider } from 'src/features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
 import { LifiCrossChainTradeProvider } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade-provider';
 import { RubicCrossChainTradeProvider } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
+import { Injector } from 'src/core/sdk/injector';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCrossChainCalculationOptions,
@@ -326,7 +327,8 @@ export class CrossChainManager {
             timeout: CrossChainManager.defaultCalculationTimeout,
             providerAddress: this.providerAddress,
             slippageTolerance: CrossChainManager.defaultSlippageTolerance * 2,
-            deadline: CrossChainManager.defaultDeadline
+            deadline: CrossChainManager.defaultDeadline,
+            toAddress: options?.toAddress || Injector.web3Private.address
         });
     }
 

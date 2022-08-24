@@ -160,44 +160,58 @@ export class CrossChainStatusManager {
         return await this.getDstTxStatusFnMap[provider].call(this, tradeData, srcTxReceipt);
     }
 
+    /**
+     * Get Rango trade dst transaction status.
+     * @param data Trade data.
+     * @param srcTxReceipt Source transaction receipt.
+     * @returns Cross-chain transaction status.
+     */
     private async getRangoDstSwapStatus(
         data: CrossChainTradeData,
-        _: TransactionReceipt
+        srcTxReceipt: TransactionReceipt
     ): Promise<CrossChainTxStatus> {
-        const { rangoRequestId: requestId, srcTxHash: txId } = data;
-        const rangoTradeStatusResponse = await Injector.httpClient.get<StatusResponse>(
-            'https://api.rango.exchange/basic/status',
-            {
-                params: { apiKey: RANGO_API_KEY, requestId: requestId as string, txId }
-            }
-        );
+        try {
+            const { rangoRequestId: requestId } = data;
+            const rangoTradeStatusResponse = await Injector.httpClient.get<StatusResponse>(
+                'https://api.rango.exchange/basic/status',
+                {
+                    params: {
+                        apiKey: RANGO_API_KEY,
+                        requestId: requestId as string,
+                        txId: srcTxReceipt.transactionHash
+                    }
+                }
+            );
 
-        if (rangoTradeStatusResponse.status === TransactionStatus.SUCCESS) {
-            return CrossChainTxStatus.SUCCESS;
-        }
-
-        if (rangoTradeStatusResponse.status === TransactionStatus.FAILED) {
-            const type = rangoTradeStatusResponse?.output?.type;
-
-            if (type === 'MIDDLE_ASSET_IN_SRC' || type === 'MIDDLE_ASSET_IN_DEST') {
-                return CrossChainTxStatus.FALLBACK;
+            if (rangoTradeStatusResponse.status === TransactionStatus.SUCCESS) {
+                return CrossChainTxStatus.SUCCESS;
             }
 
-            if (type === 'REVERTED_TO_INPUT') {
-                return CrossChainTxStatus.REVERT;
+            if (rangoTradeStatusResponse.status === TransactionStatus.FAILED) {
+                const type = rangoTradeStatusResponse?.output?.type;
+
+                if (type === 'MIDDLE_ASSET_IN_SRC' || type === 'MIDDLE_ASSET_IN_DEST') {
+                    return CrossChainTxStatus.FALLBACK;
+                }
+
+                if (type === 'REVERTED_TO_INPUT') {
+                    return CrossChainTxStatus.REVERT;
+                }
+
+                return CrossChainTxStatus.FAIL;
             }
 
-            return CrossChainTxStatus.FAIL;
-        }
+            if (
+                rangoTradeStatusResponse.status === TransactionStatus.RUNNING ||
+                rangoTradeStatusResponse.status === null
+            ) {
+                return CrossChainTxStatus.PENDING;
+            }
 
-        if (
-            rangoTradeStatusResponse.status === TransactionStatus.RUNNING ||
-            rangoTradeStatusResponse.status === null
-        ) {
+            return CrossChainTxStatus.UNKNOWN;
+        } catch {
             return CrossChainTxStatus.PENDING;
         }
-
-        return CrossChainTxStatus.UNKNOWN;
     }
 
     /**

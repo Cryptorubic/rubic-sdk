@@ -265,20 +265,6 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         return amount.multipliedBy(1 - approximatePercentDifference);
     }
 
-    private async checkContractState(fromBlockchain: SymbiosisCrossChainSupportedBlockchain) {
-        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-
-        const isPaused = await web3PublicService.callContractMethod<number>(
-            SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-            commonCrossChainAbi,
-            'paused'
-        );
-
-        if (isPaused) {
-            throw new CrossChainIsUnavailableError();
-        }
-    }
-
     protected override async getFeeInfo(
         fromBlockchain: SymbiosisCrossChainSupportedBlockchain,
         providerAddress: string,
