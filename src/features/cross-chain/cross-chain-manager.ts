@@ -323,6 +323,7 @@ export class CrossChainManager {
             fromSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
             toSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
             gasCalculation: 'disabled',
+            // TODO remove afters test
             disabledProviders: options?.disabledProviders as CrossChainTradeType[],
             timeout: CrossChainManager.defaultCalculationTimeout,
             providerAddress: this.providerAddress,
