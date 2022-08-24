@@ -1,7 +1,7 @@
 import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import { IRoute } from '@viaprotocol/router-sdk/dist/types';
 import { Via } from '@viaprotocol/router-sdk';
-import { FailedToCheckForTransactionReceiptError } from 'src/common';
+import { compareAddresses, FailedToCheckForTransactionReceiptError } from 'src/common';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/sdk/injector';
@@ -15,11 +15,15 @@ import BigNumber from 'bignumber.js';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { ItType } from 'src/features/cross-chain/models/it-type';
-import { viaContractAddress } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
+import {
+    viaContractAbi,
+    viaContractAddress
+} from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { MethodDecoder } from 'src/features/cross-chain/utils/decode-method';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
 import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
+import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
 
 export class ViaCrossChainTrade extends CrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.VIA;
@@ -157,6 +161,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
             numAction: 0
         });
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
+        const providerRouter = swapTransaction.to;
         const swapArguments = [
             this.from.address,
             this.from.stringWeiAmount,
@@ -165,10 +170,11 @@ export class ViaCrossChainTrade extends CrossChainTrade {
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
             options?.receiverAddress || this.walletAddress,
             this.providerAddress,
-            swapTransaction.to
+            providerRouter
         ];
 
         const methodArguments: unknown[] = [swapArguments];
+        let providerGateway: string | undefined;
         if (!this.from.isNative) {
             const approveTransaction = await this.via.buildApprovalTx({
                 owner: viaContractAddress,
@@ -179,12 +185,12 @@ export class ViaCrossChainTrade extends CrossChainTrade {
                 ERC20_TOKEN_ABI.find(method => method.name === 'approve')!,
                 approveTransaction.data
             );
-            const providerGateway = decodedData.params.find(
-                param => param.name === '_spender'
-            )!.value;
+            providerGateway = decodedData.params.find(param => param.name === '_spender')!.value;
             methodArguments.push(providerGateway);
         }
         methodArguments.push(swapTransaction.data);
+
+        await this.checkProviderIsWhitelisted(providerRouter, providerGateway);
 
         const sourceValue = this.from.isNative ? this.from.stringWeiAmount : '0';
         const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
@@ -197,6 +203,28 @@ export class ViaCrossChainTrade extends CrossChainTrade {
             methodArguments,
             value
         };
+    }
+
+    private async checkProviderIsWhitelisted(providerRouter: string, providerGateway?: string) {
+        const whitelistedContracts = await Injector.web3PublicService
+            .getWeb3Public(this.from.blockchain)
+            .callContractMethod<string[]>(
+                viaContractAddress,
+                viaContractAbi,
+                'getAvailableRouters'
+            );
+
+        if (
+            !whitelistedContracts.find(whitelistedContract =>
+                compareAddresses(whitelistedContract, providerRouter)
+            ) ||
+            (providerGateway &&
+                !whitelistedContracts.find(whitelistedContract =>
+                    compareAddresses(whitelistedContract, providerGateway)
+                ))
+        ) {
+            throw new NotWhitelistedProviderError(providerRouter, providerGateway);
+        }
     }
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
