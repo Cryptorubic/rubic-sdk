@@ -90,7 +90,10 @@ export const TRADE_TYPE = {
 
     ZAPPY: 'ZAPPY',
     ZIP_SWAP: 'ZIP_SWAP',
-    ZRX: 'ZRX'
+    ZRX: 'ZRX',
+
+    AURORA_SWAP: 'AURORA_SWAP',
+    JUPITER: 'JUPITER'
 } as const;
 
 /**

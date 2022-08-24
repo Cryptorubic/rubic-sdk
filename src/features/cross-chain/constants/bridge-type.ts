@@ -11,6 +11,7 @@ export const BRIDGE_TYPE = {
 
     HOP: 'hop',
     HYPHEN: 'hyphen',
+    OPEN_OCEAN: 'openocean',
 
     MAKERS_WORMHOLE: 'maker',
     MULTICHAIN: 'multichain',

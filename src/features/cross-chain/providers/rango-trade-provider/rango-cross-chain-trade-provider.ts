@@ -29,7 +29,8 @@ import {
     rangoCrossChainSupportedBlockchains
 } from './constants/rango-cross-chain-supported-blockchain';
 import { RangoCrossChainTrade } from './rango-cross-chain-trade';
-import { RangoTradeSubtype } from './models/rango-providers';
+import { RANGO_TRADE_BRIDGE_TYPE } from './models/rango-providers';
+import { BridgeType } from '../../constants/bridge-type';
 
 export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RANGO;
@@ -140,7 +141,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                     ...toToken.asStruct,
                     tokenAmount: Web3Pure.fromWei(route.outputAmount, toToken.decimals)
                 });
-                const { subType, itType } = this.parseTradeTypes(route as QuoteSimulationResult);
+                const { bridgeType, itType } = this.parseTradeTypes(route as QuoteSimulationResult);
                 const rangoTrade = new RangoCrossChainTrade(
                     {
                         from: fromToken,
@@ -148,7 +149,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                         toTokenAmountMin: new BigNumber(route.outputAmount),
                         priceImpact: 0,
                         itType,
-                        subType,
+                        bridgeType,
                         slippageTolerance: options.slippageTolerance as number,
                         feeInfo: {
                             ...feeInfo,
@@ -206,7 +207,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
     }
 
     private parseTradeTypes(route: QuoteSimulationResult): {
-        subType: RangoTradeSubtype;
+        bridgeType: BridgeType;
         itType: { from: TradeType | undefined; to: TradeType | undefined };
     } {
         const { path, swapper } = route;
@@ -214,24 +215,22 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
         if (!path) {
             return {
                 itType: { from: undefined, to: undefined },
-                subType: swapper.id as RangoTradeSubtype
+                bridgeType: RANGO_TRADE_BRIDGE_TYPE[swapper.id]
             };
         }
 
-        const subType = path.find(
+        const swapperId = path.find(
             item => item.swapperType === 'BRIDGE' || item.swapperType === 'AGGREGATOR'
         )?.swapper?.id;
-
         const dexes = path
             .filter(item => item.swapperType === 'DEX')
             .map((item: QuotePath) => item.swapper.id);
-
         const itType = {
             from: dexes[0] ? rangoProviders[dexes[0]] : undefined,
             to: dexes[1] ? rangoProviders[dexes[1]] : undefined
         };
 
-        return { itType, subType: subType as RangoTradeSubtype };
+        return { itType, bridgeType: RANGO_TRADE_BRIDGE_TYPE[swapperId as string] };
     }
 
     protected async getFeeInfo(
