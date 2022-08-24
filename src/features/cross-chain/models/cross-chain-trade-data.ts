@@ -30,6 +30,11 @@ export interface CrossChainTradeData {
     lifiBridgeType?: string;
 
     /**
+     * Via action uuid.
+     */
+    viaUuid?: string;
+
+    /**
      * Rango request id
      */
     rangoRequestId?: string;

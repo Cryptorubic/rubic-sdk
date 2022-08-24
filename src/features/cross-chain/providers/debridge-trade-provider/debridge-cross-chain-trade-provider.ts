@@ -74,7 +74,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
 
             const feeAmount = Web3Pure.toWei(
-                from.tokenAmount.multipliedBy(feeInfo.platformFee.percent).dividedBy(100),
+                from.tokenAmount.multipliedBy(feeInfo.platformFee!.percent).dividedBy(100),
                 from.decimals,
                 1
             );

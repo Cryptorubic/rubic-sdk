@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 
-export interface GasData {
+export type GasData = {
     readonly gasLimit: BigNumber;
     readonly gasPrice: BigNumber;
-}
+} | null;

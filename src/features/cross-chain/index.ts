@@ -14,7 +14,4 @@ export { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from './models/cross-chai
 export { CrossChainTradeData } from './models/cross-chain-trade-data';
 export { CrossChainTxStatus } from './models/cross-chain-tx-status';
 export { CrossChainStatus } from './models/cross-chain-status';
-export {
-    LiFiTradeSubtype,
-    Li_FI_TRADE_SUBTYPE
-} from './providers/lifi-trade-provider/models/lifi-providers';
+export { BRIDGE_TYPE, BridgeType } from './constants/bridge-type';
