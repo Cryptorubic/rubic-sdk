@@ -190,5 +190,16 @@ export const blockchains: ReadonlyArray<Blockchain> = [
             symbol: 'CELO',
             decimals: 18
         })
+    },
+    {
+        id: 288,
+        name: BLOCKCHAIN_NAME.BOBA,
+        nativeCoin: new Token({
+            blockchain: BLOCKCHAIN_NAME.BOBA,
+            address: NATIVE_TOKEN_ADDRESS,
+            name: 'ETH',
+            symbol: 'ETH',
+            decimals: 18
+        })
     }
 ];

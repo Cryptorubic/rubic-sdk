@@ -54,6 +54,9 @@ export const TRADE_TYPE = {
     // Celo
     UBE_SWAP: 'UBE_SWAP',
 
+    // Boba
+    OOLONG_SWAP: 'OOLONG_SWAP',
+
     // Solana
     RAYDIUM: 'RAYDIUM',
 

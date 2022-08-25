@@ -164,18 +164,25 @@ export class InstantTradesManager {
                 }
             })
         );
-        const lifiTradesPromise = this.calculateLifiTrades(
-            from,
-            to,
-            providers.map(provider => provider[0]),
-            options
-        );
+        const lifiTradesPromise = (async () => {
+            try {
+                return await this.calculateLifiTrades(
+                    from,
+                    to,
+                    providers.map(provider => provider[0]),
+                    options
+                );
+            } catch (e) {
+                console.debug(`[RUBIC_SDK] Trade calculation error occurred for lifi.`, e);
+                return null;
+            }
+        })();
 
         const [instantTrades, lifiTrades] = await Promise.all([
             instantTradesPromise,
             lifiTradesPromise
         ]);
-        const trades = instantTrades.concat(lifiTrades);
+        const trades = lifiTrades ? instantTrades.concat(lifiTrades) : instantTrades;
 
         return trades.sort((tradeA, tradeB) => {
             if (tradeA instanceof InstantTrade || tradeB instanceof InstantTrade) {

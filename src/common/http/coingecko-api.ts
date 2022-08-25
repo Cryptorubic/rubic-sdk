@@ -16,7 +16,8 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.FANTOM,
     BLOCKCHAIN_NAME.HARMONY,
     BLOCKCHAIN_NAME.ARBITRUM,
-    BLOCKCHAIN_NAME.AURORA
+    BLOCKCHAIN_NAME.AURORA,
+    BLOCKCHAIN_NAME.BOBA
 ] as const;
 
 type SupportedBlockchain = typeof supportedBlockchains[number];
@@ -47,7 +48,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.FANTOM]: 'fantom',
             [BLOCKCHAIN_NAME.HARMONY]: 'harmony',
             [BLOCKCHAIN_NAME.ARBITRUM]: 'ethereum',
-            [BLOCKCHAIN_NAME.AURORA]: 'ethereum'
+            [BLOCKCHAIN_NAME.AURORA]: 'ethereum',
+            [BLOCKCHAIN_NAME.BOBA]: 'ethereum'
         };
 
         this.tokenBlockchainId = {
@@ -59,7 +61,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.FANTOM]: 'fantom',
             [BLOCKCHAIN_NAME.HARMONY]: 'harmony-shard-0',
             [BLOCKCHAIN_NAME.ARBITRUM]: 'arbitrum-one',
-            [BLOCKCHAIN_NAME.AURORA]: 'aurora'
+            [BLOCKCHAIN_NAME.AURORA]: 'aurora',
+            [BLOCKCHAIN_NAME.BOBA]: 'boba-network'
         };
     }
 
