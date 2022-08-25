@@ -275,68 +275,68 @@ export class CrossChainManager {
 
     /**
      * Choose the best provider between two trades.
-     * @param newWrappedTrade New trade to compare.
-     * @param oldWrappedTrade Old trade to compare.
+     * @param nextWrappedTrade New trade to compare.
+     * @param prevWrappedTrade Old trade to compare.
      */
     private chooseBestProvider(
-        newWrappedTrade: WrappedTradeOrNull,
-        oldWrappedTrade: WrappedTradeOrNull
+        nextWrappedTrade: WrappedTradeOrNull,
+        prevWrappedTrade: WrappedTradeOrNull
     ): WrappedTradeOrNull {
         if (
-            oldWrappedTrade?.error instanceof CrossChainMinAmountError &&
-            newWrappedTrade?.error instanceof CrossChainMinAmountError
+            prevWrappedTrade?.error instanceof CrossChainMinAmountError &&
+            nextWrappedTrade?.error instanceof CrossChainMinAmountError
         ) {
-            return oldWrappedTrade.error.minAmount.lte(newWrappedTrade.error.minAmount)
-                ? oldWrappedTrade
-                : newWrappedTrade;
+            return prevWrappedTrade.error.minAmount.lte(nextWrappedTrade.error.minAmount)
+                ? prevWrappedTrade
+                : nextWrappedTrade;
         }
         if (
-            oldWrappedTrade?.error instanceof CrossChainMaxAmountError &&
-            newWrappedTrade?.error instanceof CrossChainMaxAmountError
+            prevWrappedTrade?.error instanceof CrossChainMaxAmountError &&
+            nextWrappedTrade?.error instanceof CrossChainMaxAmountError
         ) {
-            return oldWrappedTrade.error.maxAmount.gte(newWrappedTrade.error.maxAmount)
-                ? oldWrappedTrade
-                : newWrappedTrade;
+            return prevWrappedTrade.error.maxAmount.gte(nextWrappedTrade.error.maxAmount)
+                ? prevWrappedTrade
+                : nextWrappedTrade;
         }
 
-        if (!oldWrappedTrade || oldWrappedTrade.error) {
-            return newWrappedTrade;
+        if (!prevWrappedTrade || prevWrappedTrade.error) {
+            return nextWrappedTrade;
         }
 
-        if (!newWrappedTrade || newWrappedTrade.error) {
-            return oldWrappedTrade;
+        if (!nextWrappedTrade || nextWrappedTrade.error) {
+            return prevWrappedTrade;
         }
 
-        const oldTrade = oldWrappedTrade.trade;
+        const prevTrade = prevWrappedTrade.trade;
         let fromUsd: BigNumber;
-        if (oldTrade instanceof CelerRubicCrossChainTrade) {
-            fromUsd = oldTrade.fromTrade.toToken.tokenAmount;
+        if (prevTrade instanceof CelerRubicCrossChainTrade) {
+            fromUsd = prevTrade.fromTrade.toToken.tokenAmount;
         } else if (
-            oldTrade instanceof DebridgeCrossChainTrade ||
-            oldTrade instanceof SymbiosisCrossChainTrade
+            prevTrade instanceof DebridgeCrossChainTrade ||
+            prevTrade instanceof SymbiosisCrossChainTrade
         ) {
-            fromUsd = oldTrade.transitAmount;
+            fromUsd = prevTrade.transitAmount;
         } else if (
-            oldTrade instanceof LifiCrossChainTrade ||
-            oldTrade instanceof ViaCrossChainTrade
+            prevTrade instanceof LifiCrossChainTrade ||
+            prevTrade instanceof ViaCrossChainTrade
         ) {
-            fromUsd = oldTrade.from.price.multipliedBy(oldTrade.from.tokenAmount);
+            fromUsd = prevTrade.from.price.multipliedBy(prevTrade.from.tokenAmount);
         } else {
             throw new RubicSdkError('Not supported trade');
         }
 
-        const oldTradeRatio = oldWrappedTrade?.trade?.getTradeAmountRatio(fromUsd);
-        const newTradeRatio = newWrappedTrade?.trade?.getTradeAmountRatio(fromUsd);
+        const prevTradeRatio = prevWrappedTrade?.trade?.getTradeAmountRatio(fromUsd);
+        const nextTradeRatio = nextWrappedTrade?.trade?.getTradeAmountRatio(fromUsd);
 
-        if (!newTradeRatio) {
-            return oldWrappedTrade;
+        if (!nextTradeRatio) {
+            return prevWrappedTrade;
         }
 
-        if (!oldTradeRatio) {
-            return newWrappedTrade;
+        if (!prevTradeRatio) {
+            return nextWrappedTrade;
         }
 
-        return oldTradeRatio.lte(newTradeRatio) ? oldWrappedTrade : newWrappedTrade;
+        return prevTradeRatio.lte(nextTradeRatio) ? prevWrappedTrade : nextWrappedTrade;
     }
 
     private getFullOptions(

@@ -212,7 +212,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
         return sortedRoutes[0]!;
     }
 
-    private getTokensPrice(
+    private async getTokensPrice(
         blockchain: BlockchainName,
         tokens: {
             address: string;
@@ -221,20 +221,19 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
     ): Promise<(BigNumber | null)[]> {
         const chainId = BlockchainsInfo.getBlockchainByName(blockchain).id;
 
-        return Injector.httpClient
-            .get<{ [chainId: number]: { [address: string]: { USD: number } } }>(
-                'https://explorer-api.via.exchange/v1/token_price',
-                {
-                    params: {
-                        chain: chainId,
-                        tokens_addresses: tokens.map(token => token.address).join(',')
-                    }
+        try {
+            const response = await Injector.httpClient.get<{
+                [chainId: number]: { [address: string]: { USD: number } };
+            }>('https://explorer-api.via.exchange/v1/token_price', {
+                params: {
+                    chain: chainId,
+                    tokens_addresses: tokens.map(token => token.address).join(',')
                 }
-            )
-            .then(response =>
-                tokens.map(token => new BigNumber(response[chainId]![token.address]!.USD))
-            )
-            .catch(() => tokens.map(token => token.price || null));
+            });
+            return tokens.map(token => new BigNumber(response[chainId]![token.address]!.USD));
+        } catch {
+            return tokens.map(token => token.price || null);
+        }
     }
 
     private parseItProviders(route: IRoute): ItType {
