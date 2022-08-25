@@ -6,6 +6,7 @@ import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade
 import { GasData } from 'src/features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/sdk/injector';
 import {
+    BRIDGE_TYPE,
     BridgeType,
     CROSS_CHAIN_TRADE_TYPE,
     CrossChainTrade,
@@ -24,8 +25,71 @@ import { MethodDecoder } from 'src/features/cross-chain/utils/decode-method';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
 import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
+import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
+import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 
 export class ViaCrossChainTrade extends CrossChainTrade {
+    /** @internal */
+    public static async getGasData(
+        from: PriceTokenAmount,
+        to: PriceTokenAmount,
+        route: IRoute
+    ): Promise<GasData | null> {
+        const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
+        const walletAddress = Injector.web3Private.address;
+        if (!walletAddress) {
+            return null;
+        }
+
+        try {
+            const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                await new ViaCrossChainTrade(
+                    {
+                        from,
+                        to,
+                        route,
+                        gasData: null,
+                        priceImpact: 0,
+                        toTokenAmountMin: new BigNumber(0),
+                        feeInfo: {
+                            fixedFee: null,
+                            platformFee: null,
+                            cryptoFee: null
+                        },
+                        cryptoFeeToken: {} as PriceTokenAmount,
+                        itType: { from: undefined, to: undefined },
+                        bridgeType: BRIDGE_TYPE.DE_BRIDGE
+                    },
+                    EMPTY_ADDRESS
+                ).getContractParams({});
+
+            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+            const [gasLimit, gasPrice] = await Promise.all([
+                web3Public.getEstimatedGas(
+                    contractAbi,
+                    contractAddress,
+                    methodName,
+                    methodArguments,
+                    walletAddress,
+                    value
+                ),
+                new BigNumber(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+            ]);
+
+            if (!gasLimit?.isFinite()) {
+                return null;
+            }
+
+            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
+            return {
+                gasLimit: increasedGasLimit,
+                gasPrice
+            };
+        } catch (_err) {
+            return null;
+        }
+    }
+
     public readonly type = CROSS_CHAIN_TRADE_TYPE.VIA;
 
     private readonly via = new Via(VIA_DEFAULT_CONFIG);

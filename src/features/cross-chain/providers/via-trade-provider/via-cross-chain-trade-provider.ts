@@ -135,7 +135,10 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 to.decimals
             );
 
-            const gasData = options.gasCalculation === 'enabled' ? null : null;
+            const gasData =
+                options.gasCalculation === 'enabled'
+                    ? await ViaCrossChainTrade.getGasData(from, to, bestRoute)
+                    : null;
 
             const additionalFee = bestRoute.actions[0]?.additionalProviderFee;
             const cryptoFeeAmount = Web3Pure.fromWei(additionalFee?.amount.toString() || 0);
