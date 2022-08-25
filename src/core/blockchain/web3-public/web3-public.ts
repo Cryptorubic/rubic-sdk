@@ -28,7 +28,6 @@ import { HttpClient } from '@rsdk-common/models/http-client';
 import { DefaultHttpClient } from '@rsdk-common/http/default-http-client';
 import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
 import { RubicSdkError } from 'src/common';
-import { PendingTransaction } from 'src/core/blockchain/web3-public/models/pending-transaction';
 
 type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 
@@ -122,7 +121,7 @@ export class Web3Public {
      */
     public async getPendingTransactionBySrcTxHash(
         srcTxHash: string
-    ): Promise<PendingTransaction | undefined> {
+    ): Promise<Transaction | undefined> {
         const pendingTransactions = await this.web3.eth.getPendingTransactions();
 
         return pendingTransactions.find(

@@ -148,12 +148,6 @@ export class CrossChainStatusManager {
             );
             const transactionCount = await publicAdapter.getTransactionCountByUserAddress(address);
 
-            console.log('Tx Indexing Time Spent', txIndexingTimeSpent);
-            console.log('Address', address);
-            console.log('!src Tx Receipt.status', !srcTxReceipt.status);
-            console.log('Pending Transaction', pendingTransaction);
-            console.log('Transaction Count', transactionCount);
-
             if (pendingTransaction && pendingTransaction?.nonce < transactionCount) {
                 return CrossChainTxStatus.FAIL;
             }
