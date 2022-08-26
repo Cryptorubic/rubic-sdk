@@ -188,7 +188,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
 
     private parseTradeTypes(route: Route): {
         itType: { from: TradeType | undefined; to: TradeType | undefined };
-        bridgeType: BridgeType;
+        bridgeType: BridgeType | undefined;
     } {
         const steps =
             route.steps.length === 1 && (route.steps[0] as LifiStep).includedSteps

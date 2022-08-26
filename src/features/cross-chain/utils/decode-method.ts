@@ -13,7 +13,7 @@ export class MethodDecoder {
         const inputs = abiItem.inputs!;
         const decoded = abiCoder.decodeParameters(inputs, data.slice(10));
 
-        const retData: DecodedData = {
+        const decodedData: DecodedData = {
             name: abiItem.name!,
             params: []
         };
@@ -46,13 +46,13 @@ export class MethodDecoder {
                 }
             }
 
-            retData.params.push({
+            decodedData.params.push({
                 name: inputs[i]!.name,
                 value: parsedParam,
                 type: inputs[i]!.type
             });
         }
 
-        return retData;
+        return decodedData;
     }
 }

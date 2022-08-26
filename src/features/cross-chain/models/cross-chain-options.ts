@@ -41,6 +41,11 @@ export interface CrossChainOptions {
     fromAddress?: string;
 
     /**
+     * Address to send transaction, otherwise connected wallet is used (necessary for Symbiosis).
+     */
+    receiverAddress?: string;
+
+    /**
      * Timeout for each cross chain provider. Calculation for provider is cancelled, after timeout is passed.
      */
     readonly timeout?: number;

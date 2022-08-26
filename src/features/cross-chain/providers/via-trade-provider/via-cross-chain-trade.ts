@@ -1,11 +1,12 @@
 import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import { IRoute } from '@viaprotocol/router-sdk/dist/types';
 import { Via } from '@viaprotocol/router-sdk';
-import { FailedToCheckForTransactionReceiptError } from 'src/common';
+import { compareAddresses, FailedToCheckForTransactionReceiptError } from 'src/common';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/sdk/injector';
 import {
+    BRIDGE_TYPE,
     BridgeType,
     CROSS_CHAIN_TRADE_TYPE,
     CrossChainTrade,
@@ -15,12 +16,81 @@ import BigNumber from 'bignumber.js';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { ItType } from 'src/features/cross-chain/models/it-type';
-import { viaContractAddress } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
+import {
+    viaContractAbi,
+    viaContractAddress
+} from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { MethodDecoder } from 'src/features/cross-chain/utils/decode-method';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
+import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
+import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
+import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
+import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
+import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-cross-chain-supported-blockchain';
 
 export class ViaCrossChainTrade extends CrossChainTrade {
+    /** @internal */
+    public static async getGasData(
+        from: PriceTokenAmount,
+        to: PriceTokenAmount,
+        route: IRoute
+    ): Promise<GasData | null> {
+        const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
+        const walletAddress = Injector.web3Private.address;
+        if (!walletAddress) {
+            return null;
+        }
+
+        try {
+            const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                await new ViaCrossChainTrade(
+                    {
+                        from,
+                        to,
+                        route,
+                        gasData: null,
+                        priceImpact: 0,
+                        toTokenAmountMin: new BigNumber(0),
+                        feeInfo: {
+                            fixedFee: null,
+                            platformFee: null,
+                            cryptoFee: null
+                        },
+                        cryptoFeeToken: {} as PriceTokenAmount,
+                        itType: { from: undefined, to: undefined },
+                        bridgeType: BRIDGE_TYPE.DE_BRIDGE
+                    },
+                    EMPTY_ADDRESS
+                ).getContractParams({});
+
+            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+            const [gasLimit, gasPrice] = await Promise.all([
+                web3Public.getEstimatedGas(
+                    contractAbi,
+                    contractAddress,
+                    methodName,
+                    methodArguments,
+                    walletAddress,
+                    value
+                ),
+                new BigNumber(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+            ]);
+
+            if (!gasLimit?.isFinite()) {
+                return null;
+            }
+
+            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
+            return {
+                gasLimit: increasedGasLimit,
+                gasPrice
+            };
+        } catch (_err) {
+            return null;
+        }
+    }
+
     public readonly type = CROSS_CHAIN_TRADE_TYPE.VIA;
 
     private readonly via = new Via(VIA_DEFAULT_CONFIG);
@@ -48,7 +118,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     protected readonly fromWeb3Public: Web3Public;
 
     protected get fromContractAddress(): string {
-        return viaContractAddress;
+        return viaContractAddress[this.from.blockchain as ViaCrossChainSupportedBlockchain];
     }
 
     public get uuid(): string {
@@ -125,18 +195,25 @@ export class ViaCrossChainTrade extends CrossChainTrade {
                 }
             );
 
-            await this.via.startRoute({
-                fromAddress: viaContractAddress,
-                toAddress: options?.receiverAddress || this.walletAddress,
-                routeId: this.route.routeId,
-                txHash: transactionHash!
-            });
+            try {
+                await this.via.startRoute({
+                    fromAddress: this.fromContractAddress,
+                    toAddress: options?.receiverAddress || this.walletAddress,
+                    routeId: this.route.routeId,
+                    txHash: transactionHash!
+                });
+            } catch {}
 
             return transactionHash!;
         } catch (err) {
             if (err instanceof FailedToCheckForTransactionReceiptError) {
                 return transactionHash!;
             }
+
+            if ([400, 500, 503].includes(err.code)) {
+                throw new SwapRequestError();
+            }
+
             throw err;
         }
     }
@@ -144,11 +221,12 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
         const swapTransaction = await this.via.buildTx({
             routeId: this.route.routeId,
-            fromAddress: viaContractAddress,
+            fromAddress: this.fromContractAddress,
             receiveAddress: options?.receiverAddress || this.walletAddress,
             numAction: 0
         });
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
+        const providerRouter = swapTransaction.to;
         const swapArguments = [
             this.from.address,
             this.from.stringWeiAmount,
@@ -157,13 +235,14 @@ export class ViaCrossChainTrade extends CrossChainTrade {
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
             options?.receiverAddress || this.walletAddress,
             this.providerAddress,
-            swapTransaction.to
+            providerRouter
         ];
 
         const methodArguments: unknown[] = [swapArguments];
+        let providerGateway: string | undefined;
         if (!this.from.isNative) {
             const approveTransaction = await this.via.buildApprovalTx({
-                owner: viaContractAddress,
+                owner: this.fromContractAddress,
                 routeId: this.route.routeId,
                 numAction: 0
             });
@@ -171,12 +250,12 @@ export class ViaCrossChainTrade extends CrossChainTrade {
                 ERC20_TOKEN_ABI.find(method => method.name === 'approve')!,
                 approveTransaction.data
             );
-            const providerGateway = decodedData.params.find(
-                param => param.name === '_spender'
-            )!.value;
+            providerGateway = decodedData.params.find(param => param.name === '_spender')!.value;
             methodArguments.push(providerGateway);
         }
         methodArguments.push(swapTransaction.data);
+
+        await this.checkProviderIsWhitelisted(providerRouter, providerGateway);
 
         const sourceValue = this.from.isNative ? this.from.stringWeiAmount : '0';
         const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
@@ -191,11 +270,32 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         };
     }
 
-    public getTradeAmountRatio(): BigNumber {
-        const fromCost = this.from.price.multipliedBy(this.from.tokenAmount);
+    private async checkProviderIsWhitelisted(providerRouter: string, providerGateway?: string) {
+        const whitelistedContracts = await Injector.web3PublicService
+            .getWeb3Public(this.from.blockchain)
+            .callContractMethod<string[]>(
+                this.fromContractAddress,
+                viaContractAbi,
+                'getAvailableRouters'
+            );
+
+        if (
+            !whitelistedContracts.find(whitelistedContract =>
+                compareAddresses(whitelistedContract, providerRouter)
+            ) ||
+            (providerGateway &&
+                !whitelistedContracts.find(whitelistedContract =>
+                    compareAddresses(whitelistedContract, providerGateway)
+                ))
+        ) {
+            throw new NotWhitelistedProviderError(providerRouter, providerGateway);
+        }
+    }
+
+    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         const usdCryptoFee = this.cryptoFeeToken.price.multipliedBy(
             this.cryptoFeeToken.tokenAmount
         );
-        return fromCost.plus(usdCryptoFee).dividedBy(this.to.tokenAmount);
+        return fromUsd.plus(usdCryptoFee).dividedBy(this.to.tokenAmount);
     }
 }

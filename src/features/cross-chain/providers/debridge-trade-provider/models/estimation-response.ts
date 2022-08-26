@@ -18,14 +18,9 @@ interface TokenMinAmount extends TokenAmount {
  */
 export interface Estimation {
     /**
-     * Source chain token in.
+     * Source chain token out.
      */
-    readonly srcChainTokenIn: TokenAmount;
-
-    /**
-     * Destination chain token in.
-     */
-    readonly dstChainTokenIn: TokenMinAmount;
+    readonly srcChainTokenOut: TokenMinAmount;
 
     /**
      * Destination chain token out.
