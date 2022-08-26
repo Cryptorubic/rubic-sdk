@@ -27,6 +27,7 @@ import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
 import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
+import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-cross-chain-supported-blockchain';
 
 export class ViaCrossChainTrade extends CrossChainTrade {
     /** @internal */
@@ -117,7 +118,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     protected readonly fromWeb3Public: Web3Public;
 
     protected get fromContractAddress(): string {
-        return viaContractAddress;
+        return viaContractAddress[this.from.blockchain as ViaCrossChainSupportedBlockchain];
     }
 
     public get uuid(): string {
@@ -196,7 +197,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
 
             try {
                 await this.via.startRoute({
-                    fromAddress: viaContractAddress,
+                    fromAddress: this.fromContractAddress,
                     toAddress: options?.receiverAddress || this.walletAddress,
                     routeId: this.route.routeId,
                     txHash: transactionHash!
@@ -220,7 +221,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
         const swapTransaction = await this.via.buildTx({
             routeId: this.route.routeId,
-            fromAddress: viaContractAddress,
+            fromAddress: this.fromContractAddress,
             receiveAddress: options?.receiverAddress || this.walletAddress,
             numAction: 0
         });
@@ -241,7 +242,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         let providerGateway: string | undefined;
         if (!this.from.isNative) {
             const approveTransaction = await this.via.buildApprovalTx({
-                owner: viaContractAddress,
+                owner: this.fromContractAddress,
                 routeId: this.route.routeId,
                 numAction: 0
             });
@@ -273,7 +274,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         const whitelistedContracts = await Injector.web3PublicService
             .getWeb3Public(this.from.blockchain)
             .callContractMethod<string[]>(
-                viaContractAddress,
+                this.fromContractAddress,
                 viaContractAbi,
                 'getAvailableRouters'
             );

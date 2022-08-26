@@ -4,6 +4,7 @@ import {
 } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 import { UniversalContract } from 'src/features/cross-chain/providers/common/models/universal-contract';
 import { BLOCKCHAIN_NAME } from 'src/core';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/constants/rubic-proxy-contract-address';
 
 export const lifiContractAddress: Record<LifiCrossChainSupportedBlockchain, UniversalContract> =
     lifiCrossChainSupportedBlockchains.reduce((acc, blockchain) => {
@@ -16,7 +17,7 @@ export const lifiContractAddress: Record<LifiCrossChainSupportedBlockchain, Univ
             [blockchain]: {
                 providerRouter: routerAddress,
                 providerGateway: routerAddress,
-                rubicRouter: '0x3332241a5a4eCb4c28239A9731ad45De7f000333'
+                rubicRouter: rubicProxyContractAddress[blockchain]
             }
         };
     }, {} as Record<LifiCrossChainSupportedBlockchain, UniversalContract>);

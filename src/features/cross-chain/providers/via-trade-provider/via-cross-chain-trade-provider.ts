@@ -87,7 +87,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 fromAmount: from.stringWeiAmount as unknown as number,
                 toChainId,
                 toTokenAddress: toToken.address,
-                fromAddress: viaContractAddress,
+                fromAddress: viaContractAddress[fromBlockchain],
                 ...(toAddress && { toAddress: options.receiverAddress || this.walletAddress }),
                 multiTx: false,
                 limit: 1
@@ -310,7 +310,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 amount: await this.getFixedFee(
                     fromBlockchain,
                     providerAddress,
-                    viaContractAddress,
+                    viaContractAddress[fromBlockchain],
                     commonCrossChainAbi
                 ),
                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
@@ -319,7 +319,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 percent: await this.getFeePercent(
                     fromBlockchain,
                     providerAddress,
-                    viaContractAddress,
+                    viaContractAddress[fromBlockchain],
                     commonCrossChainAbi
                 ),
                 tokenSymbol: percentFeeToken.symbol
