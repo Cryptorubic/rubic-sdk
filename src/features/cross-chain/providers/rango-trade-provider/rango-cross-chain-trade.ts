@@ -150,7 +150,6 @@ export class RangoCrossChainTrade extends CrossChainTrade {
         const cryptoFee = Web3Pure.toWei(this.feeInfo?.cryptoFee?.amount || 0);
         const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
         const msgValue = new BigNumber(sourceValue)
-            .plus(cryptoFee)
             .plus(fixedFee)
             .plus(parseInt(value || '0'))
             .toFixed(0);
