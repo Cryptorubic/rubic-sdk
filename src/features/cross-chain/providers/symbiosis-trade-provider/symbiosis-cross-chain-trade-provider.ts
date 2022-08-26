@@ -102,7 +102,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
 
             const feeAmount = Web3Pure.toWei(
-                from.tokenAmount.multipliedBy(feeInfo.platformFee.percent).dividedBy(100),
+                from.tokenAmount.multipliedBy(feeInfo.platformFee!.percent).dividedBy(100),
                 from.decimals,
                 1
             );
@@ -276,7 +276,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         }
     }
 
-    protected async getFeeInfo(
+    protected override async getFeeInfo(
         fromBlockchain: SymbiosisCrossChainSupportedBlockchain,
         providerAddress: string,
         percentFeeToken: PriceTokenAmount

@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "2.10.7",
+  "version": "2.11.0",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -63,6 +63,7 @@
   },
   "dependencies": {
     "@lifi/sdk": "^1.0.2",
+    "@viaprotocol/router-sdk": "^1.0.7",
     "assert": "^2.0.0",
     "axios": "^0.26.1",
     "bignumber.js": "^9.0.2",
