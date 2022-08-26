@@ -32,5 +32,10 @@ export const SYMBIOSIS_CONTRACT_ADDRESS: Record<
         providerRouter: '0xd2B5945829D8254C40f63f476C9F02CF5762F8DF',
         providerGateway: '0x5ee04643fe2D63f364F77B38C41F15A54930f5C1',
         rubicRouter: '0x53dC7535028e2fcaCa0d847AD108b9240C0801b1'
+    },
+    [BLOCKCHAIN_NAME.BITCOIN]: {
+        providerRouter: '',
+        providerGateway: '',
+        rubicRouter: ''
     }
 };

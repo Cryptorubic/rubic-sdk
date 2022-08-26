@@ -64,7 +64,9 @@ export const TRADE_TYPE = {
     REF_FINANCE: 'REF_FINANCE',
 
     // Other
-    WRAPPED: 'WRAPPED'
+    WRAPPED: 'WRAPPED',
+
+    REN_BTC: 'REN_BTC'
 } as const;
 
 /**

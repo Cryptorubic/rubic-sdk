@@ -1,6 +1,6 @@
 /* eslint-disable no-debugger */
 import { TransactionReceipt } from 'web3-eth';
-import { BlockchainName, BlockchainsInfo } from 'src/core';
+import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo } from 'src/core';
 import { Injector } from 'src/core/sdk/injector';
 import { celerCrossChainEventStatusesAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-event-statuses-abi';
 import { LogsDecoder } from 'src/features/cross-chain/utils/decode-logs';
@@ -39,6 +39,25 @@ interface SymbiosisApiResponse {
         hash: string;
         chainId: number;
     };
+}
+
+interface BtcStatusResponse {
+    block_height: number | undefined;
+    block_index: number | undefined;
+    double_spend: boolean;
+    fee: number;
+    hash: string;
+    inputs: unknown[];
+    lock_time: number;
+    out: unknown[];
+    relayed_by: string;
+    size: number;
+    time: number;
+    tx_index: number;
+    ver: number;
+    vin_sz: number;
+    vout_sz: number;
+    weight: number;
 }
 
 type getDstTxStatusFn = (
@@ -169,7 +188,8 @@ export class CrossChainStatusManager {
             try {
                 const srcChainId = BlockchainsInfo.getBlockchainByName(data.fromBlockchain).id;
                 const {
-                    status: { text: dstTxStatus }
+                    status: { text: dstTxStatus },
+                    tx: { hash: dstHash }
                 } = await Injector.httpClient.get<SymbiosisApiResponse>(
                     `https://api.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${srcTxReceipt.transactionHash}`
                 );
@@ -190,7 +210,18 @@ export class CrossChainStatusManager {
                 }
 
                 if (dstTxStatus === SymbiosisSwapStatus.SUCCESS) {
-                    return CrossChainTxStatus.SUCCESS;
+                    if (data.toBlockchain !== BLOCKCHAIN_NAME.BITCOIN) {
+                        return CrossChainTxStatus.SUCCESS;
+                    }
+                    const btcStatusApi = 'https://blockchain.info/rawtx/';
+                    const bitcoinTransactionStatus = await this.httpClient.get<BtcStatusResponse>(
+                        `${btcStatusApi}${dstHash}`
+                    );
+                    const isCompleted = bitcoinTransactionStatus.block_index !== undefined;
+                    if (isCompleted) {
+                        return CrossChainTxStatus.SUCCESS;
+                    }
+                    return CrossChainTxStatus.PENDING;
                 }
             } catch (error) {
                 console.debug('[Symbiosis Trade] Error retrieving dst tx status', error);

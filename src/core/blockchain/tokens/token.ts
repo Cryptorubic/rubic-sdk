@@ -1,9 +1,10 @@
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { TokenBaseStruct } from '@rsdk-core/blockchain/models/token-base-struct';
 import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { compareAddresses } from '@rsdk-common/utils/blockchain';
+import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 
 export type TokenStruct = {
     blockchain: BlockchainName;
@@ -22,6 +23,12 @@ export class Token {
      * @param tokenBaseStruct Base token structure.
      */
     public static async createToken(tokenBaseStruct: TokenBaseStruct): Promise<Token> {
+        if (tokenBaseStruct.blockchain === BLOCKCHAIN_NAME.BITCOIN) {
+            return new Token({
+                ...tokenBaseStruct,
+                ...nativeTokensList[BLOCKCHAIN_NAME.BITCOIN]
+            });
+        }
         const web3Public = Injector.web3PublicService.getWeb3Public(tokenBaseStruct.blockchain);
         const tokenInfo = await web3Public.callForTokenInfo(tokenBaseStruct.address);
 
