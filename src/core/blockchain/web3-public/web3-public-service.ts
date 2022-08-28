@@ -5,11 +5,11 @@ import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
 import { RpcProvider } from '@rsdk-core/sdk/models/configuration';
 import Web3 from 'web3';
+import { RpcListProvider } from 'src/core/blockchain/web3-public/constants/rpc-list-provider';
+import { RpcFailedError } from 'src/common/errors/blockchain/rpc-failed.error';
 
 export class Web3PublicService {
-    private static readonly mainRpcDefaultTimeout: 10_000;
-
-    private static readonly healthCheckDefaultTimeout: 4_000;
+    private static readonly mainRpcDefaultTimeout = 10_000;
 
     public static async createWeb3PublicService(
         rpcList: Partial<Record<BlockchainName, RpcProvider>>
@@ -19,9 +19,36 @@ export class Web3PublicService {
         return web3PublicService;
     }
 
+    public readonly rpcListProvider: Partial<Record<BlockchainName, RpcListProvider>>;
+
     private web3PublicStorage: Partial<Record<BlockchainName, Web3Public>> = {};
 
-    constructor(private rpcList: Partial<Record<BlockchainName, RpcProvider>>) {}
+    constructor(rpcList: Partial<Record<BlockchainName, RpcProvider>>) {
+        this.rpcListProvider = Object.keys(rpcList).reduce((acc, blockchainName) => {
+            const rpcConfig = rpcList[blockchainName as BlockchainName]!;
+            let list: string[];
+            if (rpcConfig.mainRpc) {
+                list = [rpcConfig.mainRpc].concat(rpcConfig.spareRpc ? [rpcConfig.spareRpc] : []);
+            } else {
+                if (!rpcConfig.rpcList?.length) {
+                    throw new RubicSdkError(
+                        `For ${blockchainName} you must provide either 'minRpc' or 'rpcList' field`
+                    );
+                }
+                list = rpcConfig.rpcList;
+            }
+            const rpcProvider: RpcProvider = {
+                rpcList: list,
+                mainRpcTimeout: rpcConfig.mainRpcTimeout,
+                healthCheckTimeout: rpcConfig.healthCheckTimeout
+            };
+
+            return {
+                ...acc,
+                [blockchainName]: rpcProvider
+            };
+        }, {});
+    }
 
     public getWeb3Public(blockchainName: BlockchainName): Web3Public {
         const web3Public = this.web3PublicStorage[blockchainName];
@@ -30,40 +57,20 @@ export class Web3PublicService {
                 `Provider for ${blockchainName} was not initialized. Pass rpc link for this blockchain to sdk configuration object.`
             );
         }
-
         return web3Public;
     }
 
-    private async createAndCheckWeb3Public(): Promise<void> {
-        const promises = Object.entries(this.rpcList).map(async ([blockchainName, rpcConfig]) => {
-            const web3Public = this.createWeb3Public(rpcConfig, blockchainName as BlockchainName);
-            if (!rpcConfig.spareRpc) {
-                return web3Public;
-            }
-
-            const healthcheckResult = await web3Public.healthCheck(
-                rpcConfig.healthCheckTimeout || Web3PublicService.healthCheckDefaultTimeout
-            );
-            if (healthcheckResult) {
-                return web3Public;
-            }
-
-            return this.createWeb3Public(
-                { mainRpc: rpcConfig.spareRpc },
-                blockchainName as BlockchainName
-            );
-        });
-
-        const results = await Promise.all(promises);
-        Object.keys(this.rpcList).forEach(
-            (blockchainName, index) =>
-                (this.web3PublicStorage[blockchainName as BlockchainName] = results[index])
+    private createAndCheckWeb3Public(): void {
+        Object.keys(this.rpcListProvider).forEach(
+            blockchainName =>
+                (this.web3PublicStorage[blockchainName as BlockchainName] =
+                    this.createWeb3PublicProxy(blockchainName as BlockchainName))
         );
     }
 
-    private createWeb3Public(rpcProvider: RpcProvider, blockchainName: BlockchainName): Web3Public {
-        const web3Public = new Web3Public(new Web3(rpcProvider.mainRpc), blockchainName);
-        let nodeReplaced = false;
+    private createWeb3PublicProxy(blockchainName: BlockchainName): Web3Public {
+        const rpcProvider = this.rpcListProvider[blockchainName]!;
+        const web3Public = new Web3Public(new Web3(rpcProvider.rpcList![0]!), blockchainName);
 
         return new Proxy(web3Public, {
             get(target: Web3Public, prop: keyof Web3Public) {
@@ -72,25 +79,45 @@ export class Web3PublicService {
                 }
 
                 if (typeof target[prop] === 'function') {
-                    return async (...params: unknown[]) => {
+                    return async function method(...params: unknown[]): Promise<unknown> {
+                        const throwRpcError =
+                            (
+                                params.find(
+                                    param =>
+                                        typeof param === 'object' &&
+                                        'throwRpcError' in (param as { throwRpcError: boolean })
+                                ) as { throwRpcError: boolean }
+                            )?.throwRpcError || false;
+
                         const callMethod = () => (target[prop] as Function).call(target, ...params);
-                        if (!nodeReplaced && rpcProvider.spareRpc) {
-                            try {
-                                return await pTimeout(
-                                    callMethod(),
-                                    rpcProvider.mainRpcTimeout ||
-                                        Web3PublicService.mainRpcDefaultTimeout
-                                );
-                            } catch (e) {
-                                if (e instanceof TimeoutError) {
-                                    web3Public.setProvider(rpcProvider.spareRpc);
-                                    nodeReplaced = true;
-                                    return callMethod();
+                        try {
+                            return await pTimeout(
+                                callMethod(),
+                                rpcProvider.mainRpcTimeout ||
+                                    Web3PublicService.mainRpcDefaultTimeout
+                            );
+                        } catch (e) {
+                            console.log(blockchainName, e);
+                            if (
+                                e instanceof TimeoutError ||
+                                e.message?.includes('CONNECTION ERROR') // @TODO rate limit
+                            ) {
+                                if (rpcProvider.rpcList!.length) {
+                                    rpcProvider.rpcList!.shift();
                                 }
-                                throw e;
+                                if (!rpcProvider.rpcList!.length) {
+                                    throw new RubicSdkError(
+                                        `No working rpc left for ${blockchainName}`
+                                    );
+                                }
+                                web3Public.setProvider(rpcProvider.rpcList![0]!);
+                                if (throwRpcError) {
+                                    throw new RpcFailedError();
+                                }
+                                return method(...params);
                             }
+                            throw e;
                         }
-                        return callMethod();
                     };
                 }
 

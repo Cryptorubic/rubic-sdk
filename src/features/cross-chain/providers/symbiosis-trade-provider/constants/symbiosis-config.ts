@@ -1,7 +1,9 @@
-import { BLOCKCHAIN_NAME, SDK } from 'src/core';
+import { BLOCKCHAIN_NAME } from 'src/core';
 import { Config } from 'symbiosis-js-sdk/dist/crosschain/types';
+import { Injector } from 'src/core/sdk/injector';
 
 export function getSymbiosisConfig(): Config {
+    const { rpcListProvider } = Injector.web3PublicService;
     return {
         minSwapAmountInUsd: 30,
         maxSwapAmountInUsd: 5000000,
@@ -11,7 +13,7 @@ export function getSymbiosisConfig(): Config {
         chains: [
             {
                 id: 1,
-                rpc: SDK.rpcList[BLOCKCHAIN_NAME.ETHEREUM]?.mainRpc || '',
+                rpc: rpcListProvider[BLOCKCHAIN_NAME.ETHEREUM]?.rpcList![0] || '',
                 filterBlockOffset: 100000,
                 waitForBlocksCount: 5,
                 stables: [
@@ -45,7 +47,7 @@ export function getSymbiosisConfig(): Config {
             },
             {
                 id: 56,
-                rpc: SDK.rpcList[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]?.mainRpc || '',
+                rpc: rpcListProvider[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]?.rpcList![0] || '',
                 filterBlockOffset: 100000,
                 waitForBlocksCount: 20,
                 stables: [
@@ -101,7 +103,7 @@ export function getSymbiosisConfig(): Config {
             },
             {
                 id: 43114,
-                rpc: SDK.rpcList[BLOCKCHAIN_NAME.AVALANCHE]?.mainRpc || '',
+                rpc: rpcListProvider[BLOCKCHAIN_NAME.AVALANCHE]?.rpcList![0] || '',
                 filterBlockOffset: 100000,
                 waitForBlocksCount: 30,
                 stables: [
@@ -178,7 +180,7 @@ export function getSymbiosisConfig(): Config {
             },
             {
                 id: 137,
-                rpc: SDK.rpcList[BLOCKCHAIN_NAME.POLYGON]?.mainRpc || '',
+                rpc: rpcListProvider[BLOCKCHAIN_NAME.POLYGON]?.rpcList![0] || '',
                 filterBlockOffset: 100000,
                 waitForBlocksCount: 60,
                 stables: [
@@ -276,7 +278,7 @@ export function getSymbiosisConfig(): Config {
             },
             {
                 id: 288,
-                rpc: 'https://mainnet.boba.network',
+                rpc: rpcListProvider[BLOCKCHAIN_NAME.BOBA]?.rpcList![0],
                 filterBlockOffset: 4900,
                 waitForBlocksCount: 0,
                 stables: [

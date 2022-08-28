@@ -37,9 +37,7 @@ type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
  * To send transaction or execute contract method use {@link Web3Private}.
  */
 export class Web3Public {
-    private multicallAddresses: Record<BlockchainName, string> = MULTICALL_ADDRESSES;
-
-    private readonly clearController: { clear: boolean } = { clear: false };
+    private readonly multicallAddresses: Record<BlockchainName, string> = MULTICALL_ADDRESSES;
 
     /**
      * @param web3 Web3 instance initialized with ethereum provider, e.g. rpc link.
@@ -269,6 +267,7 @@ export class Web3Public {
             methodArguments?: unknown[];
             from?: string;
             value?: string;
+            throwRpcError?: boolean;
         } = { methodArguments: [] }
     ): Promise<T> {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);

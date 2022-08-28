@@ -40,12 +40,14 @@ export interface RpcProvider {
     /**
      * Rpc link. Copy it from your rpc provider (like Infura, Quicknode, Getblock, Moralis, etc.) website.
      */
-    readonly mainRpc: string;
+    readonly mainRpc?: string;
 
     /**
      * Same as `mainRpc`. Will be used instead `mainRpc` if mainRpc is out of timeout = `mainPrcTimeout`.
      */
     readonly spareRpc?: string;
+
+    readonly rpcList?: string[];
 
     /**
      * Specifies timeout in ms after which `mainRpc` will be replaced with `spareRpc` (if `spareRpc` is defined)
