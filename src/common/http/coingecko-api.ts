@@ -17,6 +17,7 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.HARMONY,
     BLOCKCHAIN_NAME.ARBITRUM,
     BLOCKCHAIN_NAME.AURORA,
+    BLOCKCHAIN_NAME.TELOS,
     BLOCKCHAIN_NAME.BOBA
 ] as const;
 
@@ -49,6 +50,7 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.HARMONY]: 'harmony',
             [BLOCKCHAIN_NAME.ARBITRUM]: 'ethereum',
             [BLOCKCHAIN_NAME.AURORA]: 'ethereum',
+            [BLOCKCHAIN_NAME.TELOS]: 'tlos',
             [BLOCKCHAIN_NAME.BOBA]: 'ethereum'
         };
 
@@ -62,6 +64,7 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.HARMONY]: 'harmony-shard-0',
             [BLOCKCHAIN_NAME.ARBITRUM]: 'arbitrum-one',
             [BLOCKCHAIN_NAME.AURORA]: 'aurora',
+            [BLOCKCHAIN_NAME.TELOS]: 'telos',
             [BLOCKCHAIN_NAME.BOBA]: 'boba-network'
         };
     }
