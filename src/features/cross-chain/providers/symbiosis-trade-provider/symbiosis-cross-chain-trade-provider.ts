@@ -210,7 +210,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             let rubicSdkError = CrossChainTradeProvider.parseError(err);
 
             if (err instanceof SymbiosisError && err.message) {
-                rubicSdkError = await this.checkMinMaxErrors(err, from);
+                rubicSdkError = await this.checkMinMaxErrors(err, from, options.slippageTolerance);
             }
 
             return {
@@ -222,14 +222,16 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
 
     private async checkMinMaxErrors(
         err: SymbiosisError,
-        from: PriceTokenAmount
+        from: PriceTokenAmount,
+        slippage: number
     ): Promise<RubicSdkError> {
         if (err.code === ErrorCode.AMOUNT_TOO_LOW || err.code === ErrorCode.AMOUNT_LESS_THAN_FEE) {
             const index = err.message!.lastIndexOf('$');
             const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
             const minAmount = await this.getFromTokenAmount(from, transitTokenAmount, 'min');
+            const minAmountWithSlippage = minAmount.dividedBy(1 - slippage);
 
-            return new CrossChainMinAmountError(minAmount, from.symbol);
+            return new CrossChainMinAmountError(minAmountWithSlippage, from.symbol);
         }
 
         if (err?.code === ErrorCode.AMOUNT_TOO_HIGH) {
