@@ -2,7 +2,6 @@ import BigNumber from 'bignumber.js';
 import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import {
     CROSS_CHAIN_TRADE_TYPE,
-    Li_FI_TRADE_SUBTYPE,
     SwapTransactionOptions,
     TRADE_TYPE,
     TradeType
@@ -18,8 +17,8 @@ import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cro
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
-import { LiFiTradeSubtype } from 'src/features/cross-chain/providers/lifi-trade-provider/models/lifi-providers';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { BRIDGE_TYPE, BridgeType } from 'src/features/cross-chain/constants/bridge-type';
 import { FeeInfo } from '../common/models/fee';
 
 /**
@@ -59,7 +58,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
                             from: TRADE_TYPE.ONE_INCH,
                             to: TRADE_TYPE.ONE_INCH
                         },
-                        subType: Li_FI_TRADE_SUBTYPE.CONNEXT
+                        bridgeType: BRIDGE_TYPE.CONNEXT
                     },
                     EMPTY_ADDRESS
                 ).getContractParams({});
@@ -116,7 +115,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             .rubicRouter;
     }
 
-    public readonly subType: LiFiTradeSubtype;
+    public readonly bridgeType: BridgeType | undefined;
 
     constructor(
         crossChainTrade: {
@@ -128,7 +127,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             feeInfo: FeeInfo;
             priceImpact: number;
             itType: { from: TradeType | undefined; to: TradeType | undefined };
-            subType: LiFiTradeSubtype;
+            bridgeType: BridgeType | undefined;
         },
         providerAddress: string
     ) {
@@ -139,7 +138,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         this.route = crossChainTrade.route;
         this.gasData = crossChainTrade.gasData;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
-        this.subType = crossChainTrade.subType;
+        this.bridgeType = crossChainTrade.bridgeType;
         this.feeInfo = crossChainTrade.feeInfo;
 
         this.priceImpact = crossChainTrade.priceImpact;
@@ -270,8 +269,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         return swapResponse.transactionRequest.data;
     }
 
-    public getTradeAmountRatio(): BigNumber {
-        const fromCost = this.from.price.multipliedBy(this.from.tokenAmount);
-        return fromCost.dividedBy(this.to.tokenAmount);
+    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
+        return fromUsd.dividedBy(this.to.tokenAmount);
     }
 }

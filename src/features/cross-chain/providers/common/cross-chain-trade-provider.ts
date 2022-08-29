@@ -21,17 +21,23 @@ export abstract class CrossChainTradeProvider {
 
     /**
      * Gets fee information.
-     * @param fromBlockchain Source network blockchain.
-     * @param providerAddress Integrator address.
-     * @param percentFeeToken Protocol fee token.
+     * @param _fromBlockchain Source network blockchain.
+     * @param _providerAddress Integrator address.
+     * @param _percentFeeToken Protocol fee token.
      * @protected
      * @internal
      */
-    protected abstract getFeeInfo(
-        fromBlockchain: Partial<BlockchainName>,
-        providerAddress: string,
-        percentFeeToken: PriceToken
-    ): Promise<FeeInfo>;
+    protected async getFeeInfo(
+        _fromBlockchain: Partial<BlockchainName>,
+        _providerAddress: string,
+        _percentFeeToken: PriceToken
+    ): Promise<FeeInfo> {
+        return {
+            fixedFee: null,
+            platformFee: null,
+            cryptoFee: null
+        };
+    }
 
     /**
      * Gets fixed fee information.

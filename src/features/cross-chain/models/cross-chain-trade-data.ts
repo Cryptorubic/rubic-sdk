@@ -28,4 +28,9 @@ export interface CrossChainTradeData {
      * Li-fi bridge type.
      */
     lifiBridgeType?: string;
+
+    /**
+     * Via action uuid.
+     */
+    viaUuid?: string;
 }

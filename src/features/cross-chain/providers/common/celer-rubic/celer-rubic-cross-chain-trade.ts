@@ -95,11 +95,10 @@ export abstract class CelerRubicCrossChainTrade extends CrossChainTrade {
         );
     }
 
-    public getTradeAmountRatio(): BigNumber {
-        const transitTokenAmount = this.fromTrade.toToken.tokenAmount;
+    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         const cryptoFeeCost = this.cryptoFeeToken.price.multipliedBy(
             this.cryptoFeeToken.tokenAmount
         );
-        return transitTokenAmount.plus(cryptoFeeCost).dividedBy(this.to.tokenAmount);
+        return fromUsd.plus(cryptoFeeCost).dividedBy(this.to.tokenAmount);
     }
 }

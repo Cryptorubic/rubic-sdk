@@ -72,7 +72,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
 
             const feeAmount = Web3Pure.toWei(
-                from.tokenAmount.multipliedBy(feeInfo.platformFee.percent).dividedBy(100),
+                from.tokenAmount.multipliedBy(feeInfo.platformFee!.percent).dividedBy(100),
                 from.decimals,
                 1
             );
@@ -111,7 +111,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                     ? await DebridgeCrossChainTrade.getGasData(from, to, requestParams)
                     : null;
 
-            const transitToken = estimation.dstChainTokenIn;
+            const transitToken = estimation.srcChainTokenOut;
 
             const cryptoFeeAmount = new BigNumber(tx.value).minus(
                 from.isNative ? from.stringWeiAmount : 0
@@ -173,7 +173,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
         }
     }
 
-    protected async getFeeInfo(
+    protected override async getFeeInfo(
         fromBlockchain: DeBridgeCrossChainSupportedBlockchain,
         providerAddress: string
     ): Promise<FeeInfo> {
