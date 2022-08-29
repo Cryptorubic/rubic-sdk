@@ -372,6 +372,12 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                     true
                 );
             } catch (err) {
+                if (
+                    err.code === ErrorCode.AMOUNT_TOO_LOW ||
+                    err.code === ErrorCode.AMOUNT_LESS_THAN_FEE
+                ) {
+                    throw err;
+                }
                 swapResult = await zapping.exactIn(
                     swapParams.tokenAmountIn,
                     poolId,

@@ -213,15 +213,8 @@ export class CrossChainStatusManager {
                     if (data.toBlockchain !== BLOCKCHAIN_NAME.BITCOIN) {
                         return CrossChainTxStatus.SUCCESS;
                     }
-                    const btcStatusApi = 'https://blockchain.info/rawtx/';
-                    const bitcoinTransactionStatus = await this.httpClient.get<BtcStatusResponse>(
-                        `${btcStatusApi}${dstHash}`
-                    );
-                    const isCompleted = bitcoinTransactionStatus.block_index !== undefined;
-                    if (isCompleted) {
-                        return CrossChainTxStatus.SUCCESS;
-                    }
-                    return CrossChainTxStatus.PENDING;
+
+                    return this.getBitcoinStatus(dstHash);
                 }
             } catch (error) {
                 console.debug('[Symbiosis Trade] Error retrieving dst tx status', error);
@@ -436,5 +429,28 @@ export class CrossChainStatusManager {
         } catch {
             return CrossChainTxStatus.PENDING;
         }
+    }
+
+    /**
+     * @internal
+     * Get transaction status in bitcoin network;
+     * @param hash Bitcoin transaction hash.
+     */
+    private async getBitcoinStatus(hash: string): Promise<CrossChainTxStatus> {
+        let bitcoinTransactionStatus: BtcStatusResponse;
+        try {
+            const btcStatusApi = 'https://blockchain.info/rawtx/';
+            bitcoinTransactionStatus = await this.httpClient.get<BtcStatusResponse>(
+                `${btcStatusApi}${hash}`
+            );
+        } catch {
+            return CrossChainTxStatus.PENDING;
+        }
+
+        const isCompleted = bitcoinTransactionStatus?.block_index !== undefined;
+        if (isCompleted) {
+            return CrossChainTxStatus.SUCCESS;
+        }
+        return CrossChainTxStatus.PENDING;
     }
 }
