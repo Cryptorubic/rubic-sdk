@@ -200,7 +200,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
     }
 
     private parseTradeTypes(route: QuoteSimulationResult): {
-        bridgeType: BridgeType;
+        bridgeType: BridgeType | undefined;
         itType: { from: TradeType | undefined; to: TradeType | undefined };
     } {
         const { path, swapper } = route;

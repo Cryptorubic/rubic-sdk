@@ -13,7 +13,10 @@ import {
     CelerCrossChainTrade,
     CROSS_CHAIN_TRADE_TYPE,
     CrossChainTradeType,
-    RangoCrossChainTradeProvider
+    RangoCrossChainTradeProvider,
+    CelerRubicCrossChainTrade,
+    SymbiosisCrossChainTrade,
+    RangoCrossChainTrade
 } from 'src/features';
 import { SwapManagerCrossChainCalculationOptions } from '@rsdk-features/cross-chain/models/swap-manager-cross-chain-options';
 import pTimeout from '@rsdk-common/utils/p-timeout';
@@ -35,6 +38,7 @@ import { LifiCrossChainTradeProvider } from 'src/features/cross-chain/providers/
 import { RubicCrossChainTradeProvider } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 import { ViaCrossChainTrade } from 'src/features/cross-chain/providers/via-trade-provider/via-cross-chain-trade';
 import { DebridgeCrossChainTrade } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade';
+import { Injector } from 'src/core/sdk/injector';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCrossChainCalculationOptions,
@@ -318,7 +322,8 @@ export class CrossChainManager {
             fromUsd = prevTrade.transitAmount;
         } else if (
             prevTrade instanceof LifiCrossChainTrade ||
-            prevTrade instanceof ViaCrossChainTrade
+            prevTrade instanceof ViaCrossChainTrade ||
+            prevTrade instanceof RangoCrossChainTrade
         ) {
             fromUsd = prevTrade.from.price.multipliedBy(prevTrade.from.tokenAmount);
         } else {

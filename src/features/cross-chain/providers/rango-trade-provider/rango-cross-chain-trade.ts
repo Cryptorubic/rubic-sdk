@@ -36,7 +36,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
 
     public readonly rangoClientRef: RangoClient;
 
-    public readonly bridgeType: BridgeType;
+    public readonly bridgeType: BridgeType | undefined;
 
     public requestId: string | undefined;
 
@@ -56,7 +56,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
             slippageTolerance: number;
             feeInfo: FeeInfo;
             itType: { from: TradeType | undefined; to: TradeType | undefined };
-            bridgeType: BridgeType;
+            bridgeType: BridgeType | undefined;
             priceImpact: number | null;
         },
         rangoClientRef: RangoClient,
