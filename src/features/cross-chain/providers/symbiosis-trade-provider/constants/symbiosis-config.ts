@@ -365,8 +365,8 @@ export function getSymbiosisConfig(): Config {
                         isStable: true,
                         icons: {
                             large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
-                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
-                        },
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
                     },
                     {
                         name: 'Synthetic BUSD',
@@ -378,8 +378,8 @@ export function getSymbiosisConfig(): Config {
                         isStable: true,
                         icons: {
                             large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png',
-                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png',
-                        },
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png'
+                        }
                     },
                     {
                         name: 'Synthetic USDC',
@@ -391,27 +391,27 @@ export function getSymbiosisConfig(): Config {
                         isStable: true,
                         icons: {
                             large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
-                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
-                        },
-                    },
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    }
                 ],
                 nerves: [
                     {
                         address: '0x7Ff7AdE2A214F9A4634bBAA4E870A5125dA521B8',
                         tokens: [
                             '0xB12BFcA5A55806AaF64E99521918A4bf0fC40802',
-                            '0xd5e98CAeb396daBE5a102bB9256B552944e3401f',
+                            '0xd5e98CAeb396daBE5a102bB9256B552944e3401f'
                         ],
-                        decimals: [6, 18],
+                        decimals: [6, 18]
                     },
                     {
                         address: '0x7F1245B61Ba0b7D4C41f28cAc9F8637fc6Bec9E4',
                         tokens: [
                             '0xB12BFcA5A55806AaF64E99521918A4bf0fC40802',
-                            '0x42Cc1CBf253F89bE6814a0f59F745b40b69b6220',
+                            '0x42Cc1CBf253F89bE6814a0f59F745b40b69b6220'
                         ],
-                        decimals: [6, 6],
-                    },
+                        decimals: [6, 6]
+                    }
                 ],
                 router: '0x2CB45Edb4517d5947aFdE3BEAbF95A582506858B',
                 dexFee: 30,
@@ -424,7 +424,7 @@ export function getSymbiosisConfig(): Config {
                 multicallRouter: '0xcB28fbE3E9C0FEA62E0E63ff3f232CECfE555aD4',
                 aavePool: '0x0000000000000000000000000000000000000000',
                 creamComptroller: '0x0000000000000000000000000000000000000000',
-                renGatewayRegistry: '0x0000000000000000000000000000000000000000',
+                renGatewayRegistry: '0x0000000000000000000000000000000000000000'
             },
             {
                 id: 40,
@@ -441,8 +441,8 @@ export function getSymbiosisConfig(): Config {
                         isStable: true,
                         icons: {
                             large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
-                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
-                        },
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
                     },
                     {
                         name: 'Synthetic BUSD',
@@ -454,19 +454,19 @@ export function getSymbiosisConfig(): Config {
                         isStable: true,
                         icons: {
                             large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png',
-                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png',
-                        },
-                    },
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png'
+                        }
+                    }
                 ],
                 nerves: [
                     {
                         address: '0x7f3C1E54b8b8C7c08b02f0da820717fb641F26C8',
                         tokens: [
                             '0x818ec0a7fe18ff94269904fced6ae3dae6d6dc0b',
-                            '0x017043607270ECbB440e20b0f0BC5E760818b3d8',
+                            '0x017043607270ECbB440e20b0f0BC5E760818b3d8'
                         ],
-                        decimals: [6, 18],
-                    },
+                        decimals: [6, 18]
+                    }
                 ],
                 router: '0xf9678db1ce83f6f51e5df348e2cc842ca51efec1',
                 dexFee: 25,
@@ -479,8 +479,8 @@ export function getSymbiosisConfig(): Config {
                 multicallRouter: '0xcB28fbE3E9C0FEA62E0E63ff3f232CECfE555aD4',
                 aavePool: '0x0000000000000000000000000000000000000000',
                 creamComptroller: '0x0000000000000000000000000000000000000000',
-                renGatewayRegistry: '0x0000000000000000000000000000000000000000',
-            },
+                renGatewayRegistry: '0x0000000000000000000000000000000000000000'
+            }
         ]
     } as unknown as Config;
 }
