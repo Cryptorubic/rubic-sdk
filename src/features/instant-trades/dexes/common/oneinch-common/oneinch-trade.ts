@@ -26,6 +26,7 @@ import {
     TransactionGasParams
 } from '@rsdk-features/instant-trades/models/gas-params';
 import { OneinchSwapRequest } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-request';
+import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 
 type OneinchTradeStruct = {
     contractAddress: string;
@@ -166,7 +167,12 @@ export class OneinchTrade extends InstantTrade {
             if (inchSpecificError) {
                 throw inchSpecificError;
             }
-            throw new RubicSdkError(err.message || err.toString());
+
+            if ([400, 500, 503].includes(err.code)) {
+                throw new SwapRequestError();
+            }
+
+            throw this.parseError(err);
         }
     }
 

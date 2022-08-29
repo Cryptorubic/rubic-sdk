@@ -16,7 +16,6 @@ import { ItCalculatedTrade } from '@rsdk-features/cross-chain/providers/common/c
 import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
 import { CrossChainMinAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-min-amount.error';
 import { CrossChainMaxAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-max-amount.error';
-import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 
 export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeProvider {
     protected abstract contracts(blockchain: BlockchainName): CrossChainContractData;
@@ -194,13 +193,5 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
         if (sourceContractPaused || targetContractPaused) {
             throw new CrossChainIsUnavailableError();
         }
-    }
-
-    protected async getFeeInfo(): Promise<FeeInfo> {
-        return {
-            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
-            platformFee: { percent: 0, tokenSymbol: '' },
-            cryptoFee: null
-        };
     }
 }

@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "2.10.3",
+  "version": "2.12.0",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -63,12 +63,13 @@
   },
   "dependencies": {
     "@lifi/sdk": "^1.0.2",
+    "@viaprotocol/router-sdk": "^1.0.7",
     "assert": "^2.0.0",
     "axios": "^0.26.1",
-    "bignumber.js": "^9.0.1",
+    "bignumber.js": "^9.0.2",
     "ethers": "^5.6.8",
     "rxjs": "^7.5.5",
-    "symbiosis-js-sdk": "^2.8.9",
+    "symbiosis-js-sdk": "2.8.13",
     "web3": "~1.7.3"
   },
   "devDependencies": {
@@ -113,10 +114,10 @@
   },
   "overrides": {
     "ethers": {
-      "bignumber.js": "^9.0.1"
+      "bignumber.js": "^9.0.2"
     },
     "symbiosis-js-sdk": {
-      "bignumber.js": "^9.0.1"
+      "bignumber.js": "^9.0.2"
     }
   }
 }
