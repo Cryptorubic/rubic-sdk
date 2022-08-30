@@ -32,6 +32,7 @@ import {
 import { RangoCrossChainTrade } from './rango-cross-chain-trade';
 import { RANGO_TRADE_BRIDGE_TYPE } from './models/rango-providers';
 import { BridgeType } from '../../constants/bridge-type';
+import { RANGO_BLOCKCHAIN_NAME } from './constants/rango-blockchain-name';
 
 export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RANGO;
@@ -188,12 +189,16 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
         const toAddress = this.walletAddress || EMPTY_ADDRESS;
         return {
             from: {
-                blockchain: fromToken.blockchain,
+                blockchain:
+                    RANGO_BLOCKCHAIN_NAME[
+                        fromToken.blockchain as RangoCrossChainSupportedBlockchain
+                    ],
                 symbol: fromToken.symbol,
                 address: fromToken.isNative ? null : fromToken.address
             },
             to: {
-                blockchain: toToken.blockchain,
+                blockchain:
+                    RANGO_BLOCKCHAIN_NAME[toToken.blockchain as RangoCrossChainSupportedBlockchain],
                 symbol: toToken.symbol,
                 address: toToken.isNative ? null : toToken.address
             },

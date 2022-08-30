@@ -13,6 +13,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { RANGO_CONTRACT_ADDRESSES } from './constants/contract-address';
 import { RangoCrossChainSupportedBlockchain } from './constants/rango-cross-chain-supported-blockchain';
 import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';
+import { RANGO_BLOCKCHAIN_NAME } from './constants/rango-blockchain-name';
 
 export class RangoCrossChainTrade extends CrossChainTrade {
     public readonly feeInfo: FeeInfo;
@@ -178,12 +179,16 @@ export class RangoCrossChainTrade extends CrossChainTrade {
     private async refetchTxData(): Promise<EvmTransaction> {
         const response = await this.rangoClientRef.swap({
             from: {
-                blockchain: this.from.blockchain,
+                blockchain:
+                    RANGO_BLOCKCHAIN_NAME[
+                        this.from.blockchain as RangoCrossChainSupportedBlockchain
+                    ],
                 symbol: this.from.symbol,
                 address: this.from.isNative ? null : this.from.address
             },
             to: {
-                blockchain: this.to.blockchain,
+                blockchain:
+                    RANGO_BLOCKCHAIN_NAME[this.to.blockchain as RangoCrossChainSupportedBlockchain],
                 symbol: this.to.symbol,
                 address: this.to.isNative ? null : this.to.address
             },
