@@ -6,7 +6,8 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/sdk/injector';
 import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
-import { FailedToCheckForTransactionReceiptError } from 'src/common';
+import { compareAddresses, FailedToCheckForTransactionReceiptError } from 'src/common';
+import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
 import { CrossChainTrade } from '../common/cross-chain-trade';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { RANGO_CONTRACT_ADDRESSES } from './constants/contract-address';
@@ -40,6 +41,8 @@ export class RangoCrossChainTrade extends CrossChainTrade {
 
     public requestId: string | undefined;
 
+    public cryptoFeeToken: PriceTokenAmount;
+
     public get fromBlockchain(): RangoCrossChainSupportedBlockchain {
         return this.from.blockchain as RangoCrossChainSupportedBlockchain;
     }
@@ -58,6 +61,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
             itType: { from: TradeType | undefined; to: TradeType | undefined };
             bridgeType: BridgeType | undefined;
             priceImpact: number | null;
+            cryptoFeeToken: PriceTokenAmount;
         },
         rangoClientRef: RangoClient,
         providerAddress: string
@@ -71,6 +75,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
         this.bridgeType = crossChainTrade.bridgeType;
         this.itType = crossChainTrade.itType;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
         this.rangoClientRef = rangoClientRef;
@@ -125,9 +130,10 @@ export class RangoCrossChainTrade extends CrossChainTrade {
     }
 
     public async getContractParams(): Promise<ContractParams> {
-        const fromContracts =
-            RANGO_CONTRACT_ADDRESSES[this.from.blockchain as RangoCrossChainSupportedBlockchain];
         const { txData, value, txTo } = await this.refetchTxData();
+
+        await this.checkProviderIsWhitelisted(txTo);
+
         const routerCallParams = [
             this.from.address,
             this.from.stringWeiAmount,
@@ -161,7 +167,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
         });
 
         return {
-            contractAddress: fromContracts.rubicRouter,
+            contractAddress: this.fromContractAddress,
             contractAbi: commonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,
@@ -239,7 +245,28 @@ export class RangoCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    public getTradeAmountRatio(): BigNumber {
-        return new BigNumber(1);
+    private async checkProviderIsWhitelisted(providerRouter: string): Promise<void> {
+        const whitelistedContracts = await Injector.web3PublicService
+            .getWeb3Public(this.from.blockchain)
+            .callContractMethod<string[]>(
+                this.fromContractAddress,
+                commonCrossChainAbi,
+                'getAvailableRouters'
+            );
+
+        if (
+            !whitelistedContracts.find(whitelistedContract =>
+                compareAddresses(whitelistedContract, providerRouter)
+            )
+        ) {
+            throw new NotWhitelistedProviderError(providerRouter);
+        }
+    }
+
+    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
+        const usdCryptoFee = this.cryptoFeeToken.price.multipliedBy(
+            this.cryptoFeeToken.tokenAmount
+        );
+        return fromUsd.plus(usdCryptoFee).dividedBy(this.to.tokenAmount);
     }
 }

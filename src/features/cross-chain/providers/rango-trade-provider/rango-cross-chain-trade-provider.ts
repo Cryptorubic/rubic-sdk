@@ -1,12 +1,13 @@
 import BigNumber from 'bignumber.js';
 import {
+    EvmTransaction,
     MetaResponse,
     QuotePath,
     QuoteSimulationResult,
     RangoClient,
     SwapRequest
 } from 'rango-sdk-basic/lib';
-import { BlockchainName, Web3Pure } from 'src/core';
+import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import { Injector } from 'src/core/sdk/injector';
@@ -101,7 +102,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
         const request = this.getRequestParams(fromToken, toToken, options);
 
         try {
-            const { route, resultType } = await this.rango.swap(request);
+            const { route, resultType, tx } = await this.rango.swap(request);
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
             const networkFee = route?.fee.find(item => item.name === 'Network Fee');
@@ -134,6 +135,12 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                     ...toToken.asStruct,
                     tokenAmount: Web3Pure.fromWei(route.outputAmount, toToken.decimals)
                 });
+                const cryptoFeeToken = await PriceTokenAmount.createFromToken({
+                    ...BlockchainsInfo.getBlockchainByName(fromBlockchain).nativeCoin,
+                    weiAmount: new BigNumber(parseInt((tx as EvmTransaction).value || '0')).minus(
+                        fromToken.isNative ? fromToken.stringWeiAmount : 0
+                    )
+                });
                 const { bridgeType, itType } = this.parseTradeTypes(route as QuoteSimulationResult);
                 const rangoTrade = new RangoCrossChainTrade(
                     {
@@ -155,7 +162,8 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                                     networkFee?.token.symbol ||
                                     nativeTokensList[fromBlockchain].symbol
                             }
-                        }
+                        },
+                        cryptoFeeToken
                     },
                     this.rango,
                     options.providerAddress || EMPTY_ADDRESS
