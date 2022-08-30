@@ -33,9 +33,19 @@ export const SYMBIOSIS_CONTRACT_ADDRESS: Record<
         providerGateway: '0x5ee04643fe2D63f364F77B38C41F15A54930f5C1',
         rubicRouter: '0x53dC7535028e2fcaCa0d847AD108b9240C0801b1'
     },
+    [BLOCKCHAIN_NAME.TELOS]: {
+        providerRouter: '0xc2299c4a45b7e44fFC23e6ba7aAC4AeFF0DDbccC',
+        providerGateway: '0xcB9ec7Bfa69c400F97fD667Bf3D8C61359cf50c2',
+        rubicRouter: '0x3335A88bb18fD3b6824b59Af62b50CE494143333'
+    },
     [BLOCKCHAIN_NAME.BITCOIN]: {
         providerRouter: '',
         providerGateway: '',
         rubicRouter: ''
     }
+    // [BLOCKCHAIN_NAME.AURORA]: {
+    //     providerRouter: '0xc2299c4a45b7e44fFC23e6ba7aAC4AeFF0DDbccC',
+    //     providerGateway: '0xcB9ec7Bfa69c400F97fD667Bf3D8C61359cf50c2',
+    //     rubicRouter: '0x3335A88bb18fD3b6824b59Af62b50CE494143333'
+    // }
 };

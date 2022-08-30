@@ -4,6 +4,9 @@ import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo } from 'src/core';
 import { Injector } from 'src/core/sdk/injector';
 import { celerCrossChainEventStatusesAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-event-statuses-abi';
 import { LogsDecoder } from 'src/features/cross-chain/utils/decode-logs';
+import { Via } from '@viaprotocol/router-sdk';
+import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
+import { ViaSwapStatus } from 'src/features/cross-chain/providers/via-trade-provider/models/via-swap-status';
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from './models/cross-chain-trade-type';
 import { celerCrossChainContractAbi } from './providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import { celerCrossChainContractsAddresses } from './providers/celer-trade-provider/constants/celer-cross-chain-contracts-addresses';
@@ -76,7 +79,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.RUBIC]: this.getRubicDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.VIA]: this.getViaDstSwapStatus
     };
 
     /**
@@ -379,7 +383,7 @@ export class CrossChainStatusManager {
     /**
      * Get transaction receipt.
      * @param blockchain Blockchain name.
-     * @param srcTxReceipt Transaction hash.
+     * @param txHash Transaction hash.
      * @returns Transaction receipt.
      */
     private async getTxReceipt(
@@ -426,6 +430,34 @@ export class CrossChainStatusManager {
             }
 
             return CrossChainTxStatus.FAIL;
+        } catch {
+            return CrossChainTxStatus.PENDING;
+        }
+    }
+
+    /**
+     * Get Via trade dst transaction status.
+     * @param data Trade data.
+     * @param _srcTxReceipt Source transaction receipt.
+     * @returns Cross-chain transaction status.
+     */
+    private async getViaDstSwapStatus(
+        data: CrossChainTradeData,
+        _srcTxReceipt: TransactionReceipt
+    ): Promise<CrossChainTxStatus> {
+        try {
+            const txStatusResponse = await new Via(VIA_DEFAULT_CONFIG).checkTx({
+                actionUuid: data.viaUuid!
+            });
+            const status = txStatusResponse.event as unknown as ViaSwapStatus;
+
+            if (status === ViaSwapStatus.SUCCESS) {
+                return CrossChainTxStatus.SUCCESS;
+            }
+            if (status === ViaSwapStatus.FAIL) {
+                return CrossChainTxStatus.FAIL;
+            }
+            return CrossChainTxStatus.PENDING;
         } catch {
             return CrossChainTxStatus.PENDING;
         }

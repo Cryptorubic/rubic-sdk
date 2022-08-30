@@ -19,6 +19,7 @@ export const BLOCKCHAIN_NAME = {
     MOONBEAM: 'MOONBEAM',
     CELO: 'CELO',
     BOBA: 'BOBA',
+    ASTAR: 'ASTAR',
     BITCOIN: 'BITCOIN'
 } as const;
 

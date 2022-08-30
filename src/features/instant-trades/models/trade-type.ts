@@ -2,69 +2,95 @@
  * List of instant trade types.
  */
 export const TRADE_TYPE = {
-    // Common
-    ONE_INCH: 'ONE_INCH',
-    SUSHI_SWAP: 'SUSHI_SWAP',
-    UNI_SWAP_V3: 'UNI_SWAP_V3',
-    ZRX: 'ZRX',
-    PARA_SWAP: 'PARA_SWAP',
-    OPEN_OCEAN: 'OPEN_OCEAN',
+    ACRYPTOS: 'ACRYPTOS',
+    ALDRIN_EXCHANGE: 'ALDRIN_EXCHANGE',
+    ALGEBRA: 'ALGEBRA',
+    ANNEX: 'ANNEX',
+    APE_SWAP: 'APE_SWAP',
+    ARTH_SWAP: 'ARTH_SWAP',
+
+    BABY_SWAP: 'BABY_SWAP',
+    BALANCER: 'BALANCER',
+    BEAM_SWAP: 'BEAM_SWAP',
+    BI_SWAP: 'BI_SWAP',
+
+    CREMA_FINANCE: 'CREMA_FINANCE',
+    CRONA_SWAP: 'CRONA_SWAP',
+    CROPPER_FINANCE: 'CROPPER_FINANCE',
+    CROW_FI: 'CROW_FI',
+    CRO_DEX: 'CRO_DEX',
+    CURVE: 'CURVE',
+
+    DEFI_PLAZA: 'DEFI_PLAZA',
+    DEFI_SWAP: 'DEFI_SWAP',
+    DFYN: 'DFYN',
     DODO: 'DODO',
+    DYSTOPIA: 'DYSTOPIA',
+
     HONEY_SWAP: 'HONEY_SWAP',
+
+    JET_SWAP: 'JET_SWAP',
+    JOE: 'JOE',
     J_SWAP: 'J_SWAP',
 
-    // Ethereum
-    UNISWAP_V2: 'UNISWAP_V2',
+    KYBER_SWAP: 'KYBER_SWAP',
 
-    // Bsc
+    LUA_SWAP: 'LUA_SWAP',
+
+    MAVERICK: 'MAVERICK',
+    MDEX: 'MDEX',
+    MESH_SWAP: 'MESH_SWAP',
+    MM_FINANCE: 'MM_FINANCE',
+    MOJITO_SWAP: 'MOJITO_SWAP',
+
+    ONE_INCH: 'ONE_INCH',
+    ONE_MOON: 'ONE_MOON',
+    ONE_SOL: 'ONE_SOL',
+    OOLONG_SWAP: 'OOLONG_SWAP',
+    OPEN_OCEAN: 'OPEN_OCEAN',
+    ORCA_SWAP: 'ORCA_SWAP',
+    OSMOSIS_SWAP: 'OSMOSIS_SWAP',
+
     PANCAKE_SWAP: 'PANCAKE_SWAP',
+    PANGOLIN: 'PANGOLIN',
+    PARA_SWAP: 'PARA_SWAP',
+    POLYDEX: 'POLYDEX',
 
-    // Polygon
-    ALGEBRA: 'ALGEBRA',
     QUICK_SWAP: 'QUICK_SWAP',
 
-    // Avalanche
-    JOE: 'JOE',
-    PANGOLIN: 'PANGOLIN',
-
-    // Moonriver
-    SOLAR_BEAM: 'SOLAR_BEAM',
-
-    // Fantom
-    SPIRIT_SWAP: 'SPIRIT_SWAP',
-    SPOOKY_SWAP: 'SPOOKY_SWAP',
-
-    // Harmony
-    VIPER_SWAP: 'VIPER_SWAP',
-
-    // Aurora
-    TRISOLARIS: 'TRISOLARIS',
-    WANNA_SWAP: 'WANNA_SWAP',
-
-    // Telos
-    ZAPPY: 'ZAPPY',
-
-    // Cronos
-    CRONA_SWAP: 'CRONA_SWAP',
-
-    // Moonbeam
-    STELLA_SWAP: 'STELLA_SWAP',
-    BEAM_SWAP: 'BEAM_SWAP',
-
-    // Celo
-    UBE_SWAP: 'UBE_SWAP',
-
-    // Boba
-    OOLONG_SWAP: 'OOLONG_SWAP',
-
-    // Solana
     RAYDIUM: 'RAYDIUM',
-
-    // Near
     REF_FINANCE: 'REF_FINANCE',
 
-    // Other
+    SABER_STABLE_SWAP: 'SABER_STABLE_SWAP',
+    SAROS_SWAP: 'SAROS_SWAP',
+    SERUM: 'SERUM',
+    SHIBA_SWAP: 'SHIBA_SWAP',
+    SMOOTHY: 'SMOOTHY',
+    SOLAR_BEAM: 'SOLAR_BEAM',
+    SPIRIT_SWAP: 'SPIRIT_SWAP',
+    SPL_TOKEN_SWAP: 'SPL_TOKEN_SWAP',
+    SPOOKY_SWAP: 'SPOOKY_SWAP',
+    STELLA_SWAP: 'STELLA_SWAP',
+    SUSHI_SWAP: 'SUSHI_SWAP',
+
+    TRISOLARIS: 'TRISOLARIS',
+
+    UBE_SWAP: 'UBE_SWAP',
+    UNISWAP_V2: 'UNISWAP_V2',
+    UNI_SWAP_V3: 'UNI_SWAP_V3',
+
+    VIPER_SWAP: 'VIPER_SWAP',
+    VOLTAGE_SWAP: 'VOLTAGE_SWAP',
+    VVS_FINANCE: 'VVS_FINANCE',
+
+    WANNA_SWAP: 'WANNA_SWAP',
+    WAULT_SWAP: 'WAULT_SWAP',
+    WOO_FI: 'WOO_FI',
     WRAPPED: 'WRAPPED',
+
+    ZAPPY: 'ZAPPY',
+    ZIP_SWAP: 'ZIP_SWAP',
+    ZRX: 'ZRX',
 
     REN_BTC: 'REN_BTC'
 } as const;
