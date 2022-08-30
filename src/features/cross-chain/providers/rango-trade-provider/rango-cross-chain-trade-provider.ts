@@ -100,6 +100,19 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
             RANGO_CONTRACT_ADDRESSES[fromBlockchain].rubicRouter
         );
 
+        const price = await fromToken.getAndUpdateTokenPrice();
+        const amountUsdPrice = fromToken.tokenAmount.multipliedBy(price);
+
+        if (price && amountUsdPrice.lt(101)) {
+            return {
+                trade: null,
+                error: new CrossChainMinAmountError(
+                    new BigNumber(101).dividedBy(price),
+                    fromToken.symbol
+                )
+            };
+        }
+
         const request = this.getRequestParams(fromToken, toToken, options);
 
         try {
