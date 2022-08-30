@@ -34,6 +34,7 @@ import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/c
 import { OolongSwapProvider } from 'src/features/instant-trades/dexes/boba/oolong-swap/oolong-swap-provider';
 import { symbiosisTransitTokens } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-transit-tokens';
 import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
+import { ZappyProvider } from 'src/features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -56,7 +57,9 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: new OneinchBscProvider(),
         [BLOCKCHAIN_NAME.POLYGON]: new OneinchPolygonProvider(),
         [BLOCKCHAIN_NAME.AVALANCHE]: new OneinchAvalancheProvider(),
-        [BLOCKCHAIN_NAME.BOBA]: new OolongSwapProvider()
+        [BLOCKCHAIN_NAME.BOBA]: new OolongSwapProvider(),
+        [BLOCKCHAIN_NAME.TELOS]: new ZappyProvider()
+        // [BLOCKCHAIN_NAME.AURORA]: new OneinchAuroraProvider()
     };
 
     protected get walletAddress(): string {

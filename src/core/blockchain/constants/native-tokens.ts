@@ -63,7 +63,7 @@ export const nativeTokensList: NativeTokensList = {
         address: NATIVE_TOKEN_ADDRESS,
         name: 'TLOS',
         symbol: 'TLOS',
-        decimals: 24
+        decimals: 18
     },
     [BLOCKCHAIN_NAME.SOLANA]: {
         address: '@TODO SOLANA',
