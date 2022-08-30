@@ -357,7 +357,7 @@ export class CrossChainManager {
             providerAddress: this.providerAddress,
             slippageTolerance: CrossChainManager.defaultSlippageTolerance * 2,
             deadline: CrossChainManager.defaultDeadline,
-            toAddress: options?.toAddress || Injector.web3Private.address
+            toAddress: Injector.web3Private.address
         });
     }
 
