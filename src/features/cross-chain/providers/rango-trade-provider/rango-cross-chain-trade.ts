@@ -41,7 +41,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
 
     public requestId: string | undefined;
 
-    public cryptoFeeToken: PriceTokenAmount;
+    public readonly cryptoFeeToken: PriceTokenAmount;
 
     public get fromBlockchain(): RangoCrossChainSupportedBlockchain {
         return this.from.blockchain as RangoCrossChainSupportedBlockchain;
