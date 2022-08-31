@@ -87,10 +87,6 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
         const fromBlockchain = fromToken.blockchain as RangoCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as RangoCrossChainSupportedBlockchain;
 
-        // if (!this.meta) {
-        //     this.meta = await this.rango.meta();
-        // }
-
         if (!this.isSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return { trade: null };
         }
