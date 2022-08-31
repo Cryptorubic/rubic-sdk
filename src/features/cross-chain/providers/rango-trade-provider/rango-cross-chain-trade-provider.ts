@@ -96,18 +96,18 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
             RANGO_CONTRACT_ADDRESSES[fromBlockchain].rubicRouter
         );
 
-        const price = await fromToken.getAndUpdateTokenPrice();
-        const amountUsdPrice = fromToken.tokenAmount.multipliedBy(price);
+        // const price = await fromToken.getAndUpdateTokenPrice();
+        // const amountUsdPrice = fromToken.tokenAmount.multipliedBy(price);
 
-        if (price && amountUsdPrice.lt(101)) {
-            return {
-                trade: null,
-                error: new CrossChainMinAmountError(
-                    new BigNumber(101).dividedBy(price),
-                    fromToken.symbol
-                )
-            };
-        }
+        // if (price && amountUsdPrice.lt(101)) {
+        //     return {
+        //         trade: null,
+        //         error: new CrossChainMinAmountError(
+        //             new BigNumber(101).dividedBy(price),
+        //             fromToken.symbol
+        //         )
+        //     };
+        // }
 
         const request = this.getRequestParams(fromToken, toToken, options);
 
@@ -119,7 +119,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
 
             if ((resultType === 'INPUT_LIMIT_ISSUE' || resultType === 'NO_ROUTE') && route) {
                 const { amountRestriction } = route;
-                if (amountRestriction?.min && fromToken.weiAmount.lt(amountRestriction.min)) {
+                if (amountRestriction?.min && fromToken.weiAmount.lte(amountRestriction.min)) {
                     return {
                         trade: null,
                         error: new CrossChainMinAmountError(
@@ -129,7 +129,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                     };
                 }
 
-                if (amountRestriction?.max && fromToken.weiAmount.gt(amountRestriction.max)) {
+                if (amountRestriction?.max && fromToken.weiAmount.gte(amountRestriction.max)) {
                     return {
                         trade: null,
                         error: new CrossChainMaxAmountError(
