@@ -18,6 +18,75 @@ import { RANGO_API_KEY } from './constants/rango-api-key';
 import { RANGO_BLOCKCHAIN_NAME } from './constants/rango-blockchain-name';
 
 export class RangoCrossChainTrade extends CrossChainTrade {
+    /** @internal */
+    public static async getGasData(
+        from: PriceTokenAmount,
+        to: PriceTokenAmount
+    ): Promise<GasData | null> {
+        const fromBlockchain = from.blockchain as RangoCrossChainSupportedBlockchain;
+        const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+        const walletAddress = Injector.web3Private.address;
+
+        if (!walletAddress) {
+            return null;
+        }
+
+        try {
+            const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                await new RangoCrossChainTrade(
+                    {
+                        from,
+                        to,
+                        toTokenAmountMin: new BigNumber(0),
+                        slippageTolerance: 4,
+                        cryptoFeeToken: {} as PriceTokenAmount,
+                        feeInfo: {
+                            cryptoFee: null,
+                            fixedFee: null,
+                            platformFee: null
+                        },
+                        itType: {
+                            from: undefined,
+                            to: undefined
+                        },
+                        bridgeType: undefined,
+                        priceImpact: null,
+                        gasData: {
+                            gasLimit: new BigNumber(0),
+                            gasPrice: new BigNumber(0)
+                        }
+                    },
+                    new RangoClient(RANGO_API_KEY),
+                    EMPTY_ADDRESS
+                ).getContractParams();
+
+            const [gasLimit, gasPrice] = await Promise.all([
+                web3Public.getEstimatedGas(
+                    contractAbi,
+                    contractAddress,
+                    methodName,
+                    methodArguments,
+                    walletAddress,
+                    value
+                ),
+                new BigNumber(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
+            ]);
+
+            if (!gasLimit?.isFinite()) {
+                return null;
+            }
+
+            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
+
+            return {
+                gasLimit: increasedGasLimit,
+                gasPrice
+            };
+        } catch (_err) {
+            return null;
+        }
+    }
+
     public readonly feeInfo: FeeInfo;
 
     public readonly fromWeb3Public: Web3Public;
@@ -205,75 +274,6 @@ export class RangoCrossChainTrade extends CrossChainTrade {
         this.checkWalletConnected();
         this.checkBlockchainCorrect();
         await this.checkUserBalance();
-    }
-
-    /** @internal */
-    public static async getGasData(
-        from: PriceTokenAmount,
-        to: PriceTokenAmount
-    ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as RangoCrossChainSupportedBlockchain;
-        const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-        const walletAddress = Injector.web3Private.address;
-
-        if (!walletAddress) {
-            return null;
-        }
-
-        try {
-            const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                await new RangoCrossChainTrade(
-                    {
-                        from,
-                        to,
-                        toTokenAmountMin: new BigNumber(0),
-                        slippageTolerance: 4,
-                        cryptoFeeToken: {} as PriceTokenAmount,
-                        feeInfo: {
-                            cryptoFee: null,
-                            fixedFee: null,
-                            platformFee: null
-                        },
-                        itType: {
-                            from: undefined,
-                            to: undefined
-                        },
-                        bridgeType: undefined,
-                        priceImpact: null,
-                        gasData: {
-                            gasLimit: new BigNumber(0),
-                            gasPrice: new BigNumber(0)
-                        }
-                    },
-                    new RangoClient(RANGO_API_KEY),
-                    EMPTY_ADDRESS
-                ).getContractParams();
-
-            const [gasLimit, gasPrice] = await Promise.all([
-                web3Public.getEstimatedGas(
-                    contractAbi,
-                    contractAddress,
-                    methodName,
-                    methodArguments,
-                    walletAddress,
-                    value
-                ),
-                new BigNumber(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
-            ]);
-
-            if (!gasLimit?.isFinite()) {
-                return null;
-            }
-
-            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
-
-            return {
-                gasLimit: increasedGasLimit,
-                gasPrice
-            };
-        } catch (_err) {
-            return null;
-        }
     }
 
     private async checkProviderIsWhitelisted(providerRouter: string): Promise<void> {
