@@ -179,7 +179,8 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                             }
                         },
                         cryptoFeeToken,
-                        gasData
+                        gasData,
+                        rangoFees: route.fee
                     },
                     this.rango,
                     options.providerAddress || EMPTY_ADDRESS
