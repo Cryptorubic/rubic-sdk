@@ -21,52 +21,12 @@ import { LifiSwapStatus } from './providers/lifi-trade-provider/models/lifi-swap
 import { SymbiosisSwapStatus } from './providers/symbiosis-trade-provider/models/symbiosis-swap-status';
 import { CrossChainTradeData } from './models/cross-chain-trade-data';
 import { RubicCrossChainSupportedBlockchain } from './providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
-
-interface DeBridgeApiResponse {
-    claim: {
-        transactionHash?: string;
-    } | null;
-    send: {
-        isExecuted: boolean;
-        confirmationsCount: number;
-        transactionHash: string;
-    } | null;
-}
-
-interface SymbiosisApiResponse {
-    status: {
-        code: string;
-        text: string;
-    };
-    tx: {
-        hash: string;
-        chainId: number;
-    };
-}
-
-interface BtcStatusResponse {
-    block_height: number | undefined;
-    block_index: number | undefined;
-    double_spend: boolean;
-    fee: number;
-    hash: string;
-    inputs: unknown[];
-    lock_time: number;
-    out: unknown[];
-    relayed_by: string;
-    size: number;
-    time: number;
-    tx_index: number;
-    ver: number;
-    vin_sz: number;
-    vout_sz: number;
-    weight: number;
-}
-
-type getDstTxStatusFn = (
-    data: CrossChainTradeData,
-    srcTxReceipt: TransactionReceipt
-) => Promise<CrossChainTxStatus>;
+import {
+    BtcStatusResponse,
+    DeBridgeApiResponse,
+    getDstTxStatusFn,
+    SymbiosisApiResponse
+} from './models/statuses-api';
 
 /**
  * Contains methods for getting cross-chain trade statuses.
