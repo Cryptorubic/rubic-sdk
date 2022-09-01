@@ -94,6 +94,7 @@ export const TRADE_TYPE = {
 
     AURORA_SWAP: 'AURORA_SWAP',
     JUPITER: 'JUPITER'
+    REN_BTC: 'REN_BTC'
 } as const;
 
 /**

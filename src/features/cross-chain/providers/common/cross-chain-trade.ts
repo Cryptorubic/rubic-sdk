@@ -1,6 +1,7 @@
 import {
     BasicTransactionOptions,
     BLOCKCHAIN_NAME,
+    BlockchainName,
     PriceTokenAmount,
     TransactionOptions,
     Web3Public,
@@ -21,6 +22,7 @@ import { TransactionConfig } from 'web3-core';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { WrongReceiverAddressError } from 'src/common/errors/blockchain/wrong-receiver-address.error';
 import { ItType } from 'src/features/cross-chain/models/it-type';
+import { Network, validate } from 'bitcoin-address-validation';
 
 /**
  * Abstract class for all cross chain providers' trades.
@@ -28,11 +30,21 @@ import { ItType } from 'src/features/cross-chain/models/it-type';
 export abstract class CrossChainTrade {
     /**
      * Checks receiver address for correctness.
-     * @param receiverAddress
+     * @param receiverAddress Receiver address.
+     * @param toBlockchain Target blockchain.
      */
-    public static checkReceiverAddress(receiverAddress: string | undefined): void {
+    public static checkReceiverAddress(
+        receiverAddress: string | undefined,
+        toBlockchain?: BlockchainName
+    ): void {
         if (!receiverAddress) {
             return;
+        }
+        if (toBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
+            const isAddressValid = validate(receiverAddress, Network.mainnet);
+            if (isAddressValid) {
+                return;
+            }
         }
         if (Web3Pure.isAddressCorrect(receiverAddress)) {
             return;

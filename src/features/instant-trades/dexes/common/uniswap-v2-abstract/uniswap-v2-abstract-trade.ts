@@ -210,17 +210,25 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         if (await this.needApprove(options.fromAddress)) {
             throw new RubicSdkError('To use `encode` function, token must be approved for wallet');
         }
-        try {
-            await this.web3Public.checkBalance(
-                this.from,
-                this.from.tokenAmount,
-                options.fromAddress
-            );
-        } catch (_err) {
-            throw new RubicSdkError('To use `encode` function, wallet must have enough balance');
+        if (options.supportFee === undefined) {
+            try {
+                await this.web3Public.checkBalance(
+                    this.from,
+                    this.from.tokenAmount,
+                    options.fromAddress
+                );
+            } catch (_err) {
+                throw new RubicSdkError(
+                    'To use `encode` function, wallet must have enough balance or you must provider `supportFee` paramter in options.'
+                );
+            }
         }
 
-        const methodName = await this.getMethodName(options, options.fromAddress);
+        const methodName = await this.getMethodName(
+            options,
+            options.fromAddress,
+            options.supportFee
+        );
         const gasParams = this.getGasParams(options);
 
         return Web3Pure.encodeMethodCall(
@@ -247,8 +255,16 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     private async getMethodName(
         options: SwapTransactionOptions,
-        fromAddress?: string
+        fromAddress?: string,
+        supportFee?: boolean
     ): Promise<string> {
+        if (supportFee === false) {
+            return this.regularSwapMethod;
+        }
+        if (supportFee === true) {
+            return this.supportedFeeSwapMethod;
+        }
+
         const regularParameters = this.getSwapParametersByMethod(
             this.regularSwapMethod,
             options,

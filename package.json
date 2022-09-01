@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "2.11.0",
+  "version": "2.13.1",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -66,11 +66,12 @@
     "@viaprotocol/router-sdk": "^1.0.7",
     "assert": "^2.0.0",
     "axios": "^0.26.1",
-    "bignumber.js": "^9.0.2",
+    "bignumber.js": "9.1.0",
+    "bitcoin-address-validation": "2.2.1",
     "ethers": "^5.6.8",
     "rango-sdk-basic": "^0.0.7",
     "rxjs": "^7.5.5",
-    "symbiosis-js-sdk": "^2.8.9",
+    "symbiosis-js-sdk": "2.8.13",
     "web3": "~1.7.3"
   },
   "devDependencies": {

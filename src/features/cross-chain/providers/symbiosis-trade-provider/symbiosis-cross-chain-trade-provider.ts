@@ -14,7 +14,10 @@ import {
     Symbiosis,
     Token as SymbiosisToken,
     TokenAmount as SymbiosisTokenAmount,
-    Error as SymbiosisError
+    Error as SymbiosisError,
+    TokenAmount,
+    Token,
+    Percent
 } from 'symbiosis-js-sdk';
 import BigNumber from 'bignumber.js';
 import { SymbiosisCrossChainTrade } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
@@ -34,6 +37,8 @@ import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/c
 import { OolongSwapProvider } from 'src/features/instant-trades/dexes/boba/oolong-swap/oolong-swap-provider';
 import { symbiosisTransitTokens } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-transit-tokens';
 import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
+import { ZappyProvider } from 'src/features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
+import { TransactionRequest } from '@ethersproject/abstract-provider';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -56,7 +61,10 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: new OneinchBscProvider(),
         [BLOCKCHAIN_NAME.POLYGON]: new OneinchPolygonProvider(),
         [BLOCKCHAIN_NAME.AVALANCHE]: new OneinchAvalancheProvider(),
-        [BLOCKCHAIN_NAME.BOBA]: new OolongSwapProvider()
+        [BLOCKCHAIN_NAME.BOBA]: new OolongSwapProvider(),
+        [BLOCKCHAIN_NAME.TELOS]: new ZappyProvider(),
+        // [BLOCKCHAIN_NAME.AURORA]: new OneinchAuroraProvider()
+        [BLOCKCHAIN_NAME.BITCOIN]: new OneinchEthereumProvider()
     };
 
     protected get walletAddress(): string {
@@ -67,6 +75,9 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         fromBlockchain: BlockchainName,
         toBlockchain: BlockchainName
     ): boolean {
+        if (fromBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
+            return false;
+        }
         return (
             SymbiosisCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
             SymbiosisCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
@@ -78,14 +89,12 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         toToken: PriceToken,
         options: RequiredCrossChainOptions
     ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
-        const fromBlockchain = from.blockchain;
-        const toBlockchain = toToken.blockchain;
-        if (
-            !SymbiosisCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) ||
-            !SymbiosisCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
-        ) {
+        const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
+        const toBlockchain = toToken.blockchain as SymbiosisCrossChainSupportedBlockchain;
+        if (!this.isSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return null;
         }
+        const isBitcoinSwap = toBlockchain === BLOCKCHAIN_NAME.BITCOIN;
 
         try {
             const fromAddress =
@@ -113,43 +122,51 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
 
             const tokenAmountIn = new SymbiosisTokenAmount(tokenIn, tokenInWithFee);
 
-            const tokenOut = new SymbiosisToken({
-                chainId: BlockchainsInfo.getBlockchainByName(toBlockchain).id,
-                address: toToken.isNative ? '' : toToken.address,
-                decimals: toToken.decimals,
-                isNative: toToken.isNative
-            });
+            const tokenOut = isBitcoinSwap
+                ? null
+                : new SymbiosisToken({
+                      chainId: BlockchainsInfo.getBlockchainByName(toBlockchain).id,
+                      address: toToken.isNative ? '' : toToken.address,
+                      decimals: toToken.decimals,
+                      isNative: toToken.isNative
+                  });
 
             const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
             const slippageTolerance = options.slippageTolerance * 10000;
+            const bitcoinNullAddress = 'bc1qgkzct5j55x8vtf9vakdu6dzy3t8j8u93l043e9';
+            const receiverAddress = isBitcoinSwap ? bitcoinNullAddress : fromAddress;
 
-            const swapping = this.symbiosis.newSwapping();
-
-            const {
-                tokenAmountOut,
-                priceImpact,
-                fee: transitTokenFee
-            } = await swapping.exactIn(
-                tokenAmountIn,
-                tokenOut,
-                fromAddress,
-                fromAddress,
-                fromAddress,
-                slippageTolerance,
-                deadline,
-                true
-            );
-            const swapFunction = (fromUserAddress: string, receiver?: string) =>
-                swapping.exactIn(
+            const { tokenAmountOut, priceImpact, transitTokenFee } = await this.getTrade(
+                fromBlockchain,
+                toBlockchain,
+                {
                     tokenAmountIn,
                     tokenOut,
-                    fromUserAddress,
-                    receiver || fromUserAddress,
-                    receiver || fromUserAddress,
-                    slippageTolerance,
-                    deadline,
-                    true
-                );
+                    fromAddress,
+                    receiverAddress,
+                    refundAddress: fromAddress,
+                    slippage: slippageTolerance,
+                    deadline
+                }
+            );
+
+            const swapFunction = (fromUserAddress: string, receiver?: string) => {
+                if (isBitcoinSwap && !receiver) {
+                    throw new RubicSdkError('No receiver address provider for bitcoin swap.');
+                }
+                const refundAddress = isBitcoinSwap ? fromUserAddress : receiver || fromAddress;
+                const receiverAddress = isBitcoinSwap ? receiver! : receiver || fromUserAddress;
+
+                return this.getTrade(fromBlockchain, toBlockchain, {
+                    tokenAmountIn,
+                    tokenOut,
+                    fromAddress: fromUserAddress,
+                    receiverAddress,
+                    refundAddress,
+                    slippage: slippageTolerance,
+                    deadline
+                });
+            };
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: new BigNumber(tokenAmountOut.toFixed())
@@ -199,7 +216,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             let rubicSdkError = CrossChainTradeProvider.parseError(err);
 
             if (err instanceof SymbiosisError && err.message) {
-                rubicSdkError = await this.checkMinMaxErrors(err, from);
+                rubicSdkError = await this.checkMinMaxErrors(err, from, options.slippageTolerance);
             }
 
             return {
@@ -211,14 +228,16 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
 
     private async checkMinMaxErrors(
         err: SymbiosisError,
-        from: PriceTokenAmount
+        from: PriceTokenAmount,
+        slippage: number
     ): Promise<RubicSdkError> {
         if (err.code === ErrorCode.AMOUNT_TOO_LOW || err.code === ErrorCode.AMOUNT_LESS_THAN_FEE) {
             const index = err.message!.lastIndexOf('$');
             const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
             const minAmount = await this.getFromTokenAmount(from, transitTokenAmount, 'min');
+            const minAmountWithSlippage = minAmount.dividedBy(1 - slippage);
 
-            return new CrossChainMinAmountError(minAmount, from.symbol);
+            return new CrossChainMinAmountError(minAmountWithSlippage, from.symbol);
         }
 
         if (err?.code === ErrorCode.AMOUNT_TOO_HIGH) {
@@ -294,6 +313,83 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 tokenSymbol: percentFeeToken.symbol
             },
             cryptoFee: null
+        };
+    }
+
+    private async getTrade(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName,
+        swapParams: {
+            tokenAmountIn: TokenAmount;
+            tokenOut: Token | null;
+            fromAddress: string;
+            receiverAddress: string;
+            refundAddress: string;
+            slippage: number;
+            deadline: number;
+        }
+    ): Promise<{
+        tokenAmountOut: SymbiosisTokenAmount;
+        priceImpact: Percent;
+        transitTokenFee: SymbiosisTokenAmount;
+        transactionRequest: TransactionRequest;
+    }> {
+        let swapResult;
+
+        if (toBlockchain !== BLOCKCHAIN_NAME.BITCOIN && swapParams.tokenOut) {
+            const swapping = this.symbiosis.newSwapping();
+            swapResult = await swapping.exactIn(
+                swapParams.tokenAmountIn,
+                swapParams.tokenOut,
+                swapParams.fromAddress,
+                swapParams.fromAddress,
+                swapParams.fromAddress,
+                swapParams.slippage,
+                swapParams.deadline,
+                true
+            );
+        } else {
+            const zapping = this.symbiosis.newZappingRenBTC();
+            const poolId =
+                fromBlockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN
+                    ? BlockchainsInfo.getBlockchainByName(BLOCKCHAIN_NAME.POLYGON).id
+                    : BlockchainsInfo.getBlockchainByName(BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN).id;
+            try {
+                swapResult = await zapping.exactIn(
+                    swapParams.tokenAmountIn,
+                    poolId,
+                    swapParams.fromAddress,
+                    swapParams.receiverAddress,
+                    swapParams.fromAddress,
+                    swapParams.slippage,
+                    swapParams.deadline,
+                    true
+                );
+            } catch (err) {
+                if (
+                    err.code === ErrorCode.AMOUNT_TOO_LOW ||
+                    err.code === ErrorCode.AMOUNT_LESS_THAN_FEE
+                ) {
+                    throw err;
+                }
+                swapResult = await zapping.exactIn(
+                    swapParams.tokenAmountIn,
+                    poolId,
+                    swapParams.fromAddress,
+                    swapParams.receiverAddress,
+                    swapParams.fromAddress,
+                    swapParams.slippage,
+                    swapParams.deadline,
+                    true
+                );
+            }
+        }
+
+        return {
+            tokenAmountOut: swapResult.tokenAmountOut,
+            priceImpact: swapResult.priceImpact,
+            transitTokenFee: swapResult.fee,
+            transactionRequest: swapResult.transactionRequest
         };
     }
 }

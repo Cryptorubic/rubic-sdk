@@ -201,5 +201,16 @@ export const blockchains: ReadonlyArray<Blockchain> = [
             symbol: 'ETH',
             decimals: 18
         })
+    },
+    {
+        id: 5555,
+        name: BLOCKCHAIN_NAME.BITCOIN,
+        nativeCoin: new Token({
+            blockchain: BLOCKCHAIN_NAME.BITCOIN,
+            address: '',
+            name: 'Bitcoin',
+            symbol: 'BTC',
+            decimals: 8
+        })
     }
 ];
