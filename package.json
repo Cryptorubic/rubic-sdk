@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "2.13.0",
+  "version": "2.13.1",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -67,7 +67,7 @@
     "assert": "^2.0.0",
     "axios": "^0.26.1",
     "bignumber.js": "9.1.0",
-    "bitcoin-address-validation": "^2.2.2",
+    "bitcoin-address-validation": "2.2.1",
     "ethers": "^5.6.8",
     "rxjs": "^7.5.5",
     "symbiosis-js-sdk": "2.8.13",
