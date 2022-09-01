@@ -19,6 +19,10 @@ export abstract class CrossChainTradeProvider {
 
     public abstract readonly type: CrossChainTradeType;
 
+    protected get walletAddress(): string {
+        return Injector.web3Private.address;
+    }
+
     /**
      * Gets fee information.
      * @param _fromBlockchain Source network blockchain.

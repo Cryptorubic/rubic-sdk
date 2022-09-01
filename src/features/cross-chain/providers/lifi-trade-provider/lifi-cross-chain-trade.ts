@@ -110,12 +110,15 @@ export class LifiCrossChainTrade extends CrossChainTrade {
 
     public readonly priceImpact: number;
 
-    public get fromContractAddress(): string {
-        return lifiContractAddress[this.from.blockchain as LifiCrossChainSupportedBlockchain]
-            .rubicRouter;
+    public readonly bridgeType: BridgeType | undefined;
+
+    private get fromBlockchain(): LifiCrossChainSupportedBlockchain {
+        return this.from.blockchain as LifiCrossChainSupportedBlockchain;
     }
 
-    public readonly bridgeType: BridgeType | undefined;
+    public get fromContractAddress(): string {
+        return lifiContractAddress[this.fromBlockchain].rubicRouter;
+    }
 
     constructor(
         crossChainTrade: {
@@ -203,8 +206,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
     public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
         const data = await this.getSwapData(options?.receiverAddress);
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
-        const fromContracts =
-            lifiContractAddress[this.from.blockchain as LifiCrossChainSupportedBlockchain];
+        const fromContracts = lifiContractAddress[this.fromBlockchain];
 
         const swapArguments = [
             this.from.address,
@@ -228,7 +230,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         const value = new BigNumber(sourceValue).plus(fixedFee).toFixed(0);
 
         return {
-            contractAddress: fromContracts.rubicRouter,
+            contractAddress: this.fromContractAddress,
             contractAbi: commonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,
@@ -242,7 +244,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             ...firstStep,
             action: {
                 ...firstStep.action,
-                fromAddress: this.walletAddress,
+                fromAddress: this.fromContractAddress,
                 toAddress: receiverAddress || this.walletAddress
             },
             execution: {
