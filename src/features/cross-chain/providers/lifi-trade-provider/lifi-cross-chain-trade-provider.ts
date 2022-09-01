@@ -22,6 +22,7 @@ import { LifiStep } from '@lifi/types/dist/step';
 import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { bridges } from 'src/features/cross-chain/constants/bridge-type';
+import { RoutesRequest } from '@lifi/types';
 
 export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -82,13 +83,16 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         const fromChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id;
         const toChainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id;
 
-        const routesRequest = {
+        const toAddress = options.receiverAddress || this.walletAddress;
+        const routesRequest: RoutesRequest = {
             fromChainId,
             fromAmount: tokenAmountIn,
             fromTokenAddress: from.address,
             toChainId,
             toTokenAddress: toToken.address,
-            options: routeOptions
+            options: routeOptions,
+            fromAddress: lifiContractAddress[fromBlockchain].rubicRouter,
+            ...(toAddress && { toAddress })
         };
 
         const result = await this.lifi.getRoutes(routesRequest);
