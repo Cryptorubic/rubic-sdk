@@ -44,6 +44,13 @@ export const symbiosisTransitTokens: Record<SymbiosisCrossChainSupportedBlockcha
         name: 'USDC',
         symbol: 'USDC',
         decimals: 6
+    },
+    [BLOCKCHAIN_NAME.BITCOIN]: {
+        blockchain: BLOCKCHAIN_NAME.BITCOIN,
+        address: 'No address',
+        name: 'Bitcoin',
+        symbol: 'BTC',
+        decimals: 8
     }
     // [BLOCKCHAIN_NAME.AURORA]: {
     //     blockchain: BLOCKCHAIN_NAME.AURORA,

@@ -90,7 +90,9 @@ export const TRADE_TYPE = {
 
     ZAPPY: 'ZAPPY',
     ZIP_SWAP: 'ZIP_SWAP',
-    ZRX: 'ZRX'
+    ZRX: 'ZRX',
+
+    REN_BTC: 'REN_BTC'
 } as const;
 
 /**
