@@ -19,7 +19,8 @@ export const BLOCKCHAIN_NAME = {
     MOONBEAM: 'MOONBEAM',
     CELO: 'CELO',
     BOBA: 'BOBA',
-    ASTAR: 'ASTAR'
+    ASTAR: 'ASTAR',
+    BITCOIN: 'BITCOIN'
 } as const;
 
 export type BlockchainName = typeof BLOCKCHAIN_NAME[keyof typeof BLOCKCHAIN_NAME];
