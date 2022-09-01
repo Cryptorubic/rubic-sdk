@@ -41,7 +41,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
 
     public meta: MetaResponse | null = null;
 
-    private get walletAddress(): string {
+    public get walletAddress(): string {
         return Injector.web3Private.address;
     }
 
