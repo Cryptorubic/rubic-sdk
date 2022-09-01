@@ -1,11 +1,11 @@
 import BigNumber from 'bignumber.js';
 import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
-import { BridgeType, BRIDGE_TYPE, SwapTransactionOptions, TradeType } from 'src/features';
+import { BridgeType, SwapTransactionOptions, TradeType } from 'src/features';
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/sdk/injector';
-import { EvmTransaction, RangoClient, SwapFee } from 'rango-sdk-basic/lib';
+import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
 import { compareAddresses, FailedToCheckForTransactionReceiptError } from 'src/common';
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
@@ -54,8 +54,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
                         gasData: {
                             gasLimit: new BigNumber(0),
                             gasPrice: new BigNumber(0)
-                        },
-                        rangoFees: [] as SwapFee[]
+                        }
                     },
                     new RangoClient(RANGO_API_KEY),
                     EMPTY_ADDRESS
@@ -112,8 +111,6 @@ export class RangoCrossChainTrade extends CrossChainTrade {
 
     public readonly bridgeType: BridgeType | undefined;
 
-    public readonly rangoFees: SwapFee[];
-
     public requestId: string | undefined;
 
     public readonly cryptoFeeToken: PriceTokenAmount;
@@ -138,7 +135,6 @@ export class RangoCrossChainTrade extends CrossChainTrade {
             priceImpact: number | null;
             cryptoFeeToken: PriceTokenAmount;
             gasData: GasData | null;
-            rangoFees: SwapFee[];
         },
         rangoClientRef: RangoClient,
         providerAddress: string
@@ -154,7 +150,6 @@ export class RangoCrossChainTrade extends CrossChainTrade {
         this.priceImpact = crossChainTrade.priceImpact;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.gasData = crossChainTrade.gasData;
-        this.rangoFees = crossChainTrade.rangoFees;
 
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
         this.rangoClientRef = rangoClientRef;
@@ -226,16 +221,9 @@ export class RangoCrossChainTrade extends CrossChainTrade {
         const sourceValue = this.from.isNative ? this.from.stringWeiAmount : '0';
         const cryptoFee = Web3Pure.toWei(this.feeInfo?.cryptoFee?.amount || 0);
         const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
-        const swapperFee =
-            this.bridgeType === BRIDGE_TYPE.CELER_BRIDGE
-                ? this.rangoFees.find(
-                      fee => fee.expenseType === 'FROM_SOURCE_WALLET' && fee.name === 'Swapper Fee'
-                  )!.amount
-                : 0;
         const msgValue = new BigNumber(sourceValue)
             .plus(fixedFee)
-            .plus(parseInt(value || '0'))
-            .plus(swapperFee)
+            .plus(value ? `${value}` : 0)
             .toFixed(0);
 
         console.log('message value data', {

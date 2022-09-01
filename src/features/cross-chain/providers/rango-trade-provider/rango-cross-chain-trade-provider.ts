@@ -96,19 +96,18 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
             RANGO_CONTRACT_ADDRESSES[fromBlockchain].rubicRouter
         );
 
-        // will be enabled before publishing next stable version
-        // const price = await fromToken.getAndUpdateTokenPrice();
-        // const amountUsdPrice = fromToken.tokenAmount.multipliedBy(price);
+        const price = await fromToken.getAndUpdateTokenPrice();
+        const amountUsdPrice = fromToken.tokenAmount.multipliedBy(price);
 
-        // if (price && amountUsdPrice.lt(101)) {
-        //     return {
-        //         trade: null,
-        //         error: new CrossChainMinAmountError(
-        //             new BigNumber(101).dividedBy(price),
-        //             fromToken.symbol
-        //         )
-        //     };
-        // }
+        if (price && amountUsdPrice.lt(101)) {
+            return {
+                trade: null,
+                error: new CrossChainMinAmountError(
+                    new BigNumber(101).dividedBy(price),
+                    fromToken.symbol
+                )
+            };
+        }
 
         const request = this.getRequestParams(fromToken, toToken, options);
 
@@ -179,8 +178,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                             }
                         },
                         cryptoFeeToken,
-                        gasData,
-                        rangoFees: route.fee
+                        gasData
                     },
                     this.rango,
                     options.providerAddress || EMPTY_ADDRESS
