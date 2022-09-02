@@ -41,10 +41,6 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.VIA;
 
-    protected get walletAddress(): string {
-        return Injector.web3Private.address;
-    }
-
     public isSupportedBlockchains(
         fromBlockchain: BlockchainName,
         toBlockchain: BlockchainName
@@ -88,7 +84,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 toChainId,
                 toTokenAddress: toToken.address,
                 fromAddress: viaContractAddress[fromBlockchain],
-                ...(toAddress && { toAddress: options.receiverAddress || this.walletAddress }),
+                ...(toAddress && { toAddress }),
                 multiTx: false,
                 limit: 1
             };

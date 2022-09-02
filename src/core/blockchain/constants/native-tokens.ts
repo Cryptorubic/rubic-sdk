@@ -1,6 +1,7 @@
 import { NATIVE_TOKEN_ADDRESS } from '@rsdk-core/blockchain/constants/native-token-address';
 import { BLOCKCHAIN_NAME, BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { TokenStruct } from '@rsdk-core/blockchain/tokens/token';
+import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 
 export type NativeTokensList = Record<BlockchainName, Omit<TokenStruct, 'blockchain'>>;
 
@@ -130,5 +131,11 @@ export const nativeTokensList: NativeTokensList = {
         name: 'ASTR',
         symbol: 'ASTR',
         decimals: 18
+    },
+    [BLOCKCHAIN_NAME.BITCOIN]: {
+        address: EMPTY_ADDRESS,
+        name: 'Bitcoin',
+        symbol: 'BTC',
+        decimals: 8
     }
 };
