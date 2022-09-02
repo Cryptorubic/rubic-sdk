@@ -45,6 +45,7 @@ export abstract class CrossChainTrade {
             if (isAddressValid) {
                 return;
             }
+            throw new WrongReceiverAddressError();
         }
         if (Web3Pure.isAddressCorrect(receiverAddress)) {
             return;
