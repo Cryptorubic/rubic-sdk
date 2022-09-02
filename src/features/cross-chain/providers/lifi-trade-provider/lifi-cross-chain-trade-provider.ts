@@ -7,14 +7,12 @@ import {
 } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 import LIFI, { Route, RouteOptions } from '@lifi/sdk';
 import { LifiCrossChainTrade } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade';
-import { Injector } from 'src/core/sdk/injector';
 import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
 import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { getLifiConfig } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-config';
-import { CrossChainIsUnavailableError } from 'src/common';
 import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
@@ -63,7 +61,10 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
             return null;
         }
 
-        await this.checkContractState(fromBlockchain);
+        await this.checkContractState(
+            fromBlockchain,
+            lifiContractAddress[fromBlockchain].rubicRouter
+        );
 
         const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
 
@@ -153,20 +154,6 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         return {
             trade
         };
-    }
-
-    private async checkContractState(fromBlockchain: LifiCrossChainSupportedBlockchain) {
-        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-
-        const isPaused = await web3PublicService.callContractMethod<number>(
-            lifiContractAddress[fromBlockchain].rubicRouter,
-            commonCrossChainAbi,
-            'paused'
-        );
-
-        if (isPaused) {
-            throw new CrossChainIsUnavailableError();
-        }
     }
 
     private checkMinError(from: PriceTokenAmount): void | never {

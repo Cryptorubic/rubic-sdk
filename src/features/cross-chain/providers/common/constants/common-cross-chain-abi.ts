@@ -97,5 +97,12 @@ export const commonCrossChainAbi: AbiItem[] = [
         outputs: [],
         stateMutability: 'payable',
         type: 'function'
+    },
+    {
+        inputs: [],
+        name: 'getAvailableRouters',
+        outputs: [{ internalType: 'address[]', name: '', type: 'address[]' }],
+        stateMutability: 'view',
+        type: 'function'
     }
 ];

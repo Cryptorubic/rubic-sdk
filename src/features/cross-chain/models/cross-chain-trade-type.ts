@@ -4,7 +4,8 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     SYMBIOSIS: 'SYMBIOSIS',
     LIFI: 'LIFI',
     DEBRIDGE: 'DEBRIDGE',
-    VIA: 'VIA'
+    VIA: 'VIA',
+    RANGO: 'RANGO'
 } as const;
 
 export type CrossChainTradeType = keyof typeof CROSS_CHAIN_TRADE_TYPE;
