@@ -33,4 +33,9 @@ export interface CrossChainTradeData {
      * Via action uuid.
      */
     viaUuid?: string;
+
+    /**
+     * Rango request id
+     */
+    rangoRequestId?: string;
 }

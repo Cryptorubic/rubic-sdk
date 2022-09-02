@@ -7,7 +7,7 @@ import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
 } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { compareAddresses, CrossChainIsUnavailableError, RubicSdkError } from 'src/common';
+import { compareAddresses, RubicSdkError } from 'src/common';
 import { Injector } from '@rsdk-core/sdk/injector';
 import {
     ErrorCode,
@@ -99,7 +99,10 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         try {
             const fromAddress =
                 options.fromAddress || this.walletAddress || oneinchApiParams.nativeAddress;
-            await this.checkContractState(fromBlockchain);
+            await this.checkContractState(
+                fromBlockchain,
+                SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter
+            );
 
             const tokenIn = new SymbiosisToken({
                 chainId: BlockchainsInfo.getBlockchainByName(fromBlockchain).id,
@@ -279,20 +282,6 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             return amount.multipliedBy(1 + approximatePercentDifference);
         }
         return amount.multipliedBy(1 - approximatePercentDifference);
-    }
-
-    private async checkContractState(fromBlockchain: SymbiosisCrossChainSupportedBlockchain) {
-        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-
-        const isPaused = await web3PublicService.callContractMethod<number>(
-            SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-            commonCrossChainAbi,
-            'paused'
-        );
-
-        if (isPaused) {
-            throw new CrossChainIsUnavailableError();
-        }
     }
 
     protected override async getFeeInfo(

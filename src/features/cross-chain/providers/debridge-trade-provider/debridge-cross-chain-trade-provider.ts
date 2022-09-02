@@ -3,7 +3,6 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
 import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
 
-import { CrossChainIsUnavailableError } from 'src/common';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
@@ -67,7 +66,10 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
         try {
             const fromAddress = options.fromAddress || this.walletAddress;
 
-            await this.checkContractState(fromBlockchain);
+            await this.checkContractState(
+                fromBlockchain,
+                DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter
+            );
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
 
@@ -159,21 +161,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
         }
     }
 
-    private async checkContractState(fromBlockchain: DeBridgeCrossChainSupportedBlockchain) {
-        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-
-        const isPaused = await web3PublicService.callContractMethod<number>(
-            DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-            commonCrossChainAbi,
-            'paused'
-        );
-
-        if (isPaused) {
-            throw new CrossChainIsUnavailableError();
-        }
-    }
-
-    protected override async getFeeInfo(
+    protected async getFeeInfo(
         fromBlockchain: DeBridgeCrossChainSupportedBlockchain,
         providerAddress: string
     ): Promise<FeeInfo> {
