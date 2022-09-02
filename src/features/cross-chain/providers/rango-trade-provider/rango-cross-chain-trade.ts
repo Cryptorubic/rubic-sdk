@@ -170,8 +170,6 @@ export class RangoCrossChainTrade extends CrossChainTrade {
             transactionHash = hash;
         };
 
-        console.log({ methodName, methodArguments, value });
-
         try {
             await Injector.web3Private.tryExecuteContractMethod(
                 contractAddress,
@@ -219,18 +217,11 @@ export class RangoCrossChainTrade extends CrossChainTrade {
         methodArguments.push(txData);
 
         const sourceValue = this.from.isNative ? this.from.stringWeiAmount : '0';
-        const cryptoFee = Web3Pure.toWei(this.feeInfo?.cryptoFee?.amount || 0);
         const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
         const msgValue = new BigNumber(sourceValue)
             .plus(fixedFee)
             .plus(value ? `${value}` : 0)
             .toFixed(0);
-
-        console.log('message value data', {
-            fee: { fixedFee, cryptoFee },
-            rangoValue: parseInt(value || '0'),
-            sum: msgValue
-        });
 
         return {
             contractAddress: this.fromContractAddress,
