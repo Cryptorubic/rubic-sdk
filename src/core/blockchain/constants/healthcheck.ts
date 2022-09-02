@@ -57,7 +57,7 @@ export const HEALTHCHECK = {
         expected: 'USDT'
     },
     [BLOCKCHAIN_NAME.TELOS]: {
-        contractAddress: '0x4988a896b1227218e4A686fdE5EabdcAbd91571f',
+        contractAddress: '0xefaeee334f0fd1712f9a8cc375f427d9cdd40d73',
         contractAbi: ERC20_TOKEN_ABI,
         method: 'symbol',
         expected: 'USDT'
