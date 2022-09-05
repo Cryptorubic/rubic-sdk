@@ -32,7 +32,7 @@ export class Web3PublicService {
             } else {
                 if (!rpcConfig.rpcList?.length) {
                     throw new RubicSdkError(
-                        `For ${blockchainName} you must provide either 'minRpc' or 'rpcList' field`
+                        `For ${blockchainName} you must provide either 'mainRpc' or 'rpcList' field`
                     );
                 }
                 list = rpcConfig.rpcList;
@@ -70,7 +70,7 @@ export class Web3PublicService {
 
     private createWeb3PublicProxy(blockchainName: BlockchainName): Web3Public {
         const rpcProvider = this.rpcListProvider[blockchainName]!;
-        const web3Public = new Web3Public(new Web3(rpcProvider.rpcList![0]!), blockchainName);
+        const web3Public = new Web3Public(new Web3(rpcProvider.rpcList[0]!), blockchainName);
 
         return new Proxy(web3Public, {
             get(target: Web3Public, prop: keyof Web3Public) {
@@ -88,6 +88,7 @@ export class Web3PublicService {
                                         'throwRpcError' in (param as { throwRpcError: boolean })
                                 ) as { throwRpcError: boolean }
                             )?.throwRpcError || false;
+                        const curRpc = rpcProvider.rpcList[0]!;
 
                         const callMethod = () => (target[prop] as Function).call(target, ...params);
                         try {
@@ -97,20 +98,24 @@ export class Web3PublicService {
                                     Web3PublicService.mainRpcDefaultTimeout
                             );
                         } catch (e) {
-                            console.log(blockchainName, e);
                             if (
                                 e instanceof TimeoutError ||
-                                e.message?.includes('CONNECTION ERROR') // @TODO rate limit
+                                e.message?.toLowerCase().includes(curRpc.toLowerCase())
                             ) {
-                                if (rpcProvider.rpcList!.length) {
-                                    rpcProvider.rpcList!.shift();
-                                }
-                                if (!rpcProvider.rpcList!.length) {
-                                    throw new RubicSdkError(
-                                        `No working rpc left for ${blockchainName}`
+                                if (curRpc === rpcProvider.rpcList[0]) {
+                                    rpcProvider.rpcList.shift();
+                                    if (!rpcProvider.rpcList.length) {
+                                        throw new RubicSdkError(
+                                            `No working rpc is left for ${blockchainName}`
+                                        );
+                                    }
+                                    const nextRpc = rpcProvider.rpcList![0]!;
+                                    web3Public.setProvider(curRpc);
+                                    console.debug(
+                                        `Rpc provider for ${blockchainName} is changed to ${nextRpc}`
                                     );
                                 }
-                                web3Public.setProvider(rpcProvider.rpcList![0]!);
+
                                 if (throwRpcError) {
                                     throw new RpcFailedError();
                                 }

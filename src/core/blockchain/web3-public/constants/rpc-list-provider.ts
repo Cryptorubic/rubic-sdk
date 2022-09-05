@@ -1,3 +1,4 @@
 import { RpcProvider } from 'src/core';
+import { MarkRequired } from 'ts-essentials';
 
-export type RpcListProvider = Exclude<RpcProvider, 'mainRpc' | 'spareRpc'>;
+export type RpcListProvider = MarkRequired<Exclude<RpcProvider, 'mainRpc' | 'spareRpc'>, 'rpcList'>;
