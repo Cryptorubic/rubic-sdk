@@ -92,6 +92,8 @@ export const TRADE_TYPE = {
     ZIP_SWAP: 'ZIP_SWAP',
     ZRX: 'ZRX',
 
+    AURORA_SWAP: 'AURORA_SWAP',
+    JUPITER: 'JUPITER',
     REN_BTC: 'REN_BTC'
 } as const;
 

@@ -7,6 +7,8 @@ export { RubicCrossChainTrade } from './providers/rubic-trade-provider/rubic-cro
 export { CelerCrossChainTrade } from './providers/celer-trade-provider/celer-cross-chain-trade';
 export { SymbiosisCrossChainTrade } from './providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
 export { LifiCrossChainTrade } from './providers/lifi-trade-provider/lifi-cross-chain-trade';
+export { RangoCrossChainTrade } from './providers/rango-trade-provider/rango-cross-chain-trade';
+export { RangoCrossChainTradeProvider } from './providers/rango-trade-provider/rango-cross-chain-trade-provider';
 
 export { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from './models/cross-chain-trade-type';
 export { CrossChainTradeData } from './models/cross-chain-trade-data';

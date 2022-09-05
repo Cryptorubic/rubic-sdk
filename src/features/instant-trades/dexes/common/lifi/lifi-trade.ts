@@ -146,6 +146,7 @@ export class LifiTrade extends InstantTrade {
             const { data, gasLimit, gasPrice } = await this.getTransactionData();
 
             return {
+                to: this.contractAddress,
                 data: data!,
                 gas: options.gasLimit || gasLimit,
                 gasPrice: options.gasPrice || gasPrice
