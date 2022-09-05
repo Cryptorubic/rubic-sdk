@@ -24,16 +24,23 @@ export class Web3PublicService {
     private web3PublicStorage: Partial<Record<BlockchainName, Web3Public>> = {};
 
     constructor(rpcList: Partial<Record<BlockchainName, RpcProvider>>) {
-        this.rpcListProvider = Object.keys(rpcList).reduce((acc, blockchainName) => {
+        this.rpcListProvider = this.parseRpcList(rpcList);
+    }
+
+    private parseRpcList(
+        rpcList: Partial<Record<BlockchainName, RpcProvider>>
+    ): Partial<Record<BlockchainName, RpcListProvider>> {
+        return Object.keys(rpcList).reduce((acc, blockchainName) => {
             const rpcConfig = rpcList[blockchainName as BlockchainName]!;
             let list: string[];
             if (rpcConfig.mainRpc) {
                 list = [rpcConfig.mainRpc].concat(rpcConfig.spareRpc ? [rpcConfig.spareRpc] : []);
             } else {
                 if (!rpcConfig.rpcList?.length) {
-                    throw new RubicSdkError(
+                    console.error(
                         `For ${blockchainName} you must provide either 'mainRpc' or 'rpcList' field`
                     );
+                    return acc;
                 }
                 list = rpcConfig.rpcList;
             }
