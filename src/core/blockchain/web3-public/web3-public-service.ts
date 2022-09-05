@@ -88,6 +88,7 @@ export class Web3PublicService {
                     return async function method(...params: unknown[]): Promise<unknown> {
                         const curRpc = rpcProvider.rpcList[0]!;
 
+                        const methodParams = structuredClone(params);
                         const callMethod = () => (target[prop] as Function).call(target, ...params);
                         try {
                             return await pTimeout(
@@ -114,7 +115,7 @@ export class Web3PublicService {
                                     );
                                 }
 
-                                return method(...params);
+                                return method(...methodParams);
                             }
                             throw e;
                         }
