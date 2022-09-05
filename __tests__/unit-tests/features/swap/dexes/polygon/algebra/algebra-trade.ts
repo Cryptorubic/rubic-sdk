@@ -5,8 +5,8 @@ import { Utils } from '__tests__/unit-tests/features/swap/utils/utils';
 import { Injector } from '@rsdk-core/sdk/injector';
 import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME, Web3Public } from 'src/core';
-import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
-import { PriceToken } from 'src/core/blockchain/tokens/price-token';
+import { PriceTokenAmount } from 'src/common/tokens-manager/tokens/price-token-amount';
+import { PriceToken } from 'src/common/tokens-manager/tokens/price-token';
 import { AlgebraProvider } from '@rsdk-features/instant-trades/dexes/polygon/algebra/algebra-provider';
 import fn = jest.fn;
 

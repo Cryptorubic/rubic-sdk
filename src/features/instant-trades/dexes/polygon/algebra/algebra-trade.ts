@@ -11,8 +11,9 @@ import {
     ALGEBRA_SWAP_ROUTER_CONTRACT_ABI,
     ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS
 } from '@rsdk-features/instant-trades/dexes/polygon/algebra/constants/swap-router-contract-data';
-import { Token, Web3Pure } from 'src/core';
+import { Web3Pure } from 'src/core';
 import { createTokenNativeAddressProxyInPathStartAndEnd } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { Token } from 'src/common';
 
 export interface AlgebraTradeStruct extends UniswapV3AlgebraTradeStruct {
     route: AlgebraRoute;

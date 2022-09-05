@@ -8,16 +8,14 @@ import {
 import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
 import { Injector } from '@rsdk-core/sdk/injector';
 import BigNumber from 'bignumber.js';
-import { Cache } from 'src/common';
+import { Cache, PriceTokenAmount, Token } from 'src/common';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import { TransactionReceipt } from 'web3-eth';
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { InsufficientFundsOneinchError } from '@rsdk-common/errors/swap/insufficient-funds-oneinch.error';
 import { blockchains } from '@rsdk-core/blockchain/constants/blockchains';
 import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
-import { Token } from '@rsdk-core/blockchain/tokens/token';
 import { TransactionConfig } from 'web3-core';
 import { LowSlippageError } from '@rsdk-common/errors/swap/low-slippage.error';
 import { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';

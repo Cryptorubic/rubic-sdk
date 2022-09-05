@@ -1,16 +1,24 @@
 import BigNumber from 'bignumber.js';
-import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
-import { BridgeType, SwapTransactionOptions, TradeType } from 'src/features';
+import { BlockchainsInfo, Web3Public, Web3Pure } from 'src/core';
+import {
+    BridgeType,
+    SwapTransactionOptions,
+    TradeType,
+    CrossChainTrade,
+    CROSS_CHAIN_TRADE_TYPE
+} from 'src/features';
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/sdk/injector';
 import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
-import { compareAddresses, FailedToCheckForTransactionReceiptError } from 'src/common';
+import {
+    compareAddresses,
+    FailedToCheckForTransactionReceiptError,
+    PriceTokenAmount
+} from 'src/common';
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
-import { CrossChainTrade } from '../common/cross-chain-trade';
-import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { RANGO_CONTRACT_ADDRESSES } from './constants/contract-address';
 import { RangoCrossChainSupportedBlockchain } from './constants/rango-cross-chain-supported-blockchain';
 import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';

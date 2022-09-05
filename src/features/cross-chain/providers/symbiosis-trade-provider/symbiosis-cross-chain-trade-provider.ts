@@ -1,13 +1,12 @@
 import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
 import { CROSS_CHAIN_TRADE_TYPE, InstantTradeProvider } from 'src/features';
-import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
+import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
-
 import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
 } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { compareAddresses, RubicSdkError } from 'src/common';
+import { compareAddresses, PriceToken, PriceTokenAmount, RubicSdkError } from 'src/common';
 import { Injector } from '@rsdk-core/sdk/injector';
 import {
     ErrorCode,
@@ -21,7 +20,6 @@ import {
 } from 'symbiosis-js-sdk';
 import BigNumber from 'bignumber.js';
 import { SymbiosisCrossChainTrade } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { SYMBIOSIS_CONTRACT_ADDRESS } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
 import { OneinchEthereumProvider } from '@rsdk-features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
 import { OneinchBscProvider } from '@rsdk-features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';

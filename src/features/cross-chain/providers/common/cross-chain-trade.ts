@@ -2,7 +2,6 @@ import {
     BasicTransactionOptions,
     BLOCKCHAIN_NAME,
     BlockchainName,
-    PriceTokenAmount,
     TransactionOptions,
     Web3Public,
     Web3Pure
@@ -15,7 +14,12 @@ import {
     EncodeTransactionOptions,
     SwapTransactionOptions
 } from 'src/features';
-import { UnnecessaryApproveError, WalletNotConnectedError, WrongNetworkError } from 'src/common';
+import {
+    PriceTokenAmount,
+    UnnecessaryApproveError,
+    WalletNotConnectedError,
+    WrongNetworkError
+} from 'src/common';
 import { TransactionReceipt } from 'web3-eth';
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { TransactionConfig } from 'web3-core';

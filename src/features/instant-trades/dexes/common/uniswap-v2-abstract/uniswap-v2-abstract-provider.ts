@@ -1,6 +1,4 @@
 import { combineOptions } from '@rsdk-common/utils/options';
-import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { GasPriceInfo } from '@rsdk-features/instant-trades/models/gas-price-info';
 import { SwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
 import { UniswapV2ProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
@@ -14,6 +12,7 @@ import { createTokenNativeAddressProxy } from '@rsdk-features/instant-trades/dex
 import { TradeType } from 'src/features';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
+import { PriceToken, PriceTokenAmount } from 'src/common';
 
 export abstract class UniswapV2AbstractProvider<
     T extends UniswapV2AbstractTrade = UniswapV2AbstractTrade

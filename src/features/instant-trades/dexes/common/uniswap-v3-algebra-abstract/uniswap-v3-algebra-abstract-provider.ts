@@ -1,5 +1,5 @@
 import { InstantTradeProvider } from '@rsdk-features/instant-trades/instant-trade-provider';
-import { PriceToken, Web3Pure } from 'src/core';
+import { Web3Pure } from 'src/core';
 import { SwapCalculationOptions } from 'src/features';
 import { combineOptions } from '@rsdk-common/utils/options';
 import { createTokenNativeAddressProxy } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
@@ -9,10 +9,14 @@ import {
     UniswapV3AlgebraCalculatedInfo,
     UniswapV3AlgebraCalculatedInfoWithProfit
 } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-calculated-info';
-import { InsufficientLiquidityError, RubicSdkError } from 'src/common';
+import {
+    InsufficientLiquidityError,
+    PriceToken,
+    PriceTokenAmount,
+    RubicSdkError
+} from 'src/common';
 import { UniswapV3AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 import { UniswapV3AlgebraProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-provider-configuration';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import {
     UniswapV3AlgebraAbstractTrade,
     UniswapV3AlgebraTradeStruct

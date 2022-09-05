@@ -5,12 +5,12 @@ import {
     TradeType
 } from 'src/features';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
-import { BLOCKCHAIN_NAME, BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
+import { BLOCKCHAIN_NAME, BlockchainsInfo, Web3Public, Web3Pure } from 'src/core';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { SYMBIOSIS_CONTRACT_ADDRESS } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
 import { SymbiosisCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
-import { FailedToCheckForTransactionReceiptError } from 'src/common';
+import { FailedToCheckForTransactionReceiptError, PriceTokenAmount } from 'src/common';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import BigNumber from 'bignumber.js';

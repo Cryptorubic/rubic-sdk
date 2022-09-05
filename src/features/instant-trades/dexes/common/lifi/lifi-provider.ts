@@ -1,15 +1,15 @@
 import { GasFeeInfo, TradeType } from 'src/features';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
-import { BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
+import { BlockchainsInfo, Web3Pure } from 'src/core';
 import LIFI, { Route, RouteOptions, RoutesRequest, Step } from '@lifi/sdk';
-import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
+import { PriceTokenAmount } from 'src/common/tokens-manager/tokens/price-token-amount';
 import { combineOptions } from 'src/common/utils/options';
 import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
-import { notNull } from 'src/common';
+import { notNull, PriceToken } from 'src/common';
 import { LifiTrade } from 'src/features/instant-trades/dexes/common/lifi/lifi-trade';
 import BigNumber from 'bignumber.js';
 import { Injector } from 'src/core/sdk/injector';
-import { Token } from 'src/core/blockchain/tokens/token';
+import { Token } from 'src/common/tokens-manager/tokens/token';
 import { LifiCalculationOptions } from 'src/features/instant-trades/dexes/common/lifi/models/lifi-calculation-options';
 
 export class LifiProvider {

@@ -10,8 +10,8 @@ import { getSymbiosisConfig } from '@rsdk-features/cross-chain/providers/symbios
 import { Injector } from '@rsdk-core/sdk/injector';
 import BigNumber from 'bignumber.js';
 import { SwapTransactionOptions } from 'src/features';
-import { RubicSdkError } from 'src/common';
-import { BlockchainName, BlockchainsInfo, Token } from 'src/core';
+import { RubicSdkError, Token } from 'src/common';
+import { BlockchainName, BlockchainsInfo } from 'src/core';
 import { TransactionReceipt as EthersReceipt, Log as EthersLog } from '@ethersproject/providers';
 import { TransactionReceipt } from 'web3-eth';
 

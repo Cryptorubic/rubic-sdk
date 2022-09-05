@@ -1,9 +1,9 @@
 import { CrossChainSupportedInstantTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
 import { ProviderData } from '@rsdk-features/cross-chain/models/provider-data';
 import { Injector } from '@rsdk-core/sdk/injector';
-import { BlockchainName, PriceToken, PriceTokenAmount, Token, Web3Public } from 'src/core';
+import { BlockchainName, Web3Public } from 'src/core';
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common';
+import { PriceToken, PriceTokenAmount, RubicSdkError, Token } from 'src/common';
 
 export abstract class CrossChainContractData {
     protected readonly web3Public: Web3Public;

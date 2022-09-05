@@ -2,7 +2,6 @@ import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { WalletNotConnectedError } from '@rsdk-common/errors/swap/wallet-not-connected.error';
 import { WrongNetworkError } from '@rsdk-common/errors/swap/wrong-network.error';
 import { BasicTransactionOptions } from '@rsdk-core/blockchain/models/basic-transaction-options';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';
 import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
@@ -15,10 +14,10 @@ import {
     OptionsGasParams,
     TransactionGasParams
 } from '@rsdk-features/instant-trades/models/gas-params';
-import { Cache, UnnecessaryApproveError } from 'src/common';
+import { Cache, PriceTokenAmount, Token, UnnecessaryApproveError } from 'src/common';
 import { TradeType } from 'src/features';
 import { parseError } from '@rsdk-common/utils/errors';
-import { Token, TransactionOptions } from 'src/core';
+import { TransactionOptions } from 'src/core';
 import BigNumber from 'bignumber.js';
 
 /**

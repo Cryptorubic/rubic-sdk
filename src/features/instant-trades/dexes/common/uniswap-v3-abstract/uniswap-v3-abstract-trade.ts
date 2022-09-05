@@ -1,8 +1,7 @@
 import { UniswapV3Route } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
 import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
 import { UniswapV3QuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
-import { Cache, compareAddresses, RubicSdkError } from 'src/common';
-import { Token } from '@rsdk-core/blockchain/tokens/token';
+import { Cache, compareAddresses, RubicSdkError, Token } from 'src/common';
 import {
     UniswapV3AlgebraAbstractTrade,
     UniswapV3AlgebraTradeStruct

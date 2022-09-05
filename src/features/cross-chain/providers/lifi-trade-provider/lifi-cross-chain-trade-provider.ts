@@ -1,5 +1,5 @@
 import { BridgeType, CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
-import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
+import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
 import BigNumber from 'bignumber.js';
 import {
     LifiCrossChainSupportedBlockchain,
@@ -11,7 +11,7 @@ import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/commo
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
 import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
-import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
+import { PriceTokenAmount } from 'src/common/tokens-manager/tokens/price-token-amount';
 import { getLifiConfig } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-config';
 import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
@@ -21,6 +21,7 @@ import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/con
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { bridges } from 'src/features/cross-chain/constants/bridge-type';
 import { RoutesRequest } from '@lifi/types';
+import { PriceToken } from 'src/common';
 
 export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(

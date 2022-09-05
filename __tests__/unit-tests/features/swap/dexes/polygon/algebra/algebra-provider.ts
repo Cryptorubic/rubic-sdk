@@ -3,8 +3,8 @@ import { mockInjector } from '__tests__/utils/mock-injector';
 import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
 import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME } from 'src/core';
-import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
-import { PriceToken } from 'src/core/blockchain/tokens/price-token';
+import { PriceTokenAmount } from 'src/common/tokens-manager/tokens/price-token-amount';
+import { PriceToken } from 'src/common/tokens-manager/tokens/price-token';
 import { AlgebraProvider } from '@rsdk-features/instant-trades/dexes/polygon/algebra/algebra-provider';
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.POLYGON];

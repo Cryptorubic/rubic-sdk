@@ -12,20 +12,18 @@ import {
 } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/factory-contract-data';
 import { notNull } from '@rsdk-common/utils/object';
 import { UniswapV3Route } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
-import { Token } from '@rsdk-core/blockchain/tokens/token';
 import { Cache } from '@rsdk-common/decorators/cache.decorator';
 import {
     QUOTER_CONTRACT_ABI,
     QUOTER_CONTRACT_ADDRESS
 } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/quoter-contract-data';
-
 import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
 import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { UniswapV3RouterConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
 import { UniswapV3AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
-import { RubicSdkError } from 'src/common';
+import { RubicSdkError, Token } from 'src/common';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];

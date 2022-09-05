@@ -6,16 +6,15 @@ import {
     TradeType
 } from 'src/features';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
-import { Token } from 'src/core';
 import { TransactionReceipt } from 'web3-eth';
 import { Injector } from 'src/core/sdk/injector';
 import { Route } from '@lifi/sdk';
 import { TransactionConfig } from 'web3-core';
 import BigNumber from 'bignumber.js';
-import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
+import { PriceTokenAmount } from 'src/common/tokens-manager/tokens/price-token-amount';
 import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { LifiPairIsUnavailable } from 'src/common/errors/swap/lifi-pair-is-unavailable';
-import { RubicSdkError } from 'src/common';
+import { RubicSdkError, Token } from 'src/common';
 
 interface LifiTransactionRequest {
     data: string;

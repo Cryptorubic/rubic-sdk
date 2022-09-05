@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
+import { BlockchainsInfo, Web3Public, Web3Pure } from 'src/core';
 import {
     CROSS_CHAIN_TRADE_TYPE,
     SwapTransactionOptions,
@@ -8,7 +8,7 @@ import {
 } from 'src/features';
 import { Route } from '@lifi/sdk';
 import { Injector } from 'src/core/sdk/injector';
-import { FailedToCheckForTransactionReceiptError } from 'src/common';
+import { FailedToCheckForTransactionReceiptError, PriceTokenAmount } from 'src/common';
 import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
 import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';

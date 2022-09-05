@@ -1,10 +1,8 @@
 import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
-import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
+import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
-
 import { Injector } from '@rsdk-core/sdk/injector';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import {
     DeBridgeCrossChainSupportedBlockchain,
@@ -19,6 +17,7 @@ import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/c
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import BigNumber from 'bignumber.js';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
+import { PriceToken, PriceTokenAmount } from 'src/common';
 
 export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(

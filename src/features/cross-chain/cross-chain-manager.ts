@@ -1,8 +1,5 @@
-import { Token } from '@rsdk-core/blockchain/tokens/token';
 import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { notNull } from '@rsdk-common/utils/object';
-import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { combineOptions } from '@rsdk-common/utils/options';
 import { getPriceTokensFromInputTokens } from '@rsdk-common/utils/tokens';
@@ -39,6 +36,7 @@ import { RubicCrossChainTradeProvider } from 'src/features/cross-chain/providers
 import { ViaCrossChainTrade } from 'src/features/cross-chain/providers/via-trade-provider/via-cross-chain-trade';
 import { DebridgeCrossChainTrade } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade';
 import { Injector } from 'src/core/sdk/injector';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCrossChainCalculationOptions,

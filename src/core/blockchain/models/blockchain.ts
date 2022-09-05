@@ -1,5 +1,5 @@
 import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { Token } from '@rsdk-core/blockchain/tokens/token';
+import { Token } from 'src/common';
 
 /**
  * Stores information about blockchain.

@@ -8,7 +8,13 @@ import { StatusResponse, TransactionStatus } from 'rango-sdk-basic/lib';
 import { Via } from '@viaprotocol/router-sdk';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
 import { ViaSwapStatus } from 'src/features/cross-chain/providers/via-trade-provider/models/via-swap-status';
-import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from './models/cross-chain-trade-type';
+import {
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTradeType,
+    CrossChainStatus,
+    CrossChainTxStatus,
+    CrossChainTradeData
+} from 'src/features';
 import { celerCrossChainContractAbi } from './providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import { celerCrossChainContractsAddresses } from './providers/celer-trade-provider/constants/celer-cross-chain-contracts-addresses';
 import { CelerCrossChainSupportedBlockchain } from './providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
@@ -16,11 +22,8 @@ import { CelerSwapStatus } from './providers/common/celer-rubic/models/celer-swa
 import { rubicCrossChainContractsAddresses } from './providers/rubic-trade-provider/constants/rubic-cross-chain-contracts-addresses';
 import { RubicSwapStatus } from './providers/common/celer-rubic/models/rubic-swap-status.enum';
 import { PROCESSED_TRANSACTION_METHOD_ABI } from './providers/common/celer-rubic/constants/processed-transactios-method-abi';
-import { CrossChainStatus } from './models/cross-chain-status';
-import { CrossChainTxStatus } from './models/cross-chain-tx-status';
 import { LifiSwapStatus } from './providers/lifi-trade-provider/models/lifi-swap-status';
 import { SymbiosisSwapStatus } from './providers/symbiosis-trade-provider/models/symbiosis-swap-status';
-import { CrossChainTradeData } from './models/cross-chain-trade-data';
 import { RubicCrossChainSupportedBlockchain } from './providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
 import { RANGO_API_KEY } from './providers/rango-trade-provider/constants/rango-api-key';
 import {

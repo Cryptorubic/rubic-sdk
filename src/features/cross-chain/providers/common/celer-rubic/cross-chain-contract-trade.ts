@@ -1,8 +1,7 @@
 import BigNumber from 'bignumber.js';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { AbiItem } from 'web3-utils';
 import { BlockchainName } from 'src/core';
-import { Cache, RubicSdkError } from 'src/common';
+import { Cache, PriceTokenAmount, RubicSdkError } from 'src/common';
 import { ProviderData } from '@rsdk-features/cross-chain/models/provider-data';
 import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 import { CrossChainSupportedInstantTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';

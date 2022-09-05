@@ -1,6 +1,5 @@
 import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@rsdk-core/sdk/injector';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
 import { CrossChainIsUnavailableError } from '@rsdk-common/errors/cross-chain/cross-chain-is-unavailable.error';
 import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swap/failed-to-check-for-transaction-receipt.error';
@@ -13,7 +12,7 @@ import { CelerRubicCrossChainTrade } from '@rsdk-features/cross-chain/providers/
 import { Web3Public } from 'src/core';
 import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
-import { LowSlippageDeflationaryTokenError, RubicSdkError } from 'src/common';
+import { LowSlippageDeflationaryTokenError, PriceTokenAmount, RubicSdkError } from 'src/common';
 import { TOKEN_WITH_FEE_ERRORS } from '@rsdk-features/cross-chain/constants/token-with-fee-errors';
 import { CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
 import { RubicDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade';

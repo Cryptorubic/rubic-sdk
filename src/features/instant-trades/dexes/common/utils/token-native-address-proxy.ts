@@ -1,5 +1,4 @@
-import { Token } from '@rsdk-core/blockchain/tokens/token';
-import { RubicSdkError } from 'src/common';
+import { RubicSdkError, Token } from 'src/common';
 
 export function createTokenNativeAddressProxy<T extends Token>(
     token: T,

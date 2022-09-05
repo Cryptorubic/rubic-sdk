@@ -1,9 +1,12 @@
 import { CrossChainTradeType } from 'src/features';
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
-import { CrossChainIsUnavailableError, RubicSdkError } from 'src/common';
+import {
+    CrossChainIsUnavailableError,
+    PriceToken,
+    PriceTokenAmount,
+    RubicSdkError
+} from 'src/common';
 import { parseError } from 'src/common/utils/errors';
 import { BlockchainName, Web3Pure } from 'src/core';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';

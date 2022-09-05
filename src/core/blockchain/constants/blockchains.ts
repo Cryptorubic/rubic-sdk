@@ -1,7 +1,7 @@
 import { NATIVE_TOKEN_ADDRESS } from '@rsdk-core/blockchain/constants/native-token-address';
 import { Blockchain } from '@rsdk-core/blockchain/models/blockchain';
 import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
-import { Token } from '@rsdk-core/blockchain/tokens/token';
+import { Token } from 'src/common';
 
 export const blockchains: ReadonlyArray<Blockchain> = [
     {

@@ -3,9 +3,6 @@ import { combineOptions } from '@rsdk-common/utils/options';
 import pTimeout from '@rsdk-common/utils/p-timeout';
 import { Mutable } from '@rsdk-common/utils/types/mutable';
 import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { Token } from '@rsdk-core/blockchain/tokens/token';
 import { InstantTradeProvider } from '@rsdk-features/instant-trades/instant-trade-provider';
 import { SwapManagerCalculationOptions } from '@rsdk-features/instant-trades/models/swap-manager-calculation-options';
 import { TRADE_TYPE, TradeType } from '@rsdk-features/instant-trades/models/trade-type';
@@ -22,6 +19,7 @@ import { InstantTradeError } from 'src/features/instant-trades/models/instant-tr
 import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
 import { LifiProvider } from 'src/features/instant-trades/dexes/common/lifi/lifi-provider';
 import { blockchains } from 'src/core/blockchain/constants/blockchains';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common';
 
 export type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCalculationOptions,

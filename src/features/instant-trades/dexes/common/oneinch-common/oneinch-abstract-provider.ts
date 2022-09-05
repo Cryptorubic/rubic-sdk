@@ -1,6 +1,4 @@
 import { combineOptions } from '@rsdk-common/utils/options';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { Token } from '@rsdk-core/blockchain/tokens/token';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { oneinchApiParams } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/constants';
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
@@ -10,13 +8,11 @@ import { OneinchSwapRequest } from '@rsdk-features/instant-trades/dexes/common/o
 import { OneinchSwapResponse } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-response';
 import { getOneinchApiBaseUrl } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/utils';
 import BigNumber from 'bignumber.js';
-
-import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
 import { OneinchTrade } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/oneinch-trade';
 import { InstantTradeProvider } from '@rsdk-features/instant-trades/instant-trade-provider';
 import { SwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
 import { createTokenNativeAddressProxy } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
-import { Cache } from 'src/common';
+import { Cache, PriceToken, PriceTokenAmount, Token } from 'src/common';
 import { BlockchainsInfo } from 'src/core';
 import { TRADE_TYPE, TradeType } from 'src/features';
 

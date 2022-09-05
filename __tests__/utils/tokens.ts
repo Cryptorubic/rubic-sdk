@@ -1,6 +1,6 @@
 import { NATIVE_TOKEN_ADDRESS } from '@rsdk-core/blockchain/constants/native-token-address';
 import { BlockchainName } from 'src/core';
-import { Token } from 'src/core/blockchain/tokens/token';
+import { Token } from 'src/common/tokens-manager/tokens/token';
 import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
 
 export const TOKENS = {

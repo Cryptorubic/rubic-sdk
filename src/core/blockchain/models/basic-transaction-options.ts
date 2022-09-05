@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js';
+
 export type BasicTransactionOptions = {
     /**
      * Callback to be called, when user confirm swap transaction.
@@ -8,10 +10,10 @@ export type BasicTransactionOptions = {
     /**
      * Transaction gas limit.
      */
-    gas?: string;
+    gas?: BigNumber | string | number;
 
     /**
      * Transaction gas price.
      */
-    gasPrice?: string;
+    gasPrice?: BigNumber | string | number;
 };

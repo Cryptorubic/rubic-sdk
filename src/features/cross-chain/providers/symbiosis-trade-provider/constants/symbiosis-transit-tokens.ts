@@ -1,4 +1,4 @@
-import { TokenStruct } from 'src/core/blockchain/tokens/token';
+import { TokenStruct } from 'src/common/tokens-manager/tokens/token';
 import { BLOCKCHAIN_NAME } from 'src/core';
 import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 

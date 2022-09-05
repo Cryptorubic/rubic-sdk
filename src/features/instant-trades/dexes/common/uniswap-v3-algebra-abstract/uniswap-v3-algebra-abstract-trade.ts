@@ -1,5 +1,5 @@
 import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
-import { RubicSdkError } from 'src/common';
+import { PriceToken, PriceTokenAmount, RubicSdkError, Token } from 'src/common';
 import {
     EncodeTransactionOptions,
     GasFeeInfo,
@@ -7,11 +7,10 @@ import {
     TradeType
 } from 'src/features';
 import { AbiItem } from 'web3-utils';
-import { PriceToken, Token, Web3Pure } from 'src/core';
+import { Web3Pure } from 'src/core';
 import { SwapOptions } from '@rsdk-features/instant-trades/models/swap-options';
 import BigNumber from 'bignumber.js';
 import { Injector } from '@rsdk-core/sdk/injector';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { TransactionReceipt } from 'web3-eth';
 import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
 import { BatchCall } from '@rsdk-core/blockchain/web3-public/models/batch-call';

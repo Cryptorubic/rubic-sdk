@@ -1,7 +1,6 @@
-import { PriceToken } from 'src/core';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import BigNumber from 'bignumber.js';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
+import { PriceToken, PriceTokenAmount } from 'src/common';
 
 export function getFromToTokensAmountsByExact(
     fromToken: PriceToken,

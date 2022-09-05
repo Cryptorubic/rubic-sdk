@@ -7,11 +7,11 @@ import { Injector } from '@rsdk-core/sdk/injector';
 import { Configuration, RpcProvider } from '@rsdk-core/sdk/models/configuration';
 import { CrossChainManager } from '@rsdk-features/cross-chain/cross-chain-manager';
 import { InstantTradesManager } from '@rsdk-features/instant-trades/instant-trades-manager';
-import { TokensManager } from '@rsdk-features/tokens/tokens-manager';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { BlockchainName } from 'src/core';
 import { CrossChainSymbiosisManager } from '@rsdk-features/cross-chain/cross-chain-symbiosis-manager';
-import { CrossChainStatusManager } from '@rsdk-features/cross-chain/cross-chain-status-manager';
+import { CrossChainStatusManager } from 'src/features';
+import { TokensManager } from 'src/common';
 
 /**
  * Base class to work with sdk.

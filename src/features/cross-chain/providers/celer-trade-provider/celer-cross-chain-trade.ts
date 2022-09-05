@@ -1,6 +1,5 @@
 import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@rsdk-core/sdk/injector';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
 import { CrossChainIsUnavailableError } from '@rsdk-common/errors/cross-chain/cross-chain-is-unavailable.error';
 import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swap/failed-to-check-for-transaction-receipt.error';
@@ -22,6 +21,7 @@ import { CelerItCrossChainContractTrade } from '@rsdk-features/cross-chain/provi
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTrade, TradeType } from 'src/features';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { CelerDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
+import { PriceTokenAmount } from 'src/common';
 
 /**
  * Calculated Celer cross chain trade.

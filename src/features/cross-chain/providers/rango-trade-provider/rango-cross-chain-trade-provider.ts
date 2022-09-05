@@ -8,7 +8,6 @@ import {
     SwapRequest
 } from 'rango-sdk-basic/lib';
 import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import { Injector } from 'src/core/sdk/injector';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
@@ -18,8 +17,9 @@ import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-ch
 import { TradeType } from 'src/features/instant-trades';
 import { rangoProviders } from 'src/features/instant-trades/dexes/common/rango/constants/rango-providers';
 import { NATIVE_TOKEN_ADDRESS } from 'src/core/blockchain/constants/native-token-address';
+import { PriceTokenAmount } from 'src/common';
+import { CROSS_CHAIN_TRADE_TYPE, RangoCrossChainTrade, BridgeType } from 'src/features';
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
-import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';
 import { CrossChainTradeProvider } from '../common/cross-chain-trade-provider';
 import { WrappedCrossChainTrade } from '../common/models/wrapped-cross-chain-trade';
@@ -29,9 +29,7 @@ import {
     RangoCrossChainSupportedBlockchain,
     rangoCrossChainSupportedBlockchains
 } from './constants/rango-cross-chain-supported-blockchain';
-import { RangoCrossChainTrade } from './rango-cross-chain-trade';
 import { RANGO_TRADE_BRIDGE_TYPE } from './models/rango-providers';
-import { BridgeType } from '../../constants/bridge-type';
 import { RANGO_BLOCKCHAIN_NAME } from './constants/rango-blockchain-name';
 
 export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {

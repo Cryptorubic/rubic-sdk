@@ -5,8 +5,6 @@ import {
     UniswapV2AbstractProvider
 } from 'src/features';
 import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
-import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import {
     CelerCrossChainSupportedBlockchain,
     celerCrossChainSupportedBlockchains
@@ -15,7 +13,7 @@ import { getCelerCrossChainContract } from '@rsdk-features/cross-chain/providers
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
 import { CelerCrossChainTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade';
 import BigNumber from 'bignumber.js';
-import { compareAddresses, notNull, RubicSdkError } from 'src/common';
+import { compareAddresses, notNull, PriceToken, PriceTokenAmount, RubicSdkError } from 'src/common';
 import { EstimateAmtResponse } from '@rsdk-features/cross-chain/providers/celer-trade-provider/models/estimate-amount-response';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { CelerCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';

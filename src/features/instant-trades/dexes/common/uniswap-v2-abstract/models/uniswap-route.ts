@@ -1,5 +1,5 @@
-import { Token } from '@rsdk-core/blockchain/tokens/token';
 import BigNumber from 'bignumber.js';
+import { Token } from 'src/common';
 
 export interface UniswapRoute {
     readonly path: ReadonlyArray<Token>;

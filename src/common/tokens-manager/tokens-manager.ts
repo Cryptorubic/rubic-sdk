@@ -1,13 +1,13 @@
-import { TokenBaseStruct } from '@rsdk-core/blockchain/models/token-base-struct';
-import { PriceToken, PriceTokenStruct } from '@rsdk-core/blockchain/tokens/price-token';
+import { TokenBaseStruct } from 'src/common/tokens-manager/models/token-base-struct';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import BigNumber from 'bignumber.js';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common';
+import { TokenStruct } from 'src/common/tokens-manager/tokens/token';
+import { PriceTokenStruct } from 'src/common/tokens-manager/tokens/price-token';
 import {
-    PriceTokenAmount,
     PriceTokenAmountBaseStruct,
     PriceTokenAmountStruct
-} from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { Token, TokenStruct } from '@rsdk-core/blockchain/tokens/token';
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import BigNumber from 'bignumber.js';
+} from 'src/common/tokens-manager/tokens/price-token-amount';
 
 /**
  * Contains methods to create Tokens classes.

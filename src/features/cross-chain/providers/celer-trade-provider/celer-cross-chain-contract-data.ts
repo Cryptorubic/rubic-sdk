@@ -1,15 +1,12 @@
 import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { ProviderData } from '@rsdk-features/cross-chain/models/provider-data';
 import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 import { celerCrossChainContractAbi } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
-import { BlockchainsInfo, PriceToken } from 'src/core';
+import { BlockchainsInfo } from 'src/core';
 import { CellerMessageBusController } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-message-bus-controller/celler-message-bus-controller';
-import { Cache } from 'src/common';
-import { Token } from '@rsdk-core/blockchain/tokens/token';
+import { Cache, PriceToken, PriceTokenAmount, Token } from 'src/common';
 import { rubicCrossChainContractAbi } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contract-abi';
 import BigNumber from 'bignumber.js';
-
 import { CelerCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
 import { celerTransitTokens } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-transit-tokens';
 

@@ -1,7 +1,11 @@
-import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
+import { BlockchainsInfo, Web3Public, Web3Pure } from 'src/core';
 import { IRoute } from '@viaprotocol/router-sdk/dist/types';
 import { Via } from '@viaprotocol/router-sdk';
-import { compareAddresses, FailedToCheckForTransactionReceiptError } from 'src/common';
+import {
+    compareAddresses,
+    FailedToCheckForTransactionReceiptError,
+    PriceTokenAmount
+} from 'src/common';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/sdk/injector';
