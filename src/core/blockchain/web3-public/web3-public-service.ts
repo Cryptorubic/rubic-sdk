@@ -6,7 +6,6 @@ import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
 import { RpcProvider } from '@rsdk-core/sdk/models/configuration';
 import Web3 from 'web3';
 import { RpcListProvider } from 'src/core/blockchain/web3-public/constants/rpc-list-provider';
-import { RpcFailedError } from 'src/common/errors/blockchain/rpc-failed.error';
 
 export class Web3PublicService {
     private static readonly mainRpcDefaultTimeout = 10_000;
@@ -87,14 +86,6 @@ export class Web3PublicService {
 
                 if (typeof target[prop] === 'function') {
                     return async function method(...params: unknown[]): Promise<unknown> {
-                        const throwRpcError =
-                            (
-                                params.find(
-                                    param =>
-                                        typeof param === 'object' &&
-                                        'throwRpcError' in (param as { throwRpcError: boolean })
-                                ) as { throwRpcError: boolean }
-                            )?.throwRpcError || false;
                         const curRpc = rpcProvider.rpcList[0]!;
 
                         const callMethod = () => (target[prop] as Function).call(target, ...params);
@@ -113,19 +104,16 @@ export class Web3PublicService {
                                     rpcProvider.rpcList.shift();
                                     if (!rpcProvider.rpcList.length) {
                                         throw new RubicSdkError(
-                                            `No working rpc is left for ${blockchainName}`
+                                            `No working rpc is left for ${blockchainName}.`
                                         );
                                     }
                                     const nextRpc = rpcProvider.rpcList![0]!;
                                     web3Public.setProvider(curRpc);
                                     console.debug(
-                                        `Rpc provider for ${blockchainName} is changed to ${nextRpc}`
+                                        `Rpc provider for ${blockchainName} is changed to ${nextRpc}.`
                                     );
                                 }
 
-                                if (throwRpcError) {
-                                    throw new RpcFailedError();
-                                }
                                 return method(...params);
                             }
                             throw e;

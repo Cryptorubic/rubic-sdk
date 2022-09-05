@@ -267,7 +267,6 @@ export class Web3Public {
             methodArguments?: unknown[];
             from?: string;
             value?: string;
-            throwRpcError?: boolean;
         } = { methodArguments: [] }
     ): Promise<T> {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
