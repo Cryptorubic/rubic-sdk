@@ -108,7 +108,7 @@ export class Web3PublicService {
                                         );
                                     }
                                     const nextRpc = rpcProvider.rpcList![0]!;
-                                    web3Public.setProvider(curRpc);
+                                    web3Public.setProvider(nextRpc);
                                     console.debug(
                                         `Rpc provider for ${blockchainName} is changed to ${nextRpc}.`
                                     );
