@@ -1,6 +1,9 @@
 import { InstantTradeProvider } from '@rsdk-features/instant-trades/instant-trade-provider';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { SwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
+import {
+    RequiredSwapCalculationOptions,
+    SwapCalculationOptions
+} from '@rsdk-features/instant-trades/models/swap-calculation-options';
 import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
 import { createTokenNativeAddressProxy } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { zrxApiParams } from '@rsdk-features/instant-trades/dexes/common/zrx-common/constants';
@@ -8,20 +11,24 @@ import { ZrxQuoteRequest } from '@rsdk-features/instant-trades/dexes/common/zrx-
 import { Injector } from '@rsdk-core/sdk/injector';
 import { ZrxQuoteResponse } from '@rsdk-features/instant-trades/dexes/common/zrx-common/models/zrx-types';
 import { getZrxApiBaseUrl } from '@rsdk-features/instant-trades/dexes/common/zrx-common/utils';
-import { ZrxSwapCalculationOptions } from '@rsdk-features/instant-trades/dexes/common/zrx-common/models/zrx-swap-calculation-options';
 import BigNumber from 'bignumber.js';
 import { ZrxTrade } from '@rsdk-features/instant-trades/dexes/common/zrx-common/zrx-trade';
 import { Cache } from 'src/common';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { TRADE_TYPE, TradeType } from 'src/features';
+import { combineOptions } from 'src/common/utils/options';
+
+type ZrxSwapCalculationOptions = Omit<
+    RequiredSwapCalculationOptions,
+    'disableMultihops' | 'deadlineMinutes'
+>;
 
 export abstract class ZrxAbstractProvider extends InstantTradeProvider {
     protected readonly gasMargin = 1.4;
 
-    private readonly defaultOptions: Required<ZrxSwapCalculationOptions> = {
+    private readonly defaultOptions: ZrxSwapCalculationOptions = {
         gasCalculation: 'calculate',
         slippageTolerance: 0.02,
-        affiliateAddress: null,
         wrappedAddress: EMPTY_ADDRESS,
         fromAddress: ''
     };
@@ -40,18 +47,19 @@ export abstract class ZrxAbstractProvider extends InstantTradeProvider {
         to: PriceToken,
         options?: SwapCalculationOptions
     ): Promise<ZrxTrade> {
-        const fullOptions = { ...this.defaultOptions, options };
+        const fullOptions = combineOptions(options, this.defaultOptions);
 
         const fromClone = createTokenNativeAddressProxy(from, zrxApiParams.nativeTokenAddress);
         const toClone = createTokenNativeAddressProxy(to, zrxApiParams.nativeTokenAddress);
 
+        const affiliateAddress = fullOptions.zrxAffiliateAddress;
         const quoteParams: ZrxQuoteRequest = {
             params: {
                 sellToken: fromClone.address,
                 buyToken: toClone.address,
                 sellAmount: fromClone.stringWeiAmount,
                 slippagePercentage: fullOptions.slippageTolerance.toString(),
-                affiliateAddress: fullOptions.affiliateAddress || undefined
+                ...(affiliateAddress && { affiliateAddress })
             }
         };
 

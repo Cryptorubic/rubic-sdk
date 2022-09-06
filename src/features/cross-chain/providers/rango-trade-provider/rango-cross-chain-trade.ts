@@ -4,7 +4,6 @@ import {
     BridgeType,
     SwapTransactionOptions,
     TradeType,
-    CrossChainTrade,
     CROSS_CHAIN_TRADE_TYPE
 } from 'src/features';
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
@@ -15,6 +14,7 @@ import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
 import { compareAddresses, FailedToCheckForTransactionReceiptError } from 'src/common';
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
+import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { RANGO_CONTRACT_ADDRESSES } from './constants/contract-address';
 import { RangoCrossChainSupportedBlockchain } from './constants/rango-cross-chain-supported-blockchain';
 import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';
