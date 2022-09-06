@@ -85,6 +85,7 @@ export interface WalletProvider {
 
     /**
      * Selected chain in user wallet.
+     * @deprecated
      */
-    readonly chainId: number | string;
+    readonly chainId?: number | string;
 }
