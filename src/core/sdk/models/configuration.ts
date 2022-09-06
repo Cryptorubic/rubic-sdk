@@ -39,13 +39,20 @@ export interface Configuration {
 export interface RpcProvider {
     /**
      * Rpc link. Copy it from your rpc provider (like Infura, Quicknode, Getblock, Moralis, etc.) website.
+     * @deprecated
      */
-    readonly mainRpc: string;
+    readonly mainRpc?: string;
 
     /**
      * Same as `mainRpc`. Will be used instead `mainRpc` if mainRpc is out of timeout = `mainPrcTimeout`.
+     * @deprecated
      */
     readonly spareRpc?: string;
+
+    /**
+     * Contains rpc links in order of prioritization. Used instead of deprecated `mainRpc` and `spareRpc` fields.
+     */
+    readonly rpcList?: string[];
 
     /**
      * Specifies timeout in ms after which `mainRpc` will be replaced with `spareRpc` (if `spareRpc` is defined)
@@ -78,6 +85,7 @@ export interface WalletProvider {
 
     /**
      * Selected chain in user wallet.
+     * @deprecated
      */
-    readonly chainId: number | string;
+    readonly chainId?: number | string;
 }

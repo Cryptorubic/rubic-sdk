@@ -1,4 +1,5 @@
 import { SwapOptions } from '@rsdk-features/instant-trades/models/swap-options';
+import { MarkRequired } from 'ts-essentials';
 
 /**
  * Stores options for calculating trade.
@@ -22,8 +23,18 @@ export interface SwapCalculationOptions extends SwapOptions {
     readonly fromAddress?: string;
 
     /**
+     * Affiliate address for zrx provider.
+     */
+    readonly zrxAffiliateAddress?: string;
+
+    /**
      * @internal
      * Wrapped native address.
      */
     readonly wrappedAddress?: string;
 }
+
+export type RequiredSwapCalculationOptions = MarkRequired<
+    SwapCalculationOptions,
+    'slippageTolerance' | 'deadlineMinutes' | 'gasCalculation' | 'disableMultihops' | 'fromAddress'
+>;

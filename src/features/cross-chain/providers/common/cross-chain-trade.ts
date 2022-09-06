@@ -15,7 +15,7 @@ import {
     EncodeTransactionOptions,
     SwapTransactionOptions
 } from 'src/features';
-import { UnnecessaryApproveError, WalletNotConnectedError, WrongNetworkError } from 'src/common';
+import { UnnecessaryApproveError, WalletNotConnectedError } from 'src/common';
 import { TransactionReceipt } from 'web3-eth';
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { TransactionConfig } from 'web3-core';
@@ -169,7 +169,7 @@ export abstract class CrossChainTrade {
         }
 
         this.checkWalletConnected();
-        this.checkBlockchainCorrect();
+        await this.checkBlockchainCorrect();
 
         const approveAmount =
             this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ||
@@ -248,10 +248,8 @@ export abstract class CrossChainTrade {
         }
     }
 
-    protected checkBlockchainCorrect(): never | void {
-        if (Injector.web3Private.blockchainName !== this.from.blockchain) {
-            throw new WrongNetworkError();
-        }
+    protected async checkBlockchainCorrect(): Promise<void | never> {
+        await Injector.web3Private.checkBlockchainCorrect(this.from.blockchain);
     }
 
     protected checkUserBalance(): Promise<void | never> {
@@ -260,6 +258,13 @@ export abstract class CrossChainTrade {
             this.from.tokenAmount,
             this.walletAddress
         );
+    }
+
+    protected async checkTradeErrors(): Promise<void | never> {
+        this.checkWalletConnected();
+        await this.checkBlockchainCorrect();
+
+        await this.checkUserBalance();
     }
 
     /**

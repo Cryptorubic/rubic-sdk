@@ -1,6 +1,5 @@
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { WalletNotConnectedError } from '@rsdk-common/errors/swap/wallet-not-connected.error';
-import { WrongNetworkError } from '@rsdk-common/errors/swap/wrong-network.error';
 import { BasicTransactionOptions } from '@rsdk-core/blockchain/models/basic-transaction-options';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { Injector } from '@rsdk-core/sdk/injector';
@@ -117,7 +116,7 @@ export abstract class InstantTrade {
         }
 
         this.checkWalletConnected();
-        this.checkBlockchainCorrect();
+        await this.checkBlockchainCorrect();
 
         const approveAmount =
             this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ||
@@ -189,7 +188,7 @@ export abstract class InstantTrade {
 
     protected async checkWalletState(): Promise<void> {
         this.checkWalletConnected();
-        this.checkBlockchainCorrect();
+        await this.checkBlockchainCorrect();
         await this.web3Public.checkBalance(this.from, this.from.tokenAmount, this.walletAddress);
     }
 
@@ -199,10 +198,8 @@ export abstract class InstantTrade {
         }
     }
 
-    private checkBlockchainCorrect(): never | void {
-        if (Injector.web3Private.blockchainName !== this.from.blockchain) {
-            throw new WrongNetworkError();
-        }
+    private async checkBlockchainCorrect(): Promise<void | never> {
+        await Injector.web3Private.checkBlockchainCorrect(this.from.blockchain);
     }
 
     protected getGasParams(options: OptionsGasParams): TransactionGasParams {

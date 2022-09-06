@@ -207,10 +207,13 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
-        if (await this.needApprove(options.fromAddress)) {
-            throw new RubicSdkError('To use `encode` function, token must be approved for wallet');
-        }
         if (options.supportFee === undefined) {
+            if (await this.needApprove(options.fromAddress)) {
+                throw new RubicSdkError(
+                    'To use `encode` function, token must be approved for wallet'
+                );
+            }
+
             try {
                 await this.web3Public.checkBalance(
                     this.from,
@@ -219,7 +222,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
                 );
             } catch (_err) {
                 throw new RubicSdkError(
-                    'To use `encode` function, wallet must have enough balance or you must provider `supportFee` paramter in options.'
+                    'To use `encode` function, wallet must have enough balance or you must provider `supportFee` parameter in options.'
                 );
             }
         }
