@@ -441,26 +441,52 @@ export class Web3Public {
      * @param tokenAddress Address of token.
      * @param tokenFields Token's fields to get.
      */
-    @Cache
+    @Cache({ conditionalCache: true })
     public async callForTokenInfo(
         tokenAddress: string,
         tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
     ): Promise<Partial<Record<SupportedTokenField, string>>> {
         if (Web3Pure.isNativeAddress(tokenAddress)) {
             const nativeToken = nativeTokensList[this.blockchainName];
-            return { ...nativeToken, decimals: nativeToken.decimals.toString() };
+            const conditionalReturns: ConditionalResult<
+                Partial<Record<SupportedTokenField, string>>
+            > = {
+                notSave: false,
+                value: { ...nativeToken, decimals: nativeToken.decimals.toString() }
+            };
+
+            // see https://github.com/microsoft/TypeScript/issues/4881
+            // @ts-ignore
+            return conditionalReturns;
         }
-        const tokenFieldsPromises = tokenFields.map(method =>
-            this.callContractMethod(tokenAddress, ERC20_TOKEN_ABI, method)
+
+        const tokenFieldsR = await this.multicallContractMethods<string>(
+            tokenAddress,
+            ERC20_TOKEN_ABI,
+            tokenFields.map(methodName => ({
+                methodName,
+                methodArguments: []
+            }))
         );
-        const tokenFieldsResults = await Promise.all(tokenFieldsPromises);
-        return tokenFieldsResults.reduce((acc, field, index) => {
-            const fieldName = tokenFields[index];
-            if (!fieldName) {
-                throw new RubicSdkError('Field name has to be defined');
+        let notSave = false;
+        const tokenInfo = tokenFieldsR.reduce((acc, field, index) => {
+            if (!field.success) {
+                notSave = true;
             }
-            return { ...acc, [fieldName]: field };
+
+            const fieldName = tokenFields[index]!;
+            return { ...acc, [fieldName]: field.success ? field.output?.[0] : undefined };
         }, {} as Record<SupportedTokenField, string>);
+
+        const conditionalReturns: ConditionalResult<Partial<Record<SupportedTokenField, string>>> =
+            {
+                notSave,
+                value: tokenInfo
+            };
+
+        // see https://github.com/microsoft/TypeScript/issues/4881
+        // @ts-ignore
+        return conditionalReturns;
     }
 
     /**
@@ -485,10 +511,20 @@ export class Web3Public {
             contractsData
         );
         let notSave = false;
-        const tokensInfo = results.map(contractCallResult => {
+        const tokensInfo = results.map((contractCallResult, index) => {
+            const tokenAddress = tokenAddresses[index]!;
+            if (Web3Pure.isNativeAddress(tokenAddress)) {
+                const nativeToken = nativeTokensList[this.blockchainName];
+                return {
+                    ...nativeToken,
+                    decimals: nativeToken.decimals.toString(),
+                    totalSupply: undefined
+                };
+            }
+
             const token = {} as Record<SupportedTokenField, string | undefined>;
-            contractCallResult.forEach((field, index) => {
-                token[tokenFields[index] as SupportedTokenField] = field.success
+            contractCallResult.forEach((field, fieldIndex) => {
+                token[tokenFields[fieldIndex] as SupportedTokenField] = field.success
                     ? field.output?.[0]
                     : undefined;
                 if (!field.success) {
