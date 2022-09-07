@@ -1,4 +1,4 @@
-export const BLOCKCHAIN_NAME = {
+export const EVM_BLOCKCHAIN_NAME = {
     ETHEREUM: 'ETH',
     BINANCE_SMART_CHAIN: 'BSC',
     POLYGON: 'POLYGON',
@@ -9,8 +9,6 @@ export const BLOCKCHAIN_NAME = {
     ARBITRUM: 'ARBITRUM',
     AURORA: 'AURORA',
     TELOS: 'TELOS',
-    SOLANA: 'SOLANA',
-    NEAR: 'NEAR',
     OPTIMISM: 'OPTIMISM',
     CRONOS: 'CRONOS',
     OKE_X_CHAIN: 'OKX',
@@ -18,9 +16,19 @@ export const BLOCKCHAIN_NAME = {
     FUSE: 'FUSE',
     MOONBEAM: 'MOONBEAM',
     CELO: 'CELO',
-    BOBA: 'BOBA',
-    ASTAR: 'ASTAR',
+    BOBA: 'BOBA'
+} as const;
+
+export const BLOCKCHAIN_NAME = {
+    ...EVM_BLOCKCHAIN_NAME,
+    SOLANA: 'SOLANA',
+    NEAR: 'NEAR',
     BITCOIN: 'BITCOIN'
 } as const;
 
 export type BlockchainName = typeof BLOCKCHAIN_NAME[keyof typeof BLOCKCHAIN_NAME];
+
+export type EvmBlockchainName = typeof EVM_BLOCKCHAIN_NAME[keyof typeof EVM_BLOCKCHAIN_NAME];
+export type SolanaBlockchainName = typeof BLOCKCHAIN_NAME.SOLANA;
+export type NearBlockchainName = typeof BLOCKCHAIN_NAME.NEAR;
+export type BitcoinBlockchainName = typeof BLOCKCHAIN_NAME.BITCOIN;

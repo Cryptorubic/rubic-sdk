@@ -126,12 +126,6 @@ export const nativeTokensList: NativeTokensList = {
         symbol: 'ETH',
         decimals: 18
     },
-    [BLOCKCHAIN_NAME.ASTAR]: {
-        address: NATIVE_TOKEN_ADDRESS,
-        name: 'ASTR',
-        symbol: 'ASTR',
-        decimals: 18
-    },
     [BLOCKCHAIN_NAME.BITCOIN]: {
         address: EMPTY_ADDRESS,
         name: 'Bitcoin',

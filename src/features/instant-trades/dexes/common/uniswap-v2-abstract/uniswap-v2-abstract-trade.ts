@@ -3,8 +3,6 @@ import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { LowSlippageDeflationaryTokenError } from '@rsdk-common/errors/swap/low-slippage-deflationary-token.error';
 import { tryExecuteAsync } from '@rsdk-common/utils/functions';
 import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { PriceTokenAmount } from '@rsdk-core/../../../../tokens-manager/tokens/price-token-amount';
-import { Token } from '@rsdk-core/../../../../tokens-manager/tokens/token';
 import { Web3Private } from '@rsdk-core/blockchain/web3-private/web3-private';
 import { BatchCall } from '@rsdk-core/blockchain/web3-public/models/batch-call';
 import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public/models/contract-multicall-response';
@@ -22,7 +20,6 @@ import {
     SUPPORTING_FEE_SWAP_METHODS_MAPPING,
     SWAP_METHOD
 } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/constants/SWAP_METHOD';
-
 import { defaultUniswapV2Abi } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi';
 import { DefaultEstimatedGas } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
 import BigNumber from 'bignumber.js';
@@ -32,6 +29,7 @@ import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { Exact } from 'src/features/instant-trades/models/exact';
+import { PriceTokenAmount, Token } from 'src/common';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount;
