@@ -6,6 +6,7 @@ import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
 import { RpcProvider } from '@rsdk-core/sdk/models/configuration';
 import Web3 from 'web3';
 import { RpcListProvider } from 'src/core/blockchain/web3-public/constants/rpc-list-provider';
+import { HealthcheckError } from 'src/common';
 
 export class Web3PublicService {
     private static readonly mainRpcDefaultTimeout = 10_000;
@@ -80,7 +81,7 @@ export class Web3PublicService {
 
         return new Proxy(web3Public, {
             get(target: Web3Public, prop: keyof Web3Public) {
-                if (prop === 'setProvider' || prop === 'healthCheck') {
+                if (prop === 'setProvider') {
                     return target[prop].bind(target);
                 }
 
@@ -91,14 +92,19 @@ export class Web3PublicService {
                         const methodParams = structuredClone(params);
                         const callMethod = () => (target[prop] as Function).call(target, ...params);
                         try {
-                            return await pTimeout(
+                            const result = await pTimeout(
                                 callMethod(),
                                 rpcProvider.mainRpcTimeout ||
                                     Web3PublicService.mainRpcDefaultTimeout
                             );
+                            if (prop === 'healthCheck' && result === false) {
+                                throw new HealthcheckError();
+                            }
+                            return result;
                         } catch (e) {
                             if (
                                 e instanceof TimeoutError ||
+                                e instanceof HealthcheckError ||
                                 e.message?.toLowerCase().includes(curRpc.toLowerCase())
                             ) {
                                 if (curRpc === rpcProvider.rpcList[0]) {

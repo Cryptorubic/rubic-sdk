@@ -1,6 +1,5 @@
 import { Cache } from '@rsdk-common/decorators/cache.decorator';
 import { ConditionalResult } from '@rsdk-common/decorators/models/conditional-result';
-import { HealthcheckError } from '@rsdk-common/errors/blockchain/healthcheck.error';
 import { TimeoutError } from '@rsdk-common/errors/utils/timeout.error';
 import pTimeout from '@rsdk-common/utils/p-timeout';
 import { ERC20_TOKEN_ABI } from '@rsdk-core/blockchain/constants/erc-20-abi';
@@ -71,11 +70,7 @@ export class Web3Public {
                 contract.methods[healthcheckData.method]().call(),
                 timeoutMs
             );
-
-            if (result !== healthcheckData.expected) {
-                throw new HealthcheckError();
-            }
-            return true;
+            return result === healthcheckData.expected;
         } catch (e: unknown) {
             if (e instanceof TimeoutError) {
                 console.debug(
