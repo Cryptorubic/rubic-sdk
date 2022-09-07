@@ -1,6 +1,6 @@
-import { blockchains } from '@rsdk-core/blockchain/constants/blockchains';
-import { Blockchain } from '@rsdk-core/blockchain/models/blockchain';
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { blockchains } from 'src/core/blockchain/constants/blockchains';
+import { Blockchain } from 'src/core/blockchain/models/blockchain';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import BigNumber from 'bignumber.js';
 
 /**

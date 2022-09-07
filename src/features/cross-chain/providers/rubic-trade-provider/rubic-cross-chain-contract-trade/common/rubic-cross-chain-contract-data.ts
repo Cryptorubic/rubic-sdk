@@ -1,7 +1,7 @@
 import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { Cache } from '@rsdk-common/decorators/cache.decorator';
 import BigNumber from 'bignumber.js';
-import { BlockchainsInfo } from '@rsdk-core/blockchain/blockchains-info';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { rubicCrossChainContractAbi } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contract-abi';
 import { ProviderData } from '@rsdk-features/cross-chain/models/provider-data';
 import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';

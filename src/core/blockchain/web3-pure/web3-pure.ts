@@ -3,7 +3,7 @@ import { NATIVE_TOKEN_ADDRESS } from '@rsdk-core/blockchain/constants/native-tok
 import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { TransactionConfig } from 'web3-core';
-import { toChecksumAddress, isAddress, AbiItem, fromAscii } from 'web3-utils';
+import { isAddress, AbiItem, fromAscii } from 'web3-utils';
 import { TransactionGasParams } from '@rsdk-features/instant-trades/models/gas-params';
 
 /**
@@ -73,14 +73,6 @@ export class Web3Pure {
         }
 
         return `0x${address.slice(2).padStart(64, '0')}`;
-    }
-
-    /**
-     * Converts address to checksum format.
-     * @param address Address to convert.
-     */
-    static toChecksumAddress(address: string): string {
-        return toChecksumAddress(address);
     }
 
     /**
