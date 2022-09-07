@@ -9,7 +9,6 @@ export { NotSupportedBlockchain } from './swap/not-supported-blockchain';
 export { UnnecessaryApproveError } from 'src/common/errors/swap/unnecessary-approve.error';
 export { WalletNotConnectedError } from './swap/wallet-not-connected.error';
 export { WrongNetworkError } from './swap/wrong-network.error';
-export { WrongChainIdError } from './provider/wrong-chain-id.error';
 export { CrossChainIsUnavailableError } from './cross-chain/cross-chain-is-unavailable.error';
 export { InsufficientFundsGasPriceValueError } from './cross-chain/insufficient-funds-gas-price-value.error';
 export { MaxGasPriceOverflowError } from './cross-chain/max-gas-price-overflow.error';

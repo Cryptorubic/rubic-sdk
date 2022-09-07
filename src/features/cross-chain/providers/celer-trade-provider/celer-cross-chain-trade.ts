@@ -167,7 +167,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
 
     protected async checkTradeErrors(): Promise<void | never> {
         this.checkWalletConnected();
-        this.checkBlockchainCorrect();
+        await this.checkBlockchainCorrect();
 
         await Promise.all([
             this.checkContractsState(),

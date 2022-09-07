@@ -30,7 +30,7 @@ export type RequiredSwapManagerCalculationOptions = MarkRequired<
  * Contains methods to calculate instant trades.
  */
 export class InstantTradesManager {
-    public static readonly defaultCalculationTimeout = 3_000;
+    public static readonly defaultCalculationTimeout = 10_000;
 
     private static getFullOptions(
         options?: SwapManagerCalculationOptions

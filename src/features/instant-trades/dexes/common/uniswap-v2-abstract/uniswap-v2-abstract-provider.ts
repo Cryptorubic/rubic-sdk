@@ -1,6 +1,9 @@
 import { combineOptions } from '@rsdk-common/utils/options';
 import { GasPriceInfo } from '@rsdk-features/instant-trades/models/gas-price-info';
-import { SwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
+import {
+    RequiredSwapCalculationOptions,
+    SwapCalculationOptions
+} from '@rsdk-features/instant-trades/models/swap-calculation-options';
 import { UniswapV2ProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 import { UniswapV2TradeClass } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-class';
 import { PathFactory } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/path-factory';
@@ -27,7 +30,7 @@ export abstract class UniswapV2AbstractProvider<
         return this.InstantTradeClass.type;
     }
 
-    protected readonly defaultOptions: Required<SwapCalculationOptions> = {
+    protected readonly defaultOptions: RequiredSwapCalculationOptions = {
         gasCalculation: 'calculate',
         disableMultihops: false,
         deadlineMinutes: 20,
@@ -89,10 +92,7 @@ export abstract class UniswapV2AbstractProvider<
         exact: Exact,
         options?: SwapCalculationOptions
     ): Promise<UniswapV2AbstractTrade> {
-        const fullOptions: Required<SwapCalculationOptions> = combineOptions(
-            options,
-            this.defaultOptions
-        );
+        const fullOptions = combineOptions(options, this.defaultOptions);
 
         const fromProxy = createTokenNativeAddressProxy(from, this.providerSettings.wethAddress);
         const toProxy = createTokenNativeAddressProxy(to, this.providerSettings.wethAddress);
@@ -136,7 +136,7 @@ export abstract class UniswapV2AbstractProvider<
         to: PriceToken,
         weiAmount: BigNumber,
         exact: Exact,
-        options: Required<SwapCalculationOptions>,
+        options: RequiredSwapCalculationOptions,
         gasPriceInUsd: BigNumber | undefined
     ): Promise<UniswapCalculatedInfo> {
         const pathFactory = new PathFactory(this, { from, to, weiAmount, exact, options });

@@ -150,13 +150,6 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
     }
 
-    protected async checkTradeErrors(): Promise<void | never> {
-        this.checkWalletConnected();
-        this.checkBlockchainCorrect();
-
-        await Promise.all([this.checkUserBalance()]);
-    }
-
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);

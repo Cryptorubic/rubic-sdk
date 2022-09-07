@@ -10,18 +10,25 @@ import { getOneinchApiBaseUrl } from '@rsdk-features/instant-trades/dexes/common
 import BigNumber from 'bignumber.js';
 import { OneinchTrade } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/oneinch-trade';
 import { InstantTradeProvider } from '@rsdk-features/instant-trades/instant-trade-provider';
-import { SwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
+import {
+    RequiredSwapCalculationOptions,
+    SwapCalculationOptions
+} from '@rsdk-features/instant-trades/models/swap-calculation-options';
 import { createTokenNativeAddressProxy } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { Cache, PriceToken, PriceTokenAmount, Token } from 'src/common';
 import { BlockchainsInfo } from 'src/core';
 import { TRADE_TYPE, TradeType } from 'src/features';
+import { MarkRequired } from 'ts-essentials';
 
-type OneinchSwapCalculationOptions = Omit<SwapCalculationOptions, 'deadlineMinutes'>;
+type OneinchSwapCalculationOptions = MarkRequired<
+    Omit<RequiredSwapCalculationOptions, 'deadlineMinutes'>,
+    'wrappedAddress'
+>;
 
 export abstract class OneinchAbstractProvider extends InstantTradeProvider {
     private readonly httpClient = Injector.httpClient;
 
-    private readonly defaultOptions: Required<OneinchSwapCalculationOptions> = {
+    private readonly defaultOptions: OneinchSwapCalculationOptions = {
         gasCalculation: 'calculate',
         disableMultihops: false,
         slippageTolerance: 0.02,
@@ -60,7 +67,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
     public async calculateExactOutputAmount(
         from: PriceToken,
         to: PriceTokenAmount,
-        options?: OneinchSwapCalculationOptions
+        options?: SwapCalculationOptions
     ): Promise<BigNumber> {
         return (await this.calculate(to, from, options)).to.tokenAmount;
     }
@@ -68,9 +75,12 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
     public async calculate(
         from: PriceTokenAmount,
         toToken: PriceToken,
-        options?: OneinchSwapCalculationOptions
+        options?: SwapCalculationOptions
     ): Promise<OneinchTrade> {
-        const fullOptions = combineOptions(options, this.defaultOptions);
+        const fullOptions = combineOptions<OneinchSwapCalculationOptions>(
+            options,
+            this.defaultOptions
+        );
 
         const fromTokenClone = createTokenNativeAddressProxy(from, oneinchApiParams.nativeAddress);
         const toTokenClone = createTokenNativeAddressProxy(toToken, oneinchApiParams.nativeAddress);
@@ -110,7 +120,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
     private async getTradeInfo(
         from: PriceTokenAmount,
         toToken: Token,
-        options: Required<OneinchSwapCalculationOptions>
+        options: OneinchSwapCalculationOptions
     ): Promise<{
         toTokenAmountInWei: BigNumber;
         estimatedGas: BigNumber;

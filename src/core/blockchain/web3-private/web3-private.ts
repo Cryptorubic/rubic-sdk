@@ -11,8 +11,8 @@ import { TransactionRevertedError } from '@rsdk-common/errors/blockchain/transac
 import { WalletConnectionConfiguration } from '@rsdk-core/blockchain/models/wallet-connection-configuration';
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swap/failed-to-check-for-transaction-receipt.error';
-import { Web3Pure } from 'src/core';
-import { LowSlippageError } from 'src/common';
+import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
+import { LowSlippageError, WrongNetworkError } from 'src/common';
 import { parseError } from 'src/common/utils/errors';
 import { TransactionConfig } from 'web3-core';
 
@@ -33,35 +33,6 @@ export class Web3Private {
         }
 
         return bnAmount.toFixed(0);
-    }
-
-    private readonly APPROVE_GAS_LIMIT = 60_000;
-
-    /**
-     * Instance of web3, initialized with ethereum wallet, e.g. Metamask, WalletConnect.
-     */
-    private readonly web3: Web3;
-
-    /**
-     * Current wallet provider address.
-     */
-    public get address(): string {
-        return this.walletConnectionConfiguration.address;
-    }
-
-    /**
-     * Current wallet blockchain name.
-     */
-    public get blockchainName(): string {
-        return this.walletConnectionConfiguration.blockchainName;
-    }
-
-    /**
-     * @param walletConnectionConfiguration Provider that implements {@link WalletConnectionConfiguration} interface.
-     * The provider must contain an instance of web3, initialized with ethereum wallet, e.g. Metamask, WalletConnect.
-     */
-    constructor(private readonly walletConnectionConfiguration: WalletConnectionConfiguration) {
-        this.web3 = walletConnectionConfiguration.web3;
     }
 
     /**
@@ -91,6 +62,34 @@ export class Web3Private {
             }
         } catch {}
         return parseError(err);
+    }
+
+    /**
+     * Instance of web3, initialized with ethereum wallet, e.g. Metamask, WalletConnect.
+     */
+    private readonly web3: Web3;
+
+    /**
+     * Current wallet provider address.
+     */
+    public get address(): string {
+        return this.walletConnectionConfiguration.address;
+    }
+
+    /**
+     * @param walletConnectionConfiguration Provider that implements {@link WalletConnectionConfiguration} interface.
+     * The provider must contain an instance of web3, initialized with ethereum wallet, e.g. Metamask, WalletConnect.
+     */
+    constructor(private readonly walletConnectionConfiguration: WalletConnectionConfiguration) {
+        this.web3 = walletConnectionConfiguration.web3;
+    }
+
+    public async checkBlockchainCorrect(blockchainName: BlockchainName): Promise<void | never> {
+        const userChainId = await this.web3.eth.getChainId();
+        const userBlockchain = BlockchainsInfo.getBlockchainById(userChainId);
+        if (userBlockchain?.name !== blockchainName) {
+            throw new WrongNetworkError();
+        }
     }
 
     /**
@@ -438,7 +437,7 @@ export class Web3Private {
         const test = ignoreCallErrors.some(err =>
             error?.message?.toLowerCase().includes(err.toLowerCase())
         );
-        console.log(test);
+        console.debug(test);
         return test;
     }
 }

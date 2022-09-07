@@ -4,7 +4,7 @@ import { BatchCall } from '@rsdk-core/blockchain/web3-public/models/batch-call';
 import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
 import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@rsdk-core/sdk/injector';
-import { SwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
+import { RequiredSwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
 import {
     UniswapCalculatedInfo,
     UniswapCalculatedInfoWithProfit
@@ -23,7 +23,7 @@ export interface PathFactoryStruct {
     readonly to: PriceToken;
     readonly weiAmount: BigNumber;
     readonly exact: Exact;
-    readonly options: Required<SwapCalculationOptions>;
+    readonly options: RequiredSwapCalculationOptions;
 }
 
 export interface UniswapV2AbstractProviderStruct<T extends UniswapV2AbstractTrade> {
@@ -42,7 +42,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
     private readonly exact: Exact;
 
-    private readonly options: Required<SwapCalculationOptions>;
+    private readonly options: RequiredSwapCalculationOptions;
 
     private readonly InstantTradeClass: UniswapV2TradeClass<T>;
 

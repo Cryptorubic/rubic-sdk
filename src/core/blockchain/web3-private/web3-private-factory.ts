@@ -1,11 +1,7 @@
-import { WrongChainIdError } from '@rsdk-common/errors/provider/wrong-chain-id.error';
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
-import { BlockchainsInfo } from '@rsdk-core/blockchain/blockchains-info';
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { WalletConnectionConfiguration } from '@rsdk-core/blockchain/models/wallet-connection-configuration';
 import { Web3Private } from '@rsdk-core/blockchain/web3-private/web3-private';
 import { WalletProvider } from '@rsdk-core/sdk/models/configuration';
-import BigNumber from 'bignumber.js';
 import Web3 from 'web3';
 import { provider } from 'web3-core';
 
@@ -14,8 +10,6 @@ export class Web3PrivateFactory {
 
     private address: string | undefined;
 
-    private blockchainName: BlockchainName | undefined;
-
     public static async createWeb3Private(walletProvider?: WalletProvider): Promise<Web3Private> {
         if (!walletProvider) {
             return Web3PrivateFactory.createWeb3PrivateEmptyProxy();
@@ -23,8 +17,7 @@ export class Web3PrivateFactory {
 
         const web3PrivateFactory = new Web3PrivateFactory(
             walletProvider.core,
-            walletProvider.address,
-            new BigNumber(walletProvider.chainId).toNumber()
+            walletProvider.address
         );
         return web3PrivateFactory.createWeb3Private();
     }
@@ -51,15 +44,10 @@ export class Web3PrivateFactory {
         );
     }
 
-    constructor(
-        private readonly core: provider | Web3,
-        private readonly walletAddress: string,
-        private readonly chainId: number
-    ) {}
+    constructor(private readonly core: provider | Web3, private readonly walletAddress: string) {}
 
     public async createWeb3Private(): Promise<Web3Private> {
         this.createWeb3();
-        await this.parseChainId();
         this.parseAddress();
         return this.createWeb3PrivateInstance();
     }
@@ -70,24 +58,6 @@ export class Web3PrivateFactory {
             web3 = new Web3(this.core);
         }
         this.web3 = web3 as Web3;
-    }
-
-    private async parseChainId(): Promise<void | never> {
-        if (!this.web3) {
-            throw new RubicSdkError('Web3 is not initialized');
-        }
-
-        const realChainId = await this.web3.eth.getChainId();
-        if (!new BigNumber(realChainId).eq(this.chainId)) {
-            throw new WrongChainIdError();
-        }
-
-        const blockchainName = BlockchainsInfo.getBlockchainById(realChainId);
-        if (!blockchainName) {
-            throw new WrongChainIdError();
-        }
-
-        this.blockchainName = blockchainName.name;
     }
 
     private parseAddress(): void {
@@ -101,8 +71,7 @@ export class Web3PrivateFactory {
     private createWeb3PrivateInstance(): Web3Private {
         const walletConfiguration: WalletConnectionConfiguration = {
             web3: this.web3!!,
-            address: this.address!!,
-            blockchainName: this.blockchainName!!
+            address: this.address!!
         };
 
         return new Web3Private(walletConfiguration);

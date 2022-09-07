@@ -4,7 +4,6 @@ import {
     BridgeType,
     SwapTransactionOptions,
     TradeType,
-    CrossChainTrade,
     CROSS_CHAIN_TRADE_TYPE
 } from 'src/features';
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
@@ -19,6 +18,7 @@ import {
 } from 'src/common';
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
+import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { RANGO_CONTRACT_ADDRESSES } from './constants/contract-address';
 import { RangoCrossChainSupportedBlockchain } from './constants/rango-cross-chain-supported-blockchain';
 import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';
@@ -267,12 +267,6 @@ export class RangoCrossChainTrade extends CrossChainTrade {
         this.requestId = response.requestId;
 
         return response.tx as EvmTransaction;
-    }
-
-    protected async checkTradeErrors(): Promise<void> {
-        this.checkWalletConnected();
-        this.checkBlockchainCorrect();
-        await this.checkUserBalance();
     }
 
     private async checkProviderIsWhitelisted(providerRouter: string): Promise<void> {

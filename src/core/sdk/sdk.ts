@@ -4,11 +4,10 @@ import { Web3Private } from '@rsdk-core/blockchain/web3-private/web3-private';
 import { Web3PrivateFactory } from '@rsdk-core/blockchain/web3-private/web3-private-factory';
 import { Web3PublicService } from '@rsdk-core/blockchain/web3-public/web3-public-service';
 import { Injector } from '@rsdk-core/sdk/injector';
-import { Configuration, RpcProvider } from '@rsdk-core/sdk/models/configuration';
+import { Configuration } from '@rsdk-core/sdk/models/configuration';
 import { CrossChainManager } from '@rsdk-features/cross-chain/cross-chain-manager';
 import { InstantTradesManager } from '@rsdk-features/instant-trades/instant-trades-manager';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
-import { BlockchainName } from 'src/core';
 import { CrossChainSymbiosisManager } from '@rsdk-features/cross-chain/cross-chain-symbiosis-manager';
 import { CrossChainStatusManager } from 'src/features';
 import { TokensManager } from 'src/common';
@@ -67,18 +66,10 @@ export class SDK {
     public readonly cryptoPriceApi = Injector.coingeckoApi;
 
     /**
-     * @internal
-     * Stores currently set rpc providers for each blockchain.
-     */
-    public static rpcList: Partial<Record<BlockchainName, RpcProvider>>;
-
-    /**
      * Creates new sdk instance. Changes dependencies of all sdk entities according
      * to new configuration (even for entities created with other previous sdk instances).
      */
     public static async createSDK(configuration: Configuration): Promise<SDK> {
-        this.rpcList = configuration.rpcProviders;
-
         const [web3PublicService, web3Private, httpClient] = await Promise.all([
             SDK.createWeb3PublicService(configuration),
             SDK.createWeb3Private(configuration),

@@ -28,6 +28,7 @@ import { Exact } from '@rsdk-features/instant-trades/models/exact';
 import { getFromToTokensAmountsByExact } from '@rsdk-features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { AbiItem } from 'web3-utils';
+import { RequiredSwapCalculationOptions } from 'src/features/instant-trades/models/swap-calculation-options';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
@@ -46,7 +47,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
 
     protected readonly gasMargin = 1.2;
 
-    protected readonly defaultOptions: Required<SwapCalculationOptions> = {
+    protected readonly defaultOptions: RequiredSwapCalculationOptions = {
         gasCalculation: 'calculate',
         disableMultihops: false,
         deadlineMinutes: 20,
@@ -162,7 +163,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         to: PriceToken,
         exact: Exact,
         weiAmount: BigNumber,
-        options: Required<SwapCalculationOptions>,
+        options: RequiredSwapCalculationOptions,
         gasPriceInUsd?: BigNumber
     ): Promise<UniswapV3AlgebraCalculatedInfo> {
         const routes = (

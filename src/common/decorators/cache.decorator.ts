@@ -78,12 +78,17 @@ function modifyMethodCacheDescriptor<T>(
 
         if (cacheConfig.conditionalCache) {
             if (result instanceof Promise) {
-                const handledPromise = result.then((resolved: ConditionalResult<T>) => {
-                    if (resolved.notSave) {
+                const handledPromise = result
+                    .then((resolved: ConditionalResult<T>) => {
+                        if (resolved.notSave) {
+                            instanceStore.delete(key);
+                        }
+                        return resolved.value;
+                    })
+                    .catch(err => {
                         instanceStore.delete(key);
-                    }
-                    return resolved.value;
-                }) as unknown as T;
+                        throw err;
+                    }) as T;
                 saveResult(instanceStore, key, handledPromise, cacheConfig.maxAge);
                 return handledPromise;
             }
@@ -97,6 +102,14 @@ function modifyMethodCacheDescriptor<T>(
             return result.value;
         }
 
+        if (result instanceof Promise) {
+            const handledPromise = result.catch(err => {
+                instanceStore.delete(key);
+                throw err;
+            }) as T;
+            saveResult(instanceStore, key, handledPromise, cacheConfig.maxAge);
+            return handledPromise;
+        }
         saveResult(instanceStore, key, result as T, cacheConfig.maxAge);
         return result;
     } as unknown as T;
@@ -156,7 +169,7 @@ export function Cache<T>(
 }
 
 /**
- * Decorated function should returns {@link ConditionalResult}.
+ * Decorated function should return {@link ConditionalResult}.
  * You have to check types by yourself {@see https://github.com/microsoft/TypeScript/issues/4881}
  */
 export function PConditionalCache<T>(
