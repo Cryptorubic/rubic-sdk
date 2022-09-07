@@ -1,10 +1,10 @@
-import { Web3Pure } from 'src/core';
 import { CrossChainInstantTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/cross-chain-instant-trade';
 import { v2LikeCelerSwap } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/v2-like-celer-swap-info';
 import { UniswapV2AbstractTrade } from 'src/features';
 import { DestinationCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
 import { SwapVersion } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/provider-type.enum';
 import { RubicSdkError } from 'src/common';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export class CrossChainUniswapV2Trade implements CrossChainInstantTrade {
     readonly defaultDeadline = 999999999999999;
@@ -16,7 +16,9 @@ export class CrossChainUniswapV2Trade implements CrossChainInstantTrade {
     }
 
     public getSecondPath(): string[] {
-        return this.instantTrade.wrappedPath.map(token => Web3Pure.addressToBytes32(token.address));
+        return this.instantTrade.wrappedPath.map(token =>
+            EvmWeb3Pure.addressToBytes32(token.address)
+        );
     }
 
     public async modifyArgumentsForProvider(

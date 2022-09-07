@@ -9,7 +9,6 @@ import { BlockchainsInfo, Web3Public, Web3Pure } from 'src/core';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { FailedToCheckForTransactionReceiptError, PriceTokenAmount } from 'src/common';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import BigNumber from 'bignumber.js';
 import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-address';
 import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/debridge-cross-chain-supported-blockchain';
@@ -20,6 +19,7 @@ import { TransactionRequest } from 'src/features/cross-chain/providers/debridge-
 import { BytesLike } from 'ethers';
 import { TransactionResponse } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
 import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade-provider';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 /**
  * Calculated DeBridge cross chain trade.
@@ -62,7 +62,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
                         transitAmount: new BigNumber(NaN),
                         cryptoFeeToken: from
                     },
-                    EMPTY_ADDRESS
+                    EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);

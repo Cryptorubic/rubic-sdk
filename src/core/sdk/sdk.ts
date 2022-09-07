@@ -7,10 +7,10 @@ import { Injector } from '@rsdk-core/sdk/injector';
 import { Configuration } from '@rsdk-core/sdk/models/configuration';
 import { CrossChainManager } from '@rsdk-features/cross-chain/cross-chain-manager';
 import { InstantTradesManager } from '@rsdk-features/instant-trades/instant-trades-manager';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { CrossChainSymbiosisManager } from '@rsdk-features/cross-chain/cross-chain-symbiosis-manager';
 import { CrossChainStatusManager } from 'src/features';
 import { TokensManager } from 'src/common';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 /**
  * Base class to work with sdk.
@@ -77,7 +77,7 @@ export class SDK {
         ]);
 
         Injector.createInjector(web3PublicService, web3Private, httpClient);
-        return new SDK(configuration.providerAddress || EMPTY_ADDRESS);
+        return new SDK(configuration.providerAddress || EvmWeb3Pure.EMPTY_ADDRESS);
     }
 
     private static createWeb3Private(configuration: Configuration): Promise<Web3Private> {

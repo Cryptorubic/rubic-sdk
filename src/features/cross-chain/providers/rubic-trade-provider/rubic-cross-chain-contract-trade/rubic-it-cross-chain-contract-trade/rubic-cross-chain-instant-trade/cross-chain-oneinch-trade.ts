@@ -1,5 +1,4 @@
 import { OneinchTrade } from 'src/features';
-import { Web3Pure } from 'src/core';
 import { CrossChainInstantTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/cross-chain-instant-trade';
 
 import { DestinationCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
@@ -8,8 +7,8 @@ import { InchCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-tr
 import { oneinchApiParams } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/constants';
 import { wrappedNative } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/wrapped-native';
 import { CelerCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { RubicSdkError } from 'src/common';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export class CrossChainOneinchTrade implements CrossChainInstantTrade {
     readonly defaultDeadline = 999999999999999;
@@ -24,7 +23,9 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
     }
 
     public getSecondPath(): string[] {
-        return this.instantTrade.wrappedPath.map(token => Web3Pure.addressToBytes32(token.address));
+        return this.instantTrade.wrappedPath.map(token =>
+            EvmWeb3Pure.addressToBytes32(token.address)
+        );
     }
 
     public async modifyArgumentsForProvider(
@@ -45,7 +46,7 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
         const dex = this.instantTrade.contractAddress;
         const [tokenIn, ...restPath] = this.instantTrade.path.map(token => token.address);
         const isOneInchNative =
-            oneinchApiParams.nativeAddress === tokenIn || tokenIn === EMPTY_ADDRESS;
+            oneinchApiParams.nativeAddress === tokenIn || EvmWeb3Pure.isEmptyAddress(tokenIn);
         const fromBlockchain = this.instantTrade.from
             .blockchain as CelerCrossChainSupportedBlockchain;
         const firstToken = isOneInchNative ? wrappedNative[fromBlockchain] : tokenIn;

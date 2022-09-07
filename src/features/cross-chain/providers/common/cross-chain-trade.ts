@@ -2,6 +2,7 @@ import {
     BasicTransactionOptions,
     BLOCKCHAIN_NAME,
     BlockchainName,
+    BlockchainsInfo,
     TransactionOptions,
     Web3Public,
     Web3Pure
@@ -22,6 +23,8 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { WrongReceiverAddressError } from 'src/common/errors/blockchain/wrong-receiver-address.error';
 import { ItType } from 'src/features/cross-chain/models/it-type';
 import { Network, validate } from 'bitcoin-address-validation';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 
 /**
  * Abstract class for all cross chain providers' trades.
@@ -46,7 +49,11 @@ export abstract class CrossChainTrade {
             }
             throw new WrongReceiverAddressError();
         }
-        if (Web3Pure.isAddressCorrect(receiverAddress)) {
+        if (
+            Web3Pure[
+                toBlockchain ? BlockchainsInfo.getChainType(toBlockchain) : CHAIN_TYPE.EVM
+            ].isAddressCorrect(receiverAddress)
+        ) {
             return;
         }
         throw new WrongReceiverAddressError();
@@ -228,7 +235,7 @@ export abstract class CrossChainTrade {
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getContractParams({ fromAddress: options?.fromAddress });
 
-        return Web3Pure.encodeMethodCall(
+        return EvmWeb3Pure.encodeMethodCall(
             contractAddress,
             contractAbi,
             methodName,

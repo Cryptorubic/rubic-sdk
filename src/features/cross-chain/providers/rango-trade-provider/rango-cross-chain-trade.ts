@@ -17,8 +17,8 @@ import {
     PriceTokenAmount
 } from 'src/common';
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
-import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { RANGO_CONTRACT_ADDRESSES } from './constants/contract-address';
 import { RangoCrossChainSupportedBlockchain } from './constants/rango-cross-chain-supported-blockchain';
 import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';
@@ -65,7 +65,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
                         }
                     },
                     new RangoClient(RANGO_API_KEY),
-                    EMPTY_ADDRESS
+                    EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams();
 
             const [gasLimit, gasPrice] = await Promise.all([

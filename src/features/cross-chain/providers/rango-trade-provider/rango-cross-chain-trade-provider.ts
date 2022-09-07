@@ -11,14 +11,13 @@ import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import { Injector } from 'src/core/sdk/injector';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
 import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
 import { TradeType } from 'src/features/instant-trades';
 import { rangoProviders } from 'src/features/instant-trades/dexes/common/rango/constants/rango-providers';
-import { NATIVE_TOKEN_ADDRESS } from 'src/core/blockchain/constants/native-token-address';
 import { PriceTokenAmount } from 'src/common';
 import { CROSS_CHAIN_TRADE_TYPE, RangoCrossChainTrade, BridgeType } from 'src/features';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';
 import { CrossChainTradeProvider } from '../common/cross-chain-trade-provider';
@@ -59,22 +58,6 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
             RangoCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
             RangoCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
         );
-    }
-
-    public isSupportedToken(token: PriceTokenAmount): boolean {
-        if (this.meta) {
-            const newLocal = token.address === NATIVE_TOKEN_ADDRESS;
-            if (newLocal) {
-                return true;
-            }
-
-            return this.meta.tokens.some(
-                item =>
-                    item.address?.toLocaleLowerCase() === token.address.toLowerCase() &&
-                    item.blockchain === token.blockchain
-            );
-        }
-        return false;
     }
 
     public async calculate(
@@ -179,7 +162,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                         gasData
                     },
                     this.rango,
-                    options.providerAddress || EMPTY_ADDRESS
+                    options.providerAddress
                 );
 
                 return { trade: rangoTrade };
@@ -197,8 +180,8 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
         toToken: PriceTokenAmount,
         options: RequiredCrossChainOptions
     ): SwapRequest {
-        const fromAddress = this.walletAddress || EMPTY_ADDRESS;
-        const toAddress = this.walletAddress || EMPTY_ADDRESS;
+        const fromAddress = this.walletAddress || EvmWeb3Pure.EMPTY_ADDRESS;
+        const toAddress = this.walletAddress || EvmWeb3Pure.EMPTY_ADDRESS;
         return {
             from: {
                 blockchain:

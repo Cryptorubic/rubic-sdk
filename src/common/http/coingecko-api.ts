@@ -5,7 +5,7 @@ import { BLOCKCHAIN_NAME, BlockchainName } from '@rsdk-core/blockchain/models/bl
 import BigNumber from 'bignumber.js';
 import { Cache } from 'src/common';
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
-import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
+import { BlockchainsInfo, Web3Pure } from 'src/core';
 
 const supportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,
@@ -166,8 +166,7 @@ export class CoingeckoApi {
         blockchain: BlockchainName;
     }): Promise<BigNumber> {
         if (
-            Web3Pure.isNativeAddress(token.address) ||
-            token.blockchain === BLOCKCHAIN_NAME.BITCOIN
+            Web3Pure[BlockchainsInfo.getChainType(token.blockchain)].isNativeAddress(token.address)
         ) {
             return this.getNativeCoinPrice(token.blockchain);
         }

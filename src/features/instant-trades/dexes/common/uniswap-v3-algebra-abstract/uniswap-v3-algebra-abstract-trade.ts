@@ -7,7 +7,6 @@ import {
     TradeType
 } from 'src/features';
 import { AbiItem } from 'web3-utils';
-import { Web3Pure } from 'src/core';
 import { SwapOptions } from '@rsdk-features/instant-trades/models/swap-options';
 import BigNumber from 'bignumber.js';
 import { Injector } from '@rsdk-core/sdk/injector';
@@ -24,6 +23,7 @@ import {
 } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/constants/estimated-gas';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
 import { getFromToTokensAmountsByExact } from '@rsdk-features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export interface UniswapV3AlgebraTradeStruct {
     from: PriceTokenAmount;
@@ -232,7 +232,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         const { methodName, methodArguments } = this.getSwapRouterMethodData(options.fromAddress);
         const gasParams = this.getGasParams(options);
 
-        return Web3Pure.encodeMethodCall(
+        return EvmWeb3Pure.encodeMethodCall(
             this.contractAddress,
             this.contractAbi,
             methodName,
@@ -253,15 +253,15 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         }
 
         const { methodName: exactInputMethodName, methodArguments: exactInputMethodArguments } =
-            this.getSwapRouterExactInputMethodData(Web3Pure.ZERO_ADDRESS);
-        const exactInputMethodEncoded = Web3Pure.encodeFunctionCall(
+            this.getSwapRouterExactInputMethodData(EvmWeb3Pure.EMPTY_ADDRESS);
+        const exactInputMethodEncoded = EvmWeb3Pure.encodeFunctionCall(
             this.contractAbi,
             exactInputMethodName,
             exactInputMethodArguments
         );
 
         const amountOutMin = this.to.weiAmountMinusSlippage(this.slippageTolerance).toFixed(0);
-        const unwrapWETHMethodEncoded = Web3Pure.encodeFunctionCall(
+        const unwrapWETHMethodEncoded = EvmWeb3Pure.encodeFunctionCall(
             this.contractAbi,
             this.unwrapWethMethodName,
             [amountOutMin, fromAddress || this.walletAddress]

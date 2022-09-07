@@ -1,67 +1,67 @@
-import { NATIVE_TOKEN_ADDRESS } from '@rsdk-core/blockchain/constants/native-token-address';
 import { BLOCKCHAIN_NAME, BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { TokenStruct } from 'src/common/tokens-manager/tokens/token';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/bitcoin-web3-pure';
 
 export type NativeTokensList = Record<BlockchainName, Omit<TokenStruct, 'blockchain'>>;
 
 export const nativeTokensList: NativeTokensList = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'Ethereum',
         symbol: 'ETH',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'Binance Coin',
         symbol: 'BNB',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.POLYGON]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'Matic Network',
         symbol: 'MATIC',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.AVALANCHE]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'AVAX',
         symbol: 'AVAX',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.MOONRIVER]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'MOVR',
         symbol: 'MOVR',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.FANTOM]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'FTM',
         symbol: 'FTM',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.HARMONY]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'ONE',
         symbol: 'ONE',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.ARBITRUM]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'AETH',
         symbol: 'AETH',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.AURORA]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'aETH',
         symbol: 'aETH',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.TELOS]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'TLOS',
         symbol: 'TLOS',
         decimals: 18
@@ -79,55 +79,55 @@ export const nativeTokensList: NativeTokensList = {
         decimals: 24
     },
     [BLOCKCHAIN_NAME.OPTIMISM]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'ETH',
         symbol: 'ETH',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.CRONOS]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'CRO',
         symbol: 'CRO',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.OKE_X_CHAIN]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'OKT',
         symbol: 'OKT',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.GNOSIS]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'xDAI',
         symbol: 'xDAI',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.FUSE]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'FUSE',
         symbol: 'FUSE',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.MOONBEAM]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'GLMR',
         symbol: 'GLMR',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.CELO]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'CELO',
         symbol: 'CELO',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.BOBA]: {
-        address: NATIVE_TOKEN_ADDRESS,
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'ETH',
         symbol: 'ETH',
         decimals: 18
     },
     [BLOCKCHAIN_NAME.BITCOIN]: {
-        address: EMPTY_ADDRESS,
+        address: BitcoinWeb3Pure.nativeTokenAddress,
         name: 'Bitcoin',
         symbol: 'BTC',
         decimals: 8

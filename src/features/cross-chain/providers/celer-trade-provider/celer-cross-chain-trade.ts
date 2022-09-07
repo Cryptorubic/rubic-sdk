@@ -6,7 +6,6 @@ import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swa
 import { InsufficientFundsGasPriceValueError } from '@rsdk-common/errors/cross-chain/insufficient-funds-gas-price-value.error';
 import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
 import BigNumber from 'bignumber.js';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { CelerRubicCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade';
 import { Web3Public } from 'src/core';
 import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
@@ -22,6 +21,7 @@ import { CROSS_CHAIN_TRADE_TYPE, CrossChainTrade, TradeType } from 'src/features
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { CelerDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
 import { PriceTokenAmount } from 'src/common';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 /**
  * Calculated Celer cross chain trade.
@@ -64,7 +64,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
                             cryptoFee: null
                         }
                     },
-                    EMPTY_ADDRESS,
+                    EvmWeb3Pure.EMPTY_ADDRESS,
                     maxSlippage
                 ).getContractParams({});
 
@@ -271,7 +271,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         const isBridge = this.fromTrade.fromToken.isEqualTo(this.fromTrade.toToken);
         const isToTransit = this.toTrade.fromToken.isEqualTo(this.toTrade.toToken);
 
-        const message = Web3Pure.asciiToBytes32(JSON.stringify(data));
+        const message = EvmWeb3Pure.asciiToBytes32(JSON.stringify(data));
         const messageBusAddress = await contract.messageBusAddress();
         const cryptoFee = await contract.destinationCryptoFee(this.toTrade.blockchain);
         const feePerByte = await contract.celerFeePerByte(message, messageBusAddress);

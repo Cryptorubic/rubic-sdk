@@ -14,8 +14,8 @@ import { UniswapCalculatedInfo } from '@rsdk-features/instant-trades/dexes/commo
 import { createTokenNativeAddressProxy } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { TradeType } from 'src/features';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { PriceToken, PriceTokenAmount } from 'src/common';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export abstract class UniswapV2AbstractProvider<
     T extends UniswapV2AbstractTrade = UniswapV2AbstractTrade
@@ -35,7 +35,7 @@ export abstract class UniswapV2AbstractProvider<
         disableMultihops: false,
         deadlineMinutes: 20,
         slippageTolerance: 0.02,
-        wrappedAddress: EMPTY_ADDRESS,
+        wrappedAddress: EvmWeb3Pure.EMPTY_ADDRESS,
         fromAddress: ''
     };
 

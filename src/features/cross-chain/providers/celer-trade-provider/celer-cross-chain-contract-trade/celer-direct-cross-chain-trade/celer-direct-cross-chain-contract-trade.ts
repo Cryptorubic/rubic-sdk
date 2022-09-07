@@ -1,13 +1,13 @@
 import BigNumber from 'bignumber.js';
-import { BlockchainsInfo, Web3Pure } from 'src/core';
+import { BlockchainsInfo } from 'src/core';
 import { CelerCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { CelerCrossChainContractData } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
 import { DestinationCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
 import { SwapVersion } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/provider-type.enum';
 import { BridgeCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/bridge-celer-swap-info';
 import { CelerCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
 import { PriceTokenAmount, RubicSdkError } from 'src/common';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export class CelerDirectCrossChainContractTrade extends CelerCrossChainContractTrade {
     public readonly fromToken: PriceTokenAmount;
@@ -32,7 +32,7 @@ export class CelerDirectCrossChainContractTrade extends CelerCrossChainContractT
     }
 
     public getSecondPath(): string[] {
-        return [Web3Pure.addressToBytes32(this.token.address)];
+        return [EvmWeb3Pure.addressToBytes32(this.token.address)];
     }
 
     protected async modifyArgumentsForProvider(methodArguments: unknown[][]): Promise<void> {
@@ -55,7 +55,7 @@ export class CelerDirectCrossChainContractTrade extends CelerCrossChainContractT
 
     public getCelerDestinationTrade(integratorAddress: string, receiverAddress: string): unknown[] {
         const trade: DestinationCelerSwapInfo = {
-            dex: EMPTY_ADDRESS,
+            dex: EvmWeb3Pure.EMPTY_ADDRESS,
             nativeOut: this.toToken.isNative,
             receiverEOA: receiverAddress,
             integrator: integratorAddress,

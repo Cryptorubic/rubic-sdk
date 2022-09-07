@@ -1,10 +1,10 @@
 import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TokenBaseStruct } from 'src/common/tokens-manager/models/token-base-struct';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/sdk/injector';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export type TokenStruct = {
     blockchain: BlockchainName;
@@ -96,7 +96,7 @@ export class Token {
     public readonly decimals: number;
 
     public get isNative(): boolean {
-        return Web3Pure.isNativeAddress(this.address);
+        return EvmWeb3Pure.isNativeAddress(this.address);
     }
 
     constructor(tokenStruct: TokenStruct) {

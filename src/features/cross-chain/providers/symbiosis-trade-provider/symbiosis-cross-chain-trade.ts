@@ -12,11 +12,11 @@ import { SymbiosisCrossChainSupportedBlockchain } from '@rsdk-features/cross-cha
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { FailedToCheckForTransactionReceiptError, PriceTokenAmount } from 'src/common';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import BigNumber from 'bignumber.js';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 /**
  * Calculated Symbiosis cross chain trade.
@@ -55,7 +55,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
                         },
                         transitAmount: new BigNumber(NaN)
                     },
-                    EMPTY_ADDRESS
+                    EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
@@ -206,7 +206,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             this.to.address,
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
             this.to.blockchain === BLOCKCHAIN_NAME.BITCOIN
-                ? EMPTY_ADDRESS
+                ? EvmWeb3Pure.EMPTY_ADDRESS
                 : options?.receiverAddress || this.walletAddress,
             this.providerAddress,
             SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain].providerRouter

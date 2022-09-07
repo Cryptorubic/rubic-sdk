@@ -8,6 +8,7 @@ import { crossChainContractAbiInch } from '@rsdk-features/cross-chain/providers/
 import { BlockchainName, Web3Pure } from 'src/core';
 import { RubicCrossChainContractData } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/rubic-cross-chain-contract-data';
 import { RubicSdkError } from 'src/common';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 enum TO_OTHER_BLOCKCHAIN_SWAP_METHOD {
     SWAP_TOKENS = 'swapTokensToOtherBlockchain',
@@ -96,7 +97,7 @@ export abstract class RubicCrossChainContractTrade extends CrossChainContractTra
             toContractTrade.toToken.decimals
         );
 
-        const toWalletAddressBytes32 = Web3Pure.addressToBytes32(walletAddress);
+        const toWalletAddressBytes32 = EvmWeb3Pure.addressToBytes32(walletAddress);
 
         const isToTokenNative = this.toToken.isNative;
 

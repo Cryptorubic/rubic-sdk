@@ -20,12 +20,12 @@ import {
 } from '@viaprotocol/router-sdk/dist/types';
 import { ItType } from 'src/features/cross-chain/models/it-type';
 import { bridges } from 'src/features/cross-chain/constants/bridge-type';
-import { NATIVE_TOKEN_ADDRESS } from 'src/core/blockchain/constants/native-token-address';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import { viaContractAddress } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
 import { PriceToken, PriceTokenAmount } from 'src/common';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 interface ToolType extends IActionStepTool {
     type: 'swap' | 'cross';
@@ -115,7 +115,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                     address: from.address,
                     price: from.price
                 },
-                { address: NATIVE_TOKEN_ADDRESS }
+                { address: EvmWeb3Pure.nativeTokenAddress }
             ]);
             const bestRoute = await this.getBestRoute(toToken, nativeTokenPrice!, routes);
 

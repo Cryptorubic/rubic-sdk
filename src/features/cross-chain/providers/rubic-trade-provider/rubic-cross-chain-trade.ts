@@ -7,7 +7,6 @@ import { InsufficientFundsGasPriceValueError } from '@rsdk-common/errors/cross-c
 import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
 import BigNumber from 'bignumber.js';
 import { RubicItCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { CelerRubicCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade';
 import { Web3Public } from 'src/core';
 import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
@@ -17,6 +16,7 @@ import { TOKEN_WITH_FEE_ERRORS } from '@rsdk-features/cross-chain/constants/toke
 import { CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
 import { RubicDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 /**
  * Calculated Rubic cross chain trade.
  */
@@ -58,7 +58,7 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
                             cryptoFee: null
                         }
                     },
-                    EMPTY_ADDRESS
+                    EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams();
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);

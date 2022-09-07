@@ -30,8 +30,8 @@ import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
 import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
 import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-cross-chain-supported-blockchain';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export class ViaCrossChainTrade extends CrossChainTrade {
     /** @internal */
@@ -65,7 +65,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
                         itType: { from: undefined, to: undefined },
                         bridgeType: BRIDGE_TYPE.DE_BRIDGE
                     },
-                    EMPTY_ADDRESS
+                    EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);

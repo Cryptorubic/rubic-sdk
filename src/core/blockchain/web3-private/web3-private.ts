@@ -15,6 +15,7 @@ import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
 import { LowSlippageError, WrongNetworkError } from 'src/common';
 import { parseError } from 'src/common/utils/errors';
 import { TransactionConfig } from 'web3-core';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 /**
  * Class containing methods for executing the functions of contracts
@@ -269,7 +270,7 @@ export class Web3Private {
             });
         }
 
-        return Web3Pure.encodeMethodCall(
+        return EvmWeb3Pure.encodeMethodCall(
             tokenAddress,
             ERC20_TOKEN_ABI,
             'approve',

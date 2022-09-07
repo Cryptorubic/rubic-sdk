@@ -17,13 +17,13 @@ import {
     QUOTER_CONTRACT_ABI,
     QUOTER_CONTRACT_ADDRESS
 } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/quoter-contract-data';
-import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
 import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { UniswapV3RouterConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
 import { UniswapV3AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
 import { RubicSdkError, Token } from 'src/common';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
@@ -229,7 +229,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
                 if (!poolMethodArguments) {
                     throw new RubicSdkError('Method arguments array for pool has to be defined');
                 }
-                if (!Web3Pure.isZeroAddress(poolAddress)) {
+                if (!EvmWeb3Pure.isEmptyAddress(poolAddress)) {
                     return new LiquidityPool(
                         poolAddress,
                         poolMethodArguments.tokenA,

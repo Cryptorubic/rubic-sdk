@@ -7,7 +7,6 @@ import { Web3Private } from '@rsdk-core/blockchain/web3-private/web3-private';
 import { BatchCall } from '@rsdk-core/blockchain/web3-public/models/batch-call';
 import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public/models/contract-multicall-response';
 import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
-import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
 import { createTokenNativeAddressProxyInPathStartAndEnd } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
 import { Injector } from '@rsdk-core/sdk/injector';
@@ -30,6 +29,7 @@ import { AbiItem } from 'web3-utils';
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { Exact } from 'src/features/instant-trades/models/exact';
 import { PriceTokenAmount, Token } from 'src/common';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount;
@@ -173,7 +173,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
         this.path = createTokenNativeAddressProxyInPathStartAndEnd(
             this.wrappedPath,
-            Web3Pure.nativeTokenAddress
+            EvmWeb3Pure.nativeTokenAddress
         );
     }
 
@@ -232,7 +232,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         );
         const gasParams = this.getGasParams(options);
 
-        return Web3Pure.encodeMethodCall(
+        return EvmWeb3Pure.encodeMethodCall(
             this.contractAddress,
             (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
             methodName,

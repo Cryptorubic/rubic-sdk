@@ -11,9 +11,9 @@ import {
     ALGEBRA_SWAP_ROUTER_CONTRACT_ABI,
     ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS
 } from '@rsdk-features/instant-trades/dexes/polygon/algebra/constants/swap-router-contract-data';
-import { Web3Pure } from 'src/core';
 import { createTokenNativeAddressProxyInPathStartAndEnd } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { Token } from 'src/common';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export interface AlgebraTradeStruct extends UniswapV3AlgebraTradeStruct {
     route: AlgebraRoute;
@@ -44,7 +44,7 @@ export class AlgebraTrade extends UniswapV3AlgebraAbstractTrade {
         this.wrappedPath = this.route.path;
         this.path = createTokenNativeAddressProxyInPathStartAndEnd(
             this.route.path,
-            Web3Pure.nativeTokenAddress
+            EvmWeb3Pure.nativeTokenAddress
         );
     }
 

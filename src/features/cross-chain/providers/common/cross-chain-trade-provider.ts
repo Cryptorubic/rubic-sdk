@@ -11,9 +11,9 @@ import { parseError } from 'src/common/utils/errors';
 import { BlockchainName, Web3Pure } from 'src/core';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { Injector } from 'src/core/sdk/injector';
-import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { AbiItem } from 'web3-utils';
 import BigNumber from 'bignumber.js';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { commonCrossChainAbi } from './constants/common-cross-chain-abi';
 
 export abstract class CrossChainTradeProvider {
@@ -64,7 +64,7 @@ export abstract class CrossChainTradeProvider {
     ): Promise<BigNumber> {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 
-        if (providerAddress !== EMPTY_ADDRESS) {
+        if (!EvmWeb3Pure.isEmptyAddress(providerAddress)) {
             const integratorInfo = await web3PublicService.callContractMethod<
                 [boolean, number, number, number, number]
             >(contractAddress, contractAbi, 'integratorToFeeInfo', {
@@ -101,7 +101,7 @@ export abstract class CrossChainTradeProvider {
     ): Promise<number> {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 
-        if (providerAddress !== EMPTY_ADDRESS) {
+        if (!EvmWeb3Pure.isEmptyAddress(providerAddress)) {
             const integratorInfo = await web3PublicService.callContractMethod<[boolean, number]>(
                 contractAddress,
                 contractAbi,

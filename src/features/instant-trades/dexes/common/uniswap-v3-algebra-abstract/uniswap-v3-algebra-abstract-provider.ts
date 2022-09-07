@@ -26,9 +26,9 @@ import { UniswapV3TradeClass } from '@rsdk-features/instant-trades/dexes/common/
 import { UniswapV3AlgebraRoute } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
 import { getFromToTokensAmountsByExact } from '@rsdk-features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { AbiItem } from 'web3-utils';
 import { RequiredSwapCalculationOptions } from 'src/features/instant-trades/models/swap-calculation-options';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
@@ -52,7 +52,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         disableMultihops: false,
         deadlineMinutes: 20,
         slippageTolerance: 0.02,
-        wrappedAddress: EMPTY_ADDRESS,
+        wrappedAddress: EvmWeb3Pure.EMPTY_ADDRESS,
         fromAddress: ''
     };
 

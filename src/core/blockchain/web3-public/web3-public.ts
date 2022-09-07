@@ -28,6 +28,7 @@ import { DefaultHttpClient } from '@rsdk-common/http/default-http-client';
 import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
 import { RubicSdkError } from 'src/common';
 import { EventData } from 'web3-eth-contract';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 
@@ -112,11 +113,10 @@ export class Web3Public {
      * Gets account native or ERC-20 token balance in wei.
      * @param address Wallet address, whose balance you want to find out.
      * @param tokenAddress Address of the smart-contract corresponding to the token,
-     * {@link NATIVE_TOKEN_ADDRESS} is used as default.
      */
     public async getBalance(address: string, tokenAddress?: string): Promise<BigNumber> {
         let balance;
-        if (tokenAddress && !Web3Pure.isNativeAddress(tokenAddress)) {
+        if (tokenAddress && !EvmWeb3Pure.isNativeAddress(tokenAddress)) {
             balance = await this.getTokenBalance(address, tokenAddress);
         } else {
             balance = await this.web3.eth.getBalance(address);
@@ -285,7 +285,7 @@ export class Web3Public {
             ERC20_TOKEN_ABI as AbiItem[],
             tokensAddresses[0]
         );
-        const indexOfNativeCoin = tokensAddresses.findIndex(Web3Pure.isNativeAddress);
+        const indexOfNativeCoin = tokensAddresses.findIndex(EvmWeb3Pure.isNativeAddress);
         const promises: [Promise<MulticallResponse[]>?, Promise<BigNumber>?] = [];
 
         if (indexOfNativeCoin !== -1) {
@@ -419,7 +419,7 @@ export class Web3Public {
         userAddress: string
     ): Promise<void> {
         let balance: BigNumber;
-        if (Web3Pure.isNativeAddress(token.address)) {
+        if (EvmWeb3Pure.isNativeAddress(token.address)) {
             balance = await this.getBalance(userAddress);
         } else {
             balance = await this.getTokenBalance(userAddress, token.address);
@@ -441,7 +441,7 @@ export class Web3Public {
         tokenAddress: string,
         tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
     ): Promise<Partial<Record<SupportedTokenField, string>>> {
-        if (Web3Pure.isNativeAddress(tokenAddress)) {
+        if (EvmWeb3Pure.isNativeAddress(tokenAddress)) {
             const nativeToken = nativeTokensList[this.blockchainName];
             const conditionalReturns: ConditionalResult<
                 Partial<Record<SupportedTokenField, string>>
@@ -508,7 +508,7 @@ export class Web3Public {
         let notSave = false;
         const tokensInfo = results.map((contractCallResult, index) => {
             const tokenAddress = tokenAddresses[index]!;
-            if (Web3Pure.isNativeAddress(tokenAddress)) {
+            if (EvmWeb3Pure.isNativeAddress(tokenAddress)) {
                 const nativeToken = nativeTokensList[this.blockchainName];
                 return {
                     ...nativeToken,

@@ -1,9 +1,9 @@
 import BigNumber from 'bignumber.js';
-import { Web3Pure } from 'src/core';
 import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 import { RubicCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-cross-chain-contract-trade';
 import { RubicCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
 import { PriceTokenAmount, RubicSdkError } from 'src/common';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export class RubicDirectCrossChainContractTrade extends RubicCrossChainContractTrade {
     public readonly fromToken: PriceTokenAmount;
@@ -28,7 +28,7 @@ export class RubicDirectCrossChainContractTrade extends RubicCrossChainContractT
     }
 
     public getSecondPath(): string[] {
-        return [Web3Pure.addressToBytes32(this.token.address)];
+        return [EvmWeb3Pure.addressToBytes32(this.token.address)];
     }
 
     protected async modifyArgumentsForProvider(methodArguments: unknown[][]): Promise<void> {

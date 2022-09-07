@@ -1,13 +1,12 @@
-import { Web3Pure } from 'src/core';
 import { CrossChainInstantTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/cross-chain-instant-trade';
 import { AlgebraTrade } from '@rsdk-features/instant-trades/dexes/polygon/algebra/algebra-trade';
 import { AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/algebra-quoter-controller';
 import { DestinationCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
 import { v3LikeCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/v3-like-celer-swap-info';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { SwapVersion } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/provider-type.enum';
 import { ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS } from '@rsdk-features/instant-trades/dexes/polygon/algebra/constants/swap-router-contract-data';
 import { RubicSdkError } from 'src/common';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export class CrossChainAlgebraTrade implements CrossChainInstantTrade {
     readonly defaultDeadline = 999999999999999;
@@ -19,7 +18,9 @@ export class CrossChainAlgebraTrade implements CrossChainInstantTrade {
     }
 
     public getSecondPath(): string[] {
-        return this.instantTrade.wrappedPath.map(token => Web3Pure.addressToBytes32(token.address));
+        return this.instantTrade.wrappedPath.map(token =>
+            EvmWeb3Pure.addressToBytes32(token.address)
+        );
     }
 
     public async modifyArgumentsForProvider(methodArguments: unknown[][]): Promise<void> {
@@ -55,7 +56,7 @@ export class CrossChainAlgebraTrade implements CrossChainInstantTrade {
             receiverEOA: receiverAddress,
             integrator: integratorAddress,
             version: SwapVersion.V3,
-            path: [EMPTY_ADDRESS],
+            path: [EvmWeb3Pure.EMPTY_ADDRESS],
             pathV3,
             deadline,
             amountOutMinimum
