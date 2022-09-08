@@ -39,6 +39,7 @@ import { symbiosisTransitTokens } from 'src/features/cross-chain/providers/symbi
 import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
 import { ZappyProvider } from 'src/features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
+import { TooLowAmount } from 'src/common/errors/cross-chain/too-low-amount';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -216,7 +217,10 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             let rubicSdkError = CrossChainTradeProvider.parseError(err);
 
             if (err instanceof SymbiosisError && err.message) {
-                rubicSdkError = await this.checkMinMaxErrors(err, from, options.slippageTolerance);
+                rubicSdkError =
+                    err.code === ErrorCode.AMOUNT_LESS_THAN_FEE
+                        ? new TooLowAmount()
+                        : await this.checkMinMaxErrors(err, from, options.slippageTolerance);
             }
 
             return {
@@ -231,7 +235,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         from: PriceTokenAmount,
         slippage: number
     ): Promise<RubicSdkError> {
-        if (err.code === ErrorCode.AMOUNT_TOO_LOW || err.code === ErrorCode.AMOUNT_LESS_THAN_FEE) {
+        if (err.code === ErrorCode.AMOUNT_TOO_LOW) {
             const index = err.message!.lastIndexOf('$');
             const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
             const minAmount = await this.getFromTokenAmount(from, transitTokenAmount, 'min');

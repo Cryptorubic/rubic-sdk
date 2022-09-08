@@ -11,7 +11,10 @@ import {
     deBridgeCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/debridge-cross-chain-supported-blockchain';
 import { TransactionRequest } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-request';
-import { TransactionResponse } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
+import {
+    TransactionErrorResponse,
+    TransactionResponse
+} from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
 import { DebridgeCrossChainTrade } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade';
 import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-address';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
@@ -19,6 +22,8 @@ import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/c
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import BigNumber from 'bignumber.js';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
+import { RubicSdkError } from 'src/common';
+import { TooLowAmount } from 'src/common/errors/cross-chain/too-low-amount';
 
 export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -151,12 +156,13 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                     options.providerAddress
                 )
             };
-        } catch (err: unknown) {
+        } catch (err) {
             const rubicSdkError = CrossChainTradeProvider.parseError(err);
+            const debridgeApiError = this.parseDebridgeApiError(err);
 
             return {
                 trade: null,
-                error: rubicSdkError
+                error: debridgeApiError || rubicSdkError
             };
         }
     }
@@ -186,5 +192,21 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
             },
             cryptoFee: null
         };
+    }
+
+    private parseDebridgeApiError(httpErrorResponse: {
+        error: TransactionErrorResponse;
+    }): RubicSdkError | null {
+        if (httpErrorResponse.error.errorId === 'INCLUDED_GAS_FEE_NOT_COVERED_BY_INPUT_AMOUNT') {
+            return new TooLowAmount();
+        }
+
+        // @TODO handle other debridge API error codes:
+        // SOURCE_AND_DESTINATION_CHAINS_ARE_EQUAL
+        // CONNECTOR_1INCH_RETURNED_ERROR
+        // INVALID_QUERY_PARAMETERS
+        // INCLUDED_GAS_FEE_CANNOT_BE_ESTIMATED_FOR_TRANSACTION_BUNDLE
+
+        return null;
     }
 }
