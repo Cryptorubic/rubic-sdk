@@ -194,7 +194,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
 
             try {
                 await this.via.startRoute({
-                    fromAddress: this.fromContractAddress,
+                    fromAddress: this.walletAddress,
                     toAddress: options?.receiverAddress || this.walletAddress,
                     routeId: this.route.routeId,
                     txHash: transactionHash!
@@ -218,7 +218,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
         const swapTransaction = await this.via.buildTx({
             routeId: this.route.routeId,
-            fromAddress: this.fromContractAddress,
+            fromAddress: this.walletAddress,
             receiveAddress: options?.receiverAddress || this.walletAddress,
             numAction: 0
         });

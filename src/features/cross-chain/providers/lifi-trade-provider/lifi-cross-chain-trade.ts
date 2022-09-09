@@ -237,7 +237,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             ...firstStep,
             action: {
                 ...firstStep.action,
-                fromAddress: this.fromContractAddress,
+                fromAddress: this.walletAddress,
                 toAddress: receiverAddress || this.walletAddress
             },
             execution: {
