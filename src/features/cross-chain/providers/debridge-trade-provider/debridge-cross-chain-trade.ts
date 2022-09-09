@@ -41,7 +41,8 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
         transactionRequest: TransactionRequest
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as DeBridgeCrossChainSupportedBlockchain;
-        const walletAddress = Injector.web3Private.address;
+        const walletAddress =
+            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
         if (!walletAddress) {
             return null;
         }
@@ -172,7 +173,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
         };
 
         try {
-            await Injector.web3Private.tryExecuteContractMethod(
+            await this.web3Private.tryExecuteContractMethod(
                 contractAddress,
                 contractAbi,
                 methodName,

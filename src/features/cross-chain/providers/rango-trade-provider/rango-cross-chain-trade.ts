@@ -35,7 +35,8 @@ export class RangoCrossChainTrade extends CrossChainTrade {
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as RangoCrossChainSupportedBlockchain;
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-        const walletAddress = Injector.web3Private.address;
+        const walletAddress =
+            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
 
         if (!walletAddress) {
             return null;
@@ -181,7 +182,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
         };
 
         try {
-            await Injector.web3Private.tryExecuteContractMethod(
+            await this.web3Private.tryExecuteContractMethod(
                 contractAddress,
                 contractAbi,
                 methodName,

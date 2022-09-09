@@ -9,6 +9,7 @@ import BigNumber from 'bignumber.js';
 import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
 import { TradeType } from 'src/features';
 import { PriceToken, PriceTokenAmount } from 'src/common';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 
 /**
  * Abstract class for all instant trade providers.
@@ -26,9 +27,14 @@ export abstract class InstantTradeProvider {
      */
     public abstract get type(): TradeType;
 
+    protected get walletAddress(): string {
+        return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address;
+    }
+
     protected get web3Public(): Web3Public {
         return Injector.web3PublicService.getWeb3Public(this.blockchain);
     }
+
     /**
      * Calculates instant trade.
      * @param from Token to sell with input amount.

@@ -52,7 +52,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
     private readonly maxTransitTokens: number;
 
     private get walletAddress(): string | undefined {
-        return Injector.web3Private.address;
+        return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain).address;
     }
 
     @Cache

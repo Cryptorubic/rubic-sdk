@@ -30,7 +30,7 @@ export const uniswapV3PolygonTradeSpec = () =>
             const configuration = await chain.getConfiguration();
             await mockInjector(configuration);
             web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.POLYGON);
-            userAddress = Injector.web3Private.address;
+            userAddress = Injector.web3PrivateService.address;
             utils = new Utils(chain, web3Public);
         });
 

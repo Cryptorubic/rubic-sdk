@@ -1,9 +1,9 @@
 import {
     ChainId,
     CHAINS_PRIORITY,
+    PendingRequest,
     Symbiosis,
     Token as SymbiosisToken,
-    PendingRequest,
     WaitForComplete
 } from 'symbiosis-js-sdk';
 import { getSymbiosisConfig } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
@@ -11,15 +11,20 @@ import { Injector } from '@rsdk-core/sdk/injector';
 import BigNumber from 'bignumber.js';
 import { SwapTransactionOptions } from 'src/features';
 import { RubicSdkError, Token } from 'src/common';
-import { BlockchainName, BlockchainsInfo } from 'src/core';
-import { TransactionReceipt as EthersReceipt, Log as EthersLog } from '@ethersproject/providers';
+import { BlockchainName, BlockchainsInfo, Web3Private } from 'src/core';
+import { Log as EthersLog, TransactionReceipt as EthersReceipt } from '@ethersproject/providers';
 import { TransactionReceipt } from 'web3-eth';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 
 export class CrossChainSymbiosisManager {
     private readonly symbiosis = new Symbiosis(getSymbiosisConfig(), 'rubic');
 
+    private get web3Private(): Web3Private {
+        return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM);
+    }
+
     private get walletAddress(): string {
-        return Injector.web3Private.address;
+        return this.web3Private.address;
     }
 
     public getUserTrades(fromAddress?: string): Promise<PendingRequest[]> {
@@ -86,7 +91,7 @@ export class CrossChainSymbiosisManager {
             }
         };
 
-        return Injector.web3Private.trySendTransaction(
+        return this.web3Private.trySendTransaction(
             transactionRequest.to!,
             new BigNumber(transactionRequest.value?.toString() || 0),
             {

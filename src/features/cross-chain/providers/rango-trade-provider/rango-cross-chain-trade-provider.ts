@@ -9,7 +9,6 @@ import {
 } from 'rango-sdk-basic/lib';
 import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
-import { Injector } from 'src/core/sdk/injector';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
 import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
@@ -38,10 +37,6 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
     public readonly rango = new RangoClient(RANGO_API_KEY);
 
     public meta: MetaResponse | null = null;
-
-    public get walletAddress(): string {
-        return Injector.web3Private.address;
-    }
 
     public static isSupportedBlockchain(
         blockchain: BlockchainName

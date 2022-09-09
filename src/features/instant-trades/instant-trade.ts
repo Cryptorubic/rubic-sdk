@@ -15,7 +15,7 @@ import {
 import { Cache, PriceTokenAmount, Token, UnnecessaryApproveError } from 'src/common';
 import { TradeType } from 'src/features';
 import { parseError } from '@rsdk-common/utils/errors';
-import { TransactionOptions } from 'src/core';
+import { TransactionOptions, Web3Private } from 'src/core';
 import BigNumber from 'bignumber.js';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 
@@ -62,8 +62,12 @@ export abstract class InstantTrade {
         return new PriceTokenAmount({ ...this.to.asStruct, weiAmount: weiAmountOutMin });
     }
 
+    protected get web3Private(): Web3Private {
+        return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
+    }
+
     protected get walletAddress(): string {
-        return Injector.web3Private.address;
+        return this.web3Private.address;
     }
 
     /**
@@ -123,7 +127,7 @@ export abstract class InstantTrade {
                 ? this.from.weiAmount
                 : 'infinity';
 
-        return Injector.web3Private.approveTokens(
+        return this.web3Private.approveTokens(
             this.from.address,
             this.contractAddress,
             approveAmount,
@@ -145,7 +149,7 @@ export abstract class InstantTrade {
         value: BigNumber | 'infinity',
         options: TransactionOptions = {}
     ): Promise<TransactionConfig> {
-        return Injector.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
+        return this.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
     }
 
     protected async checkAllowanceAndApprove(
@@ -198,7 +202,7 @@ export abstract class InstantTrade {
     }
 
     private async checkBlockchainCorrect(): Promise<void | never> {
-        await Injector.web3Private.checkBlockchainCorrect(this.from.blockchain);
+        await this.web3Private.checkBlockchainCorrect(this.from.blockchain);
     }
 
     protected getGasParams(options: OptionsGasParams): TransactionGasParams {

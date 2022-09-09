@@ -4,6 +4,7 @@ import {
     BlockchainName,
     BlockchainsInfo,
     TransactionOptions,
+    Web3Private,
     Web3Pure
 } from 'src/core';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
@@ -95,8 +96,12 @@ export abstract class CrossChainTrade {
      */
     public abstract readonly feeInfo: FeeInfo;
 
+    protected get web3Private(): Web3Private {
+        return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
+    }
+
     protected get walletAddress(): string {
-        return Injector.web3Private.address;
+        return this.web3Private.address;
     }
 
     protected get networkFee(): BigNumber {
@@ -183,7 +188,7 @@ export abstract class CrossChainTrade {
                 ? this.from.weiAmount
                 : 'infinity';
 
-        return Injector.web3Private.approveTokens(
+        return this.web3Private.approveTokens(
             this.from.address,
             this.fromContractAddress,
             approveAmount,
@@ -205,7 +210,7 @@ export abstract class CrossChainTrade {
         value: BigNumber | 'infinity',
         options: TransactionOptions = {}
     ): Promise<TransactionConfig> {
-        return Injector.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
+        return this.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
     }
 
     protected async checkAllowanceAndApprove(
@@ -255,7 +260,7 @@ export abstract class CrossChainTrade {
     }
 
     protected async checkBlockchainCorrect(): Promise<void | never> {
-        await Injector.web3Private.checkBlockchainCorrect(this.from.blockchain);
+        await this.web3Private.checkBlockchainCorrect(this.from.blockchain);
     }
 
     protected checkUserBalance(): Promise<void | never> {

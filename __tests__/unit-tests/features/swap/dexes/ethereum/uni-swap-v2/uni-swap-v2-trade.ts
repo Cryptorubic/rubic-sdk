@@ -46,7 +46,7 @@ export const uniswapV2TradeSpec = () =>
             const configuration = await chain.getConfiguration();
             await mockInjector(configuration);
             web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ETHEREUM);
-            userAddress = Injector.web3Private.address;
+            userAddress = Injector.web3PrivateService.address;
         }, 20_000);
 
         test('Swap method must works with NATIVE-ERC20 trade', async () => {

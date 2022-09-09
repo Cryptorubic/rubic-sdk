@@ -61,9 +61,11 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         const estimateGasParams = this.getEstimateGasParams(from, to, exact, options, route);
         let gasLimit = estimateGasParams.defaultGasLimit;
 
-        const walletAddress = Injector.web3Private.address;
+        const walletAddress = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
+            from.blockchain
+        ).address;
         if (walletAddress && estimateGasParams.callData) {
-            const web3Public = Injector.web3PublicService.getWeb3Public(from.blockchain);
+            const web3Public = Injector.web3PublicService.getWeb3Public(fromToken.blockchain);
             const estimatedGas = await web3Public.getEstimatedGas(
                 contractAbi,
                 contractAddress,
@@ -104,7 +106,9 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
             estimateGasParams => estimateGasParams.defaultGasLimit
         );
 
-        const walletAddress = Injector.web3Private.address;
+        const walletAddress = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
+            fromToken.blockchain
+        ).address;
         if (
             walletAddress &&
             routesEstimateGasParams.every(estimateGasParams => estimateGasParams.callData)
@@ -215,7 +219,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         const { methodName, methodArguments } = this.getSwapRouterMethodData();
         const { gas, gasPrice } = this.getGasParams(options);
 
-        return Injector.web3Private.tryExecuteContractMethod(
+        return this.web3Private.tryExecuteContractMethod(
             this.contractAddress,
             this.contractAbi,
             methodName,

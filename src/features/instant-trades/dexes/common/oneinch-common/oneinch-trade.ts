@@ -156,7 +156,7 @@ export class OneinchTrade extends InstantTrade {
                 gasPrice
             };
 
-            return Injector.web3Private.trySendTransaction(
+            return this.web3Private.trySendTransaction(
                 apiTradeData.tx.to,
                 this.nativeSupportedFrom.isNative ? this.nativeSupportedFrom.stringWeiAmount : '0',
                 transactionOptions

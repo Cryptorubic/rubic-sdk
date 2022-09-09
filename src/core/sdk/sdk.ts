@@ -1,7 +1,5 @@
 import { DefaultHttpClient } from '@rsdk-common/http/default-http-client';
 import { HttpClient } from '@rsdk-common/models/http-client';
-import { Web3Private } from '@rsdk-core/blockchain/web3-private/web3-private';
-import { Web3PrivateFactory } from '@rsdk-core/blockchain/web3-private/web3-private-factory';
 import { Web3PublicService } from '@rsdk-core/blockchain/web3-public-service/web3-public-service';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { Configuration } from '@rsdk-core/sdk/models/configuration';
@@ -11,6 +9,7 @@ import { CrossChainSymbiosisManager } from '@rsdk-features/cross-chain/cross-cha
 import { CrossChainStatusManager } from 'src/features';
 import { TokensManager } from 'src/common';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { Web3PrivateService } from 'src/core/blockchain/web3-private-service/web3-private-service';
 
 /**
  * Base class to work with sdk.
@@ -51,8 +50,8 @@ export class SDK {
     /**
      * Can be used to send transactions and execute smart contracts methods.
      */
-    public get web3Private(): Web3Private {
-        return Injector.web3Private;
+    public get web3PrivateService(): Web3PrivateService {
+        return Injector.web3PrivateService;
     }
 
     /**
@@ -70,18 +69,18 @@ export class SDK {
      * to new configuration (even for entities created with other previous sdk instances).
      */
     public static async createSDK(configuration: Configuration): Promise<SDK> {
-        const [web3PublicService, web3Private, httpClient] = await Promise.all([
+        const [web3PublicService, web3PrivateService, httpClient] = await Promise.all([
             SDK.createWeb3PublicService(configuration),
-            SDK.createWeb3Private(configuration),
+            SDK.createWeb3PrivateService(configuration),
             SDK.createHttpClient(configuration)
         ]);
 
-        Injector.createInjector(web3PublicService, web3Private, httpClient);
+        Injector.createInjector(web3PublicService, web3PrivateService, httpClient);
         return new SDK(configuration.providerAddress || EvmWeb3Pure.EMPTY_ADDRESS);
     }
 
-    private static createWeb3Private(configuration: Configuration): Promise<Web3Private> {
-        return Web3PrivateFactory.createWeb3Private(configuration.walletProvider);
+    private static createWeb3PrivateService(configuration: Configuration): Web3PrivateService {
+        return new Web3PrivateService(configuration.walletProvider);
     }
 
     private static createWeb3PublicService(configuration: Configuration): Web3PublicService {
@@ -107,12 +106,12 @@ export class SDK {
      * Updates sdk configuration and sdk entities dependencies.
      */
     public async updateConfiguration(configuration: Configuration): Promise<void> {
-        const [web3PublicService, web3Private, httpClient] = await Promise.all([
+        const [web3PublicService, web3PrivateService, httpClient] = await Promise.all([
             SDK.createWeb3PublicService(configuration),
-            SDK.createWeb3Private(configuration),
+            SDK.createWeb3PrivateService(configuration),
             SDK.createHttpClient(configuration)
         ]);
 
-        Injector.createInjector(web3PublicService, web3Private, httpClient);
+        Injector.createInjector(web3PublicService, web3PrivateService, httpClient);
     }
 }

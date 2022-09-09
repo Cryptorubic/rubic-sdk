@@ -15,6 +15,7 @@ import { AbiItem } from 'web3-utils';
 import BigNumber from 'bignumber.js';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { commonCrossChainAbi } from './constants/common-cross-chain-abi';
 
 export abstract class CrossChainTradeProvider {
@@ -25,7 +26,7 @@ export abstract class CrossChainTradeProvider {
     public abstract readonly type: CrossChainTradeType;
 
     protected get walletAddress(): string {
-        return Injector.web3Private.address;
+        return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address;
     }
 
     /**

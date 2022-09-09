@@ -43,10 +43,6 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         return TRADE_TYPE.ONE_INCH;
     }
 
-    private get walletAddress(): string {
-        return Injector.web3Private.address;
-    }
-
     @Cache
     private get apiBaseUrl(): string {
         return getOneinchApiBaseUrl(this.blockchain);

@@ -3,7 +3,6 @@ import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { LowSlippageDeflationaryTokenError } from '@rsdk-common/errors/swap/low-slippage-deflationary-token.error';
 import { tryExecuteAsync } from '@rsdk-common/utils/functions';
 import { BlockchainName, EvmBlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { Web3Private } from '@rsdk-core/blockchain/web3-private/web3-private';
 import { BatchCall } from '@rsdk-core/blockchain/web3-public-service/models/batch-call';
 import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public-service/models/contract-multicall-response';
 import { createTokenNativeAddressProxyInPathStartAndEnd } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
@@ -30,6 +29,7 @@ import { Exact } from 'src/features/instant-trades/models/exact';
 import { PriceTokenAmount, Token } from 'src/common';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { Web3Private } from 'src/core';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount<EvmBlockchainName>;
@@ -201,7 +201,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         const methodName = await this.getMethodName(options);
         const swapParameters = this.getSwapParametersByMethod(methodName, options);
 
-        return Injector.web3Private.tryExecuteContractMethod(...swapParameters);
+        return this.web3Private.tryExecuteContractMethod(...swapParameters);
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
@@ -330,7 +330,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         return parameters.slice(0, 3).concat([
             {
                 methodArguments: parameters[3],
-                from: fromAddress || Injector.web3Private.address,
+                from: fromAddress || this.walletAddress,
                 ...(parameters[4]?.value && { value: parameters[4]?.value })
             }
         ]) as Parameters<InstanceType<typeof EvmWeb3Public>['callContractMethod']>;

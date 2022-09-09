@@ -7,7 +7,6 @@ import {
     symbiosisCrossChainSupportedBlockchains
 } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { compareAddresses, PriceToken, PriceTokenAmount, RubicSdkError } from 'src/common';
-import { Injector } from '@rsdk-core/sdk/injector';
 import {
     ErrorCode,
     Symbiosis,
@@ -65,10 +64,6 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         // [BLOCKCHAIN_NAME.AURORA]: new OneinchAuroraProvider()
         [BLOCKCHAIN_NAME.BITCOIN]: new OneinchEthereumProvider()
     };
-
-    protected get walletAddress(): string {
-        return Injector.web3Private.address;
-    }
 
     public isSupportedBlockchains(
         fromBlockchain: BlockchainName,

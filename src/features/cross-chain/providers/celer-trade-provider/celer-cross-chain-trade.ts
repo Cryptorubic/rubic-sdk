@@ -42,7 +42,8 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
         maxSlippage: number
     ): Promise<GasData | null> {
         const fromBlockchain = fromTrade.blockchain;
-        const walletAddress = Injector.web3Private.address;
+        const walletAddress =
+            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
         if (!walletAddress) {
             return null;
         }
@@ -196,7 +197,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
                 transactionHash = hash;
             };
 
-            await Injector.web3Private.tryExecuteContractMethod(
+            await this.web3Private.tryExecuteContractMethod(
                 contractAddress,
                 contractAbi,
                 methodName,

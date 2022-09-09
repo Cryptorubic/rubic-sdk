@@ -42,7 +42,8 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         route: IRoute
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain;
-        const walletAddress = Injector.web3Private.address;
+        const walletAddress =
+            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
         if (!walletAddress) {
             return null;
         }
@@ -180,7 +181,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         };
 
         try {
-            await Injector.web3Private.tryExecuteContractMethod(
+            await this.web3Private.tryExecuteContractMethod(
                 contractAddress,
                 contractAbi,
                 methodName,

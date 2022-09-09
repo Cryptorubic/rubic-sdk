@@ -37,6 +37,7 @@ import { ViaCrossChainTrade } from 'src/features/cross-chain/providers/via-trade
 import { DebridgeCrossChainTrade } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade';
 import { Injector } from 'src/core/sdk/injector';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCrossChainCalculationOptions,
@@ -354,7 +355,7 @@ export class CrossChainManager {
             providerAddress: this.providerAddress,
             slippageTolerance: CrossChainManager.defaultSlippageTolerance * 2,
             deadline: CrossChainManager.defaultDeadline,
-            toAddress: Injector.web3Private.address
+            toAddress: Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address
         });
     }
 

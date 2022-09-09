@@ -118,7 +118,7 @@ export class LifiTrade extends InstantTrade {
         try {
             const { data, gasLimit, gasPrice } = await this.getTransactionData();
 
-            return await Injector.web3Private.trySendTransaction(
+            return await this.web3Private.trySendTransaction(
                 this.contractAddress,
                 this.from.isNative ? this.from.stringWeiAmount : '0',
                 {

@@ -2,6 +2,7 @@ import { HttpClient } from '@rsdk-common/models/http-client';
 import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import Web3 from 'web3';
 import { provider } from 'web3-core';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 
 /**
  * Main sdk configuration.
@@ -58,22 +59,16 @@ export interface RpcProvider {
      * Specifies timeout in ms after which `mainRpc` will be replaced with `spareRpc` (if `spareRpc` is defined)
      */
     readonly mainRpcTimeout?: number;
-
-    /**
-     * Before the `mainRpc` link is applied to the sdk, all the `mainRpc` links
-     * will be health-checked by receiving and verifying the predefined data.
-     * If an error occurs during the request the `mainRpc` will be replaced with a spare one.
-     * This `healthCheckTimeout` parameter allows you to set the maximum allowable timeout when
-     * checking the `mainRpc`.
-     * @deprecated
-     */
-    readonly healthCheckTimeout?: number;
 }
 
 /**
  * Stores wallet core and information about current user, used to make `send` transactions.
  */
 export interface WalletProvider {
+    readonly [CHAIN_TYPE.EVM]?: WalletProviderCore;
+}
+
+export interface WalletProviderCore {
     /**
      * Core provider.
      */
@@ -83,10 +78,4 @@ export interface WalletProvider {
      * User wallet address.
      */
     readonly address: string;
-
-    /**
-     * Selected chain in user wallet.
-     * @deprecated
-     */
-    readonly chainId?: number | string;
 }

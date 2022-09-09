@@ -36,7 +36,8 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
         cryptoFeeToken: PriceTokenAmount
     ): Promise<GasData | null> {
         const fromBlockchain = fromTrade.blockchain;
-        const walletAddress = Injector.web3Private.address;
+        const walletAddress =
+            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
         if (!walletAddress) {
             console.debug('Cannot calculate gas data before user logged in');
             return null;
@@ -246,7 +247,7 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
         };
 
         try {
-            await Injector.web3Private.tryExecuteContractMethod(
+            await this.web3Private.tryExecuteContractMethod(
                 contractAddress,
                 contractAbi,
                 methodName,

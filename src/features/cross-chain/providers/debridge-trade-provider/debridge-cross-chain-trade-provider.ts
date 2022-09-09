@@ -35,10 +35,6 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.DEBRIDGE;
 
-    protected get walletAddress(): string {
-        return Injector.web3Private.address;
-    }
-
     public isSupportedBlockchains(
         fromBlockchain: BlockchainName,
         toBlockchain: BlockchainName

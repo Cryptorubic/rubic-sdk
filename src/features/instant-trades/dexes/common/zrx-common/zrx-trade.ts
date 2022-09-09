@@ -1,4 +1,3 @@
-import { Injector } from '@rsdk-core/sdk/injector';
 import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
 import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
 import { TRADE_TYPE, TradeType } from 'src/features';
@@ -60,16 +59,12 @@ export class ZrxTrade extends InstantTrade {
 
         const { gas, gasPrice } = this.getGasParams(options);
 
-        return Injector.web3Private.trySendTransaction(
-            this.apiTradeData.to,
-            this.apiTradeData.value,
-            {
-                onTransactionHash: options.onConfirm,
-                data: this.apiTradeData.data,
-                gas,
-                gasPrice
-            }
-        );
+        return this.web3Private.trySendTransaction(this.apiTradeData.to, this.apiTradeData.value, {
+            onTransactionHash: options.onConfirm,
+            data: this.apiTradeData.data,
+            gas,
+            gasPrice
+        });
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
