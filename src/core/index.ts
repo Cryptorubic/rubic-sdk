@@ -8,5 +8,4 @@ export { Configuration, RpcProvider, WalletProvider } from './sdk/models/configu
 
 export type { BasicTransactionOptions } from './blockchain/models/basic-transaction-options';
 export type { Blockchain } from './blockchain/models/blockchain';
-export type { TokenBaseStruct } from '@rsdk-features/../common/tokens-manager/models/token-base-struct';
 export type { TransactionOptions } from './blockchain/models/transaction-options';

@@ -8,8 +8,7 @@ import { TokenBaseStruct } from 'src/common/tokens-manager/models/token-base-str
 import { Injector } from 'src/core/sdk/injector';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { BlockchainsInfo } from 'src/core';
+import { BlockchainsInfo, Web3Pure } from 'src/core';
 
 export type TokenStruct<T extends BlockchainName = BlockchainName> = {
     blockchain: T;
@@ -113,7 +112,9 @@ export class Token<T extends BlockchainName = BlockchainName> {
     public readonly decimals: number;
 
     public get isNative(): boolean {
-        return EvmWeb3Pure.isNativeAddress(this.address);
+        return Web3Pure[BlockchainsInfo.getChainType(this.blockchain)].isNativeAddress(
+            this.address
+        );
     }
 
     constructor(tokenStruct: TokenStruct<T>) {
