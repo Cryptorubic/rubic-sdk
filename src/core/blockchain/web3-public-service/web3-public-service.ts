@@ -8,24 +8,26 @@ import { RpcListProvider } from 'src/core/blockchain/web3-public-service/constan
 import { HealthcheckError } from 'src/common';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 import { BlockchainsInfo } from 'src/core';
-import { GetWeb3Public } from 'src/core/blockchain/web3-public-service/models/get-web3-public';
+import { Web3PublicStorage } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 
 export class Web3PublicService {
     private static readonly mainRpcDefaultTimeout = 10_000;
 
     public readonly rpcListProvider: Partial<Record<BlockchainName, RpcListProvider>>;
 
-    private readonly web3PublicStorage: Partial<Record<EvmBlockchainName, EvmWeb3Public>> = {};
+    private readonly web3PublicStorage: Web3PublicStorage = {};
 
-    public getWeb3Public: GetWeb3Public = blockchainName => {
-        const web3Public = this.web3PublicStorage[blockchainName];
+    public getWeb3Public(blockchainName: EvmBlockchainName): EvmWeb3Public;
+    public getWeb3Public(blockchainName: BlockchainName): never;
+    public getWeb3Public(blockchainName: BlockchainName) {
+        const web3Public = this.web3PublicStorage[blockchainName as keyof Web3PublicStorage];
         if (!web3Public) {
             throw new RubicSdkError(
                 `Provider for ${blockchainName} was not initialized. Pass rpc link for this blockchain to sdk configuration object.`
             );
         }
         return web3Public;
-    };
+    }
 
     constructor(rpcList: Partial<Record<BlockchainName, RpcProvider>>) {
         this.rpcListProvider = this.parseRpcList(rpcList);
