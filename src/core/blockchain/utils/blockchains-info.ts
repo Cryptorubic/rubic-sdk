@@ -40,7 +40,7 @@ export class BlockchainsInfo {
         )! as Blockchain<T>;
     }
 
-    public static getChainType(blockchainName: BlockchainName): CHAIN_TYPE | never {
+    public static getChainType(blockchainName: BlockchainName): CHAIN_TYPE {
         if (this.isEvmBlockchainName(blockchainName)) {
             return CHAIN_TYPE.EVM;
         }

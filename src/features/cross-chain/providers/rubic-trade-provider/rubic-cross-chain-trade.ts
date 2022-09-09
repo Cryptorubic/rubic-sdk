@@ -17,6 +17,7 @@ import { RubicDirectCrossChainContractTrade } from 'src/features/cross-chain/pro
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 /**
  * Calculated Rubic cross chain trade.
  */
@@ -91,7 +92,7 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
 
     public readonly transitFeeToken: PriceTokenAmount;
 
-    public readonly from: PriceTokenAmount;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount;
 

@@ -4,7 +4,6 @@ import {
     BlockchainName,
     BlockchainsInfo,
     TransactionOptions,
-    Web3Private,
     Web3Pure
 } from 'src/core';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
@@ -26,6 +25,8 @@ import { Network, validate } from 'bitcoin-address-validation';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private';
 
 /**
  * Abstract class for all cross chain providers' trades.
@@ -68,7 +69,7 @@ export abstract class CrossChainTrade {
     /**
      * Token to sell with input amount.
      */
-    public abstract readonly from: PriceTokenAmount;
+    public abstract readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     /**
      * Token to get with output amount.
@@ -96,7 +97,7 @@ export abstract class CrossChainTrade {
      */
     public abstract readonly feeInfo: FeeInfo;
 
-    protected get web3Private(): Web3Private {
+    protected get web3Private(): EvmWeb3Private {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
     }
 

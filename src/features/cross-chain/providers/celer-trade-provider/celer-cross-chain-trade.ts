@@ -21,6 +21,7 @@ import { CelerDirectCrossChainContractTrade } from 'src/features/cross-chain/pro
 import { PriceTokenAmount } from 'src/common';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 /**
  * Calculated Celer cross chain trade.
@@ -97,7 +98,7 @@ export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
 
     public readonly transitFeeToken: PriceTokenAmount;
 
-    public readonly from: PriceTokenAmount;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount;
 

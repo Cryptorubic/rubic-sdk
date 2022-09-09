@@ -15,9 +15,10 @@ import {
 import { Cache, PriceTokenAmount, Token, UnnecessaryApproveError } from 'src/common';
 import { TradeType } from 'src/features';
 import { parseError } from '@rsdk-common/utils/errors';
-import { TransactionOptions, Web3Private } from 'src/core';
+import { TransactionOptions } from 'src/core';
 import BigNumber from 'bignumber.js';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private';
 
 /**
  * Abstract class for all instant trade providers' trades.
@@ -62,7 +63,7 @@ export abstract class InstantTrade {
         return new PriceTokenAmount({ ...this.to.asStruct, weiAmount: weiAmountOutMin });
     }
 
-    protected get web3Private(): Web3Private {
+    protected get web3Private(): EvmWeb3Private {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
     }
 

@@ -29,7 +29,7 @@ import { Exact } from 'src/features/instant-trades/models/exact';
 import { PriceTokenAmount, Token } from 'src/common';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
-import { Web3Private } from 'src/core';
+import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount<EvmBlockchainName>;
@@ -305,7 +305,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         method: string,
         options: SwapTransactionOptions,
         fromAddress?: string
-    ): Parameters<InstanceType<typeof Web3Private>['executeContractMethod']> {
+    ): Parameters<InstanceType<typeof EvmWeb3Private>['executeContractMethod']> {
         const value = this.nativeValueToSend;
         const { gas, gasPrice } = this.getGasParams(options);
 
@@ -324,7 +324,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     }
 
     private convertSwapParametersToCallParameters(
-        parameters: Parameters<InstanceType<typeof Web3Private>['executeContractMethod']>,
+        parameters: Parameters<InstanceType<typeof EvmWeb3Private>['executeContractMethod']>,
         fromAddress?: string
     ): Parameters<InstanceType<typeof EvmWeb3Public>['callContractMethod']> {
         return parameters.slice(0, 3).concat([
