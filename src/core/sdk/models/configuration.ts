@@ -65,6 +65,7 @@ export interface RpcProvider {
      * If an error occurs during the request the `mainRpc` will be replaced with a spare one.
      * This `healthCheckTimeout` parameter allows you to set the maximum allowable timeout when
      * checking the `mainRpc`.
+     * @deprecated
      */
     readonly healthCheckTimeout?: number;
 }

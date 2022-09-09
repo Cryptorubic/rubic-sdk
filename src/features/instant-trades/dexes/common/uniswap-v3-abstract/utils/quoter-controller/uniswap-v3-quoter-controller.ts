@@ -4,8 +4,7 @@ import {
     LiquidityPool
 } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
 import { compareAddresses } from '@rsdk-common/utils/blockchain';
-import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
-import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
+import { MethodData } from '@rsdk-core/blockchain/web3-public-service/models/method-data';
 import {
     FACTORY_CONTRACT_ABI,
     FACTORY_CONTRACT_ADDRESS
@@ -17,13 +16,14 @@ import {
     QUOTER_CONTRACT_ABI,
     QUOTER_CONTRACT_ADDRESS
 } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/quoter-contract-data';
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { EvmBlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { UniswapV3RouterConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
 import { UniswapV3AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
 import { RubicSdkError, Token } from 'src/common';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
@@ -120,12 +120,12 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
 
     private readonly feeAmounts: FeeAmount[] = [500, 3000, 10000];
 
-    private get web3Public(): Web3Public {
+    private get web3Public(): EvmWeb3Public {
         return Injector.web3PublicService.getWeb3Public(this.blockchain);
     }
 
     constructor(
-        private readonly blockchain: BlockchainName,
+        private readonly blockchain: EvmBlockchainName,
         private readonly routerConfiguration: UniswapV3RouterConfiguration<string>
     ) {}
 

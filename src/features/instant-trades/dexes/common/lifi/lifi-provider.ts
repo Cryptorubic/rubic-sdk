@@ -11,6 +11,7 @@ import BigNumber from 'bignumber.js';
 import { Injector } from 'src/core/sdk/injector';
 import { Token } from 'src/common/tokens-manager/tokens/token';
 import { LifiCalculationOptions } from 'src/features/instant-trades/dexes/common/lifi/models/lifi-calculation-options';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export class LifiProvider {
     private readonly lifi = new LIFI();
@@ -23,7 +24,7 @@ export class LifiProvider {
     constructor() {}
 
     public async calculate(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
         disabledProviders: TradeType[],
         options?: LifiCalculationOptions
@@ -105,7 +106,7 @@ export class LifiProvider {
     }
 
     private async getGasFeeInfo(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount,
         route: Route
     ): Promise<GasFeeInfo | null> {
@@ -136,7 +137,11 @@ export class LifiProvider {
         }
     }
 
-    private async getPath(step: Step, from: Token, to: Token): Promise<ReadonlyArray<Token>> {
+    private async getPath(
+        step: Step,
+        from: Token<EvmBlockchainName>,
+        to: Token
+    ): Promise<ReadonlyArray<Token>> {
         const estimatedPath = step.estimate.data.path;
         return estimatedPath
             ? await Token.createTokens(estimatedPath, from.blockchain)

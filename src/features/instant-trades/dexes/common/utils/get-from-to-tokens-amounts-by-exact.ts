@@ -1,16 +1,17 @@
 import BigNumber from 'bignumber.js';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
 import { PriceToken, PriceTokenAmount } from 'src/common';
+import { BlockchainName } from 'src/core';
 
-export function getFromToTokensAmountsByExact(
-    fromToken: PriceToken,
-    toToken: PriceToken,
+export function getFromToTokensAmountsByExact<T extends BlockchainName>(
+    fromToken: PriceToken<T>,
+    toToken: PriceToken<T>,
     exact: Exact,
     initialWeiAmount: BigNumber,
     routeWeiAmount: BigNumber
 ): {
-    from: PriceTokenAmount;
-    to: PriceTokenAmount;
+    from: PriceTokenAmount<T>;
+    to: PriceTokenAmount<T>;
 } {
     const fromAmount = exact === 'input' ? initialWeiAmount : routeWeiAmount;
     const toAmount = exact === 'output' ? initialWeiAmount : routeWeiAmount;

@@ -15,6 +15,7 @@ import { Cache, PriceToken, PriceTokenAmount } from 'src/common';
 import { TRADE_TYPE, TradeType } from 'src/features';
 import { combineOptions } from 'src/common/utils/options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 type ZrxSwapCalculationOptions = Omit<
     RequiredSwapCalculationOptions,
@@ -41,8 +42,8 @@ export abstract class ZrxAbstractProvider extends InstantTradeProvider {
     }
 
     public async calculate(
-        from: PriceTokenAmount,
-        to: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        to: PriceToken<EvmBlockchainName>,
         options?: SwapCalculationOptions
     ): Promise<ZrxTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);

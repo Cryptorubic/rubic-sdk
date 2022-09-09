@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { BlockchainsInfo, Web3Public, Web3Pure } from 'src/core';
+import { BlockchainsInfo, Web3Pure } from 'src/core';
 import {
     BridgeType,
     SwapTransactionOptions,
@@ -19,6 +19,8 @@ import {
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 import { RANGO_CONTRACT_ADDRESSES } from './constants/contract-address';
 import { RangoCrossChainSupportedBlockchain } from './constants/rango-cross-chain-supported-blockchain';
 import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';
@@ -28,8 +30,8 @@ import { RANGO_BLOCKCHAIN_NAME } from './constants/rango-blockchain-name';
 export class RangoCrossChainTrade extends CrossChainTrade {
     /** @internal */
     public static async getGasData(
-        from: PriceTokenAmount,
-        to: PriceTokenAmount
+        from: PriceTokenAmount<EvmBlockchainName>,
+        to: PriceTokenAmount<EvmBlockchainName>
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as RangoCrossChainSupportedBlockchain;
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
@@ -97,13 +99,13 @@ export class RangoCrossChainTrade extends CrossChainTrade {
 
     public readonly feeInfo: FeeInfo;
 
-    public readonly fromWeb3Public: Web3Public;
+    public readonly fromWeb3Public: EvmWeb3Public;
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RANGO;
 
-    public readonly from: PriceTokenAmount;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly to: PriceTokenAmount;
+    public readonly to: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly slippageTolerance: number;
 
@@ -133,8 +135,8 @@ export class RangoCrossChainTrade extends CrossChainTrade {
 
     constructor(
         crossChainTrade: {
-            from: PriceTokenAmount;
-            to: PriceTokenAmount;
+            from: PriceTokenAmount<EvmBlockchainName>;
+            to: PriceTokenAmount<EvmBlockchainName>;
             toTokenAmountMin: BigNumber;
             slippageTolerance: number;
             feeInfo: FeeInfo;

@@ -25,11 +25,12 @@ import {
 } from '@rsdk-features/instant-trades/models/gas-params';
 import { OneinchSwapRequest } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-request';
 import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 type OneinchTradeStruct = {
     contractAddress: string;
-    from: PriceTokenAmount;
-    to: PriceTokenAmount;
+    from: PriceTokenAmount<EvmBlockchainName>;
+    to: PriceTokenAmount<EvmBlockchainName>;
     slippageTolerance: number;
     disableMultihops: boolean;
     path: ReadonlyArray<Token>;
@@ -55,9 +56,9 @@ export class OneinchTrade extends InstantTrade {
     /** @internal */
     public readonly contractAddress: string;
 
-    public readonly from: PriceTokenAmount;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly to: PriceTokenAmount;
+    public readonly to: PriceTokenAmount<EvmBlockchainName>;
 
     private readonly nativeSupportedFrom: PriceTokenAmount;
 

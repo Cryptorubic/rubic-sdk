@@ -19,6 +19,7 @@ import { Cache, PriceToken, PriceTokenAmount, Token } from 'src/common';
 import { BlockchainsInfo } from 'src/core';
 import { TRADE_TYPE, TradeType } from 'src/features';
 import { MarkRequired } from 'ts-essentials';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 type OneinchSwapCalculationOptions = MarkRequired<
     Omit<RequiredSwapCalculationOptions, 'deadlineMinutes'>,
@@ -65,16 +66,16 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
      * @param options Additional options.
      */
     public async calculateExactOutputAmount(
-        from: PriceToken,
-        to: PriceTokenAmount,
+        from: PriceToken<EvmBlockchainName>,
+        to: PriceTokenAmount<EvmBlockchainName>,
         options?: SwapCalculationOptions
     ): Promise<BigNumber> {
         return (await this.calculate(to, from, options)).to.tokenAmount;
     }
 
     public async calculate(
-        from: PriceTokenAmount,
-        toToken: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         options?: SwapCalculationOptions
     ): Promise<OneinchTrade> {
         const fullOptions = combineOptions<OneinchSwapCalculationOptions>(

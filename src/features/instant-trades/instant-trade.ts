@@ -7,8 +7,7 @@ import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
 import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
-import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
-import { BLOCKCHAIN_NAME, BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import {
     OptionsGasParams,
     TransactionGasParams
@@ -18,6 +17,7 @@ import { TradeType } from 'src/features';
 import { parseError } from '@rsdk-common/utils/errors';
 import { TransactionOptions } from 'src/core';
 import BigNumber from 'bignumber.js';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 
 /**
  * Abstract class for all instant trade providers' trades.
@@ -45,7 +45,7 @@ export abstract class InstantTrade {
 
     protected abstract readonly contractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
-    protected readonly web3Public: Web3Public;
+    protected readonly web3Public: EvmWeb3Public;
 
     /**
      * Type of instant trade provider.
@@ -74,7 +74,7 @@ export abstract class InstantTrade {
         return this.from.calculatePriceImpactPercent(this.to);
     }
 
-    protected constructor(blockchain: BlockchainName) {
+    protected constructor(blockchain: EvmBlockchainName) {
         this.web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
     }
 

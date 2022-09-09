@@ -1,4 +1,3 @@
-import { BlockchainName } from 'src/core';
 import { AbiItem } from 'web3-utils';
 import { CelerSwapMethod } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-swap-methods';
 import {
@@ -11,10 +10,11 @@ import { celerCrossChainContractAbi } from '@rsdk-features/cross-chain/providers
 import { CelerCrossChainContractData } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
 import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import { RubicSdkError } from 'src/common';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export abstract class CelerCrossChainContractTrade extends CrossChainContractTrade {
     protected constructor(
-        blockchain: BlockchainName,
+        blockchain: EvmBlockchainName,
         public readonly contract: CelerCrossChainContractData,
         providerIndex: number
     ) {

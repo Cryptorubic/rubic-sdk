@@ -4,18 +4,19 @@ import { RubicCrossChainContractTrade } from '@rsdk-features/cross-chain/provide
 import { RubicCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
 import { PriceTokenAmount, RubicSdkError } from 'src/common';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export class RubicDirectCrossChainContractTrade extends RubicCrossChainContractTrade {
-    public readonly fromToken: PriceTokenAmount;
+    public readonly fromToken: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly toToken: PriceTokenAmount;
+    public readonly toToken: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly toTokenAmountMin: BigNumber;
 
     constructor(
         blockchain: RubicCrossChainSupportedBlockchain,
         contract: CrossChainContractData,
-        private readonly token: PriceTokenAmount
+        private readonly token: PriceTokenAmount<EvmBlockchainName>
     ) {
         super(blockchain, contract, 0);
         this.fromToken = this.token;

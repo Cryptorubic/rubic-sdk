@@ -5,10 +5,11 @@ import { crossChainContractAbiV2 } from '@rsdk-features/cross-chain/providers/ru
 import { UniswapV3AlgebraAbstractProvider } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
 import { crossChainContractAbiV3 } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/cross-chain-contract-abi-v3';
 import { crossChainContractAbiInch } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/cross-chain-contract-abi-inch';
-import { BlockchainName, Web3Pure } from 'src/core';
+import { Web3Pure } from 'src/core';
 import { RubicCrossChainContractData } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/rubic-cross-chain-contract-data';
 import { RubicSdkError } from 'src/common';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 enum TO_OTHER_BLOCKCHAIN_SWAP_METHOD {
     SWAP_TOKENS = 'swapTokensToOtherBlockchain',
@@ -22,7 +23,7 @@ enum TO_USER_SWAP_METHOD {
 
 export abstract class RubicCrossChainContractTrade extends CrossChainContractTrade {
     protected constructor(
-        blockchain: BlockchainName,
+        blockchain: EvmBlockchainName,
         public readonly contract: RubicCrossChainContractData,
         providerIndex: number
     ) {

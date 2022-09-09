@@ -14,6 +14,7 @@ import { Injector } from 'src/core/sdk/injector';
 import { AbiItem } from 'web3-utils';
 import BigNumber from 'bignumber.js';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { commonCrossChainAbi } from './constants/common-cross-chain-abi';
 
 export abstract class CrossChainTradeProvider {
@@ -57,7 +58,7 @@ export abstract class CrossChainTradeProvider {
      * @internal
      */
     protected async getFixedFee(
-        fromBlockchain: BlockchainName,
+        fromBlockchain: EvmBlockchainName,
         providerAddress: string,
         contractAddress: string,
         contractAbi: AbiItem[]
@@ -94,7 +95,7 @@ export abstract class CrossChainTradeProvider {
      * @internal
      */
     protected async getFeePercent(
-        fromBlockchain: BlockchainName,
+        fromBlockchain: EvmBlockchainName,
         providerAddress: string,
         contractAddress: string,
         contractAbi: AbiItem[]
@@ -125,7 +126,7 @@ export abstract class CrossChainTradeProvider {
     }
 
     protected async checkContractState(
-        fromBlockchain: BlockchainName,
+        fromBlockchain: EvmBlockchainName,
         rubicRouter: string
     ): Promise<void> {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);

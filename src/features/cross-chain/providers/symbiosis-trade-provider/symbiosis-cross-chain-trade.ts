@@ -5,7 +5,7 @@ import {
     TradeType
 } from 'src/features';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
-import { BLOCKCHAIN_NAME, BlockchainsInfo, Web3Public, Web3Pure } from 'src/core';
+import { BLOCKCHAIN_NAME, BlockchainsInfo, Web3Pure } from 'src/core';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { SYMBIOSIS_CONTRACT_ADDRESS } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
 import { SymbiosisCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
@@ -17,6 +17,8 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 /**
  * Calculated Symbiosis cross chain trade.
@@ -29,10 +31,10 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
 
     /** @internal */
     public static async getGasData(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount
     ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
+        const fromBlockchain = from.blockchain;
         const walletAddress = Injector.web3Private.address;
         if (!walletAddress) {
             return null;
@@ -89,7 +91,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
 
     public readonly itType: { from: TradeType; to: TradeType };
 
-    public readonly from: PriceTokenAmount;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount;
 
@@ -107,7 +109,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         receiver?: string
     ) => Promise<{ transactionRequest: TransactionRequest }>;
 
-    protected readonly fromWeb3Public: Web3Public;
+    protected readonly fromWeb3Public: EvmWeb3Public;
 
     private get fromBlockchain(): SymbiosisCrossChainSupportedBlockchain {
         return this.from.blockchain as SymbiosisCrossChainSupportedBlockchain;
@@ -119,7 +121,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
 
     constructor(
         crossChainTrade: {
-            from: PriceTokenAmount;
+            from: PriceTokenAmount<EvmBlockchainName>;
             to: PriceTokenAmount;
             swapFunction: (
                 fromAddress: string,

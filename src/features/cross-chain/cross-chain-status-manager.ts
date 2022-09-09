@@ -1,6 +1,6 @@
 /* eslint-disable no-debugger */
 import { TransactionReceipt } from 'web3-eth';
-import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo } from 'src/core';
+import { BLOCKCHAIN_NAME, BlockchainsInfo } from 'src/core';
 import { Injector } from 'src/core/sdk/injector';
 import { celerCrossChainEventStatusesAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-event-statuses-abi';
 import { LogsDecoder } from 'src/features/cross-chain/utils/decode-logs';
@@ -15,6 +15,8 @@ import {
     CrossChainTxStatus,
     CrossChainTradeData
 } from 'src/features';
+import { RubicSdkError } from 'src/common';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { celerCrossChainContractAbi } from './providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import { celerCrossChainContractsAddresses } from './providers/celer-trade-provider/constants/celer-cross-chain-contracts-addresses';
 import { CelerCrossChainSupportedBlockchain } from './providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
@@ -139,7 +141,7 @@ export class CrossChainStatusManager {
             return CrossChainTxStatus.PENDING;
         }
 
-        return await this.getDstTxStatusFnMap[provider].call(this, tradeData, srcTxReceipt);
+        return this.getDstTxStatusFnMap[provider].call(this, tradeData, srcTxReceipt);
     }
 
     /**
@@ -308,6 +310,10 @@ export class CrossChainStatusManager {
         data: CrossChainTradeData,
         srcTxReceipt: TransactionReceipt
     ): Promise<CrossChainTxStatus> {
+        if (!BlockchainsInfo.isEvmBlockchainName(data.toBlockchain)) {
+            throw new RubicSdkError(`${data.toBlockchain} is not supported in status retrieving.`);
+        }
+
         try {
             // Filter undecoded logs.
             const [requestLog] = LogsDecoder.decodeLogs(
@@ -367,6 +373,10 @@ export class CrossChainStatusManager {
         data: CrossChainTradeData,
         srcTxReceipt: TransactionReceipt
     ): Promise<CrossChainTxStatus> {
+        if (!BlockchainsInfo.isEvmBlockchainName(data.toBlockchain)) {
+            throw new RubicSdkError(`${data.toBlockchain} is not supported in status retrieving.`);
+        }
+
         try {
             const dstTxStatus = Number(
                 await Injector.web3PublicService
@@ -407,7 +417,7 @@ export class CrossChainStatusManager {
      * @returns Transaction receipt.
      */
     private async getTxReceipt(
-        blockchain: BlockchainName,
+        blockchain: EvmBlockchainName,
         txHash: string
     ): Promise<TransactionReceipt | null> {
         let receipt: TransactionReceipt | null;

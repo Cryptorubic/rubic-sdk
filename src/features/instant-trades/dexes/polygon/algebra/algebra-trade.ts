@@ -3,7 +3,7 @@ import {
     UniswapV3AlgebraTradeStruct
 } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 import { AlgebraRoute } from '@rsdk-features/instant-trades/dexes/polygon/algebra/models/algebra-route';
-import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
+import { MethodData } from '@rsdk-core/blockchain/web3-public-service/models/method-data';
 import { AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/algebra-quoter-controller';
 import { TRADE_TYPE, TradeType } from 'src/features';
 

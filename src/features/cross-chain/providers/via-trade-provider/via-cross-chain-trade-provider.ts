@@ -26,6 +26,7 @@ import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import { viaContractAddress } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
 import { PriceToken, PriceTokenAmount } from 'src/common';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 interface ToolType extends IActionStepTool {
     type: 'swap' | 'cross';
@@ -53,7 +54,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
     }
 
     public async calculate(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
     ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {

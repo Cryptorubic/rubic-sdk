@@ -37,6 +37,7 @@ import { symbiosisTransitTokens } from 'src/features/cross-chain/providers/symbi
 import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
 import { ZappyProvider } from 'src/features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -83,7 +84,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     }
 
     public async calculate(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
     ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
@@ -98,7 +99,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             const fromAddress =
                 options.fromAddress || this.walletAddress || oneinchApiParams.nativeAddress;
             await this.checkContractState(
-                fromBlockchain,
+                fromBlockchain as EvmBlockchainName,
                 SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter
             );
 
@@ -288,14 +289,14 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
         const fixedFeeAmount = await this.getFixedFee(
-            fromBlockchain,
+            fromBlockchain as EvmBlockchainName,
             providerAddress,
             SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
             commonCrossChainAbi
         );
 
         const feePercent = await this.getFeePercent(
-            fromBlockchain,
+            fromBlockchain as EvmBlockchainName,
             providerAddress,
             SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
             commonCrossChainAbi

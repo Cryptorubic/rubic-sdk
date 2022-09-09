@@ -16,6 +16,7 @@ import { TradeType } from 'src/features';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
 import { PriceToken, PriceTokenAmount } from 'src/common';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export abstract class UniswapV2AbstractProvider<
     T extends UniswapV2AbstractTrade = UniswapV2AbstractTrade
@@ -42,8 +43,8 @@ export abstract class UniswapV2AbstractProvider<
     protected readonly gasMargin = 1.2;
 
     public async calculate(
-        from: PriceTokenAmount,
-        to: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        to: PriceToken<EvmBlockchainName>,
         options?: SwapCalculationOptions
     ): Promise<UniswapV2AbstractTrade> {
         return this.calculateDifficultTrade(from, to, from.weiAmount, 'input', options);
@@ -56,8 +57,8 @@ export abstract class UniswapV2AbstractProvider<
      * @param options Additional options.
      */
     public async calculateExactOutput(
-        from: PriceToken,
-        to: PriceTokenAmount,
+        from: PriceToken<EvmBlockchainName>,
+        to: PriceTokenAmount<EvmBlockchainName>,
         options?: SwapCalculationOptions
     ): Promise<UniswapV2AbstractTrade> {
         return this.calculateDifficultTrade(from, to, to.weiAmount, 'output', options);
@@ -70,8 +71,8 @@ export abstract class UniswapV2AbstractProvider<
      * @param options Additional options.
      */
     public async calculateExactOutputAmount(
-        from: PriceToken,
-        to: PriceTokenAmount,
+        from: PriceToken<EvmBlockchainName>,
+        to: PriceTokenAmount<EvmBlockchainName>,
         options?: SwapCalculationOptions
     ): Promise<BigNumber> {
         return (await this.calculateExactOutput(from, to, options)).from.tokenAmount;
@@ -86,8 +87,8 @@ export abstract class UniswapV2AbstractProvider<
      * @param options Additional options.
      */
     public async calculateDifficultTrade(
-        from: PriceToken,
-        to: PriceToken,
+        from: PriceToken<EvmBlockchainName>,
+        to: PriceToken<EvmBlockchainName>,
         weiAmount: BigNumber,
         exact: Exact,
         options?: SwapCalculationOptions
@@ -115,7 +116,10 @@ export abstract class UniswapV2AbstractProvider<
         const toAmount = exact === 'output' ? weiAmount : route.outputAbsoluteAmount;
 
         const instantTrade: UniswapV2AbstractTrade = new this.InstantTradeClass({
-            from: new PriceTokenAmount({ ...from.asStruct, weiAmount: fromAmount }),
+            from: new PriceTokenAmount({
+                ...from.asStruct,
+                weiAmount: fromAmount
+            }),
             to: new PriceTokenAmount({ ...to.asStruct, weiAmount: toAmount }),
             exact,
             wrappedPath: route.path,
@@ -132,8 +136,8 @@ export abstract class UniswapV2AbstractProvider<
     }
 
     private async getAmountAndPath(
-        from: PriceToken,
-        to: PriceToken,
+        from: PriceToken<EvmBlockchainName>,
+        to: PriceToken<EvmBlockchainName>,
         weiAmount: BigNumber,
         exact: Exact,
         options: RequiredSwapCalculationOptions,

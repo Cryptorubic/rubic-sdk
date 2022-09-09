@@ -2,18 +2,23 @@ import { TokenBaseStruct } from 'src/common/tokens-manager/models/token-base-str
 import { Token, TokenStruct } from 'src/common/tokens-manager/tokens/token';
 import { Injector } from 'src/core/sdk/injector';
 import BigNumber from 'bignumber.js';
+import { BlockchainName } from 'src/core';
 
-export type PriceTokenStruct = ConstructorParameters<typeof Token>[number] & { price: BigNumber };
+export type PriceTokenStruct<T extends BlockchainName = BlockchainName> = ConstructorParameters<
+    typeof Token<T>
+>[number] & { price: BigNumber };
 
 /**
  * Contains token structure with price in usd per 1 unit.
  */
-export class PriceToken extends Token {
+export class PriceToken<T extends BlockchainName = BlockchainName> extends Token<T> {
     /**
      * Creates PriceToken based on token's address and blockchain.
      * @param tokenBaseStruct Base token structure.
      */
-    public static async createToken(tokenBaseStruct: TokenBaseStruct): Promise<PriceToken> {
+    public static async createToken<T extends BlockchainName = BlockchainName>(
+        tokenBaseStruct: TokenBaseStruct<T>
+    ): Promise<PriceToken<T>> {
         const { coingeckoApi } = Injector;
 
         const tokenPromise = super.createToken(tokenBaseStruct);
@@ -29,7 +34,9 @@ export class PriceToken extends Token {
      * Creates PriceToken, fetching token's price.
      * @param token Token structure.
      */
-    public static async createFromToken(token: TokenStruct): Promise<PriceToken> {
+    public static async createFromToken<T extends BlockchainName = BlockchainName>(
+        token: TokenStruct<T>
+    ): Promise<PriceToken<T>> {
         const { coingeckoApi } = Injector;
 
         const price = await coingeckoApi.getTokenPrice(token).catch(_err => new BigNumber(NaN));
@@ -46,14 +53,14 @@ export class PriceToken extends Token {
     /**
      * Serializes priceToken and its price to struct object.
      */
-    public get asStruct(): PriceTokenStruct {
+    public get asStruct(): PriceTokenStruct<T> {
         return {
             ...this,
             price: this.price
         };
     }
 
-    constructor(tokenStruct: PriceTokenStruct) {
+    constructor(tokenStruct: PriceTokenStruct<T>) {
         super(tokenStruct);
         this._price = tokenStruct.price;
     }

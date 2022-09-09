@@ -18,6 +18,7 @@ import { rangoProviders } from 'src/features/instant-trades/dexes/common/rango/c
 import { PriceTokenAmount } from 'src/common';
 import { CROSS_CHAIN_TRADE_TYPE, RangoCrossChainTrade, BridgeType } from 'src/features';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';
 import { CrossChainTradeProvider } from '../common/cross-chain-trade-provider';
@@ -61,8 +62,8 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
     }
 
     public async calculate(
-        fromToken: PriceTokenAmount,
-        toToken: PriceTokenAmount,
+        fromToken: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceTokenAmount<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
         const fromBlockchain = fromToken.blockchain as RangoCrossChainSupportedBlockchain;
@@ -235,7 +236,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
     }
 
     protected async getFeeInfo(
-        fromBlockchain: Partial<BlockchainName>,
+        fromBlockchain: Partial<EvmBlockchainName>,
         providerAddress: string
     ): Promise<FeeInfo> {
         return {

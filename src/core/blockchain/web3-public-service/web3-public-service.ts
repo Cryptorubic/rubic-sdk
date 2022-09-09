@@ -1,30 +1,41 @@
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { TimeoutError } from '@rsdk-common/errors/utils/timeout.error';
 import pTimeout from '@rsdk-common/utils/p-timeout';
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
+import { BlockchainName, EvmBlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { RpcProvider } from '@rsdk-core/sdk/models/configuration';
 import Web3 from 'web3';
-import { RpcListProvider } from 'src/core/blockchain/web3-public/constants/rpc-list-provider';
+import { RpcListProvider } from 'src/core/blockchain/web3-public-service/constants/rpc-list-provider';
 import { HealthcheckError } from 'src/common';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { BlockchainsInfo } from 'src/core';
+import { GetWeb3Public } from 'src/core/blockchain/web3-public-service/models/get-web3-public';
 
 export class Web3PublicService {
     private static readonly mainRpcDefaultTimeout = 10_000;
 
-    public static async createWeb3PublicService(
-        rpcList: Partial<Record<BlockchainName, RpcProvider>>
-    ): Promise<Web3PublicService> {
-        const web3PublicService = new Web3PublicService(rpcList);
-        await web3PublicService.createAndCheckWeb3Public();
-        return web3PublicService;
-    }
-
     public readonly rpcListProvider: Partial<Record<BlockchainName, RpcListProvider>>;
 
-    private web3PublicStorage: Partial<Record<BlockchainName, Web3Public>> = {};
+    private readonly web3PublicStorage: Partial<Record<EvmBlockchainName, EvmWeb3Public>> = {};
+
+    public getWeb3Public: GetWeb3Public = blockchainName => {
+        const web3Public = this.web3PublicStorage[blockchainName];
+        if (!web3Public) {
+            throw new RubicSdkError(
+                `Provider for ${blockchainName} was not initialized. Pass rpc link for this blockchain to sdk configuration object.`
+            );
+        }
+        return web3Public;
+    };
 
     constructor(rpcList: Partial<Record<BlockchainName, RpcProvider>>) {
         this.rpcListProvider = this.parseRpcList(rpcList);
+
+        (Object.keys(this.rpcListProvider) as BlockchainName[]).forEach(blockchainName => {
+            if (BlockchainsInfo.isEvmBlockchainName(blockchainName)) {
+                this.web3PublicStorage[blockchainName] =
+                    this.createEvmWeb3PublicProxy(blockchainName);
+            }
+        });
     }
 
     private parseRpcList(
@@ -44,10 +55,9 @@ export class Web3PublicService {
                 }
                 list = rpcConfig.rpcList;
             }
-            const rpcProvider: RpcProvider = {
+            const rpcProvider: RpcListProvider = {
                 rpcList: list,
-                mainRpcTimeout: rpcConfig.mainRpcTimeout,
-                healthCheckTimeout: rpcConfig.healthCheckTimeout
+                mainRpcTimeout: rpcConfig.mainRpcTimeout
             };
 
             return {
@@ -57,30 +67,12 @@ export class Web3PublicService {
         }, {});
     }
 
-    public getWeb3Public(blockchainName: BlockchainName): Web3Public {
-        const web3Public = this.web3PublicStorage[blockchainName];
-        if (!web3Public) {
-            throw new RubicSdkError(
-                `Provider for ${blockchainName} was not initialized. Pass rpc link for this blockchain to sdk configuration object.`
-            );
-        }
-        return web3Public;
-    }
-
-    private createAndCheckWeb3Public(): void {
-        Object.keys(this.rpcListProvider).forEach(
-            blockchainName =>
-                (this.web3PublicStorage[blockchainName as BlockchainName] =
-                    this.createWeb3PublicProxy(blockchainName as BlockchainName))
-        );
-    }
-
-    private createWeb3PublicProxy(blockchainName: BlockchainName): Web3Public {
+    private createEvmWeb3PublicProxy(blockchainName: BlockchainName): EvmWeb3Public {
         const rpcProvider = this.rpcListProvider[blockchainName]!;
-        const web3Public = new Web3Public(new Web3(rpcProvider.rpcList[0]!), blockchainName);
+        const evmWeb3Public = new EvmWeb3Public(new Web3(rpcProvider.rpcList[0]!), blockchainName);
 
-        return new Proxy(web3Public, {
-            get(target: Web3Public, prop: keyof Web3Public) {
+        return new Proxy(evmWeb3Public, {
+            get(target: EvmWeb3Public, prop: keyof EvmWeb3Public) {
                 if (prop === 'setProvider') {
                     return target[prop].bind(target);
                 }
@@ -115,7 +107,7 @@ export class Web3PublicService {
                                         );
                                     }
                                     const nextRpc = rpcProvider.rpcList![0]!;
-                                    web3Public.setProvider(nextRpc);
+                                    evmWeb3Public.setProvider(nextRpc);
                                     console.debug(
                                         `Rpc provider for ${blockchainName} is changed to ${nextRpc}.`
                                     );

@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { BlockchainsInfo, Web3Public, Web3Pure } from 'src/core';
+import { BlockchainsInfo, Web3Pure } from 'src/core';
 import {
     CROSS_CHAIN_TRADE_TYPE,
     SwapTransactionOptions,
@@ -11,7 +11,6 @@ import { Injector } from 'src/core/sdk/injector';
 import { FailedToCheckForTransactionReceiptError, PriceTokenAmount } from 'src/common';
 import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
-import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
@@ -19,6 +18,8 @@ import { ContractParams } from 'src/features/cross-chain/models/contract-params'
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { BRIDGE_TYPE, BridgeType } from 'src/features/cross-chain/constants/bridge-type';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 import { FeeInfo } from '../common/models/fee';
 
 /**
@@ -29,11 +30,11 @@ export class LifiCrossChainTrade extends CrossChainTrade {
 
     /** @internal */
     public static async getGasData(
-        from: PriceTokenAmount,
-        to: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        to: PriceTokenAmount<EvmBlockchainName>,
         route: Route
     ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
+        const fromBlockchain = from.blockchain;
         const walletAddress = Injector.web3Private.address;
         if (!walletAddress) {
             return null;
@@ -94,15 +95,15 @@ export class LifiCrossChainTrade extends CrossChainTrade {
 
     private readonly httpClient = Injector.httpClient;
 
-    public readonly from: PriceTokenAmount;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly to: PriceTokenAmount;
+    public readonly to: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly toTokenAmountMin: BigNumber;
 
     public readonly gasData: GasData | null;
 
-    protected readonly fromWeb3Public: Web3Public;
+    protected readonly fromWeb3Public: EvmWeb3Public;
 
     private readonly route: Route;
 
@@ -122,8 +123,8 @@ export class LifiCrossChainTrade extends CrossChainTrade {
 
     constructor(
         crossChainTrade: {
-            from: PriceTokenAmount;
-            to: PriceTokenAmount;
+            from: PriceTokenAmount<EvmBlockchainName>;
+            to: PriceTokenAmount<EvmBlockchainName>;
             route: Route;
             gasData: GasData | null;
             toTokenAmountMin: BigNumber;

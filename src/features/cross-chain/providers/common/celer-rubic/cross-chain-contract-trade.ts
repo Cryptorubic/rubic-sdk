@@ -1,15 +1,15 @@
 import BigNumber from 'bignumber.js';
 import { AbiItem } from 'web3-utils';
-import { BlockchainName } from 'src/core';
 import { Cache, PriceTokenAmount, RubicSdkError } from 'src/common';
 import { ProviderData } from '@rsdk-features/cross-chain/models/provider-data';
 import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 import { CrossChainSupportedInstantTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export abstract class CrossChainContractTrade {
-    public abstract readonly fromToken: PriceTokenAmount;
+    public abstract readonly fromToken: PriceTokenAmount<EvmBlockchainName>;
 
-    public abstract readonly toToken: PriceTokenAmount;
+    public abstract readonly toToken: PriceTokenAmount<EvmBlockchainName>;
 
     public abstract readonly toTokenAmountMin: BigNumber;
 
@@ -34,7 +34,7 @@ export abstract class CrossChainContractTrade {
     }
 
     protected constructor(
-        public readonly blockchain: BlockchainName,
+        public readonly blockchain: EvmBlockchainName,
         private readonly providerIndex: number
     ) {}
 

@@ -1,4 +1,4 @@
-import { BlockchainName, BlockchainsInfo } from 'src/core';
+import { BlockchainsInfo } from 'src/core';
 import { UniswapV2AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { CrossChainSupportedInstantTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
 import { CrossChainInstantTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/cross-chain-instant-trade';
@@ -12,18 +12,19 @@ import { CrossChainAlgebraTrade } from '@rsdk-features/cross-chain/providers/rub
 import { OneinchTrade } from 'src/features';
 import { CrossChainUniswapV3Trade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-cross-chain-instant-trade/cross-chain-uniswap-v3-trade';
 import { PriceTokenAmount } from 'src/common';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export class CelerItCrossChainContractTrade extends CelerCrossChainContractTrade {
-    public readonly fromToken: PriceTokenAmount;
+    public readonly fromToken: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly toToken: PriceTokenAmount;
+    public readonly toToken: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly toTokenAmountMin: BigNumber;
 
     private readonly crossChainInstantTrade: CrossChainInstantTrade;
 
     constructor(
-        blockchain: BlockchainName,
+        blockchain: EvmBlockchainName,
         contract: CelerCrossChainContractData,
         providerIndex: number,
         public readonly slippage: number,

@@ -29,6 +29,7 @@ import { getFromToTokensAmountsByExact } from '@rsdk-features/instant-trades/dex
 import { AbiItem } from 'web3-utils';
 import { RequiredSwapCalculationOptions } from 'src/features/instant-trades/models/swap-calculation-options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
@@ -62,8 +63,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
     ): T;
 
     public async calculate(
-        from: PriceTokenAmount,
-        toToken: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         options?: SwapCalculationOptions
     ): Promise<T> {
         return this.calculateDifficultTrade(from, toToken, 'input', from.weiAmount, options);
@@ -76,8 +77,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
      * @param options Additional options.
      */
     public async calculateExactOutput(
-        fromToken: PriceToken,
-        to: PriceTokenAmount,
+        fromToken: PriceToken<EvmBlockchainName>,
+        to: PriceTokenAmount<EvmBlockchainName>,
         options?: SwapCalculationOptions
     ): Promise<T> {
         return this.calculateDifficultTrade(fromToken, to, 'output', to.weiAmount, options);
@@ -90,16 +91,16 @@ export abstract class UniswapV3AlgebraAbstractProvider<
      * @param options Additional options.
      */
     public async calculateExactOutputAmount(
-        fromToken: PriceToken,
-        to: PriceTokenAmount,
+        fromToken: PriceToken<EvmBlockchainName>,
+        to: PriceTokenAmount<EvmBlockchainName>,
         options?: SwapCalculationOptions
     ): Promise<BigNumber> {
         return (await this.calculateExactOutput(fromToken, to, options)).from.tokenAmount;
     }
 
     private async calculateDifficultTrade(
-        fromToken: PriceToken,
-        toToken: PriceToken,
+        fromToken: PriceToken<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         exact: Exact,
         weiAmount: BigNumber,
         options?: SwapCalculationOptions
@@ -159,8 +160,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
     }
 
     private async getRoute(
-        from: PriceToken,
-        to: PriceToken,
+        from: PriceToken<EvmBlockchainName>,
+        to: PriceToken<EvmBlockchainName>,
         exact: Exact,
         weiAmount: BigNumber,
         options: RequiredSwapCalculationOptions,

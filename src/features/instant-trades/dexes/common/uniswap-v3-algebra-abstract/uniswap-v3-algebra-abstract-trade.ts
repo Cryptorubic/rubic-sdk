@@ -11,8 +11,8 @@ import { SwapOptions } from '@rsdk-features/instant-trades/models/swap-options';
 import BigNumber from 'bignumber.js';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { TransactionReceipt } from 'web3-eth';
-import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
-import { BatchCall } from '@rsdk-core/blockchain/web3-public/models/batch-call';
+import { MethodData } from '@rsdk-core/blockchain/web3-public-service/models/method-data';
+import { BatchCall } from '@rsdk-core/blockchain/web3-public-service/models/batch-call';
 import { TransactionConfig } from 'web3-core';
 import { UniswapV3AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
 import { UniswapV3AlgebraRoute } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
@@ -24,10 +24,11 @@ import {
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
 import { getFromToTokensAmountsByExact } from '@rsdk-features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export interface UniswapV3AlgebraTradeStruct {
-    from: PriceTokenAmount;
-    to: PriceTokenAmount;
+    from: PriceTokenAmount<EvmBlockchainName>;
+    to: PriceTokenAmount<EvmBlockchainName>;
     exact: Exact;
     slippageTolerance: number;
     deadlineMinutes: number;
@@ -40,8 +41,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
     }
 
     public static async estimateGasLimitForRoute(
-        fromToken: PriceToken,
-        toToken: PriceToken,
+        fromToken: PriceToken<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         exact: Exact,
         weiAmount: BigNumber,
         options: Required<SwapOptions>,
@@ -80,8 +81,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
     }
 
     public static async estimateGasLimitForRoutes(
-        fromToken: PriceToken,
-        toToken: PriceToken,
+        fromToken: PriceToken<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         exact: Exact,
         weiAmount: BigNumber,
         options: Required<SwapOptions>,
@@ -151,9 +152,9 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
 
     protected abstract readonly unwrapWethMethodName: 'unwrapWETH9' | 'unwrapWNativeToken';
 
-    public readonly from: PriceTokenAmount;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly to: PriceTokenAmount;
+    public readonly to: PriceTokenAmount<EvmBlockchainName>;
 
     protected readonly exact: Exact;
 

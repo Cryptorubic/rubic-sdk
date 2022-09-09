@@ -18,6 +18,7 @@ import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount } from 'src/common';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -49,8 +50,8 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     }
 
     public async calculate(
-        from: PriceTokenAmount,
-        toToken: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
         const fromBlockchain = from.blockchain;

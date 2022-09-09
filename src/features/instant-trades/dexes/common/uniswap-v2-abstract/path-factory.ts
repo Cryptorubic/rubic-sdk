@@ -1,7 +1,6 @@
 import { InsufficientLiquidityError } from '@rsdk-common/errors/swap/insufficient-liquidity.error';
 import { notNull } from '@rsdk-common/utils/object';
-import { BatchCall } from '@rsdk-core/blockchain/web3-public/models/batch-call';
-import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
+import { BatchCall } from '@rsdk-core/blockchain/web3-public-service/models/batch-call';
 import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { RequiredSwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
@@ -17,10 +16,12 @@ import BigNumber from 'bignumber.js';
 import { Cache, PriceToken, PriceTokenAmount, RubicSdkError, Token } from 'src/common';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
 import { hasLengthAtLeast } from '@rsdk-features/instant-trades/utils/type-guards';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 
 export interface PathFactoryStruct {
-    readonly from: PriceToken;
-    readonly to: PriceToken;
+    readonly from: PriceToken<EvmBlockchainName>;
+    readonly to: PriceToken<EvmBlockchainName>;
     readonly weiAmount: BigNumber;
     readonly exact: Exact;
     readonly options: RequiredSwapCalculationOptions;
@@ -32,11 +33,11 @@ export interface UniswapV2AbstractProviderStruct<T extends UniswapV2AbstractTrad
 }
 
 export class PathFactory<T extends UniswapV2AbstractTrade> {
-    private readonly web3Public: Web3Public;
+    private readonly web3Public: EvmWeb3Public;
 
-    private readonly from: PriceToken;
+    private readonly from: PriceToken<EvmBlockchainName>;
 
-    private readonly to: PriceToken;
+    private readonly to: PriceToken<EvmBlockchainName>;
 
     private readonly weiAmount: BigNumber;
 

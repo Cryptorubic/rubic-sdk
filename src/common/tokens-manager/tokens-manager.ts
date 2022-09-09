@@ -1,5 +1,5 @@
 import { TokenBaseStruct } from 'src/common/tokens-manager/models/token-base-struct';
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common';
 import { TokenStruct } from 'src/common/tokens-manager/tokens/token';
@@ -56,7 +56,7 @@ export class TokensManager {
      * @param addresses Tokens' addresses.
      * @param blockchain Tokens' blockchain.
      */
-    public createTokens(addresses: string[], blockchain: BlockchainName): Promise<Token[]> {
+    public createTokens(addresses: string[], blockchain: EvmBlockchainName): Promise<Token[]> {
         return Token.createTokens(addresses, blockchain);
     }
 

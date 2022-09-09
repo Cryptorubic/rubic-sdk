@@ -15,6 +15,7 @@ import { PriceTokenAmount } from 'src/common/tokens-manager/tokens/price-token-a
 import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { LifiPairIsUnavailable } from 'src/common/errors/swap/lifi-pair-is-unavailable';
 import { RubicSdkError, Token } from 'src/common';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 interface LifiTransactionRequest {
     data: string;
@@ -25,7 +26,7 @@ interface LifiTransactionRequest {
 export class LifiTrade extends InstantTrade {
     /** @internal */
     public static async getGasData(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount,
         route: Route
     ): Promise<{
@@ -83,7 +84,7 @@ export class LifiTrade extends InstantTrade {
     }
 
     constructor(tradeStruct: {
-        from: PriceTokenAmount;
+        from: PriceTokenAmount<EvmBlockchainName>;
         to: PriceTokenAmount;
         gasFeeInfo: GasFeeInfo | null;
         slippageTolerance: number;

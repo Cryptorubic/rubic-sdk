@@ -1,4 +1,3 @@
-import { Web3Public } from 'src/core';
 import {
     Cache,
     CrossChainIsUnavailableError,
@@ -10,6 +9,7 @@ import { Injector } from '@rsdk-core/sdk/injector';
 import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
 import BigNumber from 'bignumber.js';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 
 /**
  * Contains common for Celer and Rubic trades methods and fields.
@@ -55,7 +55,7 @@ export abstract class CelerRubicCrossChainTrade extends CrossChainTrade {
 
     public abstract readonly feeInPercents: number;
 
-    protected abstract readonly toWeb3Public: Web3Public;
+    protected abstract readonly toWeb3Public: EvmWeb3Public;
 
     protected get fromContractAddress(): string {
         return this.fromTrade.contract.address;

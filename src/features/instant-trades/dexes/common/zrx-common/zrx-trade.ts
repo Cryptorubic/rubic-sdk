@@ -8,10 +8,11 @@ import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
 import { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';
 import { TransactionConfig } from 'web3-core';
 import { PriceTokenAmount, Token } from 'src/common';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 interface ZrxTradeStruct {
-    from: PriceTokenAmount;
-    to: PriceTokenAmount;
+    from: PriceTokenAmount<EvmBlockchainName>;
+    to: PriceTokenAmount<EvmBlockchainName>;
     slippageTolerance: number;
     apiTradeData: ZrxQuoteResponse;
     path: ReadonlyArray<Token>;

@@ -2,7 +2,7 @@ import { DefaultHttpClient } from '@rsdk-common/http/default-http-client';
 import { HttpClient } from '@rsdk-common/models/http-client';
 import { Web3Private } from '@rsdk-core/blockchain/web3-private/web3-private';
 import { Web3PrivateFactory } from '@rsdk-core/blockchain/web3-private/web3-private-factory';
-import { Web3PublicService } from '@rsdk-core/blockchain/web3-public/web3-public-service';
+import { Web3PublicService } from '@rsdk-core/blockchain/web3-public-service/web3-public-service';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { Configuration } from '@rsdk-core/sdk/models/configuration';
 import { CrossChainManager } from '@rsdk-features/cross-chain/cross-chain-manager';
@@ -84,10 +84,8 @@ export class SDK {
         return Web3PrivateFactory.createWeb3Private(configuration.walletProvider);
     }
 
-    private static createWeb3PublicService(
-        configuration: Configuration
-    ): Promise<Web3PublicService> {
-        return Web3PublicService.createWeb3PublicService(configuration.rpcProviders);
+    private static createWeb3PublicService(configuration: Configuration): Web3PublicService {
+        return new Web3PublicService(configuration.rpcProviders);
     }
 
     private static async createHttpClient(configuration: Configuration): Promise<HttpClient> {

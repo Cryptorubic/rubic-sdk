@@ -17,6 +17,7 @@ import { ItCalculatedTrade } from '@rsdk-features/cross-chain/providers/common/c
 import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
 import { CrossChainMinAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-min-amount.error';
 import { CrossChainMaxAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-max-amount.error';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeProvider {
     protected abstract contracts(blockchain: BlockchainName): CrossChainContractData;
@@ -24,8 +25,8 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
     protected async getItCalculatedTrade(
         contract: CrossChainContractData,
         providerIndex: number,
-        from: PriceTokenAmount,
-        toToken: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         slippageTolerance: number
     ): Promise<ItCalculatedTrade> {
         const provider = contract.getProvider(providerIndex);
@@ -103,9 +104,9 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
     }
 
     protected async getMinMaxTransitTokenAmounts(
-        fromBlockchain: BlockchainName,
+        fromBlockchain: EvmBlockchainName,
         slippageTolerance?: number,
-        fromToken?: PriceToken
+        fromToken?: PriceToken<EvmBlockchainName>
     ): Promise<MinMaxAmounts> {
         const fromContract = this.contracts(fromBlockchain);
         const fromTransitToken = await fromContract.getTransitToken(fromToken);
@@ -154,8 +155,8 @@ export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeP
     }
 
     protected getTokenAmountForExactTransitTokenAmountByProvider(
-        fromToken: Token,
-        transitToken: Token,
+        fromToken: Token<EvmBlockchainName>,
+        transitToken: Token<EvmBlockchainName>,
         transitTokenAmount: BigNumber,
         provider: CrossChainSupportedInstantTradeProvider
     ) {

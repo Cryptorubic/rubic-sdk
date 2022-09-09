@@ -1,4 +1,4 @@
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { ProviderData } from '@rsdk-features/cross-chain/models/provider-data';
 import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 import { celerCrossChainContractAbi } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
@@ -17,7 +17,7 @@ export class CelerCrossChainContractData extends CrossChainContractData {
     private readonly messageBusController = new CellerMessageBusController(this.web3Public);
 
     constructor(
-        public readonly blockchain: BlockchainName,
+        public readonly blockchain: EvmBlockchainName,
         public readonly address: string,
         public readonly providersData: ProviderData[],
         public readonly mainContractAddress: string
@@ -57,7 +57,9 @@ export class CelerCrossChainContractData extends CrossChainContractData {
     }
 
     @Cache
-    public async getTransitToken(token: PriceToken): Promise<Token> {
+    public async getTransitToken(
+        token: PriceToken<EvmBlockchainName>
+    ): Promise<Token<EvmBlockchainName>> {
         const blockchain = token.blockchain as CelerCrossChainSupportedBlockchain;
         const address = this.getTransitTokenAddressBasedOnBlockchain(blockchain);
         return Token.createToken({
@@ -107,7 +109,7 @@ export class CelerCrossChainContractData extends CrossChainContractData {
 
     public async getCryptoFeeToken(
         toContract: CelerCrossChainContractData
-    ): Promise<PriceTokenAmount> {
+    ): Promise<PriceTokenAmount<EvmBlockchainName>> {
         const feeAmount = await this.destinationCryptoFee(toContract.blockchain);
         const nativeToken = BlockchainsInfo.getBlockchainByName(this.blockchain).nativeCoin;
         return PriceTokenAmount.createFromToken({

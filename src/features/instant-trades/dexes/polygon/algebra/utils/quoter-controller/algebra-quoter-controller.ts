@@ -1,9 +1,9 @@
-import { BLOCKCHAIN_NAME, Web3Public } from 'src/core';
-import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
+import { BLOCKCHAIN_NAME } from 'src/core';
+import { MethodData } from '@rsdk-core/blockchain/web3-public-service/models/method-data';
 import { AlgebraRoute } from '@rsdk-features/instant-trades/dexes/polygon/algebra/models/algebra-route';
 import { notNull, PriceToken, RubicSdkError, Token } from 'src/common';
 import BigNumber from 'bignumber.js';
-import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public/models/contract-multicall-response';
+import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public-service/models/contract-multicall-response';
 import {
     QUOTER_CONTRACT_ABI,
     QUOTER_CONTRACT_ADDRESS
@@ -12,6 +12,7 @@ import { Injector } from '@rsdk-core/sdk/injector';
 import { ROUTER_TOKENS } from '@rsdk-features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/constants/router-tokens';
 import { UniswapV3AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 
 interface GetQuoterMethodsDataOptions {
     routesTokens: Token[];
@@ -79,7 +80,7 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
         };
     }
 
-    private get web3Public(): Web3Public {
+    private get web3Public(): EvmWeb3Public {
         return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.POLYGON);
     }
 

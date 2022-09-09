@@ -4,8 +4,8 @@ import { Token } from 'src/common';
 /**
  * Stores information about blockchain.
  */
-export interface Blockchain {
+export interface Blockchain<T extends BlockchainName = BlockchainName> {
     id: number;
-    name: BlockchainName;
-    nativeCoin: Token;
+    name: T;
+    nativeCoin: Token<T>;
 }

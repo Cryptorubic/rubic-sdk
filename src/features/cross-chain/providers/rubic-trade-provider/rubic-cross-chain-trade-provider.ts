@@ -16,6 +16,7 @@ import { ItCalculatedTrade } from '@rsdk-features/cross-chain/providers/common/c
 import { CelerRubicCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
 import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -45,8 +46,8 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
     }
 
     public async calculate(
-        from: PriceTokenAmount,
-        to: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        to: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
         const fromBlockchain = from.blockchain;
@@ -144,8 +145,8 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
 
     protected async calculateBestTrade(
         blockchain: RubicCrossChainSupportedBlockchain,
-        from: PriceTokenAmount,
-        toToken: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         slippageTolerance: number
     ): Promise<RubicCrossChainContractTrade> {
         if (compareAddresses(from.address, toToken.address)) {
@@ -162,8 +163,8 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
 
     protected async getBestItContractTrade(
         blockchain: RubicCrossChainSupportedBlockchain,
-        from: PriceTokenAmount,
-        toToken: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         slippageTolerance: number
     ): Promise<RubicItCrossChainContractTrade> {
         const contract = this.contracts(blockchain);

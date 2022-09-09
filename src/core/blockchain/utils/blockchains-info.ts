@@ -32,8 +32,12 @@ export class BlockchainsInfo {
     /**
      * Finds blockchain object, based on provided blockchain name.
      */
-    public static getBlockchainByName(blockchainName: BlockchainName): Blockchain {
-        return BlockchainsInfo.blockchains.find(blockchain => blockchain.name === blockchainName)!;
+    public static getBlockchainByName<T extends BlockchainName = BlockchainName>(
+        blockchainName: T
+    ): Blockchain<T> {
+        return BlockchainsInfo.blockchains.find(
+            blockchain => blockchain.name === blockchainName
+        )! as Blockchain<T>;
     }
 
     public static getChainType(blockchainName: BlockchainName): CHAIN_TYPE | never {

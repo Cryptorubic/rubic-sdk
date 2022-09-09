@@ -1,4 +1,4 @@
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { EvmBlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { Cache } from '@rsdk-common/decorators/cache.decorator';
 import BigNumber from 'bignumber.js';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
@@ -12,7 +12,7 @@ import { PriceTokenAmount, Token } from 'src/common';
  */
 export class RubicCrossChainContractData extends CrossChainContractData {
     constructor(
-        public readonly blockchain: BlockchainName,
+        public readonly blockchain: EvmBlockchainName,
         public readonly address: string,
         public readonly providersData: ProviderData[]
     ) {
@@ -30,7 +30,7 @@ export class RubicCrossChainContractData extends CrossChainContractData {
     }
 
     @Cache
-    public async getTransitToken(): Promise<Token> {
+    public async getTransitToken(): Promise<Token<EvmBlockchainName>> {
         const numOfBlockchain = await this.getNumOfBlockchain();
         const transitTokenAddress = await this.web3Public.callContractMethod(
             this.address,

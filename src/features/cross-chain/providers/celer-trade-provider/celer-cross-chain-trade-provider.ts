@@ -28,6 +28,7 @@ import { LowToSlippageError } from '@rsdk-common/errors/cross-chain/low-to-slipp
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { celerCrossChainContractAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 interface CelerCrossChainOptions extends RequiredCrossChainOptions {
     isUniV2?: boolean;
@@ -57,8 +58,8 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
     }
 
     public async calculate(
-        from: PriceTokenAmount,
-        to: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        to: PriceToken<EvmBlockchainName>,
         options: CelerCrossChainOptions
     ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
         const fromBlockchain = from.blockchain;
@@ -287,8 +288,8 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
 
     protected async calculateBestTrade(
         blockchain: CelerCrossChainSupportedBlockchain,
-        from: PriceTokenAmount,
-        toToken: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         slippageTolerance: number,
         isUniV2?: boolean,
         disabledProviders?: TradeType[]
@@ -315,8 +316,8 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
     protected async getItCalculatedTrade(
         contract: CrossChainContractData,
         providerIndex: number,
-        from: PriceTokenAmount,
-        toToken: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         slippageTolerance: number
     ): Promise<ItCalculatedTrade> {
         const provider = contract.getProvider(providerIndex);
@@ -336,8 +337,8 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
 
     protected async getBestItContractTrade(
         blockchain: CelerCrossChainSupportedBlockchain,
-        from: PriceTokenAmount,
-        toToken: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         slippageTolerance: number,
         isUniV2?: boolean,
         disabledProviders?: TradeType[]

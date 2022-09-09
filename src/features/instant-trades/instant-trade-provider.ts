@@ -1,7 +1,7 @@
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { EvmBlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
 import { SwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
-import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
+import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { GasPriceInfo } from '@rsdk-features/instant-trades/models/gas-price-info';
 import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
@@ -17,7 +17,7 @@ export abstract class InstantTradeProvider {
     /**
      * Provider blockchain.
      */
-    public abstract readonly blockchain: BlockchainName;
+    public abstract readonly blockchain: EvmBlockchainName;
 
     protected abstract readonly gasMargin: number;
 

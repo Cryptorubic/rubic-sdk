@@ -2,7 +2,7 @@ import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { combineOptions } from '@rsdk-common/utils/options';
 import pTimeout from '@rsdk-common/utils/p-timeout';
 import { Mutable } from '@rsdk-common/utils/types/mutable';
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { EvmBlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { InstantTradeProvider } from '@rsdk-features/instant-trades/instant-trade-provider';
 import { SwapManagerCalculationOptions } from '@rsdk-features/instant-trades/models/swap-manager-calculation-options';
 import { TRADE_TYPE, TradeType } from '@rsdk-features/instant-trades/models/trade-type';
@@ -103,20 +103,20 @@ export class InstantTradesManager {
      */
     public async calculateTrade(
         fromToken:
-            | Token
+            | Token<EvmBlockchainName>
             | {
                   address: string;
-                  blockchain: BlockchainName;
+                  blockchain: EvmBlockchainName;
               },
         fromAmount: string | number,
-        toToken: Token | string,
+        toToken: Token<EvmBlockchainName> | string,
         options?: SwapManagerCalculationOptions
     ): Promise<Array<InstantTrade | InstantTradeError>> {
         if (toToken instanceof Token && fromToken.blockchain !== toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be same');
         }
 
-        const { from, to } = await getPriceTokensFromInputTokens(
+        const { from, to } = await getPriceTokensFromInputTokens<EvmBlockchainName>(
             fromToken,
             fromAmount.toString(),
             toToken
@@ -130,7 +130,7 @@ export class InstantTradesManager {
     }
 
     private async calculateTradeFromTokens(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceToken,
         options: RequiredSwapManagerCalculationOptions
     ): Promise<Array<InstantTrade | InstantTradeError>> {
@@ -197,7 +197,7 @@ export class InstantTradesManager {
     }
 
     private async calculateLifiTrades(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceToken,
         providers: TradeType[],
         options: RequiredSwapManagerCalculationOptions

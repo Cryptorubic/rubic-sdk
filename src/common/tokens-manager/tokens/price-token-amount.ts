@@ -3,31 +3,33 @@ import { PriceToken } from 'src/common/tokens-manager/tokens/price-token';
 import BigNumber from 'bignumber.js';
 import { TokenStruct } from 'src/common/tokens-manager/tokens/token';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { BlockchainName } from 'src/core';
 
-export type PriceTokenAmountStruct = ConstructorParameters<typeof PriceToken>[number] &
-    (
-        | {
-              weiAmount: BigNumber;
-          }
-        | {
-              tokenAmount: BigNumber;
-          }
-    );
+export type PriceTokenAmountStruct<T extends BlockchainName = BlockchainName> =
+    ConstructorParameters<typeof PriceToken<T>>[number] &
+        (
+            | {
+                  weiAmount: BigNumber;
+              }
+            | {
+                  tokenAmount: BigNumber;
+              }
+        );
 
-export type PriceTokenAmountBaseStruct = TokenBaseStruct &
-    ({ weiAmount: BigNumber } | { tokenAmount: BigNumber });
+export type PriceTokenAmountBaseStruct<T extends BlockchainName = BlockchainName> =
+    TokenBaseStruct<T> & ({ weiAmount: BigNumber } | { tokenAmount: BigNumber });
 
 /**
  * Contains token structure with price and amount.
  */
-export class PriceTokenAmount extends PriceToken {
+export class PriceTokenAmount<T extends BlockchainName = BlockchainName> extends PriceToken<T> {
     /**
      * Creates PriceTokenAmount based on token's address and blockchain.
      * @param tokenAmountBaseStruct Base token structure with amount.
      */
-    public static async createToken(
-        tokenAmountBaseStruct: PriceTokenAmountBaseStruct
-    ): Promise<PriceTokenAmount> {
+    public static async createToken<T extends BlockchainName = BlockchainName>(
+        tokenAmountBaseStruct: PriceTokenAmountBaseStruct<T>
+    ): Promise<PriceTokenAmount<T>> {
         const token = await super.createToken(tokenAmountBaseStruct);
         return new PriceTokenAmount({
             ...tokenAmountBaseStruct,
@@ -39,9 +41,9 @@ export class PriceTokenAmount extends PriceToken {
      * Creates PriceTokenAmount, fetching token's price.
      * @param tokenAmount Token structure with amount.
      */
-    public static async createFromToken(
-        tokenAmount: TokenStruct & ({ weiAmount: BigNumber } | { tokenAmount: BigNumber })
-    ): Promise<PriceTokenAmount> {
+    public static async createFromToken<T extends BlockchainName = BlockchainName>(
+        tokenAmount: TokenStruct<T> & ({ weiAmount: BigNumber } | { tokenAmount: BigNumber })
+    ): Promise<PriceTokenAmount<T>> {
         const priceToken = await super.createFromToken(tokenAmount);
         return new PriceTokenAmount({
             ...tokenAmount,
@@ -75,7 +77,7 @@ export class PriceTokenAmount extends PriceToken {
     /**
      * Serializes priceTokenAmount to struct object.
      */
-    public get asStructWithAmount(): PriceTokenAmountStruct {
+    public get asStructWithAmount(): PriceTokenAmountStruct<T> {
         return {
             ...this,
             price: this.price,
@@ -83,7 +85,7 @@ export class PriceTokenAmount extends PriceToken {
         };
     }
 
-    constructor(tokenStruct: PriceTokenAmountStruct) {
+    constructor(tokenStruct: PriceTokenAmountStruct<T>) {
         super(tokenStruct);
         if ('weiAmount' in tokenStruct) {
             this._weiAmount = new BigNumber(tokenStruct.weiAmount);

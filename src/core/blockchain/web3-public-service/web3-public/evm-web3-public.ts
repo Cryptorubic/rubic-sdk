@@ -1,34 +1,35 @@
-import { Cache } from '@rsdk-common/decorators/cache.decorator';
-import { ConditionalResult } from '@rsdk-common/decorators/models/conditional-result';
-import { TimeoutError } from '@rsdk-common/errors/utils/timeout.error';
-import pTimeout from '@rsdk-common/utils/p-timeout';
-import { ERC20_TOKEN_ABI } from '@rsdk-core/blockchain/constants/erc-20-abi';
+import { Cache } from 'src/common/decorators/cache.decorator';
+import { ConditionalResult } from 'src/common/decorators/models/conditional-result';
+import { TimeoutError } from 'src/common/errors/utils/timeout.error';
+import pTimeout from 'src/common/utils/p-timeout';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
 import {
     HEALTHCHECK,
     isBlockchainHealthcheckAvailable
-} from '@rsdk-core/blockchain/constants/healthcheck';
-import { nativeTokensList } from '@rsdk-core/blockchain/constants/native-tokens';
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { MULTICALL_ABI } from '@rsdk-core/blockchain/web3-public/constants/multicall-abi';
-import { MULTICALL_ADDRESSES } from '@rsdk-core/blockchain/web3-public/constants/multicall-addresses';
-import { BatchCall } from '@rsdk-core/blockchain/web3-public/models/batch-call';
-import { Call } from '@rsdk-core/blockchain/web3-public/models/call';
-import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public/models/contract-multicall-response';
-import { MulticallResponse } from '@rsdk-core/blockchain/web3-public/models/multicall-response';
-import { RpcResponse } from '@rsdk-core/blockchain/web3-public/models/rpc-response';
-import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
+} from 'src/core/blockchain/constants/healthcheck';
+import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/constants/multicall-abi';
+import { MULTICALL_ADDRESSES } from 'src/core/blockchain/web3-public-service/constants/multicall-addresses';
+import { BatchCall } from 'src/core/blockchain/web3-public-service/models/batch-call';
+import { Call } from 'src/core/blockchain/web3-public-service/models/call';
+import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/models/contract-multicall-response';
+import { MulticallResponse } from 'src/core/blockchain/web3-public-service/models/multicall-response';
+import { RpcResponse } from 'src/core/blockchain/web3-public-service/models/rpc-response';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import Web3 from 'web3';
 import BigNumber from 'bignumber.js';
 import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
 import { AbiItem } from 'web3-utils';
 import { BlockTransactionString, TransactionReceipt } from 'web3-eth';
-import { InsufficientFundsError } from '@rsdk-common/errors/swap/insufficient-funds.error';
-import { HttpClient } from '@rsdk-common/models/http-client';
-import { DefaultHttpClient } from '@rsdk-common/http/default-http-client';
-import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
+import { InsufficientFundsError } from 'src/common/errors/swap/insufficient-funds.error';
+import { HttpClient } from 'src/common/models/http-client';
+import { DefaultHttpClient } from 'src/common/http/default-http-client';
+import { MethodData } from 'src/core/blockchain/web3-public-service/models/method-data';
 import { RubicSdkError } from 'src/common';
 import { EventData } from 'web3-eth-contract';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { Web3Public } from 'src/core';
 
 type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 
@@ -36,7 +37,7 @@ type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
  * To send transaction or execute contract method use {@link Web3Private}.
  */
-export class Web3Public {
+export class EvmWeb3Public extends Web3Public {
     private readonly multicallAddresses: Record<BlockchainName, string> = MULTICALL_ADDRESSES;
 
     /**
@@ -48,7 +49,9 @@ export class Web3Public {
         private readonly web3: Web3,
         private readonly blockchainName: BlockchainName,
         private httpClient?: HttpClient
-    ) {}
+    ) {
+        super();
+    }
 
     /**
      * Health-check current rpc node.

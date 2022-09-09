@@ -1,13 +1,18 @@
 import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
-import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { TokenBaseStruct } from 'src/common/tokens-manager/models/token-base-struct';
 import { Injector } from 'src/core/sdk/injector';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { BlockchainsInfo } from 'src/core';
 
-export type TokenStruct = {
-    blockchain: BlockchainName;
+export type TokenStruct<T extends BlockchainName = BlockchainName> = {
+    blockchain: T;
     address: string;
     name: string;
     symbol: string;
@@ -17,22 +22,34 @@ export type TokenStruct = {
 /**
  * Contains main token's fields.
  */
-export class Token {
+export class Token<T extends BlockchainName = BlockchainName> {
     /**
      * Creates Token based on token's address and blockchain.
      * @param tokenBaseStruct Base token structure.
      */
-    public static async createToken(tokenBaseStruct: TokenBaseStruct): Promise<Token> {
+    public static async createToken<T extends BlockchainName = BlockchainName>(
+        tokenBaseStruct: TokenBaseStruct<T>
+    ): Promise<Token<T>> {
         if (tokenBaseStruct.blockchain === BLOCKCHAIN_NAME.BITCOIN) {
             return new Token({
                 ...tokenBaseStruct,
                 ...nativeTokensList[BLOCKCHAIN_NAME.BITCOIN]
             });
         }
+
+        if (!BlockchainsInfo.isEvmBlockchainName(tokenBaseStruct.blockchain)) {
+            throw new RubicSdkError(
+                `${tokenBaseStruct.blockchain} blockchain is not supported in Token class`
+            );
+        }
         const web3Public = Injector.web3PublicService.getWeb3Public(tokenBaseStruct.blockchain);
         const tokenInfo = await web3Public.callForTokenInfo(tokenBaseStruct.address);
 
-        if (tokenInfo.decimals == null || tokenInfo.name == null || tokenInfo.symbol == null) {
+        if (
+            tokenInfo.decimals === undefined ||
+            tokenInfo.name === undefined ||
+            tokenInfo.symbol === undefined
+        ) {
             throw new RubicSdkError('Error while loading token');
         }
 
@@ -49,7 +66,7 @@ export class Token {
      */
     public static async createTokens(
         tokensAddresses: string[] | ReadonlyArray<string>,
-        blockchain: BlockchainName
+        blockchain: EvmBlockchainName
     ): Promise<Token[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
         const tokenInfo = await web3Public.callForTokensInfo(tokensAddresses);
@@ -85,7 +102,7 @@ export class Token {
         return tokens.map(token => token.address);
     }
 
-    public readonly blockchain: BlockchainName;
+    public readonly blockchain: T;
 
     public readonly address: string;
 
@@ -99,7 +116,7 @@ export class Token {
         return EvmWeb3Pure.isNativeAddress(this.address);
     }
 
-    constructor(tokenStruct: TokenStruct) {
+    constructor(tokenStruct: TokenStruct<T>) {
         this.blockchain = tokenStruct.blockchain;
         this.address = tokenStruct.address;
         this.name = tokenStruct.name;

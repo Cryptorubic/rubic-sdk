@@ -1,4 +1,4 @@
-import { BlockchainsInfo, Web3Public, Web3Pure } from 'src/core';
+import { BlockchainsInfo, Web3Pure } from 'src/core';
 import { IRoute } from '@viaprotocol/router-sdk/dist/types';
 import { Via } from '@viaprotocol/router-sdk';
 import {
@@ -29,18 +29,19 @@ import { MethodDecoder } from 'src/features/cross-chain/utils/decode-method';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
 import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
-import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-cross-chain-supported-blockchain';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 
 export class ViaCrossChainTrade extends CrossChainTrade {
     /** @internal */
     public static async getGasData(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount,
         route: IRoute
     ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
+        const fromBlockchain = from.blockchain;
         const walletAddress = Injector.web3Private.address;
         if (!walletAddress) {
             return null;
@@ -99,7 +100,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
 
     private readonly via = new Via(VIA_DEFAULT_CONFIG);
 
-    public readonly from: PriceTokenAmount;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount;
 
@@ -119,7 +120,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
 
     public readonly bridgeType: BridgeType;
 
-    protected readonly fromWeb3Public: Web3Public;
+    protected readonly fromWeb3Public: EvmWeb3Public;
 
     protected get fromContractAddress(): string {
         return viaContractAddress[this.from.blockchain as ViaCrossChainSupportedBlockchain];
@@ -131,7 +132,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
 
     constructor(
         crossChainTrade: {
-            from: PriceTokenAmount;
+            from: PriceTokenAmount<EvmBlockchainName>;
             to: PriceTokenAmount;
             route: IRoute;
             gasData: GasData;

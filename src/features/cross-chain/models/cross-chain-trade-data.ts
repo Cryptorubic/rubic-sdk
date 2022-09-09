@@ -1,4 +1,5 @@
 import { BlockchainName } from 'src/core';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 /**
  * Data required to obtain status of cross-chain trade.
@@ -7,7 +8,7 @@ export interface CrossChainTradeData {
     /**
      * Source blockchain.
      */
-    fromBlockchain: BlockchainName;
+    fromBlockchain: EvmBlockchainName;
 
     /**
      * Destination blockchain.

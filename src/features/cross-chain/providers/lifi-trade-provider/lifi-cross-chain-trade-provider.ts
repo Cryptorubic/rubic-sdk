@@ -22,6 +22,7 @@ import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/c
 import { bridges } from 'src/features/cross-chain/constants/bridge-type';
 import { RoutesRequest } from '@lifi/types';
 import { PriceToken } from 'src/common';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -49,8 +50,8 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     }
 
     public async calculate(
-        from: PriceTokenAmount,
-        toToken: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
         const fromBlockchain = from.blockchain;

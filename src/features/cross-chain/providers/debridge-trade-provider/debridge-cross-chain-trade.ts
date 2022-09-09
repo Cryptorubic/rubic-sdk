@@ -5,7 +5,7 @@ import {
     TradeType
 } from 'src/features';
 import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
-import { BlockchainsInfo, Web3Public, Web3Pure } from 'src/core';
+import { BlockchainsInfo, Web3Pure } from 'src/core';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { FailedToCheckForTransactionReceiptError, PriceTokenAmount } from 'src/common';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
@@ -20,6 +20,8 @@ import { BytesLike } from 'ethers';
 import { TransactionResponse } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
 import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade-provider';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 
 /**
  * Calculated DeBridge cross chain trade.
@@ -34,8 +36,8 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
 
     /** @internal */
     public static async getGasData(
-        from: PriceTokenAmount,
-        to: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        to: PriceTokenAmount<EvmBlockchainName>,
         transactionRequest: TransactionRequest
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as DeBridgeCrossChainSupportedBlockchain;
@@ -96,9 +98,9 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
 
     public readonly itType: { from: TradeType; to: TradeType };
 
-    public readonly from: PriceTokenAmount;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly to: PriceTokenAmount;
+    public readonly to: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly toTokenAmountMin: BigNumber;
 
@@ -106,7 +108,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
 
     public readonly gasData: GasData | null;
 
-    protected readonly fromWeb3Public: Web3Public;
+    protected readonly fromWeb3Public: EvmWeb3Public;
 
     private get fromBlockchain(): DeBridgeCrossChainSupportedBlockchain {
         return this.from.blockchain as DeBridgeCrossChainSupportedBlockchain;
@@ -120,8 +122,8 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
 
     constructor(
         crossChainTrade: {
-            from: PriceTokenAmount;
-            to: PriceTokenAmount;
+            from: PriceTokenAmount<EvmBlockchainName>;
+            to: PriceTokenAmount<EvmBlockchainName>;
             transactionRequest: TransactionRequest;
             gasData: GasData | null;
             priceImpact: number;

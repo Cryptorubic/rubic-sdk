@@ -4,7 +4,6 @@ import {
     BlockchainName,
     BlockchainsInfo,
     TransactionOptions,
-    Web3Public,
     Web3Pure
 } from 'src/core';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
@@ -25,6 +24,7 @@ import { ItType } from 'src/features/cross-chain/models/it-type';
 import { Network, validate } from 'bitcoin-address-validation';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 
 /**
  * Abstract class for all cross chain providers' trades.
@@ -84,7 +84,7 @@ export abstract class CrossChainTrade {
      */
     public abstract readonly gasData: GasData;
 
-    protected abstract readonly fromWeb3Public: Web3Public;
+    protected abstract readonly fromWeb3Public: EvmWeb3Public;
 
     protected abstract get fromContractAddress(): string;
 

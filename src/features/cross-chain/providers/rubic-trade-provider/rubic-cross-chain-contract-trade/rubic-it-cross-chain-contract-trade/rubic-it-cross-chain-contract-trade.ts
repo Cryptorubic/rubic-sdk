@@ -1,4 +1,3 @@
-import { BlockchainName } from 'src/core';
 import { OneinchTrade } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/oneinch-trade';
 import { UniswapV3AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
 import { UniswapV2AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
@@ -12,18 +11,19 @@ import { RubicCrossChainContractTrade } from '@rsdk-features/cross-chain/provide
 import { RubicCrossChainSupportedInstantTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-cross-chain-instant-trade/rubic-cross-chain-supported-instant-trade';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export class RubicItCrossChainContractTrade extends RubicCrossChainContractTrade {
-    public readonly fromToken: PriceTokenAmount;
+    public readonly fromToken: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly toToken: PriceTokenAmount;
+    public readonly toToken: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly toTokenAmountMin: BigNumber;
 
     private readonly crossChainInstantTrade: CrossChainInstantTrade;
 
     constructor(
-        blockchain: BlockchainName,
+        blockchain: EvmBlockchainName,
         contract: CrossChainContractData,
         providerIndex: number,
         public readonly slippage: number,

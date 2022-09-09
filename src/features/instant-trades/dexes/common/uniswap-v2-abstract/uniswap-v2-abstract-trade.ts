@@ -2,11 +2,10 @@ import { Cache } from '@rsdk-common/decorators/cache.decorator';
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { LowSlippageDeflationaryTokenError } from '@rsdk-common/errors/swap/low-slippage-deflationary-token.error';
 import { tryExecuteAsync } from '@rsdk-common/utils/functions';
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { Web3Private } from '@rsdk-core/blockchain/web3-private/web3-private';
-import { BatchCall } from '@rsdk-core/blockchain/web3-public/models/batch-call';
-import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public/models/contract-multicall-response';
-import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
+import { BatchCall } from '@rsdk-core/blockchain/web3-public-service/models/batch-call';
+import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public-service/models/contract-multicall-response';
 import { createTokenNativeAddressProxyInPathStartAndEnd } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
 import { Injector } from '@rsdk-core/sdk/injector';
@@ -30,10 +29,11 @@ import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { Exact } from 'src/features/instant-trades/models/exact';
 import { PriceTokenAmount, Token } from 'src/common';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 
 export type UniswapV2TradeStruct = {
-    from: PriceTokenAmount;
-    to: PriceTokenAmount;
+    from: PriceTokenAmount<EvmBlockchainName>;
+    to: PriceTokenAmount<EvmBlockchainName>;
     exact: Exact;
     wrappedPath: ReadonlyArray<Token> | Token[];
     deadlineMinutes: number;
@@ -71,7 +71,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     public static readonly defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
 
     public static callForRoutes(
-        blockchain: BlockchainName,
+        blockchain: EvmBlockchainName,
         exact: Exact,
         routesMethodArguments: [string, string[]][]
     ): Promise<ContractMulticallResponse<{ amounts: string[] }>[]> {
@@ -92,9 +92,9 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     public slippageTolerance: number;
 
-    public readonly from: PriceTokenAmount;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly to: PriceTokenAmount;
+    public readonly to: PriceTokenAmount<EvmBlockchainName>;
 
     public gasFeeInfo: GasFeeInfo | null;
 
@@ -326,14 +326,14 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     private convertSwapParametersToCallParameters(
         parameters: Parameters<InstanceType<typeof Web3Private>['executeContractMethod']>,
         fromAddress?: string
-    ): Parameters<InstanceType<typeof Web3Public>['callContractMethod']> {
+    ): Parameters<InstanceType<typeof EvmWeb3Public>['callContractMethod']> {
         return parameters.slice(0, 3).concat([
             {
                 methodArguments: parameters[3],
                 from: fromAddress || Injector.web3Private.address,
                 ...(parameters[4]?.value && { value: parameters[4]?.value })
             }
-        ]) as Parameters<InstanceType<typeof Web3Public>['callContractMethod']>;
+        ]) as Parameters<InstanceType<typeof EvmWeb3Public>['callContractMethod']>;
     }
 
     /** @internal */

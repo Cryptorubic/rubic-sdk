@@ -8,7 +8,6 @@ import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swa
 import BigNumber from 'bignumber.js';
 import { RubicItCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
 import { CelerRubicCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade';
-import { Web3Public } from 'src/core';
 import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
 import { LowSlippageDeflationaryTokenError, PriceTokenAmount, RubicSdkError } from 'src/common';
@@ -17,6 +16,7 @@ import { CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
 import { RubicDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 /**
  * Calculated Rubic cross chain trade.
  */
@@ -104,9 +104,9 @@ export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
 
     public readonly cryptoFeeToken: PriceTokenAmount;
 
-    protected readonly fromWeb3Public: Web3Public;
+    protected readonly fromWeb3Public: EvmWeb3Public;
 
-    protected readonly toWeb3Public: Web3Public;
+    protected readonly toWeb3Public: EvmWeb3Public;
 
     constructor(
         crossChainTrade: {
