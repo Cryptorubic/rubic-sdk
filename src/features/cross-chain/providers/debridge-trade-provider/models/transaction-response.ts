@@ -18,3 +18,23 @@ export interface TransactionResponse {
         value: string;
     };
 }
+
+/**
+ * Swap transaction error response.
+ */
+export interface TransactionErrorResponse {
+    /**
+     * Error code.
+     */
+    errorCode: number;
+
+    /**
+     * Error ID.
+     */
+    errorId: string;
+
+    /**
+     * Error message.
+     */
+    errorMessage: string;
+}
