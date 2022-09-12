@@ -75,6 +75,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
             });
 
             const pages = await via.routesPages();
+            const fromAddress = this.walletAddress;
             const toAddress = options.receiverAddress || this.walletAddress;
             const params: IGetRoutesRequestParams = {
                 fromChainId,
@@ -83,7 +84,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 fromAmount: from.stringWeiAmount as unknown as number,
                 toChainId,
                 toTokenAddress: toToken.address,
-                fromAddress: viaContractAddress[fromBlockchain],
+                ...(fromAddress && { fromAddress }),
                 ...(toAddress && { toAddress }),
                 multiTx: false,
                 limit: 1
