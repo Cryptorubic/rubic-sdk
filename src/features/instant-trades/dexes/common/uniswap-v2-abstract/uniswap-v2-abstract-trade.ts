@@ -319,7 +319,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             {
                 onTransactionHash: options.onConfirm,
                 value,
-                gas,
+                ...(method === this.regularSwapMethod && { gas }),
                 gasPrice
             }
         ];
