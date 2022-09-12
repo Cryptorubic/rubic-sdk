@@ -30,6 +30,7 @@ import { LowToSlippageError } from '@rsdk-common/errors/cross-chain/low-to-slipp
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { celerCrossChainContractAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
+import { TooLowAmountError } from 'src/common/errors/cross-chain/too-low-amount.error';
 
 interface CelerCrossChainOptions extends RequiredCrossChainOptions {
     isUniV2?: boolean;
@@ -121,7 +122,10 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             celerSlippage
         );
         if (estimateTransitAmountWithSlippage.lte(0)) {
-            await this.checkMinMaxAmountsErrors(fromTrade);
+            return {
+                trade: null,
+                error: new TooLowAmountError()
+            };
         }
 
         const { toTransitTokenAmount, transitFeeToken, feeInPercents } =
