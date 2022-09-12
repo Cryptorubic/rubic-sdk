@@ -9,7 +9,7 @@ import {
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { Network, validate } from 'bitcoin-address-validation';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';

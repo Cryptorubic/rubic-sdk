@@ -6,7 +6,7 @@ import {
 import { createTokenNativeAddressProxy } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { zrxApiParams } from 'src/features/instant-trades/dexes/common/zrx-common/constants';
 import { ZrxQuoteRequest } from 'src/features/instant-trades/dexes/common/zrx-common/models/zrx-quote-request';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { ZrxQuoteResponse } from 'src/features/instant-trades/dexes/common/zrx-common/models/zrx-types';
 import { getZrxApiBaseUrl } from 'src/features/instant-trades/dexes/common/zrx-common/utils';
 import BigNumber from 'bignumber.js';

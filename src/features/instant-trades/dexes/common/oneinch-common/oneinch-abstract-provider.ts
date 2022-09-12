@@ -8,7 +8,7 @@ import {
 import { OneinchTrade } from 'src/features/instant-trades/dexes/common/oneinch-common/oneinch-trade';
 import { RubicSdkError } from 'src/common/errors';
 import { createTokenNativeAddressProxy } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';

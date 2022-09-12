@@ -17,7 +17,7 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { RubicDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';

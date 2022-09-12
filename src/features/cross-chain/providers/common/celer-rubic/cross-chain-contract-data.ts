@@ -1,6 +1,6 @@
 import { CrossChainSupportedInstantTradeProvider } from 'src/features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
 import { ProviderData } from 'src/features/cross-chain/models/provider-data';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';

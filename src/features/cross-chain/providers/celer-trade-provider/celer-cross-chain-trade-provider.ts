@@ -12,7 +12,7 @@ import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { CelerDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
 import { RubicSdkError } from 'src/common/errors';
 import { CrossChainContractData } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { wrappedNative } from 'src/features/cross-chain/providers/celer-trade-provider/constants/wrapped-native';
 import { EstimateAmtResponse } from 'src/features/cross-chain/providers/celer-trade-provider/models/estimate-amount-response';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';

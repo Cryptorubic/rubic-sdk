@@ -1,6 +1,6 @@
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import Web3 from 'web3';
-import { HttpClient } from 'src/core/sdk/models/http-client';
+import { HttpClient } from 'src/core/http-client/models/http-client';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { provider } from 'web3-core';
 

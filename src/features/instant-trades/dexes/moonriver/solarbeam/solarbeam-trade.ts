@@ -7,7 +7,7 @@ import {
     UniswapV2TradeStruct
 } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/models/contract-multicall-response';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import { Exact } from 'src/features/instant-trades/models/exact';

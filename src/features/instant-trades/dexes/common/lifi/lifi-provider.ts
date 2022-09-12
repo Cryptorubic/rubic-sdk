@@ -8,7 +8,7 @@ import { LifiTrade } from 'src/features/instant-trades/dexes/common/lifi/lifi-tr
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { combineOptions } from 'src/common/utils/options';
 import { TradeType } from 'src/features/instant-trades/models/trade-type';

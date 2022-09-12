@@ -1,6 +1,6 @@
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
 import { TransactionReceipt } from 'web3-eth';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { Route } from '@lifi/sdk';
 import { TransactionConfig } from 'web3-core';
 import BigNumber from 'bignumber.js';

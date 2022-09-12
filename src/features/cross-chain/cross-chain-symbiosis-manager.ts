@@ -11,7 +11,7 @@ import { getSymbiosisConfig } from 'src/features/cross-chain/providers/symbiosis
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { RubicSdkError } from 'src/common/errors';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';

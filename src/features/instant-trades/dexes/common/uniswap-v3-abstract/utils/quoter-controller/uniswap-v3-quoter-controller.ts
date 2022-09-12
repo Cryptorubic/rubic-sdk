@@ -17,7 +17,7 @@ import {
     QUOTER_CONTRACT_ADDRESS
 } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/quoter-contract-data';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { UniswapV3RouterConfiguration } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
 import { UniswapV3AlgebraQuoterController } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 import { Exact } from 'src/features/instant-trades/models/exact';

@@ -1,11 +1,11 @@
 import { Configuration } from 'src/core/sdk/models/configuration';
 import { TokensManager } from 'src/core/tokens-manager/tokens-manager';
-import { Injector } from 'src/core/sdk/injector';
-import { HttpClient } from 'src/core/sdk/models/http-client';
+import { Injector } from 'src/core/injector/injector';
+import { HttpClient } from 'src/core/http-client/models/http-client';
 import { CrossChainSymbiosisManager } from 'src/features/cross-chain/cross-chain-symbiosis-manager';
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
 import { Web3PrivateService } from 'src/core/blockchain/web3-private-service/web3-private-service';
-import { DefaultHttpClient } from 'src/core/sdk/default-http-client';
+import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { CrossChainManager } from 'src/features/cross-chain/cross-chain-manager';
 import { CrossChainStatusManager } from 'src/features/cross-chain/cross-chain-status-manager';

@@ -12,7 +12,7 @@ import {
     UniswapCalculatedInfoWithProfit
 } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
 import { UniswapV2AbstractTrade } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { UniswapRoute } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-route';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';

@@ -9,7 +9,7 @@ import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';

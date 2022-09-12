@@ -1,5 +1,5 @@
 /* eslint-disable no-debugger */
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import {
     BtcStatusResponse,
     DeBridgeApiResponse,

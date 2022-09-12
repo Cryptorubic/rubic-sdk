@@ -1,7 +1,7 @@
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { notNull } from 'src/common/utils/object';
 import { ConfigUpdate } from '@lifi/sdk';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { lifiCrossChainSupportedBlockchains } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 
 export function getLifiConfig(): ConfigUpdate {

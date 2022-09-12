@@ -5,7 +5,7 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import {
     viaContractAbi,
     viaContractAddress

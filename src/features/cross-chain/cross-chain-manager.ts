@@ -8,7 +8,7 @@ import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/provid
 import { RubicSdkError } from 'src/common/errors';
 import { CelerCrossChainTradeProvider } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade-provider';
 import { DebridgeCrossChainTrade } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { from as fromPromise, map, merge, mergeMap, Observable, of, switchMap } from 'rxjs';
 import { RangoCrossChainTrade } from 'src/features/cross-chain/providers/rango-trade-provider/rango-cross-chain-trade';
 import { RangoCrossChainTradeProvider } from 'src/features/cross-chain/providers/rango-trade-provider/rango-cross-chain-trade-provider';

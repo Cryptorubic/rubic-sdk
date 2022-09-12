@@ -7,7 +7,7 @@ import { CrossChainTradeType } from 'src/features/cross-chain/models/cross-chain
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
 import { CrossChainIsUnavailableError, RubicSdkError } from 'src/common/errors';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';

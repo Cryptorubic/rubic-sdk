@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';

@@ -1,5 +1,5 @@
 import { CrossChainContractTrade } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { CrossChainIsUnavailableError, MaxGasPriceOverflowError } from 'src/common/errors';

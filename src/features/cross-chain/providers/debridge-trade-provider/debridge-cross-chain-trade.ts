@@ -13,7 +13,7 @@ import { ContractParams } from 'src/features/cross-chain/models/contract-params'
 import { TransactionResponse } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
 import { BytesLike } from 'ethers';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';

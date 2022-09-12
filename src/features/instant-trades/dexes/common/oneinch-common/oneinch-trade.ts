@@ -10,7 +10,7 @@ import {
     TransactionGasParams
 } from 'src/features/instant-trades/models/gas-params';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';

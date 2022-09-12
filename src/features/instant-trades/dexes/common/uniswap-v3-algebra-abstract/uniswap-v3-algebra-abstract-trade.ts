@@ -10,7 +10,7 @@ import { InstantTrade } from 'src/features/instant-trades/instant-trade';
 import { SwapOptions } from 'src/features/instant-trades/models/swap-options';
 import { UniswapV3AbstractTrade } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
 import { RubicSdkError } from 'src/common/errors';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { getFromToTokensAmountsByExact } from 'src/features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';

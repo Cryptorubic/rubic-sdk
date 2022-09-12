@@ -5,7 +5,7 @@ import {
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';

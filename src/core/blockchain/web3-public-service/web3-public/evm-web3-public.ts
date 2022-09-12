@@ -3,7 +3,7 @@ import { InsufficientFundsError, RubicSdkError, TimeoutError } from 'src/common/
 import { BatchCall } from 'src/core/blockchain/web3-public-service/models/batch-call';
 import { RpcResponse } from 'src/core/blockchain/web3-public-service/models/rpc-response';
 import { MulticallResponse } from 'src/core/blockchain/web3-public-service/models/multicall-response';
-import { DefaultHttpClient } from 'src/core/sdk/default-http-client';
+import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
 import {
     HEALTHCHECK,
     isBlockchainHealthcheckAvailable
@@ -19,7 +19,7 @@ import { BlockTransactionString, TransactionReceipt } from 'web3-eth';
 import { ConditionalResult } from 'src/common/utils/decorators/cache-decorator/models/conditional-result';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
-import { HttpClient } from 'src/core/sdk/models/http-client';
+import { HttpClient } from 'src/core/http-client/models/http-client';
 import { MethodData } from 'src/core/blockchain/web3-public-service/models/method-data';
 import pTimeout from 'src/common/utils/p-timeout';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';

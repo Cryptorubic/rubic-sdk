@@ -3,7 +3,7 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { PriceToken, Token } from 'src/common/tokens';
 import { UniswapV3AlgebraQuoterController } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 import { RubicSdkError } from 'src/common/errors';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { ROUTER_TOKENS } from 'src/features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/constants/router-tokens';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/models/contract-multicall-response';
 import { MethodData } from 'src/core/blockchain/web3-public-service/models/method-data';

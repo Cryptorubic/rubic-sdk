@@ -11,7 +11,7 @@ import {
     OptionsGasParams,
     TransactionGasParams
 } from 'src/features/instant-trades/models/gas-params';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { TransactionOptions } from 'src/core/blockchain/models/transaction-options';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';

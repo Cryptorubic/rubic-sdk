@@ -4,7 +4,7 @@ import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
 import { SwapCalculationOptions } from 'src/features/instant-trades/models/swap-calculation-options';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { GasPriceInfo } from 'src/features/instant-trades/models/gas-price-info';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';

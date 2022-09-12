@@ -6,7 +6,7 @@ import { BatchCall } from 'src/core/blockchain/web3-public-service/models/batch-
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
 import { LowSlippageDeflationaryTokenError, RubicSdkError } from 'src/common/errors';
 import { defaultEstimatedGas } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/constants/default-estimated-gas';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import {
     ExactInputOutputSwapMethodsList,
     RegularSwapMethod,

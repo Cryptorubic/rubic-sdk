@@ -1,5 +1,5 @@
 import { TimeoutError } from 'src/common/errors/utils/timeout.error';
-import { HttpClient } from 'src/core/sdk/models/http-client';
+import { HttpClient } from 'src/core/http-client/models/http-client';
 import pTimeout from 'src/common/utils/p-timeout';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import BigNumber from 'bignumber.js';
