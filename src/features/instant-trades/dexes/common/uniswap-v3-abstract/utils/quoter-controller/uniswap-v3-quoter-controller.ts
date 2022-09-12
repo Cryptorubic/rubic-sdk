@@ -13,8 +13,8 @@ import { notNull } from 'src/common/utils/object';
 import { UniswapV3Route } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
 import { Cache } from 'src/common/utils/decorators/cache-decorator/cache.decorator';
 import {
-    QUOTER_CONTRACT_ABI,
-    QUOTER_CONTRACT_ADDRESS
+    UNISWAP_V3_QUOTER_CONTRACT_ABI,
+    UNISWAP_V3_QUOTER_CONTRACT_ADDRESS
 } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/quoter-contract-data';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
@@ -274,8 +274,8 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
 
         return this.web3Public
             .multicallContractMethods<{ 0: string }>(
-                QUOTER_CONTRACT_ADDRESS,
-                QUOTER_CONTRACT_ABI,
+                UNISWAP_V3_QUOTER_CONTRACT_ADDRESS,
+                UNISWAP_V3_QUOTER_CONTRACT_ABI,
                 quoterMethodsData.map(quoterMethodData => quoterMethodData.methodData)
             )
             .then(results => {

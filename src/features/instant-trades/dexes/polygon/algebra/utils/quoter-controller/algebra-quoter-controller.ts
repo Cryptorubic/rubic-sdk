@@ -11,8 +11,8 @@ import { AlgebraRoute } from 'src/features/instant-trades/dexes/polygon/algebra/
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 import { Exact } from 'src/features/instant-trades/models/exact';
 import {
-    QUOTER_CONTRACT_ABI,
-    QUOTER_CONTRACT_ADDRESS
+    ALGEBRA_QUOTER_CONTRACT_ABI,
+    ALGEBRA_QUOTER_CONTRACT_ADDRESS
 } from 'src/features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/constants/quoter-contract-data';
 import BigNumber from 'bignumber.js';
 
@@ -124,8 +124,8 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
             .flat();
 
         const results = await this.web3Public.multicallContractMethods<{ 0: string }>(
-            QUOTER_CONTRACT_ADDRESS,
-            QUOTER_CONTRACT_ABI,
+            ALGEBRA_QUOTER_CONTRACT_ADDRESS,
+            ALGEBRA_QUOTER_CONTRACT_ABI,
             quoterMethodsData.map(quoterMethodData => quoterMethodData.methodData)
         );
 
