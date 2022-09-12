@@ -1,4 +1,4 @@
-import { UniswapV2ProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { UniswapV2ProviderConfiguration } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultEthereumRoutingProvidersAddresses = [
     '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH

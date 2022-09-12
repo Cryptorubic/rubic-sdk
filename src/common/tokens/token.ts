@@ -4,11 +4,12 @@ import {
     BlockchainName,
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
-import { TokenBaseStruct } from 'src/common/tokens-manager/models/token-base-struct';
+import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { Injector } from 'src/core/sdk/injector';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
-import { BlockchainsInfo, Web3Pure } from 'src/core';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
 export type TokenStruct<T extends BlockchainName = BlockchainName> = {
     blockchain: T;
@@ -30,10 +31,7 @@ export class Token<T extends BlockchainName = BlockchainName> {
         tokenBaseStruct: TokenBaseStruct<T>
     ): Promise<Token<T>> {
         if (tokenBaseStruct.blockchain === BLOCKCHAIN_NAME.BITCOIN) {
-            return new Token({
-                ...tokenBaseStruct,
-                ...nativeTokensList[BLOCKCHAIN_NAME.BITCOIN]
-            });
+            return nativeTokensList[BLOCKCHAIN_NAME.BITCOIN] as Token<T>;
         }
 
         if (!BlockchainsInfo.isEvmBlockchainName(tokenBaseStruct.blockchain)) {

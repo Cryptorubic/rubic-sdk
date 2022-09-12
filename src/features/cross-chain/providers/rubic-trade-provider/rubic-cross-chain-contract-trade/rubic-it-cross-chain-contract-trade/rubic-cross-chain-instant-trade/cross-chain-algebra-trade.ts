@@ -1,12 +1,12 @@
-import { CrossChainInstantTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/cross-chain-instant-trade';
-import { AlgebraTrade } from '@rsdk-features/instant-trades/dexes/polygon/algebra/algebra-trade';
-import { AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/algebra-quoter-controller';
-import { DestinationCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
-import { v3LikeCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/v3-like-celer-swap-info';
-import { SwapVersion } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/provider-type.enum';
-import { ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS } from '@rsdk-features/instant-trades/dexes/polygon/algebra/constants/swap-router-contract-data';
-import { RubicSdkError } from 'src/common';
+import { CrossChainInstantTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/cross-chain-instant-trade';
+import { AlgebraTrade } from 'src/features/instant-trades/dexes/polygon/algebra/algebra-trade';
+import { AlgebraQuoterController } from 'src/features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/algebra-quoter-controller';
+import { DestinationCelerSwapInfo } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
+import { v3LikeCelerSwapInfo } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/v3-like-celer-swap-info';
+import { SwapVersion } from 'src/features/cross-chain/providers/common/celer-rubic/models/provider-type.enum';
+import { ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS } from 'src/features/instant-trades/dexes/polygon/algebra/constants/swap-router-contract-data';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { RubicSdkError } from 'src/common/errors';
 
 export class CrossChainAlgebraTrade implements CrossChainInstantTrade {
     readonly defaultDeadline = 999999999999999;

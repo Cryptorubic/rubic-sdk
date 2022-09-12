@@ -2,13 +2,13 @@ import { Chain } from '__tests__/utils/chain';
 import { mockInjector } from '__tests__/utils/mock-injector';
 import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
 import BigNumber from 'bignumber.js';
-import { PriceTokenAmount } from 'src/common/tokens-manager/tokens/price-token-amount';
-import { PriceToken } from 'src/common/tokens-manager/tokens/price-token';
+import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
+import { PriceToken } from 'src/common/tokens/price-token';
 import { UniSwapV3EthereumTrade } from 'src/features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-trade';
 import { UNI_SWAP_V3_ETHEREUM_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/constants/provider-configuration';
 import { UNI_SWAP_V3_ETHEREUM_ROUTER_CONFIGURATION } from 'src/features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/constants/router-configuration';
 import { UniSwapV3EthereumProvider } from 'src/features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.ETHEREUM];
 

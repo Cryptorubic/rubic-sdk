@@ -1,34 +1,35 @@
 import {
-    CROSS_CHAIN_TRADE_TYPE,
-    TRADE_TYPE,
-    TradeType,
-    UniswapV2AbstractProvider
-} from 'src/features';
-import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
-import {
     CelerCrossChainSupportedBlockchain,
     celerCrossChainSupportedBlockchains
-} from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
-import { getCelerCrossChainContract } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contracts';
-import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
-import { CelerCrossChainTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade';
-import BigNumber from 'bignumber.js';
-import { compareAddresses, notNull, PriceToken, PriceTokenAmount, RubicSdkError } from 'src/common';
-import { EstimateAmtResponse } from '@rsdk-features/cross-chain/providers/celer-trade-provider/models/estimate-amount-response';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { CelerCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
-import { ItCalculatedTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/it-calculated-trade';
-import { CelerItCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
-import { CelerDirectCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
-import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
-import { wrappedNative } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/wrapped-native';
-import { CelerRubicCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
-import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
-import { LowToSlippageError } from '@rsdk-common/errors/cross-chain/low-to-slippage.error';
-import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
+} from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
+import { ItCalculatedTrade } from 'src/features/cross-chain/providers/common/celer-rubic/models/it-calculated-trade';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { CelerCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { CelerDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
+import { RubicSdkError } from 'src/common/errors';
+import { CrossChainContractData } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
+import { Injector } from 'src/core/sdk/injector';
+import { wrappedNative } from 'src/features/cross-chain/providers/celer-trade-provider/constants/wrapped-native';
+import { EstimateAmtResponse } from 'src/features/cross-chain/providers/celer-trade-provider/models/estimate-amount-response';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { getCelerCrossChainContract } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contracts';
+import { CelerCrossChainTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade';
+import { LowToSlippageError } from 'src/common/errors/cross-chain/low-to-slippage.error';
+import { notNull } from 'src/common/utils/object';
 import { celerCrossChainContractAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { UniswapV2AbstractProvider } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { CelerItCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
+import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
+import { compareAddresses } from 'src/common/utils/blockchain';
+import { CelerRubicCrossChainTradeProvider } from 'src/features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
+import BigNumber from 'bignumber.js';
 
 interface CelerCrossChainOptions extends RequiredCrossChainOptions {
     isUniV2?: boolean;

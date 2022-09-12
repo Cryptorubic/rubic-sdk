@@ -1,5 +1,5 @@
 import { AxiosInstance } from 'axios';
-import { Cache } from 'src/common';
+import { Cache } from 'src/common/utils/decorators';
 
 export class DefaultHttpClient {
     @Cache

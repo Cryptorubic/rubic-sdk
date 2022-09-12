@@ -1,15 +1,15 @@
-import { DefaultHttpClient } from '@rsdk-common/http/default-http-client';
-import { HttpClient } from '@rsdk-common/models/http-client';
-import { Web3PublicService } from '@rsdk-core/blockchain/web3-public-service/web3-public-service';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { Configuration } from '@rsdk-core/sdk/models/configuration';
-import { CrossChainManager } from '@rsdk-features/cross-chain/cross-chain-manager';
-import { InstantTradesManager } from '@rsdk-features/instant-trades/instant-trades-manager';
-import { CrossChainSymbiosisManager } from '@rsdk-features/cross-chain/cross-chain-symbiosis-manager';
-import { CrossChainStatusManager } from 'src/features';
-import { TokensManager } from 'src/common';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { Configuration } from 'src/core/sdk/models/configuration';
+import { TokensManager } from 'src/core/tokens-manager/tokens-manager';
+import { Injector } from 'src/core/sdk/injector';
+import { HttpClient } from 'src/core/sdk/models/http-client';
+import { CrossChainSymbiosisManager } from 'src/features/cross-chain/cross-chain-symbiosis-manager';
+import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
 import { Web3PrivateService } from 'src/core/blockchain/web3-private-service/web3-private-service';
+import { DefaultHttpClient } from 'src/core/sdk/default-http-client';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { CrossChainManager } from 'src/features/cross-chain/cross-chain-manager';
+import { CrossChainStatusManager } from 'src/features/cross-chain/cross-chain-status-manager';
+import { InstantTradesManager } from 'src/features/instant-trades/instant-trades-manager';
 
 /**
  * Base class to work with sdk.

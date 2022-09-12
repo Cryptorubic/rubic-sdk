@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const deBridgeCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,

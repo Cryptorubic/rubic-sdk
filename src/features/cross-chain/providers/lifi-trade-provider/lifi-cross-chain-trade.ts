@@ -1,30 +1,28 @@
-import BigNumber from 'bignumber.js';
-import { BlockchainsInfo, Web3Pure } from 'src/core';
-import {
-    CROSS_CHAIN_TRADE_TYPE,
-    SwapTransactionOptions,
-    TRADE_TYPE,
-    TradeType
-} from 'src/features';
-import { Route } from '@lifi/sdk';
-import { Injector } from 'src/core/sdk/injector';
-import { FailedToCheckForTransactionReceiptError, PriceTokenAmount } from 'src/common';
-import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
-import { GasData } from 'src/features/cross-chain/models/gas-data';
-import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
-import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
-import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
-import { ContractParams } from 'src/features/cross-chain/models/contract-params';
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
-import { BRIDGE_TYPE, BridgeType } from 'src/features/cross-chain/constants/bridge-type';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
-import { FeeInfo } from '../common/models/fee';
-
 /**
  * Calculated Celer cross chain trade.
- */
+ */ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { BRIDGE_TYPE, BridgeType } from 'src/features/cross-chain/constants/bridge-type';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
+import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
+import { ContractParams } from 'src/features/cross-chain/models/contract-params';
+import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
+import { GasData } from 'src/features/cross-chain/models/gas-data';
+import { Injector } from 'src/core/sdk/injector';
+import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import BigNumber from 'bignumber.js';
+import { Route } from '@lifi/sdk';
+
 export class LifiCrossChainTrade extends CrossChainTrade {
     public readonly feeInfo: FeeInfo;
 

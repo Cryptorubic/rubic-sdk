@@ -1,15 +1,15 @@
-import { EvmBlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
-import { SwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { GasPriceInfo } from '@rsdk-features/instant-trades/models/gas-price-info';
-import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
-import BigNumber from 'bignumber.js';
-import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
-import { TradeType } from 'src/features';
-import { PriceToken, PriceTokenAmount } from 'src/common';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
+import { SwapCalculationOptions } from 'src/features/instant-trades/models/swap-calculation-options';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { InstantTrade } from 'src/features/instant-trades/instant-trade';
+import { Injector } from 'src/core/sdk/injector';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { GasPriceInfo } from 'src/features/instant-trades/models/gas-price-info';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import BigNumber from 'bignumber.js';
 
 /**
  * Abstract class for all instant trade providers.

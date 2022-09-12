@@ -1,14 +1,16 @@
-import { BlockchainName, EvmBlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { ProviderData } from '@rsdk-features/cross-chain/models/provider-data';
-import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
-import { celerCrossChainContractAbi } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
-import { BlockchainsInfo } from 'src/core';
-import { CellerMessageBusController } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-message-bus-controller/celler-message-bus-controller';
-import { Cache, PriceToken, PriceTokenAmount, Token } from 'src/common';
-import { rubicCrossChainContractAbi } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contract-abi';
+import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { celerCrossChainContractAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
+import { rubicCrossChainContractAbi } from 'src/features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contract-abi';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { ProviderData } from 'src/features/cross-chain/models/provider-data';
+import { CrossChainContractData } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
+import { CellerMessageBusController } from 'src/features/cross-chain/providers/celer-trade-provider/celer-message-bus-controller/celler-message-bus-controller';
+import { celerTransitTokens } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-transit-tokens';
+import { Cache } from 'src/common/utils/decorators';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import BigNumber from 'bignumber.js';
-import { CelerCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
-import { celerTransitTokens } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-transit-tokens';
 
 /**
  * Class to work with readable methods of cross-chain contract.
@@ -111,7 +113,7 @@ export class CelerCrossChainContractData extends CrossChainContractData {
         toContract: CelerCrossChainContractData
     ): Promise<PriceTokenAmount<EvmBlockchainName>> {
         const feeAmount = await this.destinationCryptoFee(toContract.blockchain);
-        const nativeToken = BlockchainsInfo.getBlockchainByName(this.blockchain).nativeCoin;
+        const nativeToken = nativeTokensList[this.blockchain];
         return PriceTokenAmount.createFromToken({
             ...nativeToken,
             weiAmount: feeAmount

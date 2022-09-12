@@ -1,8 +1,8 @@
-import { HttpClient } from '@rsdk-common/models/http-client';
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import Web3 from 'web3';
-import { provider } from 'web3-core';
+import { HttpClient } from 'src/core/sdk/models/http-client';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { provider } from 'web3-core';
 
 /**
  * Main sdk configuration.

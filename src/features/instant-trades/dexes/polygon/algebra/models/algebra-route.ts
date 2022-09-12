@@ -1,5 +1,5 @@
-import { UniswapV3AlgebraRoute } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
-import { Token } from 'src/common';
+import { UniswapV3AlgebraRoute } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
+import { Token } from 'src/common/tokens';
 
 export interface AlgebraRoute extends UniswapV3AlgebraRoute {
     /**

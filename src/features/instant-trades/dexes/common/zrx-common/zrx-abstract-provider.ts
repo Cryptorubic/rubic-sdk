@@ -1,21 +1,22 @@
-import { InstantTradeProvider } from '@rsdk-features/instant-trades/instant-trade-provider';
+import { InstantTradeProvider } from 'src/features/instant-trades/instant-trade-provider';
 import {
     RequiredSwapCalculationOptions,
     SwapCalculationOptions
-} from '@rsdk-features/instant-trades/models/swap-calculation-options';
-import { createTokenNativeAddressProxy } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
-import { zrxApiParams } from '@rsdk-features/instant-trades/dexes/common/zrx-common/constants';
-import { ZrxQuoteRequest } from '@rsdk-features/instant-trades/dexes/common/zrx-common/models/zrx-quote-request';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { ZrxQuoteResponse } from '@rsdk-features/instant-trades/dexes/common/zrx-common/models/zrx-types';
-import { getZrxApiBaseUrl } from '@rsdk-features/instant-trades/dexes/common/zrx-common/utils';
+} from 'src/features/instant-trades/models/swap-calculation-options';
+import { createTokenNativeAddressProxy } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { zrxApiParams } from 'src/features/instant-trades/dexes/common/zrx-common/constants';
+import { ZrxQuoteRequest } from 'src/features/instant-trades/dexes/common/zrx-common/models/zrx-quote-request';
+import { Injector } from 'src/core/sdk/injector';
+import { ZrxQuoteResponse } from 'src/features/instant-trades/dexes/common/zrx-common/models/zrx-types';
+import { getZrxApiBaseUrl } from 'src/features/instant-trades/dexes/common/zrx-common/utils';
 import BigNumber from 'bignumber.js';
-import { ZrxTrade } from '@rsdk-features/instant-trades/dexes/common/zrx-common/zrx-trade';
-import { Cache, PriceToken, PriceTokenAmount } from 'src/common';
-import { TRADE_TYPE, TradeType } from 'src/features';
+import { ZrxTrade } from 'src/features/instant-trades/dexes/common/zrx-common/zrx-trade';
 import { combineOptions } from 'src/common/utils/options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { Cache } from 'src/common/utils/decorators';
 
 type ZrxSwapCalculationOptions = Omit<
     RequiredSwapCalculationOptions,

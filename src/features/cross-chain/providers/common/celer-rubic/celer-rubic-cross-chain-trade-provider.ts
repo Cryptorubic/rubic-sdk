@@ -1,23 +1,18 @@
-import { BlockchainName, Web3Pure } from 'src/core';
-import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
-import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
-import {
-    compareAddresses,
-    CrossChainIsUnavailableError,
-    InsufficientLiquidityError,
-    PriceToken,
-    PriceTokenAmount,
-    Token
-} from 'src/common';
-import { RubicItCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
+import { CrossChainContractTrade } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
+import { RubicItCrossChainContractTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
+import { ItCalculatedTrade } from 'src/features/cross-chain/providers/common/celer-rubic/models/it-calculated-trade';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { CrossChainIsUnavailableError, InsufficientLiquidityError } from 'src/common/errors';
+import { MinMaxAmounts } from 'src/features/cross-chain/models/min-max-amounts';
+import { CrossChainSupportedInstantTradeProvider } from 'src/features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
+import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
+import { CrossChainContractData } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
+import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import BigNumber from 'bignumber.js';
-import { CrossChainSupportedInstantTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
-import { MinMaxAmounts } from '@rsdk-features/cross-chain/models/min-max-amounts';
-import { ItCalculatedTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/it-calculated-trade';
-import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
-import { CrossChainMinAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-min-amount.error';
-import { CrossChainMaxAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-max-amount.error';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export abstract class CelerRubicCrossChainTradeProvider extends CrossChainTradeProvider {
     protected abstract contracts(blockchain: BlockchainName): CrossChainContractData;

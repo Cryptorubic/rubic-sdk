@@ -1,5 +1,5 @@
-import { UniswapV2ProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
-import { defaultMoonriverProviderConfiguration } from '@rsdk-features/instant-trades/dexes/moonriver/default-constants';
+import { UniswapV2ProviderConfiguration } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { defaultMoonriverProviderConfiguration } from 'src/features/instant-trades/dexes/moonriver/default-constants';
 import { AbiItem } from 'web3-utils';
 
 export const SOLARBEAM_CONTRACT_ADDRESS = '0xAA30eF758139ae4a7f798112902Bf6d65612045f';

@@ -1,24 +1,23 @@
-import {
-    CROSS_CHAIN_TRADE_TYPE,
-    SwapTransactionOptions,
-    TRADE_TYPE,
-    TradeType
-} from 'src/features';
-import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
-import { BLOCKCHAIN_NAME, BlockchainsInfo, Web3Pure } from 'src/core';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { SYMBIOSIS_CONTRACT_ADDRESS } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
-import { SymbiosisCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
-import { FailedToCheckForTransactionReceiptError, PriceTokenAmount } from 'src/common';
-import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
-import BigNumber from 'bignumber.js';
+import { SYMBIOSIS_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
+import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
+import { ContractParams } from 'src/features/cross-chain/models/contract-params';
+import { GasData } from 'src/features/cross-chain/models/gas-data';
+import { Injector } from 'src/core/sdk/injector';
+import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import BigNumber from 'bignumber.js';
 
 /**
  * Calculated Symbiosis cross chain trade.

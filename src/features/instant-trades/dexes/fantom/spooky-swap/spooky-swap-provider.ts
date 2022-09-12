@@ -1,7 +1,7 @@
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
-import { UniswapV2AbstractProvider } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
-import { SPOOKY_SWAP_PROVIDER_CONFIGURATION } from '@rsdk-features/instant-trades/dexes/fantom/spooky-swap/constants';
-import { SpookySwapTrade } from '@rsdk-features/instant-trades/dexes/fantom/spooky-swap/spooky-swap-trade';
+import { SPOOKY_SWAP_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/fantom/spooky-swap/constants';
+import { UniswapV2AbstractProvider } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
+import { SpookySwapTrade } from 'src/features/instant-trades/dexes/fantom/spooky-swap/spooky-swap-trade';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export class SpookySwapProvider extends UniswapV2AbstractProvider<SpookySwapTrade> {
     public readonly blockchain = BLOCKCHAIN_NAME.FANTOM;

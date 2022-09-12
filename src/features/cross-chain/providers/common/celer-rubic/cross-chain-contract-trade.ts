@@ -1,10 +1,12 @@
-import BigNumber from 'bignumber.js';
 import { AbiItem } from 'web3-utils';
-import { Cache, PriceTokenAmount, RubicSdkError } from 'src/common';
-import { ProviderData } from '@rsdk-features/cross-chain/models/provider-data';
-import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
-import { CrossChainSupportedInstantTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
+import { ProviderData } from 'src/features/cross-chain/models/provider-data';
+import { RubicSdkError } from 'src/common/errors';
+import { CrossChainContractData } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { CrossChainSupportedInstantTradeProvider } from 'src/features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
+import { Cache } from 'src/common/utils/decorators';
+import BigNumber from 'bignumber.js';
 
 export abstract class CrossChainContractTrade {
     public abstract readonly fromToken: PriceTokenAmount<EvmBlockchainName>;

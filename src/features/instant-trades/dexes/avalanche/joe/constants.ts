@@ -1,5 +1,5 @@
-import { defaultAvalancheProviderConfiguration } from '@rsdk-features/instant-trades/dexes/avalanche/default-constants';
-import { UniswapV2ProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { defaultAvalancheProviderConfiguration } from 'src/features/instant-trades/dexes/avalanche/default-constants';
+import { UniswapV2ProviderConfiguration } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 export const JOE_CONTRACT_ADDRESS = '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7';
 

@@ -1,13 +1,13 @@
-import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
-import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
-import { TRADE_TYPE, TradeType } from 'src/features';
-import { TransactionReceipt } from 'web3-eth';
-import { ZrxQuoteResponse } from '@rsdk-features/instant-trades/dexes/common/zrx-common/models/zrx-types';
-import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
-import { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';
-import { TransactionConfig } from 'web3-core';
-import { PriceTokenAmount, Token } from 'src/common';
+import { InstantTrade } from 'src/features/instant-trades/instant-trade';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { ZrxQuoteResponse } from 'src/features/instant-trades/dexes/common/zrx-common/models/zrx-types';
+import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
+import { TransactionReceipt } from 'web3-eth';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
+import { TransactionConfig } from 'web3-core';
+import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
 
 interface ZrxTradeStruct {
     from: PriceTokenAmount<EvmBlockchainName>;

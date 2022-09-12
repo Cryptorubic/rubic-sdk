@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
-import { Exact } from '@rsdk-features/instant-trades/models/exact';
-import { PriceToken, PriceTokenAmount } from 'src/common';
-import { BlockchainName } from 'src/core';
+import { Exact } from 'src/features/instant-trades/models/exact';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export function getFromToTokensAmountsByExact<T extends BlockchainName>(
     fromToken: PriceToken<T>,

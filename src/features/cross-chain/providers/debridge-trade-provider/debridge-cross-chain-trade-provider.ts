@@ -1,24 +1,25 @@
-import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
-import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
-import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import {
     DeBridgeCrossChainSupportedBlockchain,
     deBridgeCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/debridge-cross-chain-supported-blockchain';
-import { TransactionRequest } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-request';
-import { TransactionResponse } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
-import { DebridgeCrossChainTrade } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-address';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { TransactionResponse } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
+import { DebridgeCrossChainTrade } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade';
+import { Injector } from 'src/core/sdk/injector';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
-import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
-import BigNumber from 'bignumber.js';
-import { PriceToken, PriceTokenAmount } from 'src/common';
+import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { TransactionRequest } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-request';
+import BigNumber from 'bignumber.js';
 
 export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -115,7 +116,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                 from.isNative ? from.stringWeiAmount : 0
             );
 
-            const nativeToken = BlockchainsInfo.getBlockchainByName(fromBlockchain).nativeCoin;
+            const nativeToken = nativeTokensList[fromBlockchain];
             const cryptoFeeToken = await PriceTokenAmount.createFromToken({
                 ...nativeToken,
                 weiAmount: cryptoFeeAmount

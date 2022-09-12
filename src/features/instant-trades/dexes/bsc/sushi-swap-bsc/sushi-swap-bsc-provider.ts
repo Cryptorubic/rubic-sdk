@@ -1,7 +1,7 @@
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
-import { SUSHI_SWAP_BSC_PROVIDER_CONFIGURATION } from '@rsdk-features/instant-trades/dexes/bsc/sushi-swap-bsc/constants';
-import { UniswapV2AbstractProvider } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
-import { SushiSwapBscTrade } from '@rsdk-features/instant-trades/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-trade';
+import { SushiSwapBscTrade } from 'src/features/instant-trades/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-trade';
+import { UniswapV2AbstractProvider } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
+import { SUSHI_SWAP_BSC_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/bsc/sushi-swap-bsc/constants';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export class SushiSwapBscProvider extends UniswapV2AbstractProvider<SushiSwapBscTrade> {
     public readonly blockchain = BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN;

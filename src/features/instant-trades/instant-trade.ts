@@ -1,24 +1,24 @@
-import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
-import { WalletNotConnectedError } from '@rsdk-common/errors/swap/wallet-not-connected.error';
-import { BasicTransactionOptions } from '@rsdk-core/blockchain/models/basic-transaction-options';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';
-import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
-import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
-import { TransactionConfig } from 'web3-core';
+import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { RubicSdkError, UnnecessaryApproveError, WalletNotConnectedError } from 'src/common/errors';
+import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
+import { BasicTransactionOptions } from 'src/core/blockchain/models/basic-transaction-options';
 import { TransactionReceipt } from 'web3-eth';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { parseError } from 'src/common/utils/errors';
+import { TransactionConfig } from 'web3-core';
 import {
     OptionsGasParams,
     TransactionGasParams
-} from '@rsdk-features/instant-trades/models/gas-params';
-import { Cache, PriceTokenAmount, Token, UnnecessaryApproveError } from 'src/common';
-import { TradeType } from 'src/features';
-import { parseError } from '@rsdk-common/utils/errors';
-import { TransactionOptions } from 'src/core';
-import BigNumber from 'bignumber.js';
+} from 'src/features/instant-trades/models/gas-params';
+import { Injector } from 'src/core/sdk/injector';
+import { TransactionOptions } from 'src/core/blockchain/models/transaction-options';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
+import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
-import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private';
+import { Cache } from 'src/common/utils/decorators';
+import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import BigNumber from 'bignumber.js';
 
 /**
  * Abstract class for all instant trade providers' trades.

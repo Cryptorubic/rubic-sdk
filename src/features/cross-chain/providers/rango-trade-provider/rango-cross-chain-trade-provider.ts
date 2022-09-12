@@ -1,4 +1,13 @@
-import BigNumber from 'bignumber.js';
+import {
+    RangoCrossChainSupportedBlockchain,
+    rangoCrossChainSupportedBlockchains
+} from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-cross-chain-supported-blockchain';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
+import { RANGO_API_KEY } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-api-key';
 import {
     EvmTransaction,
     MetaResponse,
@@ -7,29 +16,22 @@ import {
     RangoClient,
     SwapRequest
 } from 'rango-sdk-basic/lib';
-import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
-import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
-import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { RangoCrossChainTrade } from 'src/features/cross-chain/providers/rango-trade-provider/rango-cross-chain-trade';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { RANGO_BLOCKCHAIN_NAME } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-blockchain-name';
+import { RANGO_CONTRACT_ADDRESSES } from 'src/features/cross-chain/providers/rango-trade-provider/constants/contract-address';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { BridgeType } from 'src/features/cross-chain/constants/bridge-type';
 import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
-import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
-import { TradeType } from 'src/features/instant-trades';
 import { rangoProviders } from 'src/features/instant-trades/dexes/common/rango/constants/rango-providers';
-import { PriceTokenAmount } from 'src/common';
-import { CROSS_CHAIN_TRADE_TYPE, RangoCrossChainTrade, BridgeType } from 'src/features';
+import { RANGO_TRADE_BRIDGE_TYPE } from 'src/features/cross-chain/providers/rango-trade-provider/models/rango-providers';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
-import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';
-import { CrossChainTradeProvider } from '../common/cross-chain-trade-provider';
-import { WrappedCrossChainTrade } from '../common/models/wrapped-cross-chain-trade';
-import { RANGO_CONTRACT_ADDRESSES } from './constants/contract-address';
-import { RANGO_API_KEY } from './constants/rango-api-key';
-import {
-    RangoCrossChainSupportedBlockchain,
-    rangoCrossChainSupportedBlockchains
-} from './constants/rango-cross-chain-supported-blockchain';
-import { RANGO_TRADE_BRIDGE_TYPE } from './models/rango-providers';
-import { RANGO_BLOCKCHAIN_NAME } from './constants/rango-blockchain-name';
+import BigNumber from 'bignumber.js';
+import { TradeType } from 'src/features/instant-trades/models/trade-type';
 
 export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RANGO;
@@ -123,7 +125,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                     tokenAmount: Web3Pure.fromWei(route.outputAmount, toToken.decimals)
                 });
                 const cryptoFeeToken = await PriceTokenAmount.createFromToken({
-                    ...BlockchainsInfo.getBlockchainByName(fromBlockchain).nativeCoin,
+                    ...nativeTokensList[fromBlockchain],
                     weiAmount: new BigNumber(parseInt((tx as EvmTransaction).value || '0')).minus(
                         fromToken.isNative ? fromToken.stringWeiAmount : 0
                     )

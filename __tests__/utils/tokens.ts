@@ -1,7 +1,6 @@
-import { BlockchainName } from 'src/core';
-import { Token } from 'src/common/tokens-manager/tokens/token';
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { Token } from 'src/common/tokens';
 
 export const TOKENS = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {

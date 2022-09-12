@@ -1,15 +1,15 @@
-import { TRADE_TYPE, TradeType } from 'src/features';
-import { BLOCKCHAIN_NAME } from 'src/core';
-import { AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/algebra-quoter-controller';
-import { UniswapV3AlgebraAbstractProvider } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
-import { AlgebraTrade } from '@rsdk-features/instant-trades/dexes/polygon/algebra/algebra-trade';
-import { ALGEBRA_V3_PROVIDER_CONFIGURATION } from '@rsdk-features/instant-trades/dexes/polygon/algebra/constants/provider-configuration';
-import { UniswapV3AlgebraTradeStruct } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
-import { AlgebraRoute } from '@rsdk-features/instant-trades/dexes/polygon/algebra/models/algebra-route';
+import { AlgebraQuoterController } from 'src/features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/algebra-quoter-controller';
+import { UniswapV3AlgebraAbstractProvider } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
 import {
     ALGEBRA_SWAP_ROUTER_CONTRACT_ABI,
     ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS
 } from 'src/features/instant-trades/dexes/polygon/algebra/constants/swap-router-contract-data';
+import { ALGEBRA_V3_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/polygon/algebra/constants/provider-configuration';
+import { UniswapV3AlgebraTradeStruct } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
+import { AlgebraTrade } from 'src/features/instant-trades/dexes/polygon/algebra/algebra-trade';
+import { AlgebraRoute } from 'src/features/instant-trades/dexes/polygon/algebra/models/algebra-route';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider<AlgebraTrade> {
     protected readonly contractAddress = ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS;

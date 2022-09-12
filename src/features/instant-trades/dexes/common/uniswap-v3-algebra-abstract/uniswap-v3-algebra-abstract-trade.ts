@@ -1,30 +1,29 @@
-import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
-import { PriceToken, PriceTokenAmount, RubicSdkError, Token } from 'src/common';
-import {
-    EncodeTransactionOptions,
-    GasFeeInfo,
-    SwapTransactionOptions,
-    TradeType
-} from 'src/features';
-import { AbiItem } from 'web3-utils';
-import { SwapOptions } from '@rsdk-features/instant-trades/models/swap-options';
-import BigNumber from 'bignumber.js';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { TransactionReceipt } from 'web3-eth';
-import { MethodData } from '@rsdk-core/blockchain/web3-public-service/models/method-data';
-import { BatchCall } from '@rsdk-core/blockchain/web3-public-service/models/batch-call';
-import { TransactionConfig } from 'web3-core';
-import { UniswapV3AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
-import { UniswapV3AlgebraRoute } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
-import { deadlineMinutesTimestamp } from '@rsdk-common/utils/options';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import {
     DEFAULT_ESTIMATED_GAS,
     WETH_TO_ETH_ESTIMATED_GAS
-} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/constants/estimated-gas';
-import { Exact } from '@rsdk-features/instant-trades/models/exact';
-import { getFromToTokensAmountsByExact } from '@rsdk-features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+} from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/constants/estimated-gas';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BatchCall } from 'src/core/blockchain/web3-public-service/models/batch-call';
+import { UniswapV3AlgebraRoute } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
+import { InstantTrade } from 'src/features/instant-trades/instant-trade';
+import { SwapOptions } from 'src/features/instant-trades/models/swap-options';
+import { UniswapV3AbstractTrade } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
+import { RubicSdkError } from 'src/common/errors';
+import { Injector } from 'src/core/sdk/injector';
+import { getFromToTokensAmountsByExact } from 'src/features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
+import { deadlineMinutesTimestamp } from 'src/common/utils/options';
+import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
+import { AbiItem } from 'web3-utils';
+import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
+import { TransactionReceipt } from 'web3-eth';
+import { TransactionConfig } from 'web3-core';
+import { MethodData } from 'src/core/blockchain/web3-public-service/models/method-data';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { Exact } from 'src/features/instant-trades/models/exact';
+import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import BigNumber from 'bignumber.js';
 
 export interface UniswapV3AlgebraTradeStruct {
     from: PriceTokenAmount<EvmBlockchainName>;

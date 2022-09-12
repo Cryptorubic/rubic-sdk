@@ -1,15 +1,12 @@
-import {
-    Cache,
-    CrossChainIsUnavailableError,
-    MaxGasPriceOverflowError,
-    PriceTokenAmount
-} from 'src/common';
-import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
-import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
-import BigNumber from 'bignumber.js';
+import { CrossChainContractTrade } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
+import { Injector } from 'src/core/sdk/injector';
+import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { CrossChainIsUnavailableError, MaxGasPriceOverflowError } from 'src/common/errors';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { Cache } from 'src/common/utils/decorators';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import BigNumber from 'bignumber.js';
 
 /**
  * Contains common for Celer and Rubic trades methods and fields.

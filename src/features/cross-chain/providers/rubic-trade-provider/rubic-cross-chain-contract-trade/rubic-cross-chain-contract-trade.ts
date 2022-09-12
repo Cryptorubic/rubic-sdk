@@ -1,15 +1,15 @@
-import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
+import { CrossChainContractTrade } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
+import { crossChainContractAbiV2 } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/cross-chain-contract-abi-v2';
 import { AbiItem } from 'web3-utils';
-import { UniswapV2AbstractProvider } from 'src/features';
-import { crossChainContractAbiV2 } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/cross-chain-contract-abi-v2';
-import { UniswapV3AlgebraAbstractProvider } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
-import { crossChainContractAbiV3 } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/cross-chain-contract-abi-v3';
-import { crossChainContractAbiInch } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/cross-chain-contract-abi-inch';
-import { Web3Pure } from 'src/core';
-import { RubicCrossChainContractData } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/rubic-cross-chain-contract-data';
-import { RubicSdkError } from 'src/common';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { UniswapV3AlgebraAbstractProvider } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
+import { crossChainContractAbiV3 } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/cross-chain-contract-abi-v3';
+import { RubicSdkError } from 'src/common/errors';
+import { RubicCrossChainContractData } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/rubic-cross-chain-contract-data';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { UniswapV2AbstractProvider } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
+import { crossChainContractAbiInch } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/constants/cross-chain-contract-abi-inch';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 enum TO_OTHER_BLOCKCHAIN_SWAP_METHOD {
     SWAP_TOKENS = 'swapTokensToOtherBlockchain',

@@ -1,7 +1,7 @@
-import { TokenBaseStruct } from 'src/common/tokens-manager/models/token-base-struct';
+import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import BigNumber from 'bignumber.js';
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { PriceToken, PriceTokenAmount, Token } from 'src/common';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 
 export async function getPriceTokensFromInputTokens<T extends BlockchainName = BlockchainName>(
     from:

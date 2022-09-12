@@ -1,22 +1,22 @@
-import { combineOptions } from '@rsdk-common/utils/options';
-import { GasPriceInfo } from '@rsdk-features/instant-trades/models/gas-price-info';
+import { UniswapV2TradeClass } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-class';
+import { UniswapV2ProviderConfiguration } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { PathFactory } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/path-factory';
 import {
     RequiredSwapCalculationOptions,
     SwapCalculationOptions
-} from '@rsdk-features/instant-trades/models/swap-calculation-options';
-import { UniswapV2ProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
-import { UniswapV2TradeClass } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-class';
-import { PathFactory } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/path-factory';
-import { InstantTradeProvider } from '@rsdk-features/instant-trades/instant-trade-provider';
-import { UniswapV2AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
-import BigNumber from 'bignumber.js';
-import { UniswapCalculatedInfo } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
-import { createTokenNativeAddressProxy } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
-import { TradeType } from 'src/features';
-import { Exact } from '@rsdk-features/instant-trades/models/exact';
-import { PriceToken, PriceTokenAmount } from 'src/common';
+} from 'src/features/instant-trades/models/swap-calculation-options';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { InstantTradeProvider } from 'src/features/instant-trades/instant-trade-provider';
+import { UniswapCalculatedInfo } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
+import { createTokenNativeAddressProxy } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { GasPriceInfo } from 'src/features/instant-trades/models/gas-price-info';
+import { combineOptions } from 'src/common/utils/options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { UniswapV2AbstractTrade } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import BigNumber from 'bignumber.js';
+import { Exact } from 'src/features/instant-trades/models/exact';
 
 export abstract class UniswapV2AbstractProvider<
     T extends UniswapV2AbstractTrade = UniswapV2AbstractTrade

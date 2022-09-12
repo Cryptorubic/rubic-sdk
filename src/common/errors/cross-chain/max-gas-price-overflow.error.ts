@@ -1,4 +1,4 @@
-import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
+import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
 
 /**
  * Thrown, when current gas price is higher, than max gas price on cross chain contract

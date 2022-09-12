@@ -1,5 +1,5 @@
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
-import { SDK } from '@rsdk-core/sdk/sdk';
+import { SDK } from 'src/core/sdk/sdk';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { minimalConfiguration } from '../utils/configuration';
 
 export const crossChainApiSpec = () =>

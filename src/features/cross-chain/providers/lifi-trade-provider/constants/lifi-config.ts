@@ -1,8 +1,8 @@
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { notNull } from 'src/common/utils/object';
 import { ConfigUpdate } from '@lifi/sdk';
-import { lifiCrossChainSupportedBlockchains } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
-import { BlockchainsInfo } from 'src/core';
 import { Injector } from 'src/core/sdk/injector';
-import { notNull } from 'src/common';
+import { lifiCrossChainSupportedBlockchains } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 
 export function getLifiConfig(): ConfigUpdate {
     const rpcs = Object.fromEntries(

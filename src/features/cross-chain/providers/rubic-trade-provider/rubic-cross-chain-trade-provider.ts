@@ -1,22 +1,24 @@
-import BigNumber from 'bignumber.js';
-import { getRubicCrossChainContract } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contracts';
 import {
     RubicCrossChainSupportedBlockchain,
     rubicCrossChainSupportedBlockchains
-} from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
-import { compareAddresses, notNull, PriceToken, PriceTokenAmount, RubicSdkError } from 'src/common';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
-import { BlockchainName } from 'src/core';
-import { RubicCrossChainTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-trade';
-import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
-import { RubicDirectCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade';
-import { RubicCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-cross-chain-contract-trade';
-import { RubicItCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
-import { ItCalculatedTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/it-calculated-trade';
-import { CelerRubicCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
-import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+} from 'src/features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
+import { RubicItCrossChainContractTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
+import { ItCalculatedTrade } from 'src/features/cross-chain/providers/common/celer-rubic/models/it-calculated-trade';
+import { notNull } from 'src/common/utils/object';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
+import { RubicDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade';
+import { RubicSdkError } from 'src/common/errors';
+import { getRubicCrossChainContract } from 'src/features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contracts';
+import { RubicCrossChainTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-trade';
+import { RubicCrossChainContractTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-cross-chain-contract-trade';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { compareAddresses } from 'src/common/utils/blockchain';
+import { CelerRubicCrossChainTradeProvider } from 'src/features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
+import BigNumber from 'bignumber.js';
 
 export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(

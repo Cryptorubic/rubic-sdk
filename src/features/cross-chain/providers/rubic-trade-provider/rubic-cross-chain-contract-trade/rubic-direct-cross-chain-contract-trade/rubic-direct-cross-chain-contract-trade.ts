@@ -1,10 +1,11 @@
 import BigNumber from 'bignumber.js';
-import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
-import { RubicCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-cross-chain-contract-trade';
-import { RubicCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
-import { PriceTokenAmount, RubicSdkError } from 'src/common';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { RubicSdkError } from 'src/common/errors';
+import { RubicCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
+import { CrossChainContractData } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
+import { RubicCrossChainContractTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-cross-chain-contract-trade';
+import { PriceTokenAmount } from 'src/common/tokens';
 
 export class RubicDirectCrossChainContractTrade extends RubicCrossChainContractTrade {
     public readonly fromToken: PriceTokenAmount<EvmBlockchainName>;

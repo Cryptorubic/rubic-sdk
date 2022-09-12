@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export const rubicProxyContractAddress: Record<BlockchainName, string> = Object.values(
     BLOCKCHAIN_NAME

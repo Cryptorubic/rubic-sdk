@@ -1,5 +1,6 @@
-import { CrossChainTradeData, CrossChainTxStatus } from 'src/features';
 import { TransactionReceipt } from 'web3-eth';
+import { CrossChainTradeData } from 'src/features/cross-chain/models/cross-chain-trade-data';
+import { CrossChainTxStatus } from 'src/features/cross-chain/models/cross-chain-tx-status';
 
 export interface DeBridgeApiResponse {
     claim: {

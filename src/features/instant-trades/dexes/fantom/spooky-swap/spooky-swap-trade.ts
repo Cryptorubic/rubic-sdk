@@ -1,9 +1,9 @@
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { SPOOKY_SWAP_CONTRACT_ADDRESS } from 'src/features/instant-trades/dexes/fantom/spooky-swap/constants';
 import {
     UniswapV2AbstractTrade,
     UniswapV2TradeStruct
-} from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
-import { SPOOKY_SWAP_CONTRACT_ADDRESS } from '@rsdk-features/instant-trades/dexes/fantom/spooky-swap/constants';
-import { TRADE_TYPE, TradeType } from 'src/features';
+} from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 
 export class SpookySwapTrade extends UniswapV2AbstractTrade {
     public static get type(): TradeType {

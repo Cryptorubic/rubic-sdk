@@ -1,14 +1,14 @@
 import { Chain } from '__tests__/utils/chain';
 import { mockInjector } from '__tests__/utils/mock-injector';
 import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
-import { Injector } from '@rsdk-core/sdk/injector';
+import { Injector } from 'src/core/sdk/injector';
 import BigNumber from 'bignumber.js';
 import { Web3Public } from 'src/core';
-import { PriceTokenAmount } from 'src/common/tokens-manager/tokens/price-token-amount';
-import { PriceToken } from 'src/common/tokens-manager/tokens/price-token';
+import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
+import { PriceToken } from 'src/common/tokens/price-token';
 import { TransactionReceipt } from 'web3-eth';
 import { UniSwapV2EthereumProvider } from '@rsdk-features/instant-trades/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-provider';
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import fn = jest.fn;
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.ETHEREUM];

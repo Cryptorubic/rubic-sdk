@@ -1,25 +1,26 @@
-import { combineOptions } from '@rsdk-common/utils/options';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { oneinchApiParams } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/constants';
-import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
-import { OneinchQuoteRequest } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-quote-request';
-import { OneinchQuoteResponse } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-quote-response';
-import { OneinchSwapRequest } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-request';
-import { OneinchSwapResponse } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-response';
-import { getOneinchApiBaseUrl } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/utils';
-import BigNumber from 'bignumber.js';
-import { OneinchTrade } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/oneinch-trade';
-import { InstantTradeProvider } from '@rsdk-features/instant-trades/instant-trade-provider';
+import { OneinchSwapResponse } from 'src/features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-response';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { OneinchQuoteResponse } from 'src/features/instant-trades/dexes/common/oneinch-common/models/oneinch-quote-response';
 import {
     RequiredSwapCalculationOptions,
     SwapCalculationOptions
-} from '@rsdk-features/instant-trades/models/swap-calculation-options';
-import { createTokenNativeAddressProxy } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
-import { Cache, PriceToken, PriceTokenAmount, Token } from 'src/common';
-import { BlockchainsInfo } from 'src/core';
-import { TRADE_TYPE, TradeType } from 'src/features';
+} from 'src/features/instant-trades/models/swap-calculation-options';
+import { OneinchTrade } from 'src/features/instant-trades/dexes/common/oneinch-common/oneinch-trade';
+import { RubicSdkError } from 'src/common/errors';
+import { createTokenNativeAddressProxy } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { Injector } from 'src/core/sdk/injector';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { InstantTradeProvider } from 'src/features/instant-trades/instant-trade-provider';
+import { getOneinchApiBaseUrl } from 'src/features/instant-trades/dexes/common/oneinch-common/utils';
+import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
+import { OneinchQuoteRequest } from 'src/features/instant-trades/dexes/common/oneinch-common/models/oneinch-quote-request';
 import { MarkRequired } from 'ts-essentials';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { combineOptions } from 'src/common/utils/options';
+import { Cache } from 'src/common/utils/decorators';
+import { OneinchSwapRequest } from 'src/features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-request';
+import BigNumber from 'bignumber.js';
 
 type OneinchSwapCalculationOptions = MarkRequired<
     Omit<RequiredSwapCalculationOptions, 'deadlineMinutes'>,
@@ -208,7 +209,7 @@ export abstract class OneinchAbstractProvider extends InstantTradeProvider {
         let tokensPathWithoutNativeIndex = 0;
         const tokensPath = addressesPath.map(tokenAddress => {
             if (tokenAddress === oneinchApiParams.nativeAddress) {
-                return BlockchainsInfo.getBlockchainByName(this.blockchain).nativeCoin;
+                return nativeTokensList[this.blockchain];
             }
 
             const token = tokensPathWithoutNative[tokensPathWithoutNativeIndex];

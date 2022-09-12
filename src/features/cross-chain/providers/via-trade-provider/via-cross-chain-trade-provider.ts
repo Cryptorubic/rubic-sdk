@@ -1,32 +1,34 @@
-import {
-    ViaCrossChainSupportedBlockchain,
-    viaCrossChainSupportedBlockchains
-} from 'src/features/cross-chain/providers/via-trade-provider/constants/via-cross-chain-supported-blockchain';
-import { Via } from '@viaprotocol/router-sdk';
-import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
-import { ViaCrossChainTrade } from 'src/features/cross-chain/providers/via-trade-provider/via-cross-chain-trade';
-import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
-import { Injector } from 'src/core/sdk/injector';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
-import { BridgeType, CROSS_CHAIN_TRADE_TYPE, TRADE_TYPE, TradeType } from 'src/features';
-import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
-import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
-import BigNumber from 'bignumber.js';
 import {
     IActionStepTool,
     IGetRoutesRequestParams,
     IGetRoutesResponse,
     IRoute
 } from '@viaprotocol/router-sdk/dist/types';
-import { ItType } from 'src/features/cross-chain/models/it-type';
-import { bridges } from 'src/features/cross-chain/constants/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
-import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
+import {
+    ViaCrossChainSupportedBlockchain,
+    viaCrossChainSupportedBlockchains
+} from 'src/features/cross-chain/providers/via-trade-provider/constants/via-cross-chain-supported-blockchain';
+import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { Injector } from 'src/core/sdk/injector';
 import { viaContractAddress } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
-import { PriceToken, PriceTokenAmount } from 'src/common';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { bridges, BridgeType } from 'src/features/cross-chain/constants/bridge-type';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { Via } from '@viaprotocol/router-sdk';
+import { ViaCrossChainTrade } from 'src/features/cross-chain/providers/via-trade-provider/via-cross-chain-trade';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { ItType } from 'src/features/cross-chain/models/it-type';
+import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import BigNumber from 'bignumber.js';
 
 interface ToolType extends IActionStepTool {
     type: 'swap' | 'cross';
@@ -152,7 +154,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                     : null
             };
 
-            const nativeToken = BlockchainsInfo.getBlockchainByName(from.blockchain).nativeCoin;
+            const nativeToken = nativeTokensList[from.blockchain];
             const cryptoFeeToken = new PriceTokenAmount({
                 ...nativeToken,
                 price: nativeTokenPrice || new BigNumber(0),

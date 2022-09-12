@@ -9,7 +9,7 @@ import {
 } from 'src/core/blockchain/models/blockchain-name';
 import BigNumber from 'bignumber.js';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { RubicSdkError } from 'src/common';
+import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
 
 /**
  * Works with list of all used in project blockchains.

@@ -1,39 +1,39 @@
 /* eslint-disable no-debugger */
-import { TransactionReceipt } from 'web3-eth';
-import { BLOCKCHAIN_NAME, BlockchainsInfo } from 'src/core';
 import { Injector } from 'src/core/sdk/injector';
-import { celerCrossChainEventStatusesAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-event-statuses-abi';
-import { LogsDecoder } from 'src/features/cross-chain/utils/decode-logs';
-import { StatusResponse, TransactionStatus } from 'rango-sdk-basic/lib';
-import { Via } from '@viaprotocol/router-sdk';
-import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
-import { ViaSwapStatus } from 'src/features/cross-chain/providers/via-trade-provider/models/via-swap-status';
-import {
-    CROSS_CHAIN_TRADE_TYPE,
-    CrossChainTradeType,
-    CrossChainStatus,
-    CrossChainTxStatus,
-    CrossChainTradeData
-} from 'src/features';
-import { RubicSdkError } from 'src/common';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { celerCrossChainContractAbi } from './providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
-import { celerCrossChainContractsAddresses } from './providers/celer-trade-provider/constants/celer-cross-chain-contracts-addresses';
-import { CelerCrossChainSupportedBlockchain } from './providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
-import { CelerSwapStatus } from './providers/common/celer-rubic/models/celer-swap-status.enum';
-import { rubicCrossChainContractsAddresses } from './providers/rubic-trade-provider/constants/rubic-cross-chain-contracts-addresses';
-import { RubicSwapStatus } from './providers/common/celer-rubic/models/rubic-swap-status.enum';
-import { PROCESSED_TRANSACTION_METHOD_ABI } from './providers/common/celer-rubic/constants/processed-transactios-method-abi';
-import { LifiSwapStatus } from './providers/lifi-trade-provider/models/lifi-swap-status';
-import { SymbiosisSwapStatus } from './providers/symbiosis-trade-provider/models/symbiosis-swap-status';
-import { RubicCrossChainSupportedBlockchain } from './providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
-import { RANGO_API_KEY } from './providers/rango-trade-provider/constants/rango-api-key';
 import {
     BtcStatusResponse,
     DeBridgeApiResponse,
     getDstTxStatusFn,
     SymbiosisApiResponse
-} from './models/statuses-api';
+} from 'src/features/cross-chain/models/statuses-api';
+import { rubicCrossChainContractsAddresses } from 'src/features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contracts-addresses';
+import { CrossChainStatus } from 'src/features/cross-chain/models/cross-chain-status';
+import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { RubicSwapStatus } from 'src/features/cross-chain/providers/common/celer-rubic/models/rubic-swap-status.enum';
+import { StatusResponse, TransactionStatus } from 'rango-sdk-basic';
+import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { RubicSdkError } from 'src/common/errors';
+import { RANGO_API_KEY } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-api-key';
+import { ViaSwapStatus } from 'src/features/cross-chain/providers/via-trade-provider/models/via-swap-status';
+import { SymbiosisSwapStatus } from 'src/features/cross-chain/providers/symbiosis-trade-provider/models/symbiosis-swap-status';
+import { celerCrossChainEventStatusesAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-event-statuses-abi';
+import { CrossChainTxStatus } from 'src/features/cross-chain/models/cross-chain-tx-status';
+import { LogsDecoder } from 'src/features/cross-chain/utils/decode-logs';
+import { RubicCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
+import { CelerSwapStatus } from 'src/features/cross-chain/providers/common/celer-rubic/models/celer-swap-status.enum';
+import { CrossChainTradeData } from 'src/features/cross-chain/models/cross-chain-trade-data';
+import { TransactionReceipt } from 'web3-eth';
+import { celerCrossChainContractAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
+import {
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTradeType
+} from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { LifiSwapStatus } from 'src/features/cross-chain/providers/lifi-trade-provider/models/lifi-swap-status';
+import { Via } from '@viaprotocol/router-sdk';
+import { PROCESSED_TRANSACTION_METHOD_ABI } from 'src/features/cross-chain/providers/common/celer-rubic/constants/processed-transactios-method-abi';
+import { celerCrossChainContractsAddresses } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contracts-addresses';
 
 /**
  * Contains methods for getting cross-chain trade statuses.

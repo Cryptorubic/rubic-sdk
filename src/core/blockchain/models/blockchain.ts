@@ -1,5 +1,4 @@
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { Token } from 'src/common';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 /**
  * Stores information about blockchain.
@@ -7,5 +6,4 @@ import { Token } from 'src/common';
 export interface Blockchain<T extends BlockchainName = BlockchainName> {
     id: number;
     name: T;
-    nativeCoin: Token<T>;
 }

@@ -1,12 +1,22 @@
-import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
-import { CROSS_CHAIN_TRADE_TYPE, InstantTradeProvider } from 'src/features';
-import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
-import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
+import { SYMBIOSIS_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
+import { ZappyProvider } from 'src/features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
+import { OolongSwapProvider } from 'src/features/instant-trades/dexes/boba/oolong-swap/oolong-swap-provider';
+import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { OneinchEthereumProvider } from 'src/features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
+import { OneinchBscProvider } from 'src/features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
+import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { OneinchPolygonProvider } from 'src/features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
 import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
-} from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { compareAddresses, PriceToken, PriceTokenAmount, RubicSdkError } from 'src/common';
+} from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import {
     ErrorCode,
     Symbiosis,
@@ -17,26 +27,24 @@ import {
     Token,
     Percent
 } from 'symbiosis-js-sdk';
-import BigNumber from 'bignumber.js';
-import { SymbiosisCrossChainTrade } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
-import { SYMBIOSIS_CONTRACT_ADDRESS } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
-import { OneinchEthereumProvider } from '@rsdk-features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
-import { OneinchBscProvider } from '@rsdk-features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
-import { OneinchPolygonProvider } from '@rsdk-features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
-import { OneinchAvalancheProvider } from '@rsdk-features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
-import { getSymbiosisConfig } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
-import { CrossChainMinAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-min-amount.error';
-import { CrossChainMaxAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-max-amount.error';
-import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
-import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
-import { OolongSwapProvider } from 'src/features/instant-trades/dexes/boba/oolong-swap/oolong-swap-provider';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { RubicSdkError } from 'src/common/errors';
 import { symbiosisTransitTokens } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-transit-tokens';
+import { OneinchAvalancheProvider } from 'src/features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
+import { getSymbiosisConfig } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { InstantTradeProvider } from 'src/features/instant-trades/instant-trade-provider';
+import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
 import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
-import { ZappyProvider } from 'src/features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
+import { compareAddresses } from 'src/common/utils/blockchain';
+import BigNumber from 'bignumber.js';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(

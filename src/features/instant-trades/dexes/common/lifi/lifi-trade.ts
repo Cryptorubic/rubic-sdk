@@ -1,21 +1,19 @@
-import {
-    EncodeTransactionOptions,
-    GasFeeInfo,
-    SwapTransactionOptions,
-    TRADE_TYPE,
-    TradeType
-} from 'src/features';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
 import { TransactionReceipt } from 'web3-eth';
 import { Injector } from 'src/core/sdk/injector';
 import { Route } from '@lifi/sdk';
 import { TransactionConfig } from 'web3-core';
 import BigNumber from 'bignumber.js';
-import { PriceTokenAmount } from 'src/common/tokens-manager/tokens/price-token-amount';
+import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { LifiPairIsUnavailable } from 'src/common/errors/swap/lifi-pair-is-unavailable';
-import { RubicSdkError, Token } from 'src/common';
+import { Token } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { RubicSdkError } from 'src/common/errors';
+import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
 
 interface LifiTransactionRequest {
     data: string;

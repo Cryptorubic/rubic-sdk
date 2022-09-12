@@ -1,17 +1,18 @@
-import { GasFeeInfo, TradeType } from 'src/features';
-import { InstantTrade } from 'src/features/instant-trades/instant-trade';
-import { BlockchainsInfo, Web3Pure } from 'src/core';
 import LIFI, { Route, RouteOptions, RoutesRequest, Step } from '@lifi/sdk';
-import { PriceTokenAmount } from 'src/common/tokens-manager/tokens/price-token-amount';
-import { combineOptions } from 'src/common/utils/options';
-import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
-import { notNull, PriceToken } from 'src/common';
-import { LifiTrade } from 'src/features/instant-trades/dexes/common/lifi/lifi-trade';
-import BigNumber from 'bignumber.js';
-import { Injector } from 'src/core/sdk/injector';
-import { Token } from 'src/common/tokens-manager/tokens/token';
-import { LifiCalculationOptions } from 'src/features/instant-trades/dexes/common/lifi/models/lifi-calculation-options';
+import { notNull } from 'src/common/utils/object';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { LifiCalculationOptions } from 'src/features/instant-trades/dexes/common/lifi/models/lifi-calculation-options';
+import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { LifiTrade } from 'src/features/instant-trades/dexes/common/lifi/lifi-trade';
+import { InstantTrade } from 'src/features/instant-trades/instant-trade';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
+import { Injector } from 'src/core/sdk/injector';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { combineOptions } from 'src/common/utils/options';
+import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import BigNumber from 'bignumber.js';
 
 export class LifiProvider {
     private readonly lifi = new LIFI();

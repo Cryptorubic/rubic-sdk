@@ -1,36 +1,34 @@
-import {
-    BasicTransactionOptions,
-    BLOCKCHAIN_NAME,
-    BlockchainName,
-    BlockchainsInfo,
-    TransactionOptions,
-    Web3Pure
-} from 'src/core';
-import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
-import { Injector } from '@rsdk-core/sdk/injector';
-import BigNumber from 'bignumber.js';
-import {
-    CrossChainTradeType,
-    EncodeTransactionOptions,
-    SwapTransactionOptions
-} from 'src/features';
-import { PriceTokenAmount, UnnecessaryApproveError, WalletNotConnectedError } from 'src/common';
-import { TransactionReceipt } from 'web3-eth';
-import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
-import { TransactionConfig } from 'web3-core';
-import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { WrongReceiverAddressError } from 'src/common/errors/blockchain/wrong-receiver-address.error';
-import { ItType } from 'src/features/cross-chain/models/it-type';
-import { Network, validate } from 'bitcoin-address-validation';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private';
-
 /**
  * Abstract class for all cross chain providers' trades.
- */
+ */ import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { GasData } from 'src/features/cross-chain/models/gas-data';
+import { Injector } from 'src/core/sdk/injector';
+import { Network, validate } from 'bitcoin-address-validation';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { UnnecessaryApproveError, WalletNotConnectedError } from 'src/common/errors';
+import { BasicTransactionOptions } from 'src/core/blockchain/models/basic-transaction-options';
+import { TransactionReceipt } from 'web3-eth';
+import { TransactionConfig } from 'web3-core';
+import { CrossChainTradeType } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { ContractParams } from 'src/features/cross-chain/models/contract-params';
+import { TransactionOptions } from 'src/core/blockchain/models/transaction-options';
+import { WrongReceiverAddressError } from 'src/common/errors/blockchain/wrong-receiver-address.error';
+import { ItType } from 'src/features/cross-chain/models/it-type';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import BigNumber from 'bignumber.js';
+
 export abstract class CrossChainTrade {
     /**
      * Checks receiver address for correctness.

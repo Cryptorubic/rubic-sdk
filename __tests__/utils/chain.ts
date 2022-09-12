@@ -1,4 +1,4 @@
-import { ERC20_TOKEN_ABI } from '@rsdk-core/blockchain/constants/erc-20-abi';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
 import { generateAccountsFromMnemonic } from '__tests__/utils/accounts-from-mnemonic';
 import {
     publicProvidersRPC,

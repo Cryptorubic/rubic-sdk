@@ -1,31 +1,30 @@
-import { oneinchApiParams } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/constants';
-import { OneinchSwapResponse } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-response';
-import { getOneinchApiBaseUrl } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/utils';
+import { InsufficientFundsOneinchError, LowSlippageError, RubicSdkError } from 'src/common/errors';
 import {
     createTokenNativeAddressProxy,
     createTokenNativeAddressProxyInPathStartAndEnd
-} from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
-import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
-import { Injector } from '@rsdk-core/sdk/injector';
-import BigNumber from 'bignumber.js';
-import { Cache, PriceTokenAmount, Token } from 'src/common';
-import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
-import { TransactionReceipt } from 'web3-eth';
-import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
-import { InsufficientFundsOneinchError } from '@rsdk-common/errors/swap/insufficient-funds-oneinch.error';
-import { blockchains } from '@rsdk-core/blockchain/constants/blockchains';
-import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
-import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
-import { TransactionConfig } from 'web3-core';
-import { LowSlippageError } from '@rsdk-common/errors/swap/low-slippage.error';
-import { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';
+} from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { OneinchSwapResponse } from 'src/features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-response';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import {
     OptionsGasParams,
     TransactionGasParams
-} from '@rsdk-features/instant-trades/models/gas-params';
-import { OneinchSwapRequest } from '@rsdk-features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-request';
+} from 'src/features/instant-trades/models/gas-params';
+import { InstantTrade } from 'src/features/instant-trades/instant-trade';
+import { Injector } from 'src/core/sdk/injector';
+import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
+import { TransactionReceipt } from 'web3-eth';
+import { TransactionConfig } from 'web3-core';
+import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { getOneinchApiBaseUrl } from 'src/features/instant-trades/dexes/common/oneinch-common/utils';
+import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Cache } from 'src/common/utils/decorators';
+import { OneinchSwapRequest } from 'src/features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-request';
+import BigNumber from 'bignumber.js';
 
 type OneinchTradeStruct = {
     contractAddress: string;
@@ -236,9 +235,8 @@ export class OneinchTrade extends InstantTrade {
         if (inchError) {
             if ('message' in inchError) {
                 if (inchError.message?.includes('cannot estimate')) {
-                    const nativeToken = blockchains.find(
-                        el => el.name === this.nativeSupportedFrom.blockchain
-                    )!.nativeCoin.symbol;
+                    const nativeToken =
+                        nativeTokensList[this.nativeSupportedFrom.blockchain]?.symbol;
                     const message = `1inch sets increased costs on gas fee. For transaction enter less ${nativeToken} amount or top up your ${nativeToken} balance.`;
                     return new RubicSdkError(message);
                 }

@@ -1,31 +1,29 @@
-import {
-    CROSS_CHAIN_TRADE_TYPE,
-    SwapTransactionOptions,
-    TRADE_TYPE,
-    TradeType
-} from 'src/features';
-import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
-import { BlockchainsInfo, Web3Pure } from 'src/core';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { FailedToCheckForTransactionReceiptError, PriceTokenAmount } from 'src/common';
-import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
-import BigNumber from 'bignumber.js';
-import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-address';
-import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/debridge-cross-chain-supported-blockchain';
-import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
-import { ContractParams } from 'src/features/cross-chain/models/contract-params';
-import { TransactionRequest } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-request';
-import { BytesLike } from 'ethers';
-import { TransactionResponse } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
-import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade-provider';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
-
 /**
  * Calculated DeBridge cross chain trade.
- */
+ */ import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/debridge-cross-chain-supported-blockchain';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-address';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade-provider';
+import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
+import { ContractParams } from 'src/features/cross-chain/models/contract-params';
+import { TransactionResponse } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
+import { BytesLike } from 'ethers';
+import { GasData } from 'src/features/cross-chain/models/gas-data';
+import { Injector } from 'src/core/sdk/injector';
+import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import BigNumber from 'bignumber.js';
+import { TransactionRequest } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-request';
+
 export class DebridgeCrossChainTrade extends CrossChainTrade {
     /** @internal */
     public readonly transitAmount: BigNumber;

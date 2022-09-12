@@ -1,11 +1,14 @@
 import BigNumber from 'bignumber.js';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/bitcoin-web3-pure';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { staticImplements } from 'src/common/utils/decorators';
+import { Web3PureContainer } from 'src/core/blockchain/web3-pure/models/web3-pure-container';
 
 /**
  * Contains common methods, connected with web3, e.g. wei conversion, encoding data, etc.
  */
+@staticImplements<Web3PureContainer>()
 export class Web3Pure {
     public static [CHAIN_TYPE.EVM] = EvmWeb3Pure;
 

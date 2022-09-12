@@ -1,7 +1,7 @@
-import { DefaultHttpClient } from '@rsdk-common/http/default-http-client';
+import { DefaultHttpClient } from 'src/core/sdk/default-http-client';
 import { Web3PrivateService } from 'src/core/blockchain/web3-private-service/web3-private-service';
-import { Web3PublicService } from '@rsdk-core/blockchain/web3-public-service/web3-public-service';
-import { Injector } from '@rsdk-core/sdk/injector';
+import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
+import { Injector } from 'src/core/sdk/injector';
 import { Configuration } from 'src/core';
 
 export async function mockInjector(configuration: Configuration): Promise<void> {

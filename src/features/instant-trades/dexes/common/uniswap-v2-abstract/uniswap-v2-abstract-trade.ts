@@ -1,35 +1,35 @@
-import { Cache } from '@rsdk-common/decorators/cache.decorator';
-import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
-import { LowSlippageDeflationaryTokenError } from '@rsdk-common/errors/swap/low-slippage-deflationary-token.error';
-import { tryExecuteAsync } from '@rsdk-common/utils/functions';
-import { BlockchainName, EvmBlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { BatchCall } from '@rsdk-core/blockchain/web3-public-service/models/batch-call';
-import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public-service/models/contract-multicall-response';
-import { createTokenNativeAddressProxyInPathStartAndEnd } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
-import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
-import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
-import { defaultEstimatedGas } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/constants/default-estimated-gas';
+import { DefaultEstimatedGas } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
+import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BatchCall } from 'src/core/blockchain/web3-public-service/models/batch-call';
+import { InstantTrade } from 'src/features/instant-trades/instant-trade';
+import { LowSlippageDeflationaryTokenError, RubicSdkError } from 'src/common/errors';
+import { defaultEstimatedGas } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/constants/default-estimated-gas';
+import { Injector } from 'src/core/sdk/injector';
 import {
     ExactInputOutputSwapMethodsList,
     RegularSwapMethod,
     SUPPORTING_FEE_SWAP_METHODS_MAPPING,
     SWAP_METHOD
-} from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/constants/SWAP_METHOD';
-import { defaultUniswapV2Abi } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi';
-import { DefaultEstimatedGas } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
-import BigNumber from 'bignumber.js';
-import { EncodeTransactionOptions, TradeType } from 'src/features';
-import { TransactionConfig } from 'web3-core';
-import { TransactionReceipt } from 'web3-eth';
-import { AbiItem } from 'web3-utils';
+} from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/constants/SWAP_METHOD';
+import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/models/contract-multicall-response';
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
-import { Exact } from 'src/features/instant-trades/models/exact';
-import { PriceTokenAmount, Token } from 'src/common';
+import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
+import { AbiItem } from 'web3-utils';
+import { tryExecuteAsync } from 'src/common/utils/functions';
+import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
+import { TransactionReceipt } from 'web3-eth';
+import { defaultUniswapV2Abi } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi';
+import { TransactionConfig } from 'web3-core';
+import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
+import { Cache } from 'src/common/utils/decorators';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
-import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private';
+import { Exact } from 'src/features/instant-trades/models/exact';
+import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import BigNumber from 'bignumber.js';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount<EvmBlockchainName>;

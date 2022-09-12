@@ -1,16 +1,16 @@
-import { TRADE_TYPE, TradeType } from 'src/features';
-import { UniswapV3QuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
-import { Cache } from 'src/common';
-import { UniswapV3AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
-import { UniswapV3RouterConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
-import { UniswapV3AlgebraAbstractProvider } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
-import { UniswapV3AlgebraTradeStruct } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
-import { UniswapV3Route } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
-import { UniswapV3TradeClass } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-class';
+import { UniswapV3AbstractTrade } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
+import { UniswapV3RouterConfiguration } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
+import { UniswapV3AlgebraAbstractProvider } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
+import { UniswapV3QuoterController } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
+import { UniswapV3TradeClass } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-class';
+import { UniswapV3AlgebraTradeStruct } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 import {
     UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI,
     UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS
 } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { UniswapV3Route } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
+import { Cache } from 'src/common/utils/decorators';
 
 export abstract class UniswapV3AbstractProvider<
     T extends UniswapV3AbstractTrade = UniswapV3AbstractTrade

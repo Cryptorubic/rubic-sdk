@@ -1,31 +1,34 @@
-import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
-import { CrossChainIsUnavailableError } from '@rsdk-common/errors/cross-chain/cross-chain-is-unavailable.error';
-import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swap/failed-to-check-for-transaction-receipt.error';
-import { InsufficientFundsGasPriceValueError } from '@rsdk-common/errors/cross-chain/insufficient-funds-gas-price-value.error';
-import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
-import BigNumber from 'bignumber.js';
-import { CelerRubicCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade';
-import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
-import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
-import { CelerCrossChainContractData } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
+/**
+ * Calculated Celer cross chain trade.
+ */ import { CrossChainContractTrade } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import {
     celerSourceTransitTokenFeeMultiplier,
     celerTargetTransitTokenFeeMultiplier
-} from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-fee-multipliers';
-import { CelerItCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
-import { CROSS_CHAIN_TRADE_TYPE, CrossChainTrade, TradeType } from 'src/features';
+} from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-fee-multipliers';
+import {
+    CrossChainIsUnavailableError,
+    FailedToCheckForTransactionReceiptError,
+    InsufficientFundsGasPriceValueError
+} from 'src/common/errors';
+import { CelerCrossChainContractData } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { CelerRubicCrossChainTrade } from 'src/features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { PriceTokenAmount } from 'src/common/tokens';
 import { CelerDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
-import { PriceTokenAmount } from 'src/common';
+import { ContractParams } from 'src/features/cross-chain/models/contract-params';
+import { GasData } from 'src/features/cross-chain/models/gas-data';
+import { Injector } from 'src/core/sdk/injector';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
+import { CelerItCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import BigNumber from 'bignumber.js';
 
-/**
- * Calculated Celer cross chain trade.
- */
 export class CelerCrossChainTrade extends CelerRubicCrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
 

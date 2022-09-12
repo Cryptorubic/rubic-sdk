@@ -1,26 +1,31 @@
-import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
-import { CrossChainIsUnavailableError } from '@rsdk-common/errors/cross-chain/cross-chain-is-unavailable.error';
-import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swap/failed-to-check-for-transaction-receipt.error';
-import { InsufficientFundsGasPriceValueError } from '@rsdk-common/errors/cross-chain/insufficient-funds-gas-price-value.error';
-import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
-import BigNumber from 'bignumber.js';
-import { RubicItCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
-import { CelerRubicCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade';
-import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
-import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
-import { LowSlippageDeflationaryTokenError, PriceTokenAmount, RubicSdkError } from 'src/common';
-import { TOKEN_WITH_FEE_ERRORS } from '@rsdk-features/cross-chain/constants/token-with-fee-errors';
-import { CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
-import { RubicDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade';
-import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 /**
  * Calculated Rubic cross chain trade.
- */
+ */ import { CrossChainContractTrade } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
+import { RubicItCrossChainContractTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
+import { TOKEN_WITH_FEE_ERRORS } from 'src/features/cross-chain/constants/token-with-fee-errors';
+import {
+    CrossChainIsUnavailableError,
+    FailedToCheckForTransactionReceiptError,
+    InsufficientFundsGasPriceValueError,
+    LowSlippageDeflationaryTokenError,
+    RubicSdkError
+} from 'src/common/errors';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { CelerRubicCrossChainTrade } from 'src/features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { RubicDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade/rubic-direct-cross-chain-contract-trade';
+import { ContractParams } from 'src/features/cross-chain/models/contract-params';
+import { GasData } from 'src/features/cross-chain/models/gas-data';
+import { Injector } from 'src/core/sdk/injector';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import BigNumber from 'bignumber.js';
+
 export class RubicCrossChainTrade extends CelerRubicCrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RUBIC;
 

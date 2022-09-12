@@ -1,35 +1,33 @@
-import { Cache } from 'src/common/decorators/cache.decorator';
-import { ConditionalResult } from 'src/common/decorators/models/conditional-result';
-import { TimeoutError } from 'src/common/errors/utils/timeout.error';
-import pTimeout from 'src/common/utils/p-timeout';
-import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
+import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
+import { InsufficientFundsError, RubicSdkError, TimeoutError } from 'src/common/errors';
+import { BatchCall } from 'src/core/blockchain/web3-public-service/models/batch-call';
+import { RpcResponse } from 'src/core/blockchain/web3-public-service/models/rpc-response';
+import { MulticallResponse } from 'src/core/blockchain/web3-public-service/models/multicall-response';
+import { DefaultHttpClient } from 'src/core/sdk/default-http-client';
 import {
     HEALTHCHECK,
     isBlockchainHealthcheckAvailable
 } from 'src/core/blockchain/constants/healthcheck';
-import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/constants/multicall-abi';
-import { MULTICALL_ADDRESSES } from 'src/core/blockchain/web3-public-service/constants/multicall-addresses';
-import { BatchCall } from 'src/core/blockchain/web3-public-service/models/batch-call';
-import { Call } from 'src/core/blockchain/web3-public-service/models/call';
-import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/models/contract-multicall-response';
-import { MulticallResponse } from 'src/core/blockchain/web3-public-service/models/multicall-response';
-import { RpcResponse } from 'src/core/blockchain/web3-public-service/models/rpc-response';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import Web3 from 'web3';
-import BigNumber from 'bignumber.js';
-import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
+import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/models/contract-multicall-response';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { AbiItem } from 'web3-utils';
+import { Call } from 'src/core/blockchain/web3-public-service/models/call';
 import { BlockTransactionString, TransactionReceipt } from 'web3-eth';
-import { InsufficientFundsError } from 'src/common/errors/swap/insufficient-funds.error';
-import { HttpClient } from 'src/common/models/http-client';
-import { DefaultHttpClient } from 'src/common/http/default-http-client';
+import { ConditionalResult } from 'src/common/utils/decorators/cache-decorator/models/conditional-result';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
+import { HttpClient } from 'src/core/sdk/models/http-client';
 import { MethodData } from 'src/core/blockchain/web3-public-service/models/method-data';
-import { RubicSdkError } from 'src/common';
-import { EventData } from 'web3-eth-contract';
+import pTimeout from 'src/common/utils/p-timeout';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { Web3Public } from 'src/core';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
+import { Cache } from 'src/common/utils/decorators';
+import { MULTICALL_ADDRESSES } from 'src/core/blockchain/web3-public-service/constants/multicall-addresses';
+import BigNumber from 'bignumber.js';
+import { EventData } from 'web3-eth-contract';
 
 type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 

@@ -1,12 +1,12 @@
-import { TokenBaseStruct } from 'src/common/tokens-manager/models/token-base-struct';
-import { Token, TokenStruct } from 'src/common/tokens-manager/tokens/token';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
+import { Token, TokenStruct } from 'src/common/tokens/token';
 import { Injector } from 'src/core/sdk/injector';
 import BigNumber from 'bignumber.js';
-import { BlockchainName } from 'src/core';
 
-export type PriceTokenStruct<T extends BlockchainName = BlockchainName> = ConstructorParameters<
-    typeof Token<T>
->[number] & { price: BigNumber };
+export type PriceTokenStruct<T extends BlockchainName = BlockchainName> = TokenStruct<T> & {
+    price: BigNumber;
+};
 
 /**
  * Contains token structure with price in usd per 1 unit.

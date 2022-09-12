@@ -1,19 +1,21 @@
-import { UniswapV3Route } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
-import { MethodData } from '@rsdk-core/blockchain/web3-public-service/models/method-data';
-import { UniswapV3QuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
-import { Cache, compareAddresses, RubicSdkError, Token } from 'src/common';
+import { UniswapV3Route } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
+import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import {
     UniswapV3AlgebraAbstractTrade,
     UniswapV3AlgebraTradeStruct
-} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
-
+} from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import {
     UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI,
     UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS
-} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
-import { createTokenNativeAddressProxyInPathStartAndEnd } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
+} from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
+import { RubicSdkError } from 'src/common/errors';
+import { UniswapV3QuoterController } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
+import { MethodData } from 'src/core/blockchain/web3-public-service/models/method-data';
+import { compareAddresses } from 'src/common/utils/blockchain';
+import { Cache } from 'src/common/utils/decorators';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { TRADE_TYPE, TradeType } from 'src/features';
+import { Token } from 'src/common/tokens';
 
 export interface UniswapV3TradeStruct extends UniswapV3AlgebraTradeStruct {
     route: UniswapV3Route;

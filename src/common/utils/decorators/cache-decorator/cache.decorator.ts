@@ -1,6 +1,6 @@
-import { CacheConfig } from '@rsdk-common/decorators/models/cache-config';
-import { ConditionalResult } from '@rsdk-common/decorators/models/conditional-result';
-import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
+import { CacheConfig } from 'src/common/utils/decorators/cache-decorator/models/cache-config';
+import { ConditionalResult } from 'src/common/utils/decorators/cache-decorator/models/conditional-result';
+import { RubicSdkError } from 'src/common/errors';
 
 type DecoratorSignature = <T>(
     _: Object,
@@ -88,7 +88,7 @@ function modifyMethodCacheDescriptor<T>(
                     .catch(err => {
                         instanceStore.delete(key);
                         throw err;
-                    }) as T;
+                    }) as unknown as T;
                 saveResult(instanceStore, key, handledPromise, cacheConfig.maxAge);
                 return handledPromise;
             }
@@ -106,7 +106,7 @@ function modifyMethodCacheDescriptor<T>(
             const handledPromise = result.catch(err => {
                 instanceStore.delete(key);
                 throw err;
-            }) as T;
+            }) as unknown as T;
             saveResult(instanceStore, key, handledPromise, cacheConfig.maxAge);
             return handledPromise;
         }

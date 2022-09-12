@@ -1,4 +1,4 @@
-import { defaultTelosProviderConfiguration } from '@rsdk-features/instant-trades/dexes/telos/default-constants';
+import { defaultTelosProviderConfiguration } from 'src/features/instant-trades/dexes/telos/default-constants';
 
 export const ZAPPY_CONTRACT_ADDRESS = '0xb9239af0697c8efb42cba3568424b06753c6da71';
 

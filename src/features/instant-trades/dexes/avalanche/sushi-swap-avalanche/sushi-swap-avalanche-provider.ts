@@ -1,7 +1,7 @@
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
-import { SUSHI_SWAP_AVALANCHE_PROVIDER_CONFIGURATION } from '@rsdk-features/instant-trades/dexes/avalanche/sushi-swap-avalanche/constants';
-import { UniswapV2AbstractProvider } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
-import { SushiSwapAvalancheTrade } from '@rsdk-features/instant-trades/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-trade';
+import { SushiSwapAvalancheTrade } from 'src/features/instant-trades/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-trade';
+import { UniswapV2AbstractProvider } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { SUSHI_SWAP_AVALANCHE_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/avalanche/sushi-swap-avalanche/constants';
 
 export class SushiSwapAvalancheProvider extends UniswapV2AbstractProvider<SushiSwapAvalancheTrade> {
     public readonly blockchain = BLOCKCHAIN_NAME.AVALANCHE;

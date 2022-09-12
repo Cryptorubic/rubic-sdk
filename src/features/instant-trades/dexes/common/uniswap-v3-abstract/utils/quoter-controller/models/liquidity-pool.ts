@@ -1,5 +1,5 @@
-import { compareAddresses } from '@rsdk-common/utils/blockchain';
-import { Token } from 'src/common';
+import { compareAddresses } from 'src/common/utils/blockchain';
+import { Token } from 'src/common/tokens';
 
 export type FeeAmount = 500 | 3000 | 10000;
 

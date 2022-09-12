@@ -1,8 +1,8 @@
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
-import { UniswapV3AbstractProvider } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-provider';
-import { UniSwapV3PolygonTrade } from '@rsdk-features/instant-trades/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-trade';
-import { UNI_SWAP_V3_POLYGON_PROVIDER_CONFIGURATION } from '@rsdk-features/instant-trades/dexes/polygon/uni-swap-v3-polygon/constants/provider-configuration';
-import { UNI_SWAP_V3_POLYGON_ROUTER_CONFIGURATION } from '@rsdk-features/instant-trades/dexes/polygon/uni-swap-v3-polygon/constants/router-configuration';
+import { UniswapV3AbstractProvider } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-provider';
+import { UNI_SWAP_V3_POLYGON_ROUTER_CONFIGURATION } from 'src/features/instant-trades/dexes/polygon/uni-swap-v3-polygon/constants/router-configuration';
+import { UNI_SWAP_V3_POLYGON_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/polygon/uni-swap-v3-polygon/constants/provider-configuration';
+import { UniSwapV3PolygonTrade } from 'src/features/instant-trades/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-trade';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export class UniSwapV3PolygonProvider extends UniswapV3AbstractProvider<UniSwapV3PolygonTrade> {
     public readonly blockchain = BLOCKCHAIN_NAME.POLYGON;

@@ -1,11 +1,11 @@
-import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
-import { WalletProvider } from '@rsdk-core/sdk/models/configuration';
 import Web3 from 'web3';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { Web3PrivateStorage } from 'src/core/blockchain/web3-private-service/models/web3-private-storage';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private';
-import { BlockchainName, BlockchainsInfo } from 'src/core';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { RubicSdkError } from 'src/common/errors';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { WalletProvider } from 'src/core/sdk/models/configuration';
+import { Web3PrivateStorage } from 'src/core/blockchain/web3-private-service/models/web3-private-storage';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 
 export class Web3PrivateService {
     private web3: Web3 | undefined;

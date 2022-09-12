@@ -1,7 +1,7 @@
 import { PangolinProvider } from 'src/features/instant-trades/dexes/avalanche/pangolin/pangolin-provider';
 import { PangolinTrade } from 'src/features/instant-trades/dexes/avalanche/pangolin/pangolin-trade';
 import { PANGOLIN_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/avalanche/pangolin/constants';
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const pangolinAvalancheProviderSpec = () => {
     describe('Pangolin provider tests', () => {

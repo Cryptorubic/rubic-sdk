@@ -1,6 +1,6 @@
-import { CelerCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
-import { TokenStruct } from 'src/common/tokens-manager/tokens/token';
+import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
+import { TokenStruct } from 'src/common/tokens/token';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const celerTransitTokens: Record<CelerCrossChainSupportedBlockchain, TokenStruct> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {

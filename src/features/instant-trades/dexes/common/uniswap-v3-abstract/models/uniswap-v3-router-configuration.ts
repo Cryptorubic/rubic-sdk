@@ -1,4 +1,4 @@
-import { FeeAmount } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
+import { FeeAmount } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
 
 export interface UniswapV3RouterLiquidityPool<TokenSymbol extends string> {
     poolAddress: string;

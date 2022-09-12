@@ -1,14 +1,12 @@
-import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
-import { TimeoutError } from '@rsdk-common/errors/utils/timeout.error';
-import pTimeout from '@rsdk-common/utils/p-timeout';
-import { BlockchainName, EvmBlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { RpcProvider } from '@rsdk-core/sdk/models/configuration';
-import Web3 from 'web3';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { RpcListProvider } from 'src/core/blockchain/web3-public-service/constants/rpc-list-provider';
-import { HealthcheckError } from 'src/common';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
-import { BlockchainsInfo } from 'src/core';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { HealthcheckError, RubicSdkError, TimeoutError } from 'src/common/errors';
+import Web3 from 'web3';
+import pTimeout from 'src/common/utils/p-timeout';
 import { Web3PublicStorage } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
+import { RpcProvider } from 'src/core/sdk/models/configuration';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
 
 export class Web3PublicService {
     private static readonly mainRpcDefaultTimeout = 10_000;

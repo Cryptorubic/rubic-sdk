@@ -1,22 +1,18 @@
-import { CrossChainTradeType } from 'src/features';
-import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
-import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
-import {
-    CrossChainIsUnavailableError,
-    PriceToken,
-    PriceTokenAmount,
-    RubicSdkError
-} from 'src/common';
-import { parseError } from 'src/common/utils/errors';
-import { BlockchainName, Web3Pure } from 'src/core';
-import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { Injector } from 'src/core/sdk/injector';
 import { AbiItem } from 'web3-utils';
-import BigNumber from 'bignumber.js';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { parseError } from 'src/common/utils/errors';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { CrossChainTradeType } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
+import { CrossChainIsUnavailableError, RubicSdkError } from 'src/common/errors';
+import { Injector } from 'src/core/sdk/injector';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { commonCrossChainAbi } from './constants/common-cross-chain-abi';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import BigNumber from 'bignumber.js';
 
 export abstract class CrossChainTradeProvider {
     public static parseError(err: unknown): RubicSdkError {

@@ -1,21 +1,27 @@
-import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
-import { TransactionOptions } from 'src/core/blockchain/models/transaction-options';
-import { Web3Error } from 'src/common/errors/blockchain/web3.error';
-import Web3 from 'web3';
-import BigNumber from 'bignumber.js';
-import { TransactionReceipt } from 'web3-eth';
+import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
+import {
+    FailedToCheckForTransactionReceiptError,
+    LowGasError,
+    LowSlippageError,
+    RubicSdkError,
+    TransactionRevertedError,
+    UserRejectError,
+    WrongNetworkError
+} from 'src/common/errors';
 import { AbiItem } from 'web3-utils';
-import { LowGasError } from 'src/common/errors/blockchain/low-gas.error';
-import { UserRejectError } from 'src/common/errors/blockchain/user-reject.error';
-import { TransactionRevertedError } from 'src/common/errors/blockchain/transaction-reverted.error';
-import { WalletConnectionConfiguration } from 'src/core/blockchain/models/wallet-connection-configuration';
-import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
-import { FailedToCheckForTransactionReceiptError } from 'src/common/errors/swap/failed-to-check-for-transaction-receipt.error';
-import { BlockchainName, BlockchainsInfo, Web3Private, Web3Pure } from 'src/core';
-import { LowSlippageError, WrongNetworkError } from 'src/common';
 import { parseError } from 'src/common/utils/errors';
+import { TransactionReceipt } from 'web3-eth';
 import { TransactionConfig } from 'web3-core';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { WalletConnectionConfiguration } from 'src/core/blockchain/models/wallet-connection-configuration';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import Web3 from 'web3';
+import { TransactionOptions } from 'src/core/blockchain/models/transaction-options';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import BigNumber from 'bignumber.js';
+import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private/models/web3.error';
 
 export class EvmWeb3Private extends Web3Private {
     /**

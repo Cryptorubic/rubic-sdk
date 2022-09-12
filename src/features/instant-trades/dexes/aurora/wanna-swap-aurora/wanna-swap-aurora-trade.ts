@@ -1,9 +1,9 @@
 import {
     UniswapV2AbstractTrade,
     UniswapV2TradeStruct
-} from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
-import { TRADE_TYPE, TradeType } from 'src/features';
-import { WANNA_SWAP_AURORA_CONTRACT_ADDRESS } from '@rsdk-features/instant-trades/dexes/aurora/wanna-swap-aurora/constants';
+} from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { WANNA_SWAP_AURORA_CONTRACT_ADDRESS } from 'src/features/instant-trades/dexes/aurora/wanna-swap-aurora/constants';
 
 export class WannaSwapAuroraTrade extends UniswapV2AbstractTrade {
     public static get type(): TradeType {

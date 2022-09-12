@@ -1,18 +1,20 @@
-import { BLOCKCHAIN_NAME } from 'src/core';
-import { MethodData } from '@rsdk-core/blockchain/web3-public-service/models/method-data';
-import { AlgebraRoute } from '@rsdk-features/instant-trades/dexes/polygon/algebra/models/algebra-route';
-import { notNull, PriceToken, RubicSdkError, Token } from 'src/common';
-import BigNumber from 'bignumber.js';
-import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public-service/models/contract-multicall-response';
+import { notNull } from 'src/common/utils/object';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { PriceToken, Token } from 'src/common/tokens';
+import { UniswapV3AlgebraQuoterController } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
+import { RubicSdkError } from 'src/common/errors';
+import { Injector } from 'src/core/sdk/injector';
+import { ROUTER_TOKENS } from 'src/features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/constants/router-tokens';
+import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/models/contract-multicall-response';
+import { MethodData } from 'src/core/blockchain/web3-public-service/models/method-data';
+import { AlgebraRoute } from 'src/features/instant-trades/dexes/polygon/algebra/models/algebra-route';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { Exact } from 'src/features/instant-trades/models/exact';
 import {
     QUOTER_CONTRACT_ABI,
     QUOTER_CONTRACT_ADDRESS
-} from '@rsdk-features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/constants/quoter-contract-data';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { ROUTER_TOKENS } from '@rsdk-features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/constants/router-tokens';
-import { UniswapV3AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
-import { Exact } from '@rsdk-features/instant-trades/models/exact';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+} from 'src/features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/constants/quoter-contract-data';
+import BigNumber from 'bignumber.js';
 
 interface GetQuoterMethodsDataOptions {
     routesTokens: Token[];

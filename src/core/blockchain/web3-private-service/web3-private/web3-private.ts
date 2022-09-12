@@ -1,9 +1,9 @@
 import { TransactionOptions } from 'src/core/blockchain/models/transaction-options';
-import { Web3Error } from 'src/common/errors/blockchain/web3.error';
+import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private/models/web3.error';
 import BigNumber from 'bignumber.js';
 import { TransactionReceipt } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
-import { BlockchainName } from 'src/core';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 /**
  * Class containing methods for executing the functions of contracts

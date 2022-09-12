@@ -1,4 +1,4 @@
-import { UniswapV2ProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { UniswapV2ProviderConfiguration } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultPolygonRoutingProvidersAddresses = [
     '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270', // WMATIC

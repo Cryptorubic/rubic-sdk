@@ -1,13 +1,13 @@
-import { TokenBaseStruct } from 'src/common/tokens-manager/models/token-base-struct';
+import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import BigNumber from 'bignumber.js';
-import { PriceToken, PriceTokenAmount, Token } from 'src/common';
-import { TokenStruct } from 'src/common/tokens-manager/tokens/token';
-import { PriceTokenStruct } from 'src/common/tokens-manager/tokens/price-token';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { TokenStruct } from 'src/common/tokens/token';
+import { PriceTokenStruct } from 'src/common/tokens/price-token';
 import {
     PriceTokenAmountBaseStruct,
     PriceTokenAmountStruct
-} from 'src/common/tokens-manager/tokens/price-token-amount';
+} from 'src/common/tokens/price-token-amount';
 
 /**
  * Contains methods to create Tokens classes.

@@ -1,5 +1,5 @@
-import { ERC20_TOKEN_ABI } from '@rsdk-core/blockchain/constants/erc-20-abi';
-import { BLOCKCHAIN_NAME, BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
 
 export const HEALTHCHECK = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
