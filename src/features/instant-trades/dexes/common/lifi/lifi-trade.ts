@@ -148,6 +148,7 @@ export class LifiTrade extends InstantTrade {
             return {
                 to: this.contractAddress,
                 data: data!,
+                value: this.from.isNative ? this.from.stringWeiAmount : '0',
                 gas: options.gasLimit || gasLimit,
                 gasPrice: options.gasPrice || gasPrice
             };
