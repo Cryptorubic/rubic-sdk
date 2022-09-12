@@ -39,7 +39,7 @@ import { symbiosisTransitTokens } from 'src/features/cross-chain/providers/symbi
 import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
 import { ZappyProvider } from 'src/features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
-import { TooLowAmount } from 'src/common/errors/cross-chain/too-low-amount';
+import { TooLowAmountError } from 'src/common/errors/cross-chain/too-low-amount.error';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -219,7 +219,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             if (err instanceof SymbiosisError && err.message) {
                 rubicSdkError =
                     err.code === ErrorCode.AMOUNT_LESS_THAN_FEE
-                        ? new TooLowAmount()
+                        ? new TooLowAmountError()
                         : await this.checkMinMaxErrors(err, from, options.slippageTolerance);
             }
 

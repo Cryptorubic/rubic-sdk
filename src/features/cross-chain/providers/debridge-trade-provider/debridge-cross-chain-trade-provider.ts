@@ -23,7 +23,7 @@ import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import BigNumber from 'bignumber.js';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { RubicSdkError } from 'src/common';
-import { TooLowAmount } from 'src/common/errors/cross-chain/too-low-amount';
+import { TooLowAmountError } from 'src/common/errors/cross-chain/too-low-amount.error';
 
 export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -198,13 +198,11 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
         error: TransactionErrorResponse;
     }): RubicSdkError | null {
         if (httpErrorResponse.error.errorId === 'INCLUDED_GAS_FEE_NOT_COVERED_BY_INPUT_AMOUNT') {
-            return new TooLowAmount();
+            return new TooLowAmountError();
         }
 
         // @TODO handle other debridge API error codes:
-        // SOURCE_AND_DESTINATION_CHAINS_ARE_EQUAL
         // CONNECTOR_1INCH_RETURNED_ERROR
-        // INVALID_QUERY_PARAMETERS
         // INCLUDED_GAS_FEE_CANNOT_BE_ESTIMATED_FOR_TRANSACTION_BUNDLE
 
         return null;
