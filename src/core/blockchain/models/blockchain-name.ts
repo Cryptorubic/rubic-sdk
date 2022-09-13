@@ -16,7 +16,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     FUSE: 'FUSE',
     MOONBEAM: 'MOONBEAM',
     CELO: 'CELO',
-    BOBA: 'BOBA'
+    BOBA: 'BOBA',
+    ASTAR: 'ASTAR'
 } as const;
 
 export const BLOCKCHAIN_NAME = {
