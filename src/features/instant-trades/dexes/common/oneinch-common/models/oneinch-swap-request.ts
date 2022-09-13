@@ -7,5 +7,12 @@ export interface OneinchSwapRequest {
         fromAddress: string;
         disableEstimate: boolean;
         mainRouteParts?: string;
+        destReceiver?: string;
+        protocols?: string;
+        referrerAddress?: string;
+        fee?: string;
+        permit?: string;
+        compatibilityMode?: boolean;
+        burnChi?: boolean;
     };
 }
