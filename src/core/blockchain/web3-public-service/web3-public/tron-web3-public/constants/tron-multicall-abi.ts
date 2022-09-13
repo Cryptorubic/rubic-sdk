@@ -1,3 +1,5 @@
+import { AbiItem } from 'web3-utils';
+
 export const TRON_MULTICALL_ABI = [
     {
         inputs: [
@@ -20,4 +22,4 @@ export const TRON_MULTICALL_ABI = [
         stateMutability: 'view',
         type: 'function'
     }
-];
+] as AbiItem[];

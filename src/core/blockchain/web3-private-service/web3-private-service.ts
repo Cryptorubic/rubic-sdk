@@ -25,7 +25,7 @@ export class Web3PrivateService {
     private readonly web3PrivateStorage: Web3PrivateStorage;
 
     private readonly createWeb3Private: CreateWeb3Private = {
-        [CHAIN_TYPE.EVM]: this.createEvmWeb3Private
+        [CHAIN_TYPE.EVM]: this.createEvmWeb3Private.bind(this)
     };
 
     constructor(walletProvider?: WalletProvider) {

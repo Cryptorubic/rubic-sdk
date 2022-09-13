@@ -10,7 +10,8 @@ import Web3 from 'web3';
 import pTimeout from 'src/common/utils/p-timeout';
 import {
     Web3PublicStorage,
-    Web3PublicSupportedBlockchainName
+    Web3PublicSupportedBlockchain,
+    web3PublicSupportedBlockchains
 } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
@@ -20,6 +21,14 @@ import { RpcProviders } from 'src/core/sdk/models/rpc-provider';
 import { CreateWeb3Public } from 'src/core/blockchain/web3-public-service/models/create-web3-public-proxy';
 
 export class Web3PublicService {
+    public static isSupportedBlockchain(
+        blockchain: BlockchainName
+    ): blockchain is Web3PublicSupportedBlockchain {
+        return web3PublicSupportedBlockchains.some(
+            supportedBlockchain => supportedBlockchain === blockchain
+        );
+    }
+
     private static readonly mainRpcDefaultTimeout = 10_000;
 
     private readonly web3PublicStorage: Web3PublicStorage;
@@ -36,7 +45,13 @@ export class Web3PublicService {
     public getWeb3Public(blockchainName: TronBlockchainName): TronWeb3Public;
     public getWeb3Public(blockchainName: BlockchainName): never;
     public getWeb3Public(blockchainName: BlockchainName) {
-        const web3Public = this.web3PublicStorage[blockchainName as keyof Web3PublicStorage];
+        if (!Web3PublicService.isSupportedBlockchain(blockchainName)) {
+            throw new RubicSdkError(
+                `Blockchain ${blockchainName} is not supported in web3 public.`
+            );
+        }
+
+        const web3Public = this.web3PublicStorage[blockchainName];
         if (!web3Public) {
             throw new RubicSdkError(
                 `Provider for ${blockchainName} was not initialized. Pass rpc link for this blockchain to sdk configuration object.`
@@ -50,27 +65,28 @@ export class Web3PublicService {
             ...(Object.values(EVM_BLOCKCHAIN_NAME) as EvmBlockchainName[]).reduce(
                 (acc, evmBlockchainName) => ({
                     ...acc,
-                    [evmBlockchainName]: this.createEvmWeb3PublicProxy
+                    [evmBlockchainName]: this.createEvmWeb3PublicProxy.bind(this)
                 }),
                 {} as Record<
                     EvmBlockchainName,
                     (blockchainName?: EvmBlockchainName) => EvmWeb3Public
                 >
             ),
-            [BLOCKCHAIN_NAME.TRON]: this.createTronWeb3PublicProxy
+            [BLOCKCHAIN_NAME.TRON]: this.createTronWeb3PublicProxy.bind(this)
         };
     }
 
     private createWeb3PublicStorage(): Web3PublicStorage {
-        return (Object.keys(this.rpcProvider) as Web3PublicSupportedBlockchainName[]).reduce(
-            (acc, blockchainName) => {
-                return {
-                    ...acc,
-                    [blockchainName]: this.createWeb3Public[blockchainName](blockchainName)
-                };
-            },
-            {} as Web3PublicStorage
-        );
+        return (Object.keys(this.rpcProvider) as BlockchainName[]).reduce((acc, blockchainName) => {
+            if (!Web3PublicService.isSupportedBlockchain(blockchainName)) {
+                console.debug(`Blockchain ${blockchainName} is not supported in web3 public.`);
+                return acc;
+            }
+            return {
+                ...acc,
+                [blockchainName]: this.createWeb3Public[blockchainName](blockchainName)
+            };
+        }, {} as Web3PublicStorage);
     }
 
     private createEvmWeb3PublicProxy(blockchainName: EvmBlockchainName): EvmWeb3Public {
@@ -88,7 +104,7 @@ export class Web3PublicService {
     }
 
     private createWeb3PublicProxy<T extends Web3Public = Web3Public>(
-        blockchainName: Web3PublicSupportedBlockchainName,
+        blockchainName: Web3PublicSupportedBlockchain,
         web3Public: T
     ): T {
         const rpcProvider = this.rpcProvider[blockchainName]!;

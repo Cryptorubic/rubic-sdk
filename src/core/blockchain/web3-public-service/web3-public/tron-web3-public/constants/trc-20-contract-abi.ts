@@ -1,3 +1,5 @@
+import { AbiItem } from 'web3-utils';
+
 export const TRC20_CONTRACT_ABI = [
     {
         outputs: [{ type: 'string' }],
@@ -74,4 +76,4 @@ export const TRC20_CONTRACT_ABI = [
         stateMutability: 'Nonpayable',
         type: 'Function'
     }
-];
+] as unknown as AbiItem[];

@@ -1,5 +1,6 @@
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
+import { TRC20_CONTRACT_ABI } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/constants/trc-20-contract-abi';
 
 export const HEALTHCHECK = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
@@ -61,6 +62,12 @@ export const HEALTHCHECK = {
         contractAbi: ERC20_TOKEN_ABI,
         method: 'symbol',
         expected: 'USDT'
+    },
+    [BLOCKCHAIN_NAME.TRON]: {
+        contractAddress: 'TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8',
+        contractAbi: TRC20_CONTRACT_ABI,
+        method: 'symbol',
+        expected: 'USDC'
     }
 };
 

@@ -12,37 +12,29 @@ import { EVM_MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/web3-
 import Web3 from 'web3';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { AbiItem } from 'web3-utils';
 import { EvmCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-call';
 import { BlockTransactionString, TransactionReceipt } from 'web3-eth';
-import { ConditionalResult } from 'src/common/utils/decorators/cache-decorator/models/conditional-result';
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import pTimeout from 'src/common/utils/p-timeout';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
-import { Cache } from 'src/common/utils/decorators';
 import BigNumber from 'bignumber.js';
 import { EventData } from 'web3-eth-contract';
-
-type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
  * To send transaction or execute contract method use {@link Web3Private}.
  */
-export class EvmWeb3Public extends Web3Public {
-    /**
-     * @param web3 Web3 instance initialized with ethereum provider, e.g. rpc link.
-     * @param blockchainName Blockchain in which you need to execute requests.
-     * @param [httpClient=axios] Http client that implements {@link HttpClient} interface.
-     */
+export class EvmWeb3Public extends Web3Public<EvmBlockchainName> {
+    protected readonly tokenContractAbi = ERC20_TOKEN_ABI;
+
     constructor(
         private readonly web3: Web3,
-        blockchainName: BlockchainName,
+        blockchainName: EvmBlockchainName,
         private httpClient?: HttpClient
     ) {
         super(blockchainName);
@@ -284,57 +276,6 @@ export class EvmWeb3Public extends Web3Public {
         return tokensBalances;
     }
 
-    /**
-     * Uses multicall to make several calls of one method in one contract.
-     * @param contractAddress Target contract address.
-     * @param contractAbi Target contract abi.
-     * @param methodName Method name.
-     * @param methodCallsArguments Method parameters array, for each method call.
-     */
-    public async multicallContractMethod<Output>(
-        contractAddress: string,
-        contractAbi: AbiItem[],
-        methodName: string,
-        methodCallsArguments: unknown[][]
-    ): Promise<ContractMulticallResponse<Output>[]> {
-        return this.multicallContractMethods<Output>(
-            contractAddress,
-            contractAbi,
-            methodCallsArguments.map(methodArguments => ({
-                methodName,
-                methodArguments
-            }))
-        );
-    }
-
-    /**
-     * Uses multicall to make several methods calls in one contract.
-     * @param contractAddress Target contract address.
-     * @param contractAbi Target contract abi.
-     * @param methodsData Methods data, containing methods' names and arguments.
-     */
-    public async multicallContractMethods<Output>(
-        contractAddress: string,
-        contractAbi: AbiItem[],
-        methodsData: MethodData[]
-    ): Promise<ContractMulticallResponse<Output>[]> {
-        const results = await this.multicallContractsMethods<Output>(contractAbi, [
-            {
-                contractAddress,
-                methodsData
-            }
-        ]);
-        if (!results?.[0]) {
-            throw new RubicSdkError('Cant perform multicall or request data is empty');
-        }
-        return results[0];
-    }
-
-    /**
-     * Uses multicall to make many methods calls in several contracts.
-     * @param contractAbi Target contract abi.
-     * @param contractsData Contract addresses and methods data, containing methods' names and arguments.
-     */
     public async multicallContractsMethods<Output>(
         contractAbi: AbiItem[],
         contractsData: {
@@ -371,7 +312,7 @@ export class EvmWeb3Public extends Web3Public {
                         ? (this.web3.eth.abi.decodeParameters(
                               methodOutputAbi,
                               output.returnData
-                          ) as Output)
+                          )[0] as Output)
                         : null
                 };
             })
@@ -401,116 +342,6 @@ export class EvmWeb3Public extends Web3Public {
         if (balance.lt(amountAbsolute)) {
             throw new InsufficientFundsError(token.symbol, balance.toString(), amountAbsolute);
         }
-    }
-
-    /**
-     * Gets ERC-20 token info by address.
-     * @param tokenAddress Address of token.
-     * @param tokenFields Token's fields to get.
-     */
-    @Cache({ conditionalCache: true })
-    public async callForTokenInfo(
-        tokenAddress: string,
-        tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
-    ): Promise<Partial<Record<SupportedTokenField, string>>> {
-        if (EvmWeb3Pure.isNativeAddress(tokenAddress)) {
-            const nativeToken = nativeTokensList[this.blockchainName];
-            const conditionalReturns: ConditionalResult<
-                Partial<Record<SupportedTokenField, string>>
-            > = {
-                notSave: false,
-                value: { ...nativeToken, decimals: nativeToken.decimals.toString() }
-            };
-
-            // see https://github.com/microsoft/TypeScript/issues/4881
-            // @ts-ignore
-            return conditionalReturns;
-        }
-
-        const tokenFieldsR = await this.multicallContractMethods<string>(
-            tokenAddress,
-            ERC20_TOKEN_ABI,
-            tokenFields.map(methodName => ({
-                methodName,
-                methodArguments: []
-            }))
-        );
-        let notSave = false;
-        const tokenInfo = tokenFieldsR.reduce((acc, field, index) => {
-            if (!field.success) {
-                notSave = true;
-            }
-
-            const fieldName = tokenFields[index]!;
-            return { ...acc, [fieldName]: field.success ? field.output?.[0] : undefined };
-        }, {} as Record<SupportedTokenField, string>);
-
-        const conditionalReturns: ConditionalResult<Partial<Record<SupportedTokenField, string>>> =
-            {
-                notSave,
-                value: tokenInfo
-            };
-
-        // see https://github.com/microsoft/TypeScript/issues/4881
-        // @ts-ignore
-        return conditionalReturns;
-    }
-
-    /**
-     * Gets ERC-20 tokens info by addresses.
-     * @param tokenAddresses Addresses of tokens.
-     */
-    @Cache({ conditionalCache: true })
-    public async callForTokensInfo(
-        tokenAddresses: string[] | ReadonlyArray<string>
-    ): Promise<Record<SupportedTokenField, string | undefined>[]> {
-        const tokenFields = ['decimals', 'symbol', 'name'] as const;
-        const contractsData = tokenAddresses.map(contractAddress => ({
-            contractAddress,
-            methodsData: tokenFields.map(methodName => ({
-                methodName,
-                methodArguments: []
-            }))
-        }));
-
-        const results = await this.multicallContractsMethods<[string]>(
-            ERC20_TOKEN_ABI,
-            contractsData
-        );
-        let notSave = false;
-        const tokensInfo = results.map((contractCallResult, index) => {
-            const tokenAddress = tokenAddresses[index]!;
-            if (EvmWeb3Pure.isNativeAddress(tokenAddress)) {
-                const nativeToken = nativeTokensList[this.blockchainName];
-                return {
-                    ...nativeToken,
-                    decimals: nativeToken.decimals.toString(),
-                    totalSupply: undefined
-                };
-            }
-
-            const token = {} as Record<SupportedTokenField, string | undefined>;
-            contractCallResult.forEach((field, fieldIndex) => {
-                token[tokenFields[fieldIndex] as SupportedTokenField] = field.success
-                    ? field.output?.[0]
-                    : undefined;
-                if (!field.success) {
-                    notSave = true;
-                }
-            });
-            return token;
-        });
-
-        const conditionalReturns: ConditionalResult<
-            Record<SupportedTokenField, string | undefined>[]
-        > = {
-            notSave,
-            value: tokensInfo
-        };
-
-        // see https://github.com/microsoft/TypeScript/issues/4881
-        // @ts-ignore
-        return conditionalReturns;
     }
 
     /**
