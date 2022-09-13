@@ -8,7 +8,6 @@ import {
 } from 'symbiosis-js-sdk';
 import { TransactionReceipt } from 'web3-eth';
 import { getSymbiosisConfig } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { RubicSdkError } from 'src/common/errors';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
@@ -18,6 +17,7 @@ import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Token } from 'src/common/tokens';
 import { Log as EthersLog, TransactionReceipt as EthersReceipt } from '@ethersproject/providers';
 import BigNumber from 'bignumber.js';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 export class CrossChainSymbiosisManager {
     private readonly symbiosis = new Symbiosis(getSymbiosisConfig(), 'rubic');
@@ -53,8 +53,8 @@ export class CrossChainSymbiosisManager {
         toToken: Token,
         receipt: TransactionReceipt
     ): Promise<EthersLog> {
-        const fromChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id as ChainId;
-        const toChainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id as ChainId;
+        const fromChainId = blockchainId[fromBlockchain] as ChainId;
+        const toChainId = blockchainId[toBlockchain] as ChainId;
         const tokenOut = new SymbiosisToken({
             chainId: toChainId,
             address: toToken.isNative ? '' : toToken.address,

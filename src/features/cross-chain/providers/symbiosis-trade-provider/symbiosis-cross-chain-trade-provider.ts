@@ -27,7 +27,6 @@ import {
     Token,
     Percent
 } from 'symbiosis-js-sdk';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { RubicSdkError } from 'src/common/errors';
 import { symbiosisTransitTokens } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-transit-tokens';
 import { OneinchAvalancheProvider } from 'src/features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
@@ -45,6 +44,7 @@ import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/comm
 import { compareAddresses } from 'src/common/utils/blockchain';
 import BigNumber from 'bignumber.js';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -107,7 +107,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             );
 
             const tokenIn = new SymbiosisToken({
-                chainId: BlockchainsInfo.getBlockchainByName(fromBlockchain).id,
+                chainId: blockchainId[fromBlockchain],
                 address: from.isNative ? '' : from.address,
                 decimals: from.decimals,
                 isNative: from.isNative
@@ -127,7 +127,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             const tokenOut = isBitcoinSwap
                 ? null
                 : new SymbiosisToken({
-                      chainId: BlockchainsInfo.getBlockchainByName(toBlockchain).id,
+                      chainId: blockchainId[toBlockchain],
                       address: toToken.isNative ? '' : toToken.address,
                       decimals: toToken.decimals,
                       isNative: toToken.isNative
@@ -354,8 +354,8 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             const zapping = this.symbiosis.newZappingRenBTC();
             const poolId =
                 fromBlockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN
-                    ? BlockchainsInfo.getBlockchainByName(BLOCKCHAIN_NAME.POLYGON).id
-                    : BlockchainsInfo.getBlockchainByName(BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN).id;
+                    ? blockchainId[BLOCKCHAIN_NAME.POLYGON]
+                    : blockchainId[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN];
             try {
                 swapResult = await zapping.exactIn(
                     swapParams.tokenAmountIn,

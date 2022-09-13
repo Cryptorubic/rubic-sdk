@@ -5,7 +5,7 @@ import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/bloc
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Cache } from 'src/common/utils/decorators';
 
 const supportedBlockchains = [

@@ -6,7 +6,6 @@ import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/d
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade-provider';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
@@ -23,6 +22,7 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import BigNumber from 'bignumber.js';
 import { TransactionRequest } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-request';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 export class DebridgeCrossChainTrade extends CrossChainTrade {
     /** @internal */
@@ -190,7 +190,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
 
     public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
         const data = await this.getTransactionRequest(options?.receiverAddress);
-        const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
+        const toChainId = blockchainId[this.to.blockchain];
         const fromContracts =
             DE_BRIDGE_CONTRACT_ADDRESS[
                 this.from.blockchain as DeBridgeCrossChainSupportedBlockchain

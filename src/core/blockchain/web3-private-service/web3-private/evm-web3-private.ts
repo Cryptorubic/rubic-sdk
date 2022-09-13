@@ -12,7 +12,7 @@ import { AbiItem } from 'web3-utils';
 import { parseError } from 'src/common/utils/errors';
 import { TransactionReceipt } from 'web3-eth';
 import { TransactionConfig } from 'web3-core';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { WalletConnectionConfiguration } from 'src/core/blockchain/models/wallet-connection-configuration';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import Web3 from 'web3';
@@ -93,8 +93,8 @@ export class EvmWeb3Private extends Web3Private {
      */
     public async checkBlockchainCorrect(blockchainName: BlockchainName): Promise<void | never> {
         const userChainId = await this.web3.eth.getChainId();
-        const userBlockchain = BlockchainsInfo.getBlockchainById(userChainId);
-        if (userBlockchain?.name !== blockchainName) {
+        const userBlockchainName = BlockchainsInfo.getBlockchainNameById(userChainId);
+        if (userBlockchainName !== blockchainName) {
             throw new WrongNetworkError();
         }
     }

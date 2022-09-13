@@ -1,5 +1,5 @@
 import Web3 from 'web3';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private';
 import { RubicSdkError } from 'src/common/errors';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';

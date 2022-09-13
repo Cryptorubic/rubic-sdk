@@ -3,7 +3,6 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { IRoute } from '@viaprotocol/router-sdk/dist/types';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import {
@@ -29,6 +28,7 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import BigNumber from 'bignumber.js';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 export class ViaCrossChainTrade extends CrossChainTrade {
     /** @internal */
@@ -220,7 +220,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
             receiveAddress: options?.receiverAddress || this.walletAddress,
             numAction: 0
         });
-        const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
+        const toChainId = blockchainId[this.to.blockchain];
         const providerRouter = swapTransaction.to;
         const swapArguments = [
             this.from.address,

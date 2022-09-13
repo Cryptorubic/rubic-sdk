@@ -3,7 +3,6 @@ import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/bl
 import { celerCrossChainContractAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import { rubicCrossChainContractAbi } from 'src/features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contract-abi';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { ProviderData } from 'src/features/cross-chain/models/provider-data';
 import { CrossChainContractData } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 import { CellerMessageBusController } from 'src/features/cross-chain/providers/celer-trade-provider/celer-message-bus-controller/celler-message-bus-controller';
@@ -11,6 +10,7 @@ import { celerTransitTokens } from 'src/features/cross-chain/providers/celer-tra
 import { Cache } from 'src/common/utils/decorators';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import BigNumber from 'bignumber.js';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 /**
  * Class to work with readable methods of cross-chain contract.
@@ -28,7 +28,7 @@ export class CelerCrossChainContractData extends CrossChainContractData {
     }
 
     public async destinationCryptoFee(toBlockchain: BlockchainName): Promise<BigNumber> {
-        const destinationBlockchainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id;
+        const destinationBlockchainId = blockchainId[toBlockchain];
         return this.web3Public.callContractMethod(
             this.address,
             celerCrossChainContractAbi,

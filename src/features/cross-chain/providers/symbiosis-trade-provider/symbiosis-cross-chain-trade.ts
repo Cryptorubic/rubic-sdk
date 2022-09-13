@@ -5,7 +5,6 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
 import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
@@ -18,6 +17,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import BigNumber from 'bignumber.js';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 /**
  * Calculated Symbiosis cross chain trade.
@@ -200,7 +200,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             options?.receiverAddress
         );
         const { data } = exactIn.transactionRequest;
-        const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
+        const toChainId = blockchainId[this.to.blockchain];
         const swapArguments = [
             this.from.address,
             this.from.stringWeiAmount,

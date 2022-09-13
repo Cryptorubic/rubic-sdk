@@ -12,12 +12,12 @@ import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-publ
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { BridgeType } from 'src/features/cross-chain/constants/bridge-type';
 import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { RANGO_BLOCKCHAIN_NAME } from './constants/rango-blockchain-name';
 import { RANGO_API_KEY } from './constants/rango-api-key';
 import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';
@@ -209,7 +209,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
         const routerCallParams = [
             this.from.address,
             this.from.stringWeiAmount,
-            BlockchainsInfo.getBlockchainByName(this.to.blockchain).id,
+            blockchainId[this.to.blockchain],
             this.to.address,
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
             this.walletAddress,

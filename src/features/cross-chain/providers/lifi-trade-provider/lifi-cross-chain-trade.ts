@@ -5,7 +5,6 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import { BRIDGE_TYPE, BridgeType } from 'src/features/cross-chain/constants/bridge-type';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
@@ -22,6 +21,7 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import BigNumber from 'bignumber.js';
 import { Route } from '@lifi/sdk';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 export class LifiCrossChainTrade extends CrossChainTrade {
     public readonly feeInfo: FeeInfo;
@@ -198,7 +198,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
 
     public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
         const data = await this.getSwapData(options?.receiverAddress);
-        const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
+        const toChainId = blockchainId[this.to.blockchain];
         const fromContracts = lifiContractAddress[this.fromBlockchain];
 
         const swapArguments = [

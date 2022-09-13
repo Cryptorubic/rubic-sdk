@@ -1,5 +1,3 @@
-import { blockchains } from 'src/core/blockchain/constants/blockchains';
-import { Blockchain } from 'src/core/blockchain/models/blockchain';
 import {
     BitcoinBlockchainName,
     BLOCKCHAIN_NAME,
@@ -8,9 +6,11 @@ import {
     EvmBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
-import BigNumber from 'bignumber.js';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
+import { chainTypeByBlockchain } from 'src/core/blockchain/utils/blockchains-info/constants/chain-type-by-blockchain';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import BigNumber from 'bignumber.js';
 
 /**
  * Works with list of all used in project blockchains.
@@ -18,40 +18,21 @@ import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
  */
 export class BlockchainsInfo {
     /**
-     * An array of all blockchains, used in project.
+     * Finds blockchain name, based on provided chain id.
      */
-    public static readonly blockchains: ReadonlyArray<Blockchain> = blockchains;
-
-    /**
-     * Finds blockchain object, based on provided chain id.
-     */
-    public static getBlockchainById(chainId: string | number): Blockchain | undefined {
+    public static getBlockchainNameById(chainId: string | number): BlockchainName | undefined {
         const chainIdNumber = new BigNumber(chainId).toNumber();
-        return BlockchainsInfo.blockchains.find(blockchain => blockchain.id === chainIdNumber);
-    }
-
-    /**
-     * Finds blockchain object, based on provided blockchain name.
-     */
-    public static getBlockchainByName<T extends BlockchainName = BlockchainName>(
-        blockchainName: T
-    ): Blockchain<T> {
-        return BlockchainsInfo.blockchains.find(
-            blockchain => blockchain.name === blockchainName
-        )! as Blockchain<T>;
+        return Object.entries(blockchainId).find(
+            ([_, id]) => id === chainIdNumber
+        )?.[0] as BlockchainName;
     }
 
     public static getChainType(blockchainName: BlockchainName): CHAIN_TYPE {
-        if (this.isEvmBlockchainName(blockchainName)) {
-            return CHAIN_TYPE.EVM;
+        const chainType = chainTypeByBlockchain[blockchainName];
+        if (!chainType) {
+            throw new RubicSdkError(`No supported chain type for ${blockchainName}`);
         }
-        if (this.isBitcoinBlockchainName(blockchainName)) {
-            return CHAIN_TYPE.BITCOIN;
-        }
-        if (this.isTronBlockchainName(blockchainName)) {
-            return CHAIN_TYPE.TRON;
-        }
-        throw new RubicSdkError(`No supported chain type for ${blockchainName}`);
+        return chainType;
     }
 
     public static isEvmBlockchainName(

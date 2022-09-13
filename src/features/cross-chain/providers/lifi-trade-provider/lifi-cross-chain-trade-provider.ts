@@ -9,7 +9,6 @@ import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/commo
 import LIFI, { LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
@@ -22,6 +21,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-ch
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import BigNumber from 'bignumber.js';
 import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -82,8 +82,8 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
             allowSwitchChain: false
         };
 
-        const fromChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id;
-        const toChainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id;
+        const fromChainId = blockchainId[fromBlockchain];
+        const toChainId = blockchainId[toBlockchain];
 
         const fromAddress = this.walletAddress;
         const toAddress = options.receiverAddress || this.walletAddress;

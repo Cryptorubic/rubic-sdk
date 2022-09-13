@@ -8,7 +8,6 @@ import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/commo
 import { CelerCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { CelerDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
 import { RubicSdkError } from 'src/common/errors';
 import { CrossChainContractData } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
@@ -30,6 +29,7 @@ import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/comm
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { CelerRubicCrossChainTradeProvider } from 'src/features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
 import BigNumber from 'bignumber.js';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 interface CelerCrossChainOptions extends RequiredCrossChainOptions {
     isUniV2?: boolean;
@@ -265,8 +265,8 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         transitToken: PriceToken,
         slippageTolerance: number
     ): Promise<EstimateAmtResponse> {
-        const sourceChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id;
-        const destinationChainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id;
+        const sourceChainId = blockchainId[fromBlockchain];
+        const destinationChainId = blockchainId[toBlockchain];
         // Celer accepts only USDC symbol, USDC.e for avalanche is not allowed.
         const tokenSymbol = transitToken.symbol.toLowerCase().includes('usdc')
             ? 'USDC'

@@ -4,7 +4,7 @@ import {
     EvmBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { HealthcheckError, RubicSdkError, TimeoutError } from 'src/common/errors';
 import Web3 from 'web3';
 import pTimeout from 'src/common/utils/p-timeout';

@@ -8,7 +8,6 @@ import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/d
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { TransactionResponse } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
 import { DebridgeCrossChainTrade } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade';
 import { Injector } from 'src/core/injector/injector';
@@ -20,6 +19,7 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { TransactionRequest } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-request';
 import BigNumber from 'bignumber.js';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -80,11 +80,11 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
             const slippageTolerance = options.slippageTolerance * 100;
 
             const requestParams: TransactionRequest = {
-                srcChainId: BlockchainsInfo.getBlockchainByName(fromBlockchain).id,
+                srcChainId: blockchainId[fromBlockchain],
                 srcChainTokenIn: from.address,
                 srcChainTokenInAmount: tokenAmountIn,
                 slippage: slippageTolerance,
-                dstChainId: BlockchainsInfo.getBlockchainByName(toBlockchain).id,
+                dstChainId: blockchainId[toBlockchain],
                 dstChainTokenOut: toToken.address,
                 dstChainTokenOutRecipient: EvmWeb3Pure.EMPTY_ADDRESS,
                 referralCode: this.deBridgeReferralCode

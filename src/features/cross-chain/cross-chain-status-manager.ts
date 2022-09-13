@@ -13,7 +13,7 @@ import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/b
 import { RubicSwapStatus } from 'src/features/cross-chain/providers/common/celer-rubic/models/rubic-swap-status.enum';
 import { StatusResponse, TransactionStatus } from 'rango-sdk-basic';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { RubicSdkError } from 'src/common/errors';
 import { RANGO_API_KEY } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-api-key';
 import { ViaSwapStatus } from 'src/features/cross-chain/providers/via-trade-provider/models/via-swap-status';
@@ -34,6 +34,7 @@ import { LifiSwapStatus } from 'src/features/cross-chain/providers/lifi-trade-pr
 import { Via } from '@viaprotocol/router-sdk';
 import { PROCESSED_TRANSACTION_METHOD_ABI } from 'src/features/cross-chain/providers/common/celer-rubic/constants/processed-transactios-method-abi';
 import { celerCrossChainContractsAddresses } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contracts-addresses';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 /**
  * Contains methods for getting cross-chain trade statuses.
@@ -212,7 +213,7 @@ export class CrossChainStatusManager {
 
         if (symbiosisTxIndexingTimeSpent) {
             try {
-                const srcChainId = BlockchainsInfo.getBlockchainByName(data.fromBlockchain).id;
+                const srcChainId = blockchainId[data.fromBlockchain];
                 const {
                     status: { text: dstTxStatus },
                     tx: { hash: dstHash }
@@ -268,8 +269,8 @@ export class CrossChainStatusManager {
         try {
             const params = {
                 bridge: data.lifiBridgeType,
-                fromChain: BlockchainsInfo.getBlockchainByName(data.fromBlockchain).id,
-                toChain: BlockchainsInfo.getBlockchainByName(data.toBlockchain).id,
+                fromChain: blockchainId[data.fromBlockchain],
+                toChain: blockchainId[data.toBlockchain],
                 txHash: srcTxReceipt.transactionHash
             };
             const { status } = await Injector.httpClient.get<{ status: LifiSwapStatus }>(

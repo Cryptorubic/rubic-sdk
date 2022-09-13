@@ -8,7 +8,7 @@ import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { Injector } from 'src/core/injector/injector';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
 export type TokenStruct<T extends BlockchainName = BlockchainName> = {

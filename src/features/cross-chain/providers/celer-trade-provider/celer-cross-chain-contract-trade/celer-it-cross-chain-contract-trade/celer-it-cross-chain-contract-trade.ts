@@ -9,10 +9,10 @@ import { OneinchTrade } from 'src/features/instant-trades/dexes/common/oneinch-c
 import { CrossChainUniswapV3Trade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-cross-chain-instant-trade/cross-chain-uniswap-v3-trade';
 import { CrossChainUniswapV2Trade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-cross-chain-instant-trade/cross-chain-uniswap-v2-trade';
 import { UniswapV3AbstractTrade } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { CrossChainSupportedInstantTrade } from 'src/features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
 import { UniswapV2AbstractTrade } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 export class CelerItCrossChainContractTrade extends CelerCrossChainContractTrade {
     public readonly fromToken: PriceTokenAmount<EvmBlockchainName>;
@@ -95,9 +95,7 @@ export class CelerItCrossChainContractTrade extends CelerCrossChainContractTrade
     ): Promise<unknown[]> {
         const receiver = toContractTrade.contract.address || walletAddress;
         const tokenInAmountAbsolute = this.fromToken.stringWeiAmount;
-        const targetChainId = BlockchainsInfo.getBlockchainByName(
-            toContractTrade.toToken.blockchain
-        ).id;
+        const targetChainId = blockchainId[toContractTrade.toToken.blockchain];
         const source = await this.getCelerSourceTrade();
         const destination = toContractTrade.getCelerDestinationTrade(
             providerAddress,

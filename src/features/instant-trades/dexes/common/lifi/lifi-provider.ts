@@ -6,13 +6,13 @@ import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { LifiTrade } from 'src/features/instant-trades/dexes/common/lifi/lifi-trade';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
 import { Injector } from 'src/core/injector/injector';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { combineOptions } from 'src/common/utils/options';
 import { TradeType } from 'src/features/instant-trades/models/trade-type';
 import BigNumber from 'bignumber.js';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 export class LifiProvider {
     private readonly lifi = new LIFI();
@@ -35,8 +35,8 @@ export class LifiProvider {
             this.defaultOptions
         );
 
-        const fromChainId = BlockchainsInfo.getBlockchainByName(from.blockchain).id;
-        const toChainId = BlockchainsInfo.getBlockchainByName(toToken.blockchain).id;
+        const fromChainId = blockchainId[from.blockchain];
+        const toChainId = blockchainId[toToken.blockchain];
 
         const lifiDisabledProviders = Object.entries(lifiProviders)
             .filter(([_lifiProviderKey, tradeType]: [string, TradeType]) =>

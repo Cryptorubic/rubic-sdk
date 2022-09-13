@@ -13,7 +13,6 @@ import {
     viaCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-cross-chain-supported-blockchain';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
 import { Injector } from 'src/core/injector/injector';
 import { viaContractAddress } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
@@ -29,6 +28,7 @@ import { ItType } from 'src/features/cross-chain/models/it-type';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 interface ToolType extends IActionStepTool {
     type: 'swap' | 'cross';
@@ -70,8 +70,8 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
         }
 
         try {
-            const fromChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id;
-            const toChainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id;
+            const fromChainId = blockchainId[fromBlockchain];
+            const toChainId = blockchainId[toBlockchain];
 
             const via = new Via({
                 ...VIA_DEFAULT_CONFIG,
@@ -223,7 +223,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
             price?: BigNumber;
         }[]
     ): Promise<(BigNumber | null)[]> {
-        const chainId = BlockchainsInfo.getBlockchainByName(blockchain).id;
+        const chainId = blockchainId[blockchain];
 
         try {
             const response = await Injector.httpClient.get<{

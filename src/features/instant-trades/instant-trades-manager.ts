@@ -1,5 +1,4 @@
-import { blockchains } from 'src/core/blockchain/constants/blockchains';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { OneInchTradeProviders } from 'src/features/instant-trades/constants/one-inch-trade-providers';
 import { ZrxTradeProviders } from 'src/features/instant-trades/constants/zrx-trade-providers';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
@@ -60,10 +59,10 @@ export class InstantTradesManager {
             acc[provider.blockchain][provider.type] = provider;
             return acc;
         },
-        blockchains.reduce(
+        Object.values(BLOCKCHAIN_NAME).reduce(
             (acc, blockchain) => ({
                 ...acc,
-                [blockchain.name]: {}
+                [blockchain]: {}
             }),
             {} as Mutable<TypedTradeProviders>
         )

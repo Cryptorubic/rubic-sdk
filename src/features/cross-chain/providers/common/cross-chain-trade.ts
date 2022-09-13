@@ -7,7 +7,7 @@ import {
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { Network, validate } from 'bitcoin-address-validation';
