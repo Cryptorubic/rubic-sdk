@@ -9,6 +9,7 @@ import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
 import { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';
 import { TransactionConfig } from 'web3-core';
 import { Token } from 'src/core';
+import { RubicSdkError } from 'src/common';
 
 interface ZrxTradeStruct {
     from: PriceTokenAmount;
@@ -54,6 +55,10 @@ export class ZrxTrade extends InstantTrade {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
+        if (options?.receiverAddress) {
+            throw new RubicSdkError("Selected provider doesn't support receiver address");
+        }
+
         await this.checkWalletState();
 
         await this.checkAllowanceAndApprove(options);
