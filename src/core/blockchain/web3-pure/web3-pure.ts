@@ -4,6 +4,7 @@ import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/b
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { staticImplements } from 'src/common/utils/decorators';
 import { Web3PureContainer } from 'src/core/blockchain/web3-pure/models/web3-pure-container';
+import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure';
 
 /**
  * Contains common methods, connected with web3, e.g. wei conversion, encoding data, etc.
@@ -13,6 +14,8 @@ export class Web3Pure {
     public static [CHAIN_TYPE.EVM] = EvmWeb3Pure;
 
     public static [CHAIN_TYPE.BITCOIN] = BitcoinWeb3Pure;
+
+    public static [CHAIN_TYPE.TRON] = TronWeb3Pure;
 
     /**
      * Increases the gas limit value by the specified percentage and rounds to the nearest integer.

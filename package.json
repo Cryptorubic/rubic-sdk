@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "0.0.3",
+  "version": "7.0.0",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -54,7 +54,7 @@
     "start": "webpack --watch",
     "compile": "yarn create-index && npx rimraf lib && tsc --project tsconfig.json && tscpaths -p ./tsconfig.json -s ./src -o ./lib && npx rimraf ./src/index.ts",
     "lint": "eslint src __tests__",
-    "create-index": "cti entrypoint ./src && renamer -f \"/^entrypoint/\" -r \"index\" \"./src/*\"",
+    "create-index": "cti entrypoint ./src --withoutbackup && renamer -f \"/^entrypoint/\" -r \"index\" \"./src/*\" --force",
     "test": "cd ./scripts && bash test-runner.sh",
     "build:publish": "yarn compile && yarn build && npm publish --access public",
     "analyze": "webpack --profile --json > stats.json &&  webpack-bundle-analyzer stats.json",

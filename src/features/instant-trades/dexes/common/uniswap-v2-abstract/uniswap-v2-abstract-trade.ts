@@ -26,7 +26,7 @@ import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { Cache } from 'src/common/utils/decorators';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { Exact } from 'src/features/instant-trades/models/exact';
 import { TradeType } from 'src/features/instant-trades/models/trade-type';
 import BigNumber from 'bignumber.js';

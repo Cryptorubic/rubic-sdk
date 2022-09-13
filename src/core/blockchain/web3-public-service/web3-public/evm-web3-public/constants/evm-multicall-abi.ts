@@ -1,6 +1,6 @@
 import { AbiItem } from 'web3-utils';
 
-export const MULTICALL_ABI = [
+export const EVM_MULTICALL_ABI = [
     {
         inputs: [
             { internalType: 'bool', name: 'requireSuccess', type: 'bool' },

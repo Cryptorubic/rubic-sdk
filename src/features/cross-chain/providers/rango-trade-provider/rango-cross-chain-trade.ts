@@ -8,7 +8,7 @@ import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelis
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';

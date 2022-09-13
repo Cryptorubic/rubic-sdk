@@ -8,7 +8,7 @@ export function getLifiConfig(): ConfigUpdate {
     const rpcs = Object.fromEntries(
         lifiCrossChainSupportedBlockchains
             .map(blockchain => {
-                const rpcListProvider = Injector.web3PublicService.rpcListProvider[blockchain];
+                const rpcListProvider = Injector.web3PublicService.rpcProvider[blockchain];
                 if (!rpcListProvider) {
                     return null;
                 }

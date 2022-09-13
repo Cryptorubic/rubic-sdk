@@ -1,8 +1,9 @@
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import Web3 from 'web3';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { provider } from 'web3-core';
+import { TronWebProvider } from 'src/core/blockchain/web3-public-service/models/tron-web-provider';
+import { RpcProviders } from 'src/core/sdk/models/rpc-provider';
 
 /**
  * Main sdk configuration.
@@ -12,7 +13,7 @@ export interface Configuration {
      * Rpc data to connect to blockchains you will use.
      * You have to pass rpcProvider for each blockchain you will use with sdk.
      */
-    readonly rpcProviders: Partial<Record<BlockchainName, RpcProvider>>;
+    readonly rpcProviders: RpcProviders;
 
     /**
      * Required to use `swap`, `approve` and other methods which sends transactions.
@@ -35,44 +36,18 @@ export interface Configuration {
 }
 
 /**
- * Stores information about rpc in certain blockchain.
- */
-export interface RpcProvider {
-    /**
-     * Rpc link. Copy it from your rpc provider (like Infura, Quicknode, Getblock, Moralis, etc.) website.
-     * @deprecated
-     */
-    readonly mainRpc?: string;
-
-    /**
-     * Same as `mainRpc`. Will be used instead `mainRpc` if mainRpc is out of timeout = `mainPrcTimeout`.
-     * @deprecated
-     */
-    readonly spareRpc?: string;
-
-    /**
-     * Contains rpc links in order of prioritization. Used instead of deprecated `mainRpc` and `spareRpc` fields.
-     */
-    readonly rpcList?: string[];
-
-    /**
-     * Specifies timeout in ms after which `mainRpc` will be replaced with `spareRpc` (if `spareRpc` is defined)
-     */
-    readonly mainRpcTimeout?: number;
-}
-
-/**
  * Stores wallet core and information about current user, used to make `send` transactions.
  */
 export interface WalletProvider {
-    readonly [CHAIN_TYPE.EVM]?: WalletProviderCore;
+    readonly [CHAIN_TYPE.EVM]?: WalletProviderCore<provider | Web3>;
+    readonly [CHAIN_TYPE.TRON]?: WalletProviderCore<TronWebProvider>;
 }
 
-export interface WalletProviderCore {
+export interface WalletProviderCore<T> {
     /**
      * Core provider.
      */
-    readonly core: provider | Web3;
+    readonly core: T;
 
     /**
      * User wallet address.

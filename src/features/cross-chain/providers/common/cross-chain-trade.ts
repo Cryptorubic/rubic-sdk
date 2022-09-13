@@ -25,7 +25,7 @@ import { TransactionOptions } from 'src/core/blockchain/models/transaction-optio
 import { WrongReceiverAddressError } from 'src/common/errors/blockchain/wrong-receiver-address.error';
 import { ItType } from 'src/features/cross-chain/models/it-type';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
 

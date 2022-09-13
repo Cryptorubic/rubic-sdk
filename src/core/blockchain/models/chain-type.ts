@@ -1,4 +1,5 @@
 export enum CHAIN_TYPE {
     EVM = 'EVM',
-    BITCOIN = 'BITCOIN'
+    BITCOIN = 'BITCOIN',
+    TRON = 'TRON'
 }

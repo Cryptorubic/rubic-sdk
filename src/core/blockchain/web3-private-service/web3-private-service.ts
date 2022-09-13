@@ -4,28 +4,39 @@ import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-pr
 import { RubicSdkError } from 'src/common/errors';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { WalletProvider } from 'src/core/sdk/models/configuration';
-import { Web3PrivateStorage } from 'src/core/blockchain/web3-private-service/models/web3-private-storage';
+import {
+    Web3PrivateStorage,
+    Web3PrivateSupportedChainType,
+    web3PrivateSupportedChainTypes
+} from 'src/core/blockchain/web3-private-service/models/web3-private-storage';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { EmptyWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/empty-web3-private';
 
 export class Web3PrivateService {
-    private web3: Web3 | undefined;
-
-    private address: string | undefined;
+    public static isSupportedChainType(
+        chainType: CHAIN_TYPE
+    ): chainType is Web3PrivateSupportedChainType {
+        return web3PrivateSupportedChainTypes.some(
+            supportedChainType => supportedChainType === chainType
+        );
+    }
 
     private readonly web3PrivateStorage: Web3PrivateStorage;
 
     constructor(walletProvider?: WalletProvider) {
-        this.web3PrivateStorage = this.createWeb3Private(walletProvider);
+        this.web3PrivateStorage = this.createWeb3PrivateStorage(walletProvider);
     }
 
     public getWeb3Private(chainType: CHAIN_TYPE.EVM): EvmWeb3Private;
     public getWeb3Private(chainType: CHAIN_TYPE): never;
     public getWeb3Private(chainType: CHAIN_TYPE) {
-        const web3Private = this.web3PrivateStorage[chainType as keyof Web3PrivateStorage];
+        if (!Web3PrivateService.isSupportedChainType(chainType)) {
+            throw new RubicSdkError(`Chain type ${chainType} is not supported in web3 private`);
+        }
+
+        const web3Private = this.web3PrivateStorage[chainType];
         if (!web3Private) {
-            throw new RubicSdkError(
-                `web3 provider is not initialized for ${chainType} wallet type`
-            );
+            return new EmptyWeb3Private();
         }
         return web3Private;
     }
@@ -36,7 +47,7 @@ export class Web3PrivateService {
         return this.getWeb3Private(BlockchainsInfo.getChainType(blockchain));
     }
 
-    private createWeb3Private(walletProvider?: WalletProvider): Web3PrivateStorage {
+    private createWeb3PrivateStorage(walletProvider?: WalletProvider): Web3PrivateStorage {
         if (!walletProvider) {
             return {};
         }
@@ -45,20 +56,20 @@ export class Web3PrivateService {
         if (walletProvider[CHAIN_TYPE.EVM]) {
             const wallet = walletProvider[CHAIN_TYPE.EVM]!;
 
-            let web3 = wallet.core;
+            let { core } = wallet;
             if (!(wallet.core instanceof Web3)) {
-                web3 = new Web3(wallet.core);
+                core = new Web3(wallet.core);
             }
-            this.web3 = web3 as Web3;
-            if (!this.web3) {
+            const web3 = core as Web3;
+            if (!web3) {
                 throw new RubicSdkError('Web3 is not initialized');
             }
 
-            this.address = this.web3.utils.toChecksumAddress(wallet.address);
+            const address = web3.utils.toChecksumAddress(wallet.address);
 
             storage[CHAIN_TYPE.EVM] = new EvmWeb3Private({
-                web3: this.web3,
-                address: this.address
+                web3,
+                address
             });
         }
 

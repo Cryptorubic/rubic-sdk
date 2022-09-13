@@ -1,4 +1,4 @@
-export interface MulticallResponse {
+export interface EvmMulticallResponse {
     success: boolean;
     returnData: string;
 }

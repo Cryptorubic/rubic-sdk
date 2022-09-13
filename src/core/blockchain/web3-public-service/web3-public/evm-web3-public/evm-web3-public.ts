@@ -2,13 +2,13 @@ import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/
 import { InsufficientFundsError, RubicSdkError, TimeoutError } from 'src/common/errors';
 import { BatchCall } from 'src/core/blockchain/web3-public-service/models/batch-call';
 import { RpcResponse } from 'src/core/blockchain/web3-public-service/models/rpc-response';
-import { MulticallResponse } from 'src/core/blockchain/web3-public-service/models/multicall-response';
+import { EvmMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-multicall-response';
 import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
 import {
     HEALTHCHECK,
     isBlockchainHealthcheckAvailable
 } from 'src/core/blockchain/constants/healthcheck';
-import { MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/constants/multicall-abi';
+import { EVM_MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/evm-multicall-abi';
 import Web3 from 'web3';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/models/contract-multicall-response';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -25,7 +25,6 @@ import pTimeout from 'src/common/utils/p-timeout';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
 import { Cache } from 'src/common/utils/decorators';
-import { MULTICALL_ADDRESSES } from 'src/core/blockchain/web3-public-service/constants/multicall-addresses';
 import BigNumber from 'bignumber.js';
 import { EventData } from 'web3-eth-contract';
 
@@ -36,8 +35,6 @@ type SupportedTokenField = 'decimals' | 'symbol' | 'name' | 'totalSupply';
  * To send transaction or execute contract method use {@link Web3Private}.
  */
 export class EvmWeb3Public extends Web3Public {
-    private readonly multicallAddresses: Record<BlockchainName, string> = MULTICALL_ADDRESSES;
-
     /**
      * @param web3 Web3 instance initialized with ethereum provider, e.g. rpc link.
      * @param blockchainName Blockchain in which you need to execute requests.
@@ -45,17 +42,16 @@ export class EvmWeb3Public extends Web3Public {
      */
     constructor(
         private readonly web3: Web3,
-        private readonly blockchainName: BlockchainName,
+        blockchainName: BlockchainName,
         private httpClient?: HttpClient
     ) {
-        super();
+        super(blockchainName);
     }
 
-    /**
-     * Health-check current rpc node.
-     * @param timeoutMs Acceptable node response timeout.
-     * @returns Null if healthcheck is not defined for current blockchain, else node health status.
-     */
+    public setProvider(provider: Provider): void {
+        this.web3.setProvider(provider);
+    }
+
     public async healthCheck(timeoutMs: number = 4000): Promise<boolean> {
         if (!isBlockchainHealthcheckAvailable(this.blockchainName)) {
             return true;
@@ -86,14 +82,6 @@ export class EvmWeb3Public extends Web3Public {
     }
 
     /**
-     * Sets new provider to web3 instance.
-     * @param provider New web3 provider, e.g. rpc link.
-     */
-    public setProvider(provider: Provider): void {
-        this.web3.setProvider(provider);
-    }
-
-    /**
      * Gets block by block id.
      * @param [blockId] Block id: hash, number ... Default is 'latest'.
      * @returns Block by blockId parameter.
@@ -110,11 +98,6 @@ export class EvmWeb3Public extends Web3Public {
         return this.web3.eth.getBlockNumber();
     }
 
-    /**
-     * Gets account native or ERC-20 token balance in wei.
-     * @param address Wallet address, whose balance you want to find out.
-     * @param tokenAddress Address of the smart-contract corresponding to the token,
-     */
     public async getBalance(address: string, tokenAddress?: string): Promise<BigNumber> {
         let balance;
         if (tokenAddress && !EvmWeb3Pure.isNativeAddress(tokenAddress)) {
@@ -125,13 +108,8 @@ export class EvmWeb3Public extends Web3Public {
         return new BigNumber(balance);
     }
 
-    /**
-     * Gets ERC-20 tokens balance in wei.
-     * @param tokenAddress Address of the smart-contract corresponding to the token.
-     * @param address Wallet address, whose balance you want to find out.
-     */
     public async getTokenBalance(address: string, tokenAddress: string): Promise<BigNumber> {
-        const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI as AbiItem[], tokenAddress);
+        const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
 
         const balance = await contract.methods.balanceOf(address).call();
         return new BigNumber(balance);
@@ -273,26 +251,19 @@ export class EvmWeb3Public extends Web3Public {
         });
     }
 
-    /**
-     * Gets balances of multiple tokens via multicall.
-     * @param address Wallet address, which contains tokens.
-     * @param tokensAddresses Tokens addresses.
-     */
     public async getTokensBalances(
         address: string,
         tokensAddresses: string[]
     ): Promise<BigNumber[]> {
-        const contract = new this.web3.eth.Contract(
-            ERC20_TOKEN_ABI as AbiItem[],
-            tokensAddresses[0]
-        );
         const indexOfNativeCoin = tokensAddresses.findIndex(EvmWeb3Pure.isNativeAddress);
-        const promises: [Promise<MulticallResponse[]>?, Promise<BigNumber>?] = [];
+        const promises = [];
 
         if (indexOfNativeCoin !== -1) {
             tokensAddresses.splice(indexOfNativeCoin, 1);
             promises[1] = this.getBalance(address);
         }
+
+        const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI);
         const calls: Call[] = tokensAddresses.map(tokenAddress => ({
             target: tokenAddress,
             callData: contract.methods.balanceOf(address).encodeABI()
@@ -300,7 +271,7 @@ export class EvmWeb3Public extends Web3Public {
         promises[0] = this.multicall(calls);
 
         const results = await Promise.all(
-            promises as [Promise<MulticallResponse[]>, Promise<BigNumber>]
+            promises as [Promise<EvmMulticallResponse[]>, Promise<BigNumber>]
         );
         const tokensBalances = results[0].map(({ success, returnData }) =>
             success ? new BigNumber(returnData) : new BigNumber(0)
@@ -621,11 +592,8 @@ export class EvmWeb3Public extends Web3Public {
      * @param calls Multicall calls data list.
      * @returns Result of calls execution.
      */
-    private async multicall(calls: Call[]): Promise<MulticallResponse[]> {
-        const contract = new this.web3.eth.Contract(
-            MULTICALL_ABI,
-            this.multicallAddresses[this.blockchainName]
-        );
+    private async multicall(calls: Call[]): Promise<EvmMulticallResponse[]> {
+        const contract = new this.web3.eth.Contract(EVM_MULTICALL_ABI, this.multicallAddress);
         return contract.methods.tryAggregate(false, calls).call();
     }
 

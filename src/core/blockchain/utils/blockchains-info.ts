@@ -5,7 +5,8 @@ import {
     BLOCKCHAIN_NAME,
     BlockchainName,
     EVM_BLOCKCHAIN_NAME,
-    EvmBlockchainName
+    EvmBlockchainName,
+    TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import BigNumber from 'bignumber.js';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
@@ -47,6 +48,9 @@ export class BlockchainsInfo {
         if (this.isBitcoinBlockchainName(blockchainName)) {
             return CHAIN_TYPE.BITCOIN;
         }
+        if (this.isTronBlockchainName(blockchainName)) {
+            return CHAIN_TYPE.TRON;
+        }
         throw new RubicSdkError(`No supported chain type for ${blockchainName}`);
     }
 
@@ -62,5 +66,11 @@ export class BlockchainsInfo {
         blockchainName: BlockchainName
     ): blockchainName is BitcoinBlockchainName {
         return blockchainName === BLOCKCHAIN_NAME.BITCOIN;
+    }
+
+    public static isTronBlockchainName(
+        blockchainName: BlockchainName
+    ): blockchainName is TronBlockchainName {
+        return blockchainName === BLOCKCHAIN_NAME.TRON;
     }
 }

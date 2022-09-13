@@ -23,7 +23,8 @@ export const BLOCKCHAIN_NAME = {
     ...EVM_BLOCKCHAIN_NAME,
     SOLANA: 'SOLANA',
     NEAR: 'NEAR',
-    BITCOIN: 'BITCOIN'
+    BITCOIN: 'BITCOIN',
+    TRON: 'TRON'
 } as const;
 
 export type BlockchainName = typeof BLOCKCHAIN_NAME[keyof typeof BLOCKCHAIN_NAME];
@@ -32,3 +33,4 @@ export type EvmBlockchainName = typeof EVM_BLOCKCHAIN_NAME[keyof typeof EVM_BLOC
 export type SolanaBlockchainName = typeof BLOCKCHAIN_NAME.SOLANA;
 export type NearBlockchainName = typeof BLOCKCHAIN_NAME.NEAR;
 export type BitcoinBlockchainName = typeof BLOCKCHAIN_NAME.BITCOIN;
+export type TronBlockchainName = typeof BLOCKCHAIN_NAME.TRON;

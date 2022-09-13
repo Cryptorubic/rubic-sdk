@@ -15,7 +15,7 @@ import { UniswapV2AbstractTrade } from 'src/features/instant-trades/dexes/common
 import { Injector } from 'src/core/injector/injector';
 import { UniswapRoute } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-route';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { Cache } from 'src/common/utils/decorators';
 import BigNumber from 'bignumber.js';
 import { Exact } from 'src/features/instant-trades/models/exact';

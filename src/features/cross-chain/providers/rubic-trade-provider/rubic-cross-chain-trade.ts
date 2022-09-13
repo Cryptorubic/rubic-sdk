@@ -22,7 +22,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-ch
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { TradeType } from 'src/features/instant-trades/models/trade-type';
 import BigNumber from 'bignumber.js';
 

@@ -15,7 +15,7 @@ import { Injector } from 'src/core/injector/injector';
 import { TransactionOptions } from 'src/core/blockchain/models/transaction-options';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { Cache } from 'src/common/utils/decorators';
 import { TradeType } from 'src/features/instant-trades/models/trade-type';
 import BigNumber from 'bignumber.js';

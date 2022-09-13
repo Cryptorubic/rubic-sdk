@@ -1,7 +1,7 @@
 import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
 import Web3 from 'web3';
 import { staticImplements } from 'src/common/utils/decorators';
-import { AbiItem, fromAscii, isAddress } from 'web3-utils';
+import { AbiItem, fromAscii, isAddress, toChecksumAddress } from 'web3-utils';
 import { TransactionGasParams } from 'src/features/instant-trades/models/gas-params';
 import { TransactionConfig } from 'web3-core';
 import { compareAddresses } from 'src/common/utils/blockchain';
@@ -17,15 +17,15 @@ export class EvmWeb3Pure {
         return address && address === this.EMPTY_ADDRESS;
     }
 
-    static get nativeTokenAddress(): string {
+    public static get nativeTokenAddress(): string {
         return '0x0000000000000000000000000000000000000000';
     }
 
-    static isNativeAddress(address: string): boolean {
-        return compareAddresses(address, this.nativeTokenAddress);
+    public static isNativeAddress(address: string): boolean {
+        return compareAddresses(address, EvmWeb3Pure.nativeTokenAddress);
     }
 
-    static isAddressCorrect(address: string): boolean {
+    public static isAddressCorrect(address: string): boolean {
         return isAddress(address);
     }
 
@@ -54,7 +54,7 @@ export class EvmWeb3Pure {
     /**
      * Returns transaction config with encoded data.
      */
-    static encodeMethodCall(
+    public static encodeMethodCall(
         contractAddress: string,
         contractAbi: AbiItem[],
         method: string,
@@ -90,5 +90,13 @@ export class EvmWeb3Pure {
             throw Error('No such method in abi');
         }
         return this.web3Eth.abi.encodeFunctionCall(methodSignature, methodArguments as string[]);
+    }
+
+    /**
+     * Converts address to checksum format.
+     * @param address Address to convert.
+     */
+    public static toChecksumAddress(address: string): string {
+        return toChecksumAddress(address);
     }
 }

@@ -5,7 +5,7 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { CrossChainIsUnavailableError, MaxGasPriceOverflowError } from 'src/common/errors';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { Cache } from 'src/common/utils/decorators';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import BigNumber from 'bignumber.js';
 
 /**
