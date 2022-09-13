@@ -111,6 +111,10 @@ export class LifiTrade extends InstantTrade {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
+        if (options?.receiverAddress) {
+            throw new RubicSdkError("Selected provider doesn't support receiver address");
+        }
+
         await this.checkWalletState();
 
         await this.checkAllowanceAndApprove(options);
