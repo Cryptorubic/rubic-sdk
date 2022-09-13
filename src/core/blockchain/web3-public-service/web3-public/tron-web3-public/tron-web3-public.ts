@@ -18,6 +18,7 @@ import { TimeoutError } from 'src/common/errors';
 import { AbiItem } from 'web3-utils';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
+import { TransactionInfo } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/transaction-info';
 
 export class TronWeb3Public extends Web3Public<TronBlockchainName> {
     protected readonly tokenContractAbi = TRC20_CONTRACT_ABI;
@@ -107,6 +108,24 @@ export class TronWeb3Public extends Web3Public<TronBlockchainName> {
         return tokensBalances;
     }
 
+    /**
+     * Calls allowance method in TRC-20 token contract.
+     * @param tokenAddress Address of the smart-contract corresponding to the token.
+     * @param spenderAddress Wallet or contract address, allowed to spend.
+     * @param ownerAddress Wallet address to spend from.
+     * @returns Token's amount, allowed to be spent.
+     */
+    public async getAllowance(
+        tokenAddress: string,
+        ownerAddress: string,
+        spenderAddress: string
+    ): Promise<BigNumber> {
+        const contract = await this.tronWeb.contract(this.tokenContractAbi, tokenAddress);
+
+        const allowance = await contract.allowance(ownerAddress, spenderAddress).call();
+        return new BigNumber(allowance);
+    }
+
     public async multicallContractsMethods<Output>(
         contractAbi: AbiItem[],
         contractsData: {
@@ -153,5 +172,31 @@ export class TronWeb3Public extends Web3Public<TronBlockchainName> {
         this.tronWeb.setAddress(this.multicallAddress);
         const contract = await this.tronWeb.contract(TRON_MULTICALL_ABI, this.multicallAddress);
         return contract.aggregateViewCalls(calls).call();
+    }
+
+    public async callContractMethod<T = string>(
+        contractAddress: string,
+        contractAbi: AbiItem[],
+        methodName: string,
+        options: {
+            methodArguments?: unknown[];
+            from?: string;
+            value?: string;
+        }
+    ): Promise<T> {
+        const contract = await this.tronWeb.contract(contractAbi, contractAddress);
+
+        return contract[methodName](...(options.methodArguments || [])).call({
+            ...(options.from && { from: options.from }),
+            ...(options.value && { value: options.value })
+        });
+    }
+
+    /**
+     * Gets mined transaction info.
+     * @param hash Transaction hash.
+     */
+    public async getTransactionInfo(hash: string): Promise<TransactionInfo> {
+        return this.tronWeb.trx.getTransactionInfo(hash);
     }
 }

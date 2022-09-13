@@ -13,9 +13,9 @@ import Web3 from 'web3';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { AbiItem } from 'web3-utils';
 import { EvmCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-call';
-import { BlockTransactionString, TransactionReceipt } from 'web3-eth';
+import { TransactionReceipt } from 'web3-eth';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
+import { provider as Provider, HttpProvider } from 'web3-core';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import pTimeout from 'src/common/utils/p-timeout';
@@ -136,9 +136,7 @@ export class EvmWeb3Public extends Web3Public<EvmBlockchainName> {
     ): Promise<BigNumber> {
         const contract = new this.web3.eth.Contract(this.tokenContractAbi, tokenAddress);
 
-        const allowance = await contract.methods
-            .allowance(ownerAddress, spenderAddress)
-            .call({ from: ownerAddress });
+        const allowance = await contract.methods.allowance(ownerAddress, spenderAddress).call();
         return new BigNumber(allowance);
     }
 
@@ -195,54 +193,6 @@ export class EvmWeb3Public extends Web3Public<EvmBlockchainName> {
         return contract.methods.tryAggregate(false, calls).call();
     }
 
-    /**
-     * Gets mined transaction
-     * @param hash transaction hash
-     */
-    public async getTransactionReceipt(hash: string): Promise<TransactionReceipt> {
-        return this.web3.eth.getTransactionReceipt(hash);
-    }
-
-    /**
-     * Gets a transaction by hash in several attempts.
-     * @param hash Hash of the target transaction.
-     * @param attempt Current attempt number.
-     * @param attemptsLimit Maximum allowed number of attempts.
-     * @param delay Delay before next attempt in ms.
-     */
-    public async getTransactionByHash(
-        hash: string,
-        attempt?: number,
-        attemptsLimit?: number,
-        delay?: number
-    ): Promise<Transaction | null> {
-        attempt = attempt || 0;
-        const limit = attemptsLimit || 10;
-        const timeoutMs = delay || 500;
-
-        if (attempt >= limit) {
-            return null;
-        }
-
-        const transaction = await this.web3.eth.getTransaction(hash);
-        if (transaction === null) {
-            return new Promise(resolve =>
-                setTimeout(() => resolve(this.getTransactionByHash(hash, attempt!! + 1)), timeoutMs)
-            );
-        }
-        return transaction;
-    }
-
-    /**
-     * Calls pure method of smart-contract and returns its output value.
-     * @param contractAddress Address of smart-contract which method is to be executed.
-     * @param contractAbi Abi of smart-contract which method is to be executed.
-     * @param methodName Called method name.
-     * @param [options] Additional options.
-     * @param [options.from] The address the call should be made from.
-     * @param [options.methodArguments] Method arguments.
-     * @param [options.value] Native token amount to be passed.
-     */
     public async callContractMethod<T = string>(
         contractAddress: string,
         contractAbi: AbiItem[],
@@ -255,7 +205,7 @@ export class EvmWeb3Public extends Web3Public<EvmBlockchainName> {
     ): Promise<T> {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
 
-        return contract.methods[methodName](...options.methodArguments!!).call({
+        return contract.methods[methodName](...(options.methodArguments || [])).call({
             ...(options.from && { from: options.from }),
             ...(options.value && { value: options.value })
         });
@@ -379,20 +329,11 @@ export class EvmWeb3Public extends Web3Public<EvmBlockchainName> {
     }
 
     /**
-     * Gets block by block id.
-     * @param [blockId] Block id: hash, number ... Default is 'latest'.
-     * @returns Block by blockId parameter.
+     * Gets mined transaction receipt.
+     * @param hash Transaction hash
      */
-    public getBlock(blockId: BlockNumber | string = 'latest'): Promise<BlockTransactionString> {
-        return this.web3.eth.getBlock(blockId);
-    }
-
-    /**
-     * Gets last block number.
-     * @returns Block number.
-     */
-    public async getBlockNumber(): Promise<number> {
-        return this.web3.eth.getBlockNumber();
+    public async getTransactionReceipt(hash: string): Promise<TransactionReceipt> {
+        return this.web3.eth.getTransactionReceipt(hash);
     }
 
     /**
@@ -401,6 +342,14 @@ export class EvmWeb3Public extends Web3Public<EvmBlockchainName> {
      */
     public async getGasPrice(): Promise<string> {
         return this.web3.eth.getGasPrice();
+    }
+
+    /**
+     * Gets last block number.
+     * @returns Block number.
+     */
+    public async getBlockNumber(): Promise<number> {
+        return this.web3.eth.getBlockNumber();
     }
 
     public async getPastEvents(

@@ -176,4 +176,25 @@ export abstract class Web3Public<T extends BlockchainName = BlockchainName> {
             methodsData: MethodData[];
         }[]
     ): Promise<ContractMulticallResponse<Output>[][]>;
+
+    /**
+     * Calls pure method of smart-contract and returns its output value.
+     * @param contractAddress Address of smart-contract which method is to be executed.
+     * @param contractAbi Abi of smart-contract which method is to be executed.
+     * @param methodName Called method name.
+     * @param [options] Additional options.
+     * @param [options.from] The address the call should be made from.
+     * @param [options.methodArguments] Method arguments.
+     * @param [options.value] Native token amount to be passed.
+     */
+    public abstract callContractMethod<T = string>(
+        contractAddress: string,
+        contractAbi: AbiItem[],
+        methodName: string,
+        options: {
+            methodArguments?: unknown[];
+            from?: string;
+            value?: string;
+        }
+    ): Promise<T>;
 }
