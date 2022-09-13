@@ -7,6 +7,6 @@ export const web3PrivateSupportedChainTypes = [CHAIN_TYPE.EVM] as const;
 export type Web3PrivateSupportedChainType = typeof web3PrivateSupportedChainTypes[number];
 
 export interface Web3PrivateStorage
-    extends Partial<Record<Web3PrivateSupportedChainType, Web3Private>> {
-    [CHAIN_TYPE.EVM]?: EvmWeb3Private;
+    extends Record<Web3PrivateSupportedChainType, Web3Private | undefined> {
+    [CHAIN_TYPE.EVM]: EvmWeb3Private | undefined;
 }

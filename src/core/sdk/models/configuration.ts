@@ -1,9 +1,6 @@
-import Web3 from 'web3';
 import { HttpClient } from 'src/core/http-client/models/http-client';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { provider } from 'web3-core';
-import { TronWebProvider } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-web-provider';
 import { RpcProviders } from 'src/core/sdk/models/rpc-provider';
+import { WalletProvider } from 'src/core/sdk/models/wallet-provider';
 
 /**
  * Main sdk configuration.
@@ -33,24 +30,4 @@ export interface Configuration {
      * Integrator wallet address.
      */
     readonly providerAddress?: string;
-}
-
-/**
- * Stores wallet core and information about current user, used to make `send` transactions.
- */
-export interface WalletProvider {
-    readonly [CHAIN_TYPE.EVM]?: WalletProviderCore<provider | Web3>;
-    readonly [CHAIN_TYPE.TRON]?: WalletProviderCore<TronWebProvider>;
-}
-
-export interface WalletProviderCore<T> {
-    /**
-     * Core provider.
-     */
-    readonly core: T;
-
-    /**
-     * User wallet address.
-     */
-    readonly address: string;
 }

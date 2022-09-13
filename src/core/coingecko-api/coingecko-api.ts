@@ -166,9 +166,8 @@ export class CoingeckoApi {
         address: string;
         blockchain: BlockchainName;
     }): Promise<BigNumber> {
-        if (
-            Web3Pure[BlockchainsInfo.getChainType(token.blockchain)].isNativeAddress(token.address)
-        ) {
+        const chainType = BlockchainsInfo.getChainType(token.blockchain);
+        if (Web3Pure[chainType].isNativeAddress(token.address)) {
             return this.getNativeCoinPrice(token.blockchain);
         }
         return this.getErc20TokenPrice(token);
