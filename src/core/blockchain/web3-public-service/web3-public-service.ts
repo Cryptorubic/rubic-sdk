@@ -15,7 +15,7 @@ import {
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
-import { TronWeb } from 'src/core/blockchain/constants/tron-web';
+import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
 import { RpcProviders } from 'src/core/sdk/models/rpc-provider';
 
 export class Web3PublicService {

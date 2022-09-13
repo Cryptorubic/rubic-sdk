@@ -1,4 +1,4 @@
-export interface Call {
+export interface EvmCall {
     target: string;
     callData: string;
 }

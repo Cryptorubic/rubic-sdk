@@ -4,7 +4,7 @@ import {
     WETH_TO_ETH_ESTIMATED_GAS
 } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/constants/estimated-gas';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { BatchCall } from 'src/core/blockchain/web3-public-service/models/batch-call';
+import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
 import { UniswapV3AlgebraRoute } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
 import { SwapOptions } from 'src/features/instant-trades/models/swap-options';
@@ -18,7 +18,7 @@ import { AbiItem } from 'web3-utils';
 import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
 import { TransactionReceipt } from 'web3-eth';
 import { TransactionConfig } from 'web3-core';
-import { MethodData } from 'src/core/blockchain/web3-public-service/models/method-data';
+import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { Exact } from 'src/features/instant-trades/models/exact';

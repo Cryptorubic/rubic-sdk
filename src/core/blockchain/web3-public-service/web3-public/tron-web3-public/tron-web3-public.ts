@@ -1,15 +1,15 @@
 import BigNumber from 'bignumber.js';
 import { BigNumber as EthersBigNumber } from 'ethers';
-import { TRC20_CONTRACT_ABI } from 'src/core/blockchain/constants/trc-20-abi';
-import { TronWebProvider } from 'src/core/blockchain/web3-public-service/models/tron-web-provider';
+import { TRC20_CONTRACT_ABI } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/constants/trc-20-contract-abi';
+import { TronWebProvider } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-web-provider';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
-import { TronWeb } from 'src/core/blockchain/constants/tron-web';
+import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
 import { TRON_MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/constants/tron-multicall-abi';
 import { TronMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-multicall-response';
 import Web3 from 'web3';
-import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export class TronWeb3Public extends Web3Public {

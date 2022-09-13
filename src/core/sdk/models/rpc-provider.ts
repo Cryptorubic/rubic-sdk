@@ -1,5 +1,5 @@
 import { EvmBlockchainName, TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { TronWebProvider } from 'src/core/blockchain/web3-public-service/models/tron-web-provider';
+import { TronWebProvider } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-web-provider';
 
 /**
  * Stores information about rpc in certain blockchain.

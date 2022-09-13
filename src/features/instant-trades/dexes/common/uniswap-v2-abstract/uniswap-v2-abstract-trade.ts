@@ -2,7 +2,7 @@ import { DefaultEstimatedGas } from 'src/features/instant-trades/dexes/common/un
 import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { BatchCall } from 'src/core/blockchain/web3-public-service/models/batch-call';
+import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
 import { LowSlippageDeflationaryTokenError, RubicSdkError } from 'src/common/errors';
 import { defaultEstimatedGas } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/constants/default-estimated-gas';
@@ -13,7 +13,7 @@ import {
     SUPPORTING_FEE_SWAP_METHODS_MAPPING,
     SWAP_METHOD
 } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/constants/SWAP_METHOD';
-import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/models/contract-multicall-response';
+import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
 import { AbiItem } from 'web3-utils';

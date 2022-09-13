@@ -2,7 +2,7 @@ import Web3 from 'web3';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { provider } from 'web3-core';
-import { TronWebProvider } from 'src/core/blockchain/web3-public-service/models/tron-web-provider';
+import { TronWebProvider } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-web-provider';
 import { RpcProviders } from 'src/core/sdk/models/rpc-provider';
 
 /**

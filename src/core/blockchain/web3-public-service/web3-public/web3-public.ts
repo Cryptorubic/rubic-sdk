@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { MULTICALL_ADDRESSES } from 'src/core/blockchain/web3-public-service/constants/multicall-addresses';
+import { MULTICALL_ADDRESSES } from 'src/core/blockchain/web3-public-service/web3-public/constants/multicall-addresses';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 /**

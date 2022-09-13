@@ -1,7 +1,7 @@
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { InsufficientFundsError, RubicSdkError, TimeoutError } from 'src/common/errors';
-import { BatchCall } from 'src/core/blockchain/web3-public-service/models/batch-call';
-import { RpcResponse } from 'src/core/blockchain/web3-public-service/models/rpc-response';
+import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
+import { RpcResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/rpc-response';
 import { EvmMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-multicall-response';
 import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
 import {
@@ -10,20 +10,20 @@ import {
 } from 'src/core/blockchain/constants/healthcheck';
 import { EVM_MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/evm-multicall-abi';
 import Web3 from 'web3';
-import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/models/contract-multicall-response';
+import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { AbiItem } from 'web3-utils';
-import { Call } from 'src/core/blockchain/web3-public-service/models/call';
+import { EvmCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-call';
 import { BlockTransactionString, TransactionReceipt } from 'web3-eth';
 import { ConditionalResult } from 'src/common/utils/decorators/cache-decorator/models/conditional-result';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Transaction, provider as Provider, BlockNumber, HttpProvider } from 'web3-core';
 import { HttpClient } from 'src/core/http-client/models/http-client';
-import { MethodData } from 'src/core/blockchain/web3-public-service/models/method-data';
+import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import pTimeout from 'src/common/utils/p-timeout';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { Cache } from 'src/common/utils/decorators';
 import BigNumber from 'bignumber.js';
 import { EventData } from 'web3-eth-contract';
@@ -264,7 +264,7 @@ export class EvmWeb3Public extends Web3Public {
         }
 
         const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI);
-        const calls: Call[] = tokensAddresses.map(tokenAddress => ({
+        const calls: EvmCall[] = tokensAddresses.map(tokenAddress => ({
             target: tokenAddress,
             callData: contract.methods.balanceOf(address).encodeABI()
         }));
@@ -342,7 +342,7 @@ export class EvmWeb3Public extends Web3Public {
             methodsData: MethodData[];
         }[]
     ): Promise<ContractMulticallResponse<Output>[][]> {
-        const calls: Call[][] = contractsData.map(({ contractAddress, methodsData }) => {
+        const calls: EvmCall[][] = contractsData.map(({ contractAddress, methodsData }) => {
             const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
             return methodsData.map(({ methodName, methodArguments }) => ({
                 callData: contract.methods[methodName](...methodArguments).encodeABI(),
@@ -592,7 +592,7 @@ export class EvmWeb3Public extends Web3Public {
      * @param calls Multicall calls data list.
      * @returns Result of calls execution.
      */
-    private async multicall(calls: Call[]): Promise<EvmMulticallResponse[]> {
+    private async multicall(calls: EvmCall[]): Promise<EvmMulticallResponse[]> {
         const contract = new this.web3.eth.Contract(EVM_MULTICALL_ABI, this.multicallAddress);
         return contract.methods.tryAggregate(false, calls).call();
     }

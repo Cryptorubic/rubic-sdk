@@ -27,7 +27,7 @@ import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
-import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import BigNumber from 'bignumber.js';
 
 export class ViaCrossChainTrade extends CrossChainTrade {

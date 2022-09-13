@@ -3,7 +3,7 @@ import { UniswapV2TradeClass } from 'src/features/instant-trades/dexes/common/un
 import { UniswapV2ProviderConfiguration } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 import { notNull } from 'src/common/utils/object';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { BatchCall } from 'src/core/blockchain/web3-public-service/models/batch-call';
+import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
 import { InsufficientLiquidityError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { RequiredSwapCalculationOptions } from 'src/features/instant-trades/models/swap-calculation-options';

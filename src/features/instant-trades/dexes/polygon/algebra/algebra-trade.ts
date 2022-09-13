@@ -4,7 +4,7 @@ import {
     ALGEBRA_SWAP_ROUTER_CONTRACT_ABI,
     ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS
 } from 'src/features/instant-trades/dexes/polygon/algebra/constants/swap-router-contract-data';
-import { MethodData } from 'src/core/blockchain/web3-public-service/models/method-data';
+import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import {
     UniswapV3AlgebraAbstractTrade,
     UniswapV3AlgebraTradeStruct

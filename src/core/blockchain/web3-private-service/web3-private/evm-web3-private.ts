@@ -18,7 +18,7 @@ import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import Web3 from 'web3';
 import { TransactionOptions } from 'src/core/blockchain/models/transaction-options';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
 import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private/models/web3.error';

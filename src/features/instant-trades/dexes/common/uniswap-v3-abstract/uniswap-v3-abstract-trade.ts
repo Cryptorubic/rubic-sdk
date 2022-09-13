@@ -11,7 +11,7 @@ import {
 } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
 import { RubicSdkError } from 'src/common/errors';
 import { UniswapV3QuoterController } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
-import { MethodData } from 'src/core/blockchain/web3-public-service/models/method-data';
+import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { Cache } from 'src/common/utils/decorators';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';

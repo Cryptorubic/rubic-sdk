@@ -4,7 +4,7 @@ import {
     LiquidityPool
 } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { MethodData } from 'src/core/blockchain/web3-public-service/models/method-data';
+import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import {
     FACTORY_CONTRACT_ABI,
     FACTORY_CONTRACT_ADDRESS

@@ -5,8 +5,8 @@ import { UniswapV3AlgebraQuoterController } from 'src/features/instant-trades/de
 import { RubicSdkError } from 'src/common/errors';
 import { Injector } from 'src/core/injector/injector';
 import { ROUTER_TOKENS } from 'src/features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/constants/router-tokens';
-import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/models/contract-multicall-response';
-import { MethodData } from 'src/core/blockchain/web3-public-service/models/method-data';
+import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
+import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { AlgebraRoute } from 'src/features/instant-trades/dexes/polygon/algebra/models/algebra-route';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { Exact } from 'src/features/instant-trades/models/exact';
