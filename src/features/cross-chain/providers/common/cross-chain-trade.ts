@@ -10,7 +10,6 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
-import { Network, validate } from 'bitcoin-address-validation';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
@@ -42,18 +41,11 @@ export abstract class CrossChainTrade {
         if (!receiverAddress) {
             return;
         }
-        if (toBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
-            const isAddressValid = validate(receiverAddress, Network.mainnet);
-            if (isAddressValid) {
-                return;
-            }
-            throw new WrongReceiverAddressError();
-        }
-        if (
-            Web3Pure[
-                toBlockchain ? BlockchainsInfo.getChainType(toBlockchain) : CHAIN_TYPE.EVM
-            ].isAddressCorrect(receiverAddress)
-        ) {
+
+        const toChainType = toBlockchain
+            ? BlockchainsInfo.getChainType(toBlockchain)
+            : CHAIN_TYPE.EVM;
+        if (Web3Pure[toChainType].isAddressCorrect(receiverAddress)) {
             return;
         }
         throw new WrongReceiverAddressError();

@@ -1,10 +1,10 @@
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
+    EVM_BLOCKCHAIN_NAME,
     EvmBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { HealthcheckError, RubicSdkError, TimeoutError } from 'src/common/errors';
 import Web3 from 'web3';
 import pTimeout from 'src/common/utils/p-timeout';
@@ -17,11 +17,20 @@ import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-pub
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
 import { RpcProviders } from 'src/core/sdk/models/rpc-provider';
+import { CreateWeb3Public } from 'src/core/blockchain/web3-public-service/models/create-web3-public-proxy';
 
 export class Web3PublicService {
     private static readonly mainRpcDefaultTimeout = 10_000;
 
     private readonly web3PublicStorage: Web3PublicStorage;
+
+    private readonly createWeb3Public: CreateWeb3Public;
+
+    constructor(public readonly rpcProvider: RpcProviders) {
+        this.createWeb3Public = this.setCreateWeb3Public();
+
+        this.web3PublicStorage = this.createWeb3PublicStorage();
+    }
 
     public getWeb3Public(blockchainName: EvmBlockchainName): EvmWeb3Public;
     public getWeb3Public(blockchainName: TronBlockchainName): TronWeb3Public;
@@ -36,26 +45,32 @@ export class Web3PublicService {
         return web3Public;
     }
 
-    constructor(public readonly rpcProvider: RpcProviders) {
-        this.web3PublicStorage = this.createWeb3PublicStorage();
+    private setCreateWeb3Public(): CreateWeb3Public {
+        return {
+            ...(Object.values(EVM_BLOCKCHAIN_NAME) as EvmBlockchainName[]).reduce(
+                (acc, evmBlockchainName) => ({
+                    ...acc,
+                    [evmBlockchainName]: this.createEvmWeb3PublicProxy
+                }),
+                {} as Record<
+                    EvmBlockchainName,
+                    (blockchainName?: EvmBlockchainName) => EvmWeb3Public
+                >
+            ),
+            [BLOCKCHAIN_NAME.TRON]: this.createTronWeb3PublicProxy
+        };
     }
 
     private createWeb3PublicStorage(): Web3PublicStorage {
-        return (Object.keys(this.rpcProvider) as BlockchainName[]).reduce((acc, blockchainName) => {
-            if (BlockchainsInfo.isEvmBlockchainName(blockchainName)) {
+        return (Object.keys(this.rpcProvider) as Web3PublicSupportedBlockchainName[]).reduce(
+            (acc, blockchainName) => {
                 return {
                     ...acc,
-                    [blockchainName]: this.createEvmWeb3PublicProxy(blockchainName)
+                    [blockchainName]: this.createWeb3Public[blockchainName](blockchainName)
                 };
-            }
-            if (BlockchainsInfo.isTronBlockchainName(blockchainName)) {
-                return {
-                    ...acc,
-                    [blockchainName]: this.createTronWeb3PublicProxy()
-                };
-            }
-            return acc;
-        }, {} as Web3PublicStorage);
+            },
+            {} as Web3PublicStorage
+        );
     }
 
     private createEvmWeb3PublicProxy(blockchainName: EvmBlockchainName): EvmWeb3Public {
