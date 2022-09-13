@@ -2,11 +2,16 @@ import { CrossChainContractTrade } from 'src/features/cross-chain/providers/comm
 import { Injector } from 'src/core/injector/injector';
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { CrossChainIsUnavailableError, MaxGasPriceOverflowError } from 'src/common/errors';
+import {
+    CrossChainIsUnavailableError,
+    InsufficientFundsError,
+    MaxGasPriceOverflowError
+} from 'src/common/errors';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { Cache } from 'src/common/utils/decorators';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import BigNumber from 'bignumber.js';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
 /**
  * Contains common for Celer and Rubic trades methods and fields.
@@ -90,11 +95,17 @@ export abstract class CelerRubicCrossChainTrade extends CrossChainTrade {
     }
 
     protected async checkToContractBalance(): Promise<void | never> {
-        return this.toWeb3Public.checkBalance(
-            this.toTrade.fromToken,
-            this.fromTrade.fromToken.tokenAmount,
-            this.toTrade.contract.address
+        const balance = await this.toWeb3Public.getBalance(
+            this.toTrade.contract.address,
+            this.toTrade.fromToken.address
         );
+        if (balance.lt(this.toTrade.fromToken.weiAmount)) {
+            throw new InsufficientFundsError(
+                this.toTrade.fromToken,
+                Web3Pure.fromWei(balance, this.toTrade.fromToken.decimals),
+                this.toTrade.fromToken.tokenAmount
+            );
+        }
     }
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {

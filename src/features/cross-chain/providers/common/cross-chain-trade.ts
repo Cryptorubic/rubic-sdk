@@ -13,7 +13,11 @@ import { Injector } from 'src/core/injector/injector';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { UnnecessaryApproveError, WalletNotConnectedError } from 'src/common/errors';
+import {
+    InsufficientFundsError,
+    UnnecessaryApproveError,
+    WalletNotConnectedError
+} from 'src/common/errors';
 import { BasicTransactionOptions } from 'src/core/blockchain/models/basic-transaction-options';
 import { TransactionReceipt } from 'web3-eth';
 import { TransactionConfig } from 'web3-core';
@@ -254,12 +258,15 @@ export abstract class CrossChainTrade {
         await this.web3Private.checkBlockchainCorrect(this.from.blockchain);
     }
 
-    protected checkUserBalance(): Promise<void | never> {
-        return this.fromWeb3Public.checkBalance(
-            this.from,
-            this.from.tokenAmount,
-            this.walletAddress
-        );
+    protected async checkUserBalance(): Promise<void | never> {
+        const balance = await this.fromWeb3Public.getBalance(this.walletAddress, this.from.address);
+        if (balance.lt(this.from.weiAmount)) {
+            throw new InsufficientFundsError(
+                this.from,
+                Web3Pure.fromWei(balance, this.from.decimals),
+                this.from.tokenAmount
+            );
+        }
     }
 
     protected async checkTradeErrors(): Promise<void | never> {

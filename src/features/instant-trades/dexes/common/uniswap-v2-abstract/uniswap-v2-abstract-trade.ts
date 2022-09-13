@@ -213,11 +213,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             }
 
             try {
-                await this.web3Public.checkBalance(
-                    this.from,
-                    this.from.tokenAmount,
-                    options.fromAddress
-                );
+                await this.checkBalance();
             } catch (_err) {
                 throw new RubicSdkError(
                     'To use `encode` function, wallet must have enough balance or you must provider `supportFee` parameter in options.'

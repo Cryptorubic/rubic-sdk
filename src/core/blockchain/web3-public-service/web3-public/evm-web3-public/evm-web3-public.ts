@@ -1,5 +1,5 @@
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
-import { InsufficientFundsError, RubicSdkError, TimeoutError } from 'src/common/errors';
+import { RubicSdkError, TimeoutError } from 'src/common/errors';
 import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
 import { RpcResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/rpc-response';
 import { EvmMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-multicall-response';
@@ -11,7 +11,6 @@ import {
 import { EVM_MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/evm-multicall-abi';
 import Web3 from 'web3';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { AbiItem } from 'web3-utils';
 import { EvmCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-call';
 import { BlockTransactionString, TransactionReceipt } from 'web3-eth';
@@ -73,23 +72,6 @@ export class EvmWeb3Public extends Web3Public<EvmBlockchainName> {
         }
     }
 
-    /**
-     * Gets block by block id.
-     * @param [blockId] Block id: hash, number ... Default is 'latest'.
-     * @returns Block by blockId parameter.
-     */
-    public getBlock(blockId: BlockNumber | string = 'latest'): Promise<BlockTransactionString> {
-        return this.web3.eth.getBlock(blockId);
-    }
-
-    /**
-     * Gets last block number.
-     * @returns Block number.
-     */
-    public async getBlockNumber(): Promise<number> {
-        return this.web3.eth.getBlockNumber();
-    }
-
     public async getBalance(address: string, tokenAddress?: string): Promise<BigNumber> {
         let balance;
         if (tokenAddress && !EvmWeb3Pure.isNativeAddress(tokenAddress)) {
@@ -101,60 +83,43 @@ export class EvmWeb3Public extends Web3Public<EvmBlockchainName> {
     }
 
     public async getTokenBalance(address: string, tokenAddress: string): Promise<BigNumber> {
-        const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
+        const contract = new this.web3.eth.Contract(this.tokenContractAbi, tokenAddress);
 
         const balance = await contract.methods.balanceOf(address).call();
         return new BigNumber(balance);
     }
 
-    /**
-     * Predicts the volume of gas required to execute the contract method.
-     * @param contractAbi Abi of smart-contract.
-     * @param contractAddress Address of smart-contract.
-     * @param methodName Method which execution gas limit is to be calculated.
-     * @param methodArguments Arguments of the contract method.
-     * @param fromAddress The address for which the gas calculation will be called.
-     * @param value The value transferred for the call “transaction” in wei.
-     * @returns Estimated gas limit.
-     */
-    public async getEstimatedGas(
-        contractAbi: AbiItem[],
-        contractAddress: string,
-        methodName: string,
-        methodArguments: unknown[],
-        fromAddress: string,
-        value?: string | BigNumber
-    ): Promise<BigNumber | null> {
-        const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
+    public async getTokensBalances(
+        address: string,
+        tokensAddresses: string[]
+    ): Promise<BigNumber[]> {
+        const indexOfNativeCoin = tokensAddresses.findIndex(EvmWeb3Pure.isNativeAddress);
+        const promises = [];
 
-        try {
-            const gasLimit = await contract.methods[methodName](...methodArguments).estimateGas({
-                from: fromAddress,
-                gas: 10000000,
-                ...(value && { value })
-            });
-            return new BigNumber(gasLimit);
-        } catch (err) {
-            console.debug(err);
-            return null;
+        if (indexOfNativeCoin !== -1) {
+            tokensAddresses.splice(indexOfNativeCoin, 1);
+            promises[1] = this.getBalance(address);
         }
-    }
 
-    /**
-     * Calculates the average price per unit of gas according to web3.
-     * @returns Average gas price in wei.
-     */
-    public async getGasPrice(): Promise<string> {
-        return this.web3.eth.getGasPrice();
-    }
+        const contract = new this.web3.eth.Contract(this.tokenContractAbi);
+        const calls: EvmCall[] = tokensAddresses.map(tokenAddress => ({
+            target: tokenAddress,
+            callData: contract.methods.balanceOf(address).encodeABI()
+        }));
+        promises[0] = this.multicall(calls);
 
-    /**
-     * Calculates the average price per unit of gas according to web3.
-     * @returns Average gas price with decimals.
-     */
-    public async getGasPriceInETH(): Promise<BigNumber> {
-        const gasPrice = await this.web3.eth.getGasPrice();
-        return new BigNumber(gasPrice).div(10 ** 18);
+        const results = await Promise.all(
+            promises as [Promise<EvmMulticallResponse[]>, Promise<BigNumber>]
+        );
+        const tokensBalances = results[0].map(({ success, returnData }) =>
+            success ? new BigNumber(returnData) : new BigNumber(0)
+        );
+
+        if (indexOfNativeCoin !== -1) {
+            tokensBalances.splice(indexOfNativeCoin, 0, results[1]);
+        }
+
+        return tokensBalances;
     }
 
     /**
@@ -169,12 +134,65 @@ export class EvmWeb3Public extends Web3Public<EvmBlockchainName> {
         ownerAddress: string,
         spenderAddress: string
     ): Promise<BigNumber> {
-        const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
+        const contract = new this.web3.eth.Contract(this.tokenContractAbi, tokenAddress);
 
         const allowance = await contract.methods
             .allowance(ownerAddress, spenderAddress)
             .call({ from: ownerAddress });
         return new BigNumber(allowance);
+    }
+
+    public async multicallContractsMethods<Output>(
+        contractAbi: AbiItem[],
+        contractsData: {
+            contractAddress: string;
+            methodsData: MethodData[];
+        }[]
+    ): Promise<ContractMulticallResponse<Output>[][]> {
+        const calls: EvmCall[][] = contractsData.map(({ contractAddress, methodsData }) => {
+            const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
+            return methodsData.map(({ methodName, methodArguments }) => ({
+                callData: contract.methods[methodName](...methodArguments).encodeABI(),
+                target: contractAddress
+            }));
+        });
+
+        const outputs = await this.multicall(calls.flat());
+
+        let outputIndex = 0;
+        return contractsData.map(contractData =>
+            contractData.methodsData.map(methodData => {
+                const methodOutputAbi = contractAbi.find(
+                    funcSignature => funcSignature.name === methodData.methodName
+                )!.outputs!;
+                const output = outputs[outputIndex];
+                if (!output) {
+                    throw new RubicSdkError('Output has to be defined');
+                }
+
+                outputIndex++;
+
+                return {
+                    success: output.success,
+                    output: output.success
+                        ? (this.web3.eth.abi.decodeParameters(
+                              methodOutputAbi,
+                              output.returnData
+                          )[0] as Output)
+                        : null
+                };
+            })
+        );
+    }
+
+    /**
+     * Executes multiple calls in the single contract call.
+     * @param calls Multicall calls data list.
+     * @returns Result of calls execution.
+     */
+    private async multicall(calls: EvmCall[]): Promise<EvmMulticallResponse[]> {
+        const contract = new this.web3.eth.Contract(EVM_MULTICALL_ABI, this.multicallAddress);
+        return contract.methods.tryAggregate(false, calls).call();
     }
 
     /**
@@ -243,104 +261,36 @@ export class EvmWeb3Public extends Web3Public<EvmBlockchainName> {
         });
     }
 
-    public async getTokensBalances(
-        address: string,
-        tokensAddresses: string[]
-    ): Promise<BigNumber[]> {
-        const indexOfNativeCoin = tokensAddresses.findIndex(EvmWeb3Pure.isNativeAddress);
-        const promises = [];
-
-        if (indexOfNativeCoin !== -1) {
-            tokensAddresses.splice(indexOfNativeCoin, 1);
-            promises[1] = this.getBalance(address);
-        }
-
-        const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI);
-        const calls: EvmCall[] = tokensAddresses.map(tokenAddress => ({
-            target: tokenAddress,
-            callData: contract.methods.balanceOf(address).encodeABI()
-        }));
-        promises[0] = this.multicall(calls);
-
-        const results = await Promise.all(
-            promises as [Promise<EvmMulticallResponse[]>, Promise<BigNumber>]
-        );
-        const tokensBalances = results[0].map(({ success, returnData }) =>
-            success ? new BigNumber(returnData) : new BigNumber(0)
-        );
-
-        if (indexOfNativeCoin !== -1) {
-            tokensBalances.splice(indexOfNativeCoin, 0, results[1]);
-        }
-
-        return tokensBalances;
-    }
-
-    public async multicallContractsMethods<Output>(
-        contractAbi: AbiItem[],
-        contractsData: {
-            contractAddress: string;
-            methodsData: MethodData[];
-        }[]
-    ): Promise<ContractMulticallResponse<Output>[][]> {
-        const calls: EvmCall[][] = contractsData.map(({ contractAddress, methodsData }) => {
-            const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
-            return methodsData.map(({ methodName, methodArguments }) => ({
-                callData: contract.methods[methodName](...methodArguments).encodeABI(),
-                target: contractAddress
-            }));
-        });
-
-        const outputs = await this.multicall(calls.flat());
-
-        let outputIndex = 0;
-        return contractsData.map(contractData =>
-            contractData.methodsData.map(methodData => {
-                const methodOutputAbi = contractAbi.find(
-                    funcSignature => funcSignature.name === methodData.methodName
-                )!.outputs!;
-                const output = outputs[outputIndex];
-                if (!output) {
-                    throw new RubicSdkError('Output has to be defined');
-                }
-
-                outputIndex++;
-
-                return {
-                    success: output.success,
-                    output: output.success
-                        ? (this.web3.eth.abi.decodeParameters(
-                              methodOutputAbi,
-                              output.returnData
-                          )[0] as Output)
-                        : null
-                };
-            })
-        );
-    }
-
     /**
-     * Checks if the specified address contains the required amount of these tokens.
-     * Throws an InsufficientFundsError if balance is insufficient.
-     * @param token Token, which balance you need to check.
-     * @param amount Required balance.
-     * @param userAddress The address, where the required balance should be.
+     * Predicts the volume of gas required to execute the contract method.
+     * @param contractAbi Abi of smart-contract.
+     * @param contractAddress Address of smart-contract.
+     * @param methodName Method which execution gas limit is to be calculated.
+     * @param methodArguments Arguments of the contract method.
+     * @param fromAddress The address for which the gas calculation will be called.
+     * @param value The value transferred for the call “transaction” in wei.
+     * @returns Estimated gas limit.
      */
-    public async checkBalance(
-        token: { address: string; symbol: string; decimals: number },
-        amount: BigNumber,
-        userAddress: string
-    ): Promise<void> {
-        let balance: BigNumber;
-        if (EvmWeb3Pure.isNativeAddress(token.address)) {
-            balance = await this.getBalance(userAddress);
-        } else {
-            balance = await this.getTokenBalance(userAddress, token.address);
-        }
+    public async getEstimatedGas(
+        contractAbi: AbiItem[],
+        contractAddress: string,
+        methodName: string,
+        methodArguments: unknown[],
+        fromAddress: string,
+        value?: string | BigNumber
+    ): Promise<BigNumber | null> {
+        const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
 
-        const amountAbsolute = Web3Pure.toWei(amount, token.decimals);
-        if (balance.lt(amountAbsolute)) {
-            throw new InsufficientFundsError(token.symbol, balance.toString(), amountAbsolute);
+        try {
+            const gasLimit = await contract.methods[methodName](...methodArguments).estimateGas({
+                from: fromAddress,
+                gas: 10000000,
+                ...(value && { value })
+            });
+            return new BigNumber(gasLimit);
+        } catch (err) {
+            console.debug(err);
+            return null;
         }
     }
 
@@ -419,16 +369,6 @@ export class EvmWeb3Public extends Web3Public<EvmBlockchainName> {
     }
 
     /**
-     * Executes multiple calls in the single contract call.
-     * @param calls Multicall calls data list.
-     * @returns Result of calls execution.
-     */
-    private async multicall(calls: EvmCall[]): Promise<EvmMulticallResponse[]> {
-        const contract = new this.web3.eth.Contract(EVM_MULTICALL_ABI, this.multicallAddress);
-        return contract.methods.tryAggregate(false, calls).call();
-    }
-
-    /**
      * Returns httpClient if it exists or imports the axios client.
      */
     private async getHttpClient(): Promise<HttpClient> {
@@ -436,6 +376,31 @@ export class EvmWeb3Public extends Web3Public<EvmBlockchainName> {
             this.httpClient = await DefaultHttpClient.getInstance();
         }
         return this.httpClient;
+    }
+
+    /**
+     * Gets block by block id.
+     * @param [blockId] Block id: hash, number ... Default is 'latest'.
+     * @returns Block by blockId parameter.
+     */
+    public getBlock(blockId: BlockNumber | string = 'latest'): Promise<BlockTransactionString> {
+        return this.web3.eth.getBlock(blockId);
+    }
+
+    /**
+     * Gets last block number.
+     * @returns Block number.
+     */
+    public async getBlockNumber(): Promise<number> {
+        return this.web3.eth.getBlockNumber();
+    }
+
+    /**
+     * Calculates the average price per unit of gas according to web3.
+     * @returns Average gas price in wei.
+     */
+    public async getGasPrice(): Promise<string> {
+        return this.web3.eth.getGasPrice();
     }
 
     public async getPastEvents(
