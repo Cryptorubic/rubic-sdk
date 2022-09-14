@@ -23,7 +23,7 @@ import {
     BtcStatusResponse,
     DeBridgeApiResponse,
     DstTxData,
-    getDstTxStatusFn,
+    getDstTxDataFn,
     SymbiosisApiResponse
 } from './models/statuses-api';
 
@@ -33,7 +33,7 @@ import {
 export class CrossChainStatusManager {
     private readonly httpClient = Injector.httpClient;
 
-    private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, getDstTxStatusFn> = {
+    private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, getDstTxDataFn> = {
         [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RUBIC]: this.getRubicDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
@@ -251,6 +251,8 @@ export class CrossChainStatusManager {
 
                     dstTxData = await this.getBitcoinStatus(dstHash);
                 }
+
+                return dstTxData;
             } catch (error) {
                 console.debug('[Symbiosis Trade] Error retrieving dst tx status', error);
                 return {
@@ -520,6 +522,7 @@ export class CrossChainStatusManager {
             bitcoinTransactionStatus = await this.httpClient.get<BtcStatusResponse>(
                 `${btcStatusApi}${hash}`
             );
+            dstTxData.txHash = bitcoinTransactionStatus?.hash || null;
         } catch {
             return {
                 txStatus: CrossChainTxStatus.PENDING,

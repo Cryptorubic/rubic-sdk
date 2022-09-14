@@ -47,7 +47,7 @@ export interface DstTxData {
     txHash: string | null;
 }
 
-export type getDstTxStatusFn = (
+export type getDstTxDataFn = (
     data: CrossChainTradeData,
     srcTxReceipt: TransactionReceipt
 ) => Promise<DstTxData>;
