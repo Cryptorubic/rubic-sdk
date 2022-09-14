@@ -212,7 +212,9 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         await this.checkWalletState();
         await this.checkAllowanceAndApprove(options);
 
-        const { methodName, methodArguments } = this.getSwapRouterMethodData();
+        const { methodName, methodArguments } = this.getSwapRouterMethodData(
+            options?.receiverAddress
+        );
         const { gas, gasPrice } = this.getGasParams(options);
 
         return Injector.web3Private.tryExecuteContractMethod(
