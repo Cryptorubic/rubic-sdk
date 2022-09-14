@@ -14,4 +14,9 @@ export interface CrossChainStatus {
      * Status of destination transaction.
      */
     dstTxStatus: CrossChainTxStatus;
+
+    /**
+     * Transaction hash on destination chain.
+     */
+    dstTxHash: string | null;
 }

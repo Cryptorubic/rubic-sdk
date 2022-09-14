@@ -42,7 +42,12 @@ export interface BtcStatusResponse {
     weight: number;
 }
 
+export interface DstTxData {
+    txStatus: CrossChainTxStatus;
+    txHash: string | null;
+}
+
 export type getDstTxStatusFn = (
     data: CrossChainTradeData,
     srcTxReceipt: TransactionReceipt
-) => Promise<CrossChainTxStatus>;
+) => Promise<DstTxData>;
