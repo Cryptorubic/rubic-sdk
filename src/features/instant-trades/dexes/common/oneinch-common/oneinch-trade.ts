@@ -124,15 +124,12 @@ export class OneinchTrade extends InstantTrade {
             return false;
         }
 
-        const response = await this.httpClient.get<{
-            allowance: string;
-        }>(`${this.apiBaseUrl}/approve/allowance`, {
-            params: {
-                tokenAddress: this.nativeSupportedFrom.address,
-                walletAddress: this.walletAddress
-            }
-        });
-        const allowance = new BigNumber(response.allowance);
+        const allowance = await this.web3Public.getAllowance(
+            this.nativeSupportedFrom.address,
+            this.walletAddress,
+            this.contractAddress
+        );
+
         return allowance.lt(this.nativeSupportedFrom.weiAmount);
     }
 

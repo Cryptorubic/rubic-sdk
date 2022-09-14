@@ -178,7 +178,8 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                         itType,
                         bridgeType
                     },
-                    options.providerAddress
+                    options.providerAddress,
+                    Injector.web3Private.address
                 )
             };
         } catch (err: unknown) {

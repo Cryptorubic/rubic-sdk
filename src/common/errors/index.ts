@@ -17,3 +17,4 @@ export { HealthcheckError } from './blockchain/healthcheck.error';
 export { UserRejectError } from './blockchain/user-reject.error';
 export { TransactionRevertedError } from './blockchain/transaction-reverted.error';
 export { TimeoutError } from './utils/timeout.error';
+export { TooLowAmountError } from './cross-chain/too-low-amount.error';
