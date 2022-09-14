@@ -342,7 +342,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 swapParams.tokenAmountIn,
                 swapParams.tokenOut,
                 swapParams.fromAddress,
-                swapParams.fromAddress,
+                swapParams.receiverAddress || swapParams.fromAddress,
                 swapParams.fromAddress,
                 swapParams.slippage,
                 swapParams.deadline,
