@@ -3,7 +3,7 @@ import { staticImplements } from 'src/common/utils/decorators';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
 import { AbiInput, AbiItem, AbiOutput } from 'web3-utils';
-import { InfiniteArray } from 'src/common/utils/types/infinite-array';
+import { InfiniteArray } from 'src/common/utils/types';
 import { BigNumber as EthersBigNumber } from 'ethers';
 
 @staticImplements<TypedWeb3Pure>()
