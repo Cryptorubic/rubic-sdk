@@ -187,6 +187,7 @@ export abstract class Web3Public<T extends BlockchainName = BlockchainName> {
      * @param [options.methodArguments] Method arguments.
      * @param [options.value] Native token amount to be passed.
      */
+    // @TODO update params
     public abstract callContractMethod<T = string>(
         contractAddress: string,
         contractAbi: AbiItem[],

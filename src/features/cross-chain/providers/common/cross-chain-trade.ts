@@ -1,6 +1,6 @@
 /**
  * Abstract class for all cross chain providers' trades.
- */ import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private';
+ */ import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
@@ -16,15 +16,16 @@ import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import {
     InsufficientFundsError,
     UnnecessaryApproveError,
-    WalletNotConnectedError
+    WalletNotConnectedError,
+    WrongNetworkError
 } from 'src/common/errors';
-import { BasicTransactionOptions } from 'src/core/blockchain/models/basic-transaction-options';
+import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { TransactionReceipt } from 'web3-eth';
 import { TransactionConfig } from 'web3-core';
 import { CrossChainTradeType } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
-import { TransactionOptions } from 'src/core/blockchain/models/transaction-options';
+import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { WrongReceiverAddressError } from 'src/common/errors/blockchain/wrong-receiver-address.error';
 import { ItType } from 'src/features/cross-chain/models/it-type';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
@@ -164,7 +165,7 @@ export abstract class CrossChainTrade {
      * @param checkNeedApprove If true, first allowance is checked.
      */
     public async approve(
-        options: BasicTransactionOptions,
+        options: EvmBasicTransactionOptions,
         checkNeedApprove = true
     ): Promise<TransactionReceipt> {
         if (checkNeedApprove) {
@@ -203,7 +204,7 @@ export abstract class CrossChainTrade {
         tokenAddress: string,
         spenderAddress: string,
         value: BigNumber | 'infinity',
-        options: TransactionOptions = {}
+        options: EvmTransactionOptions = {}
     ): Promise<TransactionConfig> {
         return this.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
     }
@@ -216,7 +217,7 @@ export abstract class CrossChainTrade {
             return;
         }
 
-        const approveOptions: BasicTransactionOptions = {
+        const approveOptions: EvmBasicTransactionOptions = {
             onTransactionHash: options?.onApprove,
             gas: options?.approveGasLimit,
             gasPrice: options?.gasPrice
@@ -255,7 +256,10 @@ export abstract class CrossChainTrade {
     }
 
     protected async checkBlockchainCorrect(): Promise<void | never> {
-        await this.web3Private.checkBlockchainCorrect(this.from.blockchain);
+        const userBlockchainName = await this.web3Private.getBlockchainName();
+        if (userBlockchainName !== this.from.blockchain) {
+            throw new WrongNetworkError();
+        }
     }
 
     protected async checkUserBalance(): Promise<void | never> {

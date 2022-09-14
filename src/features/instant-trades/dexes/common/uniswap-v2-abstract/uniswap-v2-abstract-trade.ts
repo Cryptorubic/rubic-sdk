@@ -1,6 +1,6 @@
 import { DefaultEstimatedGas } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
 import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
-import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private';
+import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';

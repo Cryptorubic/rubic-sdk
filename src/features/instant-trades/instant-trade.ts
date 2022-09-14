@@ -1,14 +1,15 @@
 import { PriceTokenAmount, Token } from 'src/common/tokens';
-import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private';
+import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import {
     InsufficientFundsError,
     RubicSdkError,
     UnnecessaryApproveError,
-    WalletNotConnectedError
+    WalletNotConnectedError,
+    WrongNetworkError
 } from 'src/common/errors';
 import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
-import { BasicTransactionOptions } from 'src/core/blockchain/models/basic-transaction-options';
+import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { TransactionReceipt } from 'web3-eth';
 import { parseError } from 'src/common/utils/errors';
 import { TransactionConfig } from 'web3-core';
@@ -17,7 +18,7 @@ import {
     TransactionGasParams
 } from 'src/features/instant-trades/models/gas-params';
 import { Injector } from 'src/core/injector/injector';
-import { TransactionOptions } from 'src/core/blockchain/models/transaction-options';
+import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
@@ -115,7 +116,7 @@ export abstract class InstantTrade {
      * @param checkNeedApprove If true, first allowance is checked.
      */
     public async approve(
-        options: BasicTransactionOptions,
+        options: EvmBasicTransactionOptions,
         checkNeedApprove = true
     ): Promise<TransactionReceipt> {
         if (checkNeedApprove) {
@@ -154,7 +155,7 @@ export abstract class InstantTrade {
         tokenAddress: string,
         spenderAddress: string,
         value: BigNumber | 'infinity',
-        options: TransactionOptions = {}
+        options: EvmTransactionOptions = {}
     ): Promise<TransactionConfig> {
         return this.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
     }
@@ -167,7 +168,7 @@ export abstract class InstantTrade {
             return;
         }
 
-        const approveOptions: BasicTransactionOptions = {
+        const approveOptions: EvmBasicTransactionOptions = {
             onTransactionHash: options?.onApprove,
             gas: options?.approveGasLimit || undefined,
             gasPrice: options?.gasPrice || undefined
@@ -209,7 +210,10 @@ export abstract class InstantTrade {
     }
 
     private async checkBlockchainCorrect(): Promise<void | never> {
-        await this.web3Private.checkBlockchainCorrect(this.from.blockchain);
+        const userBlockchainName = await this.web3Private.getBlockchainName();
+        if (userBlockchainName !== this.from.blockchain) {
+            throw new WrongNetworkError();
+        }
     }
 
     protected async checkBalance(): Promise<void | never> {

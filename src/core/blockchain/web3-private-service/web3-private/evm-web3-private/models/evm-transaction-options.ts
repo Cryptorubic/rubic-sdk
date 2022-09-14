@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
-import { BasicTransactionOptions } from 'src/core/blockchain/models/basic-transaction-options';
+import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 
-export type TransactionOptions = BasicTransactionOptions & {
+export type EvmTransactionOptions = EvmBasicTransactionOptions & {
     /**
      * Encoded data, which will be executed in transaction.
      */

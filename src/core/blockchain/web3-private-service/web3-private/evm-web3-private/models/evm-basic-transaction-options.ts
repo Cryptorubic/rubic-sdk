@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 
-export type BasicTransactionOptions = {
+export type EvmBasicTransactionOptions = {
     /**
      * Callback to be called, when user confirm swap transaction.
      * @param hash Transaction hash.
