@@ -1,5 +1,5 @@
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
-import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
+import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/models/celer-cross-chain-supported-blockchain';
 import { defaultEthereumProviderConfiguration } from 'src/features/instant-trades/dexes/ethereum/default-constants';
 import { defaultFantomProviderConfiguration } from 'src/features/instant-trades/dexes/fantom/default-constants';
 import { defaultBscProviderConfiguration } from 'src/features/instant-trades/dexes/bsc/default-constants';

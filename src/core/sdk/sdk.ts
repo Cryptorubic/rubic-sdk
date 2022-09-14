@@ -7,7 +7,7 @@ import { Web3PrivateService } from 'src/core/blockchain/web3-private-service/web
 import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { CrossChainManager } from 'src/features/cross-chain/cross-chain-manager';
-import { CrossChainStatusManager } from 'src/features/cross-chain/cross-chain-status-manager';
+import { CrossChainStatusManager } from 'src/features/cross-chain/cross-chain-status-manager/cross-chain-status-manager';
 import { InstantTradesManager } from 'src/features/instant-trades/instant-trades-manager';
 import { GasPriceApi } from 'src/core/gas-price-api/gas-price-api';
 import { CoingeckoApi } from 'src/core/coingecko-api/coingecko-api';

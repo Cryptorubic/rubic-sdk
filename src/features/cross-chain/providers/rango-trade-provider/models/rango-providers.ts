@@ -1,4 +1,7 @@
-import { BridgeType, BRIDGE_TYPE } from 'src/features/cross-chain/constants/bridge-type';
+import {
+    BridgeType,
+    BRIDGE_TYPE
+} from 'src/features/cross-chain/providers/common/models/bridge-type';
 
 export const RANGO_TRADE_BRIDGE_TYPE: Partial<Record<string, BridgeType>> = {
     'AnySwap Aggregator': BRIDGE_TYPE.ANY_SWAP,

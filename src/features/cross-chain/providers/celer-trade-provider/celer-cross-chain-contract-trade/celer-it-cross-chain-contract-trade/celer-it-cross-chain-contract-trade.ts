@@ -1,18 +1,19 @@
 import { CelerCrossChainContractData } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { CrossChainOneinchTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-cross-chain-instant-trade/cross-chain-oneinch-trade';
-import { CrossChainInstantTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/cross-chain-instant-trade';
 import { CelerCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { CrossChainAlgebraTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-cross-chain-instant-trade/cross-chain-algebra-trade';
 import { OneinchTrade } from 'src/features/instant-trades/dexes/common/oneinch-common/oneinch-trade';
-import { CrossChainUniswapV3Trade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-cross-chain-instant-trade/cross-chain-uniswap-v3-trade';
-import { CrossChainUniswapV2Trade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-cross-chain-instant-trade/cross-chain-uniswap-v2-trade';
 import { UniswapV3AbstractTrade } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
-import { CrossChainSupportedInstantTrade } from 'src/features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
+import { CrossChainSupportedInstantTrade } from 'src/features/cross-chain/providers/celer-trade-provider/models/cross-chain-supported-instant-trade';
 import { UniswapV2AbstractTrade } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { CrossChainInstantTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/cross-chain-instant-trade/cross-chain-instant-trade';
+import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/models/celer-cross-chain-supported-blockchain';
+import { CrossChainUniswapV2Trade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/cross-chain-instant-trade/cross-chain-uniswap-v2-trade';
+import { CrossChainOneinchTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/cross-chain-instant-trade/cross-chain-oneinch-trade';
+import { CrossChainAlgebraTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/cross-chain-instant-trade/cross-chain-algebra-trade';
+import { CrossChainUniswapV3Trade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/cross-chain-instant-trade/cross-chain-uniswap-v3-trade';
 
 export class CelerItCrossChainContractTrade extends CelerCrossChainContractTrade {
     public readonly fromToken: PriceTokenAmount<EvmBlockchainName>;
@@ -24,7 +25,7 @@ export class CelerItCrossChainContractTrade extends CelerCrossChainContractTrade
     private readonly crossChainInstantTrade: CrossChainInstantTrade;
 
     constructor(
-        blockchain: EvmBlockchainName,
+        blockchain: CelerCrossChainSupportedBlockchain,
         contract: CelerCrossChainContractData,
         providerIndex: number,
         public readonly slippage: number,
@@ -35,24 +36,6 @@ export class CelerItCrossChainContractTrade extends CelerCrossChainContractTrade
         this.toToken = this.instantTrade.to;
         this.toTokenAmountMin = this.toToken.tokenAmount.multipliedBy(1 - this.slippage);
         this.crossChainInstantTrade = this.getTrade();
-    }
-
-    protected getFirstPath(): string[] | string {
-        return this.crossChainInstantTrade.getFirstPath();
-    }
-
-    public getSecondPath(): string[] {
-        return this.crossChainInstantTrade.getSecondPath();
-    }
-
-    protected modifyArgumentsForProvider(
-        methodArguments: unknown[][],
-        walletAddress: string
-    ): Promise<void> {
-        return this.crossChainInstantTrade.modifyArgumentsForProvider(
-            methodArguments,
-            walletAddress
-        );
     }
 
     public getCelerSourceTrade(): unknown[] | unknown {

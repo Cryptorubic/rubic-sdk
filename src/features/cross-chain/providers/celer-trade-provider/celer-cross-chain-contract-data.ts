@@ -1,30 +1,38 @@
-import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
+import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/models/celer-cross-chain-supported-blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { celerCrossChainContractAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
-import { rubicCrossChainContractAbi } from 'src/features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contract-abi';
-import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
-import { ProviderData } from 'src/features/cross-chain/models/provider-data';
-import { CrossChainContractData } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
-import { CellerMessageBusController } from 'src/features/cross-chain/providers/celer-trade-provider/celer-message-bus-controller/celler-message-bus-controller';
+import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { ProviderData } from 'src/features/cross-chain/providers/celer-trade-provider/models/provider-data';
+import { CelerMessageBusController } from 'src/features/cross-chain/providers/celer-trade-provider/celer-message-bus-controller/celer-message-bus-controller';
 import { celerTransitTokens } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-transit-tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { CrossChainSupportedInstantTradeProvider } from 'src/features/cross-chain/providers/celer-trade-provider/models/cross-chain-supported-instant-trade';
+import { RubicSdkError } from 'src/common/errors';
+import { Injector } from 'src/core/injector/injector';
 
 /**
  * Class to work with readable methods of cross-chain contract.
  */
-export class CelerCrossChainContractData extends CrossChainContractData {
-    private readonly messageBusController = new CellerMessageBusController(this.web3Public);
+export class CelerCrossChainContractData {
+    private readonly web3Public = Injector.web3PublicService.getWeb3Public(this.blockchain);
+
+    private readonly messageBusController = new CelerMessageBusController(this.web3Public);
 
     constructor(
-        public readonly blockchain: EvmBlockchainName,
+        public readonly blockchain: CelerCrossChainSupportedBlockchain,
         public readonly address: string,
-        public readonly providersData: ProviderData[],
-        public readonly mainContractAddress: string
-    ) {
-        super(providersData, blockchain, address);
+        public readonly providersData: ProviderData[]
+    ) {}
+
+    public getProvider(providerIndex: number): CrossChainSupportedInstantTradeProvider {
+        const provider = this.providersData?.[providerIndex]?.provider;
+        if (!provider) {
+            throw new RubicSdkError('Provider has to be defined');
+        }
+        return provider;
     }
 
     public async destinationCryptoFee(toBlockchain: BlockchainName): Promise<BigNumber> {
@@ -57,11 +65,8 @@ export class CelerCrossChainContractData extends CrossChainContractData {
     }
 
     @Cache
-    public async getTransitToken(
-        token: PriceToken<EvmBlockchainName>
-    ): Promise<Token<EvmBlockchainName>> {
-        const blockchain = token.blockchain as CelerCrossChainSupportedBlockchain;
-        const address = this.getTransitTokenAddressBasedOnBlockchain(blockchain);
+    public async getTransitToken(): Promise<Token<EvmBlockchainName>> {
+        const address = this.getTransitTokenAddressBasedOnBlockchain(this.blockchain);
         return Token.createToken({
             address,
             blockchain: this.blockchain
@@ -116,25 +121,5 @@ export class CelerCrossChainContractData extends CrossChainContractData {
             ...nativeToken,
             weiAmount: feeAmount
         });
-    }
-
-    @Cache
-    public async getNumOfBlockchain(): Promise<number> {
-        const numOfBlockchain = await this.web3Public.callContractMethod(
-            this.mainContractAddress,
-            rubicCrossChainContractAbi,
-            'numOfThisBlockchain'
-        );
-        return parseInt(numOfBlockchain);
-    }
-
-    public async getMaxGasPrice(): Promise<BigNumber> {
-        return new BigNumber(
-            await this.web3Public.callContractMethod(
-                this.mainContractAddress,
-                rubicCrossChainContractAbi,
-                'maxGasPrice'
-            )
-        );
     }
 }

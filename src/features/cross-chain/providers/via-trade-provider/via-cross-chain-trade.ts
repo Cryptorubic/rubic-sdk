@@ -3,7 +3,7 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { IRoute } from '@viaprotocol/router-sdk/dist/types';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
-import { GasData } from 'src/features/cross-chain/models/gas-data';
+import { GasData } from 'src/features/cross-chain/providers/common/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import {
     viaContractAbi,
@@ -12,7 +12,10 @@ import {
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { BRIDGE_TYPE, BridgeType } from 'src/features/cross-chain/constants/bridge-type';
+import {
+    BRIDGE_TYPE,
+    BridgeType
+} from 'src/features/cross-chain/providers/common/models/bridge-type';
 import { Via } from '@viaprotocol/router-sdk';
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
@@ -20,7 +23,7 @@ import { ContractParams } from 'src/features/cross-chain/models/contract-params'
 import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-cross-chain-supported-blockchain';
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
-import { ItType } from 'src/features/cross-chain/models/it-type';
+import { ItType } from 'src/features/cross-chain/providers/common/models/it-type';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { compareAddresses } from 'src/common/utils/blockchain';

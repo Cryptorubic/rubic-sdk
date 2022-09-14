@@ -1,4 +1,4 @@
-import { SwapVersion } from 'src/features/cross-chain/providers/common/celer-rubic/models/provider-type.enum';
+import { SwapVersion } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/provider-type.enum';
 
 export interface DestinationCelerSwapInfo {
     dex: string;

@@ -1,6 +1,4 @@
-/**
- * Abstract class for all cross chain providers' trades.
- */ import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
+import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
@@ -8,7 +6,7 @@ import {
 } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { GasData } from 'src/features/cross-chain/models/gas-data';
+import { GasData } from 'src/features/cross-chain/providers/common/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
@@ -27,12 +25,15 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { WrongReceiverAddressError } from 'src/common/errors/blockchain/wrong-receiver-address.error';
-import { ItType } from 'src/features/cross-chain/models/it-type';
+import { ItType } from 'src/features/cross-chain/providers/common/models/it-type';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
 
+/**
+ * Abstract class for all cross chain providers' trades.
+ */
 export abstract class CrossChainTrade {
     /**
      * Checks receiver address for correctness.

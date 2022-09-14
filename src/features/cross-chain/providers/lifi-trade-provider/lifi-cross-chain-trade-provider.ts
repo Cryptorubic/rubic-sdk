@@ -12,7 +12,7 @@ import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { bridges, BridgeType } from 'src/features/cross-chain/constants/bridge-type';
+import { bridges, BridgeType } from 'src/features/cross-chain/providers/common/models/bridge-type';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
 import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';

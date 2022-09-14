@@ -7,7 +7,7 @@ import { TransactionRequest } from '@ethersproject/abstract-provider';
 import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
-import { GasData } from 'src/features/cross-chain/models/gas-data';
+import { GasData } from 'src/features/cross-chain/providers/common/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';

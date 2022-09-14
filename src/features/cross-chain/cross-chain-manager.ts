@@ -13,7 +13,7 @@ import { from as fromPromise, map, merge, mergeMap, Observable, of, switchMap } 
 import { RangoCrossChainTrade } from 'src/features/cross-chain/providers/rango-trade-provider/rango-cross-chain-trade';
 import { RangoCrossChainTradeProvider } from 'src/features/cross-chain/providers/rango-trade-provider/rango-cross-chain-trade-provider';
 import { CelerCrossChainTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade';
-import { CrossChainProviderData } from 'src/features/cross-chain/providers/common/models/cross-chain-provider-data';
+import { CrossChainProviderData } from 'src/features/cross-chain/models/cross-chain-provider-data';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
 import { getPriceTokensFromInputTokens } from 'src/common/utils/tokens';
@@ -21,11 +21,7 @@ import { CcrTypedTradeProviders } from 'src/features/cross-chain/models/typed-tr
 import { WrappedTradeOrNull } from 'src/features/cross-chain/providers/common/models/wrapped-trade-or-null';
 import { notNull } from 'src/common/utils/object';
 import { SymbiosisCrossChainTradeProvider } from 'src/features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
-import { CelerRubicCrossChainTrade } from 'src/features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade';
-import {
-    CROSS_CHAIN_TRADE_TYPE,
-    CrossChainTradeType
-} from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { CrossChainTradeType } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { Mutable } from 'src/common/utils/types';
 import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
@@ -35,7 +31,6 @@ import { ViaCrossChainTrade } from 'src/features/cross-chain/providers/via-trade
 import pTimeout from 'src/common/utils/p-timeout';
 import { MarkRequired } from 'ts-essentials';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
-import { RubicCrossChainTradeProvider } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 import { combineOptions } from 'src/common/utils/options';
 import BigNumber from 'bignumber.js';
 
@@ -56,7 +51,6 @@ export class CrossChainManager {
     private static readonly defaultDeadline = 20;
 
     public readonly tradeProviders: CcrTypedTradeProviders = [
-        RubicCrossChainTradeProvider,
         CelerCrossChainTradeProvider,
         SymbiosisCrossChainTradeProvider,
         LifiCrossChainTradeProvider,
@@ -312,7 +306,7 @@ export class CrossChainManager {
 
         const prevTrade = prevWrappedTrade.trade;
         let fromUsd: BigNumber;
-        if (prevTrade instanceof CelerRubicCrossChainTrade) {
+        if (prevTrade instanceof CelerCrossChainTrade) {
             fromUsd = prevTrade.fromTrade.toToken.tokenAmount;
         } else if (
             prevTrade instanceof DebridgeCrossChainTrade ||
@@ -415,21 +409,9 @@ export class CrossChainManager {
         options: RequiredSwapManagerCalculationOptions
     ): Promise<WrappedCrossChainTrade[]> {
         const { disabledProviders, ...providersOptions } = options;
-        const providers = Object.entries(this.tradeProviders).filter(([type]) => {
-            if (disabledProviders.includes(type as CrossChainTradeType)) {
-                return false;
-            }
-
-            if (
-                type === CROSS_CHAIN_TRADE_TYPE.RUBIC &&
-                CelerCrossChainTradeProvider.isSupportedBlockchain(from.blockchain) &&
-                CelerCrossChainTradeProvider.isSupportedBlockchain(to.blockchain)
-            ) {
-                return false;
-            }
-
-            return true;
-        }) as [CrossChainTradeType, CrossChainTradeProvider][];
+        const providers = Object.entries(this.tradeProviders).filter(
+            ([type]) => !disabledProviders.includes(type as CrossChainTradeType)
+        ) as [CrossChainTradeType, CrossChainTradeProvider][];
 
         if (!providers.length) {
             throw new RubicSdkError(`There are no providers for trade`);

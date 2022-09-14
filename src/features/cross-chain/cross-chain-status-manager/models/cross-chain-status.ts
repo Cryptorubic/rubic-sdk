@@ -1,4 +1,4 @@
-import { CrossChainTxStatus } from './cross-chain-tx-status';
+import { CrossChainTxStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-tx-status';
 
 /**
  * Object representing status of cross-chain trade.

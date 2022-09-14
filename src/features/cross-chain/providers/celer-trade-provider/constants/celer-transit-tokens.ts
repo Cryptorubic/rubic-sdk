@@ -1,4 +1,4 @@
-import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
+import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/models/celer-cross-chain-supported-blockchain';
 import { TokenStruct } from 'src/common/tokens/token';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 

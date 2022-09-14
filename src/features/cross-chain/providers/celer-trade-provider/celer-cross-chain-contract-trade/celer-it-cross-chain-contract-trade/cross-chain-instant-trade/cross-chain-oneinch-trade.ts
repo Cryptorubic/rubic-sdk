@@ -1,9 +1,9 @@
 import { RubicSdkError } from 'src/common/errors';
 import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
-import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
+import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/models/celer-cross-chain-supported-blockchain';
 import { InchCelerSwapInfo } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/inch-celer-swap-info';
 import { wrappedNative } from 'src/features/cross-chain/providers/celer-trade-provider/constants/wrapped-native';
-import { CrossChainInstantTrade } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/common/cross-chain-instant-trade';
+import { CrossChainInstantTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/cross-chain-instant-trade/cross-chain-instant-trade';
 import { DestinationCelerSwapInfo } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
 import { OneinchTrade } from 'src/features/instant-trades/dexes/common/oneinch-common/oneinch-trade';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
@@ -44,7 +44,7 @@ export class CrossChainOneinchTrade implements CrossChainInstantTrade {
         const dex = this.instantTrade.contractAddress;
         const [tokenIn, ...restPath] = this.instantTrade.path.map(token => token.address);
         const isOneInchNative =
-            oneinchApiParams.nativeAddress === tokenIn || EvmWeb3Pure.isEmptyAddress(tokenIn);
+            oneinchApiParams.nativeAddress === tokenIn || tokenIn === EvmWeb3Pure.EMPTY_ADDRESS;
         const fromBlockchain = this.instantTrade.from
             .blockchain as CelerCrossChainSupportedBlockchain;
         const firstToken = isOneInchNative ? wrappedNative[fromBlockchain] : tokenIn;

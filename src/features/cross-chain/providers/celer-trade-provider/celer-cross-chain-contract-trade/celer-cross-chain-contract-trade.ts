@@ -1,4 +1,3 @@
-import { CrossChainContractTrade } from 'src/features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import { AbiItem } from 'web3-utils';
 import { RubicSdkError } from 'src/common/errors';
 import { CelerCrossChainContractData } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
@@ -11,15 +10,33 @@ import {
 } from 'src/features/instant-trades/utils/type-guards';
 import { celerCrossChainContractAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import { CelerSwapMethod } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-swap-methods';
+import { Cache } from 'src/common/utils/decorators';
+import { CrossChainSupportedInstantTradeProvider } from 'src/features/cross-chain/providers/celer-trade-provider/models/cross-chain-supported-instant-trade';
+import { PriceTokenAmount } from 'src/common/tokens';
+import BigNumber from 'bignumber.js';
+import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/models/celer-cross-chain-supported-blockchain';
 
-export abstract class CelerCrossChainContractTrade extends CrossChainContractTrade {
-    protected constructor(
-        blockchain: EvmBlockchainName,
-        public readonly contract: CelerCrossChainContractData,
-        providerIndex: number
-    ) {
-        super(blockchain, providerIndex);
+export abstract class CelerCrossChainContractTrade {
+    public abstract readonly fromToken: PriceTokenAmount<EvmBlockchainName>;
+
+    public abstract readonly toToken: PriceTokenAmount<EvmBlockchainName>;
+
+    public abstract readonly toTokenAmountMin: BigNumber;
+
+    @Cache
+    public get provider(): CrossChainSupportedInstantTradeProvider {
+        const provider = this.contract.providersData?.[this.providerIndex]?.provider;
+        if (!provider) {
+            throw new RubicSdkError('Provider has to be defined');
+        }
+        return provider;
     }
+
+    protected constructor(
+        public readonly blockchain: CelerCrossChainSupportedBlockchain,
+        public readonly contract: CelerCrossChainContractData,
+        private readonly providerIndex: number
+    ) {}
 
     /**
      * Returns method's name and contract abi to call in source network.
@@ -45,14 +62,6 @@ export abstract class CelerCrossChainContractTrade extends CrossChainContractTra
         };
     }
 
-    /**
-     * Returns swap method name in target network.
-     * Must be called on target contract.
-     */
-    public getSwapToUserMethodSignature(): string {
-        return '';
-    }
-
     private getSwapMethod(): CelerSwapMethod {
         const nativeIn = this.fromToken.isNative;
 
@@ -74,6 +83,17 @@ export abstract class CelerCrossChainContractTrade extends CrossChainContractTra
 
         throw new RubicSdkError('Unknown swap method');
     }
+
+    public abstract getMethodArguments(
+        toContractTrade: CelerCrossChainContractTrade,
+        walletAddress: string,
+        providerAddress: string,
+        options?: {
+            swapTokenWithFee?: boolean;
+            maxSlippage?: number;
+            receiverAddress?: string;
+        }
+    ): Promise<unknown[]>;
 
     public abstract getCelerSourceTrade(): unknown[] | unknown;
 

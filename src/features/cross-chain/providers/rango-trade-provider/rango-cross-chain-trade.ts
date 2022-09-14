@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { GasData } from 'src/features/cross-chain/models/gas-data';
+import { GasData } from 'src/features/cross-chain/providers/common/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
@@ -15,7 +15,7 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { BridgeType } from 'src/features/cross-chain/constants/bridge-type';
+import { BridgeType } from 'src/features/cross-chain/providers/common/models/bridge-type';
 import { TradeType } from 'src/features/instant-trades/models/trade-type';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { RANGO_BLOCKCHAIN_NAME } from './constants/rango-blockchain-name';

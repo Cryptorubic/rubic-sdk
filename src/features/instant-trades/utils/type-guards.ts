@@ -6,7 +6,7 @@ import { AlgebraTrade } from 'src/features/instant-trades/dexes/polygon/algebra/
 import { UniswapV2AbstractProvider } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
 import { AlgebraProvider } from 'src/features/instant-trades/dexes/polygon/algebra/algebra-provider';
 import { ZrxTrade } from 'src/features/instant-trades/dexes/common/zrx-common/zrx-trade';
-import { CrossChainSupportedInstantTradeProvider } from 'src/features/cross-chain/providers/common/celer-rubic/models/cross-chain-supported-instant-trade';
+import { CrossChainSupportedInstantTradeProvider } from 'src/features/cross-chain/providers/celer-trade-provider/models/cross-chain-supported-instant-trade';
 import { UniswapV2AbstractTrade } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { OneinchTrade } from 'src/features/instant-trades/dexes/common/oneinch-common/oneinch-trade';
 

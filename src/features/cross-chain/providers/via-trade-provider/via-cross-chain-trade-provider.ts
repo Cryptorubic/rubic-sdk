@@ -18,13 +18,13 @@ import { viaContractAddress } from 'src/features/cross-chain/providers/via-trade
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { bridges, BridgeType } from 'src/features/cross-chain/constants/bridge-type';
+import { bridges, BridgeType } from 'src/features/cross-chain/providers/common/models/bridge-type';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import { Via } from '@viaprotocol/router-sdk';
 import { ViaCrossChainTrade } from 'src/features/cross-chain/providers/via-trade-provider/via-cross-chain-trade';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
-import { ItType } from 'src/features/cross-chain/models/it-type';
+import { ItType } from 'src/features/cross-chain/providers/common/models/it-type';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';

@@ -23,7 +23,7 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { RANGO_BLOCKCHAIN_NAME } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-blockchain-name';
 import { RANGO_CONTRACT_ADDRESSES } from 'src/features/cross-chain/providers/rango-trade-provider/constants/contract-address';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { BridgeType } from 'src/features/cross-chain/constants/bridge-type';
+import { BridgeType } from 'src/features/cross-chain/providers/common/models/bridge-type';
 import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
 import { rangoProviders } from 'src/features/instant-trades/dexes/common/rango/constants/rango-providers';
 import { RANGO_TRADE_BRIDGE_TYPE } from 'src/features/cross-chain/providers/rango-trade-provider/models/rango-providers';

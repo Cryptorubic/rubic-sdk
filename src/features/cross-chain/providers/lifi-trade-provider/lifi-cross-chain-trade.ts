@@ -1,15 +1,16 @@
-/**
- * Calculated Celer cross chain trade.
- */ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
-import { BRIDGE_TYPE, BridgeType } from 'src/features/cross-chain/constants/bridge-type';
+import {
+    BRIDGE_TYPE,
+    BridgeType
+} from 'src/features/cross-chain/providers/common/models/bridge-type';
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
-import { GasData } from 'src/features/cross-chain/models/gas-data';
+import { GasData } from 'src/features/cross-chain/providers/common/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
@@ -23,6 +24,9 @@ import BigNumber from 'bignumber.js';
 import { Route } from '@lifi/sdk';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
+/**
+ * Calculated Celer cross chain trade.
+ */
 export class LifiCrossChainTrade extends CrossChainTrade {
     public readonly feeInfo: FeeInfo;
 

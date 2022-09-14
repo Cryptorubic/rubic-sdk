@@ -3,7 +3,7 @@ import {
     lifiCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 import { UniversalContract } from 'src/features/cross-chain/providers/common/models/universal-contract';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/constants/rubic-proxy-contract-address';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/providers/common/constants/rubic-proxy-contract-address';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const lifiContractAddress: Record<LifiCrossChainSupportedBlockchain, UniversalContract> =

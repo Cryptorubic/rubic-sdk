@@ -5,12 +5,10 @@ import {
     DeBridgeApiResponse,
     getDstTxStatusFn,
     SymbiosisApiResponse
-} from 'src/features/cross-chain/models/statuses-api';
-import { rubicCrossChainContractsAddresses } from 'src/features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contracts-addresses';
-import { CrossChainStatus } from 'src/features/cross-chain/models/cross-chain-status';
-import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
+} from 'src/features/cross-chain/cross-chain-status-manager/models/statuses-api';
+import { CrossChainStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-status';
+import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/models/celer-cross-chain-supported-blockchain';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { RubicSwapStatus } from 'src/features/cross-chain/providers/common/celer-rubic/models/rubic-swap-status.enum';
 import { StatusResponse, TransactionStatus } from 'rango-sdk-basic';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -18,12 +16,11 @@ import { RubicSdkError } from 'src/common/errors';
 import { RANGO_API_KEY } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-api-key';
 import { ViaSwapStatus } from 'src/features/cross-chain/providers/via-trade-provider/models/via-swap-status';
 import { SymbiosisSwapStatus } from 'src/features/cross-chain/providers/symbiosis-trade-provider/models/symbiosis-swap-status';
-import { celerCrossChainEventStatusesAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-event-statuses-abi';
-import { CrossChainTxStatus } from 'src/features/cross-chain/models/cross-chain-tx-status';
+import { celerCrossChainEventStatusesAbi } from 'src/features/cross-chain/cross-chain-status-manager/constants/celer-cross-chain-event-statuses-abi';
+import { CrossChainTxStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-tx-status';
 import { LogsDecoder } from 'src/features/cross-chain/utils/decode-logs';
-import { RubicCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-supported-blockchains';
-import { CelerSwapStatus } from 'src/features/cross-chain/providers/common/celer-rubic/models/celer-swap-status.enum';
-import { CrossChainTradeData } from 'src/features/cross-chain/models/cross-chain-trade-data';
+import { CelerSwapStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/celer-swap-status.enum';
+import { CrossChainTradeData } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-trade-data';
 import { TransactionReceipt } from 'web3-eth';
 import { celerCrossChainContractAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import {
@@ -32,7 +29,6 @@ import {
 } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { LifiSwapStatus } from 'src/features/cross-chain/providers/lifi-trade-provider/models/lifi-swap-status';
 import { Via } from '@viaprotocol/router-sdk';
-import { PROCESSED_TRANSACTION_METHOD_ABI } from 'src/features/cross-chain/providers/common/celer-rubic/constants/processed-transactios-method-abi';
 import { celerCrossChainContractsAddresses } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contracts-addresses';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
@@ -44,7 +40,6 @@ export class CrossChainStatusManager {
 
     private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, getDstTxStatusFn> = {
         [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.RUBIC]: this.getRubicDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus,
@@ -356,53 +351,6 @@ export class CrossChainStatusManager {
             return CrossChainTxStatus.UNKNOWN;
         } catch (error) {
             console.debug('[Celer Trade] error retrieving tx status', error);
-            return CrossChainTxStatus.PENDING;
-        }
-    }
-
-    /**
-     * Get Rubic trade dst transaction status.
-     * @param data Trade data.
-     * @param srcTxReceipt Source transaction receipt.
-     * @returns Cross-chain transaction status.
-     */
-    private async getRubicDstSwapStatus(
-        data: CrossChainTradeData,
-        srcTxReceipt: TransactionReceipt
-    ): Promise<CrossChainTxStatus> {
-        if (!BlockchainsInfo.isEvmBlockchainName(data.toBlockchain)) {
-            throw new RubicSdkError(`${data.toBlockchain} is not supported in status retrieving.`);
-        }
-
-        try {
-            const dstTxStatus = Number(
-                await Injector.web3PublicService
-                    .getWeb3Public(data.toBlockchain)
-                    .callContractMethod(
-                        rubicCrossChainContractsAddresses[
-                            data.toBlockchain as RubicCrossChainSupportedBlockchain
-                        ],
-                        PROCESSED_TRANSACTION_METHOD_ABI,
-                        'processedTransactions',
-                        [srcTxReceipt.transactionHash]
-                    )
-            );
-
-            if (dstTxStatus === RubicSwapStatus.NULL) {
-                return CrossChainTxStatus.PENDING;
-            }
-
-            if (dstTxStatus === RubicSwapStatus.PROCESSED) {
-                return CrossChainTxStatus.SUCCESS;
-            }
-
-            if (dstTxStatus === RubicSwapStatus.REVERTED) {
-                return CrossChainTxStatus.FAIL;
-            }
-
-            return CrossChainTxStatus.UNKNOWN;
-        } catch (error) {
-            console.debug('[Rubic Trade] Error retrieving tx status', error);
             return CrossChainTxStatus.PENDING;
         }
     }
