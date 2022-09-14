@@ -23,6 +23,8 @@ import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private
 import { WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 
 export class EvmWeb3Private extends Web3Private {
+    protected readonly Web3Pure = EvmWeb3Pure;
+
     /**
      * Converts number, string or BigNumber value to integer string.
      * @param amount Value to convert.
@@ -73,6 +75,8 @@ export class EvmWeb3Private extends Web3Private {
     constructor(walletProviderCore: WalletProviderCore<Web3>) {
         super(walletProviderCore.address);
         this.web3 = walletProviderCore.core;
+
+        this.checkAddressCorrect();
     }
 
     public async getBlockchainName(): Promise<BlockchainName | undefined> {

@@ -6,13 +6,18 @@ import { UserRejectError } from 'src/common/errors';
 import { TronTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-options';
 import { MethodParameters } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/method-parameters';
 import { TronTransactionReceipt } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-receipt';
+import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure';
 
 export class TronWeb3Private extends Web3Private {
+    protected readonly Web3Pure = TronWeb3Pure;
+
     private readonly tronWeb: typeof TronWeb;
 
     constructor(walletProviderCore: WalletProviderCore<typeof TronWeb>) {
         super(walletProviderCore.address);
         this.tronWeb = walletProviderCore.core;
+
+        this.checkAddressCorrect();
     }
 
     public async getBlockchainName(): Promise<BlockchainName> {

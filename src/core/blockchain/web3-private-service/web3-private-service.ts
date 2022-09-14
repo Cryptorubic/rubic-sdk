@@ -17,7 +17,8 @@ import { EmptyWeb3Private } from 'src/core/blockchain/web3-private-service/web3-
 import {
     EvmWalletProviderCore,
     TronWalletProviderCore,
-    WalletProvider
+    WalletProvider,
+    WalletProviderCore
 } from 'src/core/sdk/models/wallet-provider';
 import { CreateWeb3Private } from 'src/core/blockchain/web3-private-service/models/create-web3-private';
 import { TronWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/tron-web3-private';
@@ -31,7 +32,7 @@ export class Web3PrivateService {
         );
     }
 
-    private readonly web3PrivateStorage: Web3PrivateStorage;
+    private web3PrivateStorage: Web3PrivateStorage;
 
     private readonly createWeb3Private: CreateWeb3Private = {
         [CHAIN_TYPE.EVM]: this.createEvmWeb3Private.bind(this),
@@ -87,7 +88,7 @@ export class Web3PrivateService {
             throw new RubicSdkError('Web3 is not initialized');
         }
 
-        const address = web3.utils.toChecksumAddress(evmWalletProviderCore.address); // @TODO add address check
+        const address = web3.utils.toChecksumAddress(evmWalletProviderCore.address);
 
         return new EvmWeb3Private({
             core: web3,
@@ -97,5 +98,19 @@ export class Web3PrivateService {
 
     private createTronWeb3Private(tronWalletProviderCore: TronWalletProviderCore): TronWeb3Private {
         return new TronWeb3Private(tronWalletProviderCore);
+    }
+
+    public updateWeb3PrivateStorage(walletProvider: WalletProvider) {
+        this.web3PrivateStorage = this.createWeb3PrivateStorage(walletProvider);
+    }
+
+    public updateWeb3Private(
+        chainType: Web3PrivateSupportedChainType,
+        walletProviderCore: WalletProviderCore
+    ) {
+        this.web3PrivateStorage = {
+            ...this.web3PrivateStorage,
+            [chainType]: this.createWeb3Private[chainType](walletProviderCore)
+        };
     }
 }

@@ -1,5 +1,4 @@
 import { Configuration } from 'src/core/sdk/models/configuration';
-import { TokensManager } from 'src/core/tokens-manager/tokens-manager';
 import { Injector } from 'src/core/injector/injector';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { CrossChainSymbiosisManager } from 'src/features/cross-chain/cross-chain-symbiosis-manager';
@@ -10,6 +9,9 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { CrossChainManager } from 'src/features/cross-chain/cross-chain-manager';
 import { CrossChainStatusManager } from 'src/features/cross-chain/cross-chain-status-manager';
 import { InstantTradesManager } from 'src/features/instant-trades/instant-trades-manager';
+import { GasPriceApi } from 'src/core/gas-price-api/gas-price-api';
+import { CoingeckoApi } from 'src/core/coingecko-api/coingecko-api';
+import { WalletProvider, WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 
 /**
  * Base class to work with sdk.
@@ -36,11 +38,6 @@ export class SDK {
     public readonly crossChainStatusManager: CrossChainStatusManager;
 
     /**
-     * Tokens manager object. Use it to fetch and store tokens data.
-     */
-    public readonly tokens = new TokensManager();
-
-    /**
      * Can be used to get `Web3Public` instance by blockchain name to get public information from blockchain.
      */
     public get web3PublicService(): Web3PublicService {
@@ -57,12 +54,16 @@ export class SDK {
     /**
      * Use it to get gas price information.
      */
-    public readonly gasPriceApi = Injector.gasPriceApi;
+    public get gasPriceApi(): GasPriceApi {
+        return Injector.gasPriceApi;
+    }
 
     /**
-     * Use it to get crypto price information.
+     * Use it to get coingecko price information.
      */
-    public readonly cryptoPriceApi = Injector.coingeckoApi;
+    public get coingeckoApi(): CoingeckoApi {
+        return Injector.coingeckoApi;
+    }
 
     /**
      * Creates new sdk instance. Changes dependencies of all sdk entities according
@@ -91,7 +92,6 @@ export class SDK {
         if (!configuration.httpClient) {
             return DefaultHttpClient.getInstance();
         }
-
         return configuration.httpClient;
     }
 
@@ -113,5 +113,16 @@ export class SDK {
         ]);
 
         Injector.createInjector(web3PublicService, web3PrivateService, httpClient);
+    }
+
+    public updateWalletProvider(walletProvider: WalletProvider): void {
+        Injector.web3PrivateService.updateWeb3PrivateStorage(walletProvider);
+    }
+
+    public updateWalletProviderCore(
+        chainType: keyof WalletProvider,
+        walletProviderCore: WalletProviderCore
+    ): void {
+        Injector.web3PrivateService.updateWeb3Private(chainType, walletProviderCore);
     }
 }
