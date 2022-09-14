@@ -4,12 +4,14 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { GasData } from 'src/features/cross-chain/providers/common/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
-import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
+import {
+    NotWhitelistedProviderError,
+    FailedToCheckForTransactionReceiptError
+} from 'src/common/errors';
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
-import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';

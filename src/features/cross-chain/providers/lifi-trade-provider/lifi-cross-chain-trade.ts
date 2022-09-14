@@ -7,7 +7,7 @@ import {
     BridgeType
 } from 'src/features/cross-chain/providers/common/models/bridge-type';
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
-import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
+import { FailedToCheckForTransactionReceiptError, SwapRequestError } from 'src/common/errors';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
 import { GasData } from 'src/features/cross-chain/providers/common/models/gas-data';
@@ -17,7 +17,6 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-ch
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import BigNumber from 'bignumber.js';

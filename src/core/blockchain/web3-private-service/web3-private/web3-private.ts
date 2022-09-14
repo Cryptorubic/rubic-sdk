@@ -1,6 +1,6 @@
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
-import { InvalidAddressError } from 'src/common/errors/blockchain/invalid-address.error';
+import { InvalidAddressError } from 'src/common/errors';
 
 /**
  * Class containing methods for executing the functions of contracts

@@ -23,8 +23,7 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { TransactionRequest } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-request';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { RubicSdkError } from 'src/common/errors';
-import { TooLowAmountError } from 'src/common/errors/cross-chain/too-low-amount.error';
+import { RubicSdkError, TooLowAmountError } from 'src/common/errors';
 
 export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(

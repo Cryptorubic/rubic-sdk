@@ -17,15 +17,18 @@ import {
     BridgeType
 } from 'src/features/cross-chain/providers/common/models/bridge-type';
 import { Via } from '@viaprotocol/router-sdk';
-import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
-import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
+import {
+    NotWhitelistedProviderError,
+    FailedToCheckForTransactionReceiptError,
+    RubicSdkError,
+    SwapRequestError
+} from 'src/common/errors';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-cross-chain-supported-blockchain';
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { ItType } from 'src/features/cross-chain/providers/common/models/it-type';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
-import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';

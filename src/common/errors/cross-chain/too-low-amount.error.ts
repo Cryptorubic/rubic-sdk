@@ -1,4 +1,4 @@
-import { RubicSdkError } from 'src/common/errors';
+import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
 
 /**
  * Thrown, when amount of tokens don't cover provider's fee

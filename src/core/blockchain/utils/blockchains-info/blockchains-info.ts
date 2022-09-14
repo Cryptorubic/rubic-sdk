@@ -7,7 +7,7 @@ import {
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
+import { RubicSdkError } from 'src/common/errors';
 import { chainTypeByBlockchain } from 'src/core/blockchain/utils/blockchains-info/constants/chain-type-by-blockchain';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import BigNumber from 'bignumber.js';

@@ -1,11 +1,14 @@
 import { LifiCrossChainTrade } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade';
 import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { LifiCrossChainTradeProvider } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade-provider';
-import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
+import {
+    CrossChainMaxAmountError,
+    RubicSdkError,
+    CrossChainMinAmountError
+} from 'src/common/errors';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
 import { SwapManagerCrossChainCalculationOptions } from 'src/features/cross-chain/models/swap-manager-cross-chain-options';
 import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade-provider';
-import { RubicSdkError } from 'src/common/errors';
 import { CelerCrossChainTradeProvider } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade-provider';
 import { DebridgeCrossChainTrade } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade';
 import { Injector } from 'src/core/injector/injector';
@@ -24,7 +27,6 @@ import { SymbiosisCrossChainTradeProvider } from 'src/features/cross-chain/provi
 import { CrossChainTradeType } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { Mutable } from 'src/common/utils/types';
-import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ViaCrossChainTradeProvider } from 'src/features/cross-chain/providers/via-trade-provider/via-cross-chain-trade-provider';
 import { ViaCrossChainTrade } from 'src/features/cross-chain/providers/via-trade-provider/via-cross-chain-trade';

@@ -5,7 +5,6 @@ import {
     EvmBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
-import { HealthcheckError, RubicSdkError, TimeoutError } from 'src/common/errors';
 import Web3 from 'web3';
 import pTimeout from 'src/common/utils/p-timeout';
 import {
@@ -19,6 +18,7 @@ import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/
 import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
 import { RpcProviders } from 'src/core/sdk/models/rpc-provider';
 import { CreateWeb3Public } from 'src/core/blockchain/web3-public-service/models/create-web3-public-proxy';
+import { HealthcheckError, RubicSdkError, TimeoutError } from 'src/common/errors';
 
 export class Web3PublicService {
     public static isSupportedBlockchain(

@@ -12,7 +12,11 @@ import { CelerDirectCrossChainContractTrade } from 'src/features/cross-chain/pro
 import {
     CrossChainIsUnavailableError,
     InsufficientLiquidityError,
-    RubicSdkError
+    RubicSdkError,
+    LowToSlippageError,
+    CrossChainMinAmountError,
+    CrossChainMaxAmountError,
+    TooLowAmountError
 } from 'src/common/errors';
 import { Injector } from 'src/core/injector/injector';
 import { wrappedNative } from 'src/features/cross-chain/providers/celer-trade-provider/constants/wrapped-native';
@@ -20,7 +24,6 @@ import { EstimateAmtResponse } from 'src/features/cross-chain/providers/celer-tr
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getCelerCrossChainContract } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contracts';
 import { CelerCrossChainTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-trade';
-import { LowToSlippageError } from 'src/common/errors/cross-chain/low-to-slippage.error';
 import { notNull } from 'src/common/utils/object';
 import { celerCrossChainContractAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import { UniswapV2AbstractProvider } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
@@ -32,12 +35,9 @@ import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/comm
 import { compareAddresses } from 'src/common/utils/blockchain';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
-import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
 import { MinMaxAmounts } from 'src/features/cross-chain/providers/celer-trade-provider/models/min-max-amounts';
 import { CrossChainSupportedInstantTradeProvider } from 'src/features/cross-chain/providers/celer-trade-provider/models/cross-chain-supported-instant-trade';
 import { CelerCrossChainContractData } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
-import { TooLowAmountError } from 'src/common/errors/cross-chain/too-low-amount.error';
 
 interface CelerCrossChainOptions extends RequiredCrossChainOptions {
     isUniV2?: boolean;

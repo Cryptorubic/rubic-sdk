@@ -9,7 +9,12 @@ import { OolongSwapProvider } from 'src/features/instant-trades/dexes/boba/oolon
 import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { OneinchEthereumProvider } from 'src/features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
 import { OneinchBscProvider } from 'src/features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
-import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
+import {
+    CrossChainMaxAmountError,
+    RubicSdkError,
+    CrossChainMinAmountError,
+    TooLowAmountError
+} from 'src/common/errors';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { OneinchPolygonProvider } from 'src/features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
@@ -27,7 +32,6 @@ import {
     Token,
     Percent
 } from 'symbiosis-js-sdk';
-import { RubicSdkError, CrossChainMinAmountError, TooLowAmountError } from 'src/common/errors';
 import { symbiosisTransitTokens } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-transit-tokens';
 import { OneinchAvalancheProvider } from 'src/features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';

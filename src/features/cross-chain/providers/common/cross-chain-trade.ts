@@ -15,7 +15,8 @@ import {
     InsufficientFundsError,
     UnnecessaryApproveError,
     WalletNotConnectedError,
-    WrongNetworkError
+    WrongNetworkError,
+    WrongReceiverAddressError
 } from 'src/common/errors';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { TransactionReceipt } from 'web3-eth';
@@ -24,7 +25,6 @@ import { CrossChainTradeType } from 'src/features/cross-chain/models/cross-chain
 import { PriceTokenAmount } from 'src/common/tokens';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
-import { WrongReceiverAddressError } from 'src/common/errors/blockchain/wrong-receiver-address.error';
 import { ItType } from 'src/features/cross-chain/providers/common/models/it-type';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';

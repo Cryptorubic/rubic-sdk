@@ -1,4 +1,9 @@
-import { InsufficientFundsOneinchError, LowSlippageError, RubicSdkError } from 'src/common/errors';
+import {
+    InsufficientFundsOneinchError,
+    LowSlippageError,
+    RubicSdkError,
+    SwapRequestError
+} from 'src/common/errors';
 import {
     createTokenNativeAddressProxy,
     createTokenNativeAddressProxyInPathStartAndEnd
@@ -21,10 +26,8 @@ import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-
 import { getOneinchApiBaseUrl } from 'src/features/instant-trades/dexes/common/oneinch-common/utils';
 import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
 import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
-import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { Cache } from 'src/common/utils/decorators';
 import { OneinchSwapRequest } from 'src/features/instant-trades/dexes/common/oneinch-common/models/oneinch-swap-request';
-import BigNumber from 'bignumber.js';
 
 type OneinchTradeStruct = {
     contractAddress: string;
