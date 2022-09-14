@@ -337,11 +337,7 @@ export class CrossChainStatusManager {
                         ],
                         celerCrossChainContractAbi,
                         'processedTransactions',
-                        {
-                            methodArguments: [
-                                requestLog?.params?.find(param => param.name === 'id')?.value
-                            ]
-                        }
+                        [requestLog?.params?.find(param => param.name === 'id')?.value]
                     )
             ) as CelerSwapStatus;
 
@@ -388,7 +384,7 @@ export class CrossChainStatusManager {
                         ],
                         PROCESSED_TRANSACTION_METHOD_ABI,
                         'processedTransactions',
-                        { methodArguments: [srcTxReceipt.transactionHash] }
+                        [srcTxReceipt.transactionHash]
                     )
             );
 

@@ -9,9 +9,7 @@ export class CellerMessageBusController {
             messageBusAddress,
             messageBusContractAbi,
             'calcFee',
-            {
-                methodArguments: [message]
-            }
+            [message]
         );
     }
 

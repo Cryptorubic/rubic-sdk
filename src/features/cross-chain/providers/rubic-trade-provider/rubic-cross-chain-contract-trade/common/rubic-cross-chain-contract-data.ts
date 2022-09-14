@@ -35,9 +35,7 @@ export class RubicCrossChainContractData extends CrossChainContractData {
             this.address,
             rubicCrossChainContractAbi,
             'RubicAddresses',
-            {
-                methodArguments: [numOfBlockchain]
-            }
+            [numOfBlockchain]
         );
         return Token.createToken({
             address: transitTokenAddress,
@@ -51,9 +49,7 @@ export class RubicCrossChainContractData extends CrossChainContractData {
             this.address,
             rubicCrossChainContractAbi,
             'feeAmountOfBlockchain',
-            {
-                methodArguments: [numOfFromBlockchain]
-            }
+            [numOfFromBlockchain]
         );
         return parseInt(feeAbsolute) / 10000;
     }
@@ -67,9 +63,7 @@ export class RubicCrossChainContractData extends CrossChainContractData {
                 this.address,
                 rubicCrossChainContractAbi,
                 'blockchainCryptoFee',
-                {
-                    methodArguments: [numOfToBlockchain]
-                }
+                [numOfToBlockchain]
             )
         );
         const nativeToken = nativeTokensList[this.blockchain];

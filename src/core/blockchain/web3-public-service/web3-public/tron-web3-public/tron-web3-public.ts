@@ -178,18 +178,11 @@ export class TronWeb3Public extends Web3Public<TronBlockchainName> {
         contractAddress: string,
         contractAbi: AbiItem[],
         methodName: string,
-        options: {
-            methodArguments?: unknown[];
-            from?: string;
-            value?: string;
-        }
+        methodArguments: unknown[] = []
     ): Promise<T> {
         const contract = await this.tronWeb.contract(contractAbi, contractAddress);
 
-        return contract[methodName](...(options.methodArguments || [])).call({
-            ...(options.from && { from: options.from }),
-            ...(options.value && { value: options.value })
-        });
+        return contract[methodName](...methodArguments).call();
     }
 
     /**

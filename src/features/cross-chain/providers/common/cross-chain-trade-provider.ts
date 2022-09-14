@@ -65,9 +65,7 @@ export abstract class CrossChainTradeProvider {
         if (!EvmWeb3Pure.isEmptyAddress(providerAddress)) {
             const integratorInfo = await web3PublicService.callContractMethod<
                 [boolean, number, number, number, number]
-            >(contractAddress, contractAbi, 'integratorToFeeInfo', {
-                methodArguments: [providerAddress]
-            });
+            >(contractAddress, contractAbi, 'integratorToFeeInfo', [providerAddress]);
             if (integratorInfo[0]) {
                 return Web3Pure.fromWei(integratorInfo[4]);
             }
@@ -104,9 +102,7 @@ export abstract class CrossChainTradeProvider {
                 contractAddress,
                 contractAbi,
                 'integratorToFeeInfo',
-                {
-                    methodArguments: [providerAddress]
-                }
+                [providerAddress]
             );
             if (integratorInfo[0]) {
                 return integratorInfo[1] / 10_000;

@@ -33,9 +33,7 @@ export class CelerCrossChainContractData extends CrossChainContractData {
             this.address,
             celerCrossChainContractAbi,
             'blockchainToGasFee',
-            {
-                methodArguments: [String(destinationBlockchainId)]
-            }
+            [String(destinationBlockchainId)]
         );
     }
 

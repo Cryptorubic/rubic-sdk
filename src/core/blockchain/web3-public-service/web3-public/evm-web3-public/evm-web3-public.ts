@@ -197,18 +197,11 @@ export class EvmWeb3Public extends Web3Public<EvmBlockchainName> {
         contractAddress: string,
         contractAbi: AbiItem[],
         methodName: string,
-        options: {
-            methodArguments?: unknown[];
-            from?: string;
-            value?: string;
-        } = { methodArguments: [] }
+        methodArguments: unknown[] = []
     ): Promise<T> {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
 
-        return contract.methods[methodName](...(options.methodArguments || [])).call({
-            ...(options.from && { from: options.from }),
-            ...(options.value && { value: options.value })
-        });
+        return contract.methods[methodName](...methodArguments).call();
     }
 
     /**
