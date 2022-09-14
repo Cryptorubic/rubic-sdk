@@ -1,4 +1,4 @@
-import { UniswapV2ProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { UniswapV2ProviderConfiguration } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultAuroraRoutingProvidersAddresses = [
     '0xC9BdeEd33CD01541e1eeD10f90519d2C06Fe3feB', // WETH

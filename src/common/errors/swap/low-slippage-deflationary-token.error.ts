@@ -1,4 +1,4 @@
-import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
+import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
 
 /**
  * Thrown, when user is selling deflationary token with too low slippage.

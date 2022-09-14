@@ -1,16 +1,18 @@
-import { GasFeeInfo, TradeType } from 'src/features';
-import { InstantTrade } from 'src/features/instant-trades/instant-trade';
-import { BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
 import LIFI, { Route, RouteOptions, RoutesRequest, Step } from '@lifi/sdk';
-import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
-import { combineOptions } from 'src/common/utils/options';
-import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
-import { notNull } from 'src/common';
-import { LifiTrade } from 'src/features/instant-trades/dexes/common/lifi/lifi-trade';
-import BigNumber from 'bignumber.js';
-import { Injector } from 'src/core/sdk/injector';
-import { Token } from 'src/core/blockchain/tokens/token';
+import { notNull } from 'src/common/utils/object';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { LifiCalculationOptions } from 'src/features/instant-trades/dexes/common/lifi/models/lifi-calculation-options';
+import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { LifiTrade } from 'src/features/instant-trades/dexes/common/lifi/lifi-trade';
+import { InstantTrade } from 'src/features/instant-trades/instant-trade';
+import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
+import { Injector } from 'src/core/injector/injector';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { combineOptions } from 'src/common/utils/options';
+import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import BigNumber from 'bignumber.js';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 export class LifiProvider {
     private readonly lifi = new LIFI();
@@ -23,7 +25,7 @@ export class LifiProvider {
     constructor() {}
 
     public async calculate(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
         disabledProviders: TradeType[],
         options?: LifiCalculationOptions
@@ -33,8 +35,8 @@ export class LifiProvider {
             this.defaultOptions
         );
 
-        const fromChainId = BlockchainsInfo.getBlockchainByName(from.blockchain).id;
-        const toChainId = BlockchainsInfo.getBlockchainByName(toToken.blockchain).id;
+        const fromChainId = blockchainId[from.blockchain];
+        const toChainId = blockchainId[toToken.blockchain];
 
         const lifiDisabledProviders = Object.entries(lifiProviders)
             .filter(([_lifiProviderKey, tradeType]: [string, TradeType]) =>
@@ -105,7 +107,7 @@ export class LifiProvider {
     }
 
     private async getGasFeeInfo(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount,
         route: Route
     ): Promise<GasFeeInfo | null> {
@@ -136,7 +138,11 @@ export class LifiProvider {
         }
     }
 
-    private async getPath(step: Step, from: Token, to: Token): Promise<ReadonlyArray<Token>> {
+    private async getPath(
+        step: Step,
+        from: Token<EvmBlockchainName>,
+        to: Token
+    ): Promise<ReadonlyArray<Token>> {
         const estimatedPath = step.estimate.data.path;
         return estimatedPath
             ? await Token.createTokens(estimatedPath, from.blockchain)

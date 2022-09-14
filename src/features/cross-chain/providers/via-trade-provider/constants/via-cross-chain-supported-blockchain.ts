@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_NAME } from 'src/core';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const viaCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,
@@ -16,8 +16,7 @@ export const viaCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.AURORA,
     BLOCKCHAIN_NAME.CRONOS,
     BLOCKCHAIN_NAME.CELO,
-    BLOCKCHAIN_NAME.BOBA,
-    BLOCKCHAIN_NAME.ASTAR
+    BLOCKCHAIN_NAME.BOBA
 ] as const;
 
 export type ViaCrossChainSupportedBlockchain = typeof viaCrossChainSupportedBlockchains[number];

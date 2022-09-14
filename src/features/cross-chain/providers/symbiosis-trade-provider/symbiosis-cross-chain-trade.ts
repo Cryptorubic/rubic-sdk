@@ -1,22 +1,23 @@
-import {
-    CROSS_CHAIN_TRADE_TYPE,
-    SwapTransactionOptions,
-    TRADE_TYPE,
-    TradeType
-} from 'src/features';
-import { CrossChainTrade } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade';
-import { BLOCKCHAIN_NAME, BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { SYMBIOSIS_CONTRACT_ADDRESS } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
-import { SymbiosisCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
-import { FailedToCheckForTransactionReceiptError } from 'src/common';
-import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
-import BigNumber from 'bignumber.js';
+import { SYMBIOSIS_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
+import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
+import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
+import { ContractParams } from 'src/features/cross-chain/models/contract-params';
+import { GasData } from 'src/features/cross-chain/providers/common/models/gas-data';
+import { Injector } from 'src/core/injector/injector';
+import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
+import BigNumber from 'bignumber.js';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 /**
  * Calculated Symbiosis cross chain trade.
@@ -29,11 +30,12 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
 
     /** @internal */
     public static async getGasData(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount
     ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
-        const walletAddress = Injector.web3Private.address;
+        const fromBlockchain = from.blockchain;
+        const walletAddress =
+            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
         if (!walletAddress) {
             return null;
         }
@@ -55,7 +57,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
                         },
                         transitAmount: new BigNumber(NaN)
                     },
-                    EMPTY_ADDRESS
+                    EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
@@ -89,7 +91,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
 
     public readonly itType: { from: TradeType; to: TradeType };
 
-    public readonly from: PriceTokenAmount;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount;
 
@@ -107,7 +109,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         receiver?: string
     ) => Promise<{ transactionRequest: TransactionRequest }>;
 
-    protected readonly fromWeb3Public: Web3Public;
+    protected readonly fromWeb3Public: EvmWeb3Public;
 
     private get fromBlockchain(): SymbiosisCrossChainSupportedBlockchain {
         return this.from.blockchain as SymbiosisCrossChainSupportedBlockchain;
@@ -119,7 +121,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
 
     constructor(
         crossChainTrade: {
-            from: PriceTokenAmount;
+            from: PriceTokenAmount<EvmBlockchainName>;
             to: PriceTokenAmount;
             swapFunction: (
                 fromAddress: string,
@@ -175,7 +177,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         };
 
         try {
-            await Injector.web3Private.tryExecuteContractMethod(
+            await this.web3Private.tryExecuteContractMethod(
                 contractAddress,
                 contractAbi,
                 methodName,
@@ -198,7 +200,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             options?.receiverAddress
         );
         const { data } = exactIn.transactionRequest;
-        const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
+        const toChainId = blockchainId[this.to.blockchain];
         const swapArguments = [
             this.from.address,
             this.from.stringWeiAmount,
@@ -206,7 +208,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             this.to.address,
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
             this.to.blockchain === BLOCKCHAIN_NAME.BITCOIN
-                ? EMPTY_ADDRESS
+                ? EvmWeb3Pure.EMPTY_ADDRESS
                 : options?.receiverAddress || this.walletAddress,
             this.providerAddress,
             SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain].providerRouter

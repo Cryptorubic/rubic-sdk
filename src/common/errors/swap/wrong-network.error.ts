@@ -1,4 +1,4 @@
-import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
+import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
 
 /**
  * Thrown during swap, if user's selected network does not match source blockchain

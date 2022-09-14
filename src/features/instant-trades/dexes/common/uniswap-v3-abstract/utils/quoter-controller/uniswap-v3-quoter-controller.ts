@@ -2,30 +2,29 @@ import BigNumber from 'bignumber.js';
 import {
     FeeAmount,
     LiquidityPool
-} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
-import { compareAddresses } from '@rsdk-common/utils/blockchain';
-import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
-import { MethodData } from '@rsdk-core/blockchain/web3-public/models/method-data';
+} from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
+import { compareAddresses } from 'src/common/utils/blockchain';
+import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import {
     FACTORY_CONTRACT_ABI,
     FACTORY_CONTRACT_ADDRESS
-} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/factory-contract-data';
-import { notNull } from '@rsdk-common/utils/object';
-import { UniswapV3Route } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
-import { Token } from '@rsdk-core/blockchain/tokens/token';
-import { Cache } from '@rsdk-common/decorators/cache.decorator';
+} from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/factory-contract-data';
+import { notNull } from 'src/common/utils/object';
+import { UniswapV3Route } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
+import { Cache } from 'src/common/utils/decorators/cache-decorator/cache.decorator';
 import {
-    QUOTER_CONTRACT_ABI,
-    QUOTER_CONTRACT_ADDRESS
-} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/quoter-contract-data';
-
-import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { UniswapV3RouterConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
-import { UniswapV3AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
-import { Exact } from '@rsdk-features/instant-trades/models/exact';
-import { RubicSdkError } from 'src/common';
+    UNISWAP_V3_QUOTER_CONTRACT_ABI,
+    UNISWAP_V3_QUOTER_CONTRACT_ADDRESS
+} from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/quoter-contract-data';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Injector } from 'src/core/injector/injector';
+import { UniswapV3RouterConfiguration } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
+import { UniswapV3AlgebraQuoterController } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
+import { Exact } from 'src/features/instant-trades/models/exact';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
+import { Token } from 'src/common/tokens';
+import { RubicSdkError } from 'src/common/errors';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
@@ -122,12 +121,12 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
 
     private readonly feeAmounts: FeeAmount[] = [500, 3000, 10000];
 
-    private get web3Public(): Web3Public {
+    private get web3Public(): EvmWeb3Public {
         return Injector.web3PublicService.getWeb3Public(this.blockchain);
     }
 
     constructor(
-        private readonly blockchain: BlockchainName,
+        private readonly blockchain: EvmBlockchainName,
         private readonly routerConfiguration: UniswapV3RouterConfiguration<string>
     ) {}
 
@@ -231,7 +230,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
                 if (!poolMethodArguments) {
                     throw new RubicSdkError('Method arguments array for pool has to be defined');
                 }
-                if (!Web3Pure.isZeroAddress(poolAddress)) {
+                if (!EvmWeb3Pure.isEmptyAddress(poolAddress)) {
                     return new LiquidityPool(
                         poolAddress,
                         poolMethodArguments.tokenA,
@@ -275,8 +274,8 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
 
         return this.web3Public
             .multicallContractMethods<{ 0: string }>(
-                QUOTER_CONTRACT_ADDRESS,
-                QUOTER_CONTRACT_ABI,
+                UNISWAP_V3_QUOTER_CONTRACT_ADDRESS,
+                UNISWAP_V3_QUOTER_CONTRACT_ABI,
                 quoterMethodsData.map(quoterMethodData => quoterMethodData.methodData)
             )
             .then(results => {

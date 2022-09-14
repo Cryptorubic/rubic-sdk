@@ -1,6 +1,6 @@
-import { BLOCKCHAIN_NAME } from 'src/core';
-import { UniversalContract } from '../../common/models/universal-contract';
-import { RangoCrossChainSupportedBlockchain } from './rango-cross-chain-supported-blockchain';
+import { UniversalContract } from 'src/features/cross-chain/providers/common/models/universal-contract';
+import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-cross-chain-supported-blockchain';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const RANGO_CONTRACT_ADDRESSES: Record<
     RangoCrossChainSupportedBlockchain,

@@ -1,29 +1,28 @@
-import { InsufficientLiquidityError } from '@rsdk-common/errors/swap/insufficient-liquidity.error';
-import { notNull } from '@rsdk-common/utils/object';
-import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { Token } from '@rsdk-core/blockchain/tokens/token';
-import { BatchCall } from '@rsdk-core/blockchain/web3-public/models/batch-call';
-import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
-import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { RequiredSwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
+import { hasLengthAtLeast } from 'src/features/instant-trades/utils/type-guards';
+import { UniswapV2TradeClass } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-class';
+import { UniswapV2ProviderConfiguration } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { notNull } from 'src/common/utils/object';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
+import { InsufficientLiquidityError, RubicSdkError } from 'src/common/errors';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { RequiredSwapCalculationOptions } from 'src/features/instant-trades/models/swap-calculation-options';
 import {
     UniswapCalculatedInfo,
     UniswapCalculatedInfoWithProfit
-} from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
-import { UniswapRoute } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-route';
-import { UniswapV2ProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
-import { UniswapV2TradeClass } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-class';
-import { UniswapV2AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+} from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
+import { UniswapV2AbstractTrade } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { Injector } from 'src/core/injector/injector';
+import { UniswapRoute } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-route';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
+import { Cache } from 'src/common/utils/decorators';
 import BigNumber from 'bignumber.js';
-import { Cache, RubicSdkError } from 'src/common';
-import { Exact } from '@rsdk-features/instant-trades/models/exact';
-import { hasLengthAtLeast } from '@rsdk-features/instant-trades/utils/type-guards';
+import { Exact } from 'src/features/instant-trades/models/exact';
 
 export interface PathFactoryStruct {
-    readonly from: PriceToken;
-    readonly to: PriceToken;
+    readonly from: PriceToken<EvmBlockchainName>;
+    readonly to: PriceToken<EvmBlockchainName>;
     readonly weiAmount: BigNumber;
     readonly exact: Exact;
     readonly options: RequiredSwapCalculationOptions;
@@ -35,11 +34,11 @@ export interface UniswapV2AbstractProviderStruct<T extends UniswapV2AbstractTrad
 }
 
 export class PathFactory<T extends UniswapV2AbstractTrade> {
-    private readonly web3Public: Web3Public;
+    private readonly web3Public: EvmWeb3Public;
 
-    private readonly from: PriceToken;
+    private readonly from: PriceToken<EvmBlockchainName>;
 
-    private readonly to: PriceToken;
+    private readonly to: PriceToken<EvmBlockchainName>;
 
     private readonly weiAmount: BigNumber;
 
@@ -54,7 +53,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
     private readonly maxTransitTokens: number;
 
     private get walletAddress(): string | undefined {
-        return Injector.web3Private.address;
+        return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain).address;
     }
 
     @Cache

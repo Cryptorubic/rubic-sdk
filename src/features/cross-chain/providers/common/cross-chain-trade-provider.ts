@@ -1,17 +1,18 @@
-import { CrossChainTradeType } from 'src/features';
-import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
-import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
-import { CrossChainIsUnavailableError, RubicSdkError } from 'src/common';
-import { parseError } from 'src/common/utils/errors';
-import { BlockchainName, Web3Pure } from 'src/core';
-import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { Injector } from 'src/core/sdk/injector';
-import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { AbiItem } from 'web3-utils';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { parseError } from 'src/common/utils/errors';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { CrossChainTradeType } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
+import { CrossChainIsUnavailableError, RubicSdkError } from 'src/common/errors';
+import { Injector } from 'src/core/injector/injector';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
-import { commonCrossChainAbi } from './constants/common-cross-chain-abi';
 
 export abstract class CrossChainTradeProvider {
     public static parseError(err: unknown): RubicSdkError {
@@ -21,7 +22,7 @@ export abstract class CrossChainTradeProvider {
     public abstract readonly type: CrossChainTradeType;
 
     protected get walletAddress(): string {
-        return Injector.web3Private.address;
+        return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address;
     }
 
     /**
@@ -54,19 +55,17 @@ export abstract class CrossChainTradeProvider {
      * @internal
      */
     protected async getFixedFee(
-        fromBlockchain: BlockchainName,
+        fromBlockchain: EvmBlockchainName,
         providerAddress: string,
         contractAddress: string,
         contractAbi: AbiItem[]
     ): Promise<BigNumber> {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 
-        if (providerAddress !== EMPTY_ADDRESS) {
+        if (!EvmWeb3Pure.isEmptyAddress(providerAddress)) {
             const integratorInfo = await web3PublicService.callContractMethod<
                 [boolean, number, number, number, number]
-            >(contractAddress, contractAbi, 'integratorToFeeInfo', {
-                methodArguments: [providerAddress]
-            });
+            >(contractAddress, contractAbi, 'integratorToFeeInfo', [providerAddress]);
             if (integratorInfo[0]) {
                 return Web3Pure.fromWei(integratorInfo[4]);
             }
@@ -91,21 +90,19 @@ export abstract class CrossChainTradeProvider {
      * @internal
      */
     protected async getFeePercent(
-        fromBlockchain: BlockchainName,
+        fromBlockchain: EvmBlockchainName,
         providerAddress: string,
         contractAddress: string,
         contractAbi: AbiItem[]
     ): Promise<number> {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 
-        if (providerAddress !== EMPTY_ADDRESS) {
+        if (!EvmWeb3Pure.isEmptyAddress(providerAddress)) {
             const integratorInfo = await web3PublicService.callContractMethod<[boolean, number]>(
                 contractAddress,
                 contractAbi,
                 'integratorToFeeInfo',
-                {
-                    methodArguments: [providerAddress]
-                }
+                [providerAddress]
             );
             if (integratorInfo[0]) {
                 return integratorInfo[1] / 10_000;
@@ -122,7 +119,7 @@ export abstract class CrossChainTradeProvider {
     }
 
     protected async checkContractState(
-        fromBlockchain: BlockchainName,
+        fromBlockchain: EvmBlockchainName,
         rubicRouter: string
     ): Promise<void> {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);

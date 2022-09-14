@@ -1,16 +1,16 @@
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public/models/contract-multicall-response';
-import { Injector } from '@rsdk-core/sdk/injector';
-import {
-    UniswapV2AbstractTrade,
-    UniswapV2TradeStruct
-} from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import {
     SOLARBEAM_CONTRACT_ABI,
     SOLARBEAM_CONTRACT_ADDRESS
-} from '@rsdk-features/instant-trades/dexes/moonriver/solarbeam/constants';
-import { TRADE_TYPE, TradeType } from 'src/features';
-import { Exact } from '@rsdk-features/instant-trades/models/exact';
+} from 'src/features/instant-trades/dexes/moonriver/solarbeam/constants';
+import {
+    UniswapV2AbstractTrade,
+    UniswapV2TradeStruct
+} from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Injector } from 'src/core/injector/injector';
+import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { Exact } from 'src/features/instant-trades/models/exact';
 
 export class SolarbeamTrade extends UniswapV2AbstractTrade {
     public static readonly contractAbi = SOLARBEAM_CONTRACT_ABI;
@@ -20,7 +20,7 @@ export class SolarbeamTrade extends UniswapV2AbstractTrade {
     }
 
     public static callForRoutes(
-        blockchain: BlockchainName,
+        blockchain: EvmBlockchainName,
         exact: Exact,
         routesMethodArguments: [string, string[]][]
     ): Promise<ContractMulticallResponse<{ amounts: string[] }>[]> {

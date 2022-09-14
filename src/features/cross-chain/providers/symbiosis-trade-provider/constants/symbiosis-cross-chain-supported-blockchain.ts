@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const symbiosisCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,
@@ -7,7 +7,6 @@ export const symbiosisCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.AVALANCHE,
     BLOCKCHAIN_NAME.BOBA,
     BLOCKCHAIN_NAME.TELOS,
-    // BLOCKCHAIN_NAME.AURORA
     BLOCKCHAIN_NAME.BITCOIN
 ] as const;
 

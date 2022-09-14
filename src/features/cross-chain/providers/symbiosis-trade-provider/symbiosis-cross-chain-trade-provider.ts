@@ -1,14 +1,22 @@
-import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
-import { CROSS_CHAIN_TRADE_TYPE, InstantTradeProvider } from 'src/features';
-import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
-import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
-
+import { SYMBIOSIS_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
+import { ZappyProvider } from 'src/features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
+import { OolongSwapProvider } from 'src/features/instant-trades/dexes/boba/oolong-swap/oolong-swap-provider';
+import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { OneinchEthereumProvider } from 'src/features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
+import { OneinchBscProvider } from 'src/features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
+import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
+import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
+import { OneinchPolygonProvider } from 'src/features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
 import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
-} from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { compareAddresses, RubicSdkError } from 'src/common';
-import { Injector } from '@rsdk-core/sdk/injector';
+} from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import {
     ErrorCode,
     Symbiosis,
@@ -19,26 +27,24 @@ import {
     Token,
     Percent
 } from 'symbiosis-js-sdk';
-import BigNumber from 'bignumber.js';
-import { SymbiosisCrossChainTrade } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { SYMBIOSIS_CONTRACT_ADDRESS } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/contract-address';
-import { OneinchEthereumProvider } from '@rsdk-features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
-import { OneinchBscProvider } from '@rsdk-features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
-import { OneinchPolygonProvider } from '@rsdk-features/instant-trades/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
-import { OneinchAvalancheProvider } from '@rsdk-features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
-import { getSymbiosisConfig } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
-import { CrossChainMinAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-min-amount.error';
-import { CrossChainMaxAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-max-amount.error';
-import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
-import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
-import { OolongSwapProvider } from 'src/features/instant-trades/dexes/boba/oolong-swap/oolong-swap-provider';
+import { RubicSdkError } from 'src/common/errors';
 import { symbiosisTransitTokens } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-transit-tokens';
+import { OneinchAvalancheProvider } from 'src/features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
+import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
+import { getSymbiosisConfig } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { InstantTradeProvider } from 'src/features/instant-trades/instant-trade-provider';
+import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
 import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
-import { ZappyProvider } from 'src/features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
+import { compareAddresses } from 'src/common/utils/blockchain';
+import BigNumber from 'bignumber.js';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -67,10 +73,6 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         [BLOCKCHAIN_NAME.BITCOIN]: new OneinchEthereumProvider()
     };
 
-    protected get walletAddress(): string {
-        return Injector.web3Private.address;
-    }
-
     public isSupportedBlockchains(
         fromBlockchain: BlockchainName,
         toBlockchain: BlockchainName
@@ -85,7 +87,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     }
 
     public async calculate(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
     ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
@@ -100,12 +102,12 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             const fromAddress =
                 options.fromAddress || this.walletAddress || oneinchApiParams.nativeAddress;
             await this.checkContractState(
-                fromBlockchain,
+                fromBlockchain as EvmBlockchainName,
                 SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter
             );
 
             const tokenIn = new SymbiosisToken({
-                chainId: BlockchainsInfo.getBlockchainByName(fromBlockchain).id,
+                chainId: blockchainId[fromBlockchain],
                 address: from.isNative ? '' : from.address,
                 decimals: from.decimals,
                 isNative: from.isNative
@@ -125,7 +127,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             const tokenOut = isBitcoinSwap
                 ? null
                 : new SymbiosisToken({
-                      chainId: BlockchainsInfo.getBlockchainByName(toBlockchain).id,
+                      chainId: blockchainId[toBlockchain],
                       address: toToken.isNative ? '' : toToken.address,
                       decimals: toToken.decimals,
                       isNative: toToken.isNative
@@ -290,14 +292,14 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
         const fixedFeeAmount = await this.getFixedFee(
-            fromBlockchain,
+            fromBlockchain as EvmBlockchainName,
             providerAddress,
             SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
             commonCrossChainAbi
         );
 
         const feePercent = await this.getFeePercent(
-            fromBlockchain,
+            fromBlockchain as EvmBlockchainName,
             providerAddress,
             SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
             commonCrossChainAbi
@@ -352,8 +354,8 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             const zapping = this.symbiosis.newZappingRenBTC();
             const poolId =
                 fromBlockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN
-                    ? BlockchainsInfo.getBlockchainByName(BLOCKCHAIN_NAME.POLYGON).id
-                    : BlockchainsInfo.getBlockchainByName(BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN).id;
+                    ? blockchainId[BLOCKCHAIN_NAME.POLYGON]
+                    : blockchainId[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN];
             try {
                 swapResult = await zapping.exactIn(
                     swapParams.tokenAmountIn,

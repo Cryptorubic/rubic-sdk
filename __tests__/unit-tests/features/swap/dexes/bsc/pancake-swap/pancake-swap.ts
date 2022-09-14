@@ -1,7 +1,7 @@
 import { PancakeSwapProvider } from 'src/features/instant-trades/dexes/bsc/pancake-swap/pancake-swap-provider';
 import { PancakeSwapTrade } from 'src/features/instant-trades/dexes/bsc/pancake-swap/pancake-swap-trade';
 import { PANCAKE_SWAP_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/bsc/pancake-swap/constants';
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const pancakeSwapBscProviderSpec = () => {
     let pancakeSwapProvider: PancakeSwapProvider;

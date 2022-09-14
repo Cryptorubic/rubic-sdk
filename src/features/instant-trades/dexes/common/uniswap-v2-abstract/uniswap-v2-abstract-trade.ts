@@ -1,41 +1,39 @@
-import { Cache } from '@rsdk-common/decorators/cache.decorator';
-import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
-import { LowSlippageDeflationaryTokenError } from '@rsdk-common/errors/swap/low-slippage-deflationary-token.error';
-import { tryExecuteAsync } from '@rsdk-common/utils/functions';
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { Token } from '@rsdk-core/blockchain/tokens/token';
-import { Web3Private } from '@rsdk-core/blockchain/web3-private/web3-private';
-import { BatchCall } from '@rsdk-core/blockchain/web3-public/models/batch-call';
-import { ContractMulticallResponse } from '@rsdk-core/blockchain/web3-public/models/contract-multicall-response';
-import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
-import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
-import { createTokenNativeAddressProxyInPathStartAndEnd } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
-import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
-import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
-import { defaultEstimatedGas } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/constants/default-estimated-gas';
+import { DefaultEstimatedGas } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
+import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
+import { InstantTrade } from 'src/features/instant-trades/instant-trade';
+import { LowSlippageDeflationaryTokenError, RubicSdkError } from 'src/common/errors';
+import { defaultEstimatedGas } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/constants/default-estimated-gas';
+import { Injector } from 'src/core/injector/injector';
 import {
     ExactInputOutputSwapMethodsList,
     RegularSwapMethod,
     SUPPORTING_FEE_SWAP_METHODS_MAPPING,
     SWAP_METHOD
-} from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/constants/SWAP_METHOD';
-
-import { defaultUniswapV2Abi } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi';
-import { DefaultEstimatedGas } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
-import BigNumber from 'bignumber.js';
-import { EncodeTransactionOptions, TradeType } from 'src/features';
-import { TransactionConfig } from 'web3-core';
-import { TransactionReceipt } from 'web3-eth';
-import { AbiItem } from 'web3-utils';
+} from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/constants/SWAP_METHOD';
+import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
+import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
+import { AbiItem } from 'web3-utils';
+import { tryExecuteAsync } from 'src/common/utils/functions';
+import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
+import { TransactionReceipt } from 'web3-eth';
+import { defaultUniswapV2Abi } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi';
+import { TransactionConfig } from 'web3-core';
+import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
+import { Cache } from 'src/common/utils/decorators';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { Exact } from 'src/features/instant-trades/models/exact';
+import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import BigNumber from 'bignumber.js';
 
 export type UniswapV2TradeStruct = {
-    from: PriceTokenAmount;
-    to: PriceTokenAmount;
+    from: PriceTokenAmount<EvmBlockchainName>;
+    to: PriceTokenAmount<EvmBlockchainName>;
     exact: Exact;
     wrappedPath: ReadonlyArray<Token> | Token[];
     deadlineMinutes: number;
@@ -73,7 +71,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     public static readonly defaultEstimatedGasInfo: DefaultEstimatedGas = defaultEstimatedGas;
 
     public static callForRoutes(
-        blockchain: BlockchainName,
+        blockchain: EvmBlockchainName,
         exact: Exact,
         routesMethodArguments: [string, string[]][]
     ): Promise<ContractMulticallResponse<{ amounts: string[] }>[]> {
@@ -94,9 +92,9 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     public slippageTolerance: number;
 
-    public readonly from: PriceTokenAmount;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly to: PriceTokenAmount;
+    public readonly to: PriceTokenAmount<EvmBlockchainName>;
 
     public gasFeeInfo: GasFeeInfo | null;
 
@@ -175,7 +173,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
         this.path = createTokenNativeAddressProxyInPathStartAndEnd(
             this.wrappedPath,
-            Web3Pure.nativeTokenAddress
+            EvmWeb3Pure.nativeTokenAddress
         );
     }
 
@@ -203,7 +201,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         const methodName = await this.getMethodName(options);
         const swapParameters = this.getSwapParametersByMethod(methodName, options);
 
-        return Injector.web3Private.tryExecuteContractMethod(...swapParameters);
+        return this.web3Private.tryExecuteContractMethod(...swapParameters);
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
@@ -215,11 +213,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             }
 
             try {
-                await this.web3Public.checkBalance(
-                    this.from,
-                    this.from.tokenAmount,
-                    options.fromAddress
-                );
+                await this.checkBalance();
             } catch (_err) {
                 throw new RubicSdkError(
                     'To use `encode` function, wallet must have enough balance or you must provider `supportFee` parameter in options.'
@@ -234,7 +228,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         );
         const gasParams = this.getGasParams(options);
 
-        return Web3Pure.encodeMethodCall(
+        return EvmWeb3Pure.encodeMethodCall(
             this.contractAddress,
             (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
             methodName,
@@ -307,7 +301,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         method: string,
         options: SwapTransactionOptions,
         fromAddress?: string
-    ): Parameters<InstanceType<typeof Web3Private>['executeContractMethod']> {
+    ): Parameters<InstanceType<typeof EvmWeb3Private>['executeContractMethod']> {
         const value = this.nativeValueToSend;
         const { gas, gasPrice } = this.getGasParams(options);
 
@@ -326,16 +320,16 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     }
 
     private convertSwapParametersToCallParameters(
-        parameters: Parameters<InstanceType<typeof Web3Private>['executeContractMethod']>,
+        parameters: Parameters<InstanceType<typeof EvmWeb3Private>['executeContractMethod']>,
         fromAddress?: string
-    ): Parameters<InstanceType<typeof Web3Public>['callContractMethod']> {
+    ): Parameters<InstanceType<typeof EvmWeb3Public>['callContractMethod']> {
         return parameters.slice(0, 3).concat([
             {
                 methodArguments: parameters[3],
-                from: fromAddress || Injector.web3Private.address,
+                from: fromAddress || this.walletAddress,
                 ...(parameters[4]?.value && { value: parameters[4]?.value })
             }
-        ]) as Parameters<InstanceType<typeof Web3Public>['callContractMethod']>;
+        ]) as Parameters<InstanceType<typeof EvmWeb3Public>['callContractMethod']>;
     }
 
     /** @internal */

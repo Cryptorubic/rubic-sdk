@@ -1,15 +1,15 @@
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
-import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
-import { SwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
-import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
-import { Injector } from '@rsdk-core/sdk/injector';
-import { GasPriceInfo } from '@rsdk-features/instant-trades/models/gas-price-info';
-import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';
+import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
+import { SwapCalculationOptions } from 'src/features/instant-trades/models/swap-calculation-options';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { InstantTrade } from 'src/features/instant-trades/instant-trade';
+import { Injector } from 'src/core/injector/injector';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { GasPriceInfo } from 'src/features/instant-trades/models/gas-price-info';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { TradeType } from 'src/features/instant-trades/models/trade-type';
 import BigNumber from 'bignumber.js';
-import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
-import { TradeType } from 'src/features';
 
 /**
  * Abstract class for all instant trade providers.
@@ -18,7 +18,7 @@ export abstract class InstantTradeProvider {
     /**
      * Provider blockchain.
      */
-    public abstract readonly blockchain: BlockchainName;
+    public abstract readonly blockchain: EvmBlockchainName;
 
     protected abstract readonly gasMargin: number;
 
@@ -27,9 +27,14 @@ export abstract class InstantTradeProvider {
      */
     public abstract get type(): TradeType;
 
+    protected get walletAddress(): string {
+        return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address;
+    }
+
     protected get web3Public(): Web3Public {
         return Injector.web3PublicService.getWeb3Public(this.blockchain);
     }
+
     /**
      * Calculates instant trade.
      * @param from Token to sell with input amount.

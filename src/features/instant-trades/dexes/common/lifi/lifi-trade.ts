@@ -1,21 +1,19 @@
-import {
-    EncodeTransactionOptions,
-    GasFeeInfo,
-    SwapTransactionOptions,
-    TRADE_TYPE,
-    TradeType
-} from 'src/features';
 import { InstantTrade } from 'src/features/instant-trades/instant-trade';
-import { Token } from 'src/core';
 import { TransactionReceipt } from 'web3-eth';
-import { Injector } from 'src/core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import { Route } from '@lifi/sdk';
 import { TransactionConfig } from 'web3-core';
 import BigNumber from 'bignumber.js';
-import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
+import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { LifiPairIsUnavailable } from 'src/common/errors/swap/lifi-pair-is-unavailable';
-import { RubicSdkError } from 'src/common';
+import { Token } from 'src/common/tokens';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { RubicSdkError } from 'src/common/errors';
+import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
 
 interface LifiTransactionRequest {
     data: string;
@@ -26,7 +24,7 @@ interface LifiTransactionRequest {
 export class LifiTrade extends InstantTrade {
     /** @internal */
     public static async getGasData(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount,
         route: Route
     ): Promise<{
@@ -84,7 +82,7 @@ export class LifiTrade extends InstantTrade {
     }
 
     constructor(tradeStruct: {
-        from: PriceTokenAmount;
+        from: PriceTokenAmount<EvmBlockchainName>;
         to: PriceTokenAmount;
         gasFeeInfo: GasFeeInfo | null;
         slippageTolerance: number;
@@ -118,7 +116,7 @@ export class LifiTrade extends InstantTrade {
         try {
             const { data, gasLimit, gasPrice } = await this.getTransactionData();
 
-            return await Injector.web3Private.trySendTransaction(
+            return await this.web3Private.trySendTransaction(
                 this.contractAddress,
                 this.from.isNative ? this.from.stringWeiAmount : '0',
                 {

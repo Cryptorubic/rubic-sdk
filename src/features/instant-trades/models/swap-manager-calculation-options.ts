@@ -1,5 +1,5 @@
-import { SwapCalculationOptions } from '@rsdk-features/instant-trades/models/swap-calculation-options';
-import { TradeType } from '@rsdk-features/instant-trades/models/trade-type';
+import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import { SwapCalculationOptions } from 'src/features/instant-trades/models/swap-calculation-options';
 
 export interface SwapManagerCalculationOptions extends SwapCalculationOptions {
     readonly timeout?: number;

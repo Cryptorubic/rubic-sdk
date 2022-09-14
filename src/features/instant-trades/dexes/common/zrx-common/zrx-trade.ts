@@ -1,18 +1,17 @@
-import { Injector } from '@rsdk-core/sdk/injector';
-import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
-import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
-import { TRADE_TYPE, TradeType } from 'src/features';
+import { InstantTrade } from 'src/features/instant-trades/instant-trade';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { ZrxQuoteResponse } from 'src/features/instant-trades/dexes/common/zrx-common/models/zrx-types';
+import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
 import { TransactionReceipt } from 'web3-eth';
-import { ZrxQuoteResponse } from '@rsdk-features/instant-trades/dexes/common/zrx-common/models/zrx-types';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
-import { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { TransactionConfig } from 'web3-core';
-import { Token } from 'src/core';
+import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
 
 interface ZrxTradeStruct {
-    from: PriceTokenAmount;
-    to: PriceTokenAmount;
+    from: PriceTokenAmount<EvmBlockchainName>;
+    to: PriceTokenAmount<EvmBlockchainName>;
     slippageTolerance: number;
     apiTradeData: ZrxQuoteResponse;
     path: ReadonlyArray<Token>;
@@ -60,16 +59,12 @@ export class ZrxTrade extends InstantTrade {
 
         const { gas, gasPrice } = this.getGasParams(options);
 
-        return Injector.web3Private.trySendTransaction(
-            this.apiTradeData.to,
-            this.apiTradeData.value,
-            {
-                onTransactionHash: options.onConfirm,
-                data: this.apiTradeData.data,
-                gas,
-                gasPrice
-            }
-        );
+        return this.web3Private.trySendTransaction(this.apiTradeData.to, this.apiTradeData.value, {
+            onTransactionHash: options.onConfirm,
+            data: this.apiTradeData.data,
+            gas,
+            gasPrice
+        });
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {

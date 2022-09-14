@@ -1,30 +1,33 @@
-import { InstantTradeProvider } from '@rsdk-features/instant-trades/instant-trade-provider';
-import { PriceToken, Web3Pure } from 'src/core';
-import { SwapCalculationOptions } from 'src/features';
-import { combineOptions } from '@rsdk-common/utils/options';
-import { createTokenNativeAddressProxy } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
-import { GasPriceInfo } from '@rsdk-features/instant-trades/models/gas-price-info';
-import BigNumber from 'bignumber.js';
+import { InstantTradeProvider } from 'src/features/instant-trades/instant-trade-provider';
 import {
     UniswapV3AlgebraCalculatedInfo,
     UniswapV3AlgebraCalculatedInfoWithProfit
-} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-calculated-info';
-import { InsufficientLiquidityError, RubicSdkError } from 'src/common';
-import { UniswapV3AlgebraQuoterController } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
-import { UniswapV3AlgebraProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-provider-configuration';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+} from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-calculated-info';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { UniswapV3TradeClass } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-class';
 import {
     UniswapV3AlgebraAbstractTrade,
     UniswapV3AlgebraTradeStruct
-} from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
-import { AlgebraTrade } from '@rsdk-features/instant-trades/dexes/polygon/algebra/algebra-trade';
-import { UniswapV3TradeClass } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-class';
-import { UniswapV3AlgebraRoute } from '@rsdk-features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
-import { Exact } from '@rsdk-features/instant-trades/models/exact';
-import { getFromToTokensAmountsByExact } from '@rsdk-features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
+} from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
+import {
+    RequiredSwapCalculationOptions,
+    SwapCalculationOptions
+} from 'src/features/instant-trades/models/swap-calculation-options';
+import { AlgebraTrade } from 'src/features/instant-trades/dexes/polygon/algebra/algebra-trade';
+import { UniswapV3AlgebraRoute } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
+import { UniswapV3AlgebraProviderConfiguration } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-provider-configuration';
+import { InsufficientLiquidityError, RubicSdkError } from 'src/common/errors';
+import { createTokenNativeAddressProxy } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { getFromToTokensAmountsByExact } from 'src/features/instant-trades/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { AbiItem } from 'web3-utils';
-import { RequiredSwapCalculationOptions } from 'src/features/instant-trades/models/swap-calculation-options';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { UniswapV3AlgebraQuoterController } from 'src/features/instant-trades/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
+import { GasPriceInfo } from 'src/features/instant-trades/models/gas-price-info';
+import { combineOptions } from 'src/common/utils/options';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import BigNumber from 'bignumber.js';
+import { Exact } from 'src/features/instant-trades/models/exact';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
@@ -48,7 +51,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         disableMultihops: false,
         deadlineMinutes: 20,
         slippageTolerance: 0.02,
-        wrappedAddress: EMPTY_ADDRESS,
+        wrappedAddress: EvmWeb3Pure.EMPTY_ADDRESS,
         fromAddress: ''
     };
 
@@ -58,8 +61,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
     ): T;
 
     public async calculate(
-        from: PriceTokenAmount,
-        toToken: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         options?: SwapCalculationOptions
     ): Promise<T> {
         return this.calculateDifficultTrade(from, toToken, 'input', from.weiAmount, options);
@@ -72,8 +75,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
      * @param options Additional options.
      */
     public async calculateExactOutput(
-        fromToken: PriceToken,
-        to: PriceTokenAmount,
+        fromToken: PriceToken<EvmBlockchainName>,
+        to: PriceTokenAmount<EvmBlockchainName>,
         options?: SwapCalculationOptions
     ): Promise<T> {
         return this.calculateDifficultTrade(fromToken, to, 'output', to.weiAmount, options);
@@ -86,16 +89,16 @@ export abstract class UniswapV3AlgebraAbstractProvider<
      * @param options Additional options.
      */
     public async calculateExactOutputAmount(
-        fromToken: PriceToken,
-        to: PriceTokenAmount,
+        fromToken: PriceToken<EvmBlockchainName>,
+        to: PriceTokenAmount<EvmBlockchainName>,
         options?: SwapCalculationOptions
     ): Promise<BigNumber> {
         return (await this.calculateExactOutput(fromToken, to, options)).from.tokenAmount;
     }
 
     private async calculateDifficultTrade(
-        fromToken: PriceToken,
-        toToken: PriceToken,
+        fromToken: PriceToken<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         exact: Exact,
         weiAmount: BigNumber,
         options?: SwapCalculationOptions
@@ -155,8 +158,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
     }
 
     private async getRoute(
-        from: PriceToken,
-        to: PriceToken,
+        from: PriceToken<EvmBlockchainName>,
+        to: PriceToken<EvmBlockchainName>,
         exact: Exact,
         weiAmount: BigNumber,
         options: RequiredSwapCalculationOptions,

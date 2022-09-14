@@ -1,13 +1,12 @@
-import { NATIVE_TOKEN_ADDRESS } from '@rsdk-core/blockchain/constants/native-token-address';
-import { BlockchainName } from 'src/core';
-import { Token } from 'src/core/blockchain/tokens/token';
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { Token } from 'src/common/tokens';
 
 export const TOKENS = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
         ETH: new Token({
             blockchain: BLOCKCHAIN_NAME.ETHEREUM,
-            address: NATIVE_TOKEN_ADDRESS,
+            address: EvmWeb3Pure.nativeTokenAddress,
             decimals: 18,
             symbol: 'ETH',
             name: 'Ethereum'
@@ -51,7 +50,7 @@ export const TOKENS = {
     [BLOCKCHAIN_NAME.POLYGON]: {
         MATIC: new Token({
             blockchain: BLOCKCHAIN_NAME.POLYGON,
-            address: NATIVE_TOKEN_ADDRESS,
+            address: EvmWeb3Pure.nativeTokenAddress,
             decimals: 18,
             symbol: 'MAT',
             name: 'Matoc'

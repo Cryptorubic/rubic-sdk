@@ -1,4 +1,4 @@
-import { UniswapV2ProviderConfiguration } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { UniswapV2ProviderConfiguration } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultTelosRoutingProvidersAddresses = [
     '0xD102cE6A4dB07D247fcc28F366A623Df0938CA9E', // WTLOS

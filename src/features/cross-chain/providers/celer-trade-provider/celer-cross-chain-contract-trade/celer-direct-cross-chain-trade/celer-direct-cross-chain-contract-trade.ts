@@ -1,50 +1,31 @@
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { BridgeCelerSwapInfo } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/bridge-celer-swap-info';
+import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/models/celer-cross-chain-supported-blockchain';
+import { CelerCrossChainContractData } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { CelerCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
+import { DestinationCelerSwapInfo } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { SwapVersion } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/provider-type.enum';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
-import { BlockchainsInfo, Web3Pure } from 'src/core';
-import { CelerCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
-import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
-import { CelerCrossChainContractData } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
-import { DestinationCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
-import { SwapVersion } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/provider-type.enum';
-import { BridgeCelerSwapInfo } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/bridge-celer-swap-info';
-import { CelerCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
-import { RubicSdkError } from 'src/common';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 export class CelerDirectCrossChainContractTrade extends CelerCrossChainContractTrade {
-    public readonly fromToken: PriceTokenAmount;
+    public readonly fromToken: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly toToken: PriceTokenAmount;
+    public readonly toToken: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly toTokenAmountMin: BigNumber;
 
     constructor(
         blockchain: CelerCrossChainSupportedBlockchain,
         contract: CelerCrossChainContractData,
-        private readonly token: PriceTokenAmount
+        private readonly token: PriceTokenAmount<EvmBlockchainName>
     ) {
         super(blockchain, contract, 0);
         this.fromToken = this.token;
         this.toToken = this.token;
         this.toTokenAmountMin = this.toToken.tokenAmount;
-    }
-
-    protected getFirstPath(): string[] {
-        return [this.token.address];
-    }
-
-    public getSecondPath(): string[] {
-        return [Web3Pure.addressToBytes32(this.token.address)];
-    }
-
-    protected async modifyArgumentsForProvider(methodArguments: unknown[][]): Promise<void> {
-        const exactTokensForTokens = true;
-        const swapTokenWithFee = false;
-
-        if (!methodArguments?.[0]) {
-            throw new RubicSdkError('Method arguments array must not be empty');
-        }
-
-        methodArguments[0].push(exactTokensForTokens, swapTokenWithFee);
     }
 
     public getCelerSourceTrade(): string {
@@ -56,7 +37,7 @@ export class CelerDirectCrossChainContractTrade extends CelerCrossChainContractT
 
     public getCelerDestinationTrade(integratorAddress: string, receiverAddress: string): unknown[] {
         const trade: DestinationCelerSwapInfo = {
-            dex: EMPTY_ADDRESS,
+            dex: EvmWeb3Pure.EMPTY_ADDRESS,
             nativeOut: this.toToken.isNative,
             receiverEOA: receiverAddress,
             integrator: integratorAddress,
@@ -83,9 +64,7 @@ export class CelerDirectCrossChainContractTrade extends CelerCrossChainContractT
     ): Promise<unknown[]> {
         const receiver = toContractTrade.contract.address || walletAddress;
         const tokenInAmountAbsolute = this.fromToken.stringWeiAmount;
-        const targetChainId = BlockchainsInfo.getBlockchainByName(
-            toContractTrade.toToken.blockchain
-        ).id;
+        const targetChainId = blockchainId[toContractTrade.toToken.blockchain];
         const source = this.getCelerSourceTrade();
         const destination = toContractTrade.getCelerDestinationTrade(
             providerAddress,

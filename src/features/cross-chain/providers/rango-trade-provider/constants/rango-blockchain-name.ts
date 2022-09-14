@@ -1,5 +1,5 @@
-import { BLOCKCHAIN_NAME } from 'src/core';
-import { RangoCrossChainSupportedBlockchain } from './rango-cross-chain-supported-blockchain';
+import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-cross-chain-supported-blockchain';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const RANGO_BLOCKCHAIN_NAME: Record<RangoCrossChainSupportedBlockchain, string> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: 'ETH',

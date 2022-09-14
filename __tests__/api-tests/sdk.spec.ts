@@ -1,4 +1,4 @@
-import { SDK } from '@rsdk-core/sdk/sdk';
+import { SDK } from 'src/core/sdk/sdk';
 import { minimalConfiguration } from '../utils/configuration';
 
 describe('Common SDK tests', () => {

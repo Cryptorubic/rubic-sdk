@@ -3,7 +3,7 @@ import {
     ViaCrossChainSupportedBlockchain,
     viaCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-cross-chain-supported-blockchain';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/constants/rubic-proxy-contract-address';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/providers/common/constants/rubic-proxy-contract-address';
 
 export const viaContractAddress: Record<ViaCrossChainSupportedBlockchain, string> =
     viaCrossChainSupportedBlockchains.reduce((acc, blockchain) => {

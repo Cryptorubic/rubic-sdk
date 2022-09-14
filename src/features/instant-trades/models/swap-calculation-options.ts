@@ -1,5 +1,5 @@
-import { SwapOptions } from '@rsdk-features/instant-trades/models/swap-options';
 import { MarkRequired } from 'ts-essentials';
+import { SwapOptions } from 'src/features/instant-trades/models/swap-options';
 
 /**
  * Stores options for calculating trade.

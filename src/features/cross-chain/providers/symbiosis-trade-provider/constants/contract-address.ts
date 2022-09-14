@@ -1,6 +1,6 @@
-import { SymbiosisCrossChainSupportedBlockchain } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { BLOCKCHAIN_NAME } from 'src/core';
-import { UniversalContract } from '../../common/models/universal-contract';
+import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
+import { UniversalContract } from 'src/features/cross-chain/providers/common/models/universal-contract';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 const defaultRubicRouterAddress = '0x3332241a5a4eCb4c28239A9731ad45De7f000333';
 

@@ -1,26 +1,27 @@
-import { BridgeType, CROSS_CHAIN_TRADE_TYPE, TradeType } from 'src/features';
-import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
-import BigNumber from 'bignumber.js';
+import { getLifiConfig } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-config';
+import { LifiCrossChainTrade } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import {
     LifiCrossChainSupportedBlockchain,
     lifiCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
-import LIFI, { Route, RouteOptions } from '@lifi/sdk';
-import { LifiCrossChainTrade } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade';
 import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
-import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
-import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
-import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
-import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
-import { getLifiConfig } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-config';
-import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
+import LIFI, { LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
-import { LifiStep } from '@lifi/types/dist/step';
-import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
-import { bridges } from 'src/features/cross-chain/constants/bridge-type';
-import { RoutesRequest } from '@lifi/types';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { bridges, BridgeType } from 'src/features/cross-chain/providers/common/models/bridge-type';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
+import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
+import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
+import BigNumber from 'bignumber.js';
+import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 
 export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -48,8 +49,8 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     }
 
     public async calculate(
-        from: PriceTokenAmount,
-        toToken: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
         const fromBlockchain = from.blockchain;
@@ -81,8 +82,8 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
             allowSwitchChain: false
         };
 
-        const fromChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id;
-        const toChainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id;
+        const fromChainId = blockchainId[fromBlockchain];
+        const toChainId = blockchainId[toBlockchain];
 
         const fromAddress = this.walletAddress;
         const toAddress = options.receiverAddress || this.walletAddress;
