@@ -27,7 +27,7 @@ import {
     Token,
     Percent
 } from 'symbiosis-js-sdk';
-import { RubicSdkError } from 'src/common/errors';
+import { RubicSdkError, CrossChainMinAmountError, TooLowAmountError } from 'src/common/errors';
 import { symbiosisTransitTokens } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-transit-tokens';
 import { OneinchAvalancheProvider } from 'src/features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
@@ -37,7 +37,6 @@ import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/providers/sym
 import { getSymbiosisConfig } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { InstantTradeProvider } from 'src/features/instant-trades/instant-trade-provider';
-import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-chain-min-amount.error';
 import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
@@ -45,7 +44,6 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 import BigNumber from 'bignumber.js';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { TooLowAmountError } from 'src/common/errors/cross-chain/too-low-amount.error';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(

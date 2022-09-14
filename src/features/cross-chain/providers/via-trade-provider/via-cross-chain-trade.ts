@@ -307,7 +307,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
     }
 
     private checkAddressEquality(): void {
-        if (compareAddresses(Injector.web3Private.address, this.calculationWalletAddress)) {
+        if (compareAddresses(this.walletAddress, this.calculationWalletAddress)) {
             return;
         }
         throw new RubicSdkError(

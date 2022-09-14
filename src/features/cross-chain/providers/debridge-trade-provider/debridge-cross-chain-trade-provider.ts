@@ -8,7 +8,10 @@ import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/d
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
-import { TransactionResponse, TransactionErrorResponse } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
+import {
+    TransactionResponse,
+    TransactionErrorResponse
+} from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
 import { DebridgeCrossChainTrade } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade';
 import { Injector } from 'src/core/injector/injector';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';

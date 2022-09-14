@@ -23,7 +23,7 @@ export class Web3Pure {
      * @param multiplier The multiplier by which the gas limit will be increased.
      */
     public static calculateGasMargin(
-        gasLimit: BigNumber | string | number | undefined,
+        gasLimit: BigNumber | string | number | null | undefined,
         multiplier: number
     ): BigNumber {
         return new BigNumber(gasLimit || '0').multipliedBy(multiplier).dp(0);

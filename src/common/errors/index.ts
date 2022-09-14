@@ -18,3 +18,5 @@ export { UserRejectError } from './blockchain/user-reject.error';
 export { TransactionRevertedError } from './blockchain/transaction-reverted.error';
 export { TimeoutError } from './utils/timeout.error';
 export { TooLowAmountError } from './cross-chain/too-low-amount.error';
+export { CrossChainMaxAmountError } from './cross-chain/cross-chain-max-amount.error';
+export { CrossChainMinAmountError } from './cross-chain/cross-chain-min-amount.error';
