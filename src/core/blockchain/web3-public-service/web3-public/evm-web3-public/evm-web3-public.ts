@@ -13,9 +13,9 @@ import Web3 from 'web3';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { AbiItem } from 'web3-utils';
 import { EvmCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-call';
-import { TransactionReceipt } from 'web3-eth';
+import { TransactionReceipt, BlockTransactionString } from 'web3-eth';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { provider as Provider, HttpProvider } from 'web3-core';
+import { provider as Provider, HttpProvider, BlockNumber } from 'web3-core';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import pTimeout from 'src/common/utils/p-timeout';
@@ -335,6 +335,15 @@ export class EvmWeb3Public extends Web3Public<EvmBlockchainName> {
      */
     public async getGasPrice(): Promise<string> {
         return this.web3.eth.getGasPrice();
+    }
+
+    /**
+     * Gets block by block id.
+     * @param [blockId] Block id: hash, number ... Default is 'latest'.
+     * @returns Block by blockId parameter.
+     */
+    public getBlock(blockId: BlockNumber | string = 'latest'): Promise<BlockTransactionString> {
+        return this.web3.eth.getBlock(blockId);
     }
 
     /**

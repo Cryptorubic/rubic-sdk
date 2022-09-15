@@ -5,6 +5,7 @@ import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
 import { AbiInput, AbiItem, AbiOutput } from 'web3-utils';
 import { InfiniteArray } from 'src/common/utils/types';
 import { BigNumber as EthersBigNumber } from 'ethers';
+import { TronParameters } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-parameters';
 
 @staticImplements<TypedWeb3Pure>()
 export class TronWeb3Pure {
@@ -50,6 +51,20 @@ export class TronWeb3Pure {
         return encodedMethodSignature + encodedParameters.slice(2);
     }
 
+    public static encodeMethodSignature(
+        methodSignature: string,
+        parameters: TronParameters
+    ): string {
+        const encodedMethodSignature = TronWeb.sha3(methodSignature).slice(0, 10);
+        const flattenedParameters = this.flattenParameters(parameters);
+        const encodedParameters = TronWeb.utils.abi.encodeParams(
+            flattenedParameters[0],
+            flattenedParameters[1]
+        );
+
+        return encodedMethodSignature + encodedParameters.slice(2);
+    }
+
     /**
      * Decodes method result using its JSON interface object and given parameters.
      * @param outputAbi The JSON interface object of an output of function.
@@ -85,5 +100,25 @@ export class TronWeb3Pure {
             }
             return abiInput.type;
         });
+    }
+
+    private static flattenParameters(
+        parameters: TronParameters
+    ): [InfiniteArray<string>, InfiniteArray<string>] {
+        const types: InfiniteArray<string> = [];
+        const values: InfiniteArray<string> = [];
+        parameters.forEach(parameter => {
+            if (parameter.type === 'tuple') {
+                const flattenedParameters = this.flattenParameters(
+                    parameter.value as TronParameters
+                );
+                types.push(flattenedParameters[0]);
+                values.push(flattenedParameters[1]);
+            } else {
+                types.push(parameter.type);
+                values.push(parameter.value as string);
+            }
+        });
+        return [types, values];
     }
 }

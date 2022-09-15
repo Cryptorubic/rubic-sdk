@@ -5,8 +5,6 @@ export interface TronTransactionOptions {
      */
     onTransactionHash?: (hash: string) => void;
 
-    feeLimit: number;
-    callValue: number;
-    tokenValue: number;
-    tokenId: number;
+    feeLimit?: number;
+    callValue?: number;
 }
