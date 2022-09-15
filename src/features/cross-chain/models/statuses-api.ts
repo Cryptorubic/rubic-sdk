@@ -1,5 +1,6 @@
 import { CrossChainTradeData, CrossChainTxStatus } from 'src/features';
 import { TransactionReceipt } from 'web3-eth';
+import { CelerTransferStatus } from '../providers/common/celer-rubic/models/celer-swap-status.enum';
 
 export interface DeBridgeApiResponse {
     claim: {
@@ -40,6 +41,18 @@ export interface BtcStatusResponse {
     vin_sz: number;
     vout_sz: number;
     weight: number;
+}
+
+export interface CelerTransferHistoryResponse {
+    err: string;
+    next_page_token: string;
+    current_size: string;
+    history: {
+        transferId: string;
+        src_block_tx_link: string;
+        dst_block_tx_link: string;
+        status: CelerTransferStatus;
+    }[];
 }
 
 export interface DstTxData {

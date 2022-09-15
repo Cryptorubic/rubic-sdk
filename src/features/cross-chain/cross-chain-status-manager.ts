@@ -9,10 +9,7 @@ import { Via } from '@viaprotocol/router-sdk';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
 import { ViaSwapStatus } from 'src/features/cross-chain/providers/via-trade-provider/models/via-swap-status';
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from './models/cross-chain-trade-type';
-import { celerCrossChainContractAbi } from './providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
-import { celerCrossChainContractsAddresses } from './providers/celer-trade-provider/constants/celer-cross-chain-contracts-addresses';
-import { CelerCrossChainSupportedBlockchain } from './providers/celer-trade-provider/constants/celer-cross-chain-supported-blockchain';
-import { CelerSwapStatus } from './providers/common/celer-rubic/models/celer-swap-status.enum';
+import { CelerTransferStatus } from './providers/common/celer-rubic/models/celer-swap-status.enum';
 import { CrossChainStatus } from './models/cross-chain-status';
 import { CrossChainTxStatus } from './models/cross-chain-tx-status';
 import { LifiSwapStatus } from './providers/lifi-trade-provider/models/lifi-swap-status';
@@ -21,6 +18,7 @@ import { CrossChainTradeData } from './models/cross-chain-trade-data';
 import { RANGO_API_KEY } from './providers/rango-trade-provider/constants/rango-api-key';
 import {
     BtcStatusResponse,
+    CelerTransferHistoryResponse,
     DeBridgeApiResponse,
     DstTxData,
     getDstTxDataFn,
@@ -338,8 +336,7 @@ export class CrossChainStatusManager {
         srcTxReceipt: TransactionReceipt
     ): Promise<DstTxData> {
         try {
-            // Filter undecoded logs.
-            const dstTxData = {
+            const dstTxData: DstTxData = {
                 txStatus: CrossChainTxStatus.PENDING,
                 txHash: null
             };
@@ -351,37 +348,55 @@ export class CrossChainStatusManager {
                 const eightHours = 60 * 60 * 1000 * 8;
                 if (!requestLog && Date.now() > data.txTimestamp + eightHours) {
                     dstTxData.txStatus = CrossChainTxStatus.FAIL;
-                    // return CrossChainTxStatus.FAIL;
                 }
                 dstTxData.txStatus = CrossChainTxStatus.PENDING;
-            }
-            const dstTxStatus = Number(
-                await Injector.web3PublicService
-                    .getWeb3Public(data.toBlockchain)
-                    .callContractMethod(
-                        celerCrossChainContractsAddresses[
-                            data.toBlockchain as CelerCrossChainSupportedBlockchain
-                        ],
-                        celerCrossChainContractAbi,
-                        'processedTransactions',
-                        {
-                            methodArguments: [
-                                requestLog?.params?.find(param => param.name === 'id')?.value
-                            ]
+            } else {
+                const celerTransferId = requestLog.params.find(param => param.name === 'id')?.value;
+                const transferHistory = await Injector.httpClient.get<CelerTransferHistoryResponse>(
+                    'https://cbridge-prod2.celer.network',
+                    {
+                        params: {
+                            next_page_token: '',
+                            page_size: 1,
+                            addr: Injector.web3Private.address
                         }
-                    )
-            ) as CelerSwapStatus;
+                    }
+                );
+                const trade = transferHistory.history.find(
+                    item => item.transferId === celerTransferId
+                );
+                dstTxData.txHash = trade?.dst_block_tx_link?.split('/tx/')[1] || null;
 
-            if (dstTxStatus === CelerSwapStatus.NULL) {
-                dstTxData.txStatus = CrossChainTxStatus.PENDING;
-            }
+                if (!trade) {
+                    return dstTxData;
+                }
 
-            if (dstTxStatus === CelerSwapStatus.FAILED) {
-                dstTxData.txStatus = CrossChainTxStatus.FAIL;
-            }
+                if (
+                    [
+                        CelerTransferStatus.TRANSFER_UNKNOWN,
+                        CelerTransferStatus.TRANSFER_WAITING_FOR_SGN_CONFIRMATION,
+                        CelerTransferStatus.TRANSFER_WAITING_FOR_FUND_RELEASE,
+                        CelerTransferStatus.TRANSFER_TO_BE_REFUNDED,
+                        CelerTransferStatus.TRANSFER_SUBMITTING,
+                        CelerTransferStatus.TRANSFER_REQUESTING_REFUND,
+                        CelerTransferStatus.TRANSFER_REFUND_TO_BE_CONFIRMED,
+                        CelerTransferStatus.TRANSFER_CONFIRMING_YOUR_REFUND
+                    ].includes(trade.status)
+                ) {
+                    dstTxData.txStatus = CrossChainTxStatus.PENDING;
+                }
 
-            if (dstTxStatus === CelerSwapStatus.SUCCESS) {
-                dstTxData.txStatus = CrossChainTxStatus.SUCCESS;
+                if (trade.status === CelerTransferStatus.TRANSFER_COMPLETED) {
+                    dstTxData.txStatus = CrossChainTxStatus.SUCCESS;
+                }
+
+                if (trade.status === CelerTransferStatus.TRANSFER_FAILED) {
+                    dstTxData.txStatus = CrossChainTxStatus.FAIL;
+                }
+
+                if (trade.status === CelerTransferStatus.TRANSFER_REFUNDED) {
+                    dstTxData.txStatus = CrossChainTxStatus.FALLBACK;
+                }
             }
 
             return dstTxData;
