@@ -164,7 +164,7 @@ export class CrossChainStatusManager {
             );
             const dstTxData: DstTxData = {
                 txStatus: CrossChainTxStatus.UNKNOWN,
-                txHash: null
+                txHash: rangoTradeStatusResponse.bridgeData?.destTxHash || null
             };
 
             if (rangoTradeStatusResponse.status === TransactionStatus.SUCCESS) {
@@ -172,17 +172,15 @@ export class CrossChainStatusManager {
             }
 
             if (rangoTradeStatusResponse.status === TransactionStatus.FAILED) {
-                const type = rangoTradeStatusResponse?.output?.type;
+                dstTxData.txStatus = CrossChainTxStatus.FAIL;
 
+                const type = rangoTradeStatusResponse?.output?.type;
                 if (type === 'MIDDLE_ASSET_IN_SRC' || type === 'MIDDLE_ASSET_IN_DEST') {
                     dstTxData.txStatus = CrossChainTxStatus.FALLBACK;
                 }
-
                 if (type === 'REVERTED_TO_INPUT') {
                     dstTxData.txStatus = CrossChainTxStatus.REVERT;
                 }
-
-                dstTxData.txStatus = CrossChainTxStatus.FAIL;
             }
 
             if (
@@ -245,9 +243,9 @@ export class CrossChainStatusManager {
                 if (dstTxStatus === SymbiosisSwapStatus.SUCCESS) {
                     if (data.toBlockchain !== BLOCKCHAIN_NAME.BITCOIN) {
                         dstTxData.txStatus = CrossChainTxStatus.SUCCESS;
+                    } else {
+                        dstTxData = await this.getBitcoinStatus(dstHash);
                     }
-
-                    dstTxData = await this.getBitcoinStatus(dstHash);
                 }
 
                 return dstTxData;
@@ -346,14 +344,14 @@ export class CrossChainStatusManager {
             );
             if (!requestLog) {
                 const eightHours = 60 * 60 * 1000 * 8;
-                if (!requestLog && Date.now() > data.txTimestamp + eightHours) {
-                    dstTxData.txStatus = CrossChainTxStatus.FAIL;
-                }
-                dstTxData.txStatus = CrossChainTxStatus.PENDING;
+                dstTxData.txStatus =
+                    !requestLog && Date.now() > data.txTimestamp + eightHours
+                        ? CrossChainTxStatus.FAIL
+                        : CrossChainTxStatus.PENDING;
             } else {
                 const celerTransferId = requestLog.params.find(param => param.name === 'id')?.value;
                 const transferHistory = await Injector.httpClient.get<CelerTransferHistoryResponse>(
-                    'https://cbridge-prod2.celer.network',
+                    'https://cbridge-prod2.celer.network/v2/transferHistory',
                     {
                         params: {
                             next_page_token: '',
