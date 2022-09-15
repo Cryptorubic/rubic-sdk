@@ -218,7 +218,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         }
         methodArguments.push(data);
 
-        const sourceValue = this.from.isNative ? this.from.stringWeiAmount : '0';
+        const sourceValue = new BigNumber(this.route.steps[0]!.estimate.data.value);
         const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
         const value = new BigNumber(sourceValue).plus(fixedFee).toFixed(0);
 
