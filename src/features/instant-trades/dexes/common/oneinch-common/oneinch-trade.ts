@@ -7,7 +7,6 @@ import {
 } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
 import { Injector } from '@rsdk-core/sdk/injector';
-import BigNumber from 'bignumber.js';
 import { Cache } from 'src/common';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import { TransactionReceipt } from 'web3-eth';
@@ -126,15 +125,12 @@ export class OneinchTrade extends InstantTrade {
             return false;
         }
 
-        const response = await this.httpClient.get<{
-            allowance: string;
-        }>(`${this.apiBaseUrl}/approve/allowance`, {
-            params: {
-                tokenAddress: this.nativeSupportedFrom.address,
-                walletAddress: this.walletAddress
-            }
-        });
-        const allowance = new BigNumber(response.allowance);
+        const allowance = await this.web3Public.getAllowance(
+            this.nativeSupportedFrom.address,
+            this.walletAddress,
+            this.contractAddress
+        );
+
         return allowance.lt(this.nativeSupportedFrom.weiAmount);
     }
 

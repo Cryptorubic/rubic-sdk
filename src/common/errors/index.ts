@@ -12,6 +12,7 @@ export { WrongNetworkError } from './swap/wrong-network.error';
 export { CrossChainIsUnavailableError } from './cross-chain/cross-chain-is-unavailable.error';
 export { InsufficientFundsGasPriceValueError } from './cross-chain/insufficient-funds-gas-price-value.error';
 export { MaxGasPriceOverflowError } from './cross-chain/max-gas-price-overflow.error';
+export { TooLowAmountError } from './cross-chain/too-low-amount.error';
 export { Web3Error } from './blockchain/web3.error';
 export { LowGasError } from './blockchain/low-gas.error';
 export { HealthcheckError } from './blockchain/healthcheck.error';

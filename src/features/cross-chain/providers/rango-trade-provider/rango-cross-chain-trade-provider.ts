@@ -167,7 +167,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                     {
                         from: fromToken,
                         to,
-                        toTokenAmountMin: new BigNumber(route.outputAmount),
+                        toTokenAmountMin: Web3Pure.fromWei(route.outputAmount, toToken.decimals),
                         priceImpact: fromToken.calculatePriceImpactPercent(toToken),
                         itType,
                         bridgeType,

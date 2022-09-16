@@ -1,7 +1,11 @@
 import { BlockchainsInfo, PriceTokenAmount, Web3Public, Web3Pure } from 'src/core';
 import { IRoute } from '@viaprotocol/router-sdk/dist/types';
 import { Via } from '@viaprotocol/router-sdk';
-import { compareAddresses, FailedToCheckForTransactionReceiptError } from 'src/common';
+import {
+    compareAddresses,
+    FailedToCheckForTransactionReceiptError,
+    RubicSdkError
+} from 'src/common';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
 import { GasData } from 'src/features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/sdk/injector';
@@ -30,6 +34,8 @@ import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-cross-chain-supported-blockchain';
 
 export class ViaCrossChainTrade extends CrossChainTrade {
+    private readonly calculationWalletAddress: string;
+
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount,
@@ -61,6 +67,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
                         itType: { from: undefined, to: undefined },
                         bridgeType: BRIDGE_TYPE.DE_BRIDGE
                     },
+                    EMPTY_ADDRESS,
                     EMPTY_ADDRESS
                 ).getContractParams({});
 
@@ -138,7 +145,8 @@ export class ViaCrossChainTrade extends CrossChainTrade {
             itType: ItType;
             bridgeType: BridgeType;
         },
-        providerAddress: string
+        providerAddress: string,
+        calculationWalletAddress: string
     ) {
         super(providerAddress);
 
@@ -152,12 +160,13 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.itType = crossChainTrade.itType;
         this.bridgeType = crossChainTrade.bridgeType;
-
+        this.calculationWalletAddress = calculationWalletAddress;
         this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
+        this.checkViaErrors();
         await this.checkAllowanceAndApprove(options);
         CrossChainTrade.checkReceiverAddress(options?.receiverAddress);
 
@@ -290,5 +299,18 @@ export class ViaCrossChainTrade extends CrossChainTrade {
             this.cryptoFeeToken.tokenAmount
         );
         return fromUsd.plus(usdCryptoFee).dividedBy(this.to.tokenAmount);
+    }
+
+    private checkViaErrors(): void {
+        this.checkAddressEquality();
+    }
+
+    private checkAddressEquality(): void {
+        if (compareAddresses(Injector.web3Private.address, this.calculationWalletAddress)) {
+            return;
+        }
+        throw new RubicSdkError(
+            'Calculation and swap wallet addresses are different. You should recalculate trade.'
+        );
     }
 }
