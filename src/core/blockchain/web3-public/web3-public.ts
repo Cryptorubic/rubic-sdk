@@ -286,6 +286,9 @@ export class Web3Public {
         address: string,
         tokensAddresses: string[]
     ): Promise<BigNumber[]> {
+        if (MULTICALL_ADDRESSES[this.blockchainName]) {
+            return new Array(tokensAddresses.length).fill(new BigNumber(0));
+        }
         const contract = new this.web3.eth.Contract(
             ERC20_TOKEN_ABI as AbiItem[],
             tokensAddresses[0]
