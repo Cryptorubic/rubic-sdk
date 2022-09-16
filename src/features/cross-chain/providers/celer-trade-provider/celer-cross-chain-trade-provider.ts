@@ -25,12 +25,12 @@ import { CelerDirectCrossChainContractTrade } from '@rsdk-features/cross-chain/p
 import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-data';
 import { wrappedNative } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/wrapped-native';
 import { CelerRubicCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
-import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { LowToSlippageError } from '@rsdk-common/errors/cross-chain/low-to-slippage.error';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { celerCrossChainContractAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import { TooLowAmountError } from 'src/common/errors/cross-chain/too-low-amount.error';
+import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 
 interface CelerCrossChainOptions extends RequiredCrossChainOptions {
     isUniV2?: boolean;
@@ -63,7 +63,7 @@ export class CelerCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         from: PriceTokenAmount,
         to: PriceToken,
         options: CelerCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
+    ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = to.blockchain;
         if (

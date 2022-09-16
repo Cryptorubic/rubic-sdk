@@ -5,7 +5,6 @@ import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cro
 
 import { Injector } from '@rsdk-core/sdk/injector';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
-import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import {
     DeBridgeCrossChainSupportedBlockchain,
     deBridgeCrossChainSupportedBlockchains
@@ -24,6 +23,7 @@ import BigNumber from 'bignumber.js';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { RubicSdkError } from 'src/common';
 import { TooLowAmountError } from 'src/common/errors/cross-chain/too-low-amount.error';
+import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 
 export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -58,7 +58,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
         from: PriceTokenAmount,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
+    ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = toToken.blockchain;
         if (

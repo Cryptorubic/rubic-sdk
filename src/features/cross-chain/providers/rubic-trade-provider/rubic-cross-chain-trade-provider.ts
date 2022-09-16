@@ -16,8 +16,8 @@ import { RubicCrossChainContractTrade } from '@rsdk-features/cross-chain/provide
 import { RubicItCrossChainContractTrade } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade/rubic-it-cross-chain-contract-trade';
 import { ItCalculatedTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/models/it-calculated-trade';
 import { CelerRubicCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/celer-rubic/celer-rubic-cross-chain-trade-provider';
-import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
+import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 
 export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -50,7 +50,7 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
+    ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = to.blockchain;
         if (
