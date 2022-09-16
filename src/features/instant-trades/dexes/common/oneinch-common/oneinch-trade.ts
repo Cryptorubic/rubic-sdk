@@ -141,7 +141,7 @@ export class OneinchTrade extends InstantTrade {
 
         try {
             const apiTradeData = await this.getTradeData(
-                undefined,
+                false,
                 undefined,
                 options.receiverAddress
             ).catch(err => {

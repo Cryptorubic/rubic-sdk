@@ -286,7 +286,7 @@ export class Web3Public {
         address: string,
         tokensAddresses: string[]
     ): Promise<BigNumber[]> {
-        if (MULTICALL_ADDRESSES[this.blockchainName]) {
+        if (MULTICALL_ADDRESSES[this.blockchainName] === 'NONE') {
             return new Array(tokensAddresses.length).fill(new BigNumber(0));
         }
         const contract = new this.web3.eth.Contract(
