@@ -21,6 +21,9 @@ import { WannaSwapAuroraProvider } from '@rsdk-features/instant-trades/dexes/aur
 import { SushiSwapTelosProvider } from 'src/features/instant-trades/dexes/telos/sushi-swap-telos/sushi-swap-telos-provider';
 import { ZappyProvider } from 'src/features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
 import { OolongSwapProvider } from 'src/features/instant-trades/dexes/boba/oolong-swap/oolong-swap-provider';
+import { UniSwapV2EthereumPowProvider } from 'src/features/instant-trades/dexes/ethereum-pow/uni-swap-v2-ethereum-pow/uni-swap-v2-ethereum-pow-provider';
+
+import { SushiSwapEthereumPowProvider } from 'src/features/instant-trades/dexes/ethereum-pow/sushi-swap-ethereum-pow/sushi-swap-ethereum-pow-provider';
 
 export const UniswapV2TradeProviders = [
     // ethereum
@@ -56,5 +59,8 @@ export const UniswapV2TradeProviders = [
     SushiSwapTelosProvider,
     ZappyProvider,
     // Boba
-    OolongSwapProvider
+    OolongSwapProvider,
+    // Ethereum PoW
+    UniSwapV2EthereumPowProvider,
+    SushiSwapEthereumPowProvider
 ] as const;

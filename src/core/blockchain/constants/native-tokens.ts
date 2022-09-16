@@ -137,5 +137,11 @@ export const nativeTokensList: NativeTokensList = {
         name: 'Bitcoin',
         symbol: 'BTC',
         decimals: 8
+    },
+    [BLOCKCHAIN_NAME.ETHEREUM_POW]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'Ethereum PoW',
+        symbol: 'ETHW',
+        decimals: 18
     }
 };
