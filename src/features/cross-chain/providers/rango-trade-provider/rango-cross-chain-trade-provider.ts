@@ -18,11 +18,12 @@ import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-ch
 import { TradeType } from 'src/features/instant-trades';
 import { rangoProviders } from 'src/features/instant-trades/dexes/common/rango/constants/rango-providers';
 import { NATIVE_TOKEN_ADDRESS } from 'src/core/blockchain/constants/native-token-address';
+import { UnsupportedReceiverAddressError } from 'src/common/errors/cross-chain/unsupported-receiver-address.error';
+import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';
 import { CrossChainTradeProvider } from '../common/cross-chain-trade-provider';
-import { WrappedCrossChainTrade } from '../common/models/wrapped-cross-chain-trade';
 import { RANGO_CONTRACT_ADDRESSES } from './constants/contract-address';
 import { RANGO_API_KEY } from './constants/rango-api-key';
 import {
@@ -79,16 +80,22 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
         return false;
     }
 
+    // @TODO Reduce complexity
+
     public async calculate(
         fromToken: PriceTokenAmount,
         toToken: PriceTokenAmount,
         options: RequiredCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
+    ): Promise<CalculationResult> {
+        if (options.receiverAddress) {
+            throw new UnsupportedReceiverAddressError();
+        }
+
         const fromBlockchain = fromToken.blockchain as RangoCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as RangoCrossChainSupportedBlockchain;
 
         if (!this.isSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return { trade: null };
+            return null;
         }
 
         await this.checkContractState(
@@ -187,7 +194,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                 return { trade: rangoTrade };
             }
 
-            return { trade: null };
+            return null;
         } catch (error: unknown) {
             const rubicSdkError = CrossChainTradeProvider.parseError(error);
             return { trade: null, error: rubicSdkError };
