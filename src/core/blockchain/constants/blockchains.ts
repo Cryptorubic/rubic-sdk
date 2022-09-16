@@ -212,5 +212,16 @@ export const blockchains: ReadonlyArray<Blockchain> = [
             symbol: 'BTC',
             decimals: 8
         })
+    },
+    {
+        id: 10001,
+        name: BLOCKCHAIN_NAME.ETHEREUM_POW,
+        nativeCoin: new Token({
+            blockchain: BLOCKCHAIN_NAME.ETHEREUM_POW,
+            address: '',
+            name: 'Ethereum PoW',
+            symbol: 'ETHW',
+            decimals: 18
+        })
     }
 ];
