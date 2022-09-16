@@ -11,7 +11,11 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
 import { Injector } from 'src/core/sdk/injector';
 import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
-import { compareAddresses, FailedToCheckForTransactionReceiptError } from 'src/common';
+import {
+    compareAddresses,
+    FailedToCheckForTransactionReceiptError,
+    UnsupportedReceiverAddressError
+} from 'src/common';
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
@@ -160,6 +164,10 @@ export class RangoCrossChainTrade extends CrossChainTrade {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string> {
+        if (options?.receiverAddress) {
+            throw new UnsupportedReceiverAddressError();
+        }
+
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
         const { onConfirm } = options;
