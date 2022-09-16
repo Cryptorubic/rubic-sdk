@@ -14,7 +14,7 @@ import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
 import {
     compareAddresses,
     FailedToCheckForTransactionReceiptError,
-    RubicSdkError
+    UnsupportedReceiverAddressError
 } from 'src/common';
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
@@ -165,7 +165,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string> {
         if (options?.receiverAddress) {
-            throw new RubicSdkError("Selected provider doesn't support receiver address");
+            throw new UnsupportedReceiverAddressError();
         }
 
         await this.checkTradeErrors();

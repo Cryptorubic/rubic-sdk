@@ -15,7 +15,7 @@ import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
 import { SwapRequestError } from 'src/common/errors/swap/swap-request.error';
 import { LifiPairIsUnavailable } from 'src/common/errors/swap/lifi-pair-is-unavailable';
-import { RubicSdkError } from 'src/common';
+import { RubicSdkError, UnsupportedReceiverAddressError } from 'src/common';
 
 interface LifiTransactionRequest {
     data: string;
@@ -112,7 +112,7 @@ export class LifiTrade extends InstantTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
         if (options?.receiverAddress) {
-            throw new RubicSdkError("Selected provider doesn't support receiver address");
+            throw new UnsupportedReceiverAddressError();
         }
 
         await this.checkWalletState();
