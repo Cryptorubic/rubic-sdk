@@ -238,14 +238,14 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         );
     }
 
-    private getCallParameters(fromAddress?: string) {
+    private getCallParameters(receiverAddress?: string) {
         const { amountIn, amountOut } = this.getAmountInAndAmountOut();
         const amountParameters = this.from.isNative ? [amountOut] : [amountIn, amountOut];
 
         return [
             ...amountParameters,
             this.wrappedPath.map(t => t.address),
-            fromAddress || this.walletAddress,
+            receiverAddress || this.walletAddress,
             this.deadlineMinutesTimestamp
         ];
     }
@@ -262,15 +262,10 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             return this.supportedFeeSwapMethod;
         }
 
-        const regularParameters = this.getSwapParametersByMethod(
-            this.regularSwapMethod,
-            options,
-            fromAddress
-        );
+        const regularParameters = this.getSwapParametersByMethod(this.regularSwapMethod, options);
         const supportedFeeParameters = this.getSwapParametersByMethod(
             this.supportedFeeSwapMethod,
-            options,
-            fromAddress
+            options
         );
 
         const regularMethodResult = await tryExecuteAsync(
@@ -299,8 +294,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     private getSwapParametersByMethod(
         method: string,
-        options: SwapTransactionOptions,
-        fromAddress?: string
+        options: SwapTransactionOptions
     ): Parameters<InstanceType<typeof EvmWeb3Private>['executeContractMethod']> {
         const value = this.nativeValueToSend;
         const { gas, gasPrice } = this.getGasParams(options);
@@ -309,7 +303,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             this.contractAddress,
             (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
             method,
-            this.getCallParameters(fromAddress),
+            this.getCallParameters(options?.receiverAddress),
             {
                 onTransactionHash: options.onConfirm,
                 value,

@@ -152,6 +152,13 @@ export const nativeTokensList = {
         symbol: 'ASTR',
         decimals: 18
     }),
+    [BLOCKCHAIN_NAME.ETHEREUM_POW]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ETHEREUM_POW,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ethereum PoW',
+        symbol: 'ETHW',
+        decimals: 18
+    }),
     [BLOCKCHAIN_NAME.BITCOIN]: new Token({
         blockchain: BLOCKCHAIN_NAME.BITCOIN,
         address: BitcoinWeb3Pure.nativeTokenAddress,

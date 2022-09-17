@@ -22,6 +22,7 @@ import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/comm
 import BigNumber from 'bignumber.js';
 import { TradeType } from 'src/features/instant-trades/models/trade-type';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 
 export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -52,7 +53,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
+    ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = toToken.blockchain;
         if (

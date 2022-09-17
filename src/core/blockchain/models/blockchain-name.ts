@@ -17,7 +17,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     MOONBEAM: 'MOONBEAM',
     CELO: 'CELO',
     BOBA: 'BOBA',
-    ASTAR: 'ASTAR'
+    ASTAR: 'ASTAR',
+    ETHEREUM_POW: 'ETHW'
 } as const;
 
 export const BLOCKCHAIN_NAME = {

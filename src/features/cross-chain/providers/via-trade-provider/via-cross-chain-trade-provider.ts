@@ -1,5 +1,4 @@
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import {
     IActionStepTool,
     IGetRoutesRequestParams,
@@ -29,6 +28,7 @@ import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/comm
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 
 interface ToolType extends IActionStepTool {
     type: 'swap' | 'cross';
@@ -59,7 +59,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
+    ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = toToken.blockchain;
         if (

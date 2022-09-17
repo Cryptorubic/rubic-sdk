@@ -6,7 +6,6 @@ import {
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { OolongSwapProvider } from 'src/features/instant-trades/dexes/boba/oolong-swap/oolong-swap-provider';
-import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { OneinchEthereumProvider } from 'src/features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
 import { OneinchBscProvider } from 'src/features/instant-trades/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
 import {
@@ -48,6 +47,7 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 import BigNumber from 'bignumber.js';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -93,7 +93,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
+    ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as SymbiosisCrossChainSupportedBlockchain;
         if (!this.isSupportedBlockchains(fromBlockchain, toBlockchain)) {
@@ -350,7 +350,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 swapParams.tokenAmountIn,
                 swapParams.tokenOut,
                 swapParams.fromAddress,
-                swapParams.fromAddress,
+                swapParams.receiverAddress || swapParams.fromAddress,
                 swapParams.fromAddress,
                 swapParams.slippage,
                 swapParams.deadline,

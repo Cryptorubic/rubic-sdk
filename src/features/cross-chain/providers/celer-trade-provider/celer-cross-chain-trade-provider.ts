@@ -38,6 +38,7 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { MinMaxAmounts } from 'src/features/cross-chain/providers/celer-trade-provider/models/min-max-amounts';
 import { CrossChainSupportedInstantTradeProvider } from 'src/features/cross-chain/providers/celer-trade-provider/models/cross-chain-supported-instant-trade';
 import { CelerCrossChainContractData } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
+import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 
 interface CelerCrossChainOptions extends RequiredCrossChainOptions {
     isUniV2?: boolean;
@@ -70,7 +71,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceToken<EvmBlockchainName>,
         options: CelerCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
+    ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = to.blockchain;
         if (
