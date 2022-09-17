@@ -4,7 +4,7 @@ import { TRC20_CONTRACT_ABI } from 'src/core/blockchain/web3-public-service/web3
 import { TronWebProvider } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-web-provider';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
-import { BLOCKCHAIN_NAME, TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
 import { TRON_MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/constants/tron-multicall-abi';
 import { TronMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-multicall-response';
@@ -20,7 +20,7 @@ import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { TransactionInfo } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/transaction-info';
 
-export class TronWeb3Public extends Web3Public<TronBlockchainName> {
+export class TronWeb3Public extends Web3Public {
     protected readonly tokenContractAbi = TRC20_CONTRACT_ABI;
 
     constructor(private readonly tronWeb: typeof TronWeb) {

@@ -1,6 +1,5 @@
 import BigNumber from 'bignumber.js';
 import { MULTICALL_ADDRESSES } from 'src/core/blockchain/web3-public-service/web3-public/constants/multicall-addresses';
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { SupportedTokenField } from 'src/core/blockchain/web3-public-service/web3-public/models/supported-token-field';
 import { AbiItem } from 'web3-utils';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
@@ -10,19 +9,20 @@ import { Cache } from 'src/common/utils/decorators';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
  * To send transaction or execute contract method use {@link Web3Private}.
  */
-export abstract class Web3Public<T extends BlockchainName = BlockchainName> {
+export abstract class Web3Public {
     protected readonly multicallAddress = MULTICALL_ADDRESSES[this.blockchainName];
 
     protected readonly Web3Pure = Web3Pure[BlockchainsInfo.getChainType(this.blockchainName)];
 
     protected abstract readonly tokenContractAbi: AbiItem[];
 
-    protected constructor(protected readonly blockchainName: T) {}
+    protected constructor(protected readonly blockchainName: Web3PublicSupportedBlockchain) {}
 
     /**
      * Sets new provider to web3 instance.

@@ -8,6 +8,7 @@ import { TransactionConfig } from 'web3-core';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
+import { UnsupportedReceiverAddressError } from 'src/common/errors';
 
 interface ZrxTradeStruct {
     from: PriceTokenAmount<EvmBlockchainName>;

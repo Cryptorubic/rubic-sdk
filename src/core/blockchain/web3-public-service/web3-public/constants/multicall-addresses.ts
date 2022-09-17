@@ -1,8 +1,7 @@
-import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 
-const NONE = 'NONE';
-
-export const MULTICALL_ADDRESSES: Record<BlockchainName, string> = {
+export const MULTICALL_ADDRESSES: Record<Web3PublicSupportedBlockchain, string> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: '0x15dc8b5ed578AA7a019dd0139B330cfD625cA795',
     [BLOCKCHAIN_NAME.POLYGON]: '0x176730799C812d70C6608F51aEa6C7e5cdA7eA50',
@@ -23,8 +22,5 @@ export const MULTICALL_ADDRESSES: Record<BlockchainName, string> = {
     [BLOCKCHAIN_NAME.BOBA]: '0x96a5Eac3fa7BB87c61881Dc093884C06719Bcd1E',
     [BLOCKCHAIN_NAME.ASTAR]: '0xcA11bde05977b3631167028862bE2a173976CA11',
     [BLOCKCHAIN_NAME.ETHEREUM_POW]: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
-    [BLOCKCHAIN_NAME.BITCOIN]: NONE,
-    [BLOCKCHAIN_NAME.SOLANA]: NONE,
-    [BLOCKCHAIN_NAME.NEAR]: NONE,
     [BLOCKCHAIN_NAME.TRON]: 'T9ziQU4EBteJzjzMzhHELdhgWFqwzS5Vki'
 };

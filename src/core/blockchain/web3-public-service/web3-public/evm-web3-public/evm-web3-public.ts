@@ -28,7 +28,7 @@ import { EventData } from 'web3-eth-contract';
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
  * To send transaction or execute contract method use {@link Web3Private}.
  */
-export class EvmWeb3Public extends Web3Public<EvmBlockchainName> {
+export class EvmWeb3Public extends Web3Public {
     protected readonly tokenContractAbi = ERC20_TOKEN_ABI;
 
     constructor(

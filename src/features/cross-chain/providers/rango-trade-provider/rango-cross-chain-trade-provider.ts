@@ -3,8 +3,11 @@ import {
     rangoCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-cross-chain-supported-blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
-import { CrossChainMaxAmountError, CrossChainMinAmountError } from 'src/common/errors';
+import {
+    CrossChainMaxAmountError,
+    CrossChainMinAmountError,
+    UnsupportedReceiverAddressError
+} from 'src/common/errors';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
 import { RANGO_API_KEY } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-api-key';
@@ -31,6 +34,7 @@ import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/comm
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
 import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 
 export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RANGO;
@@ -57,24 +61,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
         );
     }
 
-    public isSupportedToken(token: PriceTokenAmount): boolean {
-        if (this.meta) {
-            const newLocal = token.address === NATIVE_TOKEN_ADDRESS;
-            if (newLocal) {
-                return true;
-            }
-
-            return this.meta.tokens.some(
-                item =>
-                    item.address?.toLocaleLowerCase() === token.address.toLowerCase() &&
-                    item.blockchain === token.blockchain
-            );
-        }
-        return false;
-    }
-
     // @TODO Reduce complexity
-
     public async calculate(
         fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceTokenAmount<EvmBlockchainName>,
