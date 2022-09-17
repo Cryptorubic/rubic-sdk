@@ -4,7 +4,7 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { GasData } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
-import { NotWhitelistedProviderError } from 'src/common/errors';
+import { NotWhitelistedProviderError, UnsupportedReceiverAddressError } from 'src/common/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -16,6 +16,7 @@ import { TradeType } from 'src/features/instant-trades/models/trade-type';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { EvmSwapTransactionOptions } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/evm-swap-transaction-options';
 import { RANGO_BLOCKCHAIN_NAME } from './constants/rango-blockchain-name';
 import { RANGO_API_KEY } from './constants/rango-api-key';
 import { RangoCrossChainSupportedBlockchain } from './constants/rango-cross-chain-supported-blockchain';
@@ -155,6 +156,14 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         this.gasData = crossChainTrade.gasData;
 
         this.rangoClientRef = rangoClientRef;
+    }
+
+    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
+        if (options?.receiverAddress) {
+            throw new UnsupportedReceiverAddressError();
+        }
+
+        return super.swap(options);
     }
 
     public async getContractParams(): Promise<ContractParams> {
