@@ -1,4 +1,4 @@
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import {
     ViaCrossChainSupportedBlockchain,
     viaCrossChainSupportedBlockchains
@@ -13,7 +13,7 @@ export const viaContractAddress: Record<ViaCrossChainSupportedBlockchain, string
         };
     }, {} as Record<ViaCrossChainSupportedBlockchain, string>);
 
-export const viaContractAbi = commonCrossChainAbi.concat({
+export const viaContractAbi = evmCommonCrossChainAbi.concat({
     inputs: [],
     name: 'getAvailableRouters',
     outputs: [{ internalType: 'address[]', name: '', type: 'address[]' }],

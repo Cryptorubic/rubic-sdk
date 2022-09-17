@@ -15,7 +15,7 @@ import {
 import { DebridgeCrossChainTrade } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade';
 import { Injector } from 'src/core/injector/injector';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
@@ -173,7 +173,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                     fromBlockchain,
                     providerAddress,
                     DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-                    commonCrossChainAbi
+                    evmCommonCrossChainAbi
                 ),
                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
             },
@@ -182,7 +182,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
                     fromBlockchain,
                     providerAddress,
                     DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-                    commonCrossChainAbi
+                    evmCommonCrossChainAbi
                 ),
                 tokenSymbol: 'USDC'
             },

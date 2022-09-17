@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 
-export type EvmTransactionOptions = EvmBasicTransactionOptions & {
+export interface EvmTransactionOptions extends EvmBasicTransactionOptions {
     /**
      * Encoded data, which will be executed in transaction.
      */
@@ -11,4 +11,4 @@ export type EvmTransactionOptions = EvmBasicTransactionOptions & {
      * Native token amount in wei.
      */
     value?: BigNumber | string;
-};
+}

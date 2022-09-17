@@ -1,12 +1,7 @@
 import BigNumber from 'bignumber.js';
+import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 
-export type EvmBasicTransactionOptions = {
-    /**
-     * Callback to be called, when user confirm swap transaction.
-     * @param hash Transaction hash.
-     */
-    onTransactionHash?: (hash: string) => void;
-
+export interface EvmBasicTransactionOptions extends BasicTransactionOptions {
     /**
      * Transaction gas limit.
      */
@@ -16,4 +11,4 @@ export type EvmBasicTransactionOptions = {
      * Transaction gas price.
      */
     gasPrice?: BigNumber | string | number;
-};
+}

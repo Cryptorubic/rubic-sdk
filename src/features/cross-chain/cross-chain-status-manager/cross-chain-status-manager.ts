@@ -38,6 +38,7 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 export class CrossChainStatusManager {
     private readonly httpClient = Injector.httpClient;
 
+    // @ts-ignore @TODO add bridgers
     private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, getDstTxStatusFn> = {
         [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,

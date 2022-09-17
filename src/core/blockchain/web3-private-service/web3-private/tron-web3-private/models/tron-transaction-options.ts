@@ -1,10 +1,7 @@
-export interface TronTransactionOptions {
-    /**
-     * Callback to be called, when user confirm swap transaction.
-     * @param hash Transaction hash.
-     */
-    onTransactionHash?: (hash: string) => void;
+import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 
+export interface TronTransactionOptions extends BasicTransactionOptions {
     feeLimit?: number;
-    callValue?: number;
+
+    callValue?: number | string;
 }

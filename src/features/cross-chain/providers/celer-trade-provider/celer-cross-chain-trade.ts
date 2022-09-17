@@ -4,7 +4,6 @@ import {
 } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-fee-multipliers';
 import {
     CrossChainIsUnavailableError,
-    FailedToCheckForTransactionReceiptError,
     InsufficientFundsGasPriceValueError
 } from 'src/common/errors';
 import { CelerCrossChainContractData } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-data';
@@ -12,25 +11,25 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { CelerDirectCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-direct-cross-chain-trade/celer-direct-cross-chain-contract-trade';
-import { ContractParams } from 'src/features/cross-chain/models/contract-params';
-import { GasData } from 'src/features/cross-chain/providers/common/models/gas-data';
+import { ContractParams } from 'src/features/cross-chain/providers/common/models/contract-params';
+import { GasData } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
-import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
-import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { CelerItCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { TradeType } from 'src/features/instant-trades/models/trade-type';
 import BigNumber from 'bignumber.js';
 import { CelerCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
 import { Cache } from 'src/common/utils/decorators';
+import { EvmCrossChainTrade } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
+import { EvmSwapTransactionOptions } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/evm-swap-transaction-options';
+import { GetContractParamsOptions } from 'src/features/cross-chain/providers/common/models/get-contract-params-options';
 
 /**
  * Calculated Celer cross chain trade.
  */
-export class CelerCrossChainTrade extends CrossChainTrade {
+export class CelerCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
         fromTrade: CelerCrossChainContractTrade,
@@ -116,10 +115,6 @@ export class CelerCrossChainTrade extends CrossChainTrade {
 
     public readonly cryptoFeeToken: PriceTokenAmount;
 
-    protected readonly fromWeb3Public: EvmWeb3Public;
-
-    protected readonly toWeb3Public: EvmWeb3Public;
-
     /**
      * Gets price impact in source and target blockchains, based on tokens usd prices.
      */
@@ -164,9 +159,6 @@ export class CelerCrossChainTrade extends CrossChainTrade {
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.feeInfo = crossChainTrade.feeInfo;
 
-        this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.fromTrade.blockchain);
-        this.toWeb3Public = Injector.web3PublicService.getWeb3Public(this.toTrade.blockchain);
-
         this.transitFeeToken = crossChainTrade.transitFeeToken;
 
         this.from = this.fromTrade.fromToken;
@@ -192,54 +184,16 @@ export class CelerCrossChainTrade extends CrossChainTrade {
         this.toTokenAmountMin = this.toTrade.toTokenAmountMin;
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        await this.checkTradeErrors();
-        await this.checkAllowanceAndApprove(options);
-        CrossChainTrade.checkReceiverAddress(options?.receiverAddress);
-
-        const { onConfirm, gasLimit, gasPrice } = options;
-
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams({
-                receiverAddress: options?.receiverAddress || this.walletAddress
-            });
-
-        let transactionHash: string;
+    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
         try {
-            const onTransactionHash = (hash: string) => {
-                if (onConfirm) {
-                    onConfirm(hash);
-                }
-                transactionHash = hash;
-            };
-
-            await this.web3Private.tryExecuteContractMethod(
-                contractAddress,
-                contractAbi,
-                methodName,
-                methodArguments,
-                {
-                    gas: gasLimit,
-                    gasPrice,
-                    value,
-                    onTransactionHash
-                }
-            );
-
-            return transactionHash!;
+            return await super.swap(options);
         } catch (err) {
-            if (err instanceof FailedToCheckForTransactionReceiptError) {
-                return transactionHash!;
-            }
             return this.parseSwapErrors(err);
         }
     }
 
     protected async checkTradeErrors(): Promise<void | never> {
-        this.checkWalletConnected();
-        await this.checkBlockchainCorrect();
-
-        await Promise.all([this.checkContractsState(), this.checkUserBalance()]);
+        await Promise.all([super.checkTradeErrors(), this.checkContractsState()]);
     }
 
     private async checkContractsState(): Promise<void> {
@@ -264,12 +218,7 @@ export class CelerCrossChainTrade extends CrossChainTrade {
         throw err;
     }
 
-    public async getContractParams(
-        options: {
-            fromAddress?: string;
-            receiverAddress?: string;
-        } = {}
-    ): Promise<ContractParams> {
+    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const { fromTrade } = this;
 
         const contractAddress = fromTrade.contract.address;

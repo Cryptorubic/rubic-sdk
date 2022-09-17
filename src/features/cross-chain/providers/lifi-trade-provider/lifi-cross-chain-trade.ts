@@ -7,26 +7,26 @@ import {
     BridgeType
 } from 'src/features/cross-chain/providers/common/models/bridge-type';
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
-import { FailedToCheckForTransactionReceiptError, SwapRequestError } from 'src/common/errors';
-import { ContractParams } from 'src/features/cross-chain/models/contract-params';
+import { SwapRequestError } from 'src/common/errors';
+import { ContractParams } from 'src/features/cross-chain/providers/common/models/contract-params';
 import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
-import { GasData } from 'src/features/cross-chain/providers/common/models/gas-data';
+import { GasData } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
-import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
-import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import BigNumber from 'bignumber.js';
 import { Route } from '@lifi/sdk';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmCrossChainTrade } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
+import { EvmSwapTransactionOptions } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/evm-swap-transaction-options';
+import { GetContractParamsOptions } from 'src/features/cross-chain/providers/common/models/get-contract-params-options';
 
 /**
  * Calculated Celer cross chain trade.
  */
-export class LifiCrossChainTrade extends CrossChainTrade {
+export class LifiCrossChainTrade extends EvmCrossChainTrade {
     public readonly feeInfo: FeeInfo;
 
     /** @internal */
@@ -95,8 +95,6 @@ export class LifiCrossChainTrade extends CrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
 
-    private readonly httpClient = Injector.httpClient;
-
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount<EvmBlockchainName>;
@@ -104,8 +102,6 @@ export class LifiCrossChainTrade extends CrossChainTrade {
     public readonly toTokenAmountMin: BigNumber;
 
     public readonly gasData: GasData | null;
-
-    protected readonly fromWeb3Public: EvmWeb3Public;
 
     private readonly route: Route;
 
@@ -149,57 +145,20 @@ export class LifiCrossChainTrade extends CrossChainTrade {
 
         this.priceImpact = crossChainTrade.priceImpact;
         this.itType = crossChainTrade.itType;
-
-        this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        await this.checkTradeErrors();
-        await this.checkAllowanceAndApprove(options);
-        CrossChainTrade.checkReceiverAddress(options?.receiverAddress);
-
-        const { onConfirm, gasLimit, gasPrice } = options;
-
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams(options);
-
-        let transactionHash: string;
+    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
         try {
-            const onTransactionHash = (hash: string) => {
-                if (onConfirm) {
-                    onConfirm(hash);
-                }
-                transactionHash = hash;
-            };
-
-            await this.web3Private.tryExecuteContractMethod(
-                contractAddress,
-                contractAbi,
-                methodName,
-                methodArguments,
-                {
-                    gas: gasLimit,
-                    gasPrice,
-                    value,
-                    onTransactionHash
-                }
-            );
-
-            return transactionHash!;
+            return await super.swap(options);
         } catch (err) {
-            if (err instanceof FailedToCheckForTransactionReceiptError) {
-                return transactionHash!;
-            }
-
             if ([400, 500, 503].includes(err.code)) {
                 throw new SwapRequestError();
             }
-
             throw err;
         }
     }
 
-    public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
+    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const data = await this.getSwapData(options?.receiverAddress);
         const toChainId = blockchainId[this.to.blockchain];
         const fromContracts = lifiContractAddress[this.fromBlockchain];
@@ -227,7 +186,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
 
         return {
             contractAddress: this.fromContractAddress,
-            contractAbi: commonCrossChainAbi,
+            contractAbi: evmCommonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,
             value

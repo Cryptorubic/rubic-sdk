@@ -8,7 +8,7 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
 import { CrossChainIsUnavailableError, RubicSdkError } from 'src/common/errors';
 import { Injector } from 'src/core/injector/injector';
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
@@ -126,7 +126,7 @@ export abstract class CrossChainTradeProvider {
 
         const isPaused = await web3PublicService.callContractMethod<number>(
             rubicRouter,
-            commonCrossChainAbi,
+            evmCommonCrossChainAbi,
             'paused'
         );
 

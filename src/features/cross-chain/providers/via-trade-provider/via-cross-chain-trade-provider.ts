@@ -15,7 +15,7 @@ import {
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
 import { Injector } from 'src/core/injector/injector';
 import { viaContractAddress } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { bridges, BridgeType } from 'src/features/cross-chain/providers/common/models/bridge-type';
@@ -313,7 +313,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                     fromBlockchain,
                     providerAddress,
                     viaContractAddress[fromBlockchain],
-                    commonCrossChainAbi
+                    evmCommonCrossChainAbi
                 ),
                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
             },
@@ -322,7 +322,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                     fromBlockchain,
                     providerAddress,
                     viaContractAddress[fromBlockchain],
-                    commonCrossChainAbi
+                    evmCommonCrossChainAbi
                 ),
                 tokenSymbol: percentFeeToken.symbol
             },

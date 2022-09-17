@@ -1,32 +1,27 @@
 import BigNumber from 'bignumber.js';
-import { ContractParams } from 'src/features/cross-chain/models/contract-params';
+import { ContractParams } from 'src/features/cross-chain/providers/common/models/contract-params';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { GasData } from 'src/features/cross-chain/providers/common/models/gas-data';
+import { GasData } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
-import {
-    NotWhitelistedProviderError,
-    FailedToCheckForTransactionReceiptError
-} from 'src/common/errors';
-import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
+import { NotWhitelistedProviderError } from 'src/common/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
-import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { BridgeType } from 'src/features/cross-chain/providers/common/models/bridge-type';
 import { TradeType } from 'src/features/instant-trades/models/trade-type';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmCrossChainTrade } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { RANGO_BLOCKCHAIN_NAME } from './constants/rango-blockchain-name';
 import { RANGO_API_KEY } from './constants/rango-api-key';
-import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';
 import { RangoCrossChainSupportedBlockchain } from './constants/rango-cross-chain-supported-blockchain';
 import { RANGO_CONTRACT_ADDRESSES } from './constants/contract-address';
 
-export class RangoCrossChainTrade extends CrossChainTrade {
+export class RangoCrossChainTrade extends EvmCrossChainTrade {
     /**  @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -99,8 +94,6 @@ export class RangoCrossChainTrade extends CrossChainTrade {
 
     public readonly feeInfo: FeeInfo;
 
-    public readonly fromWeb3Public: EvmWeb3Public;
-
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RANGO;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
@@ -161,46 +154,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.gasData = crossChainTrade.gasData;
 
-        this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
         this.rangoClientRef = rangoClientRef;
-    }
-
-    public async swap(options: SwapTransactionOptions = {}): Promise<string> {
-        await this.checkTradeErrors();
-        await this.checkAllowanceAndApprove(options);
-        const { onConfirm } = options;
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams();
-
-        let transactionHash: string;
-        const onTransactionHash = (hash: string) => {
-            if (onConfirm) {
-                onConfirm(hash);
-            }
-            transactionHash = hash;
-        };
-
-        try {
-            await this.web3Private.tryExecuteContractMethod(
-                contractAddress,
-                contractAbi,
-                methodName,
-                methodArguments,
-                {
-                    value,
-                    onTransactionHash,
-                    gas: this.gasData?.gasLimit,
-                    gasPrice: this.gasData?.gasPrice
-                }
-            );
-
-            return transactionHash!;
-        } catch (err) {
-            if (err instanceof FailedToCheckForTransactionReceiptError) {
-                return transactionHash!;
-            }
-            throw err;
-        }
     }
 
     public async getContractParams(): Promise<ContractParams> {
@@ -235,7 +189,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
 
         return {
             contractAddress: this.fromContractAddress,
-            contractAbi: commonCrossChainAbi,
+            contractAbi: evmCommonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,
             value: msgValue
@@ -276,7 +230,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
             .getWeb3Public(this.from.blockchain)
             .callContractMethod<string[]>(
                 this.fromContractAddress,
-                commonCrossChainAbi,
+                evmCommonCrossChainAbi,
                 'getAvailableRouters'
             );
 

@@ -1,35 +1,23 @@
-import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
-import {
-    BLOCKCHAIN_NAME,
-    BlockchainName,
-    EvmBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { GasData } from 'src/features/cross-chain/providers/common/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { EncodeTransactionOptions } from 'src/features/instant-trades/models/encode-transaction-options';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import {
     InsufficientFundsError,
-    UnnecessaryApproveError,
     WalletNotConnectedError,
     WrongNetworkError,
     WrongReceiverAddressError
 } from 'src/common/errors';
-import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
-import { TransactionReceipt } from 'web3-eth';
-import { TransactionConfig } from 'web3-core';
 import { CrossChainTradeType } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { ContractParams } from 'src/features/cross-chain/models/contract-params';
-import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
-import { ItType } from 'src/features/cross-chain/providers/common/models/it-type';
-import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
+import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
+import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
+import { HttpClient } from 'src/core/http-client/models/http-client';
+import { BasicSwapTransactionOptions } from 'src/features/cross-chain/providers/common/models/basic-swap-transaction-options';
+import { BasicEncodeTransactionOptions } from 'src/features/cross-chain/providers/common/models/basic-encode-transaction-options';
+import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 
 /**
  * Abstract class for all cross chain providers' trades.
@@ -42,15 +30,13 @@ export abstract class CrossChainTrade {
      */
     public static checkReceiverAddress(
         receiverAddress: string | undefined,
-        toBlockchain?: BlockchainName
+        toBlockchain: BlockchainName
     ): void {
         if (!receiverAddress) {
             return;
         }
 
-        const toChainType = toBlockchain
-            ? BlockchainsInfo.getChainType(toBlockchain)
-            : CHAIN_TYPE.EVM;
+        const toChainType = BlockchainsInfo.getChainType(toBlockchain);
         if (Web3Pure[toChainType].isAddressCorrect(receiverAddress)) {
             return;
         }
@@ -65,7 +51,7 @@ export abstract class CrossChainTrade {
     /**
      * Token to sell with input amount.
      */
-    public abstract readonly from: PriceTokenAmount<EvmBlockchainName>;
+    public abstract readonly from: PriceTokenAmount;
 
     /**
      * Token to get with output amount.
@@ -78,22 +64,21 @@ export abstract class CrossChainTrade {
     public abstract readonly toTokenAmountMin: BigNumber;
 
     /**
-     * Gas fee info in source blockchain.
-     */
-    public abstract readonly gasData: GasData;
-
-    protected abstract readonly fromWeb3Public: EvmWeb3Public;
-
-    protected abstract get fromContractAddress(): string;
-
-    public abstract readonly itType: ItType;
-
-    /**
      * Swap fee information.
      */
     public abstract readonly feeInfo: FeeInfo;
 
-    protected get web3Private(): EvmWeb3Private {
+    protected abstract get fromContractAddress(): string;
+
+    protected get httpClient(): HttpClient {
+        return Injector.httpClient;
+    }
+
+    protected get fromWeb3Public(): Web3Public {
+        return Injector.web3PublicService.getWeb3Public(this.from.blockchain);
+    }
+
+    protected get web3Private(): Web3Private {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
     }
 
@@ -101,27 +86,32 @@ export abstract class CrossChainTrade {
         return this.web3Private.address;
     }
 
-    protected get networkFee(): BigNumber {
+    protected get methodName(): string {
+        return this.from.isNative ? 'routerCallNative' : 'routerCall';
+    }
+
+    public get networkFee(): BigNumber {
         return new BigNumber(this.feeInfo.fixedFee?.amount || 0).plus(
             this.feeInfo.cryptoFee?.amount || 0
         );
     }
 
-    protected get methodName(): string {
-        return this.from.isNative ? 'routerCallNative' : 'routerCall';
-    }
+    protected constructor(protected readonly providerAddress: string) {}
 
     /**
-     * Gets gas fee in source blockchain.
+     * Returns true, if allowance is not enough.
      */
-    public get estimatedGas(): BigNumber | null {
-        if (!this.gasData) {
-            return null;
-        }
-        return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
-    }
+    public abstract needApprove(): Promise<boolean>;
 
-    protected constructor(protected readonly providerAddress: string) {}
+    /**
+     * Sends approve transaction with connected wallet.
+     * @param options Transaction options.
+     * @param checkNeedApprove If true, first allowance is checked.
+     */
+    public abstract approve(
+        options: BasicTransactionOptions,
+        checkNeedApprove?: boolean
+    ): Promise<unknown>;
 
     /**
      * Sends swap transaction with connected wallet.
@@ -135,63 +125,13 @@ export abstract class CrossChainTrade {
      *
      * @param options Transaction options.
      */
-    public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
-
-    public abstract getContractParams(options: {
-        fromAddress?: string;
-        receiverAddress?: string;
-    }): Promise<ContractParams>;
+    public abstract swap(options?: BasicSwapTransactionOptions): Promise<string | never>;
 
     /**
-     * Returns true, if allowance is not enough.
+     * Builds transaction config, with encoded data.
+     * @param options Encode transaction options.
      */
-    public async needApprove(): Promise<boolean> {
-        this.checkWalletConnected();
-
-        if (this.from.isNative) {
-            return false;
-        }
-
-        const allowance = await this.fromWeb3Public.getAllowance(
-            this.from.address,
-            this.walletAddress,
-            this.fromContractAddress
-        );
-        return this.from.weiAmount.gt(allowance);
-    }
-
-    /**
-     * Sends approve transaction with connected wallet.
-     * @param options Transaction options.
-     * @param checkNeedApprove If true, first allowance is checked.
-     */
-    public async approve(
-        options: EvmBasicTransactionOptions,
-        checkNeedApprove = true
-    ): Promise<TransactionReceipt> {
-        if (checkNeedApprove) {
-            const needApprove = await this.needApprove();
-            if (!needApprove) {
-                throw new UnnecessaryApproveError();
-            }
-        }
-
-        this.checkWalletConnected();
-        await this.checkBlockchainCorrect();
-
-        const approveAmount =
-            this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ||
-            this.from.blockchain === BLOCKCHAIN_NAME.CRONOS
-                ? this.from.weiAmount
-                : 'infinity';
-
-        return this.web3Private.approveTokens(
-            this.from.address,
-            this.fromContractAddress,
-            approveAmount,
-            options
-        );
-    }
+    public abstract encode(options: BasicEncodeTransactionOptions): Promise<unknown>;
 
     /**
      * Build encoded approve transaction config.
@@ -201,53 +141,16 @@ export abstract class CrossChainTrade {
      * @param [options] Additional options.
      * @returns Encoded approve transaction config.
      */
-    public async encodeApprove(
+    public abstract encodeApprove(
         tokenAddress: string,
         spenderAddress: string,
         value: BigNumber | 'infinity',
-        options: EvmTransactionOptions = {}
-    ): Promise<TransactionConfig> {
-        return this.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
-    }
+        options: BasicTransactionOptions
+    ): Promise<unknown>;
 
-    protected async checkAllowanceAndApprove(
-        options?: Omit<SwapTransactionOptions, 'onConfirm'>
-    ): Promise<void> {
-        const needApprove = await this.needApprove();
-        if (!needApprove) {
-            return;
-        }
-
-        const approveOptions: EvmBasicTransactionOptions = {
-            onTransactionHash: options?.onApprove,
-            gas: options?.approveGasLimit,
-            gasPrice: options?.gasPrice
-        };
-
-        await this.approve(approveOptions, false);
-    }
-
-    /**
-     * Builds transaction config, with encoded data.
-     * @param options Encode transaction options.
-     */
-    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
-        const { gasLimit, gasPrice } = options;
-
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams({ fromAddress: options?.fromAddress });
-
-        return EvmWeb3Pure.encodeMethodCall(
-            contractAddress,
-            contractAbi,
-            methodName,
-            methodArguments,
-            value,
-            {
-                gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
-                gasPrice: gasPrice || this.gasData?.gasPrice.toFixed()
-            }
-        );
+    protected async checkTradeErrors(): Promise<void | never> {
+        this.checkWalletConnected();
+        await Promise.all([this.checkBlockchainCorrect(), this.checkUserBalance()]);
     }
 
     protected checkWalletConnected(): never | void {
@@ -272,13 +175,6 @@ export abstract class CrossChainTrade {
                 this.from.tokenAmount
             );
         }
-    }
-
-    protected async checkTradeErrors(): Promise<void | never> {
-        this.checkWalletConnected();
-        await this.checkBlockchainCorrect();
-
-        await this.checkUserBalance();
     }
 
     /**

@@ -3,13 +3,13 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { IRoute } from '@viaprotocol/router-sdk/dist/types';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
-import { GasData } from 'src/features/cross-chain/providers/common/models/gas-data';
+import { GasData } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import {
     viaContractAbi,
     viaContractAddress
 } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { PriceTokenAmount } from 'src/common/tokens';
 import {
@@ -17,26 +17,21 @@ import {
     BridgeType
 } from 'src/features/cross-chain/providers/common/models/bridge-type';
 import { Via } from '@viaprotocol/router-sdk';
-import {
-    NotWhitelistedProviderError,
-    FailedToCheckForTransactionReceiptError,
-    RubicSdkError,
-    SwapRequestError
-} from 'src/common/errors';
-import { ContractParams } from 'src/features/cross-chain/models/contract-params';
+import { NotWhitelistedProviderError, RubicSdkError, SwapRequestError } from 'src/common/errors';
+import { ContractParams } from 'src/features/cross-chain/providers/common/models/contract-params';
 import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-cross-chain-supported-blockchain';
-import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { ItType } from 'src/features/cross-chain/providers/common/models/it-type';
-import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmCrossChainTrade } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
+import { EvmSwapTransactionOptions } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/evm-swap-transaction-options';
+import { GetContractParamsOptions } from 'src/features/cross-chain/providers/common/models/get-contract-params-options';
 
-export class ViaCrossChainTrade extends CrossChainTrade {
+export class ViaCrossChainTrade extends EvmCrossChainTrade {
     private readonly calculationWalletAddress: string;
 
     /** @internal */
@@ -126,8 +121,6 @@ export class ViaCrossChainTrade extends CrossChainTrade {
 
     public readonly bridgeType: BridgeType;
 
-    protected readonly fromWeb3Public: EvmWeb3Public;
-
     protected get fromContractAddress(): string {
         return viaContractAddress[this.from.blockchain as ViaCrossChainSupportedBlockchain];
     }
@@ -165,66 +158,22 @@ export class ViaCrossChainTrade extends CrossChainTrade {
         this.itType = crossChainTrade.itType;
         this.bridgeType = crossChainTrade.bridgeType;
         this.calculationWalletAddress = calculationWalletAddress;
-        this.fromWeb3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        await this.checkTradeErrors();
+    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
         this.checkViaErrors();
-        await this.checkAllowanceAndApprove(options);
-        CrossChainTrade.checkReceiverAddress(options?.receiverAddress);
-
-        const { onConfirm, gasLimit, gasPrice } = options;
-
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams(options);
-
-        let transactionHash: string;
-        const onTransactionHash = (hash: string) => {
-            if (onConfirm) {
-                onConfirm(hash);
-            }
-            transactionHash = hash;
-        };
 
         try {
-            await this.web3Private.tryExecuteContractMethod(
-                contractAddress,
-                contractAbi,
-                methodName,
-                methodArguments,
-                {
-                    gas: gasLimit,
-                    gasPrice,
-                    value,
-                    onTransactionHash
-                }
-            );
-
-            try {
-                await this.via.startRoute({
-                    fromAddress: this.walletAddress,
-                    toAddress: options?.receiverAddress || this.walletAddress,
-                    routeId: this.route.routeId,
-                    txHash: transactionHash!
-                });
-            } catch {}
-
-            return transactionHash!;
+            return await super.swap(options);
         } catch (err) {
-            if (err instanceof FailedToCheckForTransactionReceiptError) {
-                return transactionHash!;
-            }
-
             if ([400, 500, 503].includes(err.code)) {
                 throw new SwapRequestError();
             }
-
             throw err;
         }
     }
 
-    public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
+    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const swapTransaction = await this.via.buildTx({
             routeId: this.route.routeId,
             fromAddress: this.walletAddress,
@@ -269,7 +218,7 @@ export class ViaCrossChainTrade extends CrossChainTrade {
 
         return {
             contractAddress: this.fromContractAddress,
-            contractAbi: commonCrossChainAbi,
+            contractAbi: evmCommonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,
             value

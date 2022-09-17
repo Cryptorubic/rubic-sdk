@@ -34,7 +34,7 @@ import {
 } from 'symbiosis-js-sdk';
 import { symbiosisTransitTokens } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-transit-tokens';
 import { OneinchAvalancheProvider } from 'src/features/instant-trades/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade';
@@ -301,14 +301,14 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             fromBlockchain as EvmBlockchainName,
             providerAddress,
             SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-            commonCrossChainAbi
+            evmCommonCrossChainAbi
         );
 
         const feePercent = await this.getFeePercent(
             fromBlockchain as EvmBlockchainName,
             providerAddress,
             SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-            commonCrossChainAbi
+            evmCommonCrossChainAbi
         );
 
         return {

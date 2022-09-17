@@ -6,6 +6,7 @@ import { AbiInput, AbiItem, AbiOutput } from 'web3-utils';
 import { InfiniteArray } from 'src/common/utils/types';
 import { BigNumber as EthersBigNumber } from 'ethers';
 import { TronParameters } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-parameters';
+import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
 
 @staticImplements<TypedWeb3Pure>()
 export class TronWeb3Pure {
@@ -19,6 +20,26 @@ export class TronWeb3Pure {
 
     public static isAddressCorrect(address: string): boolean {
         return TronWeb.isAddress(address);
+    }
+
+    /**
+     * Returns transaction config with encoded data.
+     */
+    public static encodeMethodCall(
+        contractAddress: string,
+        contractAbi: AbiItem[],
+        methodName: string,
+        methodArguments: unknown[] = [],
+        callValue?: string,
+        feeLimit?: number
+    ): TronTransactionConfig {
+        const data = this.encodeFunctionCall(contractAbi, methodName, methodArguments);
+        return {
+            to: contractAddress,
+            data,
+            callValue,
+            feeLimit
+        };
     }
 
     /**

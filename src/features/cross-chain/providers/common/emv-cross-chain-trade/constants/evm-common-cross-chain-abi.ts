@@ -1,6 +1,6 @@
 import { AbiItem } from 'web3-utils';
 
-export const commonCrossChainAbi: AbiItem[] = [
+export const evmCommonCrossChainAbi: AbiItem[] = [
     {
         inputs: [],
         name: 'RubicPlatformFee',

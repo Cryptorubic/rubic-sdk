@@ -17,7 +17,7 @@ import {
     SwapRequest
 } from 'rango-sdk-basic/lib';
 import { RangoCrossChainTrade } from 'src/features/cross-chain/providers/rango-trade-provider/rango-cross-chain-trade';
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { RANGO_BLOCKCHAIN_NAME } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-blockchain-name';
@@ -242,7 +242,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                     providerAddress,
                     RANGO_CONTRACT_ADDRESSES[fromBlockchain as RangoCrossChainSupportedBlockchain]
                         .rubicRouter,
-                    commonCrossChainAbi
+                    evmCommonCrossChainAbi
                 ),
                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
             },
@@ -252,7 +252,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                     providerAddress,
                     RANGO_CONTRACT_ADDRESSES[fromBlockchain as RangoCrossChainSupportedBlockchain]
                         .rubicRouter,
-                    commonCrossChainAbi
+                    evmCommonCrossChainAbi
                 ),
                 tokenSymbol: 'USDC'
             },

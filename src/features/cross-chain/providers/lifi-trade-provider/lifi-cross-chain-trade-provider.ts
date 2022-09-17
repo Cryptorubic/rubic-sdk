@@ -9,7 +9,7 @@ import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/commo
 import LIFI, { LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
-import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { bridges, BridgeType } from 'src/features/cross-chain/providers/common/models/bridge-type';
@@ -175,7 +175,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
                     fromBlockchain,
                     providerAddress,
                     lifiContractAddress[fromBlockchain].rubicRouter,
-                    commonCrossChainAbi
+                    evmCommonCrossChainAbi
                 ),
                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
             },
@@ -184,7 +184,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
                     fromBlockchain,
                     providerAddress,
                     lifiContractAddress[fromBlockchain].rubicRouter,
-                    commonCrossChainAbi
+                    evmCommonCrossChainAbi
                 ),
                 tokenSymbol: percentFeeToken.symbol
             },
