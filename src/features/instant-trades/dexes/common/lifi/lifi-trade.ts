@@ -5,7 +5,12 @@ import { Route } from '@lifi/sdk';
 import { TransactionConfig } from 'web3-core';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
-import { SwapRequestError, LifiPairIsUnavailableError, RubicSdkError, UnsupportedReceiverAddressError } from 'src/common/errors';
+import {
+    SwapRequestError,
+    LifiPairIsUnavailableError,
+    RubicSdkError,
+    UnsupportedReceiverAddressError
+} from 'src/common/errors';
 import { Token } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';

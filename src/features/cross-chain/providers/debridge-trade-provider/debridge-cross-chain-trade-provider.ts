@@ -3,7 +3,6 @@ import {
     deBridgeCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/debridge-cross-chain-supported-blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-address';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';

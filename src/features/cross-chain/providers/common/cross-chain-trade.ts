@@ -18,6 +18,7 @@ import { HttpClient } from 'src/core/http-client/models/http-client';
 import { BasicSwapTransactionOptions } from 'src/features/cross-chain/providers/common/models/basic-swap-transaction-options';
 import { BasicEncodeTransactionOptions } from 'src/features/cross-chain/providers/common/models/basic-encode-transaction-options';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
+import { ItType } from 'src/features/cross-chain/providers/common/models/it-type';
 
 /**
  * Abstract class for all cross chain providers' trades.
@@ -59,7 +60,7 @@ export abstract class CrossChainTrade {
     public abstract readonly to: PriceTokenAmount;
 
     /**
-     * Minimum amount of output token user will get.
+     * Minimum amount of output token user will get in Eth units.
      */
     public abstract readonly toTokenAmountMin: BigNumber;
 
@@ -67,6 +68,8 @@ export abstract class CrossChainTrade {
      * Swap fee information.
      */
     public abstract readonly feeInfo: FeeInfo;
+
+    public abstract readonly itType: ItType;
 
     protected abstract get fromContractAddress(): string;
 

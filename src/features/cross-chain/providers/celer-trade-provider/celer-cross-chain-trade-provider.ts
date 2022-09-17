@@ -4,7 +4,6 @@ import {
 } from 'src/features/cross-chain/providers/celer-trade-provider/models/celer-cross-chain-supported-blockchain';
 import { ItCalculatedTrade } from 'src/features/cross-chain/providers/celer-trade-provider/models/it-calculated-trade';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { CelerCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';

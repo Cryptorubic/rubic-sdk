@@ -5,7 +5,6 @@ import {
     LifiCrossChainSupportedBlockchain,
     lifiCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
-import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import LIFI, { LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';

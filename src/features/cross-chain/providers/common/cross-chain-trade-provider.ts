@@ -1,6 +1,5 @@
 import { AbiItem } from 'web3-utils';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { parseError } from 'src/common/utils/errors';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { CrossChainTradeType } from 'src/features/cross-chain/models/cross-chain-trade-type';
@@ -14,6 +13,8 @@ import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
 import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
+import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
+import { HttpClient } from 'src/core/http-client/models/http-client';
 
 export abstract class CrossChainTradeProvider {
     public static parseError(err: unknown): RubicSdkError {
@@ -25,6 +26,21 @@ export abstract class CrossChainTradeProvider {
     protected get walletAddress(): string {
         return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address;
     }
+
+    protected get httpClient(): HttpClient {
+        return Injector.httpClient;
+    }
+
+    public abstract isSupportedBlockchains(
+        fromBlockchain: BlockchainName,
+        toBlockchain: BlockchainName
+    ): boolean;
+
+    public abstract calculate(
+        from: PriceTokenAmount,
+        toToken: PriceToken,
+        options: RequiredCrossChainOptions
+    ): Promise<CalculationResult>;
 
     /**
      * Gets fee information.
@@ -56,7 +72,7 @@ export abstract class CrossChainTradeProvider {
      * @internal
      */
     protected async getFixedFee(
-        fromBlockchain: EvmBlockchainName,
+        fromBlockchain: Web3PublicSupportedBlockchain,
         providerAddress: string,
         contractAddress: string,
         contractAbi: AbiItem[]
@@ -91,7 +107,7 @@ export abstract class CrossChainTradeProvider {
      * @internal
      */
     protected async getFeePercent(
-        fromBlockchain: EvmBlockchainName,
+        fromBlockchain: Web3PublicSupportedBlockchain,
         providerAddress: string,
         contractAddress: string,
         contractAbi: AbiItem[]
@@ -120,7 +136,7 @@ export abstract class CrossChainTradeProvider {
     }
 
     protected async checkContractState(
-        fromBlockchain: EvmBlockchainName,
+        fromBlockchain: Web3PublicSupportedBlockchain,
         rubicRouter: string
     ): Promise<void> {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
@@ -135,15 +151,4 @@ export abstract class CrossChainTradeProvider {
             throw new CrossChainIsUnavailableError();
         }
     }
-
-    public abstract isSupportedBlockchains(
-        fromBlockchain: BlockchainName,
-        toBlockchain: BlockchainName
-    ): boolean;
-
-    public abstract calculate(
-        from: PriceTokenAmount,
-        to: PriceToken,
-        options: RequiredCrossChainOptions
-    ): Promise<CalculationResult>;
 }

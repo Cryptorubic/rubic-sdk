@@ -188,6 +188,6 @@ export abstract class Web3Public {
         contractAddress: string,
         contractAbi: AbiItem[],
         methodName: string,
-        methodArguments: unknown[]
+        methodArguments?: unknown[]
     ): Promise<T>;
 }

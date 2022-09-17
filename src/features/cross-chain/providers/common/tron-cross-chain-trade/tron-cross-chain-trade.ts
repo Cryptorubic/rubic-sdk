@@ -8,7 +8,6 @@ import {
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { TransactionConfig } from 'web3-core';
-import { ContractParams } from 'src/features/cross-chain/providers/common/models/contract-params';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { TronWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/tron-web3-private';
 import { TronTransactionReceipt } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-receipt';
@@ -18,6 +17,7 @@ import { TronSwapTransactionOptions } from 'src/features/cross-chain/providers/c
 import { TronEncodeTransactionOptions } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/models/tron-encode-transaction-options';
 import { TronGetContractParamsOptions } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/models/tron-get-contract-params-options';
 import BigNumber from 'bignumber.js';
+import { TronContractParams } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/models/tron-contract-params';
 
 export abstract class TronCrossChainTrade extends CrossChainTrade {
     public abstract readonly from: PriceTokenAmount<TronBlockchainName>;
@@ -93,20 +93,19 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
         }
         CrossChainTrade.checkReceiverAddress(options.receiverAddress, this.to.blockchain);
 
-        const { onConfirm, feeLimit } = options;
-
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
+        const { contractAddress, contractAbi, methodName, methodArguments, value, feeLimit } =
             await this.getContractParams(options);
 
+        const { onConfirm } = options;
         let transactionHash: string;
-        try {
-            const onTransactionHash = (hash: string) => {
-                if (onConfirm) {
-                    onConfirm(hash);
-                }
-                transactionHash = hash;
-            };
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
 
+        try {
             await this.web3Private.executeContractMethod(
                 contractAddress,
                 contractAbi,
@@ -115,7 +114,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
                 {
                     onTransactionHash,
                     callValue: value,
-                    feeLimit
+                    feeLimit: options.feeLimit || feeLimit
                 }
             );
 
@@ -130,7 +129,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
     }
 
     public async encode(options: TronEncodeTransactionOptions): Promise<TransactionConfig> {
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
+        const { contractAddress, contractAbi, methodName, methodArguments, value, feeLimit } =
             await this.getContractParams({
                 fromAddress: options.fromAddress,
                 receiverAddress: options.receiverAddress
@@ -142,7 +141,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
             methodName,
             methodArguments,
             value,
-            options.feeLimit
+            options.feeLimit || feeLimit
         );
     }
 
@@ -157,5 +156,5 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
 
     protected abstract getContractParams(
         options: TronGetContractParamsOptions
-    ): Promise<ContractParams>;
+    ): Promise<TronContractParams>;
 }

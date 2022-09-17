@@ -16,7 +16,6 @@ import {
 import { TransactionConfig } from 'web3-core';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { ContractParams } from 'src/features/cross-chain/providers/common/models/contract-params';
-import { ItType } from 'src/features/cross-chain/providers/common/models/it-type';
 import { EvmSwapTransactionOptions } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/evm-swap-transaction-options';
 import { EvmEncodeTransactionOptions } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/evm-encode-transaction-options';
 import { GetContractParamsOptions } from 'src/features/cross-chain/providers/common/models/get-contract-params-options';
@@ -24,8 +23,6 @@ import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/
 
 export abstract class EvmCrossChainTrade extends CrossChainTrade {
     public abstract readonly from: PriceTokenAmount<EvmBlockchainName>;
-
-    public abstract readonly itType: ItType;
 
     /**
      * Gas fee info in source blockchain.
