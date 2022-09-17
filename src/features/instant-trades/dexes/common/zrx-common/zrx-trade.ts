@@ -53,6 +53,10 @@ export class ZrxTrade extends InstantTrade {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
+        if (options?.receiverAddress) {
+            throw new UnsupportedReceiverAddressError();
+        }
+
         await this.checkWalletState();
 
         await this.checkAllowanceAndApprove(options);

@@ -59,7 +59,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
+    ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = toToken.blockchain;
         if (

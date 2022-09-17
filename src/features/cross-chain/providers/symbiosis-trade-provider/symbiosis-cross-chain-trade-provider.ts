@@ -93,7 +93,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
+    ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as SymbiosisCrossChainSupportedBlockchain;
         if (!this.isSupportedBlockchains(fromBlockchain, toBlockchain)) {
@@ -350,7 +350,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 swapParams.tokenAmountIn,
                 swapParams.tokenOut,
                 swapParams.fromAddress,
-                swapParams.fromAddress,
+                swapParams.receiverAddress || swapParams.fromAddress,
                 swapParams.fromAddress,
                 swapParams.slippage,
                 swapParams.deadline,

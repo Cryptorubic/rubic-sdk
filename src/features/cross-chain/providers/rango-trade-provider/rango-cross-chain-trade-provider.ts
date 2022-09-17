@@ -57,16 +57,38 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
         );
     }
 
+    public isSupportedToken(token: PriceTokenAmount): boolean {
+        if (this.meta) {
+            const newLocal = token.address === NATIVE_TOKEN_ADDRESS;
+            if (newLocal) {
+                return true;
+            }
+
+            return this.meta.tokens.some(
+                item =>
+                    item.address?.toLocaleLowerCase() === token.address.toLowerCase() &&
+                    item.blockchain === token.blockchain
+            );
+        }
+        return false;
+    }
+
+    // @TODO Reduce complexity
+
     public async calculate(
         fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceTokenAmount<EvmBlockchainName>,
         options: RequiredCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
+    ): Promise<CalculationResult> {
+        if (options.receiverAddress) {
+            throw new UnsupportedReceiverAddressError();
+        }
+
         const fromBlockchain = fromToken.blockchain as RangoCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as RangoCrossChainSupportedBlockchain;
 
         if (!this.isSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return { trade: null };
+            return null;
         }
 
         await this.checkContractState(
@@ -138,7 +160,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                     {
                         from: fromToken,
                         to,
-                        toTokenAmountMin: new BigNumber(route.outputAmount),
+                        toTokenAmountMin: Web3Pure.fromWei(route.outputAmount, toToken.decimals),
                         priceImpact: fromToken.calculatePriceImpactPercent(toToken),
                         itType,
                         bridgeType,
@@ -165,7 +187,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                 return { trade: rangoTrade };
             }
 
-            return { trade: null };
+            return null;
         } catch (error: unknown) {
             const rubicSdkError = CrossChainTradeProvider.parseError(error);
             return { trade: null, error: rubicSdkError };

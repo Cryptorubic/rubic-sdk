@@ -24,6 +24,7 @@ import { TransactionRequest } from 'src/features/cross-chain/providers/debridge-
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { RubicSdkError, TooLowAmountError } from 'src/common/errors';
+import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 
 export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -54,7 +55,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
+    ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = toToken.blockchain;
         if (

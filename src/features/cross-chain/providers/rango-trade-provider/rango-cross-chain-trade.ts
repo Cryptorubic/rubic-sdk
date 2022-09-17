@@ -6,7 +6,8 @@ import { Injector } from 'src/core/injector/injector';
 import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
 import {
     NotWhitelistedProviderError,
-    FailedToCheckForTransactionReceiptError
+    FailedToCheckForTransactionReceiptError,
+    UnsupportedReceiverAddressError
 } from 'src/common/errors';
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
@@ -166,6 +167,10 @@ export class RangoCrossChainTrade extends CrossChainTrade {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string> {
+        if (options?.receiverAddress) {
+            throw new UnsupportedReceiverAddressError();
+        }
+
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
         const { onConfirm } = options;

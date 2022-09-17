@@ -13,6 +13,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
+import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 
 export abstract class CrossChainTradeProvider {
     public static parseError(err: unknown): RubicSdkError {
@@ -144,5 +145,5 @@ export abstract class CrossChainTradeProvider {
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null>;
+    ): Promise<CalculationResult>;
 }

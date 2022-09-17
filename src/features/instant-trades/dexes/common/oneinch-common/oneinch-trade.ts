@@ -142,7 +142,11 @@ export class OneinchTrade extends InstantTrade {
         await this.checkAllowanceAndApprove(options);
 
         try {
-            const apiTradeData = await this.getTradeData().catch(err => {
+            const apiTradeData = await this.getTradeData(
+                false,
+                undefined,
+                options.receiverAddress
+            ).catch(err => {
                 throw new Error(err?.response?.data?.description || err.message);
             });
 
@@ -195,7 +199,8 @@ export class OneinchTrade extends InstantTrade {
 
     private getTradeData(
         disableEstimate = false,
-        fromAddress?: string
+        fromAddress?: string,
+        receiverAddress?: string
     ): Promise<OneinchSwapResponse> {
         const swapRequest: OneinchSwapRequest = {
             params: {
@@ -205,7 +210,8 @@ export class OneinchTrade extends InstantTrade {
                 slippage: (this.slippageTolerance * 100).toString(),
                 fromAddress: fromAddress || this.walletAddress,
                 disableEstimate,
-                ...(this.disableMultihops && { mainRouteParts: '1' })
+                ...(this.disableMultihops && { mainRouteParts: '1' }),
+                ...(receiverAddress && { destReceiver: receiverAddress })
             }
         };
 
