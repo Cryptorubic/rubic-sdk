@@ -103,28 +103,26 @@ export abstract class Web3Public {
         tokenAddresses: string[] | ReadonlyArray<string>,
         tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
     ): Promise<Partial<Record<SupportedTokenField, string>>[]> {
-        const contractsData = tokenAddresses.map(contractAddress => ({
+        const nativeTokenIndex = tokenAddresses.findIndex(address =>
+            this.Web3Pure.isNativeAddress(address)
+        );
+        const filteredTokenAddresses = tokenAddresses.filter(
+            (_, index) => index !== nativeTokenIndex
+        );
+        const contractsData = filteredTokenAddresses.map(contractAddress => ({
             contractAddress,
             methodsData: tokenFields.map(methodName => ({
                 methodName,
                 methodArguments: []
             }))
         }));
+
         const results = await this.multicallContractsMethods<string>(
             this.tokenContractAbi,
             contractsData
         );
-
-        return results.map((tokenFieldsResults, tokenIndex) => {
+        const tokens = results.map((tokenFieldsResults, tokenIndex) => {
             const tokenAddress = tokenAddresses[tokenIndex]!;
-            if (this.Web3Pure.isNativeAddress(tokenAddress)) {
-                const nativeToken = nativeTokensList[this.blockchainName];
-                return {
-                    ...nativeToken,
-                    decimals: nativeToken.decimals.toString()
-                };
-            }
-
             return tokenFieldsResults.reduce((acc, field, fieldIndex) => {
                 if (!field.success) {
                     throw new RubicSdkError(`Cannot retrieve information about ${tokenAddress}`);
@@ -135,6 +133,18 @@ export abstract class Web3Public {
                 };
             }, {});
         });
+
+        if (nativeTokenIndex === -1) {
+            return tokens;
+        }
+
+        const blockchainNativeToken = nativeTokensList[this.blockchainName];
+        const nativeToken = {
+            ...blockchainNativeToken,
+            decimals: blockchainNativeToken.decimals.toString()
+        };
+        tokens.splice(nativeTokenIndex, 0, nativeToken);
+        return tokens;
     }
 
     /**

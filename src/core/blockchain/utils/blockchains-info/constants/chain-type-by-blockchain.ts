@@ -1,12 +1,11 @@
 import {
     BLOCKCHAIN_NAME,
-    BlockchainName,
     EVM_BLOCKCHAIN_NAME,
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 
-export const chainTypeByBlockchain: Record<BlockchainName, CHAIN_TYPE | undefined> = {
+export const chainTypeByBlockchain = {
     ...Object.values(EVM_BLOCKCHAIN_NAME).reduce(
         (acc, evmBlockchainName) => ({
             ...acc,

@@ -3,11 +3,7 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Injector } from 'src/core/injector/injector';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import {
-    WalletNotConnectedError,
-    WrongNetworkError,
-    WrongReceiverAddressError
-} from 'src/common/errors';
+import { WalletNotConnectedError, WrongReceiverAddressError } from 'src/common/errors';
 import { CrossChainTradeType } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { PriceTokenAmount } from 'src/common/tokens';
 import BigNumber from 'bignumber.js';
@@ -162,10 +158,7 @@ export abstract class CrossChainTrade {
     }
 
     protected async checkBlockchainCorrect(): Promise<void | never> {
-        const userBlockchainName = await this.web3Private.getBlockchainName();
-        if (userBlockchainName !== this.from.blockchain) {
-            throw new WrongNetworkError();
-        }
+        await this.web3Private.checkBlockchainCorrect(this.from.blockchain);
     }
 
     protected async checkUserBalance(): Promise<void | never> {

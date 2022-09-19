@@ -1,6 +1,6 @@
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
-import { InvalidAddressError, RubicSdkError } from 'src/common/errors';
+import { InvalidAddressError, RubicSdkError, WrongNetworkError } from 'src/common/errors';
 import BigNumber from 'bignumber.js';
 
 /**
@@ -39,4 +39,11 @@ export abstract class Web3Private {
      * Gets currently selected blockchain in wallet.
      */
     public abstract getBlockchainName(): Promise<BlockchainName | undefined>;
+
+    public async checkBlockchainCorrect(blockchainName: BlockchainName): Promise<void | never> {
+        const userBlockchainName = await this.getBlockchainName();
+        if (userBlockchainName !== blockchainName) {
+            throw new WrongNetworkError(blockchainName);
+        }
+    }
 }

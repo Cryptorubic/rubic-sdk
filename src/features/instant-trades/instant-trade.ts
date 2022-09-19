@@ -1,12 +1,7 @@
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import {
-    RubicSdkError,
-    UnnecessaryApproveError,
-    WalletNotConnectedError,
-    WrongNetworkError
-} from 'src/common/errors';
+import { RubicSdkError, UnnecessaryApproveError, WalletNotConnectedError } from 'src/common/errors';
 import { GasFeeInfo } from 'src/features/instant-trades/models/gas-fee-info';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { TransactionReceipt } from 'web3-eth';
@@ -208,10 +203,7 @@ export abstract class InstantTrade {
     }
 
     private async checkBlockchainCorrect(): Promise<void | never> {
-        const userBlockchainName = await this.web3Private.getBlockchainName();
-        if (userBlockchainName !== this.from.blockchain) {
-            throw new WrongNetworkError();
-        }
+        await this.web3Private.checkBlockchainCorrect(this.from.blockchain);
     }
 
     protected async checkBalance(): Promise<void | never> {

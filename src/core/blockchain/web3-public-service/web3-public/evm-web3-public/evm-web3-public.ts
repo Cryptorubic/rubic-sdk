@@ -172,12 +172,13 @@ export class EvmWeb3Public extends Web3Public {
 
                 return {
                     success: output.success,
-                    output: output.success
-                        ? (this.web3.eth.abi.decodeParameters(
-                              methodOutputAbi,
-                              output.returnData
-                          )[0] as Output)
-                        : null
+                    output:
+                        output.success && output.returnData.length > 2
+                            ? (this.web3.eth.abi.decodeParameters(
+                                  methodOutputAbi,
+                                  output.returnData
+                              )[0] as Output)
+                            : null
                 };
             })
         );
