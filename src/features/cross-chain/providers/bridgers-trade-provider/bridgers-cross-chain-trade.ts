@@ -71,7 +71,7 @@ export class BridgersCrossChainTrade extends TronCrossChainTrade {
             'https://sswap.swft.pro/api/sswap/swap',
             swapRequest
         );
-        const transactionData = swapData.txData;
+        const transactionData = swapData.data.txData;
 
         const methodArguments: unknown[] = [
             [

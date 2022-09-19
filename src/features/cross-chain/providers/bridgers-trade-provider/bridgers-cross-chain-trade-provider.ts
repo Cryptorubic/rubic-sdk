@@ -21,6 +21,9 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 
+import { bridgersNativeAddress } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/bridgers-native-address';
+import { createTokenNativeAddressProxy } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
+
 export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
         blockchain: BlockchainName
@@ -71,9 +74,17 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
             );
             const tokenAmountIn = from.weiAmount.minus(feeAmount).toFixed(0);
 
+            const fromTokenAddress = createTokenNativeAddressProxy(
+                from,
+                bridgersNativeAddress
+            ).address;
+            const toTokenAddress = createTokenNativeAddressProxy(
+                toToken,
+                bridgersNativeAddress
+            ).address;
             const quoteRequest: BridgersQuoteRequest = {
-                fromTokenAddress: from.address,
-                toTokenAddress: toToken.address,
+                fromTokenAddress,
+                toTokenAddress,
                 fromTokenAmount: tokenAmountIn,
                 fromTokenChain: toBridgersBlockchain[fromBlockchain],
                 toTokenChain: toBridgersBlockchain[toBlockchain]
@@ -82,7 +93,14 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
                 'https://sswap.swft.pro/api/sswap/quote',
                 quoteRequest
             );
-            const transactionData = quoteResponse.txData;
+            if (quoteResponse.resCode !== 100) {
+                return {
+                    trade: null,
+                    error: CrossChainTradeProvider.parseError(quoteResponse.resMsg)
+                };
+            }
+
+            const transactionData = quoteResponse.data.txData;
             if (!transactionData) {
                 return null;
             }
