@@ -43,15 +43,14 @@ export interface BtcStatusResponse {
     weight: number;
 }
 
-export interface CelerTransferHistoryResponse {
+export interface CelerXtransferStatusResponse {
     err: string;
-    next_page_token: string;
-    current_size: string;
-    history: {
-        transferId: string;
-        src_block_tx_link: string;
-        dst_block_tx_link: string;
-        status: CelerTransferStatus;
+    txSearchInfo: {
+        transfer: {
+            xfer_id: string;
+            dst_tx_hash: string;
+            xfer_status: CelerTransferStatus;
+        }[];
     }[];
 }
 
