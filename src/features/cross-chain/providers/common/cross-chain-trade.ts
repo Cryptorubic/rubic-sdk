@@ -4,7 +4,6 @@ import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/bloc
 import { Injector } from 'src/core/injector/injector';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import {
-    InsufficientFundsError,
     WalletNotConnectedError,
     WrongNetworkError,
     WrongReceiverAddressError
@@ -170,14 +169,11 @@ export abstract class CrossChainTrade {
     }
 
     protected async checkUserBalance(): Promise<void | never> {
-        const balance = await this.fromWeb3Public.getBalance(this.walletAddress, this.from.address);
-        if (balance.lt(this.from.weiAmount)) {
-            throw new InsufficientFundsError(
-                this.from,
-                Web3Pure.fromWei(balance, this.from.decimals),
-                this.from.tokenAmount
-            );
-        }
+        await this.fromWeb3Public.checkBalance(
+            this.from,
+            this.from.tokenAmount,
+            this.walletAddress
+        );
     }
 
     /**

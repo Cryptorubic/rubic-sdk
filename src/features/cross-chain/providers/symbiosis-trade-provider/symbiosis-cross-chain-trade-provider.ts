@@ -48,6 +48,7 @@ import BigNumber from 'bignumber.js';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
+import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -103,7 +104,9 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
 
         try {
             const fromAddress =
-                options.fromAddress || this.walletAddress || oneinchApiParams.nativeAddress;
+                options.fromAddress ||
+                this.getWalletAddress(fromBlockchain as Web3PrivateSupportedBlockchain) ||
+                oneinchApiParams.nativeAddress;
             await this.checkContractState(
                 fromBlockchain as EvmBlockchainName,
                 SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter

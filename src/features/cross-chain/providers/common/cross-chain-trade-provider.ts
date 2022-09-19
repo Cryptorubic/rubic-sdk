@@ -9,12 +9,12 @@ import { CrossChainIsUnavailableError, RubicSdkError } from 'src/common/errors';
 import { Injector } from 'src/core/injector/injector';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
 import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { HttpClient } from 'src/core/http-client/models/http-client';
+import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
 
 export abstract class CrossChainTradeProvider {
     public static parseError(err: unknown): RubicSdkError {
@@ -22,10 +22,6 @@ export abstract class CrossChainTradeProvider {
     }
 
     public abstract readonly type: CrossChainTradeType;
-
-    protected get walletAddress(): string {
-        return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address;
-    }
 
     protected get httpClient(): HttpClient {
         return Injector.httpClient;
@@ -41,6 +37,10 @@ export abstract class CrossChainTradeProvider {
         toToken: PriceToken,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult>;
+
+    protected getWalletAddress(blockchain: Web3PrivateSupportedBlockchain): string {
+        return Injector.web3PrivateService.getWeb3PrivateByBlockchain(blockchain).address;
+    }
 
     /**
      * Gets fee information.

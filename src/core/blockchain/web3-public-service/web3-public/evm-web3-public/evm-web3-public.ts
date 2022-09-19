@@ -72,25 +72,25 @@ export class EvmWeb3Public extends Web3Public {
         }
     }
 
-    public async getBalance(address: string, tokenAddress?: string): Promise<BigNumber> {
+    public async getBalance(userAddress: string, tokenAddress?: string): Promise<BigNumber> {
         let balance;
         if (tokenAddress && !EvmWeb3Pure.isNativeAddress(tokenAddress)) {
-            balance = await this.getTokenBalance(address, tokenAddress);
+            balance = await this.getTokenBalance(userAddress, tokenAddress);
         } else {
-            balance = await this.web3.eth.getBalance(address);
+            balance = await this.web3.eth.getBalance(userAddress);
         }
         return new BigNumber(balance);
     }
 
-    public async getTokenBalance(address: string, tokenAddress: string): Promise<BigNumber> {
+    public async getTokenBalance(userAddress: string, tokenAddress: string): Promise<BigNumber> {
         const contract = new this.web3.eth.Contract(this.tokenContractAbi, tokenAddress);
 
-        const balance = await contract.methods.balanceOf(address).call();
+        const balance = await contract.methods.balanceOf(userAddress).call();
         return new BigNumber(balance);
     }
 
     public async getTokensBalances(
-        address: string,
+        userAddress: string,
         tokensAddresses: string[]
     ): Promise<BigNumber[]> {
         const indexOfNativeCoin = tokensAddresses.findIndex(EvmWeb3Pure.isNativeAddress);
@@ -98,13 +98,13 @@ export class EvmWeb3Public extends Web3Public {
 
         if (indexOfNativeCoin !== -1) {
             tokensAddresses.splice(indexOfNativeCoin, 1);
-            promises[1] = this.getBalance(address);
+            promises[1] = this.getBalance(userAddress);
         }
 
         const contract = new this.web3.eth.Contract(this.tokenContractAbi);
         const calls: EvmCall[] = tokensAddresses.map(tokenAddress => ({
             target: tokenAddress,
-            callData: contract.methods.balanceOf(address).encodeABI()
+            callData: contract.methods.balanceOf(userAddress).encodeABI()
         }));
         promises[0] = this.multicall(calls);
 

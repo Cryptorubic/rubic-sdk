@@ -186,8 +186,10 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
         toToken: PriceTokenAmount,
         options: RequiredCrossChainOptions
     ): SwapRequest {
-        const fromAddress = this.walletAddress || EvmWeb3Pure.EMPTY_ADDRESS;
-        const toAddress = this.walletAddress || EvmWeb3Pure.EMPTY_ADDRESS;
+        const fromAddress =
+            this.getWalletAddress(fromToken.blockchain as RangoCrossChainSupportedBlockchain) ||
+            EvmWeb3Pure.EMPTY_ADDRESS;
+        const toAddress = fromAddress;
         return {
             from: {
                 blockchain:

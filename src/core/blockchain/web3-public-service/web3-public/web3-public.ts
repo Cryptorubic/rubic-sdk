@@ -4,12 +4,13 @@ import { SupportedTokenField } from 'src/core/blockchain/web3-public-service/web
 import { AbiItem } from 'web3-utils';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
-import { RubicSdkError } from 'src/common/errors';
+import { InsufficientFundsError, RubicSdkError } from 'src/common/errors';
 import { Cache } from 'src/common/utils/decorators';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
+import { Token } from 'src/common/tokens';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
@@ -39,27 +40,45 @@ export abstract class Web3Public {
 
     /**
      * Gets account native or token balance in wei.
-     * @param address Wallet address, whose balance you want to find out.
+     * @param userAddress Wallet address, whose balance you want to find out.
      * @param tokenAddress Address of the smart-contract corresponding to the token,
      */
-    public abstract getBalance(address: string, tokenAddress?: string): Promise<BigNumber>;
+    public abstract getBalance(userAddress: string, tokenAddress?: string): Promise<BigNumber>;
 
     /**
      * Gets token's balance in wei.
      * @param tokenAddress Address of the smart-contract corresponding to the token.
-     * @param address Wallet address, whose balance you want to find out.
+     * @param userAddress Wallet address, whose balance you want to find out.
      */
-    public abstract getTokenBalance(address: string, tokenAddress: string): Promise<BigNumber>;
+    public abstract getTokenBalance(userAddress: string, tokenAddress: string): Promise<BigNumber>;
 
     /**
      * Gets balances of multiple tokens via multicall.
-     * @param address Wallet address, which contains tokens.
+     * @param userAddress Wallet address, which contains tokens.
      * @param tokensAddresses Tokens addresses.
      */
     public abstract getTokensBalances(
-        address: string,
+        userAddress: string,
         tokensAddresses: string[]
     ): Promise<BigNumber[]>;
+
+    /**
+     * Checks that user has enough balance.
+     * @param userAddress Wallet address, which contains tokens.
+     * @param token Token to check balance of.
+     * @param requiredAmount Required user balance in Eth units.
+     */
+    public async checkBalance(
+        token: Token,
+        requiredAmount: BigNumber,
+        userAddress: string
+    ): Promise<void | never> {
+        const balanceWei = await this.getBalance(userAddress, token.address);
+        const balance = Web3Pure.fromWei(balanceWei, token.decimals);
+        if (balance.lt(requiredAmount)) {
+            throw new InsufficientFundsError(token, balance, requiredAmount);
+        }
+    }
 
     /**
      * Gets token info by address.

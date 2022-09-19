@@ -12,7 +12,7 @@ export const chainTypeByBlockchain: Record<BlockchainName, CHAIN_TYPE | undefine
             ...acc,
             [evmBlockchainName]: CHAIN_TYPE.EVM
         }),
-        {} as Record<EvmBlockchainName, CHAIN_TYPE>
+        {} as Record<EvmBlockchainName, CHAIN_TYPE.EVM>
     ),
     [BLOCKCHAIN_NAME.BITCOIN]: CHAIN_TYPE.BITCOIN,
     [BLOCKCHAIN_NAME.TRON]: CHAIN_TYPE.TRON,

@@ -2,7 +2,6 @@ import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import {
-    InsufficientFundsError,
     RubicSdkError,
     UnnecessaryApproveError,
     WalletNotConnectedError,
@@ -25,7 +24,6 @@ import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-publ
 import { Cache } from 'src/common/utils/decorators';
 import { TradeType } from 'src/features/instant-trades/models/trade-type';
 import BigNumber from 'bignumber.js';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
 /**
  * Abstract class for all instant trade providers' trades.
@@ -217,14 +215,7 @@ export abstract class InstantTrade {
     }
 
     protected async checkBalance(): Promise<void | never> {
-        const balance = await this.web3Public.getBalance(this.walletAddress, this.from.address);
-        if (balance.lt(this.from.weiAmount)) {
-            throw new InsufficientFundsError(
-                this.from,
-                Web3Pure.fromWei(balance, this.from.decimals),
-                this.from.tokenAmount
-            );
-        }
+        await this.web3Public.checkBalance(this.from, this.from.tokenAmount, this.walletAddress);
     }
 
     protected getGasParams(options: OptionsGasParams): TransactionGasParams {

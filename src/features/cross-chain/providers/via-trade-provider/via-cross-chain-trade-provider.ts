@@ -79,8 +79,8 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
             });
 
             const pages = await via.routesPages();
-            const fromAddress = this.walletAddress;
-            const toAddress = options.receiverAddress || this.walletAddress;
+            const fromAddress = this.getWalletAddress(fromBlockchain);
+            const toAddress = options.receiverAddress || fromAddress;
             const params: IGetRoutesRequestParams = {
                 fromChainId,
                 fromTokenAddress: from.address,
@@ -179,7 +179,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                         bridgeType
                     },
                     options.providerAddress,
-                    this.walletAddress
+                    fromAddress
                 )
             };
         } catch (err: unknown) {

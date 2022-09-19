@@ -85,8 +85,8 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         const fromChainId = blockchainId[fromBlockchain];
         const toChainId = blockchainId[toBlockchain];
 
-        const fromAddress = this.walletAddress;
-        const toAddress = options.receiverAddress || this.walletAddress;
+        const fromAddress = this.getWalletAddress(fromBlockchain);
+        const toAddress = options.receiverAddress || fromAddress;
         const routesRequest: RoutesRequest = {
             fromChainId,
             fromAmount: tokenAmountIn,

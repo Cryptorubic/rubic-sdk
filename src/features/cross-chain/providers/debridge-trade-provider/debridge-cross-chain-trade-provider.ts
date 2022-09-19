@@ -65,7 +65,7 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
         }
 
         try {
-            const fromAddress = options.fromAddress || this.walletAddress;
+            const fromAddress = options.fromAddress || this.getWalletAddress(fromBlockchain);
 
             await this.checkContractState(
                 fromBlockchain,

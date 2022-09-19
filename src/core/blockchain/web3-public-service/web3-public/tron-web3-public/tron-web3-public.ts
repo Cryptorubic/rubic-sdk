@@ -58,26 +58,26 @@ export class TronWeb3Public extends Web3Public {
         }
     }
 
-    public async getBalance(address: string, tokenAddress?: string): Promise<BigNumber> {
+    public async getBalance(userAddress: string, tokenAddress?: string): Promise<BigNumber> {
         let balance;
         if (tokenAddress && !TronWeb3Pure.isNativeAddress(tokenAddress)) {
-            balance = await this.getTokenBalance(address, tokenAddress);
+            balance = await this.getTokenBalance(userAddress, tokenAddress);
         } else {
-            this.tronWeb.setAddress(address);
-            balance = await this.tronWeb.trx.getBalance(address);
+            this.tronWeb.setAddress(userAddress);
+            balance = await this.tronWeb.trx.getBalance(userAddress);
         }
         return new BigNumber(balance);
     }
 
-    public async getTokenBalance(address: string, tokenAddress: string): Promise<BigNumber> {
-        this.tronWeb.setAddress(address);
+    public async getTokenBalance(userAddress: string, tokenAddress: string): Promise<BigNumber> {
+        this.tronWeb.setAddress(userAddress);
         const contract = await this.tronWeb.contract(this.tokenContractAbi, tokenAddress);
-        const balance: EthersBigNumber = await contract.balanceOf(address).call();
+        const balance: EthersBigNumber = await contract.balanceOf(userAddress).call();
         return new BigNumber(balance.toString());
     }
 
     public async getTokensBalances(
-        address: string,
+        userAddress: string,
         tokensAddresses: string[]
     ): Promise<BigNumber[]> {
         const indexOfNativeCoin = tokensAddresses.findIndex(TronWeb3Pure.isNativeAddress);
@@ -85,12 +85,12 @@ export class TronWeb3Public extends Web3Public {
 
         if (indexOfNativeCoin !== -1) {
             tokensAddresses.splice(indexOfNativeCoin, 1);
-            promises[1] = this.getBalance(address);
+            promises[1] = this.getBalance(userAddress);
         }
 
         const calls: TronCall[] = tokensAddresses.map(tokenAddress => [
             tokenAddress,
-            TronWeb3Pure.encodeFunctionCall(this.tokenContractAbi, 'balanceOf', [address])
+            TronWeb3Pure.encodeFunctionCall(this.tokenContractAbi, 'balanceOf', [userAddress])
         ]);
         promises[0] = this.multicall(calls);
 

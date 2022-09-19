@@ -35,6 +35,7 @@ import { MarkRequired } from 'ts-essentials';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { combineOptions } from 'src/common/utils/options';
 import BigNumber from 'bignumber.js';
+import { BridgersCrossChainTradeProvider } from 'src/features/cross-chain/providers/bridgers-trade-provider/bridgers-cross-chain-trade-provider';
 
 type RequiredSwapManagerCalculationOptions = MarkRequired<
     SwapManagerCrossChainCalculationOptions,
@@ -58,7 +59,8 @@ export class CrossChainManager {
         LifiCrossChainTradeProvider,
         DebridgeCrossChainTradeProvider,
         RangoCrossChainTradeProvider,
-        ViaCrossChainTradeProvider
+        ViaCrossChainTradeProvider,
+        BridgersCrossChainTradeProvider
     ].reduce((acc, ProviderClass) => {
         const provider = new ProviderClass();
         acc[provider.type] = provider;
