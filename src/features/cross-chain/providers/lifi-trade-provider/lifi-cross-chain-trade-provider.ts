@@ -7,7 +7,6 @@ import {
 } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-cross-chain-supported-blockchain';
 import LIFI, { Route, RouteOptions } from '@lifi/sdk';
 import { LifiCrossChainTrade } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade';
-import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
 import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
@@ -21,6 +20,7 @@ import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/con
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { bridges } from 'src/features/cross-chain/constants/bridge-type';
 import { RoutesRequest } from '@lifi/types';
+import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 
 export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -51,7 +51,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         from: PriceTokenAmount,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
+    ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = toToken.blockchain;
         if (
@@ -100,7 +100,9 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         const result = await this.lifi.getRoutes(routesRequest);
         const { routes } = result;
 
-        const bestRoute = routes.find(route => !route.containsSwitchChain);
+        const bestRoute = routes.find(
+            route => route.steps.length === 1 && !route.containsSwitchChain
+        );
 
         if (!bestRoute) {
             return null;

@@ -18,3 +18,4 @@ export { LowGasError } from './blockchain/low-gas.error';
 export { HealthcheckError } from './blockchain/healthcheck.error';
 export { UserRejectError } from './blockchain/user-reject.error';
 export { TransactionRevertedError } from './blockchain/transaction-reverted.error';
+export { UnsupportedReceiverAddressError } from './cross-chain/unsupported-receiver-address.error';

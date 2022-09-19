@@ -19,7 +19,8 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.AURORA,
     BLOCKCHAIN_NAME.TELOS,
     BLOCKCHAIN_NAME.BOBA,
-    BLOCKCHAIN_NAME.BITCOIN
+    BLOCKCHAIN_NAME.BITCOIN,
+    BLOCKCHAIN_NAME.ETHEREUM_POW
 ] as const;
 
 type SupportedBlockchain = typeof supportedBlockchains[number];
@@ -53,7 +54,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.AURORA]: 'ethereum',
             [BLOCKCHAIN_NAME.TELOS]: 'tlos',
             [BLOCKCHAIN_NAME.BOBA]: 'ethereum',
-            [BLOCKCHAIN_NAME.BITCOIN]: 'bitcoin'
+            [BLOCKCHAIN_NAME.BITCOIN]: 'bitcoin',
+            [BLOCKCHAIN_NAME.ETHEREUM_POW]: 'ethereum-pow-iou'
         };
 
         this.tokenBlockchainId = {
@@ -68,7 +70,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.AURORA]: 'aurora',
             [BLOCKCHAIN_NAME.TELOS]: 'telos',
             [BLOCKCHAIN_NAME.BOBA]: 'boba-network',
-            [BLOCKCHAIN_NAME.BITCOIN]: 'bitcoin'
+            [BLOCKCHAIN_NAME.BITCOIN]: 'bitcoin',
+            [BLOCKCHAIN_NAME.ETHEREUM_POW]: 'ethereum-pow-iou'
         };
     }
 
