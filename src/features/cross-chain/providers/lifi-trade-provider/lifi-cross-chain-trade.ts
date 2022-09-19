@@ -20,7 +20,7 @@ import { ContractParams } from 'src/features/cross-chain/models/contract-params'
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { BRIDGE_TYPE, BridgeType } from 'src/features/cross-chain/constants/bridge-type';
 import { FeeInfo } from '../common/models/fee';
-import { TransactionRequest } from './models/transaction-request';
+import { LifiTransactionRequest } from './models/lifi-transaction-request';
 
 /**
  * Calculated Celer cross chain trade.
@@ -231,7 +231,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         };
     }
 
-    private async getSwapData(receiverAddress?: string): Promise<TransactionRequest> {
+    private async getSwapData(receiverAddress?: string): Promise<LifiTransactionRequest> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
@@ -253,12 +253,10 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             }
         };
 
-        const swapResponse: { transactionRequest: TransactionRequest } = await this.httpClient.post(
-            'https://li.quest/v1/advanced/stepTransaction',
-            {
+        const swapResponse: { transactionRequest: LifiTransactionRequest } =
+            await this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
                 ...step
-            }
-        );
+            });
 
         return swapResponse.transactionRequest;
     }
