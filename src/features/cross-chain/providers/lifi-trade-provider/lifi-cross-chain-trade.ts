@@ -20,6 +20,7 @@ import { ContractParams } from 'src/features/cross-chain/models/contract-params'
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { BRIDGE_TYPE, BridgeType } from 'src/features/cross-chain/constants/bridge-type';
 import { FeeInfo } from '../common/models/fee';
+import { LifiTransactionRequest } from './models/lifi-transaction-request';
 
 /**
  * Calculated Celer cross chain trade.
@@ -197,7 +198,7 @@ export class LifiCrossChainTrade extends CrossChainTrade {
     }
 
     public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
-        const data = await this.getSwapData(options?.receiverAddress);
+        const { data, value } = await this.getSwapData(options?.receiverAddress);
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
         const fromContracts = lifiContractAddress[this.fromBlockchain];
 
@@ -218,20 +219,19 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         }
         methodArguments.push(data);
 
-        const sourceValue = this.from.isNative ? this.from.stringWeiAmount : '0';
         const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
-        const value = new BigNumber(sourceValue).plus(fixedFee).toFixed(0);
+        const msgValue = new BigNumber(value ? `${value}` : 0).plus(fixedFee).toFixed(0);
 
         return {
             contractAddress: this.fromContractAddress,
             contractAbi: commonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,
-            value
+            value: msgValue
         };
     }
 
-    private async getSwapData(receiverAddress?: string): Promise<string> {
+    private async getSwapData(receiverAddress?: string): Promise<LifiTransactionRequest> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
@@ -253,15 +253,12 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             }
         };
 
-        const swapResponse: {
-            transactionRequest: {
-                data: string;
-            };
-        } = await this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
-            ...step
-        });
+        const swapResponse: { transactionRequest: LifiTransactionRequest } =
+            await this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
+                ...step
+            });
 
-        return swapResponse.transactionRequest.data;
+        return swapResponse.transactionRequest;
     }
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
