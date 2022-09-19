@@ -30,7 +30,6 @@ import { OneinchAvalancheProvider } from '@rsdk-features/instant-trades/dexes/av
 import { getSymbiosisConfig } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
 import { CrossChainMinAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-min-amount.error';
 import { CrossChainMaxAmountError } from '@rsdk-common/errors/cross-chain/cross-chain-max-amount.error';
-import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
@@ -40,6 +39,7 @@ import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/onein
 import { ZappyProvider } from 'src/features/instant-trades/dexes/telos/zappy/trisolaris-aurora-provider';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
 import { TooLowAmountError } from 'src/common/errors/cross-chain/too-low-amount.error';
+import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -89,7 +89,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
         from: PriceTokenAmount,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null> {
+    ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as SymbiosisCrossChainSupportedBlockchain;
         if (!this.isSupportedBlockchains(fromBlockchain, toBlockchain)) {
@@ -346,7 +346,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
                 swapParams.tokenAmountIn,
                 swapParams.tokenOut,
                 swapParams.fromAddress,
-                swapParams.fromAddress,
+                swapParams.receiverAddress || swapParams.fromAddress,
                 swapParams.fromAddress,
                 swapParams.slippage,
                 swapParams.deadline,

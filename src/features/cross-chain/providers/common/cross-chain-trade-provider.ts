@@ -2,7 +2,6 @@ import { CrossChainTradeType } from 'src/features';
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
-import { WrappedCrossChainTrade } from '@rsdk-features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { CrossChainIsUnavailableError, RubicSdkError } from 'src/common';
 import { parseError } from 'src/common/utils/errors';
 import { BlockchainName, Web3Pure } from 'src/core';
@@ -11,6 +10,7 @@ import { Injector } from 'src/core/sdk/injector';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { AbiItem } from 'web3-utils';
 import BigNumber from 'bignumber.js';
+import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 import { commonCrossChainAbi } from './constants/common-cross-chain-abi';
 
 export abstract class CrossChainTradeProvider {
@@ -147,5 +147,5 @@ export abstract class CrossChainTradeProvider {
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<Omit<WrappedCrossChainTrade, 'tradeType'> | null>;
+    ): Promise<CalculationResult>;
 }
