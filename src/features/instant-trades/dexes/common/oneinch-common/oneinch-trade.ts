@@ -128,7 +128,7 @@ export class OneinchTrade extends InstantTrade {
         const allowance = await this.web3Public.getAllowance(
             this.nativeSupportedFrom.address,
             this.walletAddress,
-            this.contractAddress
+            this.commonContractAddress
         );
 
         return allowance.lt(this.nativeSupportedFrom.weiAmount);
@@ -149,19 +149,11 @@ export class OneinchTrade extends InstantTrade {
             });
 
             const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, apiTradeData);
+            const value = this.nativeSupportedFrom.isNative
+                ? this.nativeSupportedFrom.stringWeiAmount
+                : '0';
 
-            const transactionOptions = {
-                onTransactionHash: options.onConfirm,
-                data: apiTradeData.tx.data,
-                gas,
-                gasPrice
-            };
-
-            return Injector.web3Private.trySendTransaction(
-                apiTradeData.tx.to,
-                this.nativeSupportedFrom.isNative ? this.nativeSupportedFrom.stringWeiAmount : '0',
-                transactionOptions
-            );
+            return this.createProxyTrade(options, apiTradeData.tx.data, value, gas, gasPrice);
         } catch (err) {
             const inchSpecificError = this.specifyError(err);
             if (inchSpecificError) {

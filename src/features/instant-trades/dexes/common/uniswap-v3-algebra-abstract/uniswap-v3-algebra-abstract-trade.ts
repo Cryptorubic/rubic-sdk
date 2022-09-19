@@ -212,23 +212,15 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
         await this.checkWalletState();
         await this.checkAllowanceAndApprove(options);
 
-        const { methodName, methodArguments } = this.getSwapRouterMethodData(
-            options?.receiverAddress
-        );
-        const { gas, gasPrice } = this.getGasParams(options);
+        const { data, value, gas, gasPrice } = await this.encode({
+            fromAddress: this.walletAddress
+        });
 
-        return Injector.web3Private.tryExecuteContractMethod(
-            this.contractAddress,
-            this.contractAbi,
-            methodName,
-            methodArguments,
-            {
-                value: this.from.isNative ? this.from.stringWeiAmount : undefined,
-                onTransactionHash: options.onConfirm,
-                gas,
-                gasPrice
-            }
-        );
+        if (!data || !value) {
+            throw new RubicSdkError('Cant create trade.');
+        }
+
+        return this.createProxyTrade(options, data, value.toString(), gas, gasPrice?.toString());
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
@@ -240,7 +232,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
             this.contractAbi,
             methodName,
             methodArguments,
-            this.from.isNative ? this.from.stringWeiAmount : undefined,
+            this.from.isNative ? this.from.stringWeiAmount : '0',
             gasParams
         );
     }

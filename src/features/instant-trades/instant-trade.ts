@@ -19,11 +19,20 @@ import { TradeType } from 'src/features';
 import { parseError } from '@rsdk-common/utils/errors';
 import { Token, TransactionOptions } from 'src/core';
 import BigNumber from 'bignumber.js';
+import { rubicRouterAddress } from 'src/features/instant-trades/dexes/common/rubic-router/rubic-router-address';
+import { rubicRouterAbi } from 'src/features/instant-trades/dexes/common/rubic-router/rubic-router-abi';
 
 /**
  * Abstract class for all instant trade providers' trades.
  */
 export abstract class InstantTrade {
+    /**
+     * Common router address for all on-chain swaps.
+     */
+    protected readonly commonContractAddress = rubicRouterAddress;
+
+    protected readonly commonContractAbi = rubicRouterAbi;
+
     /**
      * Token to sell with input amount.
      */
@@ -94,7 +103,7 @@ export abstract class InstantTrade {
         const allowance = await this.web3Public.getAllowance(
             this.from.address,
             fromAddress || this.walletAddress,
-            this.contractAddress
+            this.commonContractAddress
         );
         return allowance.lt(this.from.weiAmount);
     }
@@ -126,7 +135,7 @@ export abstract class InstantTrade {
 
         return Injector.web3Private.approveTokens(
             this.from.address,
-            this.contractAddress,
+            this.commonContractAddress,
             approveAmount,
             options
         );
@@ -211,5 +220,41 @@ export abstract class InstantTrade {
 
     protected parseError(err: unknown): RubicSdkError {
         return parseError(err, 'Cannot calculate instant trade');
+    }
+
+    protected async createProxyTrade(
+        options: SwapTransactionOptions,
+        data: string,
+        value: string,
+        gas: string | undefined | number,
+        gasPrice: string | undefined | number
+    ): Promise<TransactionReceipt> {
+        const transactionOptions = {
+            onTransactionHash: options.onConfirm,
+            value,
+            gas,
+            gasPrice
+        };
+        const methodArguments = await this.getProxyArguments(options, data);
+
+        return Injector.web3Private.tryExecuteContractMethod(
+            this.commonContractAddress,
+            this.commonContractAbi,
+            options.receiverAddress ? 'dexCallWithReceiver' : 'dexCall',
+            methodArguments,
+            transactionOptions
+        );
+    }
+
+    private async getProxyArguments(
+        options: SwapTransactionOptions,
+        data: string
+    ): Promise<unknown[]> {
+        const params = [this.contractAddress];
+        if (options?.receiverAddress) {
+            params.push(options.receiverAddress);
+        }
+
+        return [...params, this.from.address, this.from.stringWeiAmount, this.to.address, data];
     }
 }

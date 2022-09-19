@@ -301,17 +301,17 @@ export class Web3Private {
         options: TransactionOptions = {},
         allowError?: (err: Web3Error) => boolean
     ): Promise<TransactionReceipt> {
-        const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
+        // const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
 
         try {
-            const gas = await contract.methods[methodName](...methodArguments).estimateGas({
-                from: this.address,
-                ...(options.value && { value: Web3Private.stringifyAmount(options.value) }),
-                ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
-                ...(options.gasPrice && {
-                    gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                })
-            });
+            // const gas = await contract.methods[methodName](...methodArguments).estimateGas({
+            //     from: this.address,
+            //     ...(options.value && { value: Web3Private.stringifyAmount(options.value) }),
+            //     ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
+            //     ...(options.gasPrice && {
+            //         gasPrice: Web3Private.stringifyAmount(options.gasPrice)
+            //     })
+            // });
             return this.executeContractMethod(
                 contractAddress,
                 contractAbi,
@@ -319,7 +319,7 @@ export class Web3Private {
                 methodArguments,
                 {
                     ...options,
-                    gas: options.gas || Web3Pure.calculateGasMargin(gas, 1.15)
+                    gas: options.gas
                 }
             );
         } catch (err) {

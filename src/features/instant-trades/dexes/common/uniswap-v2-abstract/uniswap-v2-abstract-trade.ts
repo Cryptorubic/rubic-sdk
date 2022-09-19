@@ -136,7 +136,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         if (this.from.isNative) {
             return this.getAmountInAndAmountOut().amountIn;
         }
-        return undefined;
+        return '0';
     }
 
     private get regularSwapMethod(): string {
@@ -200,10 +200,25 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     private async createAnyToAnyTrade(
         options: SwapTransactionOptions
     ): Promise<TransactionReceipt> {
-        const methodName = await this.getMethodName(options);
-        const swapParameters = this.getSwapParametersByMethod(methodName, options);
-
-        return Injector.web3Private.tryExecuteContractMethod(...swapParameters);
+        const {
+            data,
+            value: sourceValue,
+            gas,
+            gasPrice
+        } = await this.encode({
+            fromAddress: this.walletAddress
+        });
+        if (!data || !sourceValue) {
+            // @TODO fix
+            throw new RubicSdkError('Cant create trade');
+        }
+        return this.createProxyTrade(
+            options,
+            data,
+            sourceValue.toString(),
+            gas,
+            gasPrice?.toString()
+        );
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {

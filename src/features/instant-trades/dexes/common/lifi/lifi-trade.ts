@@ -122,15 +122,12 @@ export class LifiTrade extends InstantTrade {
         try {
             const { data, gasLimit, gasPrice } = await this.getTransactionData();
 
-            return await Injector.web3Private.trySendTransaction(
-                this.contractAddress,
+            return this.createProxyTrade(
+                options,
+                data,
                 this.from.isNative ? this.from.stringWeiAmount : '0',
-                {
-                    data,
-                    gas: options.gasLimit || gasLimit,
-                    gasPrice: options.gasPrice || gasPrice,
-                    onTransactionHash: options.onConfirm
-                }
+                options.gasLimit || gasLimit,
+                options.gasPrice || gasPrice
             );
         } catch (err) {
             if ([400, 500, 503].includes(err.code)) {

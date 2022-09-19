@@ -1,4 +1,3 @@
-import { Injector } from '@rsdk-core/sdk/injector';
 import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
 import { SwapTransactionOptions } from '@rsdk-features/instant-trades/models/swap-transaction-options';
 import { TRADE_TYPE, TradeType } from 'src/features';
@@ -9,7 +8,7 @@ import { GasFeeInfo } from '@rsdk-features/instant-trades/models/gas-fee-info';
 import { EncodeTransactionOptions } from '@rsdk-features/instant-trades/models/encode-transaction-options';
 import { TransactionConfig } from 'web3-core';
 import { Token } from 'src/core';
-import { UnsupportedReceiverAddressError } from 'src/common';
+import { RubicSdkError, UnsupportedReceiverAddressError } from 'src/common';
 
 interface ZrxTradeStruct {
     from: PriceTokenAmount;
@@ -64,17 +63,13 @@ export class ZrxTrade extends InstantTrade {
         await this.checkAllowanceAndApprove(options);
 
         const { gas, gasPrice } = this.getGasParams(options);
+        const { data, value } = await this.encode({ fromAddress: this.walletAddress });
 
-        return Injector.web3Private.trySendTransaction(
-            this.apiTradeData.to,
-            this.apiTradeData.value,
-            {
-                onTransactionHash: options.onConfirm,
-                data: this.apiTradeData.data,
-                gas,
-                gasPrice
-            }
-        );
+        if (!data || !value) {
+            throw new RubicSdkError('Cant create trade');
+        }
+
+        return this.createProxyTrade(options, data, value.toString(), gas, gasPrice);
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
