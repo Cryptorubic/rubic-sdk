@@ -1,4 +1,4 @@
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export const bridgersCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,
@@ -10,3 +10,6 @@ export const bridgersCrossChainSupportedBlockchains = [
 
 export type BridgersCrossChainSupportedBlockchain =
     typeof bridgersCrossChainSupportedBlockchains[number];
+
+export type BridgersEvmCrossChainSupportedBlockchain = BridgersCrossChainSupportedBlockchain &
+    EvmBlockchainName;

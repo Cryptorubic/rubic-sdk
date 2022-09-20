@@ -1,16 +1,10 @@
-import { TronParameters } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-parameters';
+import { EvmBridgersTransactionData } from 'src/features/cross-chain/providers/bridgers-trade-provider/evm-bridgers-trade/models/evm-bridgers-transaction-data';
+import { TronBridgersTransactionData } from 'src/features/cross-chain/providers/bridgers-trade-provider/tron-bridgers-trade/models/tron-bridgers-transaction-data';
 
-export interface BridgersSwapResponse {
+export interface BridgersSwapResponse<
+    T extends EvmBridgersTransactionData | TronBridgersTransactionData
+> {
     data: {
-        txData: {
-            tronRouterAddress: string;
-            functionName: string;
-            options: {
-                feeLimit: number;
-                callValue: string;
-            };
-            parameter: TronParameters;
-            to: string;
-        };
+        txData: T;
     };
 }

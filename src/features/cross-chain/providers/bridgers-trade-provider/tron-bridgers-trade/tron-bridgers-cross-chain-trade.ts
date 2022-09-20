@@ -1,27 +1,25 @@
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { TronCrossChainTrade } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/tron-cross-chain-trade';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/providers/common/constants/rubic-proxy-contract-address';
 import BigNumber from 'bignumber.js';
-import { BridgersSwapResponse } from 'src/features/cross-chain/providers/bridgers-trade-provider/models/bridgers-swap-response';
-import { BridgersSwapRequest } from 'src/features/cross-chain/providers/bridgers-trade-provider/models/bridgers-swap-request';
 import { tronCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';
-import { toBridgersBlockchain } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/to-bridgers-blockchain';
-import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/bridgers-cross-chain-supported-blockchain';
+import { BridgersEvmCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { TronGetContractParamsOptions } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/models/tron-get-contract-params-options';
 import { TronContractParams } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/models/tron-contract-params';
+import { getMethodArgumentsAndTransactionData } from 'src/features/cross-chain/providers/bridgers-trade-provider/utils/get-method-arguments-and-transaction-data';
 
-export class BridgersCrossChainTrade extends TronCrossChainTrade {
+import { TronBridgersTransactionData } from 'src/features/cross-chain/providers/bridgers-trade-provider/tron-bridgers-trade/models/tron-bridgers-transaction-data';
+
+export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;
 
     public readonly from: PriceTokenAmount<TronBlockchainName>;
 
-    public readonly to: PriceTokenAmount<BridgersCrossChainSupportedBlockchain>;
+    public readonly to: PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>;
 
     public readonly toTokenAmountMin: BigNumber;
 
@@ -36,7 +34,7 @@ export class BridgersCrossChainTrade extends TronCrossChainTrade {
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<TronBlockchainName>;
-            to: PriceTokenAmount<BridgersCrossChainSupportedBlockchain>;
+            to: PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>;
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
         },
@@ -53,41 +51,14 @@ export class BridgersCrossChainTrade extends TronCrossChainTrade {
     protected async getContractParams(
         options: TronGetContractParamsOptions
     ): Promise<TronContractParams> {
-        const amountOutMin = Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals);
-        const swapRequest: BridgersSwapRequest = {
-            fromTokenAddress: this.from.address,
-            toTokenAddress: this.to.address,
-            fromAddress: options.fromAddress || this.walletAddress,
-            toAddress: options.receiverAddress,
-            fromTokenChain: 'TRON',
-            toTokenChain: toBridgersBlockchain[this.to.blockchain],
-            fromTokenAmount: this.from.stringWeiAmount,
-            amountOutMin,
-            equipmentNo: this.walletAddress.slice(0, 32),
-            sourceFlag: 'widget'
-        };
-
-        const swapData = await this.httpClient.post<BridgersSwapResponse>(
-            'https://sswap.swft.pro/api/sswap/swap',
-            swapRequest
-        );
-        const transactionData = swapData.data.txData;
-
-        const methodArguments: unknown[] = [
-            [
-                this.from.address,
-                this.from.weiAmount,
-                blockchainId[this.to.blockchain],
-                this.to.address,
-                amountOutMin,
-                options.receiverAddress,
-                TronWeb3Pure.nativeTokenAddress,
-                transactionData.to
-            ]
-        ];
-        if (!this.from.isNative) {
-            methodArguments.push(transactionData.to);
-        }
+        const { methodArguments, transactionData } =
+            await getMethodArgumentsAndTransactionData<TronBridgersTransactionData>(
+                this.from,
+                this.to,
+                this.toTokenAmountMin,
+                this.walletAddress,
+                options
+            );
 
         const encodedData = TronWeb3Pure.encodeMethodSignature(
             transactionData.functionName,
@@ -95,11 +66,13 @@ export class BridgersCrossChainTrade extends TronCrossChainTrade {
         );
         methodArguments.push(encodedData);
 
-        const value = transactionData.options.callValue;
+        const value = new BigNumber(transactionData.options.callValue)
+            .plus(this.feeInfo.fixedFee?.amount || 0)
+            .toFixed();
         const { feeLimit } = transactionData.options;
 
         return {
-            contractAddress: transactionData.tronRouterAddress,
+            contractAddress: transactionData.to,
             contractAbi: tronCommonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,

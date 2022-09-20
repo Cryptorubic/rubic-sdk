@@ -1,9 +1,14 @@
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
-import { BlockchainName, TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    TronBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import {
     BridgersCrossChainSupportedBlockchain,
-    bridgersCrossChainSupportedBlockchains
+    bridgersCrossChainSupportedBlockchains,
+    BridgersEvmCrossChainSupportedBlockchain
 } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
@@ -16,13 +21,15 @@ import { toBridgersBlockchain } from 'src/features/cross-chain/providers/bridger
 import { BridgersQuoteResponse } from 'src/features/cross-chain/providers/bridgers-trade-provider/models/bridgers-quote-response';
 import { CrossChainMaxAmountError, CrossChainMinAmountError } from 'src/common/errors';
 import BigNumber from 'bignumber.js';
-import { BridgersCrossChainTrade } from 'src/features/cross-chain/providers/bridgers-trade-provider/bridgers-cross-chain-trade';
+import { TronBridgersCrossChainTrade } from 'src/features/cross-chain/providers/bridgers-trade-provider/tron-bridgers-trade/tron-bridgers-cross-chain-trade';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 
 import { bridgersNativeAddress } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/bridgers-native-address';
 import { createTokenNativeAddressProxy } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { EvmBridgersCrossChainTrade } from 'src/features/cross-chain/providers/bridgers-trade-provider/evm-bridgers-trade/evm-bridgers-cross-chain-trade';
 
 export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -40,8 +47,10 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
         toBlockchain: BlockchainName
     ): boolean {
         return (
-            BridgersCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
-            BridgersCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
+            (fromBlockchain === BLOCKCHAIN_NAME.TRON &&
+                BridgersCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)) ||
+            (BridgersCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) &&
+                toBlockchain === BLOCKCHAIN_NAME.TRON)
         );
     }
 
@@ -50,12 +59,9 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
         toToken: PriceToken,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
-        const fromBlockchain = from.blockchain;
-        const toBlockchain = toToken.blockchain;
-        if (
-            !BridgersCrossChainTradeProvider.isSupportedBlockchain(fromBlockchain) ||
-            !BridgersCrossChainTradeProvider.isSupportedBlockchain(toBlockchain)
-        ) {
+        const fromBlockchain = from.blockchain as BridgersCrossChainSupportedBlockchain;
+        const toBlockchain = toToken.blockchain as BridgersCrossChainSupportedBlockchain;
+        if (!this.isSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return null;
         }
 
@@ -134,11 +140,24 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
                 toToken.decimals
             );
 
+            if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
+                return {
+                    trade: new EvmBridgersCrossChainTrade(
+                        {
+                            from: from as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
+                            to: to as PriceTokenAmount<TronBlockchainName>,
+                            toTokenAmountMin,
+                            feeInfo
+                        },
+                        options.providerAddress
+                    )
+                };
+            }
             return {
-                trade: new BridgersCrossChainTrade(
+                trade: new TronBridgersCrossChainTrade(
                     {
                         from: from as PriceTokenAmount<TronBlockchainName>,
-                        to,
+                        to: to as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
                         toTokenAmountMin,
                         feeInfo
                     },
