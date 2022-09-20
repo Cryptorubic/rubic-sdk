@@ -101,7 +101,9 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
         const result = await this.lifi.getRoutes(routesRequest);
         const { routes } = result;
 
-        const bestRoute = routes.find(route => !route.containsSwitchChain);
+        const bestRoute = routes.find(
+            route => route.steps.length === 1 && !route.containsSwitchChain
+        );
 
         if (!bestRoute) {
             return null;
