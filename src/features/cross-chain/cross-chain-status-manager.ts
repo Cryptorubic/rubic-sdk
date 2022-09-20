@@ -41,7 +41,7 @@ export class CrossChainStatusManager {
 
     /**
      * Returns cross-chain trade statuses on the source and target network.
-     * The result consists of the status of the source and target transactions.
+     * The result consists of the status of the source and target transactions and destination tx hash.
      * @example
      * ```ts
      * const tradeData = {
@@ -50,14 +50,15 @@ export class CrossChainStatusManager {
      *   txTimestamp: 1658241570024,
      *   srxTxHash: '0xd2263ca82ac0fce606cb75df27d7f0dc94909d41a58c37563bd6772496cb8924'
      * };
-     * const provider = CROSS_CHAIN_TRADE_TYPE.CELER;
+     * const provider = CROSS_CHAIN_TRADE_TYPE.VIA;
      * const crossChainStatus = await sdk.crossChainStatusManager.getCrossChainStatus(tradeData, provider);
      * console.log('Source transaction status', crossChainStatus.srcTxStatus);
      * console.log('Destination transaction status', crossChainStatus.dstTxStatus);
+     * console.log('Destination transaction hash', crossChainStatus.dstTxHash);
      * ```
      * @param data Data needed to calculate statuses.
      * @param provider Cross-chain trade type.
-     * @returns Object with transaction statuses.
+     * @returns Object with transaction statuses and hash.
      */
     public async getCrossChainStatus(
         data: CrossChainTradeData,
@@ -113,13 +114,13 @@ export class CrossChainStatusManager {
     }
 
     /**
-     * Get destination transaction status based on source transaction status,
+     * Get destination transaction status and hash based on source transaction status,
      * source transaction receipt, trade data and provider type.
      * @param srcTxStatus Source transaction status.
      * @param srcTxReceipt Source transaction receipt.
      * @param tradeData Trade data.
      * @param provider Cross-chain trade type.
-     * @returns Cross-chain transaction status.
+     * @returns Cross-chain transaction status and hash.
      */
     private async getDstTxStatus(
         srcTxStatus: CrossChainTxStatus,
@@ -139,10 +140,10 @@ export class CrossChainStatusManager {
     }
 
     /**
-     * Get Rango trade dst transaction status.
+     * Get Rango trade dst transaction status and hash.
      * @param data Trade data.
      * @param srcTxReceipt Source transaction receipt.
-     * @returns Cross-chain transaction status.
+     * @returns Cross-chain transaction status and hash.
      */
     private async getRangoDstSwapStatus(
         data: CrossChainTradeData,
@@ -198,10 +199,10 @@ export class CrossChainStatusManager {
     }
 
     /**
-     * Get Symbiosis trade dst transaction status.
+     * Get Symbiosis trade dst transaction status and hash.
      * @param data Trade data.
      * @param srcTxReceipt Source transaction receipt.
-     * @returns Cross-chain transaction status.
+     * @returns Cross-chain transaction status and hash.
      */
     private async getSymbiosisDstSwapStatus(
         data: CrossChainTradeData,
@@ -263,10 +264,10 @@ export class CrossChainStatusManager {
     }
 
     /**
-     * Get Li-fi trade dst transaction status.
+     * Get Li-fi trade dst transaction status and hash.
      * @param data Trade data.
      * @param srcTxReceipt Source transaction receipt.
-     * @returns Cross-chain transaction status.
+     * @returns Cross-chain transaction status and hash.
      */
     private async getLifiDstSwapStatus(
         data: CrossChainTradeData,
@@ -385,6 +386,7 @@ export class CrossChainStatusManager {
         }
     }
 
+    // @TODO remove after removing rubic cross-chain provider
     /**
      * Get Rubic trade dst transaction status.
      * @param data Trade data.
@@ -392,11 +394,10 @@ export class CrossChainStatusManager {
      * @returns Cross-chain transaction status.
      */
     private async getRubicDstSwapStatus(
-        data: CrossChainTradeData,
-        srcTxReceipt: TransactionReceipt
+        _data: CrossChainTradeData,
+        _srcTxReceipt: TransactionReceipt
     ): Promise<DstTxData> {
-        console.log(data, srcTxReceipt);
-        return { txStatus: CrossChainTxStatus.PENDING, txHash: null };
+        return { txStatus: CrossChainTxStatus.UNKNOWN, txHash: null };
     }
 
     /**
@@ -424,10 +425,10 @@ export class CrossChainStatusManager {
     }
 
     /**
-     * Get DeBridge trade dst transaction status.
+     * Get DeBridge trade dst transaction status and hash.
      * @param _data Trade data.
      * @param srcTxReceipt Source transaction receipt.
-     * @returns Cross-chain transaction status.
+     * @returns Cross-chain transaction status and hash.
      */
     private async getDebridgeDstSwapStatus(
         _data: CrossChainTradeData,
@@ -462,10 +463,10 @@ export class CrossChainStatusManager {
     }
 
     /**
-     * Get Via trade dst transaction status.
+     * Get Via trade dst transaction status and hash.
      * @param data Trade data.
      * @param _srcTxReceipt Source transaction receipt.
-     * @returns Cross-chain transaction status.
+     * @returns Cross-chain transaction status and hash.
      */
     private async getViaDstSwapStatus(
         data: CrossChainTradeData,
