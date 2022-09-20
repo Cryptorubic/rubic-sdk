@@ -141,13 +141,23 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
             );
 
             if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
+                const gasData =
+                    options.gasCalculation === 'enabled' && options.receiverAddress
+                        ? await EvmBridgersCrossChainTrade.getGasData(
+                              from as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
+                              to as PriceTokenAmount<TronBlockchainName>,
+                              options.receiverAddress
+                          )
+                        : null;
+
                 return {
                     trade: new EvmBridgersCrossChainTrade(
                         {
                             from: from as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
                             to: to as PriceTokenAmount<TronBlockchainName>,
                             toTokenAmountMin,
-                            feeInfo
+                            feeInfo,
+                            gasData
                         },
                         options.providerAddress
                     )

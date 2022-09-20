@@ -28,8 +28,6 @@ import { LifiTransactionRequest } from './models/lifi-transaction-request';
  * Calculated Celer cross chain trade.
  */
 export class LifiCrossChainTrade extends EvmCrossChainTrade {
-    public readonly feeInfo: FeeInfo;
-
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -111,6 +109,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     public readonly priceImpact: number;
 
     public readonly bridgeType: BridgeType | undefined;
+
+    public readonly feeInfo: FeeInfo;
 
     private get fromBlockchain(): LifiCrossChainSupportedBlockchain {
         return this.from.blockchain as LifiCrossChainSupportedBlockchain;
