@@ -131,7 +131,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         const value = new BigNumber(transactionData.value).plus(fixedFee).toFixed();
 
         return {
-            contractAddress: transactionData.to,
+            contractAddress: this.fromContractAddress,
             contractAbi: evmCommonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,

@@ -72,7 +72,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
         const { feeLimit } = transactionData.options;
 
         return {
-            contractAddress: transactionData.to,
+            contractAddress: this.fromContractAddress,
             contractAbi: tronCommonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,
