@@ -22,9 +22,6 @@ export class GasPriceApi {
      * @param blockchain Blockchain to get gas price from.
      */
     public getGasPrice(blockchain: BlockchainName): Promise<string> {
-        if (blockchain === BLOCKCHAIN_NAME.ETHEREUM) {
-            return this.fetchEthGas();
-        }
         return this.fetchGas(blockchain);
     }
 
