@@ -22,6 +22,9 @@ export class GasPriceApi {
      * @param blockchain Blockchain to get gas price from.
      */
     public getGasPrice(blockchain: BlockchainName): Promise<string> {
+        if (blockchain === BLOCKCHAIN_NAME.ETHEREUM) {
+            return this.fetchEthGas();
+        }
         return this.fetchGas(blockchain);
     }
 
@@ -44,11 +47,11 @@ export class GasPriceApi {
         const requestTimeout = 3000;
 
         try {
-            const response: { medium: { maxFeePerGas: string } } = await pTimeout(
+            const response: { high: { maxFeePerGas: string } } = await pTimeout(
                 this.httpClient.get('https://gas-price-api.1inch.io/v1.2/1'),
                 requestTimeout
             );
-            return response.medium.maxFeePerGas;
+            return response.high.maxFeePerGas;
         } catch (_err) {}
 
         try {
