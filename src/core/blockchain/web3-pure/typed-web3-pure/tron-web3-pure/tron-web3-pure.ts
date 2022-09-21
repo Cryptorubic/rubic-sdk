@@ -6,6 +6,11 @@ import { AbiInput, AbiItem, AbiOutput } from 'web3-utils';
 import { InfiniteArray } from 'src/common/utils/types';
 import { TronParameters } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-parameters';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
+import { BigNumber as EthersBigNumber } from 'ethers';
+import {
+    TronWeb3PrimitiveType,
+    Web3PrimitiveType
+} from 'src/core/blockchain/models/web3-primitive-type';
 
 @staticImplements<TypedWeb3Pure>()
 export class TronWeb3Pure {
@@ -99,10 +104,13 @@ export class TronWeb3Pure {
      * @param response Bytes code returned after method call.
      * @returns Parsed method output.
      */
-    public static decodeMethodOutput(outputAbi: AbiOutput[], response: string): string[] {
-        return TronWeb.utils.abi
-            .decodeParams([], this.flattenTypesToArray(outputAbi), response)
-            .map((parsedParam: unknown) => parsedParam?.toString());
+    public static decodeMethodOutput(outputAbi: AbiOutput[], response: string): Web3PrimitiveType {
+        const decodedParam: TronWeb3PrimitiveType = TronWeb.utils.abi.decodeParams(
+            [],
+            this.flattenTypesToArray(outputAbi),
+            response
+        )[0];
+        return this.flattenParametersToPrimitive(decodedParam);
     }
 
     private static flattenTypesToString(abiInputs: (AbiInput | AbiOutput)[]): string[] {
@@ -142,5 +150,23 @@ export class TronWeb3Pure {
             }
         });
         return [types, values];
+    }
+
+    public static flattenParametersToPrimitive(param: TronWeb3PrimitiveType): Web3PrimitiveType {
+        if (typeof param === 'number' || param instanceof EthersBigNumber) {
+            return param.toString();
+        }
+        if (Object.keys(param).length) {
+            Object.keys(param).reduce(
+                (acc, paramKey) => ({
+                    ...acc,
+                    [paramKey]: this.flattenParametersToPrimitive(
+                        param[paramKey as keyof typeof param]
+                    )
+                }),
+                {}
+            );
+        }
+        return param as Web3PrimitiveType;
     }
 }

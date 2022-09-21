@@ -23,6 +23,7 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import BigNumber from 'bignumber.js';
 import { EventData } from 'web3-eth-contract';
+import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
@@ -140,7 +141,7 @@ export class EvmWeb3Public extends Web3Public {
         return new BigNumber(allowance);
     }
 
-    public async multicallContractsMethods<Output>(
+    public async multicallContractsMethods<Output extends Web3PrimitiveType>(
         contractAbi: AbiItem[],
         contractsData: {
             contractAddress: string;
@@ -177,7 +178,7 @@ export class EvmWeb3Public extends Web3Public {
                             ? (this.web3.eth.abi.decodeParameters(
                                   methodOutputAbi,
                                   output.returnData
-                              ) as Output)
+                              )[0] as Output)
                             : null
                 };
             })
@@ -194,7 +195,7 @@ export class EvmWeb3Public extends Web3Public {
         return contract.methods.tryAggregate(false, calls).call();
     }
 
-    public async callContractMethod<T = string>(
+    public async callContractMethod<T extends Web3PrimitiveType = string>(
         contractAddress: string,
         contractAbi: AbiItem[],
         methodName: string,

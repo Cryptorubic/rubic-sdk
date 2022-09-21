@@ -269,7 +269,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             if (!response.success || !response.output) {
                 return null;
             }
-            const { amounts } = response.output;
+            const amounts = response.output;
 
             const numberAmount = this.exact === 'input' ? amounts[amounts.length - 1] : amounts[0];
             if (!numberAmount) {

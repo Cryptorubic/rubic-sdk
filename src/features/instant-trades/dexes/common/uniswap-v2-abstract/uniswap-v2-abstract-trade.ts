@@ -74,10 +74,10 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         blockchain: EvmBlockchainName,
         exact: Exact,
         routesMethodArguments: [string, string[]][]
-    ): Promise<ContractMulticallResponse<{ amounts: string[] }>[]> {
+    ): Promise<ContractMulticallResponse<string[]>[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
         const methodName = exact === 'input' ? 'getAmountsOut' : 'getAmountsIn';
-        return web3Public.multicallContractMethod<{ amounts: string[] }>(
+        return web3Public.multicallContractMethod<string[]>(
             this.getContractAddress(blockchain),
             this.contractAbi,
             methodName,

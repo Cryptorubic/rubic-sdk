@@ -212,7 +212,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
         );
 
         const poolsAddresses = (
-            await this.web3Public.multicallContractMethod<{ 0: string }>(
+            await this.web3Public.multicallContractMethod<string>(
                 FACTORY_CONTRACT_ADDRESS,
                 FACTORY_CONTRACT_ABI,
                 'getPool',
@@ -222,7 +222,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
                     methodArguments.fee
                 ])
             )
-        ).map(result => result.output![0]);
+        ).map(result => result.output!);
 
         return poolsAddresses
             .map((poolAddress, index) => {
@@ -273,7 +273,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
             .flat();
 
         return this.web3Public
-            .multicallContractMethods<{ 0: string }>(
+            .multicallContractMethods<string>(
                 UNISWAP_V3_QUOTER_CONTRACT_ADDRESS,
                 UNISWAP_V3_QUOTER_CONTRACT_ABI,
                 quoterMethodsData.map(quoterMethodData => quoterMethodData.methodData)
@@ -287,7 +287,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
                         }
                         if (result.success) {
                             return {
-                                outputAbsoluteAmount: new BigNumber(result.output![0]),
+                                outputAbsoluteAmount: new BigNumber(result.output!),
                                 poolsPath: pool.poolsPath,
                                 initialTokenAddress: from.address
                             };

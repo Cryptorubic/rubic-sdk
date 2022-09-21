@@ -123,21 +123,21 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
             )
             .flat();
 
-        const results = await this.web3Public.multicallContractMethods<{ 0: string }>(
+        const results = await this.web3Public.multicallContractMethods<string>(
             ALGEBRA_QUOTER_CONTRACT_ADDRESS,
             ALGEBRA_QUOTER_CONTRACT_ABI,
             quoterMethodsData.map(quoterMethodData => quoterMethodData.methodData)
         );
 
         return results
-            .map((result: ContractMulticallResponse<{ 0: string }>, index: number) => {
+            .map((result: ContractMulticallResponse<string>, index: number) => {
                 if (result.success) {
                     const quoter = quoterMethodsData?.[index];
                     if (!quoter) {
                         throw new RubicSdkError('Quoter has to be defined');
                     }
                     return {
-                        outputAbsoluteAmount: new BigNumber(result.output![0]),
+                        outputAbsoluteAmount: new BigNumber(result.output!),
                         path: quoter.path
                     };
                 }

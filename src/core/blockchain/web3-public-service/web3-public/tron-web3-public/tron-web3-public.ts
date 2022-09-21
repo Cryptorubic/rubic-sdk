@@ -19,6 +19,7 @@ import { AbiItem } from 'web3-utils';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { TransactionInfo } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/transaction-info';
+import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 
 export class TronWeb3Public extends Web3Public {
     protected readonly tokenContractAbi = TRC20_CONTRACT_ABI;
@@ -92,7 +93,7 @@ export class TronWeb3Public extends Web3Public {
             tokenAddress,
             TronWeb3Pure.encodeFunctionCall(this.tokenContractAbi, 'balanceOf', [userAddress])
         ]);
-        promises[0] = this.multicall(calls);
+        promises[0] = this.multicall(calls); // @todo multicallContractMethods
 
         const results = await Promise.all(
             promises as [Promise<TronMulticallResponse>, Promise<BigNumber>]
@@ -126,7 +127,7 @@ export class TronWeb3Public extends Web3Public {
         return new BigNumber(allowance);
     }
 
-    public async multicallContractsMethods<Output>(
+    public async multicallContractsMethods<Output extends Web3PrimitiveType>(
         contractAbi: AbiItem[],
         contractsData: {
             contractAddress: string;
@@ -174,15 +175,17 @@ export class TronWeb3Public extends Web3Public {
         return contract.aggregateViewCalls(calls).call();
     }
 
-    public async callContractMethod<T = string>(
+    public async callContractMethod<T extends Web3PrimitiveType = string>(
         contractAddress: string,
         contractAbi: AbiItem[],
         methodName: string,
         methodArguments: unknown[] = []
     ): Promise<T> {
+        this.tronWeb.setAddress(contractAddress);
         const contract = await this.tronWeb.contract(contractAbi, contractAddress);
 
-        return contract[methodName](...methodArguments).call();
+        const response = await contract[methodName](...methodArguments).call();
+        return TronWeb3Pure.flattenParametersToPrimitive(response) as T;
     }
 
     /**

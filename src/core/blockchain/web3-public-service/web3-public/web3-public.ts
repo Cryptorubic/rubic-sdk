@@ -11,6 +11,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { Token } from 'src/common/tokens';
+import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
@@ -128,7 +129,7 @@ export abstract class Web3Public {
                 }
                 return {
                     ...acc,
-                    [tokenFields[fieldIndex]!]: field.success ? field.output![0] : undefined
+                    [tokenFields[fieldIndex]!]: field.success ? field.output : undefined
                 };
             }, {});
         });
@@ -153,7 +154,7 @@ export abstract class Web3Public {
      * @param methodName Method name.
      * @param methodCallsArguments Method parameters array, for each method call.
      */
-    public async multicallContractMethod<Output>(
+    public async multicallContractMethod<Output extends Web3PrimitiveType>(
         contractAddress: string,
         contractAbi: AbiItem[],
         methodName: string,
@@ -175,7 +176,7 @@ export abstract class Web3Public {
      * @param contractAbi Target contract abi.
      * @param methodsData Methods data, containing methods' names and arguments.
      */
-    public async multicallContractMethods<Output>(
+    public async multicallContractMethods<Output extends Web3PrimitiveType>(
         contractAddress: string,
         contractAbi: AbiItem[],
         methodsData: MethodData[]
@@ -197,7 +198,7 @@ export abstract class Web3Public {
      * @param contractAbi Target contract abi.
      * @param contractsData Contract addresses and methods data, containing methods' names and arguments.
      */
-    public abstract multicallContractsMethods<Output>(
+    public abstract multicallContractsMethods<Output extends Web3PrimitiveType>(
         contractAbi: AbiItem[],
         contractsData: {
             contractAddress: string;
@@ -212,7 +213,7 @@ export abstract class Web3Public {
      * @param methodName Called method name.
      * @param methodArguments Method arguments.
      */
-    public abstract callContractMethod<T = string>(
+    public abstract callContractMethod<T extends Web3PrimitiveType = string>(
         contractAddress: string,
         contractAbi: AbiItem[],
         methodName: string,

@@ -37,17 +37,19 @@ export class CelerCrossChainContractData {
 
     public async destinationCryptoFee(toBlockchain: BlockchainName): Promise<BigNumber> {
         const destinationBlockchainId = blockchainId[toBlockchain];
-        return this.web3Public.callContractMethod(
-            this.address,
-            celerCrossChainContractAbi,
-            'blockchainToGasFee',
-            [String(destinationBlockchainId)]
+        return new BigNumber(
+            await this.web3Public.callContractMethod<string>(
+                this.address,
+                celerCrossChainContractAbi,
+                'blockchainToGasFee',
+                [String(destinationBlockchainId)]
+            )
         );
     }
 
     public async getMinMaxTransitTokenAmounts(tokenAddress: string): Promise<[string, string]> {
         return (
-            await this.web3Public.multicallContractMethods<[string]>(
+            await this.web3Public.multicallContractMethods<string>(
                 this.address,
                 celerCrossChainContractAbi,
                 [
@@ -61,7 +63,7 @@ export class CelerCrossChainContractData {
                     }
                 ]
             )
-        ).map(result => result.output![0] as string) as [string, string];
+        ).map(result => result.output) as [string, string];
     }
 
     @Cache
