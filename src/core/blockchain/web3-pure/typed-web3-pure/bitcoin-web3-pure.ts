@@ -13,6 +13,10 @@ export class BitcoinWeb3Pure {
         return compareAddresses(address, BitcoinWeb3Pure.nativeTokenAddress);
     }
 
+    public static isEmptyAddress(address?: string): boolean {
+        return Boolean(address) && address === '';
+    }
+
     public static isAddressCorrect(address: string): boolean {
         return validate(address, Network.mainnet);
     }

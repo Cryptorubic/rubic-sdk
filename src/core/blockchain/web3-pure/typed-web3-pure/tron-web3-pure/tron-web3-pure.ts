@@ -18,8 +18,16 @@ export class TronWeb3Pure {
         return compareAddresses(address, TronWeb3Pure.nativeTokenAddress);
     }
 
+    public static isEmptyAddress(address?: string): boolean {
+        return Boolean(address) && address === '0x0000000000000000000000000000000000000000';
+    }
+
     public static isAddressCorrect(address: string): boolean {
         return TronWeb.isAddress(address);
+    }
+
+    public static addressToHex(address: string): string {
+        return TronWeb.address.toHex(address).replace(/^41/, '0x');
     }
 
     /**

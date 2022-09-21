@@ -2,13 +2,15 @@ export interface TypedWeb3Pure {
     /**
      * Gets address of native coin.
      */
-    get nativeTokenAddress(): string;
+    get nativeTokenAddress(): string; // @todo rename
 
     /**
      * Checks if address is native address.
      * @param address Address to check.
      */
     isNativeAddress(address: string): boolean;
+
+    isEmptyAddress(address: string): boolean;
 
     /**
      * Checks if a given address is a valid Ethereum address.

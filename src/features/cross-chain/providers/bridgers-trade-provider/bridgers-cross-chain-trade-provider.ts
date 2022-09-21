@@ -23,13 +23,14 @@ import { CrossChainMaxAmountError, CrossChainMinAmountError } from 'src/common/e
 import BigNumber from 'bignumber.js';
 import { TronBridgersCrossChainTrade } from 'src/features/cross-chain/providers/bridgers-trade-provider/tron-bridgers-trade/tron-bridgers-cross-chain-trade';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-
 import { bridgersNativeAddress } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/bridgers-native-address';
 import { createTokenNativeAddressProxy } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmBridgersCrossChainTrade } from 'src/features/cross-chain/providers/bridgers-trade-provider/evm-bridgers-trade/evm-bridgers-cross-chain-trade';
+import { tronCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { AbiItem } from 'web3-utils';
 
 export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -66,12 +67,21 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
         }
 
         try {
+            const contractAbi = BlockchainsInfo.isTronBlockchainName(fromBlockchain)
+                ? tronCommonCrossChainAbi
+                : evmCommonCrossChainAbi;
             await this.checkContractState(
                 fromBlockchain,
-                rubicProxyContractAddress[fromBlockchain]
+                rubicProxyContractAddress[fromBlockchain],
+                contractAbi
             );
 
-            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+            const feeInfo = await this.getFeeInfo(
+                fromBlockchain,
+                options.providerAddress,
+                from,
+                contractAbi
+            );
 
             const feeAmount = Web3Pure.toWei(
                 from.tokenAmount.multipliedBy(feeInfo.platformFee!.percent).dividedBy(100),
@@ -185,7 +195,8 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
     protected override async getFeeInfo(
         fromBlockchain: BridgersCrossChainSupportedBlockchain,
         providerAddress: string,
-        percentFeeToken: PriceTokenAmount
+        percentFeeToken: PriceTokenAmount,
+        contractAbi: AbiItem[]
     ): Promise<FeeInfo> {
         return {
             fixedFee: {
@@ -193,7 +204,7 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
                     fromBlockchain,
                     providerAddress,
                     rubicProxyContractAddress[fromBlockchain],
-                    evmCommonCrossChainAbi
+                    contractAbi
                 ),
                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
             },
@@ -202,7 +213,7 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
                     fromBlockchain,
                     providerAddress,
                     rubicProxyContractAddress[fromBlockchain],
-                    evmCommonCrossChainAbi
+                    contractAbi
                 ),
                 tokenSymbol: percentFeeToken.symbol
             },

@@ -2,24 +2,21 @@ import { AbiItem } from 'web3-utils';
 
 export const tronCommonCrossChainAbi = [
     {
+        inputs: [],
         outputs: [{ type: 'uint256' }],
         name: 'RubicPlatformFee',
         stateMutability: 'View',
         type: 'Function'
     },
     {
-        inputs: [{ name: '_router', type: 'address' }],
-        name: 'addAvailableRouter',
-        stateMutability: 'Nonpayable',
-        type: 'Function'
-    },
-    {
+        inputs: [],
         outputs: [{ type: 'uint256' }],
         name: 'fixedCryptoFee',
         stateMutability: 'View',
         type: 'Function'
     },
     {
+        inputs: [],
         outputs: [{ type: 'address[]' }],
         name: 'getAvailableRouters',
         stateMutability: 'View',
@@ -53,6 +50,7 @@ export const tronCommonCrossChainAbi = [
         type: 'Function'
     },
     {
+        inputs: [],
         outputs: [{ type: 'bool' }],
         name: 'paused',
         stateMutability: 'View',

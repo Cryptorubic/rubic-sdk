@@ -13,16 +13,16 @@ export class EvmWeb3Pure {
 
     private static web3Eth = new Web3().eth;
 
-    public static isEmptyAddress(address?: string) {
-        return address && address === this.EMPTY_ADDRESS;
-    }
-
     public static get nativeTokenAddress(): string {
         return '0x0000000000000000000000000000000000000000';
     }
 
     public static isNativeAddress(address: string): boolean {
         return compareAddresses(address, EvmWeb3Pure.nativeTokenAddress);
+    }
+
+    public static isEmptyAddress(address?: string): boolean {
+        return Boolean(address) && address === EvmWeb3Pure.EMPTY_ADDRESS;
     }
 
     public static isAddressCorrect(address: string): boolean {

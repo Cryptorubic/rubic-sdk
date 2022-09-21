@@ -13,6 +13,7 @@ import { TronContractParams } from 'src/features/cross-chain/providers/common/tr
 import { getMethodArgumentsAndTransactionData } from 'src/features/cross-chain/providers/bridgers-trade-provider/utils/get-method-arguments-and-transaction-data';
 
 import { TronBridgersTransactionData } from 'src/features/cross-chain/providers/bridgers-trade-provider/tron-bridgers-trade/models/tron-bridgers-transaction-data';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
 export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;
@@ -66,9 +67,8 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
         );
         methodArguments.push(encodedData);
 
-        const value = new BigNumber(transactionData.options.callValue)
-            .plus(this.feeInfo.fixedFee?.amount || 0)
-            .toFixed();
+        const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
+        const value = new BigNumber(transactionData.options.callValue).plus(fixedFee).toFixed();
         const { feeLimit } = transactionData.options;
 
         return {
