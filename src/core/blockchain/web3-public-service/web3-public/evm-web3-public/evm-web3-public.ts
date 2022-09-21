@@ -177,7 +177,7 @@ export class EvmWeb3Public extends Web3Public {
                             ? (this.web3.eth.abi.decodeParameters(
                                   methodOutputAbi,
                                   output.returnData
-                              )[0] as Output)
+                              ) as Output)
                             : null
                 };
             })

@@ -4,7 +4,6 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
 import { AbiInput, AbiItem, AbiOutput } from 'web3-utils';
 import { InfiniteArray } from 'src/common/utils/types';
-import { BigNumber as EthersBigNumber } from 'ethers';
 import { TronParameters } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-parameters';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
 
@@ -100,16 +99,10 @@ export class TronWeb3Pure {
      * @param response Bytes code returned after method call.
      * @returns Parsed method output.
      */
-    public static decodeMethodOutput(outputAbi: AbiOutput[], response: string): string {
-        const parsedResponse = TronWeb.utils.abi.decodeParams(
-            [],
-            this.flattenTypesToArray(outputAbi),
-            response
-        )[0];
-        if (parsedResponse instanceof EthersBigNumber) {
-            return parsedResponse.toString();
-        }
-        return parsedResponse;
+    public static decodeMethodOutput(outputAbi: AbiOutput[], response: string): string[] {
+        return TronWeb.utils.abi
+            .decodeParams([], this.flattenTypesToArray(outputAbi), response)
+            .map((parsedParam: unknown) => parsedParam?.toString());
     }
 
     private static flattenTypesToString(abiInputs: (AbiInput | AbiOutput)[]): string[] {

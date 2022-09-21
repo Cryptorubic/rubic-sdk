@@ -117,10 +117,9 @@ export abstract class Web3Public {
             }))
         }));
 
-        const results = await this.multicallContractsMethods<string>(
-            this.tokenContractAbi,
-            contractsData
-        );
+        const results = contractsData.length
+            ? await this.multicallContractsMethods<[string]>(this.tokenContractAbi, contractsData)
+            : [];
         const tokens = results.map((tokenFieldsResults, tokenIndex) => {
             const tokenAddress = tokenAddresses[tokenIndex]!;
             return tokenFieldsResults.reduce((acc, field, fieldIndex) => {
@@ -129,7 +128,7 @@ export abstract class Web3Public {
                 }
                 return {
                     ...acc,
-                    [tokenFields[fieldIndex]!]: field.success ? field.output! : undefined
+                    [tokenFields[fieldIndex]!]: field.success ? field.output![0] : undefined
                 };
             }, {});
         });
