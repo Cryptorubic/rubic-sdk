@@ -3,12 +3,12 @@ import { Injector } from 'src/core/injector/injector';
 import {
     BtcStatusResponse,
     DeBridgeApiResponse,
-    getDstTxStatusFn,
+    GetDstTxStatusFn,
     SymbiosisApiResponse
 } from 'src/features/cross-chain/cross-chain-status-manager/models/statuses-api';
 import { CrossChainStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-status';
 import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/celer-trade-provider/models/celer-cross-chain-supported-blockchain';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { StatusResponse, TransactionStatus } from 'rango-sdk-basic';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -21,7 +21,6 @@ import { CrossChainTxStatus } from 'src/features/cross-chain/cross-chain-status-
 import { LogsDecoder } from 'src/features/cross-chain/utils/decode-logs';
 import { CelerSwapStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/celer-swap-status.enum';
 import { CrossChainTradeData } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-trade-data';
-import { TransactionReceipt } from 'web3-eth';
 import { celerCrossChainContractAbi } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import {
     CROSS_CHAIN_TRADE_TYPE,
@@ -31,6 +30,20 @@ import { LifiSwapStatus } from 'src/features/cross-chain/providers/lifi-trade-pr
 import { Via } from '@viaprotocol/router-sdk';
 import { celerCrossChainContractsAddresses } from 'src/features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contracts-addresses';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
+import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
+
+import {
+    BridgersGetTransDataByIdRequest,
+    BridgersGetTransDataByIdResponse
+} from 'src/features/cross-chain/cross-chain-status-manager/models/bridgers-get-trans-data-by-id';
+import {
+    BridgersUpdateDataAndStatusRequest,
+    BridgersUpdateDataAndStatusResponse
+} from 'src/features/cross-chain/cross-chain-status-manager/models/bridgers-update-data-and-status';
+import { toBridgersBlockchain } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/to-bridgers-blockchain';
+import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/bridgers-cross-chain-supported-blockchain';
 
 /**
  * Contains methods for getting cross-chain trade statuses.
@@ -38,19 +51,19 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 export class CrossChainStatusManager {
     private readonly httpClient = Injector.httpClient;
 
-    // @ts-ignore @TODO add bridgers
-    private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, getDstTxStatusFn> = {
+    private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, GetDstTxStatusFn> = {
         [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.VIA]: this.getViaDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.BRIDGERS]: this.getBridgersDstSwapStatus
     };
 
     /**
-     * Returns cross-chain trade statuses on the source and target network.
-     * The result consists of the status of the source and target transactions.
+     * Returns cross-chain trade statuses on the source and target networks.
+     * The result consists of statuses of the source and target transactions.
      * @example
      * ```ts
      * const tradeData = {
@@ -77,17 +90,11 @@ export class CrossChainStatusManager {
             dstTxStatus: CrossChainTxStatus.UNKNOWN
         };
         const { fromBlockchain, srcTxHash } = data;
-        const srcTxReceipt = await this.getTxReceipt(fromBlockchain, srcTxHash as string);
-        const srcTxStatus = this.getSrcTxStatus(srcTxReceipt);
+        const srcTxStatus = await this.getSrcTxStatus(fromBlockchain, srcTxHash);
 
         crossChainStatus.srcTxStatus = srcTxStatus;
 
-        const dstTxStatus = await this.getDstTxStatus(
-            srcTxStatus,
-            srcTxReceipt as TransactionReceipt,
-            data,
-            provider
-        );
+        const dstTxStatus = await this.getDstTxStatus(srcTxStatus, data, provider);
 
         if (dstTxStatus === CrossChainTxStatus.FAIL && srcTxStatus === CrossChainTxStatus.PENDING) {
             crossChainStatus.srcTxStatus = CrossChainTxStatus.FAIL;
@@ -100,33 +107,54 @@ export class CrossChainStatusManager {
 
     /**
      * Get cross-chain trade's source transaction status via receipt.
-     * @param srcTxReceipt Transaction receipt.
      * @returns Cross-chain transaction status.
      */
-    private getSrcTxStatus(srcTxReceipt: TransactionReceipt | null): CrossChainTxStatus {
-        if (srcTxReceipt === null) {
+    private async getSrcTxStatus(
+        fromBlockchain: Web3PublicSupportedBlockchain,
+        srcTxHash: string
+    ): Promise<CrossChainTxStatus> {
+        try {
+            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+
+            if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
+                const srcTxReceipt = await (web3Public as EvmWeb3Public).getTransactionReceipt(
+                    srcTxHash
+                );
+
+                if (srcTxReceipt === null) {
+                    return CrossChainTxStatus.PENDING;
+                }
+                if (srcTxReceipt.status) {
+                    return CrossChainTxStatus.SUCCESS;
+                }
+                return CrossChainTxStatus.FAIL;
+            }
+
+            // Tron
+            const srcTxReceipt = await (web3Public as TronWeb3Public).getTransactionInfo(srcTxHash);
+
+            if (srcTxReceipt?.receipt) {
+                if (srcTxReceipt.result === 'FAILED') {
+                    return CrossChainTxStatus.FAIL;
+                }
+                return CrossChainTxStatus.SUCCESS;
+            }
+            return CrossChainTxStatus.PENDING;
+        } catch {
             return CrossChainTxStatus.PENDING;
         }
-
-        if (srcTxReceipt.status) {
-            return CrossChainTxStatus.SUCCESS;
-        }
-
-        return CrossChainTxStatus.FAIL;
     }
 
     /**
      * Get destination transaction status based on source transaction status,
      * source transaction receipt, trade data and provider type.
      * @param srcTxStatus Source transaction status.
-     * @param srcTxReceipt Source transaction receipt.
      * @param tradeData Trade data.
      * @param provider Cross-chain trade type.
      * @returns Cross-chain transaction status.
      */
     private async getDstTxStatus(
         srcTxStatus: CrossChainTxStatus,
-        srcTxReceipt: TransactionReceipt,
         tradeData: CrossChainTradeData,
         provider: CrossChainTradeType
     ): Promise<CrossChainTxStatus> {
@@ -138,19 +166,15 @@ export class CrossChainStatusManager {
             return CrossChainTxStatus.PENDING;
         }
 
-        return this.getDstTxStatusFnMap[provider].call(this, tradeData, srcTxReceipt);
+        return this.getDstTxStatusFnMap[provider].call(this, tradeData);
     }
 
     /**
      * Get Rango trade dst transaction status.
      * @param data Trade data.
-     * @param srcTxReceipt Source transaction receipt.
      * @returns Cross-chain transaction status.
      */
-    private async getRangoDstSwapStatus(
-        data: CrossChainTradeData,
-        srcTxReceipt: TransactionReceipt
-    ): Promise<CrossChainTxStatus> {
+    private async getRangoDstSwapStatus(data: CrossChainTradeData): Promise<CrossChainTxStatus> {
         try {
             const { rangoRequestId: requestId } = data;
             const rangoTradeStatusResponse = await Injector.httpClient.get<StatusResponse>(
@@ -159,7 +183,7 @@ export class CrossChainStatusManager {
                     params: {
                         apiKey: RANGO_API_KEY,
                         requestId: requestId as string,
-                        txId: srcTxReceipt.transactionHash
+                        txId: data.srcTxHash
                     }
                 }
             );
@@ -198,12 +222,10 @@ export class CrossChainStatusManager {
     /**
      * Get Symbiosis trade dst transaction status.
      * @param data Trade data.
-     * @param srcTxReceipt Source transaction receipt.
      * @returns Cross-chain transaction status.
      */
     private async getSymbiosisDstSwapStatus(
-        data: CrossChainTradeData,
-        srcTxReceipt: TransactionReceipt
+        data: CrossChainTradeData
     ): Promise<CrossChainTxStatus> {
         const symbiosisTxIndexingTimeSpent = Date.now() > data.txTimestamp + 30000;
 
@@ -214,7 +236,7 @@ export class CrossChainStatusManager {
                     status: { text: dstTxStatus },
                     tx: { hash: dstHash }
                 } = await Injector.httpClient.get<SymbiosisApiResponse>(
-                    `https://api.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${srcTxReceipt.transactionHash}`
+                    `https://api.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
                 );
 
                 if (
@@ -251,13 +273,9 @@ export class CrossChainStatusManager {
     /**
      * Get Li-fi trade dst transaction status.
      * @param data Trade data.
-     * @param srcTxReceipt Source transaction receipt.
      * @returns Cross-chain transaction status.
      */
-    private async getLifiDstSwapStatus(
-        data: CrossChainTradeData,
-        srcTxReceipt: TransactionReceipt
-    ): Promise<CrossChainTxStatus> {
+    private async getLifiDstSwapStatus(data: CrossChainTradeData): Promise<CrossChainTxStatus> {
         if (!data.lifiBridgeType) {
             return CrossChainTxStatus.PENDING;
         }
@@ -267,7 +285,7 @@ export class CrossChainStatusManager {
                 bridge: data.lifiBridgeType,
                 fromChain: blockchainId[data.fromBlockchain],
                 toChain: blockchainId[data.toBlockchain],
-                txHash: srcTxReceipt.transactionHash
+                txHash: data.srcTxHash
             };
             const { status } = await Injector.httpClient.get<{ status: LifiSwapStatus }>(
                 'https://li.quest/v1/status',
@@ -300,18 +318,17 @@ export class CrossChainStatusManager {
     /**
      * Get Celer trade dst transaction status.
      * @param data Trade data.
-     * @param srcTxReceipt Source transaction receipt.
      * @returns Cross-chain transaction status.
      */
-    private async getCelerDstSwapStatus(
-        data: CrossChainTradeData,
-        srcTxReceipt: TransactionReceipt
-    ): Promise<CrossChainTxStatus> {
+    private async getCelerDstSwapStatus(data: CrossChainTradeData): Promise<CrossChainTxStatus> {
         if (!BlockchainsInfo.isEvmBlockchainName(data.toBlockchain)) {
             throw new RubicSdkError(`${data.toBlockchain} is not supported in status retrieving.`);
         }
 
         try {
+            const web3Public = Injector.web3PublicService.getWeb3Public(data.toBlockchain);
+
+            const srcTxReceipt = await web3Public.getTransactionReceipt(data.srcTxHash);
             // Filter undecoded logs.
             const [requestLog] = LogsDecoder.decodeLogs(
                 celerCrossChainEventStatusesAbi,
@@ -324,17 +341,16 @@ export class CrossChainStatusManager {
                 }
                 return CrossChainTxStatus.PENDING;
             }
+
             const dstTxStatus = Number(
-                await Injector.web3PublicService
-                    .getWeb3Public(data.toBlockchain)
-                    .callContractMethod(
-                        celerCrossChainContractsAddresses[
-                            data.toBlockchain as CelerCrossChainSupportedBlockchain
-                        ],
-                        celerCrossChainContractAbi,
-                        'processedTransactions',
-                        [requestLog?.params?.find(param => param.name === 'id')?.value]
-                    )
+                await web3Public.callContractMethod(
+                    celerCrossChainContractsAddresses[
+                        data.toBlockchain as CelerCrossChainSupportedBlockchain
+                    ],
+                    celerCrossChainContractAbi,
+                    'processedTransactions',
+                    [requestLog?.params?.find(param => param.name === 'id')?.value]
+                )
             ) as CelerSwapStatus;
 
             if (dstTxStatus === CelerSwapStatus.NULL) {
@@ -357,41 +373,13 @@ export class CrossChainStatusManager {
     }
 
     /**
-     * Get transaction receipt.
-     * @param blockchain Blockchain name.
-     * @param txHash Transaction hash.
-     * @returns Transaction receipt.
-     */
-    private async getTxReceipt(
-        blockchain: EvmBlockchainName,
-        txHash: string
-    ): Promise<TransactionReceipt | null> {
-        let receipt: TransactionReceipt | null;
-
-        try {
-            receipt = await Injector.web3PublicService
-                .getWeb3Public(blockchain)
-                .getTransactionReceipt(txHash);
-        } catch (error) {
-            console.debug('Error retrieving src tx receipt', { error, txHash });
-            receipt = null;
-        }
-
-        return receipt;
-    }
-
-    /**
      * Get DeBridge trade dst transaction status.
-     * @param _data Trade data.
-     * @param srcTxReceipt Source transaction receipt.
+     * @param data Trade data.
      * @returns Cross-chain transaction status.
      */
-    private async getDebridgeDstSwapStatus(
-        _data: CrossChainTradeData,
-        srcTxReceipt: TransactionReceipt
-    ): Promise<CrossChainTxStatus> {
+    private async getDebridgeDstSwapStatus(data: CrossChainTradeData): Promise<CrossChainTxStatus> {
         try {
-            const params = { filter: srcTxReceipt.transactionHash, filterType: 1 };
+            const params = { filter: data.srcTxHash, filterType: 1 };
             const { send = null, claim = null } = await this.httpClient.get<DeBridgeApiResponse>(
                 'https://api.debridge.finance/api/Transactions/GetFullSubmissionInfo',
                 { params }
@@ -414,13 +402,9 @@ export class CrossChainStatusManager {
     /**
      * Get Via trade dst transaction status.
      * @param data Trade data.
-     * @param _srcTxReceipt Source transaction receipt.
      * @returns Cross-chain transaction status.
      */
-    private async getViaDstSwapStatus(
-        data: CrossChainTradeData,
-        _srcTxReceipt: TransactionReceipt
-    ): Promise<CrossChainTxStatus> {
+    private async getViaDstSwapStatus(data: CrossChainTradeData): Promise<CrossChainTxStatus> {
         try {
             const txStatusResponse = await new Via(VIA_DEFAULT_CONFIG).checkTx({
                 actionUuid: data.viaUuid!
@@ -431,6 +415,59 @@ export class CrossChainStatusManager {
                 return CrossChainTxStatus.SUCCESS;
             }
             if (status === ViaSwapStatus.FAIL) {
+                return CrossChainTxStatus.FAIL;
+            }
+            return CrossChainTxStatus.PENDING;
+        } catch {
+            return CrossChainTxStatus.PENDING;
+        }
+    }
+
+    /**
+     * Get Bridgers trade dst transaction status.
+     * @param data Trade data.
+     * @returns Cross-chain transaction status.
+     */
+    private async getBridgersDstSwapStatus(data: CrossChainTradeData): Promise<CrossChainTxStatus> {
+        try {
+            const updateDataAndStatusRequest: BridgersUpdateDataAndStatusRequest = {
+                hash: data.srcTxHash,
+                fromTokenChain:
+                    toBridgersBlockchain[
+                        data.fromBlockchain as BridgersCrossChainSupportedBlockchain
+                    ],
+                sourceFlag: 'rubic'
+            };
+            const updateDataAndStatusResponse =
+                await Injector.httpClient.post<BridgersUpdateDataAndStatusResponse>(
+                    'https://sswap.swft.pro/api/exchangeRecord/updateDataAndStatus',
+                    updateDataAndStatusRequest
+                );
+            const orderId = updateDataAndStatusResponse.data?.orderId;
+            if (!orderId) {
+                return CrossChainTxStatus.PENDING;
+            }
+
+            const getTransDataByIdRequest: BridgersGetTransDataByIdRequest = {
+                orderId
+            };
+            const getTransDataByIdResponse =
+                await this.httpClient.post<BridgersGetTransDataByIdResponse>(
+                    'https://sswap.swft.pro/api/exchangeRecord/getTransDataById',
+                    getTransDataByIdRequest
+                );
+            const transactionData = getTransDataByIdResponse.data;
+            if (!transactionData?.status) {
+                return CrossChainTxStatus.PENDING;
+            }
+
+            if (transactionData.status === 'receive_complete') {
+                return CrossChainTxStatus.SUCCESS;
+            }
+            if (
+                transactionData.status.includes('error') ||
+                transactionData.status.includes('fail')
+            ) {
                 return CrossChainTxStatus.FAIL;
             }
             return CrossChainTxStatus.PENDING;

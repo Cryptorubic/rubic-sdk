@@ -1,6 +1,5 @@
-import { TransactionReceipt } from 'web3-eth';
-import { CrossChainTradeData } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-trade-data';
 import { CrossChainTxStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-tx-status';
+import { CrossChainTradeData } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-trade-data';
 
 export interface DeBridgeApiResponse {
     claim: {
@@ -43,7 +42,4 @@ export interface BtcStatusResponse {
     weight: number;
 }
 
-export type getDstTxStatusFn = (
-    data: CrossChainTradeData,
-    srcTxReceipt: TransactionReceipt
-) => Promise<CrossChainTxStatus>;
+export type GetDstTxStatusFn = (data: CrossChainTradeData) => Promise<CrossChainTxStatus>;

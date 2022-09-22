@@ -1,4 +1,5 @@
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 /**
  * Data required to obtain status of cross-chain trade.
@@ -7,7 +8,7 @@ export interface CrossChainTradeData {
     /**
      * Source blockchain.
      */
-    fromBlockchain: EvmBlockchainName;
+    fromBlockchain: Web3PublicSupportedBlockchain;
 
     /**
      * Destination blockchain.
@@ -35,7 +36,7 @@ export interface CrossChainTradeData {
     viaUuid?: string;
 
     /**
-     * Rango request id
+     * Rango request id.
      */
     rangoRequestId?: string;
 }

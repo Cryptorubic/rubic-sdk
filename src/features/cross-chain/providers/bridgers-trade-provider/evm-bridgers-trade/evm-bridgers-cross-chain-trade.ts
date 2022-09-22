@@ -16,6 +16,7 @@ import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/commo
 import { Injector } from 'src/core/injector/injector';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { EvmSwapTransactionOptions } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/evm-swap-transaction-options';
 
 export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -110,6 +111,12 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.feeInfo = crossChainTrade.feeInfo;
         this.gasData = crossChainTrade.gasData;
+    }
+
+    public async swap(
+        options: MarkRequired<EvmSwapTransactionOptions, 'receiverAddress'>
+    ): Promise<string | never> {
+        return super.swap(options);
     }
 
     protected async getContractParams(

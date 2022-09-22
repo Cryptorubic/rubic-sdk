@@ -348,10 +348,6 @@ export class EvmWeb3Public extends Web3Public {
         return this.web3.eth.getBlock(blockId);
     }
 
-    /**
-     * Gets last block number.
-     * @returns Block number.
-     */
     public async getBlockNumber(): Promise<number> {
         return this.web3.eth.getBlockNumber();
     }

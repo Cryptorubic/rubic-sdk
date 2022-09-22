@@ -8,5 +8,5 @@ export interface BridgersSwapRequest {
     fromTokenAmount: string;
     amountOutMin: string;
     equipmentNo: string;
-    sourceFlag: string;
+    sourceFlag: 'rubic';
 }

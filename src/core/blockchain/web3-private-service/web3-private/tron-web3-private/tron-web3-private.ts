@@ -3,7 +3,6 @@ import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/bloc
 import { WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
 import { TronTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-options';
-import { TronTransactionReceipt } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-receipt';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { AbiItem } from 'web3-utils';
 import BigNumber from 'bignumber.js';
@@ -31,22 +30,23 @@ export class TronWeb3Private extends Web3Private {
         spenderAddress: string,
         value: BigNumber | 'infinity',
         options: TronTransactionOptions = {}
-    ): Promise<TronTransactionReceipt> {
+    ): Promise<string> {
+        const contract = await this.tronWeb.contract(TRC20_CONTRACT_ABI, tokenAddress);
+
         let rawValue: BigNumber;
         if (value === 'infinity') {
             rawValue = new BigNumber(2).pow(256).minus(1);
         } else {
             rawValue = value;
         }
-        const contract = await this.tronWeb.contract(TRC20_CONTRACT_ABI, tokenAddress);
 
-        const receipt = contract.approve(spenderAddress, rawValue.toFixed(0)).send({
+        const transactionHash = contract.approve(spenderAddress, rawValue.toFixed(0)).send({
             ...(options.feeLimit && { feeLimit: Web3Private.stringifyAmount(options.feeLimit) })
         });
         if (options.onTransactionHash) {
-            options.onTransactionHash(receipt.txid);
+            options.onTransactionHash(transactionHash);
         }
-        return receipt;
+        return transactionHash;
     }
 
     public async encodeApprove(
@@ -73,10 +73,10 @@ export class TronWeb3Private extends Web3Private {
         methodName: string,
         methodArguments: unknown[],
         options: TronTransactionOptions = {}
-    ): Promise<TronTransactionReceipt> {
+    ): Promise<string> {
         const contract = await this.tronWeb.contract(contractAbi, contractAddress);
 
-        const receipt = await contract[methodName](...methodArguments).send({
+        const transactionHash = await contract[methodName](...methodArguments).send({
             from: this.address,
             ...(options.callValue && {
                 callValue: Web3Private.stringifyAmount(options.callValue)
@@ -86,8 +86,9 @@ export class TronWeb3Private extends Web3Private {
             })
         });
         if (options.onTransactionHash) {
-            options.onTransactionHash(receipt.txid);
+            options.onTransactionHash(transactionHash);
         }
-        return receipt;
+        return transactionHash;
+        // @todo add error parsing
     }
 }

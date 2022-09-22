@@ -10,7 +10,6 @@ import {
 import { TransactionConfig } from 'web3-core';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { TronWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/tron-web3-private';
-import { TronTransactionReceipt } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-receipt';
 import { TronTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-options';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { TronSwapTransactionOptions } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/models/tron-swap-transaction-options';
@@ -48,7 +47,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
     public async approve(
         options: TronTransactionOptions,
         checkNeedApprove = true
-    ): Promise<TronTransactionReceipt> {
+    ): Promise<string> {
         if (checkNeedApprove) {
             const needApprove = await this.needApprove();
             if (!needApprove) {

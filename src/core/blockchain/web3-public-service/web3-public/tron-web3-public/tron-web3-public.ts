@@ -18,8 +18,9 @@ import { TimeoutError } from 'src/common/errors';
 import { AbiItem } from 'web3-utils';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
-import { TransactionInfo } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/transaction-info';
+import { TronTransactionInfo } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-transaction-info';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
+import { TronBlock } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-block';
 
 export class TronWeb3Public extends Web3Public {
     protected readonly tokenContractAbi = TRC20_CONTRACT_ABI;
@@ -192,7 +193,15 @@ export class TronWeb3Public extends Web3Public {
      * Gets mined transaction info.
      * @param hash Transaction hash.
      */
-    public async getTransactionInfo(hash: string): Promise<TransactionInfo> {
+    public async getTransactionInfo(hash: string): Promise<TronTransactionInfo> {
         return this.tronWeb.trx.getTransactionInfo(hash);
+    }
+
+    public async getBlock(): Promise<TronBlock> {
+        return this.tronWeb.trx.getCurrentBlock();
+    }
+
+    public async getBlockNumber(): Promise<number> {
+        return (await this.getBlock()).block_header.raw_data.number;
     }
 }

@@ -1,4 +1,4 @@
-export interface TransactionInfo {
+export interface TronTransactionInfo {
     blockNumber: number;
     blockTimeStamp: number;
     contract_address: string;

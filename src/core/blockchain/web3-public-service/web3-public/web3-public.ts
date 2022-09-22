@@ -219,4 +219,10 @@ export abstract class Web3Public {
         methodName: string,
         methodArguments?: unknown[]
     ): Promise<T>;
+
+    /**
+     * Gets last block number.
+     * @returns Block number.
+     */
+    public abstract getBlockNumber(): Promise<number>;
 }
