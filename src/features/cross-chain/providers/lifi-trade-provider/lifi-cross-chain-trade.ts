@@ -157,12 +157,12 @@ export class LifiCrossChainTrade extends CrossChainTrade {
         CrossChainTrade.checkReceiverAddress(options?.receiverAddress);
 
         const { onConfirm, gasLimit, gasPrice } = options;
-
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams(options);
-
         let transactionHash: string;
+
         try {
+            const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                await this.getContractParams(options);
+
             const onTransactionHash = (hash: string) => {
                 if (onConfirm) {
                     onConfirm(hash);
