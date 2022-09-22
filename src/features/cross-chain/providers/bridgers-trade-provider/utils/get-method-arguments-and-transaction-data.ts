@@ -51,6 +51,9 @@ export async function getMethodArgumentsAndTransactionData<
     );
     const transactionData = swapData.data.txData;
 
+    const dstTokenAddress = BlockchainsInfo.isTronBlockchainName(to.blockchain)
+        ? TronWeb3Pure.addressToHex(to.address)
+        : to.address;
     const receiverAddress = BlockchainsInfo.isTronBlockchainName(to.blockchain)
         ? TronWeb3Pure.addressToHex(options.receiverAddress)
         : options.receiverAddress;
@@ -59,7 +62,7 @@ export async function getMethodArgumentsAndTransactionData<
             from.address,
             from.stringWeiAmount,
             blockchainId[to.blockchain],
-            to.address,
+            dstTokenAddress,
             amountOutMin,
             receiverAddress,
             EvmWeb3Pure.nativeTokenAddress,
