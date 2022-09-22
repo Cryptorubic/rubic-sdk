@@ -11,6 +11,7 @@ import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-ser
 import { TransactionReceipt } from 'web3-eth';
 import {
     FailedToCheckForTransactionReceiptError,
+    RubicSdkError,
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { TransactionConfig } from 'web3-core';
@@ -20,6 +21,7 @@ import { EvmSwapTransactionOptions } from 'src/features/cross-chain/providers/co
 import { EvmEncodeTransactionOptions } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/evm-encode-transaction-options';
 import { GetContractParamsOptions } from 'src/features/cross-chain/providers/common/models/get-contract-params-options';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 
 export abstract class EvmCrossChainTrade extends CrossChainTrade {
     public abstract readonly from: PriceTokenAmount<EvmBlockchainName>;
@@ -110,7 +112,11 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
     public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
-        CrossChainTrade.checkReceiverAddress(options?.receiverAddress, this.to.blockchain);
+
+        if (!BlockchainsInfo.isEvmBlockchainName(this.to.blockchain) && !options.receiverAddress) {
+            throw new RubicSdkError(`'receiverAddress' is required option`);
+        }
+        CrossChainTrade.checkReceiverAddress(options.receiverAddress, this.to.blockchain);
 
         const { onConfirm, gasLimit, gasPrice } = options;
         const { contractAddress, contractAbi, methodName, methodArguments, value } =

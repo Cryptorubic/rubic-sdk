@@ -87,9 +87,8 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        // @TODO check if check is necessary
         if (!options.receiverAddress) {
-            throw new RubicSdkError(`'receiverAddress' is required option in Bridgers trade`);
+            throw new RubicSdkError(`'receiverAddress' is required option`);
         }
         CrossChainTrade.checkReceiverAddress(options.receiverAddress, this.to.blockchain);
 
