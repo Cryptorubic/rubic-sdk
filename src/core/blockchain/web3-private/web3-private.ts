@@ -12,7 +12,11 @@ import { WalletConnectionConfiguration } from '@rsdk-core/blockchain/models/wall
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
 import { FailedToCheckForTransactionReceiptError } from '@rsdk-common/errors/swap/failed-to-check-for-transaction-receipt.error';
 import { BlockchainName, BlockchainsInfo, Web3Pure } from 'src/core';
-import { LowSlippageError, WrongNetworkError } from 'src/common';
+import {
+    InsufficientFundsGasPriceValueError,
+    LowSlippageError,
+    WrongNetworkError
+} from 'src/common';
 import { parseError } from 'src/common/utils/errors';
 import { TransactionConfig } from 'web3-core';
 
@@ -45,6 +49,9 @@ export class Web3Private {
         }
         if (err.message.includes('execution reverted: UNIV3R: min return')) {
             return new LowSlippageError();
+        }
+        if (err.message.includes('execution reverted: Address: low-level call with value failed')) {
+            return new InsufficientFundsGasPriceValueError();
         }
         if (err.message.includes('Failed to check for transaction receipt')) {
             return new FailedToCheckForTransactionReceiptError();
