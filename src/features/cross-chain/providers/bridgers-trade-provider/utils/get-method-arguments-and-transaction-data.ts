@@ -42,7 +42,7 @@ export async function getMethodArgumentsAndTransactionData<
         fromTokenAmount: from.stringWeiAmount,
         amountOutMin,
         equipmentNo: walletAddress.slice(0, 32),
-        sourceFlag: 'widget'
+        sourceFlag: 'rubic'
     };
 
     const swapData = await Injector.httpClient.post<BridgersSwapResponse<T>>(
