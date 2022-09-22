@@ -110,26 +110,30 @@ export class TronWeb3Pure {
             this.flattenTypesToArray(outputAbi),
             response
         )[0];
-        return this.flattenParametersToPrimitive(decodedParam);
+        return this.flattenParameterToPrimitive(decodedParam);
     }
 
     private static flattenTypesToString(abiInputs: (AbiInput | AbiOutput)[]): string[] {
-        return abiInputs.map(abiInput => {
-            if (abiInput.type === 'tuple') {
-                const flattenedComponents = this.flattenTypesToString(abiInput.components!);
-                return `(${flattenedComponents.join(',')})`;
-            }
-            return abiInput.type;
-        });
+        return (
+            abiInputs?.map(abiInput => {
+                if (abiInput.type === 'tuple') {
+                    const flattenedComponents = this.flattenTypesToString(abiInput.components!);
+                    return `(${flattenedComponents.join(',')})`;
+                }
+                return abiInput.type;
+            }) || []
+        );
     }
 
     private static flattenTypesToArray(abiInputs: (AbiInput | AbiOutput)[]): InfiniteArray<string> {
-        return abiInputs.map(abiInput => {
-            if (abiInput.type === 'tuple') {
-                return this.flattenTypesToArray(abiInput.components!);
-            }
-            return abiInput.type;
-        });
+        return (
+            abiInputs?.map(abiInput => {
+                if (abiInput.type === 'tuple') {
+                    return this.flattenTypesToArray(abiInput.components!);
+                }
+                return abiInput.type;
+            }) || []
+        );
     }
 
     private static flattenParameters(
@@ -152,21 +156,21 @@ export class TronWeb3Pure {
         return [types, values];
     }
 
-    public static flattenParametersToPrimitive(param: TronWeb3PrimitiveType): Web3PrimitiveType {
-        if (typeof param === 'number' || param instanceof EthersBigNumber) {
-            return param.toString();
+    public static flattenParameterToPrimitive(parameter: TronWeb3PrimitiveType): Web3PrimitiveType {
+        if (typeof parameter === 'number' || parameter instanceof EthersBigNumber) {
+            return parameter.toString();
         }
-        if (Object.keys(param).length) {
-            Object.keys(param).reduce(
-                (acc, paramKey) => ({
-                    ...acc,
-                    [paramKey]: this.flattenParametersToPrimitive(
-                        param[paramKey as keyof typeof param]
-                    )
-                }),
-                {}
-            );
+        if (typeof parameter === 'string' || typeof parameter === 'boolean') {
+            return parameter;
         }
-        return param as Web3PrimitiveType;
+        return Object.keys(parameter).reduce((acc, paramKey) => {
+            const parameterField = (parameter as { [key: string]: TronWeb3PrimitiveType })[
+                paramKey
+            ] as TronWeb3PrimitiveType;
+            return {
+                ...acc,
+                [paramKey]: this.flattenParameterToPrimitive(parameterField)
+            };
+        }, {});
     }
 }

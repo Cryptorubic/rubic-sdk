@@ -185,7 +185,7 @@ export class TronWeb3Public extends Web3Public {
         const contract = await this.tronWeb.contract(contractAbi, contractAddress);
 
         const response = await contract[methodName](...methodArguments).call();
-        return TronWeb3Pure.flattenParametersToPrimitive(response) as T;
+        return TronWeb3Pure.flattenParameterToPrimitive(response) as T;
     }
 
     /**
