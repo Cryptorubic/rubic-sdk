@@ -75,7 +75,7 @@ export class TronWeb3Public extends Web3Public {
         this.tronWeb.setAddress(userAddress);
         const contract = await this.tronWeb.contract(this.tokenContractAbi, tokenAddress);
         const balance: EthersBigNumber = await contract.balanceOf(userAddress).call();
-        return new BigNumber(balance.toString());
+        return new BigNumber(balance?.toString());
     }
 
     public async getTokensBalances(
@@ -124,8 +124,10 @@ export class TronWeb3Public extends Web3Public {
     ): Promise<BigNumber> {
         const contract = await this.tronWeb.contract(this.tokenContractAbi, tokenAddress);
 
-        const allowance = await contract.allowance(ownerAddress, spenderAddress).call();
-        return new BigNumber(allowance);
+        const allowance: EthersBigNumber = await contract
+            .allowance(ownerAddress, spenderAddress)
+            .call();
+        return new BigNumber(allowance?.toString());
     }
 
     public async multicallContractsMethods<Output extends Web3PrimitiveType>(
