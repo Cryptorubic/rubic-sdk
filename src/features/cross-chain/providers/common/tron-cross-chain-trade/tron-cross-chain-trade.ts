@@ -61,7 +61,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
         return this.web3Private.approveTokens(
             this.from.address,
             this.fromContractAddress,
-            this.from.weiAmount,
+            'infinity',
             options
         );
     }
