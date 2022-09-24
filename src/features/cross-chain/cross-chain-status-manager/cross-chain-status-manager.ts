@@ -25,7 +25,7 @@ import {
 import { LifiSwapStatus } from 'src/features/cross-chain/providers/lifi-trade-provider/models/lifi-swap-status';
 import { Via } from '@viaprotocol/router-sdk';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { CelerTransferStatus } from './providers/common/celer-rubic/models/celer-swap-status.enum';
+import { CelerTransferStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/celer-transfer-status.enum';
 
 /**
  * Contains methods for getting cross-chain trade statuses.
