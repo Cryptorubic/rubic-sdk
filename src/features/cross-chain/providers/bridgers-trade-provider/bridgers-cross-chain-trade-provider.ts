@@ -76,7 +76,7 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
                 contractAbi
             );
 
-            const feeInfo = await this.getFeeInfo(
+            let feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
                 from,
@@ -88,7 +88,7 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
                 from.decimals,
                 1
             );
-            const tokenAmountIn = from.weiAmount.minus(feeAmount).toFixed(0);
+            const fromAmountWithoutFeeWei = from.weiAmount.minus(feeAmount).toFixed();
 
             const fromTokenAddress = createTokenNativeAddressProxy(
                 from,
@@ -101,7 +101,7 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
             const quoteRequest: BridgersQuoteRequest = {
                 fromTokenAddress,
                 toTokenAddress,
-                fromTokenAmount: tokenAmountIn,
+                fromTokenAmount: fromAmountWithoutFeeWei,
                 fromTokenChain: toBridgersBlockchain[fromBlockchain],
                 toTokenChain: toBridgersBlockchain[toBlockchain]
             };
@@ -150,12 +150,25 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
                 toToken.decimals
             );
 
+            feeInfo = {
+                ...feeInfo,
+                platformFee: {
+                    ...feeInfo.platformFee!,
+                    percent: feeInfo.platformFee!.percent + transactionData.fee * 100
+                },
+                cryptoFee: {
+                    amount: new BigNumber(transactionData.chainFee),
+                    tokenSymbol: nativeTokensList[from.blockchain].symbol
+                }
+            };
+
             if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
                 const gasData =
                     options.gasCalculation === 'enabled' && options.receiverAddress
                         ? await EvmBridgersCrossChainTrade.getGasData(
                               from as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
                               to as PriceTokenAmount<TronBlockchainName>,
+                              fromAmountWithoutFeeWei,
                               options.receiverAddress
                           )
                         : null;
@@ -165,6 +178,7 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
                         {
                             from: from as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
                             to: to as PriceTokenAmount<TronBlockchainName>,
+                            fromAmountWithoutFeeWei,
                             toTokenAmountMin,
                             feeInfo,
                             gasData
@@ -178,6 +192,7 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
                     {
                         from: from as PriceTokenAmount<TronBlockchainName>,
                         to: to as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
+                        fromAmountWithoutFeeWei,
                         toTokenAmountMin,
                         feeInfo
                     },

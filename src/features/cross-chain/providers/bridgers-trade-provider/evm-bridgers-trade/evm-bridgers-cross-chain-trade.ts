@@ -23,6 +23,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     public static async getGasData(
         from: PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
         to: PriceTokenAmount<TronBlockchainName>,
+        fromAmountWithoutFeeWei: string,
         receiverAddress: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain;
@@ -38,6 +39,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                     {
                         from,
                         to,
+                        fromAmountWithoutFeeWei,
                         toTokenAmountMin: new BigNumber(0),
                         feeInfo: {
                             fixedFee: null,
@@ -82,6 +84,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly to: PriceTokenAmount<TronBlockchainName>;
 
+    private readonly fromAmountWithoutFeeWei: string;
+
     public readonly toTokenAmountMin: BigNumber;
 
     public readonly gasData: GasData;
@@ -89,6 +93,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     public readonly feeInfo: FeeInfo;
 
     public readonly itType = { from: undefined, to: undefined };
+
+    public readonly priceImpact: number | null;
 
     protected get fromContractAddress(): string {
         return rubicProxyContractAddress[this.from.blockchain];
@@ -98,6 +104,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         crossChainTrade: {
             from: PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>;
             to: PriceTokenAmount<TronBlockchainName>;
+            fromAmountWithoutFeeWei: string;
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
             gasData: GasData;
@@ -108,9 +115,11 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
+        this.fromAmountWithoutFeeWei = crossChainTrade.fromAmountWithoutFeeWei;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.feeInfo = crossChainTrade.feeInfo;
         this.gasData = crossChainTrade.gasData;
+        this.priceImpact = this.from.calculatePriceImpactPercent(this.to);
     }
 
     public async swap(
@@ -126,6 +135,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             await getMethodArgumentsAndTransactionData<EvmBridgersTransactionData>(
                 this.from,
                 this.to,
+                this.fromAmountWithoutFeeWei,
                 this.toTokenAmountMin,
                 this.walletAddress,
                 options

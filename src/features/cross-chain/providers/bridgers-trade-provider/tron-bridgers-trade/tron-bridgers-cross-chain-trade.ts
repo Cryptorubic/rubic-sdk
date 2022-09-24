@@ -22,11 +22,15 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
 
     public readonly to: PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>;
 
+    private readonly fromAmountWithoutFeeWei: string;
+
     public readonly toTokenAmountMin: BigNumber;
 
     public readonly feeInfo: FeeInfo;
 
     public readonly itType = { from: undefined, to: undefined };
+
+    public readonly priceImpact: number | null;
 
     protected get fromContractAddress(): string {
         return rubicProxyContractAddress[this.from.blockchain];
@@ -36,6 +40,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
         crossChainTrade: {
             from: PriceTokenAmount<TronBlockchainName>;
             to: PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>;
+            fromAmountWithoutFeeWei: string;
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
         },
@@ -45,8 +50,10 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
+        this.fromAmountWithoutFeeWei = crossChainTrade.fromAmountWithoutFeeWei;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.feeInfo = crossChainTrade.feeInfo;
+        this.priceImpact = this.from.calculatePriceImpactPercent(this.to);
     }
 
     protected async getContractParams(
@@ -56,6 +63,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
             await getMethodArgumentsAndTransactionData<TronBridgersTransactionData>(
                 this.from,
                 this.to,
+                this.fromAmountWithoutFeeWei,
                 this.toTokenAmountMin,
                 this.walletAddress,
                 options

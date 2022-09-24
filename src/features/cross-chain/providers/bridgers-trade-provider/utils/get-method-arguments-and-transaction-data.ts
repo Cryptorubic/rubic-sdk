@@ -22,6 +22,7 @@ export async function getMethodArgumentsAndTransactionData<
 >(
     from: PriceTokenAmount<BridgersCrossChainSupportedBlockchain>,
     to: PriceTokenAmount<BridgersCrossChainSupportedBlockchain>,
+    fromAmountWithoutFeeWei: string,
     toTokenAmountMin: BigNumber,
     walletAddress: string,
     options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
@@ -39,7 +40,7 @@ export async function getMethodArgumentsAndTransactionData<
         toAddress: options.receiverAddress,
         fromTokenChain: toBridgersBlockchain[from.blockchain],
         toTokenChain: toBridgersBlockchain[to.blockchain],
-        fromTokenAmount: from.stringWeiAmount,
+        fromTokenAmount: fromAmountWithoutFeeWei,
         amountOutMin,
         equipmentNo: walletAddress.slice(0, 32),
         sourceFlag: 'rubic'
