@@ -2,13 +2,15 @@ export interface TypedWeb3Pure {
     /**
      * Gets address of native coin.
      */
-    get nativeTokenAddress(): string; // @todo rename
+    get nativeTokenAddress(): string;
 
     /**
      * Checks if address is native address.
      * @param address Address to check.
      */
     isNativeAddress(address: string): boolean;
+
+    EMPTY_ADDRESS: string;
 
     isEmptyAddress(address: string): boolean;
 

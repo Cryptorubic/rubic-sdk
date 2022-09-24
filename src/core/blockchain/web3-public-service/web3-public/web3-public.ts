@@ -12,6 +12,7 @@ import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/bloc
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { Token } from 'src/common/tokens';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
+import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
@@ -58,10 +59,45 @@ export abstract class Web3Public {
      * @param userAddress Wallet address, which contains tokens.
      * @param tokensAddresses Tokens addresses.
      */
-    public abstract getTokensBalances(
+    public async getTokensBalances(
         userAddress: string,
         tokensAddresses: string[]
-    ): Promise<BigNumber[]>;
+    ): Promise<BigNumber[]> {
+        const indexOfNativeCoin = tokensAddresses.findIndex(TronWeb3Pure.isNativeAddress);
+        const promises = [];
+
+        if (indexOfNativeCoin !== -1) {
+            tokensAddresses.splice(indexOfNativeCoin, 1);
+            promises[1] = this.getBalance(userAddress);
+        }
+
+        promises[0] = this.multicallContractsMethods<string>(
+            this.tokenContractAbi,
+            tokensAddresses.map(tokenAddress => ({
+                contractAddress: tokenAddress,
+                methodsData: [
+                    {
+                        methodName: 'balanceOf',
+                        methodArguments: [userAddress]
+                    }
+                ]
+            }))
+        );
+
+        const results = await Promise.all(
+            promises as [Promise<ContractMulticallResponse<string>[][]>, Promise<BigNumber>]
+        );
+        const tokensBalances = results[0].map(tokenResults => {
+            const { success, output } = tokenResults[0]!;
+            return success ? new BigNumber(output!) : new BigNumber(0);
+        });
+
+        if (indexOfNativeCoin !== -1) {
+            tokensBalances.splice(indexOfNativeCoin, 0, results[1]);
+        }
+
+        return tokensBalances;
+    }
 
     /**
      * Checks that user has enough balance.

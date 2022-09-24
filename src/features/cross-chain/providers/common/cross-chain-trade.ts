@@ -3,7 +3,11 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Injector } from 'src/core/injector/injector';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { WalletNotConnectedError, WrongReceiverAddressError } from 'src/common/errors';
+import {
+    RubicSdkError,
+    WalletNotConnectedError,
+    WrongReceiverAddressError
+} from 'src/common/errors';
 import { CrossChainTradeType } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { PriceTokenAmount } from 'src/common/tokens';
 import BigNumber from 'bignumber.js';
@@ -23,12 +27,17 @@ export abstract class CrossChainTrade {
      * Checks receiver address for correctness.
      * @param receiverAddress Receiver address.
      * @param toBlockchain Target blockchain.
+     * @param isRequired True, if receiver address must not be empty.
      */
     public static checkReceiverAddress(
         receiverAddress: string | undefined,
-        toBlockchain: BlockchainName
+        toBlockchain: BlockchainName,
+        isRequired = false
     ): void {
         if (!receiverAddress) {
+            if (isRequired) {
+                throw new RubicSdkError(`'receiverAddress' is required option`);
+            }
             return;
         }
 

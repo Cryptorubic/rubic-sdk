@@ -14,6 +14,8 @@ import {
 
 @staticImplements<TypedWeb3Pure>()
 export class TronWeb3Pure {
+    public static readonly EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
+
     public static get nativeTokenAddress(): string {
         return '0x0000000000000000000000000000000000000000';
     }
@@ -23,7 +25,7 @@ export class TronWeb3Pure {
     }
 
     public static isEmptyAddress(address?: string): boolean {
-        return Boolean(address) && address === '0x0000000000000000000000000000000000000000';
+        return Boolean(address) && address === TronWeb3Pure.EMPTY_ADDRESS;
     }
 
     public static isAddressCorrect(address: string): boolean {

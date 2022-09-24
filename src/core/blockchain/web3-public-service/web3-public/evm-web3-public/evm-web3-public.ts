@@ -90,39 +90,6 @@ export class EvmWeb3Public extends Web3Public {
         return new BigNumber(balance);
     }
 
-    public async getTokensBalances(
-        userAddress: string,
-        tokensAddresses: string[]
-    ): Promise<BigNumber[]> {
-        const indexOfNativeCoin = tokensAddresses.findIndex(EvmWeb3Pure.isNativeAddress);
-        const promises = [];
-
-        if (indexOfNativeCoin !== -1) {
-            tokensAddresses.splice(indexOfNativeCoin, 1);
-            promises[1] = this.getBalance(userAddress);
-        }
-
-        const contract = new this.web3.eth.Contract(this.tokenContractAbi);
-        const calls: EvmCall[] = tokensAddresses.map(tokenAddress => ({
-            target: tokenAddress,
-            callData: contract.methods.balanceOf(userAddress).encodeABI()
-        }));
-        promises[0] = this.multicall(calls);
-
-        const results = await Promise.all(
-            promises as [Promise<EvmMulticallResponse[]>, Promise<BigNumber>]
-        );
-        const tokensBalances = results[0].map(({ success, returnData }) =>
-            success ? new BigNumber(returnData) : new BigNumber(0)
-        );
-
-        if (indexOfNativeCoin !== -1) {
-            tokensBalances.splice(indexOfNativeCoin, 0, results[1]);
-        }
-
-        return tokensBalances;
-    }
-
     /**
      * Calls allowance method in ERC-20 token contract.
      * @param tokenAddress Address of the smart-contract corresponding to the token.

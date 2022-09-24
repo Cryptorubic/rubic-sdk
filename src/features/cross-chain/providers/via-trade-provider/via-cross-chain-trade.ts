@@ -125,10 +125,6 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
         return viaContractAddress[this.from.blockchain as ViaCrossChainSupportedBlockchain];
     }
 
-    public get uuid(): string {
-        return this.route.actions[0]!.uuid;
-    }
-
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
@@ -164,7 +160,18 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
         this.checkViaErrors();
 
         try {
-            return await super.swap(options);
+            const transactionHash = await super.swap(options);
+
+            try {
+                await this.via.startRoute({
+                    fromAddress: this.walletAddress,
+                    toAddress: options?.receiverAddress || this.walletAddress,
+                    routeId: this.route.routeId,
+                    txHash: transactionHash!
+                });
+            } catch {}
+
+            return transactionHash;
         } catch (err) {
             if ([400, 500, 503].includes(err.code)) {
                 throw new SwapRequestError();

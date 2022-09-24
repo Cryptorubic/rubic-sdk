@@ -5,6 +5,8 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 
 @staticImplements<TypedWeb3Pure>()
 export class BitcoinWeb3Pure {
+    public static readonly EMPTY_ADDRESS = '';
+
     public static get nativeTokenAddress(): string {
         return '';
     }

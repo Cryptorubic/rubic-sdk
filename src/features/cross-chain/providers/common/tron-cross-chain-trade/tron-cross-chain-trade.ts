@@ -4,7 +4,6 @@ import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
 import {
     FailedToCheckForTransactionReceiptError,
-    RubicSdkError,
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { TransactionConfig } from 'web3-core';
@@ -86,13 +85,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        if (!options.receiverAddress) {
-            throw new RubicSdkError(`'receiverAddress' is required option`);
-        }
-        CrossChainTrade.checkReceiverAddress(options.receiverAddress, this.to.blockchain);
-
-        const { contractAddress, contractAbi, methodName, methodArguments, value, feeLimit } =
-            await this.getContractParams(options);
+        CrossChainTrade.checkReceiverAddress(options.receiverAddress, this.to.blockchain, true);
 
         const { onConfirm } = options;
         let transactionHash: string;
@@ -102,6 +95,9 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
             }
             transactionHash = hash;
         };
+
+        const { contractAddress, contractAbi, methodName, methodArguments, value, feeLimit } =
+            await this.getContractParams(options);
 
         try {
             await this.web3Private.executeContractMethod(

@@ -11,7 +11,6 @@ import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-ser
 import { TransactionReceipt } from 'web3-eth';
 import {
     FailedToCheckForTransactionReceiptError,
-    RubicSdkError,
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { TransactionConfig } from 'web3-core';
@@ -113,10 +112,11 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        if (!BlockchainsInfo.isEvmBlockchainName(this.to.blockchain) && !options.receiverAddress) {
-            throw new RubicSdkError(`'receiverAddress' is required option`);
-        }
-        CrossChainTrade.checkReceiverAddress(options.receiverAddress, this.to.blockchain); // @todo add isRequired
+        CrossChainTrade.checkReceiverAddress(
+            options.receiverAddress,
+            this.to.blockchain,
+            !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
+        );
 
         const { onConfirm, gasLimit, gasPrice } = options;
         let transactionHash: string;
@@ -131,8 +131,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
             await this.getContractParams(options);
 
         try {
-            // @todo tryExecute
-            await this.web3Private.executeContractMethod(
+            await this.web3Private.tryExecuteContractMethod(
                 contractAddress,
                 contractAbi,
                 methodName,

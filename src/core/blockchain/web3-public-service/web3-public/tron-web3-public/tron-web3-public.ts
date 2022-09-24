@@ -78,38 +78,6 @@ export class TronWeb3Public extends Web3Public {
         return new BigNumber(balance?.toString());
     }
 
-    public async getTokensBalances(
-        userAddress: string,
-        tokensAddresses: string[]
-    ): Promise<BigNumber[]> {
-        const indexOfNativeCoin = tokensAddresses.findIndex(TronWeb3Pure.isNativeAddress);
-        const promises = [];
-
-        if (indexOfNativeCoin !== -1) {
-            tokensAddresses.splice(indexOfNativeCoin, 1);
-            promises[1] = this.getBalance(userAddress);
-        }
-
-        const calls: TronCall[] = tokensAddresses.map(tokenAddress => [
-            tokenAddress,
-            TronWeb3Pure.encodeFunctionCall(this.tokenContractAbi, 'balanceOf', [userAddress])
-        ]);
-        promises[0] = this.multicall(calls); // @todo multicallContractMethods
-
-        const results = await Promise.all(
-            promises as [Promise<TronMulticallResponse>, Promise<BigNumber>]
-        );
-        const tokensBalances = results[0].results.map((success, index) =>
-            success ? new BigNumber(results[0].returnData[index]!) : new BigNumber(0)
-        );
-
-        if (indexOfNativeCoin !== -1) {
-            tokensBalances.splice(indexOfNativeCoin, 0, results[1]);
-        }
-
-        return tokensBalances;
-    }
-
     /**
      * Calls allowance method in TRC-20 token contract.
      * @param tokenAddress Address of the smart-contract corresponding to the token.
