@@ -1,15 +1,14 @@
-/* eslint-disable no-debugger */
 import { Injector } from 'src/core/injector/injector';
 import {
     BtcStatusResponse,
     CelerXtransferStatusResponse,
     DeBridgeApiResponse,
     DstTxData,
-    getDstTxDataFn,
+    GetDstTxDataFn,
     SymbiosisApiResponse
 } from 'src/features/cross-chain/cross-chain-status-manager/models/statuses-api';
 import { CrossChainStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-status';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { StatusResponse, TransactionStatus } from 'rango-sdk-basic';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
 import { RANGO_API_KEY } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-api-key';
@@ -17,7 +16,6 @@ import { ViaSwapStatus } from 'src/features/cross-chain/providers/via-trade-prov
 import { SymbiosisSwapStatus } from 'src/features/cross-chain/providers/symbiosis-trade-provider/models/symbiosis-swap-status';
 import { CrossChainTxStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-tx-status';
 import { CrossChainTradeData } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-trade-data';
-import { TransactionReceipt } from 'web3-eth';
 import {
     CROSS_CHAIN_TRADE_TYPE,
     CrossChainTradeType
@@ -39,6 +37,7 @@ import {
 import { toBridgersBlockchain } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/to-bridgers-blockchain';
 import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { CelerTransferStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/celer-transfer-status.enum';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 
 /**
  * Contains methods for getting cross-chain trade statuses.
@@ -46,7 +45,7 @@ import { CelerTransferStatus } from 'src/features/cross-chain/cross-chain-status
 export class CrossChainStatusManager {
     private readonly httpClient = Injector.httpClient;
 
-    private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, getDstTxDataFn> = {
+    private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, GetDstTxDataFn> = {
         [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
@@ -81,34 +80,22 @@ export class CrossChainStatusManager {
         data: CrossChainTradeData,
         provider: CrossChainTradeType
     ): Promise<CrossChainStatus> {
-        const crossChainStatus: CrossChainStatus = {
-            srcTxStatus: CrossChainTxStatus.UNKNOWN,
-            dstTxStatus: CrossChainTxStatus.UNKNOWN,
-            dstTxHash: null
-        };
         const { fromBlockchain, srcTxHash } = data;
-        const srcTxStatus = await this.getSrcTxStatus(fromBlockchain, srcTxHash);
+        let srcTxStatus = await this.getSrcTxStatus(fromBlockchain, srcTxHash);
 
-        crossChainStatus.srcTxStatus = srcTxStatus;
-
-        const dstTxData = await this.getDstTxStatus(
-            srcTxStatus,
-            data,
-            provider
-        );
-
-        crossChainStatus.dstTxHash = dstTxData.txHash;
-
+        const dstTxData = await this.getDstTxData(srcTxStatus, data, provider);
         if (
             dstTxData.txStatus === CrossChainTxStatus.FAIL &&
             srcTxStatus === CrossChainTxStatus.PENDING
         ) {
-            crossChainStatus.srcTxStatus = CrossChainTxStatus.FAIL;
+            srcTxStatus = CrossChainTxStatus.FAIL;
         }
 
-        crossChainStatus.dstTxStatus = dstTxData.txStatus;
-
-        return crossChainStatus;
+        return {
+            srcTxStatus,
+            dstTxStatus: dstTxData.txStatus,
+            dstTxHash: dstTxData.txHash
+        };
     }
 
     /**
@@ -159,7 +146,7 @@ export class CrossChainStatusManager {
      * @param provider Cross-chain trade type.
      * @returns Cross-chain transaction status and hash.
      */
-    private async getDstTxStatus(
+    private async getDstTxData(
         srcTxStatus: CrossChainTxStatus,
         tradeData: CrossChainTradeData,
         provider: CrossChainTradeType
@@ -235,9 +222,7 @@ export class CrossChainStatusManager {
      * @param data Trade data.
      * @returns Cross-chain transaction status and hash.
      */
-    private async getSymbiosisDstSwapStatus(
-        data: CrossChainTradeData
-    ): Promise<DstTxData> {
+    private async getSymbiosisDstSwapStatus(data: CrossChainTradeData): Promise<DstTxData> {
         const symbiosisTxIndexingTimeSpent = Date.now() > data.txTimestamp + 30000;
 
         if (symbiosisTxIndexingTimeSpent) {
@@ -353,9 +338,7 @@ export class CrossChainStatusManager {
      * @param data Trade data.
      * @returns Cross-chain transaction status.
      */
-    private async getCelerDstSwapStatus(
-        data: CrossChainTradeData
-    ): Promise<DstTxData> {
+    private async getCelerDstSwapStatus(data: CrossChainTradeData): Promise<DstTxData> {
         try {
             const dstTxData: DstTxData = {
                 txStatus: CrossChainTxStatus.PENDING,
@@ -481,7 +464,7 @@ export class CrossChainStatusManager {
      * @param data Trade data.
      * @returns Cross-chain transaction status.
      */
-    private async getBridgersDstSwapStatus(data: CrossChainTradeData): Promise<CrossChainTxStatus> {
+    private async getBridgersDstSwapStatus(data: CrossChainTradeData): Promise<DstTxData> {
         try {
             const updateDataAndStatusRequest: BridgersUpdateDataAndStatusRequest = {
                 hash: data.srcTxHash,
@@ -498,7 +481,10 @@ export class CrossChainStatusManager {
                 );
             const orderId = updateDataAndStatusResponse.data?.orderId;
             if (!orderId) {
-                return CrossChainTxStatus.PENDING;
+                return {
+                    txStatus: CrossChainTxStatus.PENDING,
+                    txHash: null
+                };
             }
 
             const getTransDataByIdRequest: BridgersGetTransDataByIdRequest = {
@@ -511,22 +497,33 @@ export class CrossChainStatusManager {
                 );
             const transactionData = getTransDataByIdResponse.data;
             if (!transactionData?.status) {
-                return CrossChainTxStatus.PENDING;
+                return {
+                    txStatus: CrossChainTxStatus.PENDING,
+                    txHash: null
+                };
             }
 
             if (transactionData.status === 'receive_complete') {
-                return CrossChainTxStatus.SUCCESS;
+                return {
+                    txStatus: CrossChainTxStatus.PENDING,
+                    txHash: transactionData.toHash
+                };
             }
             if (
                 transactionData.status.includes('error') ||
                 transactionData.status.includes('fail')
             ) {
-                return CrossChainTxStatus.FAIL;
+                return {
+                    txStatus: CrossChainTxStatus.FAIL,
+                    txHash: null
+                };
             }
-            return CrossChainTxStatus.PENDING;
-        } catch {
-            return CrossChainTxStatus.PENDING;
-        }
+        } catch {}
+
+        return {
+            txStatus: CrossChainTxStatus.FAIL,
+            txHash: null
+        };
     }
 
     /**

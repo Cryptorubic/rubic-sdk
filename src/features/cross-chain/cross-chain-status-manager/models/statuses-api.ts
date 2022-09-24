@@ -59,6 +59,4 @@ export interface DstTxData {
     txHash: string | null;
 }
 
-export type getDstTxDataFn = (
-    data: CrossChainTradeData
-) => Promise<DstTxData>;
+export type GetDstTxDataFn = (data: CrossChainTradeData) => Promise<DstTxData>;

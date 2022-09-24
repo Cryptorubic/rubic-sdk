@@ -5,5 +5,6 @@ export interface BridgersGetTransDataByIdRequest {
 export interface BridgersGetTransDataByIdResponse {
     data: {
         status: string;
+        toHash: string;
     };
 }

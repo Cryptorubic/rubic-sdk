@@ -116,12 +116,9 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         if (!BlockchainsInfo.isEvmBlockchainName(this.to.blockchain) && !options.receiverAddress) {
             throw new RubicSdkError(`'receiverAddress' is required option`);
         }
-        CrossChainTrade.checkReceiverAddress(options.receiverAddress, this.to.blockchain);
+        CrossChainTrade.checkReceiverAddress(options.receiverAddress, this.to.blockchain); // @todo add isRequired
 
         const { onConfirm, gasLimit, gasPrice } = options;
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams(options);
-
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -129,6 +126,9 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
             }
             transactionHash = hash;
         };
+
+        const { contractAddress, contractAbi, methodName, methodArguments, value } =
+            await this.getContractParams(options);
 
         try {
             // @todo tryExecute
