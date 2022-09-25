@@ -1,24 +1,20 @@
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { OneinchTradeProviders } from 'src/features/instant-trades/constants/oneinch-trade-providers';
-import { ZrxTradeProviders } from 'src/features/instant-trades/constants/zrx-trade-providers';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { InstantTrade } from 'src/features/instant-trades/providers/abstract/instant-trade';
-import { UniswapV3TradeProviders } from 'src/features/instant-trades/constants/uniswap-v3-trade-providers';
 import { RubicSdkError } from 'src/common/errors';
 import { InstantTradeError } from 'src/features/instant-trades/models/instant-trade-error';
 import { getPriceTokensFromInputTokens } from 'src/common/utils/tokens';
-import { AlgebraTradeProviders } from 'src/features/instant-trades/constants/algebra-trade-providers';
 import { ManagerCalculationOptions } from 'src/features/instant-trades/models/manager-calculation-options';
-import { UniswapV2TradeProviders } from 'src/features/instant-trades/constants/uniswap-v2-trade-providers';
 import { LifiProvider } from 'src/features/instant-trades/providers/lifi/lifi-provider';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/providers/models/trade-type';
 import { InstantTradeProvider } from 'src/features/instant-trades/providers/dexes/abstract/instant-trade-provider/instant-trade-provider';
-import { Mutable } from 'src/common/utils/types';
 import { oneinchApiParams } from 'src/features/instant-trades/providers/dexes/abstract/oneinch-abstract/constants';
 import { TypedTradeProviders } from 'src/features/instant-trades/models/typed-trade-provider';
 import pTimeout from 'src/common/utils/p-timeout';
 import { MarkRequired } from 'ts-essentials';
 import { combineOptions } from 'src/common/utils/options';
+import { typedTradeProviders } from 'src/features/instant-trades/constants/trade-providers/typed-trade-providers';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 
 export type RequiredManagerCalculationOptions = MarkRequired<
     ManagerCalculationOptions,
@@ -43,26 +39,7 @@ export class InstantTradesManager {
     /**
      * List of all instant trade providers, combined by blockchains.
      */
-    public readonly tradeProviders: TypedTradeProviders = [
-        ...UniswapV2TradeProviders,
-        ...UniswapV3TradeProviders,
-        ...OneinchTradeProviders,
-        ...ZrxTradeProviders,
-        ...AlgebraTradeProviders
-    ].reduce(
-        (acc, ProviderClass) => {
-            const provider = new ProviderClass();
-            acc[provider.blockchain][provider.type] = provider;
-            return acc;
-        },
-        Object.values(BLOCKCHAIN_NAME).reduce(
-            (acc, blockchain) => ({
-                ...acc,
-                [blockchain]: {}
-            }),
-            {} as Mutable<TypedTradeProviders>
-        )
-    );
+    public readonly tradeProviders: TypedTradeProviders = typedTradeProviders;
 
     public readonly lifiProvider = new LifiProvider();
 
@@ -98,20 +75,20 @@ export class InstantTradesManager {
      */
     public async calculateTrade(
         fromToken:
-            | Token<EvmBlockchainName>
+            | Token
             | {
                   address: string;
-                  blockchain: EvmBlockchainName;
+                  blockchain: BlockchainName;
               },
         fromAmount: string | number,
-        toToken: Token<EvmBlockchainName> | string,
+        toToken: Token | string,
         options?: ManagerCalculationOptions
     ): Promise<Array<InstantTrade | InstantTradeError>> {
         if (toToken instanceof Token && fromToken.blockchain !== toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be same');
         }
 
-        const { from, to } = await getPriceTokensFromInputTokens<EvmBlockchainName>(
+        const { from, to } = await getPriceTokensFromInputTokens(
             fromToken,
             fromAmount.toString(),
             toToken
@@ -125,8 +102,8 @@ export class InstantTradesManager {
     }
 
     private async calculateTradeFromTokens(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceToken<EvmBlockchainName>,
+        from: PriceTokenAmount,
+        to: PriceToken,
         options: RequiredManagerCalculationOptions
     ): Promise<Array<InstantTrade | InstantTradeError>> {
         const { timeout, disabledProviders, ...providersOptions } = options;
@@ -192,16 +169,25 @@ export class InstantTradesManager {
     }
 
     private async calculateLifiTrades(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceToken<EvmBlockchainName>,
+        from: PriceTokenAmount,
+        to: PriceToken,
         providers: TradeType[],
         options: RequiredManagerCalculationOptions
     ): Promise<InstantTrade[]> {
+        if (!BlockchainsInfo.isEvmBlockchainName(from.blockchain)) {
+            return [];
+        }
+
         const disabledProviders = providers.concat(options.disabledProviders);
 
-        return this.lifiProvider.calculate(from, to, disabledProviders, {
-            slippageTolerance: options.slippageTolerance,
-            gasCalculation: options.gasCalculation === 'disabled' ? 'disabled' : 'calculate'
-        });
+        return this.lifiProvider.calculate(
+            from as PriceTokenAmount<EvmBlockchainName>,
+            to as PriceTokenAmount<EvmBlockchainName>,
+            disabledProviders,
+            {
+                slippageTolerance: options.slippageTolerance,
+                gasCalculation: options.gasCalculation === 'disabled' ? 'disabled' : 'calculate'
+            }
+        );
     }
 }

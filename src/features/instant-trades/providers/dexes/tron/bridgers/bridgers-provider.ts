@@ -15,7 +15,7 @@ import BigNumber from 'bignumber.js';
 import { BridgersCalculationOptions } from 'src/features/instant-trades/providers/dexes/tron/bridgers/models/bridgers-calculation-options';
 import { combineOptions } from 'src/common/utils/options';
 
-export abstract class BridgersTradeProvider extends TronInstantTradeProvider {
+export class BridgersProvider extends TronInstantTradeProvider {
     private readonly defaultOptions: BridgersCalculationOptions = {
         slippageTolerance: 0.02
     };

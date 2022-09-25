@@ -1,5 +1,5 @@
 import { InstantTradeProvider } from 'src/features/instant-trades/providers/dexes/abstract/instant-trade-provider/instant-trade-provider';
-import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
@@ -8,9 +8,7 @@ import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-pub
 import { TronInstantTrade } from 'src/features/instant-trades/providers/abstract/tron-instant-trade/tron-instant-trade';
 
 export abstract class TronInstantTradeProvider extends InstantTradeProvider {
-    public abstract readonly blockchain: TronBlockchainName;
-
-    protected abstract readonly gasMargin: number;
+    public readonly blockchain = BLOCKCHAIN_NAME.TRON;
 
     protected get walletAddress(): string {
         return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.TRON).address;
