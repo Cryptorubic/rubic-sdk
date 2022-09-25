@@ -1,11 +1,7 @@
 import { LifiCrossChainTrade } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade';
 import { WrappedCrossChainTrade } from 'src/features/cross-chain/providers/common/models/wrapped-cross-chain-trade';
 import { LifiCrossChainTradeProvider } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade-provider';
-import {
-    CrossChainMaxAmountError,
-    RubicSdkError,
-    CrossChainMinAmountError
-} from 'src/common/errors';
+import { MaxAmountError, RubicSdkError, MinAmountError } from 'src/common/errors';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
 import { SwapManagerCrossChainCalculationOptions } from 'src/features/cross-chain/models/swap-manager-cross-chain-options';
 import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade-provider';
@@ -284,16 +280,16 @@ export class CrossChainManager {
         prevWrappedTrade: WrappedTradeOrNull
     ): WrappedTradeOrNull {
         if (
-            prevWrappedTrade?.error instanceof CrossChainMinAmountError &&
-            nextWrappedTrade?.error instanceof CrossChainMinAmountError
+            prevWrappedTrade?.error instanceof MinAmountError &&
+            nextWrappedTrade?.error instanceof MinAmountError
         ) {
             return prevWrappedTrade.error.minAmount.lte(nextWrappedTrade.error.minAmount)
                 ? prevWrappedTrade
                 : nextWrappedTrade;
         }
         if (
-            prevWrappedTrade?.error instanceof CrossChainMaxAmountError &&
-            nextWrappedTrade?.error instanceof CrossChainMaxAmountError
+            prevWrappedTrade?.error instanceof MaxAmountError &&
+            nextWrappedTrade?.error instanceof MaxAmountError
         ) {
             return prevWrappedTrade.error.maxAmount.gte(nextWrappedTrade.error.maxAmount)
                 ? prevWrappedTrade

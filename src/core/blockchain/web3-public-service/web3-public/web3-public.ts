@@ -261,12 +261,14 @@ export abstract class Web3Public {
      * @param contractAbi Abi of smart-contract which method is to be executed.
      * @param methodName Called method name.
      * @param methodArguments Method arguments.
+     * @param options Transaction options.
      */
     public abstract callContractMethod<T extends Web3PrimitiveType = string>(
         contractAddress: string,
         contractAbi: AbiItem[],
         methodName: string,
-        methodArguments?: unknown[]
+        methodArguments?: unknown[],
+        options?: object
     ): Promise<T>;
 
     /**

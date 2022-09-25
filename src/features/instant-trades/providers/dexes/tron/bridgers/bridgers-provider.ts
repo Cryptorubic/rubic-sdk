@@ -10,7 +10,7 @@ import { BridgersQuoteResponse } from 'src/features/common/providers/bridgers/mo
 import { createTokenNativeAddressProxy } from 'src/features/instant-trades/providers/dexes/abstract/utils/token-native-address-proxy';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { InstantTradeProvider } from 'src/features/instant-trades/providers/dexes/abstract/instant-trade-provider/instant-trade-provider';
-import { CrossChainMaxAmountError, CrossChainMinAmountError } from 'src/common/errors';
+import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import BigNumber from 'bignumber.js';
 import { BridgersCalculationOptions } from 'src/features/instant-trades/providers/dexes/tron/bridgers/models/bridgers-calculation-options';
 import { combineOptions } from 'src/common/utils/options';
@@ -54,16 +54,10 @@ export class BridgersProvider extends TronInstantTradeProvider {
         const transactionData = quoteResponse.data.txData;
 
         if (from.tokenAmount.lt(transactionData.depositMin)) {
-            throw new CrossChainMinAmountError(
-                new BigNumber(transactionData.depositMin),
-                from.symbol
-            ); // @todo update error
+            throw new MinAmountError(new BigNumber(transactionData.depositMin), from.symbol);
         }
         if (from.tokenAmount.gt(transactionData.depositMax)) {
-            throw new CrossChainMaxAmountError(
-                new BigNumber(transactionData.depositMax),
-                from.symbol
-            );
+            throw new MaxAmountError(new BigNumber(transactionData.depositMax), from.symbol);
         }
 
         const to = new PriceTokenAmount({

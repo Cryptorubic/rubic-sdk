@@ -41,7 +41,7 @@ export class TronWeb3Private extends Web3Private {
             rawValue = value;
         }
 
-        const transactionHash = contract.approve(spenderAddress, rawValue.toFixed(0)).send({
+        const transactionHash = await contract.approve(spenderAddress, rawValue.toFixed(0)).send({
             ...(options.feeLimit && { feeLimit: Web3Private.stringifyAmount(options.feeLimit) })
         });
         if (options.onTransactionHash) {
@@ -99,13 +99,16 @@ export class TronWeb3Private extends Web3Private {
         parameters: TronParameters,
         options: TronTransactionOptions = {}
     ): Promise<string> {
-        const transactionHash = await this.tronWeb.transactionBuilder.triggerSmartContract(
+        const transaction = await this.tronWeb.transactionBuilder.triggerSmartContract(
             contractAddress,
             methodSignature,
             options,
             parameters,
             this.address
         );
+        const signedTransaction = await this.tronWeb.trx.sign(transaction.transaction);
+
+        const transactionHash = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
         if (options.onTransactionHash) {
             options.onTransactionHash(transactionHash);
         }

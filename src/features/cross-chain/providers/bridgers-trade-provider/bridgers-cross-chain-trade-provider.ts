@@ -18,7 +18,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { BridgersQuoteRequest } from 'src/features/common/providers/bridgers/models/bridgers-quote-request';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
 import { BridgersQuoteResponse } from 'src/features/common/providers/bridgers/models/bridgers-quote-response';
-import { CrossChainMaxAmountError, CrossChainMinAmountError } from 'src/common/errors';
+import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import BigNumber from 'bignumber.js';
 import { TronBridgersCrossChainTrade } from 'src/features/cross-chain/providers/bridgers-trade-provider/tron-bridgers-trade/tron-bridgers-cross-chain-trade';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
@@ -123,7 +123,7 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
             if (from.tokenAmount.lt(transactionData.depositMin)) {
                 return {
                     trade: null,
-                    error: new CrossChainMinAmountError(
+                    error: new MinAmountError(
                         new BigNumber(transactionData.depositMin),
                         from.symbol
                     )
@@ -132,7 +132,7 @@ export class BridgersCrossChainTradeProvider extends CrossChainTradeProvider {
             if (from.tokenAmount.gt(transactionData.depositMax)) {
                 return {
                     trade: null,
-                    error: new CrossChainMaxAmountError(
+                    error: new MaxAmountError(
                         new BigNumber(transactionData.depositMax),
                         from.symbol
                     )

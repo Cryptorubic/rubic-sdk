@@ -13,8 +13,8 @@ import {
     InsufficientLiquidityError,
     RubicSdkError,
     LowToSlippageError,
-    CrossChainMinAmountError,
-    CrossChainMaxAmountError,
+    MinAmountError,
+    MaxAmountError,
     TooLowAmountError
 } from 'src/common/errors';
 import { Injector } from 'src/core/injector/injector';
@@ -489,7 +489,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
             if (!minAmount?.isFinite()) {
                 throw new InsufficientLiquidityError();
             }
-            throw new CrossChainMinAmountError(minAmount, fromTrade.fromToken.symbol);
+            throw new MinAmountError(minAmount, fromTrade.fromToken.symbol);
         }
 
         if (fromTransitTokenAmount.gt(maxTransitTokenAmount)) {
@@ -497,7 +497,7 @@ export class CelerCrossChainTradeProvider extends CrossChainTradeProvider {
                 fromTrade,
                 maxTransitTokenAmount
             );
-            throw new CrossChainMaxAmountError(maxAmount, fromTrade.fromToken.symbol);
+            throw new MaxAmountError(maxAmount, fromTrade.fromToken.symbol);
         }
     }
 

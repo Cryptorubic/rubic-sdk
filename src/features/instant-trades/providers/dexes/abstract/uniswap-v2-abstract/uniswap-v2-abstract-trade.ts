@@ -321,9 +321,8 @@ export abstract class UniswapV2AbstractTrade extends EvmInstantTrade {
         parameters: Parameters<InstanceType<typeof EvmWeb3Private>['executeContractMethod']>,
         fromAddress?: string
     ): Parameters<InstanceType<typeof EvmWeb3Public>['callContractMethod']> {
-        return parameters.slice(0, 3).concat([
+        return parameters.slice(0, 4).concat([
             {
-                methodArguments: parameters[3],
                 from: fromAddress || this.walletAddress,
                 ...(parameters[4]?.value && { value: parameters[4]?.value })
             }

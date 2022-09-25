@@ -13,7 +13,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { bridges, BridgeType } from 'src/features/cross-chain/providers/common/models/bridge-type';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { CrossChainMinAmountError } from 'src/common/errors';
+import { MinAmountError } from 'src/common/errors';
 import { lifiProviders } from 'src/features/instant-trades/providers/lifi/constants/lifi-providers';
 import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
@@ -162,7 +162,7 @@ export class LifiCrossChainTradeProvider extends CrossChainTradeProvider {
 
     private checkMinError(from: PriceTokenAmount): void | never {
         if (from.price.multipliedBy(from.tokenAmount).lt(this.MIN_AMOUNT_USD)) {
-            throw new CrossChainMinAmountError(this.MIN_AMOUNT_USD, 'USDC');
+            throw new MinAmountError(this.MIN_AMOUNT_USD, 'USDC');
         }
     }
 

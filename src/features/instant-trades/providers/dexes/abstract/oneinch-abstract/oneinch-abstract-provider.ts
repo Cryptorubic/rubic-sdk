@@ -19,11 +19,10 @@ import { OneinchCalculationOptions } from 'src/features/instant-trades/providers
 import { EvmInstantTradeProvider } from 'src/features/instant-trades/providers/dexes/abstract/instant-trade-provider/evm-instant-trade-provider/evm-instant-trade-provider';
 
 export abstract class OneinchAbstractProvider extends EvmInstantTradeProvider {
-    private readonly defaultOptions: OneinchCalculationOptions = {
-        slippageTolerance: 0.02,
+    private readonly defaultOptions: Omit<OneinchCalculationOptions, 'fromAddress'> = {
         gasCalculation: 'calculate',
         disableMultihops: false,
-        fromAddress: this.walletAddress,
+        slippageTolerance: 0.02,
         wrappedAddress: oneinchApiParams.nativeAddress
     };
 
@@ -64,7 +63,10 @@ export abstract class OneinchAbstractProvider extends EvmInstantTradeProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options?: CalculationOptions
     ): Promise<OneinchTrade> {
-        const fullOptions = combineOptions(options, this.defaultOptions);
+        const fullOptions = combineOptions(options, {
+            ...this.defaultOptions,
+            fromAddress: this.walletAddress
+        });
 
         const fromTokenClone = createTokenNativeAddressProxy(from, oneinchApiParams.nativeAddress);
         const toTokenClone = createTokenNativeAddressProxy(toToken, oneinchApiParams.nativeAddress);

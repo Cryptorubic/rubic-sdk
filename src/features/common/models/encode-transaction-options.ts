@@ -1,7 +1,7 @@
 /**
  * Stores options for transaction in `encode` function.
  */
-export interface BasicEncodeTransactionOptions {
+export interface EncodeTransactionOptions {
     /**
      * User wallet address to send swap transaction.
      */

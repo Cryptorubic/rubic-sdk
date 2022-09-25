@@ -17,8 +17,6 @@ export class Web3Pure {
 
     public static [CHAIN_TYPE.TRON] = TronWeb3Pure;
 
-    // @todo add get(blockchain)
-
     /**
      * Increases the gas limit value by the specified percentage and rounds to the nearest integer.
      * @param gasLimit Gas limit value to increase.

@@ -1,6 +1,6 @@
-import { BasicSwapTransactionOptions } from 'src/features/common/models/basic-swap-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 
-export interface TronSwapTransactionOptions extends BasicSwapTransactionOptions {
+export interface TronSwapTransactionOptions extends SwapTransactionOptions {
     feeLimit?: number;
 
     approveFeeLimit?: number;

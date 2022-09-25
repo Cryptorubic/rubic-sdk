@@ -1,6 +1,6 @@
-import { BasicEncodeTransactionOptions } from 'src/features/common/models/basic-encode-transaction-options';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
-export interface EvmEncodeTransactionOptions extends BasicEncodeTransactionOptions {
+export interface EvmEncodeTransactionOptions extends EncodeTransactionOptions {
     /**
      * Transaction gas price.
      */

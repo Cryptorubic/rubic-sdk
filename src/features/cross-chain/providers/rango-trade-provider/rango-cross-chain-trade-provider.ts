@@ -3,11 +3,7 @@ import {
     rangoCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-cross-chain-supported-blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import {
-    CrossChainMaxAmountError,
-    CrossChainMinAmountError,
-    UnsupportedReceiverAddressError
-} from 'src/common/errors';
+import { MaxAmountError, MinAmountError, UnsupportedReceiverAddressError } from 'src/common/errors';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
 import { RANGO_API_KEY } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-api-key';
@@ -89,10 +85,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
         if (price && amountUsdPrice.lt(101)) {
             return {
                 trade: null,
-                error: new CrossChainMinAmountError(
-                    new BigNumber(101).dividedBy(price),
-                    fromToken.symbol
-                )
+                error: new MinAmountError(new BigNumber(101).dividedBy(price), fromToken.symbol)
             };
         }
 
@@ -109,7 +102,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                 if (amountRestriction?.min && fromToken.weiAmount.lte(amountRestriction.min)) {
                     return {
                         trade: null,
-                        error: new CrossChainMinAmountError(
+                        error: new MinAmountError(
                             Web3Pure.fromWei(amountRestriction.min, fromToken.decimals),
                             fromToken.symbol
                         )
@@ -119,7 +112,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                 if (amountRestriction?.max && fromToken.weiAmount.gte(amountRestriction.max)) {
                     return {
                         trade: null,
-                        error: new CrossChainMaxAmountError(
+                        error: new MaxAmountError(
                             Web3Pure.fromWei(amountRestriction.max, fromToken.decimals),
                             fromToken.symbol
                         )

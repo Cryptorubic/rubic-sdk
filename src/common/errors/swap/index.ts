@@ -5,6 +5,8 @@ export * from './insufficient-liquidity.error';
 export * from './lifi-pair-is-unavailable.error';
 export * from './low-slippage-deflationary-token.error';
 export * from './low-slippage.error';
+export * from './max-amount.error';
+export * from './min-amount.error';
 export * from './not-supported-blockchain';
 export * from './not-whitelisted-provider.error';
 export * from './swap-request.error';

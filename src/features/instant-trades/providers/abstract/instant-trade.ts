@@ -14,8 +14,8 @@ import BigNumber from 'bignumber.js';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
-import { BasicSwapTransactionOptions } from 'src/features/common/models/basic-swap-transaction-options';
-import { BasicEncodeTransactionOptions } from 'src/features/common/models/basic-encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { isAddressCorrect } from 'src/features/common/utils/check-address';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 
@@ -123,13 +123,13 @@ export abstract class InstantTrade {
      *
      * @param options Transaction options.
      */
-    public abstract swap(options?: BasicSwapTransactionOptions): Promise<string | never>;
+    public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
 
     /**
      * Builds transaction config, with encoded data.
      * @param options Encode transaction options.
      */
-    public abstract encode(options: BasicEncodeTransactionOptions): Promise<unknown>;
+    public abstract encode(options: EncodeTransactionOptions): Promise<unknown>;
 
     /**
      * Builds encoded approve transaction config.

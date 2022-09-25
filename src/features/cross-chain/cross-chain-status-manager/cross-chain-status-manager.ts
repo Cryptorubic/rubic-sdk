@@ -505,7 +505,7 @@ export class CrossChainStatusManager {
 
             if (transactionData.status === 'receive_complete') {
                 return {
-                    txStatus: CrossChainTxStatus.PENDING,
+                    txStatus: CrossChainTxStatus.SUCCESS,
                     txHash: transactionData.toHash
                 };
             }
@@ -521,7 +521,7 @@ export class CrossChainStatusManager {
         } catch {}
 
         return {
-            txStatus: CrossChainTxStatus.FAIL,
+            txStatus: CrossChainTxStatus.PENDING,
             txHash: null
         };
     }

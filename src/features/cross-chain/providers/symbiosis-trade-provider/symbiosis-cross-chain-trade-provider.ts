@@ -9,9 +9,9 @@ import { OolongSwapProvider } from 'src/features/instant-trades/providers/dexes/
 import { OneinchEthereumProvider } from 'src/features/instant-trades/providers/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
 import { OneinchBscProvider } from 'src/features/instant-trades/providers/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
 import {
-    CrossChainMaxAmountError,
+    MaxAmountError,
     RubicSdkError,
-    CrossChainMinAmountError,
+    MinAmountError,
     TooLowAmountError
 } from 'src/common/errors';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
@@ -248,7 +248,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             const minAmount = await this.getFromTokenAmount(from, transitTokenAmount, 'min');
             const minAmountWithSlippage = minAmount.dividedBy(1 - slippage);
 
-            return new CrossChainMinAmountError(minAmountWithSlippage, from.symbol);
+            return new MinAmountError(minAmountWithSlippage, from.symbol);
         }
 
         if (err?.code === ErrorCode.AMOUNT_TOO_HIGH) {
@@ -256,7 +256,7 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
             const maxAmount = await this.getFromTokenAmount(from, transitTokenAmount, 'max');
 
-            return new CrossChainMaxAmountError(maxAmount, from.symbol);
+            return new MaxAmountError(maxAmount, from.symbol);
         }
 
         return new RubicSdkError(err.message);

@@ -1,4 +1,4 @@
-export interface BasicSwapTransactionOptions {
+export interface SwapTransactionOptions {
     /**
      * Callback to be called, when user confirm swap transaction.
      * @param hash Transaction hash.
