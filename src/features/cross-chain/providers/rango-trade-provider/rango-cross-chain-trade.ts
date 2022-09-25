@@ -16,7 +16,7 @@ import { TradeType } from 'src/features/instant-trades/providers/models/trade-ty
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { EvmSwapTransactionOptions } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/evm-swap-transaction-options';
+import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
 import { RANGO_BLOCKCHAIN_NAME } from './constants/rango-blockchain-name';
 import { RANGO_API_KEY } from './constants/rango-api-key';
 import { RangoCrossChainSupportedBlockchain } from './constants/rango-cross-chain-supported-blockchain';

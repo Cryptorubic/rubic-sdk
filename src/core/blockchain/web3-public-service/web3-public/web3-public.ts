@@ -184,6 +184,19 @@ export abstract class Web3Public {
     }
 
     /**
+     * Calls allowance method in token contract.
+     * @param tokenAddress Address of the smart-contract corresponding to the token.
+     * @param spenderAddress Wallet or contract address, allowed to spend.
+     * @param ownerAddress Wallet address to spend from.
+     * @returns Token's amount, allowed to be spent.
+     */
+    public abstract getAllowance(
+        tokenAddress: string,
+        ownerAddress: string,
+        spenderAddress: string
+    ): Promise<BigNumber>;
+
+    /**
      * Uses multicall to make several calls of one method in one contract.
      * @param contractAddress Target contract address.
      * @param contractAbi Target contract abi.

@@ -1,5 +1,3 @@
-import { InstantTrade } from 'src/features/instant-trades/providers/abstract/instant-trade';
-import { TransactionReceipt } from 'web3-eth';
 import { Injector } from 'src/core/injector/injector';
 import { Route } from '@lifi/sdk';
 import { TransactionConfig } from 'web3-core';
@@ -14,9 +12,10 @@ import {
 import { Token } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { GasFeeInfo } from 'src/features/instant-trades/providers/models/gas-fee-info';
-import { SwapTransactionOptions } from 'src/features/instant-trades/providers/models/swap-transaction-options';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/providers/models/trade-type';
-import { EncodeTransactionOptions } from 'src/features/instant-trades/providers/models/encode-transaction-options';
+import { EvmInstantTrade } from 'src/features/instant-trades/providers/abstract/evm-instant-trade/evm-instant-trade';
+import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
+import { EvmEncodeTransactionOptions } from 'src/features/common/models/evm/evm-encode-transaction-options';
 
 interface LifiTransactionRequest {
     data: string;
@@ -24,11 +23,11 @@ interface LifiTransactionRequest {
     gasPrice?: string;
 }
 
-export class LifiTrade extends InstantTrade {
+export class LifiTrade extends EvmInstantTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount,
+        to: PriceTokenAmount<EvmBlockchainName>,
         route: Route
     ): Promise<{
         gasLimit: BigNumber;
@@ -62,9 +61,9 @@ export class LifiTrade extends InstantTrade {
 
     private readonly httpClient = Injector.httpClient;
 
-    public readonly from: PriceTokenAmount;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly to: PriceTokenAmount;
+    public readonly to: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly gasFeeInfo: GasFeeInfo | null;
 
@@ -86,7 +85,7 @@ export class LifiTrade extends InstantTrade {
 
     constructor(tradeStruct: {
         from: PriceTokenAmount<EvmBlockchainName>;
-        to: PriceTokenAmount;
+        to: PriceTokenAmount<EvmBlockchainName>;
         gasFeeInfo: GasFeeInfo | null;
         slippageTolerance: number;
         contractAddress: string;
@@ -95,7 +94,7 @@ export class LifiTrade extends InstantTrade {
         route: Route;
         toTokenWeiAmountMin: BigNumber;
     }) {
-        super(tradeStruct.from.blockchain);
+        super();
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
@@ -111,19 +110,18 @@ export class LifiTrade extends InstantTrade {
         this.route = tradeStruct.route;
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
+    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
         if (options?.receiverAddress) {
             throw new UnsupportedReceiverAddressError();
         }
 
         await this.checkWalletState();
-
         await this.checkAllowanceAndApprove(options);
 
         try {
             const { data, gasLimit, gasPrice } = await this.getTransactionData();
 
-            return await this.web3Private.trySendTransaction(
+            const receipt = await this.web3Private.trySendTransaction(
                 this.contractAddress,
                 this.from.isNative ? this.from.stringWeiAmount : '0',
                 {
@@ -133,6 +131,7 @@ export class LifiTrade extends InstantTrade {
                     onTransactionHash: options.onConfirm
                 }
             );
+            return receipt.transactionHash;
         } catch (err) {
             if ([400, 500, 503].includes(err.code)) {
                 throw new SwapRequestError();
@@ -146,9 +145,14 @@ export class LifiTrade extends InstantTrade {
         }
     }
 
-    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encode(options: EvmEncodeTransactionOptions): Promise<TransactionConfig> {
+        if (options?.receiverAddress) {
+            throw new UnsupportedReceiverAddressError();
+        }
+        this.checkFromAddress(options.fromAddress, true);
+
         try {
-            const { data, gasLimit, gasPrice } = await this.getTransactionData();
+            const { data, gasLimit, gasPrice } = await this.getTransactionData(options.fromAddress);
 
             return {
                 to: this.contractAddress,
@@ -162,14 +166,14 @@ export class LifiTrade extends InstantTrade {
         }
     }
 
-    private async getTransactionData(): Promise<LifiTransactionRequest> {
+    private async getTransactionData(fromAddress?: string): Promise<LifiTransactionRequest> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
             action: {
                 ...firstStep.action,
-                fromAddress: this.walletAddress,
-                toAddress: this.walletAddress
+                fromAddress: fromAddress || this.walletAddress,
+                toAddress: fromAddress || this.walletAddress
             },
             execution: {
                 status: 'NOT_STARTED',

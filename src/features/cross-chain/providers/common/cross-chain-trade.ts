@@ -1,11 +1,9 @@
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Injector } from 'src/core/injector/injector';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import {
     RubicSdkError,
     WalletNotConnectedError,
+    WrongFromAddressError,
     WrongReceiverAddressError
 } from 'src/common/errors';
 import { CrossChainTradeType } from 'src/features/cross-chain/models/cross-chain-trade-type';
@@ -14,40 +12,16 @@ import BigNumber from 'bignumber.js';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { HttpClient } from 'src/core/http-client/models/http-client';
-import { BasicSwapTransactionOptions } from 'src/features/cross-chain/providers/common/models/basic-swap-transaction-options';
-import { BasicEncodeTransactionOptions } from 'src/features/cross-chain/providers/common/models/basic-encode-transaction-options';
+import { BasicSwapTransactionOptions } from 'src/features/common/models/basic-swap-transaction-options';
+import { BasicEncodeTransactionOptions } from 'src/features/common/models/basic-encode-transaction-options';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 import { ItType } from 'src/features/cross-chain/providers/common/models/it-type';
+import { isAddressCorrect } from 'src/features/common/utils/check-address';
 
 /**
  * Abstract class for all cross chain providers' trades.
  */
 export abstract class CrossChainTrade {
-    /**
-     * Checks receiver address for correctness.
-     * @param receiverAddress Receiver address.
-     * @param toBlockchain Target blockchain.
-     * @param isRequired True, if receiver address must not be empty.
-     */
-    public static checkReceiverAddress(
-        receiverAddress: string | undefined,
-        toBlockchain: BlockchainName,
-        isRequired = false
-    ): void {
-        if (!receiverAddress) {
-            if (isRequired) {
-                throw new RubicSdkError(`'receiverAddress' is required option`);
-            }
-            return;
-        }
-
-        const toChainType = BlockchainsInfo.getChainType(toBlockchain);
-        if (Web3Pure[toChainType].isAddressCorrect(receiverAddress)) {
-            return;
-        }
-        throw new WrongReceiverAddressError();
-    }
-
     /**
      * Type of calculated cross chain trade.
      */
@@ -108,7 +82,20 @@ export abstract class CrossChainTrade {
     /**
      * Returns true, if allowance is not enough.
      */
-    public abstract needApprove(): Promise<boolean>;
+    public async needApprove(): Promise<boolean> {
+        this.checkWalletConnected();
+
+        if (this.from.isNative) {
+            return false;
+        }
+
+        const allowance = await this.fromWeb3Public.getAllowance(
+            this.from.address,
+            this.walletAddress,
+            this.fromContractAddress
+        );
+        return this.from.weiAmount.gt(allowance);
+    }
 
     /**
      * Sends approve transaction with connected wallet.
@@ -176,6 +163,33 @@ export abstract class CrossChainTrade {
             this.from.tokenAmount,
             this.walletAddress
         );
+    }
+
+    protected checkFromAddress(fromAddress: string | undefined, isRequired = false): void | never {
+        if (!fromAddress) {
+            if (isRequired) {
+                throw new RubicSdkError(`'fromAddress' is required option`);
+            }
+            return;
+        }
+        if (!isAddressCorrect(fromAddress, this.from.blockchain)) {
+            throw new WrongFromAddressError();
+        }
+    }
+
+    protected checkReceiverAddress(
+        receiverAddress: string | undefined,
+        isRequired = false
+    ): void | never {
+        if (!receiverAddress) {
+            if (isRequired) {
+                throw new RubicSdkError(`'receiverAddress' is required option`);
+            }
+            return;
+        }
+        if (!isAddressCorrect(receiverAddress, this.to.blockchain)) {
+            throw new WrongReceiverAddressError();
+        }
     }
 
     /**

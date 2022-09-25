@@ -78,13 +78,6 @@ export class TronWeb3Public extends Web3Public {
         return new BigNumber(balance?.toString());
     }
 
-    /**
-     * Calls allowance method in TRC-20 token contract.
-     * @param tokenAddress Address of the smart-contract corresponding to the token.
-     * @param spenderAddress Wallet or contract address, allowed to spend.
-     * @param ownerAddress Wallet address to spend from.
-     * @returns Token's amount, allowed to be spent.
-     */
     public async getAllowance(
         tokenAddress: string,
         ownerAddress: string,

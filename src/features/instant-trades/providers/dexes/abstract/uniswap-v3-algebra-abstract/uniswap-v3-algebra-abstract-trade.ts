@@ -6,23 +6,22 @@ import {
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
 import { UniswapV3AlgebraRoute } from 'src/features/instant-trades/providers/dexes/abstract/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
-import { InstantTrade } from 'src/features/instant-trades/providers/abstract/instant-trade';
 import { UniswapV3AbstractTrade } from 'src/features/instant-trades/providers/dexes/abstract/uniswap-v3-abstract/uniswap-v3-abstract-trade';
 import { RubicSdkError } from 'src/common/errors';
 import { Injector } from 'src/core/injector/injector';
 import { getFromToTokensAmountsByExact } from 'src/features/instant-trades/providers/dexes/abstract/utils/get-from-to-tokens-amounts-by-exact';
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
-import { EncodeTransactionOptions } from 'src/features/instant-trades/providers/models/encode-transaction-options';
 import { AbiItem } from 'web3-utils';
 import { GasFeeInfo } from 'src/features/instant-trades/providers/models/gas-fee-info';
-import { TransactionReceipt } from 'web3-eth';
 import { TransactionConfig } from 'web3-core';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
-import { SwapTransactionOptions } from 'src/features/instant-trades/providers/models/swap-transaction-options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { Exact } from 'src/features/instant-trades/providers/models/exact';
 import { TradeType } from 'src/features/instant-trades/providers/models/trade-type';
 import BigNumber from 'bignumber.js';
+import { EvmInstantTrade } from 'src/features/instant-trades/providers/abstract/evm-instant-trade/evm-instant-trade';
+import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
+import { EvmEncodeTransactionOptions } from 'src/features/common/models/evm/evm-encode-transaction-options';
 
 export interface UniswapV3AlgebraTradeStruct {
     from: PriceTokenAmount<EvmBlockchainName>;
@@ -38,7 +37,7 @@ interface EstimateGasOptions {
     deadlineMinutes: number;
 }
 
-export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
+export abstract class UniswapV3AlgebraAbstractTrade extends EvmInstantTrade {
     public static get type(): TradeType {
         throw new RubicSdkError(`Static TRADE_TYPE getter is not implemented by ${this.name}`);
     }
@@ -190,7 +189,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
     }
 
     protected constructor(tradeStruct: UniswapV3AlgebraTradeStruct) {
-        super(tradeStruct.from.blockchain);
+        super();
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
@@ -215,16 +214,18 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
      */
     protected abstract getSwapRouterExactInputMethodData(walletAddress: string): MethodData;
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
+    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
         await this.checkWalletState();
+        this.checkReceiverAddress(options.receiverAddress);
+
         await this.checkAllowanceAndApprove(options);
 
         const { methodName, methodArguments } = this.getSwapRouterMethodData(
-            options?.receiverAddress
+            options.receiverAddress
         );
         const { gas, gasPrice } = this.getGasParams(options);
 
-        return this.web3Private.tryExecuteContractMethod(
+        const receipt = await this.web3Private.tryExecuteContractMethod(
             this.contractAddress,
             this.contractAbi,
             methodName,
@@ -236,10 +237,16 @@ export abstract class UniswapV3AlgebraAbstractTrade extends InstantTrade {
                 gasPrice
             }
         );
+        return receipt.transactionHash;
     }
 
-    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
-        const { methodName, methodArguments } = this.getSwapRouterMethodData(options.fromAddress);
+    public async encode(options: EvmEncodeTransactionOptions): Promise<TransactionConfig> {
+        this.checkFromAddress(options.fromAddress, true);
+        this.checkReceiverAddress(options.receiverAddress);
+
+        const { methodName, methodArguments } = this.getSwapRouterMethodData(
+            options.receiverAddress || options.fromAddress
+        );
         const gasParams = this.getGasParams(options);
 
         return EvmWeb3Pure.encodeMethodCall(

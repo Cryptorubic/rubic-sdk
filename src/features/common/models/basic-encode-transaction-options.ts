@@ -7,5 +7,5 @@ export interface BasicEncodeTransactionOptions {
      */
     fromAddress: string;
 
-    receiverAddress: string;
+    receiverAddress?: string;
 }

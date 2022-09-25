@@ -16,8 +16,8 @@ import {
 import { TransactionConfig } from 'web3-core';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { ContractParams } from 'src/features/cross-chain/providers/common/models/contract-params';
-import { EvmSwapTransactionOptions } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/evm-swap-transaction-options';
-import { EvmEncodeTransactionOptions } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/evm-encode-transaction-options';
+import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
+import { EvmEncodeTransactionOptions } from 'src/features/common/models/evm/evm-encode-transaction-options';
 import { GetContractParamsOptions } from 'src/features/cross-chain/providers/common/models/get-contract-params-options';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -46,21 +46,6 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
             return null;
         }
         return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
-    }
-
-    public async needApprove(): Promise<boolean> {
-        this.checkWalletConnected();
-
-        if (this.from.isNative) {
-            return false;
-        }
-
-        const allowance = await this.fromWeb3Public.getAllowance(
-            this.from.address,
-            this.walletAddress,
-            this.fromContractAddress
-        );
-        return this.from.weiAmount.gt(allowance);
     }
 
     public async approve(
@@ -110,13 +95,12 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
 
     public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
-        await this.checkAllowanceAndApprove(options);
-
-        CrossChainTrade.checkReceiverAddress(
+        this.checkReceiverAddress(
             options.receiverAddress,
-            this.to.blockchain,
             !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
         );
+
+        await this.checkAllowanceAndApprove(options);
 
         const { onConfirm, gasLimit, gasPrice } = options;
         let transactionHash: string;
@@ -149,12 +133,18 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
     }
 
     public async encode(options: EvmEncodeTransactionOptions): Promise<TransactionConfig> {
+        this.checkFromAddress(options.fromAddress, true);
+        this.checkReceiverAddress(
+            options.receiverAddress,
+            !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
+        );
+
         const { gasLimit, gasPrice } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getContractParams({
                 fromAddress: options.fromAddress,
-                receiverAddress: options.receiverAddress
+                receiverAddress: options.receiverAddress || options.fromAddress
             });
 
         return EvmWeb3Pure.encodeMethodCall(

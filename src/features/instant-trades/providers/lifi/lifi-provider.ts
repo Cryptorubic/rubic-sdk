@@ -26,7 +26,7 @@ export class LifiProvider {
 
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceToken,
+        toToken: PriceToken<EvmBlockchainName>,
         disabledProviders: TradeType[],
         options?: LifiCalculationOptions
     ): Promise<InstantTrade[]> {
@@ -108,7 +108,7 @@ export class LifiProvider {
 
     private async getGasFeeInfo(
         from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount,
+        to: PriceTokenAmount<EvmBlockchainName>,
         route: Route
     ): Promise<GasFeeInfo | null> {
         try {

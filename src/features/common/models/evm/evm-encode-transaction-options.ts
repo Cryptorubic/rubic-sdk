@@ -1,12 +1,6 @@
-/**
- * Stores options for transaction in `encode` function.
- */
-export interface EncodeTransactionOptions {
-    /**
-     * User wallet address to send swap transaction.
-     */
-    fromAddress: string;
+import { BasicEncodeTransactionOptions } from 'src/features/common/models/basic-encode-transaction-options';
 
+export interface EvmEncodeTransactionOptions extends BasicEncodeTransactionOptions {
     /**
      * Transaction gas price.
      */

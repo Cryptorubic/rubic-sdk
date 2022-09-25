@@ -1,4 +1,4 @@
-import { BasicSwapTransactionOptions } from 'src/features/cross-chain/providers/common/models/basic-swap-transaction-options';
+import { BasicSwapTransactionOptions } from 'src/features/common/models/basic-swap-transaction-options';
 
 export interface EvmSwapTransactionOptions extends BasicSwapTransactionOptions {
     /**

@@ -20,7 +20,7 @@ import pTimeout from 'src/common/utils/p-timeout';
 import { MarkRequired } from 'ts-essentials';
 import { combineOptions } from 'src/common/utils/options';
 
-export type RequiredSwapManagerCalculationOptions = MarkRequired<
+export type RequiredManagerCalculationOptions = MarkRequired<
     ManagerCalculationOptions,
     'timeout' | 'disabledProviders'
 >;
@@ -33,14 +33,10 @@ export class InstantTradesManager {
 
     private static getFullOptions(
         options?: ManagerCalculationOptions
-    ): RequiredSwapManagerCalculationOptions {
-        return combineOptions<RequiredSwapManagerCalculationOptions>(options, {
+    ): RequiredManagerCalculationOptions {
+        return combineOptions<RequiredManagerCalculationOptions>(options, {
             timeout: InstantTradesManager.defaultCalculationTimeout,
-            disabledProviders: [],
-            gasCalculation: 'calculate',
-            disableMultihops: false,
-            slippageTolerance: 0.02,
-            deadlineMinutes: 20
+            disabledProviders: []
         });
     }
 
@@ -130,8 +126,8 @@ export class InstantTradesManager {
 
     private async calculateTradeFromTokens(
         from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceToken,
-        options: RequiredSwapManagerCalculationOptions
+        to: PriceToken<EvmBlockchainName>,
+        options: RequiredManagerCalculationOptions
     ): Promise<Array<InstantTrade | InstantTradeError>> {
         const { timeout, disabledProviders, ...providersOptions } = options;
         const providers = Object.entries(this.tradeProviders[from.blockchain]).filter(
@@ -197,9 +193,9 @@ export class InstantTradesManager {
 
     private async calculateLifiTrades(
         from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceToken,
+        to: PriceToken<EvmBlockchainName>,
         providers: TradeType[],
-        options: RequiredSwapManagerCalculationOptions
+        options: RequiredManagerCalculationOptions
     ): Promise<InstantTrade[]> {
         const disabledProviders = providers.concat(options.disabledProviders);
 

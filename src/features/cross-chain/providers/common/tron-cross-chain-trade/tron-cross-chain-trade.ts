@@ -11,11 +11,13 @@ import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-pub
 import { TronWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/tron-web3-private';
 import { TronTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-options';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
-import { TronSwapTransactionOptions } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/models/tron-swap-transaction-options';
-import { TronEncodeTransactionOptions } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/models/tron-encode-transaction-options';
+import { TronSwapTransactionOptions } from 'src/features/common/models/tron/tron-swap-transaction-options';
+import { TronEncodeTransactionOptions } from 'src/features/common/models/tron/tron-encode-transaction-options';
 import { TronGetContractParamsOptions } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/models/tron-get-contract-params-options';
 import BigNumber from 'bignumber.js';
 import { TronContractParams } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/models/tron-contract-params';
+import { MarkRequired } from 'ts-essentials';
+import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
 
 export abstract class TronCrossChainTrade extends CrossChainTrade {
     public abstract readonly from: PriceTokenAmount<TronBlockchainName>;
@@ -26,21 +28,6 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
 
     protected get web3Private(): TronWeb3Private {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
-    }
-
-    public async needApprove(): Promise<boolean> {
-        this.checkWalletConnected();
-
-        if (this.from.isNative) {
-            return false;
-        }
-
-        const allowance = await this.fromWeb3Public.getAllowance(
-            this.from.address,
-            this.walletAddress,
-            this.fromContractAddress
-        );
-        return this.from.weiAmount.gt(allowance);
     }
 
     public async approve(
@@ -81,11 +68,13 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
         await this.approve(approveOptions, false);
     }
 
-    public async swap(options: TronSwapTransactionOptions): Promise<string | never> {
+    public async swap(
+        options: MarkRequired<TronSwapTransactionOptions, 'receiverAddress'>
+    ): Promise<string | never> {
         await this.checkTradeErrors();
-        await this.checkAllowanceAndApprove(options);
+        this.checkReceiverAddress(options.receiverAddress, true);
 
-        CrossChainTrade.checkReceiverAddress(options.receiverAddress, this.to.blockchain, true);
+        await this.checkAllowanceAndApprove(options);
 
         const { onConfirm } = options;
         let transactionHash: string;
@@ -122,7 +111,12 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    public async encode(options: TronEncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encode(
+        options: MarkRequired<TronEncodeTransactionOptions, 'receiverAddress'>
+    ): Promise<TronTransactionConfig> {
+        this.checkFromAddress(options.fromAddress, true);
+        this.checkReceiverAddress(options.receiverAddress, true);
+
         const { contractAddress, contractAbi, methodName, methodArguments, value, feeLimit } =
             await this.getContractParams({
                 fromAddress: options.fromAddress,

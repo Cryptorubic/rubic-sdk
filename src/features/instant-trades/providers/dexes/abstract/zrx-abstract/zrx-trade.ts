@@ -1,14 +1,13 @@
-import { InstantTrade } from 'src/features/instant-trades/providers/abstract/instant-trade';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ZrxQuoteResponse } from 'src/features/instant-trades/providers/dexes/abstract/zrx-abstract/models/zrx-types';
 import { GasFeeInfo } from 'src/features/instant-trades/providers/models/gas-fee-info';
-import { TransactionReceipt } from 'web3-eth';
-import { SwapTransactionOptions } from 'src/features/instant-trades/providers/models/swap-transaction-options';
 import { TransactionConfig } from 'web3-core';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/providers/models/trade-type';
-import { EncodeTransactionOptions } from 'src/features/instant-trades/providers/models/encode-transaction-options';
 import { UnsupportedReceiverAddressError } from 'src/common/errors';
+import { EvmInstantTrade } from 'src/features/instant-trades/providers/abstract/evm-instant-trade/evm-instant-trade';
+import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
+import { EvmEncodeTransactionOptions } from 'src/features/common/models/evm/evm-encode-transaction-options';
 
 interface ZrxTradeStruct {
     from: PriceTokenAmount<EvmBlockchainName>;
@@ -19,10 +18,10 @@ interface ZrxTradeStruct {
     gasFeeInfo?: GasFeeInfo;
 }
 
-export class ZrxTrade extends InstantTrade {
-    public readonly from: PriceTokenAmount;
+export class ZrxTrade extends EvmInstantTrade {
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
-    public readonly to: PriceTokenAmount;
+    public readonly to: PriceTokenAmount<EvmBlockchainName>;
 
     /**
      * In Zrx you can't change slippage after calculation is done.
@@ -42,7 +41,7 @@ export class ZrxTrade extends InstantTrade {
     }
 
     constructor(tradeStruct: ZrxTradeStruct) {
-        super(tradeStruct.from.blockchain);
+        super();
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
@@ -53,26 +52,34 @@ export class ZrxTrade extends InstantTrade {
         this.path = tradeStruct.path;
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
+    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
         if (options?.receiverAddress) {
             throw new UnsupportedReceiverAddressError();
         }
 
         await this.checkWalletState();
-
         await this.checkAllowanceAndApprove(options);
 
         const { gas, gasPrice } = this.getGasParams(options);
 
-        return this.web3Private.trySendTransaction(this.apiTradeData.to, this.apiTradeData.value, {
-            onTransactionHash: options.onConfirm,
-            data: this.apiTradeData.data,
-            gas,
-            gasPrice
-        });
+        const receipt = await this.web3Private.trySendTransaction(
+            this.apiTradeData.to,
+            this.apiTradeData.value,
+            {
+                onTransactionHash: options.onConfirm,
+                data: this.apiTradeData.data,
+                gas,
+                gasPrice
+            }
+        );
+        return receipt.transactionHash;
     }
 
-    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encode(options: EvmEncodeTransactionOptions): Promise<TransactionConfig> {
+        if (options?.receiverAddress) {
+            throw new UnsupportedReceiverAddressError();
+        }
+
         const { gas, gasPrice } = this.getGasParams(options);
 
         return {

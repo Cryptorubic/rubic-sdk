@@ -14,20 +14,19 @@ import {
     OptionsGasParams,
     TransactionGasParams
 } from 'src/features/instant-trades/providers/models/gas-params';
-import { InstantTrade } from 'src/features/instant-trades/providers/abstract/instant-trade';
 import { Injector } from 'src/core/injector/injector';
-import { EncodeTransactionOptions } from 'src/features/instant-trades/providers/models/encode-transaction-options';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { GasFeeInfo } from 'src/features/instant-trades/providers/models/gas-fee-info';
-import { TransactionReceipt } from 'web3-eth';
 import { TransactionConfig } from 'web3-core';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/providers/models/trade-type';
 import { getOneinchApiBaseUrl } from 'src/features/instant-trades/providers/dexes/abstract/oneinch-abstract/utils';
 import { oneinchApiParams } from 'src/features/instant-trades/providers/dexes/abstract/oneinch-abstract/constants';
-import { SwapTransactionOptions } from 'src/features/instant-trades/providers/models/swap-transaction-options';
 import { Cache } from 'src/common/utils/decorators';
 import { OneinchSwapRequest } from 'src/features/instant-trades/providers/dexes/abstract/oneinch-abstract/models/oneinch-swap-request';
+import { EvmInstantTrade } from 'src/features/instant-trades/providers/abstract/evm-instant-trade/evm-instant-trade';
+import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
+import { EvmEncodeTransactionOptions } from 'src/features/common/models/evm/evm-encode-transaction-options';
 
 type OneinchTradeStruct = {
     contractAddress: string;
@@ -40,7 +39,7 @@ type OneinchTradeStruct = {
     data: string | null;
 };
 
-export class OneinchTrade extends InstantTrade {
+export class OneinchTrade extends EvmInstantTrade {
     /** @internal */
     public static async checkIfNeedApproveAndThrowError(
         from: PriceTokenAmount
@@ -96,7 +95,7 @@ export class OneinchTrade extends InstantTrade {
     }
 
     constructor(oneinchTradeStruct: OneinchTradeStruct) {
-        super(oneinchTradeStruct.from.blockchain);
+        super();
 
         this.contractAddress = oneinchTradeStruct.contractAddress;
         this.from = oneinchTradeStruct.from;
@@ -136,8 +135,9 @@ export class OneinchTrade extends InstantTrade {
         return allowance.lt(this.nativeSupportedFrom.weiAmount);
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
+    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
         await this.checkWalletState();
+        this.checkReceiverAddress(options.receiverAddress);
 
         await this.checkAllowanceAndApprove(options);
 
@@ -159,11 +159,12 @@ export class OneinchTrade extends InstantTrade {
                 gasPrice
             };
 
-            return this.web3Private.trySendTransaction(
+            const receipt = await this.web3Private.trySendTransaction(
                 apiTradeData.tx.to,
                 this.nativeSupportedFrom.isNative ? this.nativeSupportedFrom.stringWeiAmount : '0',
                 transactionOptions
             );
+            return receipt.transactionHash;
         } catch (err) {
             const inchSpecificError = this.specifyError(err);
             if (inchSpecificError) {
@@ -178,9 +179,16 @@ export class OneinchTrade extends InstantTrade {
         }
     }
 
-    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encode(options: EvmEncodeTransactionOptions): Promise<TransactionConfig> {
+        this.checkFromAddress(options.fromAddress, true);
+        this.checkReceiverAddress(options.receiverAddress);
+
         try {
-            const apiTradeData = await this.getTradeData(true, options.fromAddress);
+            const apiTradeData = await this.getTradeData(
+                true,
+                options.fromAddress,
+                options.receiverAddress
+            );
             const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, apiTradeData);
 
             return {

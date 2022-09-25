@@ -3,7 +3,6 @@ import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/ins
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
-import { InstantTrade } from 'src/features/instant-trades/providers/abstract/instant-trade';
 import { LowSlippageDeflationaryTokenError, RubicSdkError } from 'src/common/errors';
 import { defaultEstimatedGas } from 'src/features/instant-trades/providers/dexes/abstract/uniswap-v2-abstract/constants/default-estimated-gas';
 import { Injector } from 'src/core/injector/injector';
@@ -15,21 +14,21 @@ import {
 } from 'src/features/instant-trades/providers/dexes/abstract/uniswap-v2-abstract/constants/SWAP_METHOD';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
-import { EncodeTransactionOptions } from 'src/features/instant-trades/providers/models/encode-transaction-options';
 import { AbiItem } from 'web3-utils';
 import { tryExecuteAsync } from 'src/common/utils/functions';
 import { GasFeeInfo } from 'src/features/instant-trades/providers/models/gas-fee-info';
-import { TransactionReceipt } from 'web3-eth';
 import { defaultUniswapV2Abi } from 'src/features/instant-trades/providers/dexes/abstract/uniswap-v2-abstract/constants/uniswap-v2-abi';
 import { TransactionConfig } from 'web3-core';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
-import { SwapTransactionOptions } from 'src/features/instant-trades/providers/models/swap-transaction-options';
 import { Cache } from 'src/common/utils/decorators';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { Exact } from 'src/features/instant-trades/providers/models/exact';
 import { TradeType } from 'src/features/instant-trades/providers/models/trade-type';
 import BigNumber from 'bignumber.js';
+import { EvmInstantTrade } from 'src/features/instant-trades/providers/abstract/evm-instant-trade/evm-instant-trade';
+import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
+import { EvmEncodeTransactionOptions } from 'src/features/common/models/evm/evm-encode-transaction-options';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount<EvmBlockchainName>;
@@ -41,7 +40,7 @@ export type UniswapV2TradeStruct = {
     gasFeeInfo?: GasFeeInfo | null;
 };
 
-export abstract class UniswapV2AbstractTrade extends InstantTrade {
+export abstract class UniswapV2AbstractTrade extends EvmInstantTrade {
     /** @internal */
     @Cache
     public static getContractAddress(blockchain: BlockchainName): string {
@@ -160,7 +159,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     }
 
     protected constructor(tradeStruct: UniswapV2TradeStruct) {
-        super(tradeStruct.from.blockchain);
+        super();
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
@@ -189,22 +188,27 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
         return { amountIn, amountOut };
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<TransactionReceipt> {
+    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
         await this.checkWalletState();
+        this.checkReceiverAddress(options.receiverAddress);
+
         await this.checkAllowanceAndApprove(options);
+
         return this.createAnyToAnyTrade(options);
     }
 
-    private async createAnyToAnyTrade(
-        options: SwapTransactionOptions
-    ): Promise<TransactionReceipt> {
+    private async createAnyToAnyTrade(options: EvmSwapTransactionOptions): Promise<string | never> {
         const methodName = await this.getMethodName(options);
         const swapParameters = this.getSwapParametersByMethod(methodName, options);
 
-        return this.web3Private.tryExecuteContractMethod(...swapParameters);
+        const receipt = await this.web3Private.tryExecuteContractMethod(...swapParameters);
+        return receipt.transactionHash;
     }
 
-    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encode(options: EvmEncodeTransactionOptions): Promise<TransactionConfig> {
+        this.checkFromAddress(options.fromAddress, true);
+        this.checkReceiverAddress(options.receiverAddress);
+
         if (options.supportFee === undefined) {
             if (await this.needApprove(options.fromAddress)) {
                 throw new RubicSdkError(
@@ -232,7 +236,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
             this.contractAddress,
             (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
             methodName,
-            this.getCallParameters(options.fromAddress),
+            this.getCallParameters(options.receiverAddress || options.fromAddress),
             this.nativeValueToSend,
             gasParams
         );
@@ -251,7 +255,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
     }
 
     private async getMethodName(
-        options: SwapTransactionOptions,
+        options: EvmSwapTransactionOptions,
         fromAddress?: string,
         supportFee?: boolean
     ): Promise<string> {
@@ -294,7 +298,7 @@ export abstract class UniswapV2AbstractTrade extends InstantTrade {
 
     private getSwapParametersByMethod(
         method: string,
-        options: SwapTransactionOptions
+        options: EvmSwapTransactionOptions
     ): Parameters<InstanceType<typeof EvmWeb3Private>['executeContractMethod']> {
         const value = this.nativeValueToSend;
         const { gas, gasPrice } = this.getGasParams(options);
