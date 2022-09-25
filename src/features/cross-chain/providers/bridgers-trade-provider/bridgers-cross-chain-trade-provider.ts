@@ -13,7 +13,6 @@ import {
 import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
-
 import { rubicProxyContractAddress } from 'src/features/cross-chain/providers/common/constants/rubic-proxy-contract-address';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { BridgersQuoteRequest } from 'src/features/common/providers/bridgers/models/bridgers-quote-request';

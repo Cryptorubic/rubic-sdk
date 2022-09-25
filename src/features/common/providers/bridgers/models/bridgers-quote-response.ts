@@ -9,6 +9,7 @@ export interface BridgersQuoteResponse {
             chainFee: string;
             depositMin: string;
             depositMax: string;
+            contractAddress: string;
         };
     };
 }

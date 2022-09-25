@@ -5,11 +5,11 @@ import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { CalculationOptions } from 'src/features/instant-trades/providers/models/calculation-options';
-import { InstantTrade } from 'src/features/instant-trades/providers/abstract/instant-trade';
 import { GasPriceInfo } from 'src/features/instant-trades/providers/dexes/abstract/models/gas-price-info';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import BigNumber from 'bignumber.js';
 import { GasFeeInfo } from 'src/features/instant-trades/providers/models/gas-fee-info';
+import { EvmInstantTrade } from 'src/features/instant-trades/providers/abstract/evm-instant-trade/evm-instant-trade';
 
 export abstract class EvmInstantTradeProvider extends InstantTradeProvider {
     public abstract readonly blockchain: EvmBlockchainName;
@@ -28,7 +28,7 @@ export abstract class EvmInstantTradeProvider extends InstantTradeProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceToken<EvmBlockchainName>,
         options?: CalculationOptions
-    ): Promise<InstantTrade>;
+    ): Promise<EvmInstantTrade>;
 
     protected async getGasPriceInfo(): Promise<GasPriceInfo> {
         const [gasPrice, nativeCoinPrice] = await Promise.all([

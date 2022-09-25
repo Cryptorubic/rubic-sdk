@@ -6,11 +6,17 @@ import { InstantTrade } from 'src/features/instant-trades/providers/abstract/ins
 import { Injector } from 'src/core/injector/injector';
 import { TradeType } from 'src/features/instant-trades/providers/models/trade-type';
 import { HttpClient } from 'src/core/http-client/models/http-client';
+import { RubicSdkError } from 'src/common/errors';
+import { parseError } from 'src/common/utils/errors';
 
 /**
  * Abstract class for all instant trade providers.
  */
 export abstract class InstantTradeProvider {
+    public static parseError(err: unknown): RubicSdkError {
+        return parseError(err, 'Cannot calculate instant trade');
+    }
+
     /**
      * Provider blockchain.
      */
