@@ -1,4 +1,3 @@
-import { Injector } from 'src/core/injector/injector';
 import { Route } from '@lifi/sdk';
 import { TransactionConfig } from 'web3-core';
 import BigNumber from 'bignumber.js';
@@ -58,8 +57,6 @@ export class LifiTrade extends EvmInstantTrade {
             return null;
         }
     }
-
-    private readonly httpClient = Injector.httpClient;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 

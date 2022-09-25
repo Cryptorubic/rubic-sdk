@@ -14,7 +14,6 @@ import {
     OptionsGasParams,
     TransactionGasParams
 } from 'src/features/instant-trades/providers/models/gas-params';
-import { Injector } from 'src/core/injector/injector';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { GasFeeInfo } from 'src/features/instant-trades/providers/models/gas-fee-info';
 import { TransactionConfig } from 'web3-core';
@@ -51,8 +50,6 @@ export class OneinchTrade extends EvmInstantTrade {
             throw new RubicSdkError('Approve is needed');
         }
     }
-
-    private readonly httpClient = Injector.httpClient;
 
     /** @internal */
     public readonly contractAddress: string;

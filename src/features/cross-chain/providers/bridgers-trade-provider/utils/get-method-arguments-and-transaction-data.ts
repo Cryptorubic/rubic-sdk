@@ -1,6 +1,6 @@
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { BridgersSwapRequest } from 'src/features/cross-chain/providers/bridgers-trade-provider/models/bridgers-swap-request';
-import { toBridgersBlockchain } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/to-bridgers-blockchain';
+import { BridgersSwapRequest } from 'src/features/common/providers/bridgers/models/bridgers-swap-request';
+import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmBridgersTransactionData } from 'src/features/cross-chain/providers/bridgers-trade-provider/evm-bridgers-trade/models/evm-bridgers-transaction-data';
@@ -11,9 +11,9 @@ import { MarkRequired } from 'ts-essentials';
 import { GetContractParamsOptions } from 'src/features/cross-chain/providers/common/models/get-contract-params-options';
 import BigNumber from 'bignumber.js';
 import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/bridgers-cross-chain-supported-blockchain';
-import { BridgersSwapResponse } from 'src/features/cross-chain/providers/bridgers-trade-provider/models/bridgers-swap-response';
+import { BridgersSwapResponse } from 'src/features/common/providers/bridgers/models/bridgers-swap-response';
 import { createTokenNativeAddressProxy } from 'src/features/instant-trades/providers/dexes/abstract/utils/token-native-address-proxy';
-import { bridgersNativeAddress } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/bridgers-native-address';
+import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 
@@ -33,16 +33,17 @@ export async function getMethodArgumentsAndTransactionData<
     const amountOutMin = Web3Pure.toWei(toTokenAmountMin, to.decimals);
     const fromTokenAddress = createTokenNativeAddressProxy(from, bridgersNativeAddress).address;
     const toTokenAddress = createTokenNativeAddressProxy(to, bridgersNativeAddress).address;
+    const fromAddress = options.fromAddress || walletAddress;
     const swapRequest: BridgersSwapRequest = {
         fromTokenAddress,
         toTokenAddress,
-        fromAddress: options.fromAddress || walletAddress,
+        fromAddress,
         toAddress: options.receiverAddress,
         fromTokenChain: toBridgersBlockchain[from.blockchain],
         toTokenChain: toBridgersBlockchain[to.blockchain],
         fromTokenAmount: fromAmountWithoutFeeWei,
         amountOutMin,
-        equipmentNo: walletAddress.slice(0, 32),
+        equipmentNo: fromAddress.slice(0, 32),
         sourceFlag: 'rubic'
     };
 

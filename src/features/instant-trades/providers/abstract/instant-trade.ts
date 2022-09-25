@@ -17,6 +17,7 @@ import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-servic
 import { BasicSwapTransactionOptions } from 'src/features/common/models/basic-swap-transaction-options';
 import { BasicEncodeTransactionOptions } from 'src/features/common/models/basic-encode-transaction-options';
 import { isAddressCorrect } from 'src/features/common/utils/check-address';
+import { HttpClient } from 'src/core/http-client/models/http-client';
 
 /**
  * Abstract class for all instant trade providers' trades.
@@ -64,6 +65,10 @@ export abstract class InstantTrade {
 
     protected get walletAddress(): string {
         return this.web3Private.address;
+    }
+
+    protected get httpClient(): HttpClient {
+        return Injector.httpClient;
     }
 
     /**

@@ -16,15 +16,15 @@ import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross
 
 import { rubicProxyContractAddress } from 'src/features/cross-chain/providers/common/constants/rubic-proxy-contract-address';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { BridgersQuoteRequest } from 'src/features/cross-chain/providers/bridgers-trade-provider/models/bridgers-quote-request';
-import { toBridgersBlockchain } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/to-bridgers-blockchain';
-import { BridgersQuoteResponse } from 'src/features/cross-chain/providers/bridgers-trade-provider/models/bridgers-quote-response';
+import { BridgersQuoteRequest } from 'src/features/common/providers/bridgers/models/bridgers-quote-request';
+import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
+import { BridgersQuoteResponse } from 'src/features/common/providers/bridgers/models/bridgers-quote-response';
 import { CrossChainMaxAmountError, CrossChainMinAmountError } from 'src/common/errors';
 import BigNumber from 'bignumber.js';
 import { TronBridgersCrossChainTrade } from 'src/features/cross-chain/providers/bridgers-trade-provider/tron-bridgers-trade/tron-bridgers-cross-chain-trade';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { bridgersNativeAddress } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/bridgers-native-address';
+import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { createTokenNativeAddressProxy } from 'src/features/instant-trades/providers/dexes/abstract/utils/token-native-address-proxy';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmBridgersCrossChainTrade } from 'src/features/cross-chain/providers/bridgers-trade-provider/evm-bridgers-trade/evm-bridgers-cross-chain-trade';

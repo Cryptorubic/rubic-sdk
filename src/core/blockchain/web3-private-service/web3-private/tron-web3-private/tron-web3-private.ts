@@ -8,6 +8,7 @@ import { AbiItem } from 'web3-utils';
 import BigNumber from 'bignumber.js';
 import { TRC20_CONTRACT_ABI } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/constants/trc-20-contract-abi';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
+import { TronParameters } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-parameters';
 
 export class TronWeb3Private extends Web3Private {
     protected readonly Web3Pure = TronWeb3Pure;
@@ -85,6 +86,26 @@ export class TronWeb3Private extends Web3Private {
                 feeLimit: Web3Private.stringifyAmount(options.feeLimit)
             })
         });
+        if (options.onTransactionHash) {
+            options.onTransactionHash(transactionHash);
+        }
+        return transactionHash;
+        // @todo add error parsing
+    }
+
+    public async triggerContract(
+        contractAddress: string,
+        methodSignature: string,
+        parameters: TronParameters,
+        options: TronTransactionOptions = {}
+    ): Promise<string> {
+        const transactionHash = await this.tronWeb.transactionBuilder.triggerSmartContract(
+            contractAddress,
+            methodSignature,
+            options,
+            parameters,
+            this.address
+        );
         if (options.onTransactionHash) {
             options.onTransactionHash(transactionHash);
         }
