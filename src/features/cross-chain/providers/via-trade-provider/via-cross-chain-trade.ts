@@ -125,6 +125,10 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
         return viaContractAddress[this.from.blockchain as ViaCrossChainSupportedBlockchain];
     }
 
+    public get uuid(): string {
+        return this.route.actions[0]!.uuid;
+    }
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
