@@ -7,7 +7,7 @@ import BigNumber from 'bignumber.js';
 import { Web3Public } from 'src/core';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { PriceToken } from 'src/common/tokens/price-token';
-import { UniSwapV3EthereumProvider } from 'src/features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
+import { UniSwapV3EthereumProvider } from 'src/features/instant-trades/providers/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import fn = jest.fn;
 

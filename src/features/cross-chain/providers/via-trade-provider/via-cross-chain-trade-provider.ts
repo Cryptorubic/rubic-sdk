@@ -19,7 +19,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { bridges, BridgeType } from 'src/features/cross-chain/providers/common/models/bridge-type';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/providers/models/trade-type';
 import { Via } from '@viaprotocol/router-sdk';
 import { ViaCrossChainTrade } from 'src/features/cross-chain/providers/via-trade-provider/via-cross-chain-trade';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';

@@ -1,8 +1,8 @@
-import { AlgebraQuoterController } from 'src/features/instant-trades/dexes/polygon/algebra/utils/quoter-controller/algebra-quoter-controller';
+import { AlgebraQuoterController } from 'src/features/instant-trades/providers/dexes/polygon/algebra/utils/quoter-controller/algebra-quoter-controller';
 import { RubicSdkError } from 'src/common/errors';
-import { ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS } from 'src/features/instant-trades/dexes/polygon/algebra/constants/swap-router-contract-data';
+import { ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS } from 'src/features/instant-trades/providers/dexes/polygon/algebra/constants/swap-router-contract-data';
 import { CrossChainInstantTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/cross-chain-instant-trade/cross-chain-instant-trade';
-import { AlgebraTrade } from 'src/features/instant-trades/dexes/polygon/algebra/algebra-trade';
+import { AlgebraTrade } from 'src/features/instant-trades/providers/dexes/polygon/algebra/algebra-trade';
 import { DestinationCelerSwapInfo } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/destination-celer-swap-info';
 import { SwapVersion } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/provider-type.enum';
 import { v3LikeCelerSwapInfo } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/models/v3-like-celer-swap-info';

@@ -1,14 +1,14 @@
-import { InstantTrade } from 'src/features/instant-trades/instant-trade';
-import { UniswapV3AbstractProvider } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-provider';
-import { UniswapV3AbstractTrade } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
-import { OneinchAbstractProvider } from 'src/features/instant-trades/dexes/common/oneinch-common/oneinch-abstract-provider';
-import { AlgebraTrade } from 'src/features/instant-trades/dexes/polygon/algebra/algebra-trade';
-import { UniswapV2AbstractProvider } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
-import { AlgebraProvider } from 'src/features/instant-trades/dexes/polygon/algebra/algebra-provider';
-import { ZrxTrade } from 'src/features/instant-trades/dexes/common/zrx-common/zrx-trade';
+import { InstantTrade } from 'src/features/instant-trades/providers/abstract/instant-trade';
+import { UniswapV3AbstractProvider } from 'src/features/instant-trades/providers/dexes/abstract/uniswap-v3-abstract/uniswap-v3-abstract-provider';
+import { UniswapV3AbstractTrade } from 'src/features/instant-trades/providers/dexes/abstract/uniswap-v3-abstract/uniswap-v3-abstract-trade';
+import { OneinchAbstractProvider } from 'src/features/instant-trades/providers/dexes/abstract/oneinch-abstract/oneinch-abstract-provider';
+import { AlgebraTrade } from 'src/features/instant-trades/providers/dexes/polygon/algebra/algebra-trade';
+import { UniswapV2AbstractProvider } from 'src/features/instant-trades/providers/dexes/abstract/uniswap-v2-abstract/uniswap-v2-abstract-provider';
+import { AlgebraProvider } from 'src/features/instant-trades/providers/dexes/polygon/algebra/algebra-provider';
+import { ZrxTrade } from 'src/features/instant-trades/providers/dexes/abstract/zrx-abstract/zrx-trade';
 import { CrossChainSupportedInstantTradeProvider } from 'src/features/cross-chain/providers/celer-trade-provider/models/cross-chain-supported-instant-trade';
-import { UniswapV2AbstractTrade } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
-import { OneinchTrade } from 'src/features/instant-trades/dexes/common/oneinch-common/oneinch-trade';
+import { UniswapV2AbstractTrade } from 'src/features/instant-trades/providers/dexes/abstract/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { OneinchTrade } from 'src/features/instant-trades/providers/dexes/abstract/oneinch-abstract/oneinch-trade';
 
 export function isUniswapV2LikeTrade(trade: InstantTrade): trade is UniswapV2AbstractTrade {
     return trade instanceof UniswapV2AbstractTrade;

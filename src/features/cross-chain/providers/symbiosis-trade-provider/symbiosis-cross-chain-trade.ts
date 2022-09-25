@@ -2,7 +2,7 @@ import { SYMBIOSIS_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/s
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/providers/models/trade-type';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
 import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { ContractParams } from 'src/features/cross-chain/providers/common/models/contract-params';

@@ -1,6 +1,6 @@
-import { SushiSwapHarmonyProvider } from 'src/features/instant-trades/dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-provider';
-import { SushiSwapHarmonyTrade } from 'src/features/instant-trades/dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-trade';
-import { SUSHI_SWAP_HARMONY_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/harmony/sushi-swap-harmony/constants';
+import { SushiSwapHarmonyProvider } from 'src/features/instant-trades/providers/dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-provider';
+import { SushiSwapHarmonyTrade } from 'src/features/instant-trades/providers/dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-trade';
+import { SUSHI_SWAP_HARMONY_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/providers/dexes/harmony/sushi-swap-harmony/constants';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const sushiSwapHarmonyProviderSpec = () => {

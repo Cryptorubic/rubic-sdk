@@ -27,13 +27,13 @@ import { RANGO_BLOCKCHAIN_NAME } from 'src/features/cross-chain/providers/rango-
 import { RANGO_CONTRACT_ADDRESSES } from 'src/features/cross-chain/providers/rango-trade-provider/constants/contract-address';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BridgeType } from 'src/features/cross-chain/providers/common/models/bridge-type';
-import { rangoProviders } from 'src/features/instant-trades/dexes/common/rango/constants/rango-providers';
+import { rangoProviders } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-providers';
 import { RANGO_TRADE_BRIDGE_TYPE } from 'src/features/cross-chain/providers/rango-trade-provider/models/rango-providers';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
-import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import { TradeType } from 'src/features/instant-trades/providers/models/trade-type';
 import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 
 export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {

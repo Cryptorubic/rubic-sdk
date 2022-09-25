@@ -1,4 +1,4 @@
-import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import { TradeType } from 'src/features/instant-trades/providers/models/trade-type';
 
 export interface InstantTradeError {
     type: TradeType;

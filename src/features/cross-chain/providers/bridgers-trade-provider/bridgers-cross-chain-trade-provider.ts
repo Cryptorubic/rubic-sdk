@@ -25,7 +25,7 @@ import { TronBridgersCrossChainTrade } from 'src/features/cross-chain/providers/
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { bridgersNativeAddress } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/bridgers-native-address';
-import { createTokenNativeAddressProxy } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { createTokenNativeAddressProxy } from 'src/features/instant-trades/providers/dexes/abstract/utils/token-native-address-proxy';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmBridgersCrossChainTrade } from 'src/features/cross-chain/providers/bridgers-trade-provider/evm-bridgers-trade/evm-bridgers-cross-chain-trade';
 import { tronCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';

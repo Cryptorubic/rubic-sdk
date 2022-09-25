@@ -1,6 +1,6 @@
-import { SushiSwapAvalancheProvider } from 'src/features/instant-trades/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
-import { SushiSwapAvalancheTrade } from 'src/features/instant-trades/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-trade';
-import { SUSHI_SWAP_AVALANCHE_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/avalanche/sushi-swap-avalanche/constants';
+import { SushiSwapAvalancheProvider } from 'src/features/instant-trades/providers/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
+import { SushiSwapAvalancheTrade } from 'src/features/instant-trades/providers/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-trade';
+import { SUSHI_SWAP_AVALANCHE_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/providers/dexes/avalanche/sushi-swap-avalanche/constants';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const sushiSwapAvalancheProviderSpec = () => {

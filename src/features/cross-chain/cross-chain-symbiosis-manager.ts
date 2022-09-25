@@ -11,13 +11,13 @@ import { getSymbiosisConfig } from 'src/features/cross-chain/providers/symbiosis
 import { RubicSdkError } from 'src/common/errors';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
-import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Token } from 'src/common/tokens';
 import { Log as EthersLog, TransactionReceipt as EthersReceipt } from '@ethersproject/providers';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
+import { EvmSwapTransactionOptions } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/evm-swap-transaction-options';
 
 export class CrossChainSymbiosisManager {
     private readonly symbiosis = new Symbiosis(getSymbiosisConfig(), 'rubic');
@@ -73,7 +73,7 @@ export class CrossChainSymbiosisManager {
 
     public async revertTrade(
         revertTransactionHash: string,
-        options: SwapTransactionOptions = {}
+        options: EvmSwapTransactionOptions = {}
     ): Promise<TransactionReceipt> {
         const pendingRequest = await this.getUserTrades();
         const request = pendingRequest.find(

@@ -1,7 +1,7 @@
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/providers/models/trade-type';
 import {
     BRIDGE_TYPE,
     BridgeType

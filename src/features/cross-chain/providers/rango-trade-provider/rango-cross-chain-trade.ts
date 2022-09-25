@@ -12,7 +12,7 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { BridgeType } from 'src/features/cross-chain/providers/common/models/bridge-type';
-import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import { TradeType } from 'src/features/instant-trades/providers/models/trade-type';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
@@ -221,7 +221,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
                 symbol: this.to.symbol,
                 address: this.to.isNative ? null : this.to.address
             },
-            amount: this.from.weiAmount.toFixed(0),
+            amount: this.from.weiAmount.toFixed(0), // @todo update
             disableEstimate: false,
             slippage: String(this.slippageTolerance * 100),
             fromAddress: this.walletAddress,

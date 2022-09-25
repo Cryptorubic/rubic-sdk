@@ -4,9 +4,9 @@ import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { PriceToken } from 'src/common/tokens/price-token';
-import { QuickSwapProvider } from 'src/features/instant-trades/dexes/polygon/quick-swap/quick-swap-provider';
-import { QuickSwapTrade } from 'src/features/instant-trades/dexes/polygon/quick-swap/quick-swap-trade';
-import { QUICK_SWAP_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/polygon/quick-swap/constants';
+import { QuickSwapProvider } from 'src/features/instant-trades/providers/dexes/polygon/quick-swap/quick-swap-provider';
+import { QuickSwapTrade } from 'src/features/instant-trades/providers/dexes/polygon/quick-swap/quick-swap-trade';
+import { QUICK_SWAP_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/providers/dexes/polygon/quick-swap/constants';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.POLYGON];

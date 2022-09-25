@@ -14,12 +14,12 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { bridges, BridgeType } from 'src/features/cross-chain/providers/common/models/bridge-type';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { CrossChainMinAmountError } from 'src/common/errors';
-import { lifiProviders } from 'src/features/instant-trades/dexes/common/lifi/constants/lifi-providers';
+import { lifiProviders } from 'src/features/instant-trades/providers/lifi/constants/lifi-providers';
 import { lifiContractAddress } from 'src/features/cross-chain/providers/lifi-trade-provider/constants/lifi-contract-data';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
 import { CrossChainTradeProvider } from 'src/features/cross-chain/providers/common/cross-chain-trade-provider';
 import BigNumber from 'bignumber.js';
-import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import { TradeType } from 'src/features/instant-trades/providers/models/trade-type';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 

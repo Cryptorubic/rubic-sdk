@@ -18,7 +18,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-ch
 import { CelerItCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/celer-it-cross-chain-contract-trade';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import { TradeType } from 'src/features/instant-trades/providers/models/trade-type';
 import BigNumber from 'bignumber.js';
 import { CelerCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
 import { Cache } from 'src/common/utils/decorators';

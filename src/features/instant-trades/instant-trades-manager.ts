@@ -1,27 +1,27 @@
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { OneInchTradeProviders } from 'src/features/instant-trades/constants/one-inch-trade-providers';
+import { OneinchTradeProviders } from 'src/features/instant-trades/constants/oneinch-trade-providers';
 import { ZrxTradeProviders } from 'src/features/instant-trades/constants/zrx-trade-providers';
-import { InstantTrade } from 'src/features/instant-trades/instant-trade';
+import { InstantTrade } from 'src/features/instant-trades/providers/abstract/instant-trade';
 import { UniswapV3TradeProviders } from 'src/features/instant-trades/constants/uniswap-v3-trade-providers';
 import { RubicSdkError } from 'src/common/errors';
 import { InstantTradeError } from 'src/features/instant-trades/models/instant-trade-error';
 import { getPriceTokensFromInputTokens } from 'src/common/utils/tokens';
 import { AlgebraTradeProviders } from 'src/features/instant-trades/constants/algebra-trade-providers';
-import { SwapManagerCalculationOptions } from 'src/features/instant-trades/models/swap-manager-calculation-options';
+import { ManagerCalculationOptions } from 'src/features/instant-trades/models/manager-calculation-options';
 import { UniswapV2TradeProviders } from 'src/features/instant-trades/constants/uniswap-v2-trade-providers';
-import { LifiProvider } from 'src/features/instant-trades/dexes/common/lifi/lifi-provider';
+import { LifiProvider } from 'src/features/instant-trades/providers/lifi/lifi-provider';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
-import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
-import { InstantTradeProvider } from 'src/features/instant-trades/instant-trade-provider';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/providers/models/trade-type';
+import { InstantTradeProvider } from 'src/features/instant-trades/providers/dexes/abstract/instant-trade-provider/instant-trade-provider';
 import { Mutable } from 'src/common/utils/types';
-import { oneinchApiParams } from 'src/features/instant-trades/dexes/common/oneinch-common/constants';
+import { oneinchApiParams } from 'src/features/instant-trades/providers/dexes/abstract/oneinch-abstract/constants';
 import { TypedTradeProviders } from 'src/features/instant-trades/models/typed-trade-provider';
 import pTimeout from 'src/common/utils/p-timeout';
 import { MarkRequired } from 'ts-essentials';
 import { combineOptions } from 'src/common/utils/options';
 
 export type RequiredSwapManagerCalculationOptions = MarkRequired<
-    SwapManagerCalculationOptions,
+    ManagerCalculationOptions,
     'timeout' | 'disabledProviders'
 >;
 
@@ -32,7 +32,7 @@ export class InstantTradesManager {
     public static readonly defaultCalculationTimeout = 10_000;
 
     private static getFullOptions(
-        options?: SwapManagerCalculationOptions
+        options?: ManagerCalculationOptions
     ): RequiredSwapManagerCalculationOptions {
         return combineOptions<RequiredSwapManagerCalculationOptions>(options, {
             timeout: InstantTradesManager.defaultCalculationTimeout,
@@ -50,7 +50,7 @@ export class InstantTradesManager {
     public readonly tradeProviders: TypedTradeProviders = [
         ...UniswapV2TradeProviders,
         ...UniswapV3TradeProviders,
-        ...OneInchTradeProviders,
+        ...OneinchTradeProviders,
         ...ZrxTradeProviders,
         ...AlgebraTradeProviders
     ].reduce(
@@ -109,7 +109,7 @@ export class InstantTradesManager {
               },
         fromAmount: string | number,
         toToken: Token<EvmBlockchainName> | string,
-        options?: SwapManagerCalculationOptions
+        options?: ManagerCalculationOptions
     ): Promise<Array<InstantTrade | InstantTradeError>> {
         if (toToken instanceof Token && fromToken.blockchain !== toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be same');

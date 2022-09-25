@@ -12,7 +12,7 @@ import { GetContractParamsOptions } from 'src/features/cross-chain/providers/com
 import BigNumber from 'bignumber.js';
 import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { BridgersSwapResponse } from 'src/features/cross-chain/providers/bridgers-trade-provider/models/bridgers-swap-response';
-import { createTokenNativeAddressProxy } from 'src/features/instant-trades/dexes/common/utils/token-native-address-proxy';
+import { createTokenNativeAddressProxy } from 'src/features/instant-trades/providers/dexes/abstract/utils/token-native-address-proxy';
 import { bridgersNativeAddress } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/bridgers-native-address';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';

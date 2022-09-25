@@ -2,10 +2,10 @@ import { CelerCrossChainContractData } from 'src/features/cross-chain/providers/
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CelerCrossChainContractTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-cross-chain-contract-trade';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { OneinchTrade } from 'src/features/instant-trades/dexes/common/oneinch-common/oneinch-trade';
-import { UniswapV3AbstractTrade } from 'src/features/instant-trades/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
+import { OneinchTrade } from 'src/features/instant-trades/providers/dexes/abstract/oneinch-abstract/oneinch-trade';
+import { UniswapV3AbstractTrade } from 'src/features/instant-trades/providers/dexes/abstract/uniswap-v3-abstract/uniswap-v3-abstract-trade';
 import { CrossChainSupportedInstantTrade } from 'src/features/cross-chain/providers/celer-trade-provider/models/cross-chain-supported-instant-trade';
-import { UniswapV2AbstractTrade } from 'src/features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { UniswapV2AbstractTrade } from 'src/features/instant-trades/providers/dexes/abstract/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { CrossChainInstantTrade } from 'src/features/cross-chain/providers/celer-trade-provider/celer-cross-chain-contract-trade/celer-it-cross-chain-contract-trade/cross-chain-instant-trade/cross-chain-instant-trade';

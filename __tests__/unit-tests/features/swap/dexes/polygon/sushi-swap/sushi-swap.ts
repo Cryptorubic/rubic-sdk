@@ -4,9 +4,9 @@ import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { PriceToken } from 'src/common/tokens/price-token';
 import BigNumber from 'bignumber.js';
-import { SushiSwapPolygonProvider } from 'src/features/instant-trades/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
-import { SushiSwapPolygonTrade } from 'src/features/instant-trades/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-trade';
-import { SUSHI_SWAP_POLYGON_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/polygon/sushi-swap-polygon/constants';
+import { SushiSwapPolygonProvider } from 'src/features/instant-trades/providers/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
+import { SushiSwapPolygonTrade } from 'src/features/instant-trades/providers/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-trade';
+import { SUSHI_SWAP_POLYGON_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/providers/dexes/polygon/sushi-swap-polygon/constants';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.POLYGON];

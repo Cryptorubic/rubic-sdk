@@ -3,7 +3,7 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/providers/debridge-trade-provider/constants/contract-address';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
+import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/providers/models/trade-type';
 import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade-provider';
 import { ContractParams } from 'src/features/cross-chain/providers/common/models/contract-params';
 import { TransactionResponse } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';

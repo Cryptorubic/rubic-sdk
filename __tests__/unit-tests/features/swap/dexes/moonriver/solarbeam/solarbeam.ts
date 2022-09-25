@@ -1,6 +1,6 @@
-import { SolarbeamProvider } from 'src/features/instant-trades/dexes/moonriver/solarbeam/solarbeam-provider';
-import { SolarbeamTrade } from 'src/features/instant-trades/dexes/moonriver/solarbeam/solarbeam-trade';
-import { SOLARBEAM_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/moonriver/solarbeam/constants';
+import { SolarbeamProvider } from 'src/features/instant-trades/providers/dexes/moonriver/solarbeam/solarbeam-provider';
+import { SolarbeamTrade } from 'src/features/instant-trades/providers/dexes/moonriver/solarbeam/solarbeam-trade';
+import { SOLARBEAM_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/providers/dexes/moonriver/solarbeam/constants';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const solarbeamMoonriverProviderSpec = () => {
