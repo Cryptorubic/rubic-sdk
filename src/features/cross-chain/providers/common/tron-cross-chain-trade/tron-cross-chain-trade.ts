@@ -6,7 +6,6 @@ import {
     FailedToCheckForTransactionReceiptError,
     UnnecessaryApproveError
 } from 'src/common/errors';
-import { TransactionConfig } from 'web3-core';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { TronWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/tron-web3-private';
 import { TronTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-options';
@@ -64,7 +63,6 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
             onTransactionHash: options?.onApprove,
             feeLimit: options?.approveFeeLimit
         };
-
         await this.approve(approveOptions, false);
     }
 
@@ -138,7 +136,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
         spenderAddress: string,
         value: BigNumber | 'infinity',
         options: TronTransactionOptions = {}
-    ): Promise<TransactionConfig> {
+    ): Promise<TronTransactionConfig> {
         return this.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
     }
 
