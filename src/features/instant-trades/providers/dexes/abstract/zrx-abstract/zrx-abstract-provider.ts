@@ -1,4 +1,3 @@
-import { InstantTradeProvider } from 'src/features/instant-trades/providers/dexes/abstract/instant-trade-provider/instant-trade-provider';
 import { CalculationOptions } from 'src/features/instant-trades/providers/models/calculation-options';
 import { createTokenNativeAddressProxy } from 'src/features/instant-trades/providers/dexes/abstract/utils/token-native-address-proxy';
 import { zrxApiParams } from 'src/features/instant-trades/providers/dexes/abstract/zrx-abstract/constants';
@@ -13,8 +12,9 @@ import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/providers/mod
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { ZrxCalculationOptions } from 'src/features/instant-trades/providers/dexes/abstract/zrx-abstract/models/zrx-calculation-options';
+import { EvmInstantTradeProvider } from 'src/features/instant-trades/providers/dexes/abstract/instant-trade-provider/evm-instant-trade-provider/evm-instant-trade-provider';
 
-export abstract class ZrxAbstractProvider extends InstantTradeProvider {
+export abstract class ZrxAbstractProvider extends EvmInstantTradeProvider {
     protected readonly gasMargin = 1.4;
 
     private readonly defaultOptions: ZrxCalculationOptions = {

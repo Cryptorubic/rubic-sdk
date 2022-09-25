@@ -1,4 +1,3 @@
-import { InstantTradeProvider } from 'src/features/instant-trades/providers/dexes/abstract/instant-trade-provider/instant-trade-provider';
 import {
     UniswapV3AlgebraCalculatedInfo,
     UniswapV3AlgebraCalculatedInfoWithProfit
@@ -25,10 +24,11 @@ import { combineOptions } from 'src/common/utils/options';
 import BigNumber from 'bignumber.js';
 import { Exact } from 'src/features/instant-trades/providers/models/exact';
 import { UniswapV3AlgebraCalculationOptions } from 'src/features/instant-trades/providers/dexes/abstract/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-calculation-options';
+import { EvmInstantTradeProvider } from 'src/features/instant-trades/providers/dexes/abstract/instant-trade-provider/evm-instant-trade-provider/evm-instant-trade-provider';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
-> extends InstantTradeProvider {
+> extends EvmInstantTradeProvider {
     protected abstract readonly contractAbi: AbiItem[];
 
     protected abstract readonly contractAddress: string;

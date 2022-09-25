@@ -4,7 +4,6 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { PathFactory } from 'src/features/instant-trades/providers/dexes/abstract/uniswap-v2-abstract/path-factory';
 import { CalculationOptions } from 'src/features/instant-trades/providers/models/calculation-options';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { InstantTradeProvider } from 'src/features/instant-trades/providers/dexes/abstract/instant-trade-provider/instant-trade-provider';
 import { UniswapCalculatedInfo } from 'src/features/instant-trades/providers/dexes/abstract/uniswap-v2-abstract/models/uniswap-calculated-info';
 import { createTokenNativeAddressProxy } from 'src/features/instant-trades/providers/dexes/abstract/utils/token-native-address-proxy';
 import { GasPriceInfo } from 'src/features/instant-trades/providers/dexes/abstract/models/gas-price-info';
@@ -14,10 +13,11 @@ import { TradeType } from 'src/features/instant-trades/providers/models/trade-ty
 import BigNumber from 'bignumber.js';
 import { Exact } from 'src/features/instant-trades/providers/models/exact';
 import { UniswapV2CalculationOptions } from 'src/features/instant-trades/providers/dexes/abstract/uniswap-v2-abstract/models/uniswap-v2-calculation-options';
+import { EvmInstantTradeProvider } from 'src/features/instant-trades/providers/dexes/abstract/instant-trade-provider/evm-instant-trade-provider/evm-instant-trade-provider';
 
 export abstract class UniswapV2AbstractProvider<
     T extends UniswapV2AbstractTrade = UniswapV2AbstractTrade
-> extends InstantTradeProvider {
+> extends EvmInstantTradeProvider {
     /** @internal */
     public abstract readonly InstantTradeClass: UniswapV2TradeClass<T>;
 

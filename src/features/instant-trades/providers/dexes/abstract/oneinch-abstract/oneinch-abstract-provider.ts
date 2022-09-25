@@ -8,7 +8,6 @@ import { createTokenNativeAddressProxy } from 'src/features/instant-trades/provi
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/providers/models/trade-type';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
-import { InstantTradeProvider } from 'src/features/instant-trades/providers/dexes/abstract/instant-trade-provider/instant-trade-provider';
 import { getOneinchApiBaseUrl } from 'src/features/instant-trades/providers/dexes/abstract/oneinch-abstract/utils';
 import { oneinchApiParams } from 'src/features/instant-trades/providers/dexes/abstract/oneinch-abstract/constants';
 import { OneinchQuoteRequest } from 'src/features/instant-trades/providers/dexes/abstract/oneinch-abstract/models/oneinch-quote-request';
@@ -17,8 +16,9 @@ import { Cache } from 'src/common/utils/decorators';
 import { OneinchSwapRequest } from 'src/features/instant-trades/providers/dexes/abstract/oneinch-abstract/models/oneinch-swap-request';
 import BigNumber from 'bignumber.js';
 import { OneinchCalculationOptions } from 'src/features/instant-trades/providers/dexes/abstract/oneinch-abstract/models/oneinch-calculation-options';
+import { EvmInstantTradeProvider } from 'src/features/instant-trades/providers/dexes/abstract/instant-trade-provider/evm-instant-trade-provider/evm-instant-trade-provider';
 
-export abstract class OneinchAbstractProvider extends InstantTradeProvider {
+export abstract class OneinchAbstractProvider extends EvmInstantTradeProvider {
     private readonly defaultOptions: OneinchCalculationOptions = {
         slippageTolerance: 0.02,
         gasCalculation: 'calculate',
