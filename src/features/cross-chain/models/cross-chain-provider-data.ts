@@ -1,11 +1,11 @@
 import { WrappedTradeOrNull } from 'src/features/cross-chain/providers/common/models/wrapped-trade-or-null';
 
 /**
- * Cross chain providers data.
+ * Cross-chain providers data.
  */
 export interface CrossChainProviderData {
     /**
-     * Best cross chain provider wrapped trade or null in case of strong error.
+     * Best cross-chain provider wrapped trade or null in case of strong error.
      */
     bestProvider: WrappedTradeOrNull;
 

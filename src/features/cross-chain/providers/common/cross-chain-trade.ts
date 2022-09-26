@@ -19,11 +19,11 @@ import { ItType } from 'src/features/cross-chain/providers/common/models/it-type
 import { isAddressCorrect } from 'src/features/common/utils/check-address';
 
 /**
- * Abstract class for all cross chain providers' trades.
+ * Abstract class for all cross-chain providers' trades.
  */
 export abstract class CrossChainTrade {
     /**
-     * Type of calculated cross chain trade.
+     * Type of calculated cross-chain trade.
      */
     public abstract readonly type: CrossChainTradeType;
 

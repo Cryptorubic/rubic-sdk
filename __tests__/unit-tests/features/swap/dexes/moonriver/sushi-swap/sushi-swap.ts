@@ -1,6 +1,6 @@
-import { SushiSwapMoonriverProvider } from 'src/features/instant-trades/providers/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
-import { SushiSwapMoonriverTrade } from 'src/features/instant-trades/providers/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-trade';
-import { SUSHI_SWAP_MOONRIVER_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/providers/dexes/moonriver/sushi-swap-moonriver/constants';
+import { SushiSwapMoonriverProvider } from 'src/features/on-chain/providers/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
+import { SushiSwapMoonriverTrade } from 'src/features/on-chain/providers/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-trade';
+import { SUSHI_SWAP_MOONRIVER_PROVIDER_CONFIGURATION } from 'src/features/on-chain/providers/dexes/moonriver/sushi-swap-moonriver/constants';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const sushiSwapMoonriverProviderSpec = () => {
@@ -13,7 +13,9 @@ export const sushiSwapMoonriverProviderSpec = () => {
 
         test('Initialize values', () => {
             expect(sushiSwapProvider.blockchain).toBe(BLOCKCHAIN_NAME.MOONRIVER);
-            expect(typeof sushiSwapProvider.InstantTradeClass).toBe(typeof SushiSwapMoonriverTrade);
+            expect(typeof sushiSwapProvider.UniswapV2TradeClass).toBe(
+                typeof SushiSwapMoonriverTrade
+            );
             expect(sushiSwapProvider.providerSettings).toBe(
                 SUSHI_SWAP_MOONRIVER_PROVIDER_CONFIGURATION
             );

@@ -1,6 +1,6 @@
-import { PancakeSwapProvider } from 'src/features/instant-trades/providers/dexes/bsc/pancake-swap/pancake-swap-provider';
-import { PancakeSwapTrade } from 'src/features/instant-trades/providers/dexes/bsc/pancake-swap/pancake-swap-trade';
-import { PANCAKE_SWAP_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/providers/dexes/bsc/pancake-swap/constants';
+import { PancakeSwapProvider } from 'src/features/on-chain/providers/dexes/bsc/pancake-swap/pancake-swap-provider';
+import { PancakeSwapTrade } from 'src/features/on-chain/providers/dexes/bsc/pancake-swap/pancake-swap-trade';
+import { PANCAKE_SWAP_PROVIDER_CONFIGURATION } from 'src/features/on-chain/providers/dexes/bsc/pancake-swap/constants';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const pancakeSwapBscProviderSpec = () => {
@@ -12,7 +12,7 @@ export const pancakeSwapBscProviderSpec = () => {
 
     test('Initialize values', () => {
         expect(pancakeSwapProvider.blockchain).toBe(BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN);
-        expect(typeof pancakeSwapProvider.InstantTradeClass).toBe(typeof PancakeSwapTrade);
+        expect(typeof pancakeSwapProvider.UniswapV2TradeClass).toBe(typeof PancakeSwapTrade);
         expect(pancakeSwapProvider.providerSettings).toBe(PANCAKE_SWAP_PROVIDER_CONFIGURATION);
     });
 };

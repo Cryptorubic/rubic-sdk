@@ -10,17 +10,17 @@ import {
 import { CrossChainStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-status';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { StatusResponse, TransactionStatus } from 'rango-sdk-basic';
-import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-trade-provider/constants/via-default-api-key';
-import { RANGO_API_KEY } from 'src/features/cross-chain/providers/rango-trade-provider/constants/rango-api-key';
-import { ViaSwapStatus } from 'src/features/cross-chain/providers/via-trade-provider/models/via-swap-status';
-import { SymbiosisSwapStatus } from 'src/features/cross-chain/providers/symbiosis-trade-provider/models/symbiosis-swap-status';
+import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-provider/constants/via-default-api-key';
+import { RANGO_API_KEY } from 'src/features/cross-chain/providers/rango-provider/constants/rango-api-key';
+import { ViaSwapStatus } from 'src/features/cross-chain/providers/via-provider/models/via-swap-status';
+import { SymbiosisSwapStatus } from 'src/features/cross-chain/providers/symbiosis-provider/models/symbiosis-swap-status';
 import { CrossChainTxStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-tx-status';
 import { CrossChainTradeData } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-trade-data';
 import {
     CROSS_CHAIN_TRADE_TYPE,
     CrossChainTradeType
 } from 'src/features/cross-chain/models/cross-chain-trade-type';
-import { LifiSwapStatus } from 'src/features/cross-chain/providers/lifi-trade-provider/models/lifi-swap-status';
+import { LifiSwapStatus } from 'src/features/cross-chain/providers/lifi-provider/models/lifi-swap-status';
 import { Via } from '@viaprotocol/router-sdk';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
@@ -35,7 +35,7 @@ import {
     BridgersUpdateDataAndStatusResponse
 } from 'src/features/cross-chain/cross-chain-status-manager/models/bridgers-update-data-and-status';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
-import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/bridgers-trade-provider/constants/bridgers-cross-chain-supported-blockchain';
+import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { CelerTransferStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/celer-transfer-status.enum';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 

@@ -4,9 +4,9 @@ import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { PriceToken } from 'src/common/tokens/price-token';
-import { UniSwapV2EthereumProvider } from 'src/features/instant-trades/providers/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-provider';
-import { UniSwapV2EthereumTrade } from 'src/features/instant-trades/providers/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-trade';
-import { UNISWAP_V2_ETHEREUM_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/providers/dexes/ethereum/uni-swap-v2-ethereum/constants';
+import { UniSwapV2EthereumProvider } from 'src/features/on-chain/providers/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-provider';
+import { UniSwapV2EthereumTrade } from 'src/features/on-chain/providers/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-trade';
+import { UNISWAP_V2_ETHEREUM_PROVIDER_CONFIGURATION } from 'src/features/on-chain/providers/dexes/ethereum/uni-swap-v2-ethereum/constants';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.ETHEREUM];
@@ -27,7 +27,9 @@ export const uniswapV2ProviderSpec = () =>
 
         test('Initialize values', () => {
             expect(uniswapV2Provider.blockchain).toBe(BLOCKCHAIN_NAME.ETHEREUM);
-            expect(typeof uniswapV2Provider.InstantTradeClass).toBe(typeof UniSwapV2EthereumTrade);
+            expect(typeof uniswapV2Provider.UniswapV2TradeClass).toBe(
+                typeof UniSwapV2EthereumTrade
+            );
             expect(uniswapV2Provider.providerSettings).toBe(
                 UNISWAP_V2_ETHEREUM_PROVIDER_CONFIGURATION
             );

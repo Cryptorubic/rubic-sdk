@@ -7,7 +7,7 @@ import {
     WaitForComplete
 } from 'symbiosis-js-sdk';
 import { TransactionReceipt } from 'web3-eth';
-import { getSymbiosisConfig } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
+import { getSymbiosisConfig } from 'src/features/cross-chain/providers/symbiosis-provider/constants/symbiosis-config';
 import { RubicSdkError } from 'src/common/errors';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';

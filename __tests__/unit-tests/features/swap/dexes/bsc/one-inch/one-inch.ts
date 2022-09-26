@@ -1,5 +1,5 @@
 import { TRADE_TYPE } from 'src/features';
-import { OneinchBscProvider } from 'src/features/instant-trades/providers/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
+import { OneinchBscProvider } from 'src/features/on-chain/providers/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
 import { mockEmptyInjector } from '__tests__/utils/mock-injector';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
