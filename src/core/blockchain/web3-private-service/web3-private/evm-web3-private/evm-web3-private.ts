@@ -266,13 +266,9 @@ export class EvmWeb3Private extends Web3Private {
         value: BigNumber | 'infinity',
         options: EvmTransactionOptions = {}
     ): Promise<TransactionReceipt> {
-        let rawValue: BigNumber;
-        if (value === 'infinity') {
-            rawValue = new BigNumber(2).pow(256).minus(1);
-        } else {
-            rawValue = value;
-        }
         const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
+
+        const rawValue = value === 'infinity' ? new BigNumber(2).pow(256).minus(1) : value;
 
         let { gas } = options;
         if (!gas) {

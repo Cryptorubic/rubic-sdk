@@ -40,6 +40,9 @@ export abstract class Web3Private {
      */
     public abstract getBlockchainName(): Promise<BlockchainName | undefined>;
 
+    /**
+     * Checks, that selected blockchain in wallet is equal to passed blockchain.
+     */
     public async checkBlockchainCorrect(blockchainName: BlockchainName): Promise<void | never> {
         const userBlockchainName = await this.getBlockchainName();
         if (userBlockchainName !== blockchainName) {

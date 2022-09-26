@@ -33,10 +33,7 @@ export abstract class OnChainTrade {
      */
     public abstract readonly to: PriceTokenAmount;
 
-    /**
-     * Slippage tolerance. Can be mutated after calculation, except for Zrx.
-     */
-    public abstract slippageTolerance: number;
+    public abstract readonly slippageTolerance: number;
 
     protected abstract readonly contractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 

@@ -16,7 +16,7 @@ export class BitcoinWeb3Pure {
     }
 
     public static isEmptyAddress(address?: string): boolean {
-        return Boolean(address) && address === '';
+        return address === BitcoinWeb3Pure.EMPTY_ADDRESS;
     }
 
     public static isAddressCorrect(address: string): boolean {

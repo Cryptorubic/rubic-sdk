@@ -22,7 +22,7 @@ export class EvmWeb3Pure {
     }
 
     public static isEmptyAddress(address?: string): boolean {
-        return Boolean(address) && address === EvmWeb3Pure.EMPTY_ADDRESS;
+        return address === EvmWeb3Pure.EMPTY_ADDRESS;
     }
 
     public static isAddressCorrect(address: string): boolean {

@@ -25,7 +25,7 @@ export class TronWeb3Pure {
     }
 
     public static isEmptyAddress(address?: string): boolean {
-        return Boolean(address) && address === TronWeb3Pure.EMPTY_ADDRESS;
+        return address === TronWeb3Pure.EMPTY_ADDRESS;
     }
 
     public static isAddressCorrect(address: string): boolean {
