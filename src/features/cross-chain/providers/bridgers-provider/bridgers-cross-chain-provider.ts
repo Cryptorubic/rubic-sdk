@@ -153,7 +153,7 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 },
                 cryptoFee: {
                     amount: new BigNumber(transactionData.chainFee),
-                    tokenSymbol: nativeTokensList[from.blockchain].symbol
+                    tokenSymbol: toToken.symbol
                 }
             };
 
