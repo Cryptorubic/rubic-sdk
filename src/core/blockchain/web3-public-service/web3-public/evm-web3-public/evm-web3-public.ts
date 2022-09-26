@@ -24,6 +24,7 @@ import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-pu
 import BigNumber from 'bignumber.js';
 import { EventData } from 'web3-eth-contract';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
+import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
@@ -296,6 +297,18 @@ export class EvmWeb3Public extends Web3Public {
      */
     public async getTransactionReceipt(hash: string): Promise<TransactionReceipt> {
         return this.web3.eth.getTransactionReceipt(hash);
+    }
+
+    public async getTransactionStatus(hash: string): Promise<TxStatus> {
+        const txReceipt = await this.getTransactionReceipt(hash);
+
+        if (txReceipt === null) {
+            return TxStatus.PENDING;
+        }
+        if (txReceipt.status) {
+            return TxStatus.SUCCESS;
+        }
+        return TxStatus.FAIL;
     }
 
     /**

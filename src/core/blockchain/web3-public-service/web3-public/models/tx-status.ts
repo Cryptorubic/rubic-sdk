@@ -1,4 +1,4 @@
-export enum CrossChainTxStatus {
+export enum TxStatus {
     PENDING = 'PENDING',
     SUCCESS = 'SUCCESS',
     FAIL = 'FAIL',

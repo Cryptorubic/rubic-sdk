@@ -21,6 +21,7 @@ import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-servi
 import { TronTransactionInfo } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-transaction-info';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 import { TronBlock } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-block';
+import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 
 export class TronWeb3Public extends Web3Public {
     protected readonly tokenContractAbi = TRC20_CONTRACT_ABI;
@@ -158,6 +159,18 @@ export class TronWeb3Public extends Web3Public {
      */
     public async getTransactionInfo(hash: string): Promise<TronTransactionInfo> {
         return this.tronWeb.trx.getTransactionInfo(hash);
+    }
+
+    public async getTransactionStatus(hash: string): Promise<TxStatus> {
+        const txReceipt = await this.getTransactionInfo(hash);
+
+        if (txReceipt?.receipt) {
+            if (txReceipt.result === 'FAILED') {
+                return TxStatus.FAIL;
+            }
+            return TxStatus.SUCCESS;
+        }
+        return TxStatus.PENDING;
     }
 
     public async getBlock(): Promise<TronBlock> {

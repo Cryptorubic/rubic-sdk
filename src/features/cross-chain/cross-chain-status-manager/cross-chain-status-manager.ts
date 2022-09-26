@@ -14,7 +14,7 @@ import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/providers/via-provi
 import { RANGO_API_KEY } from 'src/features/cross-chain/providers/rango-provider/constants/rango-api-key';
 import { ViaSwapStatus } from 'src/features/cross-chain/providers/via-provider/models/via-swap-status';
 import { SymbiosisSwapStatus } from 'src/features/cross-chain/providers/symbiosis-provider/models/symbiosis-swap-status';
-import { CrossChainTxStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-tx-status';
+import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { CrossChainTradeData } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-trade-data';
 import {
     CROSS_CHAIN_TRADE_TYPE,
@@ -24,8 +24,6 @@ import { LifiSwapStatus } from 'src/features/cross-chain/providers/lifi-provider
 import { Via } from '@viaprotocol/router-sdk';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
-import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import {
     BridgersGetTransDataByIdRequest,
     BridgersGetTransDataByIdResponse
@@ -37,7 +35,6 @@ import {
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
 import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { CelerTransferStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/celer-transfer-status.enum';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 
 /**
  * Contains methods for getting cross-chain trade statuses.
@@ -84,11 +81,8 @@ export class CrossChainStatusManager {
         let srcTxStatus = await this.getSrcTxStatus(fromBlockchain, srcTxHash);
 
         const dstTxData = await this.getDstTxData(srcTxStatus, data, provider);
-        if (
-            dstTxData.txStatus === CrossChainTxStatus.FAIL &&
-            srcTxStatus === CrossChainTxStatus.PENDING
-        ) {
-            srcTxStatus = CrossChainTxStatus.FAIL;
+        if (dstTxData.txStatus === TxStatus.FAIL && srcTxStatus === TxStatus.PENDING) {
+            srcTxStatus = TxStatus.FAIL;
         }
 
         return {
@@ -105,36 +99,12 @@ export class CrossChainStatusManager {
     private async getSrcTxStatus(
         fromBlockchain: Web3PublicSupportedBlockchain,
         srcTxHash: string
-    ): Promise<CrossChainTxStatus> {
+    ): Promise<TxStatus> {
         try {
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-
-            if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
-                const srcTxReceipt = await (web3Public as EvmWeb3Public).getTransactionReceipt(
-                    srcTxHash
-                );
-
-                if (srcTxReceipt === null) {
-                    return CrossChainTxStatus.PENDING;
-                }
-                if (srcTxReceipt.status) {
-                    return CrossChainTxStatus.SUCCESS;
-                }
-                return CrossChainTxStatus.FAIL;
-            }
-
-            // Tron
-            const srcTxReceipt = await (web3Public as TronWeb3Public).getTransactionInfo(srcTxHash);
-
-            if (srcTxReceipt?.receipt) {
-                if (srcTxReceipt.result === 'FAILED') {
-                    return CrossChainTxStatus.FAIL;
-                }
-                return CrossChainTxStatus.SUCCESS;
-            }
-            return CrossChainTxStatus.PENDING;
+            return await web3Public.getTransactionStatus(srcTxHash);
         } catch {
-            return CrossChainTxStatus.PENDING;
+            return TxStatus.PENDING;
         }
     }
 
@@ -147,16 +117,16 @@ export class CrossChainStatusManager {
      * @returns Cross-chain transaction status and hash.
      */
     private async getDstTxData(
-        srcTxStatus: CrossChainTxStatus,
+        srcTxStatus: TxStatus,
         tradeData: CrossChainTradeData,
         provider: CrossChainTradeType
     ): Promise<DstTxData> {
-        if (srcTxStatus === CrossChainTxStatus.FAIL) {
-            return { txHash: null, txStatus: CrossChainTxStatus.FAIL };
+        if (srcTxStatus === TxStatus.FAIL) {
+            return { txHash: null, txStatus: TxStatus.FAIL };
         }
 
-        if (srcTxStatus === CrossChainTxStatus.PENDING) {
-            return { txHash: null, txStatus: CrossChainTxStatus.PENDING };
+        if (srcTxStatus === TxStatus.PENDING) {
+            return { txHash: null, txStatus: TxStatus.PENDING };
         }
 
         return this.getDstTxStatusFnMap[provider].call(this, tradeData);
@@ -181,23 +151,23 @@ export class CrossChainStatusManager {
                 }
             );
             const dstTxData: DstTxData = {
-                txStatus: CrossChainTxStatus.UNKNOWN,
+                txStatus: TxStatus.UNKNOWN,
                 txHash: rangoTradeStatusResponse.bridgeData?.destTxHash || null
             };
 
             if (rangoTradeStatusResponse.status === TransactionStatus.SUCCESS) {
-                dstTxData.txStatus = CrossChainTxStatus.SUCCESS;
+                dstTxData.txStatus = TxStatus.SUCCESS;
             }
 
             if (rangoTradeStatusResponse.status === TransactionStatus.FAILED) {
-                dstTxData.txStatus = CrossChainTxStatus.FAIL;
+                dstTxData.txStatus = TxStatus.FAIL;
 
                 const type = rangoTradeStatusResponse?.output?.type;
                 if (type === 'MIDDLE_ASSET_IN_SRC' || type === 'MIDDLE_ASSET_IN_DEST') {
-                    dstTxData.txStatus = CrossChainTxStatus.FALLBACK;
+                    dstTxData.txStatus = TxStatus.FALLBACK;
                 }
                 if (type === 'REVERTED_TO_INPUT') {
-                    dstTxData.txStatus = CrossChainTxStatus.REVERT;
+                    dstTxData.txStatus = TxStatus.REVERT;
                 }
             }
 
@@ -205,13 +175,13 @@ export class CrossChainStatusManager {
                 rangoTradeStatusResponse.status === TransactionStatus.RUNNING ||
                 rangoTradeStatusResponse.status === null
             ) {
-                dstTxData.txStatus = CrossChainTxStatus.PENDING;
+                dstTxData.txStatus = TxStatus.PENDING;
             }
 
             return dstTxData;
         } catch {
             return {
-                txStatus: CrossChainTxStatus.PENDING,
+                txStatus: TxStatus.PENDING,
                 txHash: null
             };
         }
@@ -235,7 +205,7 @@ export class CrossChainStatusManager {
                     `https://api.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
                 );
                 let dstTxData: DstTxData = {
-                    txStatus: CrossChainTxStatus.PENDING,
+                    txStatus: TxStatus.PENDING,
                     txHash: dstHash || null
                 };
 
@@ -243,20 +213,20 @@ export class CrossChainStatusManager {
                     dstTxStatus === SymbiosisSwapStatus.PENDING ||
                     dstTxStatus === SymbiosisSwapStatus.NOT_FOUND
                 ) {
-                    dstTxData.txStatus = CrossChainTxStatus.PENDING;
+                    dstTxData.txStatus = TxStatus.PENDING;
                 }
 
                 if (dstTxStatus === SymbiosisSwapStatus.STUCKED) {
-                    dstTxData.txStatus = CrossChainTxStatus.REVERT;
+                    dstTxData.txStatus = TxStatus.REVERT;
                 }
 
                 if (dstTxStatus === SymbiosisSwapStatus.REVERTED) {
-                    dstTxData.txStatus = CrossChainTxStatus.FALLBACK;
+                    dstTxData.txStatus = TxStatus.FALLBACK;
                 }
 
                 if (dstTxStatus === SymbiosisSwapStatus.SUCCESS) {
                     if (data.toBlockchain !== BLOCKCHAIN_NAME.BITCOIN) {
-                        dstTxData.txStatus = CrossChainTxStatus.SUCCESS;
+                        dstTxData.txStatus = TxStatus.SUCCESS;
                     } else {
                         dstTxData = await this.getBitcoinStatus(dstHash);
                     }
@@ -266,14 +236,14 @@ export class CrossChainStatusManager {
             } catch (error) {
                 console.debug('[Symbiosis Trade] Error retrieving dst tx status', error);
                 return {
-                    txStatus: CrossChainTxStatus.PENDING,
+                    txStatus: TxStatus.PENDING,
                     txHash: null
                 };
             }
         }
 
         return {
-            txStatus: CrossChainTxStatus.PENDING,
+            txStatus: TxStatus.PENDING,
             txHash: null
         };
     }
@@ -286,7 +256,7 @@ export class CrossChainStatusManager {
     private async getLifiDstSwapStatus(data: CrossChainTradeData): Promise<DstTxData> {
         if (!data.lifiBridgeType) {
             return {
-                txStatus: CrossChainTxStatus.PENDING,
+                txStatus: TxStatus.PENDING,
                 txHash: null
             };
         }
@@ -303,31 +273,31 @@ export class CrossChainStatusManager {
                 receiving: { txHash: string };
             }>('https://li.quest/v1/status', { params });
             const dstTxData: DstTxData = {
-                txStatus: CrossChainTxStatus.UNKNOWN,
+                txStatus: TxStatus.UNKNOWN,
                 txHash: receiving?.txHash || null
             };
 
             if (status === LifiSwapStatus.DONE) {
-                dstTxData.txStatus = CrossChainTxStatus.SUCCESS;
+                dstTxData.txStatus = TxStatus.SUCCESS;
             }
 
             if (status === LifiSwapStatus.FAILED) {
-                dstTxData.txStatus = CrossChainTxStatus.FAIL;
+                dstTxData.txStatus = TxStatus.FAIL;
             }
 
             if (status === LifiSwapStatus.INVALID) {
-                dstTxData.txStatus = CrossChainTxStatus.UNKNOWN;
+                dstTxData.txStatus = TxStatus.UNKNOWN;
             }
 
             if (status === LifiSwapStatus.NOT_FOUND || status === LifiSwapStatus.PENDING) {
-                dstTxData.txStatus = CrossChainTxStatus.PENDING;
+                dstTxData.txStatus = TxStatus.PENDING;
             }
 
             return dstTxData;
         } catch (error) {
             console.debug('[Li-fi Trade] error retrieving tx status', error);
             return {
-                txStatus: CrossChainTxStatus.PENDING,
+                txStatus: TxStatus.PENDING,
                 txHash: null
             };
         }
@@ -341,7 +311,7 @@ export class CrossChainStatusManager {
     private async getCelerDstSwapStatus(data: CrossChainTradeData): Promise<DstTxData> {
         try {
             const dstTxData: DstTxData = {
-                txStatus: CrossChainTxStatus.PENDING,
+                txStatus: TxStatus.PENDING,
                 txHash: null
             };
             const txSearchResult = await Injector.httpClient.get<CelerXtransferStatusResponse>(
@@ -366,11 +336,11 @@ export class CrossChainStatusManager {
                     CelerTransferStatus.XS_WAITING_FOR_FUND_RELEASE
                 ].includes(trade.xfer_status)
             ) {
-                dstTxData.txStatus = CrossChainTxStatus.PENDING;
+                dstTxData.txStatus = TxStatus.PENDING;
             }
 
             if (trade.xfer_status === CelerTransferStatus.XS_COMPLETED) {
-                dstTxData.txStatus = CrossChainTxStatus.SUCCESS;
+                dstTxData.txStatus = TxStatus.SUCCESS;
             }
 
             if (
@@ -380,14 +350,14 @@ export class CrossChainStatusManager {
                     CelerTransferStatus.XS_REFUND_TO_BE_CONFIRMED
                 ].includes(trade.xfer_status)
             ) {
-                dstTxData.txStatus = CrossChainTxStatus.FALLBACK;
+                dstTxData.txStatus = TxStatus.FALLBACK;
             }
 
             return dstTxData;
         } catch (error) {
             console.debug('[Celer Trade] error retrieving tx status', error);
             return {
-                txStatus: CrossChainTxStatus.PENDING,
+                txStatus: TxStatus.PENDING,
                 txHash: null
             };
         }
@@ -406,22 +376,22 @@ export class CrossChainStatusManager {
                 { params }
             );
             const dstTxData: DstTxData = {
-                txStatus: CrossChainTxStatus.FAIL,
+                txStatus: TxStatus.FAIL,
                 txHash: claim?.transactionHash || null
             };
 
             if (!send || !claim) {
-                dstTxData.txStatus = CrossChainTxStatus.PENDING;
+                dstTxData.txStatus = TxStatus.PENDING;
             }
 
             if (claim?.transactionHash) {
-                dstTxData.txStatus = CrossChainTxStatus.SUCCESS;
+                dstTxData.txStatus = TxStatus.SUCCESS;
             }
 
             return dstTxData;
         } catch {
             return {
-                txStatus: CrossChainTxStatus.PENDING,
+                txStatus: TxStatus.PENDING,
                 txHash: null
             };
         }
@@ -439,21 +409,21 @@ export class CrossChainStatusManager {
             });
             const status = txStatusResponse.event as unknown as ViaSwapStatus;
             const dstTxData: DstTxData = {
-                txStatus: CrossChainTxStatus.PENDING,
+                txStatus: TxStatus.PENDING,
                 txHash: txStatusResponse.data?.txHash || null
             };
 
             if (status === ViaSwapStatus.SUCCESS) {
-                dstTxData.txStatus = CrossChainTxStatus.SUCCESS;
+                dstTxData.txStatus = TxStatus.SUCCESS;
             }
             if (status === ViaSwapStatus.FAIL) {
-                dstTxData.txStatus = CrossChainTxStatus.FAIL;
+                dstTxData.txStatus = TxStatus.FAIL;
             }
 
             return dstTxData;
         } catch {
             return {
-                txStatus: CrossChainTxStatus.PENDING,
+                txStatus: TxStatus.PENDING,
                 txHash: null
             };
         }
@@ -482,7 +452,7 @@ export class CrossChainStatusManager {
             const orderId = updateDataAndStatusResponse.data?.orderId;
             if (!orderId) {
                 return {
-                    txStatus: CrossChainTxStatus.PENDING,
+                    txStatus: TxStatus.PENDING,
                     txHash: null
                 };
             }
@@ -498,14 +468,14 @@ export class CrossChainStatusManager {
             const transactionData = getTransDataByIdResponse.data;
             if (!transactionData?.status) {
                 return {
-                    txStatus: CrossChainTxStatus.PENDING,
+                    txStatus: TxStatus.PENDING,
                     txHash: null
                 };
             }
 
             if (transactionData.status === 'receive_complete') {
                 return {
-                    txStatus: CrossChainTxStatus.SUCCESS,
+                    txStatus: TxStatus.SUCCESS,
                     txHash: transactionData.toHash
                 };
             }
@@ -514,14 +484,14 @@ export class CrossChainStatusManager {
                 transactionData.status.includes('fail')
             ) {
                 return {
-                    txStatus: CrossChainTxStatus.FAIL,
+                    txStatus: TxStatus.FAIL,
                     txHash: null
                 };
             }
         } catch {}
 
         return {
-            txStatus: CrossChainTxStatus.PENDING,
+            txStatus: TxStatus.PENDING,
             txHash: null
         };
     }
@@ -534,7 +504,7 @@ export class CrossChainStatusManager {
     private async getBitcoinStatus(hash: string): Promise<DstTxData> {
         let bitcoinTransactionStatus: BtcStatusResponse;
         const dstTxData: DstTxData = {
-            txStatus: CrossChainTxStatus.PENDING,
+            txStatus: TxStatus.PENDING,
             txHash: null
         };
         try {
@@ -545,14 +515,14 @@ export class CrossChainStatusManager {
             dstTxData.txHash = bitcoinTransactionStatus?.hash || null;
         } catch {
             return {
-                txStatus: CrossChainTxStatus.PENDING,
+                txStatus: TxStatus.PENDING,
                 txHash: null
             };
         }
 
         const isCompleted = bitcoinTransactionStatus?.block_index !== undefined;
         if (isCompleted) {
-            dstTxData.txStatus = CrossChainTxStatus.SUCCESS;
+            dstTxData.txStatus = TxStatus.SUCCESS;
         }
 
         return dstTxData;

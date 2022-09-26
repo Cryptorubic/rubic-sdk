@@ -13,6 +13,7 @@ import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-s
 import { Token } from 'src/common/tokens';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
+import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
@@ -270,6 +271,11 @@ export abstract class Web3Public {
         methodArguments?: unknown[],
         options?: object
     ): Promise<T>;
+
+    /**
+     * Returns transaction status, based on transaction receipt.
+     */
+    public abstract getTransactionStatus(hash: string): Promise<TxStatus>;
 
     /**
      * Gets last block number.

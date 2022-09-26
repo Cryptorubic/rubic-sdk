@@ -1,4 +1,4 @@
-import { CrossChainTxStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-tx-status';
+import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { CrossChainTradeData } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-trade-data';
 import { CelerTransferStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/celer-transfer-status.enum';
 
@@ -55,7 +55,7 @@ export interface CelerXtransferStatusResponse {
 }
 
 export interface DstTxData {
-    txStatus: CrossChainTxStatus;
+    txStatus: TxStatus;
     txHash: string | null;
 }
 
