@@ -8,5 +8,10 @@ export interface BridgersSwapRequest {
     fromTokenAmount: string;
     amountOutMin: string;
     equipmentNo: string;
-    sourceFlag: 'rubic';
+
+    /**
+     * Use `rubic` if swap is sent through rubic-proxy contract.
+     * Use `rubic_widget` if swap is sent directly through bridgers contract.
+     */
+    sourceFlag: 'rubic' | 'rubic_widget';
 }

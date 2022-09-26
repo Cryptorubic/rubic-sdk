@@ -120,7 +120,7 @@ export class BridgersTrade extends TronOnChainTrade {
             fromTokenAmount: this.from.stringWeiAmount,
             amountOutMin,
             equipmentNo: fromAddress.slice(0, 32),
-            sourceFlag: 'rubic'
+            sourceFlag: 'rubic_widget'
         };
 
         const swapData = await Injector.httpClient.post<
