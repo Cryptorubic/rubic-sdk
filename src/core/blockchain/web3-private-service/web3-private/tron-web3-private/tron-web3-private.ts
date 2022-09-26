@@ -12,6 +12,7 @@ import { TronParameters } from 'src/core/blockchain/web3-pure/typed-web3-pure/tr
 import { RubicSdkError, UserRejectError } from 'src/common/errors';
 import { parseError } from 'src/common/utils/errors';
 import { TronInsufficientNativeBalance } from 'src/common/errors/blockchain/tron-insufficient-native-balance';
+import { TronTransactionReceipt } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-receipt';
 
 export class TronWeb3Private extends Web3Private {
     /**
@@ -25,6 +26,7 @@ export class TronWeb3Private extends Web3Private {
         if ((err as { message: string })?.message?.includes('balance is not sufficient')) {
             throw new TronInsufficientNativeBalance();
         }
+        // @todo add error of timeout
         return parseError(err);
     }
 
@@ -125,11 +127,13 @@ export class TronWeb3Private extends Web3Private {
             );
             const signedTransaction = await this.tronWeb.trx.sign(transaction.transaction);
 
-            const transactionHash = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
+            const receipt: TronTransactionReceipt = await this.tronWeb.trx.sendRawTransaction(
+                signedTransaction
+            );
             if (options.onTransactionHash) {
-                options.onTransactionHash(transactionHash);
+                options.onTransactionHash(receipt.txid);
             }
-            return transactionHash;
+            return receipt.txid;
         } catch (err) {
             console.error('Method execution error: ', err);
             throw TronWeb3Private.parseError(err);

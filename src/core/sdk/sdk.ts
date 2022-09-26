@@ -12,6 +12,7 @@ import { OnChainManager } from 'src/features/on-chain/on-chain-manager';
 import { GasPriceApi } from 'src/core/gas-price-api/gas-price-api';
 import { CoingeckoApi } from 'src/core/coingecko-api/coingecko-api';
 import { WalletProvider, WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
+import { OnChainStatusManager } from 'src/features/on-chain/on-chain-status-manager/on-chain-status-manager';
 
 /**
  * Base class to work with sdk.
@@ -28,14 +29,19 @@ export class SDK {
     public readonly crossChainManager: CrossChainManager;
 
     /**
-     * Cross-chain symbiosis manager object. Use it to get pending trades in symbiosis and revert them.
+     * On-chain status manager object. Use it for special providers, which requires more than one trade.
      */
-    public readonly crossChainSymbiosisManager: CrossChainSymbiosisManager;
+    public readonly onChainStatusManager: OnChainStatusManager;
 
     /**
      * Cross-chain status manager object. Use it to get trade statuses on source and target network.
      */
     public readonly crossChainStatusManager: CrossChainStatusManager;
+
+    /**
+     * Cross-chain symbiosis manager object. Use it to get pending trades in symbiosis and revert them.
+     */
+    public readonly crossChainSymbiosisManager: CrossChainSymbiosisManager;
 
     /**
      * Can be used to get `Web3Public` instance by blockchain name to get public information from blockchain.
@@ -98,8 +104,10 @@ export class SDK {
     private constructor(providerAddress: string) {
         this.onChainManager = new OnChainManager();
         this.crossChainManager = new CrossChainManager(providerAddress);
-        this.crossChainSymbiosisManager = new CrossChainSymbiosisManager();
+
+        this.onChainStatusManager = new OnChainStatusManager();
         this.crossChainStatusManager = new CrossChainStatusManager();
+        this.crossChainSymbiosisManager = new CrossChainSymbiosisManager();
     }
 
     /**

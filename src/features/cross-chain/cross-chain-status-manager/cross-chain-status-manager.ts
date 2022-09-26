@@ -24,17 +24,10 @@ import { LifiSwapStatus } from 'src/features/cross-chain/providers/lifi-provider
 import { Via } from '@viaprotocol/router-sdk';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
-import {
-    BridgersGetTransDataByIdRequest,
-    BridgersGetTransDataByIdResponse
-} from 'src/features/cross-chain/cross-chain-status-manager/models/bridgers-get-trans-data-by-id';
-import {
-    BridgersUpdateDataAndStatusRequest,
-    BridgersUpdateDataAndStatusResponse
-} from 'src/features/cross-chain/cross-chain-status-manager/models/bridgers-update-data-and-status';
-import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
+
 import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { CelerTransferStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/celer-transfer-status.enum';
+import { getBridgersTradeStatus } from 'src/features/common/providers/bridgers/utils/get-bridgers-trade-status';
 
 /**
  * Contains methods for getting cross-chain trade statuses.
@@ -434,66 +427,12 @@ export class CrossChainStatusManager {
      * @param data Trade data.
      * @returns Cross-chain transaction status.
      */
-    private async getBridgersDstSwapStatus(data: CrossChainTradeData): Promise<DstTxData> {
-        try {
-            const updateDataAndStatusRequest: BridgersUpdateDataAndStatusRequest = {
-                hash: data.srcTxHash,
-                fromTokenChain:
-                    toBridgersBlockchain[
-                        data.fromBlockchain as BridgersCrossChainSupportedBlockchain
-                    ],
-                sourceFlag: 'rubic'
-            };
-            const updateDataAndStatusResponse =
-                await Injector.httpClient.post<BridgersUpdateDataAndStatusResponse>(
-                    'https://sswap.swft.pro/api/exchangeRecord/updateDataAndStatus',
-                    updateDataAndStatusRequest
-                );
-            const orderId = updateDataAndStatusResponse.data?.orderId;
-            if (!orderId) {
-                return {
-                    txStatus: TxStatus.PENDING,
-                    txHash: null
-                };
-            }
-
-            const getTransDataByIdRequest: BridgersGetTransDataByIdRequest = {
-                orderId
-            };
-            const getTransDataByIdResponse =
-                await this.httpClient.post<BridgersGetTransDataByIdResponse>(
-                    'https://sswap.swft.pro/api/exchangeRecord/getTransDataById',
-                    getTransDataByIdRequest
-                );
-            const transactionData = getTransDataByIdResponse.data;
-            if (!transactionData?.status) {
-                return {
-                    txStatus: TxStatus.PENDING,
-                    txHash: null
-                };
-            }
-
-            if (transactionData.status === 'receive_complete') {
-                return {
-                    txStatus: TxStatus.SUCCESS,
-                    txHash: transactionData.toHash
-                };
-            }
-            if (
-                transactionData.status.includes('error') ||
-                transactionData.status.includes('fail')
-            ) {
-                return {
-                    txStatus: TxStatus.FAIL,
-                    txHash: null
-                };
-            }
-        } catch {}
-
-        return {
-            txStatus: TxStatus.PENDING,
-            txHash: null
-        };
+    private getBridgersDstSwapStatus(data: CrossChainTradeData): Promise<DstTxData> {
+        return getBridgersTradeStatus(
+            data.srcTxHash,
+            data.fromBlockchain as BridgersCrossChainSupportedBlockchain,
+            'rubic'
+        );
     }
 
     /**
