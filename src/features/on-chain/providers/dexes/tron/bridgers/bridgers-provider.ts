@@ -7,9 +7,7 @@ import {
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { TronOnChainProvider } from 'src/features/on-chain/providers/dexes/abstract/on-chain-provider/tron-on-chain-provider/tron-on-chain-provider';
 import { BridgersTrade } from 'src/features/on-chain/providers/dexes/tron/bridgers/bridgers-trade';
-import { BridgersQuoteRequest } from 'src/features/common/providers/bridgers/models/bridgers-quote-request';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
-import { BridgersQuoteResponse } from 'src/features/common/providers/bridgers/models/bridgers-quote-response';
 import { createTokenNativeAddressProxy } from 'src/features/on-chain/providers/dexes/abstract/utils/token-native-address-proxy';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { OnChainProvider } from 'src/features/on-chain/providers/dexes/abstract/on-chain-provider/on-chain-provider';
@@ -17,6 +15,10 @@ import { BridgersPairIsUnavailableError, MaxAmountError, MinAmountError } from '
 import BigNumber from 'bignumber.js';
 import { BridgersCalculationOptions } from 'src/features/on-chain/providers/dexes/tron/bridgers/models/bridgers-calculation-options';
 import { combineOptions } from 'src/common/utils/options';
+import {
+    BridgersQuoteRequest,
+    BridgersQuoteResponse
+} from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
 
 export class BridgersProvider extends TronOnChainProvider {
     private readonly defaultOptions: BridgersCalculationOptions = {

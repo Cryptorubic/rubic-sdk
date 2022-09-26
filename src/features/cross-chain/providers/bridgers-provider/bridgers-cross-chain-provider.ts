@@ -15,9 +15,7 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/models/cross-chain-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/providers/common/constants/rubic-proxy-contract-address';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { BridgersQuoteRequest } from 'src/features/common/providers/bridgers/models/bridgers-quote-request';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
-import { BridgersQuoteResponse } from 'src/features/common/providers/bridgers/models/bridgers-quote-response';
 import { BridgersPairIsUnavailableError, MaxAmountError, MinAmountError } from 'src/common/errors';
 import BigNumber from 'bignumber.js';
 import { TronBridgersCrossChainTrade } from 'src/features/cross-chain/providers/bridgers-provider/tron-bridgers-trade/tron-bridgers-cross-chain-trade';
@@ -30,6 +28,10 @@ import { EvmBridgersCrossChainTrade } from 'src/features/cross-chain/providers/b
 import { tronCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { AbiItem } from 'web3-utils';
+import {
+    BridgersQuoteRequest,
+    BridgersQuoteResponse
+} from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
 
 export class BridgersCrossChainProvider extends CrossChainProvider {
     public static isSupportedBlockchain(

@@ -1,7 +1,7 @@
 import {
     BridgersUpdateDataAndStatusRequest,
     BridgersUpdateDataAndStatusResponse
-} from 'src/features/common/providers/bridgers/models/bridgers-update-data-and-status';
+} from 'src/features/common/providers/bridgers/models/bridgers-update-data-and-status-api';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
 import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { Injector } from 'src/core/injector/injector';
@@ -9,7 +9,7 @@ import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/mo
 import {
     BridgersGetTransDataByIdRequest,
     BridgersGetTransDataByIdResponse
-} from 'src/features/common/providers/bridgers/models/bridgers-get-trans-data-by-id';
+} from 'src/features/common/providers/bridgers/models/bridgers-get-trans-data-by-id-api';
 import { DstTxData } from 'src/features/cross-chain/cross-chain-status-manager/models/statuses-api';
 
 export async function getBridgersTradeStatus(

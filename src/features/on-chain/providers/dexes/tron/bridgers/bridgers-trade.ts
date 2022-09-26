@@ -10,13 +10,15 @@ import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-
 import { TronEncodeTransactionOptions } from 'src/features/common/models/tron/tron-encode-transaction-options';
 import { createTokenNativeAddressProxy } from 'src/features/on-chain/providers/dexes/abstract/utils/token-native-address-proxy';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
-import { BridgersSwapRequest } from 'src/features/common/providers/bridgers/models/bridgers-swap-request';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
 import { Injector } from 'src/core/injector/injector';
-import { BridgersSwapResponse } from 'src/features/common/providers/bridgers/models/bridgers-swap-response';
 import { TronBridgersTransactionData } from 'src/features/cross-chain/providers/bridgers-provider/tron-bridgers-trade/models/tron-bridgers-transaction-data';
 import { SwapRequestError } from 'src/common/errors';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
+import {
+    BridgersSwapRequest,
+    BridgersSwapResponse
+} from 'src/features/common/providers/bridgers/models/bridgers-swap-api';
 
 export class BridgersTrade extends TronOnChainTrade {
     public readonly from: PriceTokenAmount<TronBlockchainName>;
