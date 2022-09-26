@@ -259,6 +259,6 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         const usdCryptoFee = this.cryptoFeeToken.price.multipliedBy(
             this.cryptoFeeToken.tokenAmount
         );
-        return fromUsd.plus(usdCryptoFee).dividedBy(this.to.tokenAmount);
+        return fromUsd.plus(usdCryptoFee.isNaN() ? 0 : usdCryptoFee).dividedBy(this.to.tokenAmount);
     }
 }
