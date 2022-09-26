@@ -4,12 +4,11 @@ import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
 import { UnnecessaryApproveError } from 'src/common/errors';
 import BigNumber from 'bignumber.js';
-
 import { TronWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/tron-web3-private';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { TronTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-options';
-import { TronSwapTransactionOptions } from 'src/features/common/models/tron/tron-swap-transaction-options';
-import { TronEncodeTransactionOptions } from 'src/features/common/models/tron/tron-encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
 
 export abstract class TronOnChainTrade extends OnChainTrade {
@@ -48,7 +47,7 @@ export abstract class TronOnChainTrade extends OnChainTrade {
     }
 
     protected async checkAllowanceAndApprove(
-        options?: Omit<TronSwapTransactionOptions, 'onConfirm' | 'feeLimit'>
+        options?: Omit<SwapTransactionOptions, 'onConfirm' | 'feeLimit'>
     ): Promise<void> {
         const needApprove = await this.needApprove();
         if (!needApprove) {
@@ -62,9 +61,9 @@ export abstract class TronOnChainTrade extends OnChainTrade {
         await this.approve(approveOptions, false);
     }
 
-    public abstract swap(options?: TronSwapTransactionOptions): Promise<string | never>;
+    public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
 
-    public abstract encode(options: TronEncodeTransactionOptions): Promise<TronTransactionConfig>;
+    public abstract encode(options: EncodeTransactionOptions): Promise<TronTransactionConfig>;
 
     public async encodeApprove(
         tokenAddress: string,

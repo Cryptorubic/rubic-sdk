@@ -27,8 +27,8 @@ import { oneinchApiParams } from 'src/features/on-chain/providers/dexes/abstract
 import { Cache } from 'src/common/utils/decorators';
 import { OneinchSwapRequest } from 'src/features/on-chain/providers/dexes/abstract/oneinch-abstract/models/oneinch-swap-request';
 import { EvmOnChainTrade } from 'src/features/on-chain/providers/abstract/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
-import { EvmEncodeTransactionOptions } from 'src/features/common/models/evm/evm-encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 type OneinchTradeStruct = {
     contractAddress: string;
@@ -135,7 +135,7 @@ export class OneinchTrade extends EvmOnChainTrade {
         return allowance.lt(this.nativeSupportedFrom.weiAmount);
     }
 
-    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkWalletState();
         this.checkReceiverAddress(options.receiverAddress);
 
@@ -179,7 +179,7 @@ export class OneinchTrade extends EvmOnChainTrade {
         }
     }
 
-    public async encode(options: EvmEncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         this.checkFromAddress(options.fromAddress, true);
         this.checkReceiverAddress(options.receiverAddress);
 

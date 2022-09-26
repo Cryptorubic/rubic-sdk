@@ -16,8 +16,8 @@ import {
 import { TransactionConfig } from 'web3-core';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { ContractParams } from 'src/features/cross-chain/providers/common/models/contract-params';
-import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
-import { EvmEncodeTransactionOptions } from 'src/features/common/models/evm/evm-encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { GetContractParamsOptions } from 'src/features/cross-chain/providers/common/models/get-contract-params-options';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -77,7 +77,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
     }
 
     protected async checkAllowanceAndApprove(
-        options?: Omit<EvmSwapTransactionOptions, 'onConfirm' | 'gasLimit'>
+        options?: Omit<SwapTransactionOptions, 'onConfirm' | 'gasLimit'>
     ): Promise<void> {
         const needApprove = await this.needApprove();
         if (!needApprove) {
@@ -93,7 +93,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         await this.approve(approveOptions, false);
     }
 
-    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
         this.checkReceiverAddress(
             options.receiverAddress,
@@ -132,7 +132,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    public async encode(options: EvmEncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         this.checkFromAddress(options.fromAddress, true);
         this.checkReceiverAddress(
             options.receiverAddress,

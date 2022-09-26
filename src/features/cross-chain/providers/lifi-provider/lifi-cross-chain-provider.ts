@@ -64,7 +64,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
         await this.checkContractState(
             fromBlockchain,
-            lifiContractAddress[fromBlockchain].rubicRouter
+            lifiContractAddress[fromBlockchain].rubicRouter,
+            evmCommonCrossChainAbi
         );
 
         const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);

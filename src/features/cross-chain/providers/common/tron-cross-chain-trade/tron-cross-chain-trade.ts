@@ -10,8 +10,8 @@ import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-pub
 import { TronWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/tron-web3-private';
 import { TronTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-options';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
-import { TronSwapTransactionOptions } from 'src/features/common/models/tron/tron-swap-transaction-options';
-import { TronEncodeTransactionOptions } from 'src/features/common/models/tron/tron-encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { TronGetContractParamsOptions } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/models/tron-get-contract-params-options';
 import BigNumber from 'bignumber.js';
 import { TronContractParams } from 'src/features/cross-chain/providers/common/tron-cross-chain-trade/models/tron-contract-params';
@@ -52,7 +52,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
     }
 
     protected async checkAllowanceAndApprove(
-        options?: Omit<TronSwapTransactionOptions, 'onConfirm' | 'feeLimit'>
+        options?: Omit<SwapTransactionOptions, 'onConfirm' | 'feeLimit'>
     ): Promise<void> {
         const needApprove = await this.needApprove();
         if (!needApprove) {
@@ -67,7 +67,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
     }
 
     public async swap(
-        options: MarkRequired<TronSwapTransactionOptions, 'receiverAddress'>
+        options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
     ): Promise<string | never> {
         await this.checkTradeErrors();
         this.checkReceiverAddress(options.receiverAddress, true);
@@ -110,7 +110,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
     }
 
     public async encode(
-        options: MarkRequired<TronEncodeTransactionOptions, 'receiverAddress'>
+        options: MarkRequired<EncodeTransactionOptions, 'receiverAddress'>
     ): Promise<TronTransactionConfig> {
         this.checkFromAddress(options.fromAddress, true);
         this.checkReceiverAddress(options.receiverAddress, true);

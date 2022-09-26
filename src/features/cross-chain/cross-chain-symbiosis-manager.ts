@@ -17,7 +17,7 @@ import { Log as EthersLog, TransactionReceipt as EthersReceipt } from '@etherspr
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
-import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 
 export class CrossChainSymbiosisManager {
     private readonly symbiosis = new Symbiosis(getSymbiosisConfig(), 'rubic');
@@ -73,7 +73,7 @@ export class CrossChainSymbiosisManager {
 
     public async revertTrade(
         revertTransactionHash: string,
-        options: EvmSwapTransactionOptions = {}
+        options: SwapTransactionOptions = {}
     ): Promise<TransactionReceipt> {
         const pendingRequest = await this.getUserTrades();
         const request = pendingRequest.find(

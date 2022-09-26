@@ -20,8 +20,8 @@ import { Exact } from 'src/features/on-chain/providers/abstract/on-chain-trade/e
 import { OnChainTradeType } from 'src/features/on-chain/providers/models/on-chain-trade-type';
 import BigNumber from 'bignumber.js';
 import { EvmOnChainTrade } from 'src/features/on-chain/providers/abstract/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
-import { EvmEncodeTransactionOptions } from 'src/features/common/models/evm/evm-encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 export interface UniswapV3AlgebraTradeStruct {
     from: PriceTokenAmount<EvmBlockchainName>;
@@ -214,7 +214,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
      */
     protected abstract getSwapRouterExactInputMethodData(walletAddress: string): MethodData;
 
-    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkWalletState();
         this.checkReceiverAddress(options.receiverAddress);
 
@@ -240,7 +240,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         return receipt.transactionHash;
     }
 
-    public async encode(options: EvmEncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         this.checkFromAddress(options.fromAddress, true);
         this.checkReceiverAddress(options.receiverAddress);
 

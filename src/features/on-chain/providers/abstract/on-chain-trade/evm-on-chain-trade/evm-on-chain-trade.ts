@@ -15,8 +15,8 @@ import {
     OptionsGasParams,
     TransactionGasParams
 } from 'src/features/on-chain/providers/abstract/on-chain-trade/evm-on-chain-trade/models/gas-params';
-import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
-import { EvmEncodeTransactionOptions } from 'src/features/common/models/evm/evm-encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 export abstract class EvmOnChainTrade extends OnChainTrade {
     public abstract readonly from: PriceTokenAmount<EvmBlockchainName>;
@@ -65,7 +65,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     }
 
     protected async checkAllowanceAndApprove(
-        options?: Omit<EvmSwapTransactionOptions, 'onConfirm' | 'gasLimit'>
+        options?: Omit<SwapTransactionOptions, 'onConfirm' | 'gasLimit'>
     ): Promise<void> {
         const needApprove = await this.needApprove();
         if (!needApprove) {
@@ -81,9 +81,9 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         await this.approve(approveOptions, false);
     }
 
-    public abstract swap(options?: EvmSwapTransactionOptions): Promise<string | never>;
+    public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
 
-    public abstract encode(options: EvmEncodeTransactionOptions): Promise<TransactionConfig>;
+    public abstract encode(options: EncodeTransactionOptions): Promise<TransactionConfig>;
 
     public async encodeApprove(
         tokenAddress: string,

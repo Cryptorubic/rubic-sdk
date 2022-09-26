@@ -76,7 +76,8 @@ export class RangoCrossChainProvider extends CrossChainProvider {
 
         await this.checkContractState(
             fromBlockchain,
-            RANGO_CONTRACT_ADDRESSES[fromBlockchain].rubicRouter
+            RANGO_CONTRACT_ADDRESSES[fromBlockchain].rubicRouter,
+            evmCommonCrossChainAbi
         );
 
         const price = await fromToken.getAndUpdateTokenPrice();

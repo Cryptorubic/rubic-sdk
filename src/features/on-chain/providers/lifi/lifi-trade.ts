@@ -16,8 +16,8 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/providers/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/providers/abstract/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
-import { EvmEncodeTransactionOptions } from 'src/features/common/models/evm/evm-encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 interface LifiTransactionRequest {
     data: string;
@@ -110,7 +110,7 @@ export class LifiTrade extends EvmOnChainTrade {
         this.route = tradeStruct.route;
     }
 
-    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         if (options?.receiverAddress) {
             throw new UnsupportedReceiverAddressError();
         }
@@ -145,7 +145,7 @@ export class LifiTrade extends EvmOnChainTrade {
         }
     }
 
-    public async encode(options: EvmEncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         if (options?.receiverAddress) {
             throw new UnsupportedReceiverAddressError();
         }

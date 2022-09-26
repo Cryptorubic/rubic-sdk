@@ -14,7 +14,6 @@ import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-s
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 
 export abstract class CrossChainProvider {
     public static parseError(err: unknown): RubicSdkError {
@@ -83,11 +82,12 @@ export abstract class CrossChainProvider {
         const fromChainType = BlockchainsInfo.getChainType(fromBlockchain);
 
         if (!Web3Pure[fromChainType].isEmptyAddress(providerAddress)) {
-            const integratorInfo = await web3PublicService.callContractMethod<
-                [boolean, string, string, string, string]
-            >(contractAddress, contractAbi, 'integratorToFeeInfo', [providerAddress]);
-            if (integratorInfo[0]) {
-                return Web3Pure.fromWei(integratorInfo[4]);
+            const integratorInfo = await web3PublicService.callContractMethod<{
+                isIntegrator: boolean;
+                fixedFeeAmount: string;
+            }>(contractAddress, contractAbi, 'integratorToFeeInfo', [providerAddress]);
+            if (integratorInfo.isIntegrator) {
+                return Web3Pure.fromWei(integratorInfo.fixedFeeAmount);
             }
         }
 
@@ -119,15 +119,12 @@ export abstract class CrossChainProvider {
         const fromChainType = BlockchainsInfo.getChainType(fromBlockchain);
 
         if (!Web3Pure[fromChainType].isEmptyAddress(providerAddress)) {
-            // @todo add types
-            const integratorInfo = await web3PublicService.callContractMethod<[boolean, string]>(
-                contractAddress,
-                contractAbi,
-                'integratorToFeeInfo',
-                [providerAddress]
-            );
-            if (integratorInfo[0]) {
-                return new BigNumber(integratorInfo[1]).toNumber() / 10_000; // @todo make BigNumber
+            const integratorInfo = await web3PublicService.callContractMethod<{
+                isIntegrator: boolean;
+                tokenFee: string;
+            }>(contractAddress, contractAbi, 'integratorToFeeInfo', [providerAddress]);
+            if (integratorInfo.isIntegrator) {
+                return new BigNumber(integratorInfo.tokenFee).toNumber() / 10_000;
             }
         }
 
@@ -145,7 +142,7 @@ export abstract class CrossChainProvider {
     protected async checkContractState(
         fromBlockchain: Web3PublicSupportedBlockchain,
         rubicRouter: string,
-        contractAbi: AbiItem[] = evmCommonCrossChainAbi // @todo redo
+        contractAbi: AbiItem[]
     ): Promise<void> {
         const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 

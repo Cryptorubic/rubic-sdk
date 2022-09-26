@@ -109,7 +109,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 oneinchApiParams.nativeAddress;
             await this.checkContractState(
                 fromBlockchain as EvmBlockchainName,
-                SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter
+                SYMBIOSIS_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+                evmCommonCrossChainAbi
             );
 
             const tokenIn = new SymbiosisToken({

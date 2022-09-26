@@ -5,9 +5,9 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/providers/models/on-chain-trade-type';
-import { TronSwapTransactionOptions } from 'src/features/common/models/tron/tron-swap-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
-import { TronEncodeTransactionOptions } from 'src/features/common/models/tron/tron-encode-transaction-options';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { createTokenNativeAddressProxy } from 'src/features/on-chain/providers/dexes/abstract/utils/token-native-address-proxy';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
@@ -49,7 +49,7 @@ export class BridgersTrade extends TronOnChainTrade {
         this.contractAddress = tradeStruct.contractAddress;
     }
 
-    public async swap(options: TronSwapTransactionOptions = {}): Promise<string | never> {
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkWalletState();
         await this.checkAllowanceAndApprove(options);
 
@@ -66,12 +66,11 @@ export class BridgersTrade extends TronOnChainTrade {
             if ([400, 500, 503].includes(err.code)) {
                 throw new SwapRequestError();
             }
-            // @todo add unavailablePairError
             throw err;
         }
     }
 
-    public async encode(options: TronEncodeTransactionOptions): Promise<TronTransactionConfig> {
+    public async encode(options: EncodeTransactionOptions): Promise<TronTransactionConfig> {
         try {
             const transactionData = await this.getTransactionData(options);
             const encodedData = TronWeb3Pure.encodeMethodSignature(
@@ -89,7 +88,6 @@ export class BridgersTrade extends TronOnChainTrade {
             if ([400, 500, 503].includes(err.code)) {
                 throw new SwapRequestError();
             }
-            // @todo add unavailablePairError
             throw err;
         }
     }

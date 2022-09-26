@@ -69,7 +69,8 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
 
             await this.checkContractState(
                 fromBlockchain,
-                DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter
+                DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+                evmCommonCrossChainAbi
             );
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);

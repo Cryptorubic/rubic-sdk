@@ -13,6 +13,7 @@ import { RubicSdkError, UserRejectError } from 'src/common/errors';
 import { parseError } from 'src/common/utils/errors';
 import { TronInsufficientNativeBalance } from 'src/common/errors/blockchain/tron-insufficient-native-balance';
 import { TronTransactionReceipt } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-receipt';
+import { TronTransactionExpired } from 'src/common/errors/blockchain/tron-transaction-expired';
 
 export class TronWeb3Private extends Web3Private {
     /**
@@ -23,10 +24,15 @@ export class TronWeb3Private extends Web3Private {
         if ((err as string)?.includes?.('Confirmation declined by user')) {
             throw new UserRejectError();
         }
-        if ((err as { message: string })?.message?.includes('balance is not sufficient')) {
+
+        const message = (err as { message: string })?.message;
+        if (message?.includes('balance is not sufficient')) {
             throw new TronInsufficientNativeBalance();
         }
-        // @todo add error of timeout
+        if (message?.includes('Transaction expired')) {
+            throw new TronTransactionExpired();
+        }
+
         return parseError(err);
     }
 

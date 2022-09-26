@@ -23,7 +23,7 @@ import BigNumber from 'bignumber.js';
 import { CelerContractTrade } from 'src/features/cross-chain/providers/celer-provider/celer-contract-trade/celer-contract-trade';
 import { Cache } from 'src/common/utils/decorators';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
-import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { GetContractParamsOptions } from 'src/features/cross-chain/providers/common/models/get-contract-params-options';
 
 /**
@@ -187,7 +187,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
         this.toTokenAmountMin = this.toTrade.toTokenAmountMin;
     }
 
-    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         try {
             return await super.swap(options);
         } catch (err) {

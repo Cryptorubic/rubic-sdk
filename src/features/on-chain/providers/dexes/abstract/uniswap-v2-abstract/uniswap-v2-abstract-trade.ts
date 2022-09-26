@@ -27,8 +27,8 @@ import { Exact } from 'src/features/on-chain/providers/abstract/on-chain-trade/e
 import { OnChainTradeType } from 'src/features/on-chain/providers/models/on-chain-trade-type';
 import BigNumber from 'bignumber.js';
 import { EvmOnChainTrade } from 'src/features/on-chain/providers/abstract/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
-import { EvmEncodeTransactionOptions } from 'src/features/common/models/evm/evm-encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount<EvmBlockchainName>;
@@ -188,7 +188,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         return { amountIn, amountOut };
     }
 
-    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkWalletState();
         this.checkReceiverAddress(options.receiverAddress);
 
@@ -197,7 +197,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         return this.createAnyToAnyTrade(options);
     }
 
-    private async createAnyToAnyTrade(options: EvmSwapTransactionOptions): Promise<string | never> {
+    private async createAnyToAnyTrade(options: SwapTransactionOptions): Promise<string | never> {
         const methodName = await this.getMethodName(options);
         const swapParameters = this.getSwapParametersByMethod(methodName, options);
 
@@ -205,7 +205,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         return receipt.transactionHash;
     }
 
-    public async encode(options: EvmEncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         this.checkFromAddress(options.fromAddress, true);
         this.checkReceiverAddress(options.receiverAddress);
 
@@ -255,7 +255,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
     }
 
     private async getMethodName(
-        options: EvmSwapTransactionOptions,
+        options: SwapTransactionOptions,
         fromAddress?: string,
         supportFee?: boolean
     ): Promise<string> {
@@ -298,7 +298,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
 
     private getSwapParametersByMethod(
         method: string,
-        options: EvmSwapTransactionOptions
+        options: SwapTransactionOptions
     ): Parameters<InstanceType<typeof EvmWeb3Private>['executeContractMethod']> {
         const value = this.nativeValueToSend;
         const { gas, gasPrice } = this.getGasParams(options);

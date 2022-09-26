@@ -16,7 +16,7 @@ import { OnChainTradeType } from 'src/features/on-chain/providers/models/on-chai
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { EvmSwapTransactionOptions } from 'src/features/common/models/evm/evm-swap-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { RANGO_BLOCKCHAIN_NAME } from './constants/rango-blockchain-name';
 import { RANGO_API_KEY } from './constants/rango-api-key';
 import { RangoCrossChainSupportedBlockchain } from './constants/rango-cross-chain-supported-blockchain';
@@ -161,7 +161,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         this.rangoClientRef = rangoClientRef;
     }
 
-    public async swap(options: EvmSwapTransactionOptions = {}): Promise<string | never> {
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         if (options?.receiverAddress) {
             throw new UnsupportedReceiverAddressError();
         }
@@ -224,7 +224,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
                 symbol: this.to.symbol,
                 address: this.to.isNative ? null : this.to.address
             },
-            amount: this.from.weiAmount.toFixed(0), // @todo update
+            amount: this.from.weiAmount.toFixed(0),
             disableEstimate: false,
             slippage: String(this.slippageTolerance * 100),
             fromAddress: this.walletAddress,
