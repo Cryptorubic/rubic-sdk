@@ -9,8 +9,25 @@ import BigNumber from 'bignumber.js';
 import { TRC20_CONTRACT_ABI } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/constants/trc-20-contract-abi';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
 import { TronParameters } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-parameters';
+import { RubicSdkError, UserRejectError } from 'src/common/errors';
+import { parseError } from 'src/common/utils/errors';
+import { TronInsufficientNativeBalance } from 'src/common/errors/blockchain/tron-insufficient-native-balance';
 
 export class TronWeb3Private extends Web3Private {
+    /**
+     * Parses web3 error by its code or message.
+     * @param err Web3 error to parse.
+     */
+    private static parseError(err: unknown): RubicSdkError {
+        if ((err as string)?.includes?.('Confirmation declined by user')) {
+            throw new UserRejectError();
+        }
+        if ((err as { message: string })?.message?.includes('balance is not sufficient')) {
+            throw new TronInsufficientNativeBalance();
+        }
+        return parseError(err);
+    }
+
     protected readonly Web3Pure = TronWeb3Pure;
 
     private readonly tronWeb: typeof TronWeb;
@@ -75,22 +92,26 @@ export class TronWeb3Private extends Web3Private {
         methodArguments: unknown[],
         options: TronTransactionOptions = {}
     ): Promise<string> {
-        const contract = await this.tronWeb.contract(contractAbi, contractAddress);
+        try {
+            const contract = await this.tronWeb.contract(contractAbi, contractAddress);
 
-        const transactionHash = await contract[methodName](...methodArguments).send({
-            from: this.address,
-            ...(options.callValue && {
-                callValue: Web3Private.stringifyAmount(options.callValue)
-            }),
-            ...(options.feeLimit && {
-                feeLimit: Web3Private.stringifyAmount(options.feeLimit)
-            })
-        });
-        if (options.onTransactionHash) {
-            options.onTransactionHash(transactionHash);
+            const transactionHash = await contract[methodName](...methodArguments).send({
+                from: this.address,
+                ...(options.callValue && {
+                    callValue: Web3Private.stringifyAmount(options.callValue)
+                }),
+                ...(options.feeLimit && {
+                    feeLimit: Web3Private.stringifyAmount(options.feeLimit)
+                })
+            });
+            if (options.onTransactionHash) {
+                options.onTransactionHash(transactionHash);
+            }
+            return transactionHash;
+        } catch (err) {
+            console.error('Method execution error: ', err);
+            throw TronWeb3Private.parseError(err);
         }
-        return transactionHash;
-        // @todo add error parsing
     }
 
     public async triggerContract(
@@ -99,20 +120,24 @@ export class TronWeb3Private extends Web3Private {
         parameters: TronParameters,
         options: TronTransactionOptions = {}
     ): Promise<string> {
-        const transaction = await this.tronWeb.transactionBuilder.triggerSmartContract(
-            contractAddress,
-            methodSignature,
-            options,
-            parameters,
-            this.address
-        );
-        const signedTransaction = await this.tronWeb.trx.sign(transaction.transaction);
+        try {
+            const transaction = await this.tronWeb.transactionBuilder.triggerSmartContract(
+                contractAddress,
+                methodSignature,
+                options,
+                parameters,
+                this.address
+            );
+            const signedTransaction = await this.tronWeb.trx.sign(transaction.transaction);
 
-        const transactionHash = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
-        if (options.onTransactionHash) {
-            options.onTransactionHash(transactionHash);
+            const transactionHash = await this.tronWeb.trx.sendRawTransaction(signedTransaction);
+            if (options.onTransactionHash) {
+                options.onTransactionHash(transactionHash);
+            }
+            return transactionHash;
+        } catch (err) {
+            console.error('Method execution error: ', err);
+            throw TronWeb3Private.parseError(err);
         }
-        return transactionHash;
-        // @todo add error parsing
     }
 }

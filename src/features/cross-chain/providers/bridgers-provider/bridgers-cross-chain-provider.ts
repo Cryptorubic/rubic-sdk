@@ -18,7 +18,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { BridgersQuoteRequest } from 'src/features/common/providers/bridgers/models/bridgers-quote-request';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
 import { BridgersQuoteResponse } from 'src/features/common/providers/bridgers/models/bridgers-quote-response';
-import { MaxAmountError, MinAmountError } from 'src/common/errors';
+import { BridgersPairIsUnavailableError, MaxAmountError, MinAmountError } from 'src/common/errors';
 import BigNumber from 'bignumber.js';
 import { TronBridgersCrossChainTrade } from 'src/features/cross-chain/providers/bridgers-provider/tron-bridgers-trade/tron-bridgers-cross-chain-trade';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
@@ -108,16 +108,12 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 'https://sswap.swft.pro/api/sswap/quote',
                 quoteRequest
             );
-            if (quoteResponse.resCode !== 100) {
+            const transactionData = quoteResponse.data?.txData;
+            if (quoteResponse.resCode !== 100 || !transactionData) {
                 return {
                     trade: null,
-                    error: CrossChainProvider.parseError(quoteResponse.resMsg)
+                    error: CrossChainProvider.parseError(new BridgersPairIsUnavailableError())
                 };
-            }
-
-            const transactionData = quoteResponse.data.txData;
-            if (!transactionData) {
-                return null;
             }
 
             if (from.tokenAmount.lt(transactionData.depositMin)) {

@@ -13,7 +13,7 @@ import { BridgersQuoteResponse } from 'src/features/common/providers/bridgers/mo
 import { createTokenNativeAddressProxy } from 'src/features/on-chain/providers/dexes/abstract/utils/token-native-address-proxy';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { OnChainProvider } from 'src/features/on-chain/providers/dexes/abstract/on-chain-provider/on-chain-provider';
-import { MaxAmountError, MinAmountError } from 'src/common/errors';
+import { BridgersPairIsUnavailableError, MaxAmountError, MinAmountError } from 'src/common/errors';
 import BigNumber from 'bignumber.js';
 import { BridgersCalculationOptions } from 'src/features/on-chain/providers/dexes/tron/bridgers/models/bridgers-calculation-options';
 import { combineOptions } from 'src/common/utils/options';
@@ -50,11 +50,10 @@ export class BridgersProvider extends TronOnChainProvider {
             'https://sswap.swft.pro/api/sswap/quote',
             quoteRequest
         );
-        if (quoteResponse.resCode !== 100) {
-            throw OnChainProvider.parseError(quoteResponse.resMsg);
+        const transactionData = quoteResponse.data?.txData;
+        if (quoteResponse.resCode !== 100 || !transactionData) {
+            throw OnChainProvider.parseError(new BridgersPairIsUnavailableError());
         }
-
-        const transactionData = quoteResponse.data.txData;
 
         if (from.tokenAmount.lt(transactionData.depositMin)) {
             throw new MinAmountError(new BigNumber(transactionData.depositMin), from.symbol);
