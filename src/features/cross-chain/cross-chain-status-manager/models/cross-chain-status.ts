@@ -1,4 +1,4 @@
-import { CrossChainTxStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-tx-status';
+import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 
 /**
  * Object representing status of cross-chain trade.
@@ -8,12 +8,12 @@ export interface CrossChainStatus {
     /**
      * Status of source transaction.
      */
-    srcTxStatus: CrossChainTxStatus;
+    srcTxStatus: TxStatus;
 
     /**
      * Status of destination transaction.
      */
-    dstTxStatus: CrossChainTxStatus;
+    dstTxStatus: TxStatus;
 
     /**
      * Transaction hash on destination chain.

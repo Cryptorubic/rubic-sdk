@@ -23,21 +23,6 @@ import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private
 import { WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 
 export class EvmWeb3Private extends Web3Private {
-    protected readonly Web3Pure = EvmWeb3Pure;
-
-    /**
-     * Converts number, string or BigNumber value to integer string.
-     * @param amount Value to convert.
-     */
-    private static stringifyAmount(amount: number | string | BigNumber): string {
-        const bnAmount = new BigNumber(amount);
-        if (!bnAmount.isInteger()) {
-            throw new RubicSdkError(`Value ${amount} is not integer`);
-        }
-
-        return bnAmount.toFixed(0);
-    }
-
     /**
      * Parses web3 error by its code or message.
      * @param err Web3 error to parse.
@@ -66,6 +51,8 @@ export class EvmWeb3Private extends Web3Private {
         } catch {}
         return parseError(err);
     }
+
+    protected readonly Web3Pure = EvmWeb3Pure;
 
     /**
      * Instance of web3, initialized with ethereum wallet, e.g. Metamask, WalletConnect.
@@ -101,10 +88,10 @@ export class EvmWeb3Private extends Web3Private {
                 .sendTransaction({
                     from: this.address,
                     to: toAddress,
-                    value: EvmWeb3Private.stringifyAmount(value),
-                    ...(options.gas && { gas: EvmWeb3Private.stringifyAmount(options.gas) }),
+                    value: Web3Private.stringifyAmount(value),
+                    ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                     ...(options.gasPrice && {
-                        gasPrice: EvmWeb3Private.stringifyAmount(options.gasPrice)
+                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                     }),
                     ...(options.data && { data: options.data })
                 })
@@ -133,10 +120,10 @@ export class EvmWeb3Private extends Web3Private {
             const gas = await this.web3.eth.estimateGas({
                 from: this.address,
                 to: toAddress,
-                value: EvmWeb3Private.stringifyAmount(value),
-                ...(options.gas && { gas: EvmWeb3Private.stringifyAmount(options.gas) }),
+                value: Web3Private.stringifyAmount(value),
+                ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                 ...(options.gasPrice && {
-                    gasPrice: EvmWeb3Private.stringifyAmount(options.gasPrice)
+                    gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                 }),
                 ...(options.data && { data: options.data })
             });
@@ -177,13 +164,13 @@ export class EvmWeb3Private extends Web3Private {
                 .send({
                     from: this.address,
                     ...(options.value && {
-                        value: EvmWeb3Private.stringifyAmount(options.value)
+                        value: Web3Private.stringifyAmount(options.value)
                     }),
                     ...(options.gas && {
-                        gas: EvmWeb3Private.stringifyAmount(options.gas)
+                        gas: Web3Private.stringifyAmount(options.gas)
                     }),
                     ...(options.gasPrice && {
-                        gasPrice: EvmWeb3Private.stringifyAmount(options.gasPrice)
+                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                     })
                 })
                 .on('transactionHash', options.onTransactionHash || (() => {}))
@@ -217,10 +204,10 @@ export class EvmWeb3Private extends Web3Private {
         try {
             const gas = await contract.methods[methodName](...methodArguments).estimateGas({
                 from: this.address,
-                ...(options.value && { value: EvmWeb3Private.stringifyAmount(options.value) }),
-                ...(options.gas && { gas: EvmWeb3Private.stringifyAmount(options.gas) }),
+                ...(options.value && { value: Web3Private.stringifyAmount(options.value) }),
+                ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                 ...(options.gasPrice && {
-                    gasPrice: EvmWeb3Private.stringifyAmount(options.gasPrice)
+                    gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                 })
             });
             return this.executeContractMethod(
@@ -279,13 +266,9 @@ export class EvmWeb3Private extends Web3Private {
         value: BigNumber | 'infinity',
         options: EvmTransactionOptions = {}
     ): Promise<TransactionReceipt> {
-        let rawValue: BigNumber;
-        if (value === 'infinity') {
-            rawValue = new BigNumber(2).pow(256).minus(1);
-        } else {
-            rawValue = value;
-        }
         const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
+
+        const rawValue = value === 'infinity' ? new BigNumber(2).pow(256).minus(1) : value;
 
         let { gas } = options;
         if (!gas) {
@@ -299,9 +282,9 @@ export class EvmWeb3Private extends Web3Private {
                 .approve(spenderAddress, rawValue.toFixed(0))
                 .send({
                     from: this.address,
-                    ...(gas && { gas: EvmWeb3Private.stringifyAmount(gas) }),
+                    ...(gas && { gas: Web3Private.stringifyAmount(gas) }),
                     ...(options.gasPrice && {
-                        gasPrice: EvmWeb3Private.stringifyAmount(options.gasPrice)
+                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                     })
                 })
                 .on('transactionHash', options.onTransactionHash || (() => {}))
@@ -344,9 +327,9 @@ export class EvmWeb3Private extends Web3Private {
             [spenderAddress, rawValue.toFixed(0)],
             undefined,
             {
-                ...(gas && { gas: EvmWeb3Private.stringifyAmount(gas) }),
+                ...(gas && { gas: Web3Private.stringifyAmount(gas) }),
                 ...(options.gasPrice && {
-                    gasPrice: EvmWeb3Private.stringifyAmount(options.gasPrice)
+                    gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                 })
             }
         );

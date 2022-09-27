@@ -1,6 +1,6 @@
-import { TradeType } from 'src/features/instant-trades/models/trade-type';
+import { OnChainTradeType } from 'src/features/on-chain/providers/models/on-chain-trade-type';
 
 export interface ItType {
-    from: TradeType | undefined;
-    to: TradeType | undefined;
+    from: OnChainTradeType | undefined;
+    to: OnChainTradeType | undefined;
 }

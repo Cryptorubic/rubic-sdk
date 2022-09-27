@@ -7,17 +7,17 @@ import {
     WaitForComplete
 } from 'symbiosis-js-sdk';
 import { TransactionReceipt } from 'web3-eth';
-import { getSymbiosisConfig } from 'src/features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
+import { getSymbiosisConfig } from 'src/features/cross-chain/providers/symbiosis-provider/constants/symbiosis-config';
 import { RubicSdkError } from 'src/common/errors';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
-import { SwapTransactionOptions } from 'src/features/instant-trades/models/swap-transaction-options';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Token } from 'src/common/tokens';
 import { Log as EthersLog, TransactionReceipt as EthersReceipt } from '@ethersproject/providers';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 
 export class CrossChainSymbiosisManager {
     private readonly symbiosis = new Symbiosis(getSymbiosisConfig(), 'rubic');

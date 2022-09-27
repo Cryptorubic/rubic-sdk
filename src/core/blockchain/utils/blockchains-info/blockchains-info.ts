@@ -35,6 +35,10 @@ export class BlockchainsInfo {
         return chainType;
     }
 
+    public static isBlockchainName(chain: string): chain is BlockchainName {
+        return Object.values(BLOCKCHAIN_NAME).some(blockchainName => blockchainName === chain);
+    }
+
     public static isEvmBlockchainName(
         blockchainName: BlockchainName
     ): blockchainName is EvmBlockchainName {

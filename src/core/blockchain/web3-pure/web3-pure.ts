@@ -4,7 +4,7 @@ import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/b
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { staticImplements } from 'src/common/utils/decorators';
 import { Web3PureContainer } from 'src/core/blockchain/web3-pure/models/web3-pure-container';
-import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure';
+import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 
 /**
  * Contains common methods, connected with web3, e.g. wei conversion, encoding data, etc.

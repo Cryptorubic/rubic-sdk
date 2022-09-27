@@ -4,7 +4,7 @@ import { CrossChainTradeType } from 'src/features/cross-chain/models/cross-chain
 
 export interface WrappedCrossChainTrade {
     /**
-     * Calculated cross chain trade.
+     * Calculated cross-chain trade.
      * Sometimes trade can be calculated even if error was thrown.
      * Equals `null` in case error is critical and trade cannot be calculated.
      */

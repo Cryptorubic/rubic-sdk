@@ -2,7 +2,7 @@ import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typ
 import Web3 from 'web3';
 import { staticImplements } from 'src/common/utils/decorators';
 import { AbiItem, fromAscii, isAddress, toChecksumAddress } from 'web3-utils';
-import { TransactionGasParams } from 'src/features/instant-trades/models/gas-params';
+import { TransactionGasParams } from 'src/features/on-chain/providers/abstract/on-chain-trade/evm-on-chain-trade/models/gas-params';
 import { TransactionConfig } from 'web3-core';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { RubicSdkError } from 'src/common/errors';
@@ -13,16 +13,16 @@ export class EvmWeb3Pure {
 
     private static web3Eth = new Web3().eth;
 
-    public static isEmptyAddress(address?: string) {
-        return address && address === this.EMPTY_ADDRESS;
-    }
-
     public static get nativeTokenAddress(): string {
         return '0x0000000000000000000000000000000000000000';
     }
 
     public static isNativeAddress(address: string): boolean {
         return compareAddresses(address, EvmWeb3Pure.nativeTokenAddress);
+    }
+
+    public static isEmptyAddress(address?: string): boolean {
+        return address === EvmWeb3Pure.EMPTY_ADDRESS;
     }
 
     public static isAddressCorrect(address: string): boolean {

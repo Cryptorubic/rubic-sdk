@@ -8,6 +8,11 @@ export const rubicProxyContractAddress: Record<BlockchainName, string> = Object.
     if (blockchain === BLOCKCHAIN_NAME.OKE_X_CHAIN) {
         contractAddress = '0x3332241a5a4eCb4c28239A9731ad45De7f000333';
     }
+
+    if (blockchain === BLOCKCHAIN_NAME.TRON) {
+        contractAddress = 'TBzbnMwAJZdxiQmeAYrywa27BT3qQFww99';
+    }
+
     return {
         ...acc,
         [blockchain]: contractAddress

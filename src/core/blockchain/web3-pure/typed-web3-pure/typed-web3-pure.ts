@@ -10,6 +10,10 @@ export interface TypedWeb3Pure {
      */
     isNativeAddress(address: string): boolean;
 
+    EMPTY_ADDRESS: string;
+
+    isEmptyAddress(address: string): boolean;
+
     /**
      * Checks if a given address is a valid Ethereum address.
      * @param address The address to check validity of.

@@ -10,7 +10,7 @@ export const instantTradesApiSpec = () =>
         });
 
         test('Should create InstantTradesManager instance', async () => {
-            expect(typeof sdk.instantTrades).toBe('object');
+            expect(typeof sdk.onChainManager).toBe('object');
         });
 
         test('Should calculate ETH to USDT trade', async () => {
@@ -21,7 +21,7 @@ export const instantTradesApiSpec = () =>
             const toToken = '0xdac17f958d2ee523a2206206994597c13d831ec7';
             const fromAmount = 1;
 
-            const trades = await sdk.instantTrades.calculateTrade(fromToken, fromAmount, toToken);
+            const trades = await sdk.onChainManager.calculateTrade(fromToken, fromAmount, toToken);
             expect(Array.isArray(trades)).toBeTruthy();
             expect(trades.length).not.toBe(0);
         }, 400_000);

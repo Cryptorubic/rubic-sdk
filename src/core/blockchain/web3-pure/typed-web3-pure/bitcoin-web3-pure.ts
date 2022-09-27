@@ -5,12 +5,18 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 
 @staticImplements<TypedWeb3Pure>()
 export class BitcoinWeb3Pure {
+    public static readonly EMPTY_ADDRESS = '';
+
     public static get nativeTokenAddress(): string {
         return '';
     }
 
     public static isNativeAddress(address: string): boolean {
         return compareAddresses(address, BitcoinWeb3Pure.nativeTokenAddress);
+    }
+
+    public static isEmptyAddress(address?: string): boolean {
+        return address === BitcoinWeb3Pure.EMPTY_ADDRESS;
     }
 
     public static isAddressCorrect(address: string): boolean {

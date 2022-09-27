@@ -4,10 +4,10 @@ import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { PriceToken } from 'src/common/tokens/price-token';
-import { UniSwapV3EthereumTrade } from 'src/features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-trade';
-import { UNI_SWAP_V3_ETHEREUM_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/constants/provider-configuration';
-import { UNI_SWAP_V3_ETHEREUM_ROUTER_CONFIGURATION } from 'src/features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/constants/router-configuration';
-import { UniSwapV3EthereumProvider } from 'src/features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
+import { UniSwapV3EthereumTrade } from 'src/features/on-chain/providers/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-trade';
+import { UNI_SWAP_V3_ETHEREUM_PROVIDER_CONFIGURATION } from 'src/features/on-chain/providers/dexes/ethereum/uni-swap-v3-ethereum/constants/provider-configuration';
+import { UNI_SWAP_V3_ETHEREUM_ROUTER_CONFIGURATION } from 'src/features/on-chain/providers/dexes/ethereum/uni-swap-v3-ethereum/constants/router-configuration';
+import { UniSwapV3EthereumProvider } from 'src/features/on-chain/providers/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.ETHEREUM];
@@ -28,7 +28,7 @@ export const uniswapV3EthProviderSpec = () =>
 
         test('Initialize values', () => {
             expect(uniswapV3Provider.blockchain).toBe(BLOCKCHAIN_NAME.ETHEREUM);
-            expect(typeof uniswapV3Provider.InstantTradeClass).toBe(typeof UniSwapV3EthereumTrade);
+            expect(typeof uniswapV3Provider.OnChainTradeClass).toBe(typeof UniSwapV3EthereumTrade);
             expect(uniswapV3Provider.providerConfiguration).toBe(
                 UNI_SWAP_V3_ETHEREUM_PROVIDER_CONFIGURATION
             );

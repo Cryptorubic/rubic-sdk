@@ -8,34 +8,40 @@ import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { CrossChainManager } from 'src/features/cross-chain/cross-chain-manager';
 import { CrossChainStatusManager } from 'src/features/cross-chain/cross-chain-status-manager/cross-chain-status-manager';
-import { InstantTradesManager } from 'src/features/instant-trades/instant-trades-manager';
+import { OnChainManager } from 'src/features/on-chain/on-chain-manager';
 import { GasPriceApi } from 'src/core/gas-price-api/gas-price-api';
 import { CoingeckoApi } from 'src/core/coingecko-api/coingecko-api';
 import { WalletProvider, WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
+import { OnChainStatusManager } from 'src/features/on-chain/on-chain-status-manager/on-chain-status-manager';
 
 /**
  * Base class to work with sdk.
  */
 export class SDK {
     /**
-     * Instant trades manager object. Use it to calculate and create instant trades.
+     * On-chain manager object. Use it to calculate and create on-chain trades.
      */
-    public readonly instantTrades: InstantTradesManager;
+    public readonly onChainManager: OnChainManager;
 
     /**
      * Cross-chain trades manager object. Use it to calculate and create cross-chain trades.
      */
-    public readonly crossChain: CrossChainManager;
+    public readonly crossChainManager: CrossChainManager;
 
     /**
-     * Cross-chain symbiosis manager object. Use it to get pending trades in symbiosis and revert them.
+     * On-chain status manager object. Use it for special providers, which requires more than one trade.
      */
-    public readonly crossChainSymbiosisManager: CrossChainSymbiosisManager;
+    public readonly onChainStatusManager: OnChainStatusManager;
 
     /**
      * Cross-chain status manager object. Use it to get trade statuses on source and target network.
      */
     public readonly crossChainStatusManager: CrossChainStatusManager;
+
+    /**
+     * Cross-chain symbiosis manager object. Use it to get pending trades in symbiosis and revert them.
+     */
+    public readonly crossChainSymbiosisManager: CrossChainSymbiosisManager;
 
     /**
      * Can be used to get `Web3Public` instance by blockchain name to get public information from blockchain.
@@ -96,10 +102,12 @@ export class SDK {
     }
 
     private constructor(providerAddress: string) {
-        this.instantTrades = new InstantTradesManager();
-        this.crossChain = new CrossChainManager(providerAddress);
-        this.crossChainSymbiosisManager = new CrossChainSymbiosisManager();
+        this.onChainManager = new OnChainManager();
+        this.crossChainManager = new CrossChainManager(providerAddress);
+
+        this.onChainStatusManager = new OnChainStatusManager();
         this.crossChainStatusManager = new CrossChainStatusManager();
+        this.crossChainSymbiosisManager = new CrossChainSymbiosisManager();
     }
 
     /**

@@ -7,11 +7,7 @@ import {
     EvmBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
-import {
-    Web3PrivateStorage,
-    Web3PrivateSupportedChainType,
-    web3PrivateSupportedChainTypes
-} from 'src/core/blockchain/web3-private-service/models/web3-private-storage';
+import { Web3PrivateStorage } from 'src/core/blockchain/web3-private-service/models/web3-private-storage';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { EmptyWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/empty-web3-private';
 import {
@@ -22,6 +18,12 @@ import {
 } from 'src/core/sdk/models/wallet-provider';
 import { CreateWeb3Private } from 'src/core/blockchain/web3-private-service/models/create-web3-private';
 import { TronWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/tron-web3-private';
+import {
+    Web3PrivateSupportedChainType,
+    web3PrivateSupportedChainTypes
+} from 'src/core/blockchain/web3-private-service/models/web-private-supported-chain-type';
+import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
+import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 
 export class Web3PrivateService {
     public static isSupportedChainType(
@@ -60,6 +62,7 @@ export class Web3PrivateService {
 
     public getWeb3PrivateByBlockchain(blockchain: EvmBlockchainName): EvmWeb3Private;
     public getWeb3PrivateByBlockchain(blockchain: TronBlockchainName): TronWeb3Private;
+    public getWeb3PrivateByBlockchain(blockchain: Web3PrivateSupportedBlockchain): Web3Private;
     public getWeb3PrivateByBlockchain(blockchain: BlockchainName): never;
     public getWeb3PrivateByBlockchain(blockchain: BlockchainName) {
         return this.getWeb3Private(BlockchainsInfo.getChainType(blockchain));

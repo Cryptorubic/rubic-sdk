@@ -1,6 +1,6 @@
-import { JoeProvider } from 'src/features/instant-trades/dexes/avalanche/joe/joe-provider';
-import { JoeTrade } from 'src/features/instant-trades/dexes/avalanche/joe/joe-trade';
-import { JOE_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/avalanche/joe/constants';
+import { JoeProvider } from 'src/features/on-chain/providers/dexes/avalanche/joe/joe-provider';
+import { JoeTrade } from 'src/features/on-chain/providers/dexes/avalanche/joe/joe-trade';
+import { JOE_PROVIDER_CONFIGURATION } from 'src/features/on-chain/providers/dexes/avalanche/joe/constants';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const joeAvalancheProviderSpec = () => {
@@ -13,7 +13,7 @@ export const joeAvalancheProviderSpec = () => {
 
         test('Initialize values', () => {
             expect(joeProvider.blockchain).toBe(BLOCKCHAIN_NAME.AVALANCHE);
-            expect(typeof joeProvider.InstantTradeClass).toBe(typeof JoeTrade);
+            expect(typeof joeProvider.UniswapV2TradeClass).toBe(typeof JoeTrade);
             expect(joeProvider.providerSettings).toBe(JOE_PROVIDER_CONFIGURATION);
         });
     });

@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import { BigNumber as EthersBigNumber } from 'ethers';
 import { TRC20_CONTRACT_ABI } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/constants/trc-20-contract-abi';
 import { TronWebProvider } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-web-provider';
-import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure';
+import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
@@ -18,7 +18,10 @@ import { TimeoutError } from 'src/common/errors';
 import { AbiItem } from 'web3-utils';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
-import { TransactionInfo } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/transaction-info';
+import { TronTransactionInfo } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-transaction-info';
+import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
+import { TronBlock } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-block';
+import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 
 export class TronWeb3Public extends Web3Public {
     protected readonly tokenContractAbi = TRC20_CONTRACT_ABI;
@@ -58,63 +61,24 @@ export class TronWeb3Public extends Web3Public {
         }
     }
 
-    public async getBalance(address: string, tokenAddress?: string): Promise<BigNumber> {
+    public async getBalance(userAddress: string, tokenAddress?: string): Promise<BigNumber> {
         let balance;
         if (tokenAddress && !TronWeb3Pure.isNativeAddress(tokenAddress)) {
-            balance = await this.getTokenBalance(address, tokenAddress);
+            balance = await this.getTokenBalance(userAddress, tokenAddress);
         } else {
-            this.tronWeb.setAddress(address);
-            balance = await this.tronWeb.trx.getBalance(address);
+            this.tronWeb.setAddress(userAddress);
+            balance = await this.tronWeb.trx.getBalance(userAddress);
         }
         return new BigNumber(balance);
     }
 
-    public async getTokenBalance(address: string, tokenAddress: string): Promise<BigNumber> {
-        this.tronWeb.setAddress(address);
+    public async getTokenBalance(userAddress: string, tokenAddress: string): Promise<BigNumber> {
+        this.tronWeb.setAddress(userAddress);
         const contract = await this.tronWeb.contract(this.tokenContractAbi, tokenAddress);
-        const balance: EthersBigNumber = await contract.balanceOf(address).call();
-        return new BigNumber(balance.toString());
+        const balance: EthersBigNumber = await contract.balanceOf(userAddress).call();
+        return new BigNumber(balance?.toString());
     }
 
-    public async getTokensBalances(
-        address: string,
-        tokensAddresses: string[]
-    ): Promise<BigNumber[]> {
-        const indexOfNativeCoin = tokensAddresses.findIndex(TronWeb3Pure.isNativeAddress);
-        const promises = [];
-
-        if (indexOfNativeCoin !== -1) {
-            tokensAddresses.splice(indexOfNativeCoin, 1);
-            promises[1] = this.getBalance(address);
-        }
-
-        const calls: TronCall[] = tokensAddresses.map(tokenAddress => [
-            tokenAddress,
-            TronWeb3Pure.encodeFunctionCall(this.tokenContractAbi, 'balanceOf', [address])
-        ]);
-        promises[0] = this.multicall(calls);
-
-        const results = await Promise.all(
-            promises as [Promise<TronMulticallResponse>, Promise<BigNumber>]
-        );
-        const tokensBalances = results[0].results.map((success, index) =>
-            success ? new BigNumber(results[0].returnData[index]!) : new BigNumber(0)
-        );
-
-        if (indexOfNativeCoin !== -1) {
-            tokensBalances.splice(indexOfNativeCoin, 0, results[1]);
-        }
-
-        return tokensBalances;
-    }
-
-    /**
-     * Calls allowance method in TRC-20 token contract.
-     * @param tokenAddress Address of the smart-contract corresponding to the token.
-     * @param spenderAddress Wallet or contract address, allowed to spend.
-     * @param ownerAddress Wallet address to spend from.
-     * @returns Token's amount, allowed to be spent.
-     */
     public async getAllowance(
         tokenAddress: string,
         ownerAddress: string,
@@ -122,11 +86,13 @@ export class TronWeb3Public extends Web3Public {
     ): Promise<BigNumber> {
         const contract = await this.tronWeb.contract(this.tokenContractAbi, tokenAddress);
 
-        const allowance = await contract.allowance(ownerAddress, spenderAddress).call();
-        return new BigNumber(allowance);
+        const allowance: EthersBigNumber = await contract
+            .allowance(ownerAddress, spenderAddress)
+            .call();
+        return new BigNumber(allowance?.toString());
     }
 
-    public async multicallContractsMethods<Output>(
+    public async multicallContractsMethods<Output extends Web3PrimitiveType>(
         contractAbi: AbiItem[],
         contractsData: {
             contractAddress: string;
@@ -174,22 +140,44 @@ export class TronWeb3Public extends Web3Public {
         return contract.aggregateViewCalls(calls).call();
     }
 
-    public async callContractMethod<T = string>(
+    public async callContractMethod<T extends Web3PrimitiveType = string>(
         contractAddress: string,
         contractAbi: AbiItem[],
         methodName: string,
         methodArguments: unknown[] = []
     ): Promise<T> {
+        this.tronWeb.setAddress(contractAddress);
         const contract = await this.tronWeb.contract(contractAbi, contractAddress);
 
-        return contract[methodName](...methodArguments).call();
+        const response = await contract[methodName](...methodArguments).call();
+        return TronWeb3Pure.flattenParameterToPrimitive(response) as T;
     }
 
     /**
      * Gets mined transaction info.
      * @param hash Transaction hash.
      */
-    public async getTransactionInfo(hash: string): Promise<TransactionInfo> {
+    public async getTransactionInfo(hash: string): Promise<TronTransactionInfo> {
         return this.tronWeb.trx.getTransactionInfo(hash);
+    }
+
+    public async getTransactionStatus(hash: string): Promise<TxStatus> {
+        const txReceipt = await this.getTransactionInfo(hash);
+
+        if (txReceipt?.receipt) {
+            if (txReceipt.result === 'FAILED') {
+                return TxStatus.FAIL;
+            }
+            return TxStatus.SUCCESS;
+        }
+        return TxStatus.PENDING;
+    }
+
+    public async getBlock(): Promise<TronBlock> {
+        return this.tronWeb.trx.getCurrentBlock();
+    }
+
+    public async getBlockNumber(): Promise<number> {
+        return (await this.getBlock()).block_header.raw_data.number;
     }
 }

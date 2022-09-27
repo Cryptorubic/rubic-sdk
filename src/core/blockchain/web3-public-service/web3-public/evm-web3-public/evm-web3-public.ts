@@ -13,9 +13,9 @@ import Web3 from 'web3';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { AbiItem } from 'web3-utils';
 import { EvmCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-call';
-import { TransactionReceipt } from 'web3-eth';
+import { TransactionReceipt, BlockTransactionString } from 'web3-eth';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { provider as Provider, HttpProvider } from 'web3-core';
+import { provider as Provider, HttpProvider, BlockNumber } from 'web3-core';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import pTimeout from 'src/common/utils/p-timeout';
@@ -23,6 +23,8 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import BigNumber from 'bignumber.js';
 import { EventData } from 'web3-eth-contract';
+import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
+import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
@@ -72,63 +74,23 @@ export class EvmWeb3Public extends Web3Public {
         }
     }
 
-    public async getBalance(address: string, tokenAddress?: string): Promise<BigNumber> {
+    public async getBalance(userAddress: string, tokenAddress?: string): Promise<BigNumber> {
         let balance;
         if (tokenAddress && !EvmWeb3Pure.isNativeAddress(tokenAddress)) {
-            balance = await this.getTokenBalance(address, tokenAddress);
+            balance = await this.getTokenBalance(userAddress, tokenAddress);
         } else {
-            balance = await this.web3.eth.getBalance(address);
+            balance = await this.web3.eth.getBalance(userAddress);
         }
         return new BigNumber(balance);
     }
 
-    public async getTokenBalance(address: string, tokenAddress: string): Promise<BigNumber> {
+    public async getTokenBalance(userAddress: string, tokenAddress: string): Promise<BigNumber> {
         const contract = new this.web3.eth.Contract(this.tokenContractAbi, tokenAddress);
 
-        const balance = await contract.methods.balanceOf(address).call();
+        const balance = await contract.methods.balanceOf(userAddress).call();
         return new BigNumber(balance);
     }
 
-    public async getTokensBalances(
-        address: string,
-        tokensAddresses: string[]
-    ): Promise<BigNumber[]> {
-        const indexOfNativeCoin = tokensAddresses.findIndex(EvmWeb3Pure.isNativeAddress);
-        const promises = [];
-
-        if (indexOfNativeCoin !== -1) {
-            tokensAddresses.splice(indexOfNativeCoin, 1);
-            promises[1] = this.getBalance(address);
-        }
-
-        const contract = new this.web3.eth.Contract(this.tokenContractAbi);
-        const calls: EvmCall[] = tokensAddresses.map(tokenAddress => ({
-            target: tokenAddress,
-            callData: contract.methods.balanceOf(address).encodeABI()
-        }));
-        promises[0] = this.multicall(calls);
-
-        const results = await Promise.all(
-            promises as [Promise<EvmMulticallResponse[]>, Promise<BigNumber>]
-        );
-        const tokensBalances = results[0].map(({ success, returnData }) =>
-            success ? new BigNumber(returnData) : new BigNumber(0)
-        );
-
-        if (indexOfNativeCoin !== -1) {
-            tokensBalances.splice(indexOfNativeCoin, 0, results[1]);
-        }
-
-        return tokensBalances;
-    }
-
-    /**
-     * Calls allowance method in ERC-20 token contract.
-     * @param tokenAddress Address of the smart-contract corresponding to the token.
-     * @param spenderAddress Wallet or contract address, allowed to spend.
-     * @param ownerAddress Wallet address to spend from.
-     * @returns Token's amount, allowed to be spent.
-     */
     public async getAllowance(
         tokenAddress: string,
         ownerAddress: string,
@@ -140,7 +102,7 @@ export class EvmWeb3Public extends Web3Public {
         return new BigNumber(allowance);
     }
 
-    public async multicallContractsMethods<Output>(
+    public async multicallContractsMethods<Output extends Web3PrimitiveType>(
         contractAbi: AbiItem[],
         contractsData: {
             contractAddress: string;
@@ -172,12 +134,13 @@ export class EvmWeb3Public extends Web3Public {
 
                 return {
                     success: output.success,
-                    output: output.success
-                        ? (this.web3.eth.abi.decodeParameters(
-                              methodOutputAbi,
-                              output.returnData
-                          )[0] as Output)
-                        : null
+                    output:
+                        output.success && output.returnData.length > 2
+                            ? (this.web3.eth.abi.decodeParameters(
+                                  methodOutputAbi,
+                                  output.returnData
+                              )[0] as Output)
+                            : null
                 };
             })
         );
@@ -193,15 +156,22 @@ export class EvmWeb3Public extends Web3Public {
         return contract.methods.tryAggregate(false, calls).call();
     }
 
-    public async callContractMethod<T = string>(
+    public async callContractMethod<T extends Web3PrimitiveType = string>(
         contractAddress: string,
         contractAbi: AbiItem[],
         methodName: string,
-        methodArguments: unknown[] = []
+        methodArguments: unknown[] = [],
+        options: {
+            from?: string;
+            value?: string;
+        } = {}
     ): Promise<T> {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
 
-        return contract.methods[methodName](...methodArguments).call();
+        return contract.methods[methodName](...methodArguments).call({
+            ...(options.from && { from: options.from }),
+            ...(options.value && { value: options.value })
+        });
     }
 
     /**
@@ -329,6 +299,18 @@ export class EvmWeb3Public extends Web3Public {
         return this.web3.eth.getTransactionReceipt(hash);
     }
 
+    public async getTransactionStatus(hash: string): Promise<TxStatus> {
+        const txReceipt = await this.getTransactionReceipt(hash);
+
+        if (txReceipt === null) {
+            return TxStatus.PENDING;
+        }
+        if (txReceipt.status) {
+            return TxStatus.SUCCESS;
+        }
+        return TxStatus.FAIL;
+    }
+
     /**
      * Calculates the average price per unit of gas according to web3.
      * @returns Average gas price in wei.
@@ -338,9 +320,14 @@ export class EvmWeb3Public extends Web3Public {
     }
 
     /**
-     * Gets last block number.
-     * @returns Block number.
+     * Gets block by block id.
+     * @param [blockId] Block id: hash, number ... Default is 'latest'.
+     * @returns Block by blockId parameter.
      */
+    public getBlock(blockId: BlockNumber | string = 'latest'): Promise<BlockTransactionString> {
+        return this.web3.eth.getBlock(blockId);
+    }
+
     public async getBlockNumber(): Promise<number> {
         return this.web3.eth.getBlockNumber();
     }
