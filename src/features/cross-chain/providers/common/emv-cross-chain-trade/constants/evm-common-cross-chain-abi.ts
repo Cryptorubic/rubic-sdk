@@ -51,6 +51,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
     },
     {
         inputs: [
+            { internalType: 'string', name: '_providerInfo', type: 'string' },
             {
                 components: [
                     { internalType: 'address', name: 'srcInputToken', type: 'address' },
@@ -76,6 +77,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
     },
     {
         inputs: [
+            { internalType: 'string', name: '_providerInfo', type: 'string' },
             {
                 components: [
                     { internalType: 'address', name: 'srcInputToken', type: 'address' },
