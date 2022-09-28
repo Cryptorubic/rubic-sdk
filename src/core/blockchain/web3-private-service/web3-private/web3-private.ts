@@ -29,6 +29,11 @@ export abstract class Web3Private {
      */
     protected constructor(public address: string) {}
 
+    public setAddress(address: string): void {
+        this.address = address;
+        this.checkAddressCorrect();
+    }
+
     protected checkAddressCorrect(): void {
         if (!this.Web3Pure.isAddressCorrect(this.address)) {
             throw new InvalidAddressError(this.address);

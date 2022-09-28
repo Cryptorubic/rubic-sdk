@@ -116,4 +116,8 @@ export class Web3PrivateService {
             [chainType]: this.createWeb3Private[chainType](walletProviderCore)
         };
     }
+
+    public updateWeb3PrivateAddress(chainType: Web3PrivateSupportedChainType, address: string) {
+        this.web3PrivateStorage[chainType]?.setAddress(address);
+    }
 }

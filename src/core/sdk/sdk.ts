@@ -133,4 +133,8 @@ export class SDK {
     ): void {
         Injector.web3PrivateService.updateWeb3Private(chainType, walletProviderCore);
     }
+
+    public updateWalletAddress(chainType: keyof WalletProvider, address: string): void {
+        Injector.web3PrivateService.updateWeb3PrivateAddress(chainType, address);
+    }
 }
