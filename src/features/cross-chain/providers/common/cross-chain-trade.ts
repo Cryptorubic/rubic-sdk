@@ -23,6 +23,7 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { WrongReceiverAddressError } from 'src/common/errors/blockchain/wrong-receiver-address.error';
 import { ItType } from 'src/features/cross-chain/models/it-type';
 import { Network, validate } from 'bitcoin-address-validation';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
 
 /**
  * Abstract class for all cross chain providers' trades.
@@ -72,6 +73,8 @@ export abstract class CrossChainTrade {
      * Minimum amount of output token user will get.
      */
     public abstract readonly toTokenAmountMin: BigNumber;
+
+    // public readonly pureTokenAmount = this.getPureTokenAmount();
 
     /**
      * Gas fee info in source blockchain.
@@ -185,6 +188,35 @@ export abstract class CrossChainTrade {
         );
     }
 
+    public async getApprovePrice(): Promise<GasData> {
+        try {
+            const web3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
+            const [gasLimit, gasPrice] = await Promise.all([
+                web3Public.getEstimatedGas(
+                    ERC20_TOKEN_ABI,
+                    this.from.address,
+                    'approve',
+                    [this.fromContractAddress, new BigNumber(2).pow(256).minus(1)],
+                    this.walletAddress,
+                    '0'
+                ),
+                new BigNumber(await Injector.gasPriceApi.getGasPrice(this.from.blockchain))
+            ]);
+
+            if (!gasLimit?.isFinite()) {
+                return null;
+            }
+
+            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
+            return {
+                gasLimit: increasedGasLimit,
+                gasPrice
+            };
+        } catch (_err) {
+            return null;
+        }
+    }
+
     /**
      * Build encoded approve transaction config.
      * @param tokenAddress Address of the smart-contract corresponding to the token.
@@ -272,4 +304,21 @@ export abstract class CrossChainTrade {
      * Gets ratio between transit usd amount and to token amount.
      */
     public abstract getTradeAmountRatio(fromUsd: BigNumber): BigNumber;
+
+    // private async getPureTokenAmount(): Promise<BigNumber> {
+    //     const gasData = await this.getApprovePrice();
+    //     const approveGas = new BigNumber(gasData?.gasLimit || 0).multipliedBy(
+    //         gasData?.gasPrice || 0
+    //     );
+    //     const nativeToken = await PriceToken.createToken({
+    //         address: EMPTY_ADDRESS,
+    //         blockchain: this.from.blockchain
+    //     });
+    //     const priceTokenAmount = await PriceTokenAmount.createFromToken({
+    //         ...nativeToken.asStruct,
+    //         tokenAmount: Web3Pure.fromWei(approveGas)
+    //     });
+    //     const approvePrice = priceTokenAmount.price.multipliedBy(priceTokenAmount.weiAmount);
+    //     const finalPrice = this.feeInfo.cryptoFee?.amount;
+    // }
 }

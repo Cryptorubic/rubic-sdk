@@ -139,9 +139,7 @@ export class RubicCrossChainTradeProvider extends CelerRubicCrossChainTradeProvi
             };
         }
 
-        return {
-            trade
-        };
+        return { trade };
     }
 
     protected async calculateBestTrade(
