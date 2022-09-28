@@ -62,6 +62,7 @@ export async function getMethodArgumentsAndTransactionData<
         ? TronWeb3Pure.addressToHex(options.receiverAddress)
         : options.receiverAddress;
     const methodArguments: unknown[] = [
+        'native:bridgers',
         [
             from.address,
             from.stringWeiAmount,
