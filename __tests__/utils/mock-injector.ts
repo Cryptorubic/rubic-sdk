@@ -1,17 +1,15 @@
-import { DefaultHttpClient } from '@rsdk-common/http/default-http-client';
-import { Web3PrivateFactory } from '@rsdk-core/blockchain/web3-private/web3-private-factory';
-import { Web3PublicService } from '@rsdk-core/blockchain/web3-public/web3-public-service';
-import { Injector } from '@rsdk-core/sdk/injector';
+import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
+import { Web3PrivateService } from 'src/core/blockchain/web3-private-service/web3-private-service';
+import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
+import { Injector } from 'src/core/injector/injector';
 import { Configuration } from 'src/core';
 
 export async function mockInjector(configuration: Configuration): Promise<void> {
-    const web3PublicService = await Web3PublicService.createWeb3PublicService(
-        configuration.rpcProviders
-    );
-    const web3Private = await Web3PrivateFactory.createWeb3Private(configuration.walletProvider);
+    const web3PublicService = new Web3PublicService(configuration.rpcProviders);
+    const web3PrivateService = new Web3PrivateService(configuration.walletProvider);
     const httpClient = configuration.httpClient || (await DefaultHttpClient.getInstance());
 
-    Injector.createInjector(web3PublicService, web3Private, httpClient);
+    Injector.createInjector(web3PublicService, web3PrivateService, httpClient);
 }
 
 export function mockEmptyInjector(): void {

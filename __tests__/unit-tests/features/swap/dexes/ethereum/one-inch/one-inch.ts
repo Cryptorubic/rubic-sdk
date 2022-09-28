@@ -1,7 +1,7 @@
 import { TRADE_TYPE } from 'src/features';
-import { OneinchEthereumProvider } from 'src/features/instant-trades/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
+import { OneinchEthereumProvider } from 'src/features/on-chain/providers/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
 import { mockEmptyInjector } from '__tests__/utils/mock-injector';
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const oneinchProviderEthereumSpec = () => {
     let oneinchProvider: OneinchEthereumProvider;
