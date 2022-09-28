@@ -1,6 +1,7 @@
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { RpcProviders } from 'src/core/sdk/models/rpc-provider';
 import { WalletProvider } from 'src/core/sdk/models/wallet-provider';
+import { ProviderAddress } from 'src/core/sdk/models/provider-address';
 
 /**
  * Main sdk configuration.
@@ -29,5 +30,5 @@ export interface Configuration {
     /**
      * Integrator wallet address.
      */
-    readonly providerAddress?: string;
+    readonly providerAddress?: Partial<ProviderAddress>;
 }

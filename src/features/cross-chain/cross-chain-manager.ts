@@ -30,6 +30,8 @@ import { CrossChainProvider } from 'src/features/cross-chain/providers/common/cr
 import { combineOptions } from 'src/common/utils/options';
 import BigNumber from 'bignumber.js';
 import { BridgersCrossChainProvider } from 'src/features/cross-chain/providers/bridgers-provider/bridgers-cross-chain-provider';
+import { ProviderAddress } from 'src/core/sdk/models/provider-address';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 
 type RequiredCrossChainManagerCalculationOptions = MarkRequired<
     CrossChainManagerCalculationOptions,
@@ -61,7 +63,7 @@ export class CrossChainManager {
         return acc;
     }, {} as Mutable<CrossChainTypedTradeProviders>);
 
-    constructor(private readonly providerAddress: string) {}
+    constructor(private readonly providerAddress: ProviderAddress) {}
 
     /**
      * Calculates cross-chain trades and sorts them by exchange courses.
@@ -128,7 +130,11 @@ export class CrossChainManager {
             toToken
         );
 
-        return this.calculateBestTradeFromTokens(from, to, this.getFullOptions(options));
+        return this.calculateBestTradeFromTokens(
+            from,
+            to,
+            this.getFullOptions(from.blockchain, options)
+        );
     }
 
     /**
@@ -193,7 +199,10 @@ export class CrossChainManager {
         ).pipe(
             switchMap(tokens => {
                 const { from, to } = tokens;
-                const { disabledProviders, ...providersOptions } = this.getFullOptions(options);
+                const { disabledProviders, ...providersOptions } = this.getFullOptions(
+                    from.blockchain,
+                    options
+                );
 
                 const providers = Object.entries(this.tradeProviders).filter(([type, provider]) => {
                     if (disabledProviders.includes(type as CrossChainTradeType)) {
@@ -336,15 +345,17 @@ export class CrossChainManager {
     }
 
     private getFullOptions(
+        fromBlockchain: BlockchainName,
         options?: CrossChainManagerCalculationOptions
     ): RequiredCrossChainManagerCalculationOptions {
+        const chainType = BlockchainsInfo.getChainType(fromBlockchain) as keyof ProviderAddress;
         return combineOptions<RequiredCrossChainManagerCalculationOptions>(options, {
             fromSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
             toSlippageTolerance: CrossChainManager.defaultSlippageTolerance,
             gasCalculation: 'disabled',
             disabledProviders: [],
             timeout: CrossChainManager.defaultCalculationTimeout,
-            providerAddress: this.providerAddress,
+            providerAddress: this.providerAddress[chainType],
             slippageTolerance: CrossChainManager.defaultSlippageTolerance * 2,
             deadline: CrossChainManager.defaultDeadline
         });
@@ -355,11 +366,7 @@ export class CrossChainManager {
         to: PriceToken,
         options: RequiredCrossChainManagerCalculationOptions
     ): Promise<WrappedCrossChainTrade[]> {
-        const wrappedTrades = await this.calculateTradeFromTokens(
-            from,
-            to,
-            this.getFullOptions(options)
-        );
+        const wrappedTrades = await this.calculateTradeFromTokens(from, to, options);
 
         const fromTokenPrice =
             (

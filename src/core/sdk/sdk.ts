@@ -13,6 +13,9 @@ import { GasPriceApi } from 'src/core/gas-price-api/gas-price-api';
 import { CoingeckoApi } from 'src/core/coingecko-api/coingecko-api';
 import { WalletProvider, WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 import { OnChainStatusManager } from 'src/features/on-chain/on-chain-status-manager/on-chain-status-manager';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
+import { ProviderAddress } from 'src/core/sdk/models/provider-address';
 
 /**
  * Base class to work with sdk.
@@ -81,9 +84,13 @@ export class SDK {
             SDK.createWeb3PrivateService(configuration),
             SDK.createHttpClient(configuration)
         ]);
-
         Injector.createInjector(web3PublicService, web3PrivateService, httpClient);
-        return new SDK(configuration.providerAddress || EvmWeb3Pure.EMPTY_ADDRESS);
+
+        return new SDK({
+            [CHAIN_TYPE.EVM]: EvmWeb3Pure.EMPTY_ADDRESS,
+            [CHAIN_TYPE.TRON]: TronWeb3Pure.EMPTY_ADDRESS,
+            ...configuration.providerAddress
+        });
     }
 
     private static createWeb3PrivateService(configuration: Configuration): Web3PrivateService {
@@ -101,7 +108,7 @@ export class SDK {
         return configuration.httpClient;
     }
 
-    private constructor(providerAddress: string) {
+    private constructor(providerAddress: ProviderAddress) {
         this.onChainManager = new OnChainManager();
         this.crossChainManager = new CrossChainManager(providerAddress);
 
