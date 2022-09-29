@@ -185,7 +185,10 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             txTo
         ];
 
-        const methodArguments: unknown[] = [routerCallParams];
+        const methodArguments: unknown[] = [
+            `${this.type.toLowerCase()}:${this.bridgeType}`,
+            routerCallParams
+        ];
 
         if (!this.from.isNative) {
             methodArguments.push(txTo);

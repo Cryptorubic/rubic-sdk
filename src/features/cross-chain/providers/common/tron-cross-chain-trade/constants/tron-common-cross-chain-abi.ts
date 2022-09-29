@@ -58,6 +58,7 @@ export const tronCommonCrossChainAbi = [
     },
     {
         inputs: [
+            { name: '_providerInfo', type: 'string' },
             {
                 name: '_params',
                 type: 'tuple',
@@ -81,6 +82,7 @@ export const tronCommonCrossChainAbi = [
     },
     {
         inputs: [
+            { name: '_providerInfo', type: 'string' },
             {
                 name: '_params',
                 type: 'tuple',
