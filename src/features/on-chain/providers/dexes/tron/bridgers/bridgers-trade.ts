@@ -19,6 +19,7 @@ import {
     BridgersSwapRequest,
     BridgersSwapResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-swap-api';
+import { TokenAmountSymbol } from 'src/common/tokens/models/token-amount-symbol';
 
 export class BridgersTrade extends TronOnChainTrade {
     public readonly from: PriceTokenAmount<TronBlockchainName>;
@@ -31,8 +32,16 @@ export class BridgersTrade extends TronOnChainTrade {
 
     protected readonly contractAddress: string;
 
+    public readonly cryptoFeeToken: TokenAmountSymbol;
+
+    public readonly platformFeePercent: number;
+
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.BRIDGERS;
+    }
+
+    public get toTokenAmountMin(): PriceTokenAmount {
+        return this.to;
     }
 
     constructor(tradeStruct: {
@@ -40,6 +49,8 @@ export class BridgersTrade extends TronOnChainTrade {
         to: PriceTokenAmount<TronBlockchainName>;
         slippageTolerance: number;
         contractAddress: string;
+        cryptoFeeToken: TokenAmountSymbol;
+        platformFeePercent: number;
     }) {
         super();
 
@@ -47,6 +58,8 @@ export class BridgersTrade extends TronOnChainTrade {
         this.to = tradeStruct.to;
         this.slippageTolerance = tradeStruct.slippageTolerance;
         this.contractAddress = tradeStruct.contractAddress;
+        this.cryptoFeeToken = tradeStruct.cryptoFeeToken;
+        this.platformFeePercent = tradeStruct.platformFeePercent;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {

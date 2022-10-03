@@ -1,6 +1,6 @@
-import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { CrossChainTradeData } from 'src/features/cross-chain/cross-chain-status-manager/models/cross-chain-trade-data';
 import { CelerTransferStatus } from 'src/features/cross-chain/cross-chain-status-manager/models/celer-transfer-status.enum';
+import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 
 export interface DeBridgeApiResponse {
     claim: {
@@ -54,9 +54,4 @@ export interface CelerXtransferStatusResponse {
     }[];
 }
 
-export interface DstTxData {
-    txStatus: TxStatus;
-    txHash: string | null;
-}
-
-export type GetDstTxDataFn = (data: CrossChainTradeData) => Promise<DstTxData>;
+export type GetDstTxDataFn = (data: CrossChainTradeData) => Promise<TxStatusData>;
