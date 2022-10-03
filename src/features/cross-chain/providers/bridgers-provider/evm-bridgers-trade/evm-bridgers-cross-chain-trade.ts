@@ -152,8 +152,12 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         const encodedData = transactionData.data;
         methodArguments.push(encodedData);
 
-        const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
-        const value = new BigNumber(transactionData.value).plus(fixedFee).toFixed();
+        const sourceValue = this.from.isNative ? this.from.weiAmount : 0;
+        const bridgersValueFee = new BigNumber(transactionData.value).minus(
+            this.from.isNative ? this.fromAmountWithoutFeeWei : 0
+        );
+        const fixedFee = Web3Pure.toWei(this.feeInfo.fixedFee?.amount || 0);
+        const value = new BigNumber(sourceValue).plus(fixedFee).plus(bridgersValueFee).toFixed(0);
 
         return {
             contractAddress: this.fromContractAddress,
