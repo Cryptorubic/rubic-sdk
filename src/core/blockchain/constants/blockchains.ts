@@ -223,5 +223,16 @@ export const blockchains: ReadonlyArray<Blockchain> = [
             symbol: 'ETHW',
             decimals: 18
         })
+    },
+    {
+        id: 32520,
+        name: BLOCKCHAIN_NAME.BITGERT,
+        nativeCoin: new Token({
+            blockchain: BLOCKCHAIN_NAME.BITGERT,
+            address: '',
+            name: 'Brise',
+            symbol: 'BRISE',
+            decimals: 18
+        })
     }
 ];

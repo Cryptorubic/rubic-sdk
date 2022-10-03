@@ -143,5 +143,11 @@ export const nativeTokensList: NativeTokensList = {
         name: 'Ethereum PoW',
         symbol: 'ETHW',
         decimals: 18
+    },
+    [BLOCKCHAIN_NAME.BITGERT]: {
+        address: NATIVE_TOKEN_ADDRESS,
+        name: 'Brise',
+        symbol: 'BRISE',
+        decimals: 18
     }
 };

@@ -36,7 +36,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.VIA]: this.getViaDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.BITGERT_BRIDGE]: this.getBitgertDstSwapStatus
     };
 
     /**
@@ -496,6 +497,14 @@ export class CrossChainStatusManager {
                 txHash: null
             };
         }
+    }
+
+    private async getBitgertDstSwapStatus(
+        data: CrossChainTradeData,
+        _srcTxReceipt: TransactionReceipt
+    ): Promise<DstTxData> {
+        console.log(data);
+        return { txStatus: CrossChainTxStatus.PENDING, txHash: null };
     }
 
     /**

@@ -21,7 +21,8 @@ export const BLOCKCHAIN_NAME = {
     BOBA: 'BOBA',
     ASTAR: 'ASTAR',
     BITCOIN: 'BITCOIN',
-    ETHEREUM_POW: 'ETHW'
+    ETHEREUM_POW: 'ETHW',
+    BITGERT: 'BITGERT'
 } as const;
 
 export type BlockchainName = typeof BLOCKCHAIN_NAME[keyof typeof BLOCKCHAIN_NAME];
