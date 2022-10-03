@@ -10,13 +10,13 @@ import {
     BridgersGetTransDataByIdRequest,
     BridgersGetTransDataByIdResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-get-trans-data-by-id-api';
-import { DstTxData } from 'src/features/cross-chain/cross-chain-status-manager/models/statuses-api';
+import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 
 export async function getBridgersTradeStatus(
     srcTxHash: string,
     fromBlockchain: BridgersCrossChainSupportedBlockchain,
     sourceFlag: 'rubic' | 'rubic_widget'
-): Promise<DstTxData> {
+): Promise<TxStatusData> {
     try {
         const updateDataAndStatusRequest: BridgersUpdateDataAndStatusRequest = {
             hash: srcTxHash,
@@ -31,8 +31,8 @@ export async function getBridgersTradeStatus(
         const orderId = updateDataAndStatusResponse.data?.orderId;
         if (!orderId) {
             return {
-                txStatus: TxStatus.PENDING,
-                txHash: null
+                status: TxStatus.PENDING,
+                hash: null
             };
         }
 
@@ -47,27 +47,27 @@ export async function getBridgersTradeStatus(
         const transactionData = getTransDataByIdResponse.data;
         if (!transactionData?.status) {
             return {
-                txStatus: TxStatus.PENDING,
-                txHash: null
+                status: TxStatus.PENDING,
+                hash: null
             };
         }
 
         if (transactionData.status === 'receive_complete') {
             return {
-                txStatus: TxStatus.SUCCESS,
-                txHash: transactionData.toHash
+                status: TxStatus.SUCCESS,
+                hash: transactionData.toHash
             };
         }
         if (transactionData.status.includes('error') || transactionData.status.includes('fail')) {
             return {
-                txStatus: TxStatus.FAIL,
-                txHash: null
+                status: TxStatus.FAIL,
+                hash: null
             };
         }
     } catch {}
 
     return {
-        txStatus: TxStatus.PENDING,
-        txHash: null
+        status: TxStatus.PENDING,
+        hash: null
     };
 }
