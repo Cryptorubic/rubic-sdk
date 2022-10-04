@@ -25,6 +25,7 @@ import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/c
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import { viaContractAddress } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
 import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
+import { getFromWithoutFee } from 'src/features/cross-chain/utils/get-from-without-fee';
 
 interface ToolType extends IActionStepTool {
     type: 'swap' | 'cross';
@@ -69,6 +70,9 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
             const fromChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id;
             const toChainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id;
 
+            let feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+
             const via = new Via({
                 ...VIA_DEFAULT_CONFIG,
                 timeout: options.timeout
@@ -81,7 +85,7 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 fromChainId,
                 fromTokenAddress: from.address,
                 // `number` max value is less, than from wei amount
-                fromAmount: from.stringWeiAmount as unknown as number,
+                fromAmount: fromWithoutFee.stringWeiAmount as unknown as number,
                 toChainId,
                 toTokenAddress: toToken.address,
                 ...(fromAddress && { fromAddress }),
@@ -140,8 +144,8 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
             const additionalFee = bestRoute.actions[0]?.additionalProviderFee;
             const cryptoFeeAmount = Web3Pure.fromWei(additionalFee?.amount.toString() || 0);
             const cryptoFeeSymbol = additionalFee?.token.symbol;
-            const feeInfo = {
-                ...(await this.getFeeInfo(fromBlockchain, options.providerAddress, from)),
+            feeInfo = {
+                ...feeInfo,
                 cryptoFee: additionalFee
                     ? {
                           amount: cryptoFeeAmount,

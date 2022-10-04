@@ -19,6 +19,7 @@ import {
 import { NotWhitelistedProviderError } from 'src/common/errors/swap/not-whitelisted-provider.error';
 import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { CrossChainTrade } from 'src/features/cross-chain/providers/common/cross-chain-trade';
+import { getFromWithoutFee } from 'src/features/cross-chain/utils/get-from-without-fee';
 import { RANGO_CONTRACT_ADDRESSES } from './constants/contract-address';
 import { RangoCrossChainSupportedBlockchain } from './constants/rango-cross-chain-supported-blockchain';
 import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';
@@ -107,7 +108,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
 
     public readonly slippageTolerance: number;
 
-    public readonly gasData: GasData | null;
+    public readonly gasData: GasData;
 
     public readonly priceImpact: number | null;
 
@@ -142,7 +143,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
             bridgeType: BridgeType | undefined;
             priceImpact: number | null;
             cryptoFeeToken: PriceTokenAmount;
-            gasData: GasData | null;
+            gasData: GasData;
         },
         rangoClientRef: RangoClient,
         providerAddress: string
@@ -206,7 +207,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
     }
 
     public async getContractParams(): Promise<ContractParams> {
-        const { txData, value, txTo } = await this.refetchTxData();
+        const { txData, value: providerValue, txTo } = await this.refetchTxData();
 
         await this.checkProviderIsWhitelisted(txTo);
 
@@ -231,23 +232,19 @@ export class RangoCrossChainTrade extends CrossChainTrade {
         }
         methodArguments.push(txData);
 
-        const sourceValue = this.from.isNative ? this.from.stringWeiAmount : '0';
-        const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
-        const msgValue = new BigNumber(sourceValue)
-            .plus(fixedFee)
-            .plus(value ? `${value}` : 0)
-            .toFixed(0);
+        const value = this.getSwapValue(providerValue);
 
         return {
             contractAddress: this.fromContractAddress,
             contractAbi: commonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,
-            value: msgValue
+            value
         };
     }
 
     private async refetchTxData(): Promise<EvmTransaction> {
+        const amountWithoutFee = getFromWithoutFee(this.from, this.feeInfo).stringWeiAmount;
         const response = await this.rangoClientRef.swap({
             from: {
                 blockchain:
@@ -263,7 +260,7 @@ export class RangoCrossChainTrade extends CrossChainTrade {
                 symbol: this.to.symbol,
                 address: this.to.isNative ? null : this.to.address
             },
-            amount: this.from.weiAmount.toFixed(0),
+            amount: amountWithoutFee,
             disableEstimate: false,
             slippage: String(this.slippageTolerance * 100),
             fromAddress: this.walletAddress,
