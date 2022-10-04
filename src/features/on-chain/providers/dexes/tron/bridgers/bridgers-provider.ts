@@ -19,6 +19,7 @@ import {
     BridgersQuoteRequest,
     BridgersQuoteResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
+import { TokenAmountSymbol } from 'src/common/tokens/models/token-amount-symbol';
 
 export class BridgersProvider extends TronOnChainProvider {
     private readonly defaultOptions: BridgersCalculationOptions = {
@@ -69,11 +70,19 @@ export class BridgersProvider extends TronOnChainProvider {
             tokenAmount: new BigNumber(transactionData.toTokenAmount)
         });
 
+        const cryptoFeeToken: TokenAmountSymbol = {
+            tokenAmount: new BigNumber(transactionData.chainFee),
+            symbol: toToken.symbol
+        };
+        const platformFeePercent = transactionData.fee * 100;
+
         return new BridgersTrade({
             from,
             to,
             slippageTolerance: fullOptions.slippageTolerance,
-            contractAddress: transactionData.contractAddress
+            contractAddress: transactionData.contractAddress,
+            cryptoFeeToken,
+            platformFeePercent
         });
     }
 }
