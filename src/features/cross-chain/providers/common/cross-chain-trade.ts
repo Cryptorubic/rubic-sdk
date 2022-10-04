@@ -17,7 +17,6 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 import { ItType } from 'src/features/cross-chain/providers/common/models/it-type';
 import { isAddressCorrect } from 'src/features/common/utils/check-address';
-import { ERC20_TOKEN_ABI } from 'src/core/blockchain/constants/erc-20-abi';
 
 /**
  * Abstract class for all cross-chain providers' trades.
@@ -127,35 +126,6 @@ export abstract class CrossChainTrade {
      * @param options Encode transaction options.
      */
     public abstract encode(options: EncodeTransactionOptions): Promise<unknown>;
-
-    public async getApprovePrice(): Promise<GasData> {
-        try {
-            const web3Public = Injector.web3PublicService.getWeb3Public(this.from.blockchain);
-            const [gasLimit, gasPrice] = await Promise.all([
-                web3Public.getEstimatedGas(
-                    ERC20_TOKEN_ABI,
-                    this.from.address,
-                    'approve',
-                    [this.fromContractAddress, new BigNumber(2).pow(256).minus(1)],
-                    this.walletAddress,
-                    '0'
-                ),
-                new BigNumber(await Injector.gasPriceApi.getGasPrice(this.from.blockchain))
-            ]);
-
-            if (!gasLimit?.isFinite()) {
-                return null;
-            }
-
-            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
-            return {
-                gasLimit: increasedGasLimit,
-                gasPrice
-            };
-        } catch (_err) {
-            return null;
-        }
-    }
 
     /**
      * Build encoded approve transaction config.
