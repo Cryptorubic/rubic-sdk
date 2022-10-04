@@ -5,7 +5,8 @@ import {
     LowSlippageError,
     RubicSdkError,
     TransactionRevertedError,
-    UserRejectError
+    UserRejectError,
+    InsufficientFundsGasPriceValueError
 } from 'src/common/errors';
 import { AbiItem } from 'web3-utils';
 import { parseError } from 'src/common/utils/errors';
@@ -33,6 +34,9 @@ export class EvmWeb3Private extends Web3Private {
         }
         if (err.message.includes('execution reverted: UNIV3R: min return')) {
             return new LowSlippageError();
+        }
+        if (err.message.includes('execution reverted: Address: low-level call with value failed')) {
+            return new InsufficientFundsGasPriceValueError();
         }
         if (err.message.includes('Failed to check for transaction receipt')) {
             return new FailedToCheckForTransactionReceiptError();
