@@ -1,25 +1,33 @@
 import {
     ChainId,
     CHAINS_PRIORITY,
+    PendingRequest,
     Symbiosis,
     Token as SymbiosisToken,
-    PendingRequest,
     WaitForComplete
 } from 'symbiosis-js-sdk';
-import { getSymbiosisConfig } from '@rsdk-features/cross-chain/providers/symbiosis-trade-provider/constants/symbiosis-config';
-import { Injector } from '@rsdk-core/sdk/injector';
-import BigNumber from 'bignumber.js';
-import { SwapTransactionOptions } from 'src/features';
-import { RubicSdkError } from 'src/common';
-import { BlockchainName, BlockchainsInfo, Token } from 'src/core';
-import { TransactionReceipt as EthersReceipt, Log as EthersLog } from '@ethersproject/providers';
 import { TransactionReceipt } from 'web3-eth';
+import { getSymbiosisConfig } from 'src/features/cross-chain/providers/symbiosis-provider/constants/symbiosis-config';
+import { RubicSdkError } from 'src/common/errors';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Injector } from 'src/core/injector/injector';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { Token } from 'src/common/tokens';
+import { Log as EthersLog, TransactionReceipt as EthersReceipt } from '@ethersproject/providers';
+import BigNumber from 'bignumber.js';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 
 export class CrossChainSymbiosisManager {
     private readonly symbiosis = new Symbiosis(getSymbiosisConfig(), 'rubic');
 
+    private get web3Private(): EvmWeb3Private {
+        return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM);
+    }
+
     private get walletAddress(): string {
-        return Injector.web3Private.address;
+        return this.web3Private.address;
     }
 
     public getUserTrades(fromAddress?: string): Promise<PendingRequest[]> {
@@ -45,8 +53,8 @@ export class CrossChainSymbiosisManager {
         toToken: Token,
         receipt: TransactionReceipt
     ): Promise<EthersLog> {
-        const fromChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id as ChainId;
-        const toChainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id as ChainId;
+        const fromChainId = blockchainId[fromBlockchain] as ChainId;
+        const toChainId = blockchainId[toBlockchain] as ChainId;
         const tokenOut = new SymbiosisToken({
             chainId: toChainId,
             address: toToken.isNative ? '' : toToken.address,
@@ -86,7 +94,7 @@ export class CrossChainSymbiosisManager {
             }
         };
 
-        return Injector.web3Private.trySendTransaction(
+        return this.web3Private.trySendTransaction(
             transactionRequest.to!,
             new BigNumber(transactionRequest.value?.toString() || 0),
             {

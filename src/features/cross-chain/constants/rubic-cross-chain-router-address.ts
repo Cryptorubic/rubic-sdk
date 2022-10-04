@@ -1,1 +1,0 @@
-export const rubicCrossChainRouterAddress = '0x3335A88bb18fD3b6824b59Af62b50CE494143333';

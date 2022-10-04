@@ -1,5 +1,5 @@
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
-import { SDK } from '@rsdk-core/sdk/sdk';
+import { SDK } from 'src/core/sdk/sdk';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { minimalConfiguration } from '../utils/configuration';
 
 export const crossChainApiSpec = () =>
@@ -10,7 +10,7 @@ export const crossChainApiSpec = () =>
         });
 
         test('Should create InstantTradesManager instance', async () => {
-            expect(typeof sdk.crossChain).toBe('object');
+            expect(typeof sdk.crossChainManager).toBe('object');
         });
 
         test('Should calculate MATIC to USDT trade', async () => {
@@ -24,7 +24,7 @@ export const crossChainApiSpec = () =>
             };
             const fromAmount = 100;
 
-            const trade = await sdk.crossChain.calculateTrade(
+            const trade = await sdk.crossChainManager.calculateTrade(
                 fromToken,
                 fromAmount.toString(),
                 toToken

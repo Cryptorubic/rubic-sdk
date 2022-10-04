@@ -1,5 +1,5 @@
-import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';
-import { BlockchainName } from 'src/core';
+import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 /**
  * Thrown by 1inch, if user doesn't have enough balance.

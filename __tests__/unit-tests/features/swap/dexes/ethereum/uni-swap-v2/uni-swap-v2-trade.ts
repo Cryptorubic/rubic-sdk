@@ -1,14 +1,14 @@
 import { Chain } from '__tests__/utils/chain';
 import { mockInjector } from '__tests__/utils/mock-injector';
 import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
-import { Injector } from '@rsdk-core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import BigNumber from 'bignumber.js';
 import { Web3Public } from 'src/core';
-import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
-import { PriceToken } from 'src/core/blockchain/tokens/price-token';
+import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
+import { PriceToken } from 'src/common/tokens/price-token';
 import { TransactionReceipt } from 'web3-eth';
 import { UniSwapV2EthereumProvider } from '@rsdk-features/instant-trades/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-provider';
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import fn = jest.fn;
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.ETHEREUM];
@@ -46,7 +46,7 @@ export const uniswapV2TradeSpec = () =>
             const configuration = await chain.getConfiguration();
             await mockInjector(configuration);
             web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ETHEREUM);
-            userAddress = Injector.web3Private.address;
+            userAddress = Injector.web3PrivateService.address;
         }, 20_000);
 
         test('Swap method must works with NATIVE-ERC20 trade', async () => {
