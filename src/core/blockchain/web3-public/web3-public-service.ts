@@ -6,6 +6,7 @@ import { Web3Public } from '@rsdk-core/blockchain/web3-public/web3-public';
 import { RpcProvider } from '@rsdk-core/sdk/models/configuration';
 import Web3 from 'web3';
 import { RpcListProvider } from 'src/core/blockchain/web3-public/constants/rpc-list-provider';
+import cloneDeep from 'lodash.clonedeep';
 
 export class Web3PublicService {
     private static readonly mainRpcDefaultTimeout = 10_000;
@@ -88,7 +89,7 @@ export class Web3PublicService {
                     return async function method(...params: unknown[]): Promise<unknown> {
                         const curRpc = rpcProvider.rpcList[0]!;
 
-                        const methodParams = structuredClone(params);
+                        const methodParams = cloneDeep(params);
                         const callMethod = () => (target[prop] as Function).call(target, ...params);
                         try {
                             return await pTimeout(
