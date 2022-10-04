@@ -206,7 +206,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
             fromContracts.providerRouter
         ];
 
-        const methodArguments: unknown[] = [swapArguments];
+        const methodArguments: unknown[] = [`native:${this.type.toLowerCase()}`, swapArguments];
         if (!this.from.isNative) {
             methodArguments.push(fromContracts.providerGateway);
         }

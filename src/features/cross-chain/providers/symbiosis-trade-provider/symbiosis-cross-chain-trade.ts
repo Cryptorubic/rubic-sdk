@@ -212,7 +212,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain].providerRouter
         ];
 
-        const methodArguments: unknown[] = [swapArguments];
+        const methodArguments: unknown[] = [`native:${this.type.toLowerCase()}`, swapArguments];
         if (!this.from.isNative) {
             methodArguments.push(SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain].providerGateway);
         }

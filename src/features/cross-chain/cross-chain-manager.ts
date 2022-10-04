@@ -35,7 +35,6 @@ import { ViaCrossChainTradeProvider } from '@rsdk-features/cross-chain/providers
 import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade-provider';
 import { SymbiosisCrossChainTradeProvider } from 'src/features/cross-chain/providers/symbiosis-trade-provider/symbiosis-cross-chain-trade-provider';
 import { LifiCrossChainTradeProvider } from 'src/features/cross-chain/providers/lifi-trade-provider/lifi-cross-chain-trade-provider';
-import { RubicCrossChainTradeProvider } from 'src/features/cross-chain/providers/rubic-trade-provider/rubic-cross-chain-trade-provider';
 import { ViaCrossChainTrade } from 'src/features/cross-chain/providers/via-trade-provider/via-cross-chain-trade';
 import { DebridgeCrossChainTrade } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade';
 import { Injector } from 'src/core/sdk/injector';
@@ -57,7 +56,6 @@ export class CrossChainManager {
     private static readonly defaultDeadline = 20;
 
     public readonly tradeProviders: CcrTypedTradeProviders = [
-        RubicCrossChainTradeProvider,
         CelerCrossChainTradeProvider,
         SymbiosisCrossChainTradeProvider,
         LifiCrossChainTradeProvider,

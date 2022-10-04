@@ -240,7 +240,10 @@ export class ViaCrossChainTrade extends CrossChainTrade {
             providerRouter
         ];
 
-        const methodArguments: unknown[] = [swapArguments];
+        const methodArguments: unknown[] = [
+            `${this.type.toLowerCase()}:${this.bridgeType}`,
+            swapArguments
+        ];
         let providerGateway: string | undefined;
         if (!this.from.isNative) {
             const approveTransaction = await this.via.buildApprovalTx({

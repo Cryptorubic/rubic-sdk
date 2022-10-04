@@ -213,7 +213,10 @@ export class LifiCrossChainTrade extends CrossChainTrade {
             fromContracts.providerRouter
         ];
 
-        const methodArguments: unknown[] = [swapArguments];
+        const methodArguments: unknown[] = [
+            `${this.type.toLowerCase()}:${this.bridgeType}`,
+            swapArguments
+        ];
         if (!this.from.isNative) {
             methodArguments.push(fromContracts.providerGateway);
         }

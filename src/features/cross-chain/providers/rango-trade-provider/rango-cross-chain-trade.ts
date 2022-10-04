@@ -221,7 +221,10 @@ export class RangoCrossChainTrade extends CrossChainTrade {
             txTo
         ];
 
-        const methodArguments: unknown[] = [routerCallParams];
+        const methodArguments: unknown[] = [
+            `${this.type.toLowerCase()}:${this.bridgeType}`,
+            routerCallParams
+        ];
 
         if (!this.from.isNative) {
             methodArguments.push(txTo);
