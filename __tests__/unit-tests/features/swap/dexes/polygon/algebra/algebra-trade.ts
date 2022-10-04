@@ -2,11 +2,11 @@ import { Chain } from '__tests__/utils/chain';
 import { mockInjector } from '__tests__/utils/mock-injector';
 import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
 import { Utils } from '__tests__/unit-tests/features/swap/utils/utils';
-import { Injector } from '@rsdk-core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import BigNumber from 'bignumber.js';
 import { BLOCKCHAIN_NAME, Web3Public } from 'src/core';
-import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
-import { PriceToken } from 'src/core/blockchain/tokens/price-token';
+import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
+import { PriceToken } from 'src/common/tokens/price-token';
 import { AlgebraProvider } from '@rsdk-features/instant-trades/dexes/polygon/algebra/algebra-provider';
 import fn = jest.fn;
 
@@ -29,7 +29,7 @@ export const algebraPolygonTradeSpec = () => {
             const configuration = await chain.getConfiguration();
             await mockInjector(configuration);
             web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.POLYGON);
-            userAddress = Injector.web3Private.address;
+            userAddress = Injector.web3PrivateService.address;
             utils = new Utils(chain, web3Public);
         });
 

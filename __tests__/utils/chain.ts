@@ -1,4 +1,4 @@
-import { ERC20_TOKEN_ABI } from '@rsdk-core/blockchain/constants/erc-20-abi';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { generateAccountsFromMnemonic } from '__tests__/utils/accounts-from-mnemonic';
 import {
     publicProvidersRPC,
@@ -8,10 +8,12 @@ import { DEFAULT_MNEMONIC } from '__tests__/utils/constants/mnemonic';
 import { TOKENS_HOLDERS } from '__tests__/utils/tokens';
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
-import { BlockchainName, Configuration, Token } from 'src/core';
+import { BlockchainName, Configuration } from 'src/core';
 import * as util from 'util';
 import Web3 from 'web3';
 import { HttpProvider } from 'web3-core';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { Token } from 'src/common';
 
 export class Chain {
     private static walletsNumber = 10;
@@ -50,7 +52,6 @@ export class Chain {
     private constructor(public web3: Web3, public accounts: string[]) {}
 
     public async getConfiguration(): Promise<Configuration> {
-        const chainId = await this.web3.eth.getChainId();
         return {
             rpcProviders: Object.fromEntries(
                 Object.entries(publicProvidersRPC).map(([key, value]) => [
@@ -61,9 +62,10 @@ export class Chain {
                 ])
             ),
             walletProvider: {
-                core: this.web3,
-                chainId,
-                address: this.accounts[0]
+                [CHAIN_TYPE.EVM]: {
+                    core: this.web3,
+                    address: this.accounts[0]
+                }
             }
         };
     }

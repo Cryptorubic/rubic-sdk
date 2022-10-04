@@ -1,7 +1,7 @@
-import { SushiSwapAvalancheProvider } from 'src/features/instant-trades/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
-import { SushiSwapAvalancheTrade } from 'src/features/instant-trades/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-trade';
-import { SUSHI_SWAP_AVALANCHE_PROVIDER_CONFIGURATION } from 'src/features/instant-trades/dexes/avalanche/sushi-swap-avalanche/constants';
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { SushiSwapAvalancheProvider } from 'src/features/on-chain/providers/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
+import { SushiSwapAvalancheTrade } from 'src/features/on-chain/providers/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-trade';
+import { SUSHI_SWAP_AVALANCHE_PROVIDER_CONFIGURATION } from 'src/features/on-chain/providers/dexes/avalanche/sushi-swap-avalanche/constants';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const sushiSwapAvalancheProviderSpec = () => {
     describe('SushiSwap provider tests', () => {
@@ -13,7 +13,9 @@ export const sushiSwapAvalancheProviderSpec = () => {
 
         test('Initialize values', () => {
             expect(sushiSwapProvider.blockchain).toBe(BLOCKCHAIN_NAME.AVALANCHE);
-            expect(typeof sushiSwapProvider.InstantTradeClass).toBe(typeof SushiSwapAvalancheTrade);
+            expect(typeof sushiSwapProvider.UniswapV2TradeClass).toBe(
+                typeof SushiSwapAvalancheTrade
+            );
             expect(sushiSwapProvider.providerSettings).toBe(
                 SUSHI_SWAP_AVALANCHE_PROVIDER_CONFIGURATION
             );

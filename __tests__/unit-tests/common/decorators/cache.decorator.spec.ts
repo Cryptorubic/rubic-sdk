@@ -1,5 +1,5 @@
 import JestMockPromise from 'jest-mock-promise';
-import { Cache } from 'src/common';
+import { Cache } from 'src/common/utils/decorators';
 import fn = jest.fn;
 
 describe('Cache decorator tests', () => {

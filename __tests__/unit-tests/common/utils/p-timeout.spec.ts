@@ -1,6 +1,6 @@
-import { TimeoutError } from '@rsdk-common/errors/utils/timeout.error';
-import pTimeout from '@rsdk-common/utils/p-timeout';
+import { TimeoutError } from 'src/common/errors';
 import CancelablePromise from 'cancelable-promise';
+import pTimeout from 'src/common/utils/p-timeout';
 import delay from 'delay';
 import fn = jest.fn;
 
