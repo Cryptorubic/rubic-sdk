@@ -9,6 +9,7 @@ import { GasData } from '../../models/gas-data';
 import { ItType } from '../../models/it-type';
 import { CrossChainTrade } from '../common/cross-chain-trade';
 import { FeeInfo } from '../common/models/fee';
+import { bitgertApiUrl } from './constants/bitgert-api-url';
 import { bitgertBridgeAbi } from './constants/bitgert-bridge-abi';
 import { BitgertCrossChainSupportedBlockchain } from './constants/bitgert-cross-chain-supported-blockchain';
 import { bitgertBridges } from './constants/contract-address';
@@ -81,18 +82,22 @@ export class BitgertCrossChainTrade extends CrossChainTrade {
             const receipt = await Injector.web3Private.tryExecuteContractMethod(
                 bitgertBridges[this.from.symbol]![
                     this.from.blockchain as BitgertCrossChainSupportedBlockchain
-                ],
+                ] as string,
                 bitgertBridgeAbi,
                 'swap',
                 [this.from.weiAmount],
                 { onTransactionHash }
             );
-            const api = await Injector.httpClient.post('https://bitgert.rubic.exchange/api/', {
-                fromChain: this.from.blockchain,
-                toChain: this.to.blockchain,
-                hash: receipt.transactionHash,
-                account: Injector.web3Private.address
-            });
+            console.log(bitgertApiUrl.baseUrl + bitgertApiUrl.swap[this.from.symbol]);
+            const api = await Injector.httpClient.post(
+                bitgertApiUrl.baseUrl + bitgertApiUrl.swap[this.from.symbol],
+                {
+                    fromChain: this.from.blockchain,
+                    toChain: this.to.blockchain,
+                    hash: receipt.transactionHash,
+                    account: Injector.web3Private.address
+                }
+            );
             console.log(api);
 
             return receipt.transactionHash;
