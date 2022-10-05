@@ -197,21 +197,4 @@ export abstract class CrossChainTrade {
      * Gets ratio between transit usd amount and to token amount.
      */
     public abstract getTradeAmountRatio(fromUsd: BigNumber): BigNumber;
-
-    // private async getPureTokenAmount(): Promise<BigNumber> {
-    //     const gasData = await this.getApprovePrice();
-    //     const approveGas = new BigNumber(gasData?.gasLimit || 0).multipliedBy(
-    //         gasData?.gasPrice || 0
-    //     );
-    //     const nativeToken = await PriceToken.createToken({
-    //         address: EMPTY_ADDRESS,
-    //         blockchain: this.from.blockchain
-    //     });
-    //     const priceTokenAmount = await PriceTokenAmount.createFromToken({
-    //         ...nativeToken.asStruct,
-    //         tokenAmount: Web3Pure.fromWei(approveGas)
-    //     });
-    //     const approvePrice = priceTokenAmount.price.multipliedBy(priceTokenAmount.weiAmount);
-    //     const finalPrice = this.feeInfo.cryptoFee?.amount;
-    // }
 }
