@@ -17,7 +17,6 @@ import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
 import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/constants/common-cross-chain-abi';
 import { ContractParams } from 'src/features/cross-chain/models/contract-params';
 import { TransactionRequest } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-request';
-import { BytesLike } from 'ethers';
 import { TransactionResponse } from 'src/features/cross-chain/providers/debridge-trade-provider/models/transaction-response';
 import { DebridgeCrossChainTradeProvider } from 'src/features/cross-chain/providers/debridge-trade-provider/debridge-cross-chain-trade-provider';
 
@@ -188,7 +187,9 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
     }
 
     public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
-        const data = await this.getTransactionRequest(options?.receiverAddress);
+        const { data, value: providerValue } = await this.getTransactionRequest(
+            options?.receiverAddress
+        );
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
         const fromContracts =
             DE_BRIDGE_CONTRACT_ADDRESS[
@@ -212,10 +213,7 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
         }
         methodArguments.push(data);
 
-        const sourceValue = this.from.isNative ? this.from.stringWeiAmount : '0';
-        const cryptoFee = Web3Pure.toWei(this.feeInfo?.cryptoFee?.amount || 0);
-        const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
-        const value = new BigNumber(sourceValue).plus(cryptoFee).plus(fixedFee).toFixed(0);
+        const value = this.getSwapValue(providerValue);
 
         return {
             contractAddress: fromContracts.rubicRouter,
@@ -233,7 +231,10 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
         return fromUsd.plus(usdCryptoFee.isNaN() ? 0 : usdCryptoFee).dividedBy(this.to.tokenAmount);
     }
 
-    private async getTransactionRequest(receiverAddress?: string): Promise<BytesLike> {
+    private async getTransactionRequest(receiverAddress?: string): Promise<{
+        data: string;
+        value: string;
+    }> {
         const params = {
             ...this.transactionRequest,
             ...(receiverAddress && { dstChainTokenOutRecipient: receiverAddress })
@@ -243,6 +244,6 @@ export class DebridgeCrossChainTrade extends CrossChainTrade {
             DebridgeCrossChainTradeProvider.apiEndpoint,
             { params }
         );
-        return tx.data;
+        return tx;
     }
 }

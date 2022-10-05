@@ -197,7 +197,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
             this.walletAddress,
             options?.receiverAddress
         );
-        const { data } = exactIn.transactionRequest;
+        const { data, value: providerValue } = exactIn.transactionRequest;
         const toChainId = BlockchainsInfo.getBlockchainByName(this.to.blockchain).id;
         const swapArguments = [
             this.from.address,
@@ -218,9 +218,7 @@ export class SymbiosisCrossChainTrade extends CrossChainTrade {
         }
         methodArguments.push(data);
 
-        const sourceValue = this.from.isNative ? this.from.stringWeiAmount : '0';
-        const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
-        const value = new BigNumber(sourceValue).plus(fixedFee).toFixed(0);
+        const value = this.getSwapValue(providerValue?.toString());
 
         return {
             contractAddress: SYMBIOSIS_CONTRACT_ADDRESS[this.fromBlockchain].rubicRouter,

@@ -17,9 +17,9 @@ import { CrossChainMinAmountError } from 'src/common/errors/cross-chain/cross-ch
 import { CrossChainMaxAmountError } from 'src/common/errors/cross-chain/cross-chain-max-amount.error';
 import { TradeType } from 'src/features/instant-trades';
 import { rangoProviders } from 'src/features/instant-trades/dexes/common/rango/constants/rango-providers';
-import { NATIVE_TOKEN_ADDRESS } from 'src/core/blockchain/constants/native-token-address';
 import { UnsupportedReceiverAddressError } from 'src/common/errors/cross-chain/unsupported-receiver-address.error';
 import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
+import { getFromWithoutFee } from 'src/features/cross-chain/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { commonCrossChainAbi } from '../common/constants/common-cross-chain-abi';
@@ -64,26 +64,8 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
         );
     }
 
-    public isSupportedToken(token: PriceTokenAmount): boolean {
-        if (this.meta) {
-            const newLocal = token.address === NATIVE_TOKEN_ADDRESS;
-            if (newLocal) {
-                return true;
-            }
-
-            return this.meta.tokens.some(
-                item =>
-                    item.address?.toLocaleLowerCase() === token.address.toLowerCase() &&
-                    item.blockchain === token.blockchain
-            );
-        }
-        return false;
-    }
-
-    // @TODO Reduce complexity
-
     public async calculate(
-        fromToken: PriceTokenAmount,
+        from: PriceTokenAmount,
         toToken: PriceTokenAmount,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
@@ -91,7 +73,7 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
             throw new UnsupportedReceiverAddressError();
         }
 
-        const fromBlockchain = fromToken.blockchain as RangoCrossChainSupportedBlockchain;
+        const fromBlockchain = from.blockchain as RangoCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as RangoCrossChainSupportedBlockchain;
 
         if (!this.isSupportedBlockchains(fromBlockchain, toBlockchain)) {
@@ -103,48 +85,30 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
             RANGO_CONTRACT_ADDRESSES[fromBlockchain].rubicRouter
         );
 
-        const price = await fromToken.getAndUpdateTokenPrice();
-        const amountUsdPrice = fromToken.tokenAmount.multipliedBy(price);
+        const price = await from.getAndUpdateTokenPrice();
+        const amountUsdPrice = from.tokenAmount.multipliedBy(price);
 
         if (price && amountUsdPrice.lt(101)) {
             return {
                 trade: null,
                 error: new CrossChainMinAmountError(
                     new BigNumber(101).dividedBy(price),
-                    fromToken.symbol
+                    from.symbol
                 )
             };
         }
 
-        const request = this.getRequestParams(fromToken, toToken, options);
-
         try {
+            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+            const request = this.getRequestParams(fromWithoutFee, toToken, options);
+
             const { route, resultType, tx } = await this.rango.swap(request);
 
-            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
             const networkFee = route?.fee.find(item => item.name === 'Network Fee');
 
             if ((resultType === 'INPUT_LIMIT_ISSUE' || resultType === 'NO_ROUTE') && route) {
-                const { amountRestriction } = route;
-                if (amountRestriction?.min && fromToken.weiAmount.lte(amountRestriction.min)) {
-                    return {
-                        trade: null,
-                        error: new CrossChainMinAmountError(
-                            Web3Pure.fromWei(amountRestriction.min, fromToken.decimals),
-                            fromToken.symbol
-                        )
-                    };
-                }
-
-                if (amountRestriction?.max && fromToken.weiAmount.gte(amountRestriction.max)) {
-                    return {
-                        trade: null,
-                        error: new CrossChainMaxAmountError(
-                            Web3Pure.fromWei(amountRestriction.max, fromToken.decimals),
-                            fromToken.symbol
-                        )
-                    };
-                }
+                return this.parseMinMaxAmountErrors(from, route);
             }
 
             if (resultType === 'OK' && route) {
@@ -152,23 +116,27 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
                     ...toToken.asStruct,
                     tokenAmount: Web3Pure.fromWei(route.outputAmount, toToken.decimals)
                 });
+
                 const cryptoFeeToken = await PriceTokenAmount.createFromToken({
                     ...BlockchainsInfo.getBlockchainByName(fromBlockchain).nativeCoin,
                     weiAmount: new BigNumber(parseInt((tx as EvmTransaction).value || '0')).minus(
-                        fromToken.isNative ? fromToken.stringWeiAmount : 0
+                        from.isNative ? from.stringWeiAmount : 0
                     )
                 });
+
                 const gasData =
                     options.gasCalculation === 'enabled'
-                        ? await RangoCrossChainTrade.getGasData(fromToken, toToken)
+                        ? await RangoCrossChainTrade.getGasData(from, toToken)
                         : null;
+
                 const { bridgeType, itType } = this.parseTradeTypes(route as QuoteSimulationResult);
+
                 const rangoTrade = new RangoCrossChainTrade(
                     {
-                        from: fromToken,
+                        from,
                         to,
                         toTokenAmountMin: Web3Pure.fromWei(route.outputAmount, toToken.decimals),
-                        priceImpact: fromToken.calculatePriceImpactPercent(toToken),
+                        priceImpact: from.calculatePriceImpactPercent(toToken),
                         itType,
                         bridgeType,
                         slippageTolerance: options.slippageTolerance as number,
@@ -231,6 +199,34 @@ export class RangoCrossChainTradeProvider extends CrossChainTradeProvider {
             referrerAddress: null,
             referrerFee: null
         };
+    }
+
+    private parseMinMaxAmountErrors(
+        fromToken: PriceTokenAmount,
+        route: QuoteSimulationResult
+    ): CalculationResult {
+        const { amountRestriction } = route;
+        if (amountRestriction?.min && fromToken.weiAmount.lte(amountRestriction.min)) {
+            return {
+                trade: null,
+                error: new CrossChainMinAmountError(
+                    Web3Pure.fromWei(amountRestriction.min, fromToken.decimals),
+                    fromToken.symbol
+                )
+            };
+        }
+
+        if (amountRestriction?.max && fromToken.weiAmount.gte(amountRestriction.max)) {
+            return {
+                trade: null,
+                error: new CrossChainMaxAmountError(
+                    Web3Pure.fromWei(amountRestriction.max, fromToken.decimals),
+                    fromToken.symbol
+                )
+            };
+        }
+
+        return null;
     }
 
     private parseTradeTypes(route: QuoteSimulationResult): {

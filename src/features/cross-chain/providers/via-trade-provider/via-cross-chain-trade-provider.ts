@@ -14,7 +14,6 @@ import BigNumber from 'bignumber.js';
 import {
     IActionStepTool,
     IGetRoutesRequestParams,
-    IGetRoutesResponse,
     IRoute
 } from '@viaprotocol/router-sdk/dist/types';
 import { ItType } from 'src/features/cross-chain/models/it-type';
@@ -25,6 +24,7 @@ import { commonCrossChainAbi } from 'src/features/cross-chain/providers/common/c
 import { nativeTokensList } from 'src/core/blockchain/constants/native-tokens';
 import { viaContractAddress } from 'src/features/cross-chain/providers/via-trade-provider/constants/contract-data';
 import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
+import { getFromWithoutFee } from 'src/features/cross-chain/utils/get-from-without-fee';
 
 interface ToolType extends IActionStepTool {
     type: 'swap' | 'cross';
@@ -69,19 +69,21 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
             const fromChainId = BlockchainsInfo.getBlockchainByName(fromBlockchain).id;
             const toChainId = BlockchainsInfo.getBlockchainByName(toBlockchain).id;
 
+            let feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+
             const via = new Via({
                 ...VIA_DEFAULT_CONFIG,
                 timeout: options.timeout
             });
 
-            const pages = await via.routesPages();
             const fromAddress = this.walletAddress;
             const toAddress = options.receiverAddress || this.walletAddress;
             const params: IGetRoutesRequestParams = {
                 fromChainId,
                 fromTokenAddress: from.address,
                 // `number` max value is less, than from wei amount
-                fromAmount: from.stringWeiAmount as unknown as number,
+                fromAmount: fromWithoutFee.stringWeiAmount as unknown as number,
                 toChainId,
                 toTokenAddress: toToken.address,
                 ...(fromAddress && { fromAddress }),
@@ -89,23 +91,10 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 multiTx: false,
                 limit: 1
             };
-            const wrappedRoutes = await Promise.allSettled(
-                [...Array(pages)].map((_, i) =>
-                    via.getRoutes({
-                        ...params,
-                        offset: i + 1
-                    })
-                )
-            );
-            const routes = (
-                wrappedRoutes.filter(
-                    wrappedRoute =>
-                        wrappedRoute.status === 'fulfilled' && wrappedRoute.value.routes.length
-                ) as PromiseFulfilledResult<IGetRoutesResponse>[]
-            )
-                .map(wrappedRoute => wrappedRoute.value.routes)
-                .flat()
-                .filter(route => this.parseBridge(route));
+            const wrappedRoutes = await via.getRoutes({
+                ...params
+            });
+            const routes = wrappedRoutes.routes.filter(route => this.parseBridge(route));
             if (!routes.length) {
                 return null;
             }
@@ -140,8 +129,8 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
             const additionalFee = bestRoute.actions[0]?.additionalProviderFee;
             const cryptoFeeAmount = Web3Pure.fromWei(additionalFee?.amount.toString() || 0);
             const cryptoFeeSymbol = additionalFee?.token.symbol;
-            const feeInfo = {
-                ...(await this.getFeeInfo(fromBlockchain, options.providerAddress, from)),
+            feeInfo = {
+                ...feeInfo,
                 cryptoFee: additionalFee
                     ? {
                           amount: cryptoFeeAmount,

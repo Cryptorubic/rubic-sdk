@@ -2,7 +2,6 @@ import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/co
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features';
 import { BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
-
 import { Injector } from '@rsdk-core/sdk/injector';
 import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
 import {
@@ -24,6 +23,7 @@ import { EMPTY_ADDRESS } from 'src/core/blockchain/constants/empty-address';
 import { RubicSdkError } from 'src/common';
 import { TooLowAmountError } from 'src/common/errors/cross-chain/too-low-amount.error';
 import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
+import { getFromWithoutFee } from 'src/features/cross-chain/utils/get-from-without-fee';
 
 export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -77,20 +77,14 @@ export class DebridgeCrossChainTradeProvider extends CrossChainTradeProvider {
             );
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-
-            const feeAmount = Web3Pure.toWei(
-                from.tokenAmount.multipliedBy(feeInfo.platformFee!.percent).dividedBy(100),
-                from.decimals,
-                1
-            );
-            const tokenAmountIn = from.weiAmount.minus(feeAmount).toFixed(0);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
 
             const slippageTolerance = options.slippageTolerance * 100;
 
             const requestParams: TransactionRequest = {
                 srcChainId: BlockchainsInfo.getBlockchainByName(fromBlockchain).id,
                 srcChainTokenIn: from.address,
-                srcChainTokenInAmount: tokenAmountIn,
+                srcChainTokenInAmount: fromWithoutFee.stringWeiAmount,
                 slippage: slippageTolerance,
                 dstChainId: BlockchainsInfo.getBlockchainByName(toBlockchain).id,
                 dstChainTokenOut: toToken.address,

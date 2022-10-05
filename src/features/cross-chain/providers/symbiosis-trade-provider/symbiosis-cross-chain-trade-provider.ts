@@ -1,8 +1,7 @@
 import { CrossChainTradeProvider } from '@rsdk-features/cross-chain/providers/common/cross-chain-trade-provider';
 import { CROSS_CHAIN_TRADE_TYPE, InstantTradeProvider } from 'src/features';
-import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo, PriceToken, Web3Pure } from 'src/core';
+import { BLOCKCHAIN_NAME, BlockchainName, BlockchainsInfo, PriceToken } from 'src/core';
 import { RequiredCrossChainOptions } from '@rsdk-features/cross-chain/models/cross-chain-options';
-
 import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
@@ -40,6 +39,7 @@ import { ZappyProvider } from 'src/features/instant-trades/dexes/telos/zappy/tri
 import { TransactionRequest } from '@ethersproject/abstract-provider';
 import { TooLowAmountError } from 'src/common/errors/cross-chain/too-low-amount.error';
 import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
+import { getFromWithoutFee } from 'src/features/cross-chain/utils/get-from-without-fee';
 
 export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
     public static isSupportedBlockchain(
@@ -113,15 +113,8 @@ export class SymbiosisCrossChainTradeProvider extends CrossChainTradeProvider {
             });
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-
-            const feeAmount = Web3Pure.toWei(
-                from.tokenAmount.multipliedBy(feeInfo.platformFee!.percent).dividedBy(100),
-                from.decimals,
-                1
-            );
-            const tokenInWithFee = from.weiAmount.minus(feeAmount).toFixed(0);
-
-            const tokenAmountIn = new SymbiosisTokenAmount(tokenIn, tokenInWithFee);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+            const tokenAmountIn = new SymbiosisTokenAmount(tokenIn, fromWithoutFee.stringWeiAmount);
 
             const tokenOut = isBitcoinSwap
                 ? null

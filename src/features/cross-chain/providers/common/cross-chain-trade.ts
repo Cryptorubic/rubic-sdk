@@ -272,4 +272,23 @@ export abstract class CrossChainTrade {
      * Gets ratio between transit usd amount and to token amount.
      */
     public abstract getTradeAmountRatio(fromUsd: BigNumber): BigNumber;
+
+    protected getSwapValue(providerValue?: BigNumber | string | number | null): string {
+        const fixedFeeValue = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
+
+        let fromValue: BigNumber;
+        if (this.from.isNative) {
+            if (providerValue) {
+                fromValue = new BigNumber(providerValue).dividedBy(
+                    1 - (this.feeInfo.platformFee?.percent || 0) / 100
+                );
+            } else {
+                fromValue = this.from.weiAmount;
+            }
+        } else {
+            fromValue = new BigNumber(providerValue || 0);
+        }
+
+        return new BigNumber(fromValue).plus(fixedFeeValue).toFixed(0, 0);
+    }
 }
