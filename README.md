@@ -199,7 +199,7 @@
     ```
 
 4. When user connects wallet (e.g. MetaMask) you should change configuration to use trade `swap` method.<br />
-**Recalculate trades after this**.
+**⚠️ Recalculate trades after this**.
     ```typescript
     import { WalletProvider, CHAIN_TYPE, Configuration } from 'rubic-sdk';
    
