@@ -1,11 +1,11 @@
 export const CROSS_CHAIN_TRADE_TYPE = {
-    RUBIC: 'RUBIC',
     CELER: 'CELER',
     SYMBIOSIS: 'SYMBIOSIS',
     LIFI: 'LIFI',
     DEBRIDGE: 'DEBRIDGE',
     VIA: 'VIA',
-    RANGO: 'RANGO'
+    RANGO: 'RANGO',
+    BRIDGERS: 'BRIDGERS'
 } as const;
 
 export type CrossChainTradeType = keyof typeof CROSS_CHAIN_TRADE_TYPE;

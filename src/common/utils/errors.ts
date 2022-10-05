@@ -1,4 +1,4 @@
-import { RubicSdkError } from 'src/common';
+import { RubicSdkError } from 'src/common/errors';
 
 export function parseError(err: unknown, defaultMessage?: string): RubicSdkError {
     if (err instanceof RubicSdkError) {

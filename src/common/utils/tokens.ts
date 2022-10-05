@@ -1,28 +1,26 @@
-import { TokenBaseStruct } from '@rsdk-core/blockchain/models/token-base-struct';
-import { Token } from '@rsdk-core/blockchain/tokens/token';
-import { PriceToken } from '@rsdk-core/blockchain/tokens/price-token';
-import { PriceTokenAmount } from '@rsdk-core/blockchain/tokens/price-token-amount';
+import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import BigNumber from 'bignumber.js';
-import { BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 
-export async function getPriceTokensFromInputTokens(
+export async function getPriceTokensFromInputTokens<T extends BlockchainName = BlockchainName>(
     from:
-        | Token
+        | Token<T>
         | {
               address: string;
-              blockchain: BlockchainName;
+              blockchain: T;
           },
     fromAmount: string,
     to:
-        | Token
+        | Token<T>
         | string
         | {
               address: string;
-              blockchain: BlockchainName;
+              blockchain: T;
           }
 ): Promise<{
-    from: PriceTokenAmount;
-    to: PriceToken;
+    from: PriceTokenAmount<T>;
+    to: PriceToken<T>;
 }> {
     const fromPriceTokenPromise =
         from instanceof Token ? PriceToken.createFromToken(from) : PriceToken.createToken(from);
@@ -30,10 +28,10 @@ export async function getPriceTokensFromInputTokens(
     let toPriceTokenPromise;
     switch (true) {
         case to instanceof Token:
-            toPriceTokenPromise = PriceToken.createFromToken(to as Token);
+            toPriceTokenPromise = PriceToken.createFromToken(to as Token<T>);
             break;
         case typeof to === 'object':
-            toPriceTokenPromise = PriceToken.createToken(to as TokenBaseStruct);
+            toPriceTokenPromise = PriceToken.createToken(to as TokenBaseStruct<T>);
             break;
         default:
             toPriceTokenPromise = PriceToken.createToken({

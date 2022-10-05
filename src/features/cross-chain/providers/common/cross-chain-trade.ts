@@ -1,60 +1,30 @@
-import {
-    BasicTransactionOptions,
-    BLOCKCHAIN_NAME,
-    BlockchainName,
-    PriceTokenAmount,
-    TransactionOptions,
-    Web3Public,
-    Web3Pure
-} from 'src/core';
-import { GasData } from '@rsdk-features/cross-chain/models/gas-data';
-import { Injector } from '@rsdk-core/sdk/injector';
-import BigNumber from 'bignumber.js';
-import {
-    CrossChainTradeType,
-    EncodeTransactionOptions,
-    SwapTransactionOptions
-} from 'src/features';
-import { UnnecessaryApproveError, WalletNotConnectedError } from 'src/common';
-import { TransactionReceipt } from 'web3-eth';
-import { ContractParams } from '@rsdk-features/cross-chain/models/contract-params';
-import { TransactionConfig } from 'web3-core';
 import { FeeInfo } from 'src/features/cross-chain/providers/common/models/fee';
-import { WrongReceiverAddressError } from 'src/common/errors/blockchain/wrong-receiver-address.error';
-import { ItType } from 'src/features/cross-chain/models/it-type';
-import { Network, validate } from 'bitcoin-address-validation';
+import { Injector } from 'src/core/injector/injector';
+import {
+    RubicSdkError,
+    WalletNotConnectedError,
+    WrongFromAddressError,
+    WrongReceiverAddressError
+} from 'src/common/errors';
+import { CrossChainTradeType } from 'src/features/cross-chain/models/cross-chain-trade-type';
+import { PriceTokenAmount } from 'src/common/tokens';
+import BigNumber from 'bignumber.js';
+import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
+import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
+import { HttpClient } from 'src/core/http-client/models/http-client';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
+import { ItType } from 'src/features/cross-chain/providers/common/models/it-type';
+import { isAddressCorrect } from 'src/features/common/utils/check-address';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
 /**
- * Abstract class for all cross chain providers' trades.
+ * Abstract class for all cross-chain providers' trades.
  */
 export abstract class CrossChainTrade {
     /**
-     * Checks receiver address for correctness.
-     * @param receiverAddress Receiver address.
-     * @param toBlockchain Target blockchain.
-     */
-    public static checkReceiverAddress(
-        receiverAddress: string | undefined,
-        toBlockchain?: BlockchainName
-    ): void {
-        if (!receiverAddress) {
-            return;
-        }
-        if (toBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
-            const isAddressValid = validate(receiverAddress, Network.mainnet);
-            if (isAddressValid) {
-                return;
-            }
-            throw new WrongReceiverAddressError();
-        }
-        if (Web3Pure.isAddressCorrect(receiverAddress)) {
-            return;
-        }
-        throw new WrongReceiverAddressError();
-    }
-
-    /**
-     * Type of calculated cross chain trade.
+     * Type of calculated cross-chain trade.
      */
     public abstract readonly type: CrossChainTradeType;
 
@@ -69,70 +39,46 @@ export abstract class CrossChainTrade {
     public abstract readonly to: PriceTokenAmount;
 
     /**
-     * Minimum amount of output token user will get.
+     * Minimum amount of output token user will get in Eth units.
      */
     public abstract readonly toTokenAmountMin: BigNumber;
-
-    /**
-     * Gas fee info in source blockchain.
-     */
-    public abstract readonly gasData: GasData;
-
-    protected abstract readonly fromWeb3Public: Web3Public;
-
-    protected abstract get fromContractAddress(): string;
-
-    public abstract readonly itType: ItType;
 
     /**
      * Swap fee information.
      */
     public abstract readonly feeInfo: FeeInfo;
 
-    protected get walletAddress(): string {
-        return Injector.web3Private.address;
+    public abstract readonly itType: ItType;
+
+    protected abstract get fromContractAddress(): string;
+
+    protected get httpClient(): HttpClient {
+        return Injector.httpClient;
     }
 
-    protected get networkFee(): BigNumber {
-        return new BigNumber(this.feeInfo.fixedFee?.amount || 0).plus(
-            this.feeInfo.cryptoFee?.amount || 0
-        );
+    protected get fromWeb3Public(): Web3Public {
+        return Injector.web3PublicService.getWeb3Public(this.from.blockchain);
+    }
+
+    protected get web3Private(): Web3Private {
+        return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
+    }
+
+    protected get walletAddress(): string {
+        return this.web3Private.address;
     }
 
     protected get methodName(): string {
         return this.from.isNative ? 'routerCallNative' : 'routerCall';
     }
 
-    /**
-     * Gets gas fee in source blockchain.
-     */
-    public get estimatedGas(): BigNumber | null {
-        if (!this.gasData) {
-            return null;
-        }
-        return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
+    public get networkFee(): BigNumber {
+        return new BigNumber(this.feeInfo.fixedFee?.amount || 0).plus(
+            this.feeInfo.cryptoFee?.amount || 0
+        );
     }
 
     protected constructor(protected readonly providerAddress: string) {}
-
-    /**
-     * Sends swap transaction with connected wallet.
-     * If user has not enough allowance, then approve transaction will be called first.
-     *
-     * @example
-     * ```ts
-     * const onConfirm = (hash: string) => console.log(hash);
-     * const receipt = await trade.swap({ onConfirm });
-     * ```
-     *
-     * @param options Transaction options.
-     */
-    public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
-
-    public abstract getContractParams(options: {
-        fromAddress?: string;
-        receiverAddress?: string;
-    }): Promise<ContractParams>;
 
     /**
      * Returns true, if allowance is not enough.
@@ -157,33 +103,30 @@ export abstract class CrossChainTrade {
      * @param options Transaction options.
      * @param checkNeedApprove If true, first allowance is checked.
      */
-    public async approve(
+    public abstract approve(
         options: BasicTransactionOptions,
-        checkNeedApprove = true
-    ): Promise<TransactionReceipt> {
-        if (checkNeedApprove) {
-            const needApprove = await this.needApprove();
-            if (!needApprove) {
-                throw new UnnecessaryApproveError();
-            }
-        }
+        checkNeedApprove?: boolean
+    ): Promise<unknown>;
 
-        this.checkWalletConnected();
-        await this.checkBlockchainCorrect();
+    /**
+     * Sends swap transaction with connected wallet.
+     * If user has not enough allowance, then approve transaction will be called first.
+     *
+     * @example
+     * ```ts
+     * const onConfirm = (hash: string) => console.log(hash);
+     * const receipt = await trade.swap({ onConfirm });
+     * ```
+     *
+     * @param options Transaction options.
+     */
+    public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
 
-        const approveAmount =
-            this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ||
-            this.from.blockchain === BLOCKCHAIN_NAME.CRONOS
-                ? this.from.weiAmount
-                : 'infinity';
-
-        return Injector.web3Private.approveTokens(
-            this.from.address,
-            this.fromContractAddress,
-            approveAmount,
-            options
-        );
-    }
+    /**
+     * Builds transaction config, with encoded data.
+     * @param options Encode transaction options.
+     */
+    public abstract encode(options: EncodeTransactionOptions): Promise<unknown>;
 
     /**
      * Build encoded approve transaction config.
@@ -193,53 +136,16 @@ export abstract class CrossChainTrade {
      * @param [options] Additional options.
      * @returns Encoded approve transaction config.
      */
-    public async encodeApprove(
+    public abstract encodeApprove(
         tokenAddress: string,
         spenderAddress: string,
         value: BigNumber | 'infinity',
-        options: TransactionOptions = {}
-    ): Promise<TransactionConfig> {
-        return Injector.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
-    }
+        options: BasicTransactionOptions
+    ): Promise<unknown>;
 
-    protected async checkAllowanceAndApprove(
-        options?: Omit<SwapTransactionOptions, 'onConfirm'>
-    ): Promise<void> {
-        const needApprove = await this.needApprove();
-        if (!needApprove) {
-            return;
-        }
-
-        const approveOptions: BasicTransactionOptions = {
-            onTransactionHash: options?.onApprove,
-            gas: options?.approveGasLimit,
-            gasPrice: options?.gasPrice
-        };
-
-        await this.approve(approveOptions, false);
-    }
-
-    /**
-     * Builds transaction config, with encoded data.
-     * @param options Encode transaction options.
-     */
-    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
-        const { gasLimit, gasPrice } = options;
-
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams({ fromAddress: options?.fromAddress });
-
-        return Web3Pure.encodeMethodCall(
-            contractAddress,
-            contractAbi,
-            methodName,
-            methodArguments,
-            value,
-            {
-                gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
-                gasPrice: gasPrice || this.gasData?.gasPrice.toFixed()
-            }
-        );
+    protected async checkTradeErrors(): Promise<void | never> {
+        this.checkWalletConnected();
+        await Promise.all([this.checkBlockchainCorrect(), this.checkUserBalance()]);
     }
 
     protected checkWalletConnected(): never | void {
@@ -249,22 +155,42 @@ export abstract class CrossChainTrade {
     }
 
     protected async checkBlockchainCorrect(): Promise<void | never> {
-        await Injector.web3Private.checkBlockchainCorrect(this.from.blockchain);
+        await this.web3Private.checkBlockchainCorrect(this.from.blockchain);
     }
 
-    protected checkUserBalance(): Promise<void | never> {
-        return this.fromWeb3Public.checkBalance(
+    protected async checkUserBalance(): Promise<void | never> {
+        await this.fromWeb3Public.checkBalance(
             this.from,
             this.from.tokenAmount,
             this.walletAddress
         );
     }
 
-    protected async checkTradeErrors(): Promise<void | never> {
-        this.checkWalletConnected();
-        await this.checkBlockchainCorrect();
+    protected checkFromAddress(fromAddress: string | undefined, isRequired = false): void | never {
+        if (!fromAddress) {
+            if (isRequired) {
+                throw new RubicSdkError(`'fromAddress' is required option`);
+            }
+            return;
+        }
+        if (!isAddressCorrect(fromAddress, this.from.blockchain)) {
+            throw new WrongFromAddressError();
+        }
+    }
 
-        await this.checkUserBalance();
+    protected checkReceiverAddress(
+        receiverAddress: string | undefined,
+        isRequired = false
+    ): void | never {
+        if (!receiverAddress) {
+            if (isRequired) {
+                throw new RubicSdkError(`'receiverAddress' is required option`);
+            }
+            return;
+        }
+        if (!isAddressCorrect(receiverAddress, this.to.blockchain)) {
+            throw new WrongReceiverAddressError();
+        }
     }
 
     /**
@@ -272,4 +198,27 @@ export abstract class CrossChainTrade {
      * Gets ratio between transit usd amount and to token amount.
      */
     public abstract getTradeAmountRatio(fromUsd: BigNumber): BigNumber;
+
+    /**
+     * Calculates value for swap transaction.
+     * @param providerValue Value, returned from cross-chain provider.
+     */
+    protected getSwapValue(providerValue?: BigNumber | string | number | null): string {
+        const fixedFeeValue = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
+
+        let fromValue: BigNumber;
+        if (this.from.isNative) {
+            if (providerValue) {
+                fromValue = new BigNumber(providerValue).dividedBy(
+                    1 - (this.feeInfo.platformFee?.percent || 0) / 100
+                );
+            } else {
+                fromValue = this.from.weiAmount;
+            }
+        } else {
+            fromValue = new BigNumber(providerValue || 0);
+        }
+
+        return new BigNumber(fromValue).plus(fixedFeeValue).toFixed(0, 0);
+    }
 }

@@ -45,9 +45,6 @@ module.exports = function(env, argv) {
         resolve: {
             extensions: ['.ts', '.js'],
             alias: {
-                "@rsdk-common": path.resolve(__dirname, 'src/common'),
-                "@rsdk-features": path.resolve(__dirname, 'src/features'),
-                "@rsdk-core": path.resolve(__dirname, 'src/core'),
                 "src": path.resolve(__dirname, 'src'),
                 // To avoid blotting up the `bn.js` library all over the packages
                 // use single library instance.

@@ -46,14 +46,9 @@ export interface CrossChainOptions {
     receiverAddress?: string;
 
     /**
-     * Timeout for each cross chain provider. Calculation for provider is cancelled, after timeout is passed.
+     * Timeout for each cross-chain provider. Calculation for provider is cancelled, after timeout is passed.
      */
-    readonly timeout?: number;
-
-    /**
-     * Receiver address, otherwise connected wallet is used (necessary for Rango).
-     */
-    toAddress?: string;
+    timeout?: number;
 }
 
 export type RequiredCrossChainOptions = MarkRequired<
@@ -61,8 +56,8 @@ export type RequiredCrossChainOptions = MarkRequired<
     | 'fromSlippageTolerance'
     | 'toSlippageTolerance'
     | 'slippageTolerance'
+    | 'gasCalculation'
     | 'deadline'
     | 'providerAddress'
     | 'timeout'
-    | 'toAddress'
 >;

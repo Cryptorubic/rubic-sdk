@@ -1,4 +1,4 @@
-import { TimeoutError } from '@rsdk-common/errors/utils/timeout.error';
+import { TimeoutError } from 'src/common/errors';
 
 export interface ClearablePromise<T> extends Promise<T> {
     clear: () => void;
