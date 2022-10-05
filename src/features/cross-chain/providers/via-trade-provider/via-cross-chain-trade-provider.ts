@@ -14,7 +14,6 @@ import BigNumber from 'bignumber.js';
 import {
     IActionStepTool,
     IGetRoutesRequestParams,
-    IGetRoutesResponse,
     IRoute
 } from '@viaprotocol/router-sdk/dist/types';
 import { ItType } from 'src/features/cross-chain/models/it-type';
@@ -78,7 +77,6 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 timeout: options.timeout
             });
 
-            const pages = await via.routesPages();
             const fromAddress = this.walletAddress;
             const toAddress = options.receiverAddress || this.walletAddress;
             const params: IGetRoutesRequestParams = {
@@ -93,23 +91,10 @@ export class ViaCrossChainTradeProvider extends CrossChainTradeProvider {
                 multiTx: false,
                 limit: 1
             };
-            const wrappedRoutes = await Promise.allSettled(
-                [...Array(pages)].map((_, i) =>
-                    via.getRoutes({
-                        ...params,
-                        offset: i + 1
-                    })
-                )
-            );
-            const routes = (
-                wrappedRoutes.filter(
-                    wrappedRoute =>
-                        wrappedRoute.status === 'fulfilled' && wrappedRoute.value.routes.length
-                ) as PromiseFulfilledResult<IGetRoutesResponse>[]
-            )
-                .map(wrappedRoute => wrappedRoute.value.routes)
-                .flat()
-                .filter(route => this.parseBridge(route));
+            const wrappedRoutes = await via.getRoutes({
+                ...params
+            });
+            const routes = wrappedRoutes.routes.filter(route => this.parseBridge(route));
             if (!routes.length) {
                 return null;
             }
