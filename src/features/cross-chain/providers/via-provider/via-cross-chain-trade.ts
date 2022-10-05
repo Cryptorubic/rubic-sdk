@@ -226,9 +226,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
 
         await this.checkProviderIsWhitelisted(providerRouter, providerGateway);
 
-        const sourceValue = new BigNumber(swapTransaction.value || 0);
-        const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
-        const value = new BigNumber(sourceValue).plus(fixedFee).toFixed(0);
+        const value = this.getSwapValue(swapTransaction.value);
 
         return {
             contractAddress: this.fromContractAddress,

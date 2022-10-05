@@ -17,6 +17,7 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 import { ItType } from 'src/features/cross-chain/providers/common/models/it-type';
 import { isAddressCorrect } from 'src/features/common/utils/check-address';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
 /**
  * Abstract class for all cross-chain providers' trades.
@@ -197,4 +198,27 @@ export abstract class CrossChainTrade {
      * Gets ratio between transit usd amount and to token amount.
      */
     public abstract getTradeAmountRatio(fromUsd: BigNumber): BigNumber;
+
+    /**
+     * Calculates value for swap transaction.
+     * @param providerValue Value, returned from cross-chain provider.
+     */
+    protected getSwapValue(providerValue?: BigNumber | string | number | null): string {
+        const fixedFeeValue = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
+
+        let fromValue: BigNumber;
+        if (this.from.isNative) {
+            if (providerValue) {
+                fromValue = new BigNumber(providerValue).dividedBy(
+                    1 - (this.feeInfo.platformFee?.percent || 0) / 100
+                );
+            } else {
+                fromValue = this.from.weiAmount;
+            }
+        } else {
+            fromValue = new BigNumber(providerValue || 0);
+        }
+
+        return new BigNumber(fromValue).plus(fixedFeeValue).toFixed(0, 0);
+    }
 }

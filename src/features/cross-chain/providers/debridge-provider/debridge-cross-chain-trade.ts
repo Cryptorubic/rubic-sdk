@@ -10,7 +10,6 @@ import {
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/providers/debridge-provider/debridge-cross-chain-provider';
 import { ContractParams } from 'src/features/cross-chain/providers/common/models/contract-params';
 import { TransactionResponse } from 'src/features/cross-chain/providers/debridge-provider/models/transaction-response';
-import { BytesLike } from 'ethers';
 import { GasData } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/models/cross-chain-trade-type';
@@ -152,7 +151,9 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        const data = await this.getTransactionRequest(options?.receiverAddress);
+        const { data, value: providerValue } = await this.getTransactionRequest(
+            options?.receiverAddress
+        );
         const toChainId = blockchainId[this.to.blockchain];
         const fromContracts =
             DE_BRIDGE_CONTRACT_ADDRESS[
@@ -176,10 +177,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         }
         methodArguments.push(data);
 
-        const sourceValue = this.from.isNative ? this.from.stringWeiAmount : '0';
-        const cryptoFee = Web3Pure.toWei(this.feeInfo?.cryptoFee?.amount || 0);
-        const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
-        const value = new BigNumber(sourceValue).plus(cryptoFee).plus(fixedFee).toFixed(0);
+        const value = this.getSwapValue(providerValue);
 
         return {
             contractAddress: fromContracts.rubicRouter,
@@ -197,7 +195,10 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         return fromUsd.plus(usdCryptoFee.isNaN() ? 0 : usdCryptoFee).dividedBy(this.to.tokenAmount);
     }
 
-    private async getTransactionRequest(receiverAddress?: string): Promise<BytesLike> {
+    private async getTransactionRequest(receiverAddress?: string): Promise<{
+        data: string;
+        value: string;
+    }> {
         const params = {
             ...this.transactionRequest,
             ...(receiverAddress && { dstChainTokenOutRecipient: receiverAddress })
@@ -207,6 +208,6 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             DebridgeCrossChainProvider.apiEndpoint,
             { params }
         );
-        return tx.data;
+        return tx;
     }
 }

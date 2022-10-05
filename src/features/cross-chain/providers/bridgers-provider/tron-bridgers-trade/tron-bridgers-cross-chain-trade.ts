@@ -13,7 +13,7 @@ import { TronContractParams } from 'src/features/cross-chain/providers/common/tr
 import { getMethodArgumentsAndTransactionData } from 'src/features/cross-chain/providers/bridgers-provider/utils/get-method-arguments-and-transaction-data';
 
 import { TronBridgersTransactionData } from 'src/features/cross-chain/providers/bridgers-provider/tron-bridgers-trade/models/tron-bridgers-transaction-data';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { getFromWithoutFee } from 'src/features/cross-chain/utils/get-from-without-fee';
 
 export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;
@@ -21,8 +21,6 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
     public readonly from: PriceTokenAmount<TronBlockchainName>;
 
     public readonly to: PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>;
-
-    private readonly fromAmountWithoutFeeWei: string;
 
     public readonly toTokenAmountMin: BigNumber;
 
@@ -40,7 +38,6 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
         crossChainTrade: {
             from: PriceTokenAmount<TronBlockchainName>;
             to: PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>;
-            fromAmountWithoutFeeWei: string;
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
         },
@@ -50,7 +47,6 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
-        this.fromAmountWithoutFeeWei = crossChainTrade.fromAmountWithoutFeeWei;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.feeInfo = crossChainTrade.feeInfo;
         this.priceImpact = this.from.calculatePriceImpactPercent(this.to);
@@ -59,11 +55,11 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
     protected async getContractParams(
         options: TronGetContractParamsOptions
     ): Promise<TronContractParams> {
+        const fromWithoutFee = getFromWithoutFee(this.from, this.feeInfo);
         const { methodArguments, transactionData } =
             await getMethodArgumentsAndTransactionData<TronBridgersTransactionData>(
-                this.from,
+                fromWithoutFee,
                 this.to,
-                this.fromAmountWithoutFeeWei,
                 this.toTokenAmountMin,
                 this.walletAddress,
                 options
@@ -75,12 +71,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
         );
         methodArguments.push(encodedData);
 
-        const sourceValue = this.from.isNative ? this.from.weiAmount : 0;
-        const bridgersValueFee = new BigNumber(transactionData.options.callValue).minus(
-            this.from.isNative ? this.fromAmountWithoutFeeWei : 0
-        );
-        const fixedFee = Web3Pure.toWei(this.feeInfo.fixedFee?.amount || 0);
-        const value = new BigNumber(sourceValue).plus(fixedFee).plus(bridgersValueFee).toFixed(0);
+        const value = this.getSwapValue(transactionData.options.callValue);
         const { feeLimit } = transactionData.options;
 
         return {

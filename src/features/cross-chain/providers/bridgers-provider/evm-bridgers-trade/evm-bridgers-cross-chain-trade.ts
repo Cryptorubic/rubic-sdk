@@ -19,13 +19,13 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { TransactionConfig } from 'web3-core';
+import { getFromWithoutFee } from 'src/features/cross-chain/utils/get-from-without-fee';
 
 export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
         to: PriceTokenAmount<TronBlockchainName>,
-        fromAmountWithoutFeeWei: string,
         receiverAddress: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain;
@@ -41,7 +41,6 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                     {
                         from,
                         to,
-                        fromAmountWithoutFeeWei,
                         toTokenAmountMin: new BigNumber(0),
                         feeInfo: {
                             fixedFee: null,
@@ -86,8 +85,6 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly to: PriceTokenAmount<TronBlockchainName>;
 
-    private readonly fromAmountWithoutFeeWei: string;
-
     public readonly toTokenAmountMin: BigNumber;
 
     public readonly gasData: GasData;
@@ -106,7 +103,6 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         crossChainTrade: {
             from: PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>;
             to: PriceTokenAmount<TronBlockchainName>;
-            fromAmountWithoutFeeWei: string;
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
             gasData: GasData;
@@ -117,7 +113,6 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
-        this.fromAmountWithoutFeeWei = crossChainTrade.fromAmountWithoutFeeWei;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.feeInfo = crossChainTrade.feeInfo;
         this.gasData = crossChainTrade.gasData;
@@ -139,11 +134,11 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     protected async getContractParams(
         options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
     ): Promise<ContractParams> {
+        const fromWithoutFee = getFromWithoutFee(this.from, this.feeInfo);
         const { methodArguments, transactionData } =
             await getMethodArgumentsAndTransactionData<EvmBridgersTransactionData>(
-                this.from,
+                fromWithoutFee,
                 this.to,
-                this.fromAmountWithoutFeeWei,
                 this.toTokenAmountMin,
                 this.walletAddress,
                 options
@@ -152,12 +147,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         const encodedData = transactionData.data;
         methodArguments.push(encodedData);
 
-        const sourceValue = this.from.isNative ? this.from.weiAmount : 0;
-        const bridgersValueFee = new BigNumber(transactionData.value).minus(
-            this.from.isNative ? this.fromAmountWithoutFeeWei : 0
-        );
-        const fixedFee = Web3Pure.toWei(this.feeInfo.fixedFee?.amount || 0);
-        const value = new BigNumber(sourceValue).plus(fixedFee).plus(bridgersValueFee).toFixed(0);
+        const value = this.getSwapValue(transactionData.value);
 
         return {
             contractAddress: this.fromContractAddress,
