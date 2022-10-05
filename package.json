@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "3.0.3-alpha.1",
+  "version": "3.0.0",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -50,7 +50,7 @@
   ],
   "license": "GPL-3.0",
   "scripts": {
-    "build": "webpack",
+    "build": "yarn create-index && webpack && npx rimraf ./src/index.ts",
     "start": "webpack --watch",
     "compile": "yarn create-index && npx rimraf lib && tsc --project tsconfig.json && tscpaths -p ./tsconfig.json -s ./src -o ./lib && npx rimraf ./src/index.ts",
     "lint": "eslint src __tests__",
