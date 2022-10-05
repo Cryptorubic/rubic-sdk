@@ -22,6 +22,7 @@ import BigNumber from 'bignumber.js';
 import { OnChainTradeType } from 'src/features/on-chain/providers/models/on-chain-trade-type';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
+import { getFromWithoutFee } from 'src/features/cross-chain/utils/get-from-without-fee';
 
 export class LifiCrossChainProvider extends CrossChainProvider {
     public static isSupportedBlockchain(
@@ -68,15 +69,6 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             evmCommonCrossChainAbi
         );
 
-        const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-
-        const feeAmount = Web3Pure.toWei(
-            from.tokenAmount.multipliedBy(feeInfo.platformFee!.percent).dividedBy(100),
-            from.decimals,
-            1
-        );
-        const tokenAmountIn = from.weiAmount.minus(feeAmount).toFixed(0);
-
         const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
             order: 'RECOMMENDED',
@@ -86,11 +78,14 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const fromChainId = blockchainId[fromBlockchain];
         const toChainId = blockchainId[toBlockchain];
 
+        const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+        const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+
         const fromAddress = this.getWalletAddress(fromBlockchain);
         const toAddress = options.receiverAddress || fromAddress;
         const routesRequest: RoutesRequest = {
             fromChainId,
-            fromAmount: tokenAmountIn,
+            fromAmount: fromWithoutFee.stringWeiAmount,
             fromTokenAddress: from.address,
             toChainId,
             toTokenAddress: toToken.address,

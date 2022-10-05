@@ -24,6 +24,7 @@ import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { RubicSdkError, TooLowAmountError } from 'src/common/errors';
 import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
+import { getFromWithoutFee } from 'src/features/cross-chain/utils/get-from-without-fee';
 
 export class DebridgeCrossChainProvider extends CrossChainProvider {
     public static isSupportedBlockchain(
@@ -74,20 +75,14 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             );
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-
-            const feeAmount = Web3Pure.toWei(
-                from.tokenAmount.multipliedBy(feeInfo.platformFee!.percent).dividedBy(100),
-                from.decimals,
-                1
-            );
-            const tokenAmountIn = from.weiAmount.minus(feeAmount).toFixed(0);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
 
             const slippageTolerance = options.slippageTolerance * 100;
 
             const requestParams: TransactionRequest = {
                 srcChainId: blockchainId[fromBlockchain],
                 srcChainTokenIn: from.address,
-                srcChainTokenInAmount: tokenAmountIn,
+                srcChainTokenInAmount: fromWithoutFee.stringWeiAmount,
                 slippage: slippageTolerance,
                 dstChainId: blockchainId[toBlockchain],
                 dstChainTokenOut: toToken.address,

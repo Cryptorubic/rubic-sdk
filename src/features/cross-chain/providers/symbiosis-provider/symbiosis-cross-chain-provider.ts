@@ -34,7 +34,6 @@ import {
 import { symbiosisTransitTokens } from 'src/features/cross-chain/providers/symbiosis-provider/constants/symbiosis-transit-tokens';
 import { OneinchAvalancheProvider } from 'src/features/on-chain/providers/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/providers/symbiosis-provider/symbiosis-cross-chain-trade';
 import { getSymbiosisConfig } from 'src/features/cross-chain/providers/symbiosis-provider/constants/symbiosis-config';
@@ -49,6 +48,7 @@ import { TransactionRequest } from '@ethersproject/abstract-provider';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { CalculationResult } from 'src/features/cross-chain/providers/common/models/calculation-result';
 import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
+import { getFromWithoutFee } from 'src/features/cross-chain/utils/get-from-without-fee';
 
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
     public static isSupportedBlockchain(
@@ -121,15 +121,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             });
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-
-            const feeAmount = Web3Pure.toWei(
-                from.tokenAmount.multipliedBy(feeInfo.platformFee!.percent).dividedBy(100),
-                from.decimals,
-                1
-            );
-            const tokenInWithFee = from.weiAmount.minus(feeAmount).toFixed(0);
-
-            const tokenAmountIn = new SymbiosisTokenAmount(tokenIn, tokenInWithFee);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+            const tokenAmountIn = new SymbiosisTokenAmount(tokenIn, fromWithoutFee.stringWeiAmount);
 
             const tokenOut = isBitcoinSwap
                 ? null
