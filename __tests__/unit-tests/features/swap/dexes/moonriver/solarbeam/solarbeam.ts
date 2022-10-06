@@ -1,6 +1,6 @@
-import { SolarbeamProvider } from 'src/features/on-chain/providers/dexes/moonriver/solarbeam/solarbeam-provider';
-import { SolarbeamTrade } from 'src/features/on-chain/providers/dexes/moonriver/solarbeam/solarbeam-trade';
-import { SOLARBEAM_PROVIDER_CONFIGURATION } from 'src/features/on-chain/providers/dexes/moonriver/solarbeam/constants';
+import { SolarbeamProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/solarbeam/solarbeam-provider';
+import { SolarbeamTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/solarbeam/solarbeam-trade';
+import { SOLARBEAM_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/solarbeam/constants';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const solarbeamMoonriverProviderSpec = () => {

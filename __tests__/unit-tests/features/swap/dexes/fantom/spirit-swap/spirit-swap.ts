@@ -1,6 +1,6 @@
 import { BLOCKCHAIN_NAME } from 'src/core';
-import { SpiritSwapProvider } from 'src/features/on-chain/providers/dexes/fantom/spirit-swap/spirit-swap-provider';
-import { SpiritSwapTrade } from 'src/features/on-chain/providers/dexes/fantom/spirit-swap/spirit-swap-trade';
+import { SpiritSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/spirit-swap/spirit-swap-provider';
+import { SpiritSwapTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/spirit-swap/spirit-swap-trade';
 import { SPIRIT_SWAP_PROVIDER_CONFIGURATION } from '@rsdk-features/instant-trades/dexes/fantom/spirit-swap/constants';
 
 export const spiritSwapFantomProviderSpec = () => {

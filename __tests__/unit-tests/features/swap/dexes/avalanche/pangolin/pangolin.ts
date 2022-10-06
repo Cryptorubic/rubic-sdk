@@ -1,6 +1,6 @@
-import { PangolinProvider } from 'src/features/on-chain/providers/dexes/avalanche/pangolin/pangolin-provider';
-import { PangolinTrade } from 'src/features/on-chain/providers/dexes/avalanche/pangolin/pangolin-trade';
-import { PANGOLIN_PROVIDER_CONFIGURATION } from 'src/features/on-chain/providers/dexes/avalanche/pangolin/constants';
+import { PangolinProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/pangolin/pangolin-provider';
+import { PangolinTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/pangolin/pangolin-trade';
+import { PANGOLIN_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/pangolin/constants';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const pangolinAvalancheProviderSpec = () => {
