@@ -103,7 +103,10 @@ export class ViaCrossChainProvider extends CrossChainProvider {
                 },
                 { address: EvmWeb3Pure.nativeTokenAddress }
             ]);
-            const bestRoute = await this.getBestRoute(toToken, nativeTokenPrice!, routes);
+            const bestRoute = await this.getBestRoute(from, toToken, nativeTokenPrice!, routes);
+            if (!bestRoute) {
+                return null;
+            }
 
             from = new PriceTokenAmount({
                 ...from.asStructWithAmount,
@@ -173,13 +176,22 @@ export class ViaCrossChainProvider extends CrossChainProvider {
     }
 
     private async getBestRoute(
+        from: PriceTokenAmount,
         toToken: PriceToken,
         nativeTokenPrice: BigNumber | null,
         routes: IRoute[]
-    ): Promise<IRoute> {
+    ): Promise<IRoute | undefined> {
         const toTokenPrice = (await this.getTokensPrice(toToken.blockchain, [toToken]))[0];
 
-        const sortedRoutes = routes.sort((routeA, routeB) => {
+        const filteredRoutes = routes.filter(route => {
+            if (from.isNative) {
+                return true;
+            }
+
+            const viaFromAmount = route.actions[0]?.fromTokenAmount;
+            return viaFromAmount && from.weiAmount.gte(viaFromAmount);
+        });
+        const sortedRoutes = filteredRoutes.sort((routeA, routeB) => {
             if (!toTokenPrice) {
                 return new BigNumber(routeB.toTokenAmount).comparedTo(routeA.toTokenAmount);
             }
@@ -196,7 +208,7 @@ export class ViaCrossChainProvider extends CrossChainProvider {
 
             return routeProfitB.comparedTo(routeProfitA);
         });
-        return sortedRoutes[0]!;
+        return sortedRoutes[0];
     }
 
     private async getTokensPrice(
