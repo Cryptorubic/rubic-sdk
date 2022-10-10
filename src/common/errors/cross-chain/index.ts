@@ -4,3 +4,4 @@ export * from './low-to-slippage.error';
 export * from './max-gas-price-overflow.error';
 export * from './too-low-amount.error';
 export * from './unsupported-receiver-address.error';
+export * from './unsupported-token-pair.error';

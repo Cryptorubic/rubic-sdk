@@ -133,7 +133,8 @@ export class Web3PublicService {
                             }
                             return result;
                         } catch (e) {
-                            const rpcString = typeof curRpc === 'string' ? curRpc : curRpc.fullHost;
+                            const rpcString =
+                                typeof curRpc === 'string' ? curRpc : curRpc?.fullHost;
                             if (
                                 e instanceof TimeoutError ||
                                 e instanceof HealthcheckError ||

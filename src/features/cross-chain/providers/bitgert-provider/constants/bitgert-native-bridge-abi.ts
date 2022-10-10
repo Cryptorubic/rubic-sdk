@@ -1,13 +1,19 @@
 import { AbiItem } from 'web3-utils';
 
-export const bitgertBridgeAbi: AbiItem[] = [
+export const bitgertNativeBridgeAbi = [
     {
-        inputs: [
-            { internalType: 'address', name: '_token', type: 'address' },
-            { internalType: 'address', name: '_owner', type: 'address' }
-        ],
+        inputs: [{ internalType: 'address', name: '_owner', type: 'address' }],
         stateMutability: 'nonpayable',
         type: 'constructor'
+    },
+    {
+        anonymous: false,
+        inputs: [
+            { indexed: false, internalType: 'address', name: '', type: 'address' },
+            { indexed: false, internalType: 'uint256', name: '', type: 'uint256' }
+        ],
+        name: 'nativeTransfer',
+        type: 'event'
     },
     { inputs: [], name: 'allowSwap', outputs: [], stateMutability: 'nonpayable', type: 'function' },
     {
@@ -38,13 +44,7 @@ export const bitgertBridgeAbi: AbiItem[] = [
         stateMutability: 'nonpayable',
         type: 'function'
     },
-    {
-        inputs: [{ internalType: 'uint256', name: '_amount', type: 'uint256' }],
-        name: 'swap',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function'
-    },
+    { inputs: [], name: 'swap', outputs: [], stateMutability: 'payable', type: 'function' },
     {
         inputs: [
             { internalType: 'address', name: '_to', type: 'address' },

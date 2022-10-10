@@ -32,6 +32,7 @@ import BigNumber from 'bignumber.js';
 import { BridgersCrossChainProvider } from 'src/features/cross-chain/providers/bridgers-provider/bridgers-cross-chain-provider';
 import { ProviderAddress } from 'src/core/sdk/models/provider-address';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { BitgertCrossChainProvider } from './providers/bitgert-provider/bitgert-cross-chain-provider';
 
 type RequiredCrossChainManagerCalculationOptions = MarkRequired<
     CrossChainManagerCalculationOptions,
@@ -56,7 +57,8 @@ export class CrossChainManager {
         DebridgeCrossChainProvider,
         RangoCrossChainProvider,
         ViaCrossChainProvider,
-        BridgersCrossChainProvider
+        BridgersCrossChainProvider,
+        BitgertCrossChainProvider
     ].reduce((acc, ProviderClass) => {
         const provider = new ProviderClass();
         acc[provider.type] = provider;
@@ -262,6 +264,7 @@ export class CrossChainManager {
                     mergeMap(el => el),
                     map(wrappedTrade => {
                         providerData.calculatedProviders += 1;
+                        console.log(wrappedTrade);
                         providerData.bestProvider = this.chooseBestProvider(
                             wrappedTrade,
                             providerData.bestProvider

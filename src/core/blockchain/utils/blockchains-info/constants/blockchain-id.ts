@@ -24,5 +24,6 @@ export const blockchainId: Record<BlockchainName, number> = {
     [BLOCKCHAIN_NAME.BITCOIN]: 5555,
     [BLOCKCHAIN_NAME.TRON]: 195,
     [BLOCKCHAIN_NAME.SOLANA]: NaN,
-    [BLOCKCHAIN_NAME.NEAR]: NaN
+    [BLOCKCHAIN_NAME.NEAR]: NaN,
+    [BLOCKCHAIN_NAME.BITGERT]: 32520
 };

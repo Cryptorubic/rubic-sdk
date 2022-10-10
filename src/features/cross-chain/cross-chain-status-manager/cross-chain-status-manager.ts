@@ -1,5 +1,6 @@
 import { Injector } from 'src/core/injector/injector';
 import {
+    BitgertStatusResponse,
     BtcStatusResponse,
     CelerXtransferStatusResponse,
     DeBridgeApiResponse,
@@ -27,6 +28,10 @@ import { CelerTransferStatus } from 'src/features/cross-chain/cross-chain-status
 import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils/get-bridgers-trade-status';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getSrcTxStatus } from 'src/features/common/status-manager/utils/get-src-tx-status';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { BitgertTransferStatus } from './models/bitgert-transfer-status.enum';
+import { blockchainNameToBitgertBlockchain } from '../providers/bitgert-provider/constants/blockchain-name-to-bitgert-blockchain';
+import { BitgertCrossChainSupportedBlockchain } from '../providers/bitgert-provider/constants/bitgert-cross-chain-supported-blockchain';
 
 /**
  * Contains methods for getting cross-chain trade statuses.
@@ -406,12 +411,36 @@ export class CrossChainStatusManager {
         }
     }
 
-    private async getBitgertDstSwapStatus(
-        data: CrossChainTradeData,
-        _srcTxReceipt: TransactionReceipt
-    ): Promise<DstTxData> {
-        console.log(data);
-        return { txStatus: CrossChainTxStatus.PENDING, txHash: null };
+    private async getBitgertDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        try {
+            const { status, tx_hash } = await Injector.httpClient.post<BitgertStatusResponse>(
+                'https://dev-bitgert.rubic.exchange/api/get_transaction',
+                {
+                    address: Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address,
+                    from_tx_hash: data.srcTxHash.toLocaleLowerCase(),
+                    from_network:
+                        blockchainNameToBitgertBlockchain[
+                            data.fromBlockchain as BitgertCrossChainSupportedBlockchain
+                        ]
+                }
+            );
+            const dstTxData: TxStatusData = {
+                status:
+                    status === BitgertTransferStatus.CREATED ||
+                    status === BitgertTransferStatus.PENDING
+                        ? TxStatus.PENDING
+                        : TxStatus.SUCCESS,
+                hash: tx_hash || null
+            };
+
+            return dstTxData;
+        } catch (error) {
+            console.debug('[Bitgert Trade] error retrieving tx status', error);
+            return {
+                status: TxStatus.PENDING,
+                hash: null
+            };
+        }
     }
 
     /**
