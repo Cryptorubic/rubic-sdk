@@ -93,25 +93,17 @@ export class BitgertCrossChainTrade extends EvmCrossChainTrade {
         };
 
         try {
-            console.log('[swap call params]', {
-                contractAddrr: this.fromContractAddress,
-                isNative: this.from.isNative
-            });
-            const receipt = !this.from.isNative
-                ? await this.web3Private.tryExecuteContractMethod(
-                      this.fromContractAddress,
-                      bitgertBridgeAbi,
-                      'swap',
-                      [this.from.weiAmount],
-                      { onTransactionHash }
-                  )
-                : await this.web3Private.tryExecuteContractMethod(
-                      this.fromContractAddress,
-                      bitgertNativeBridgeAbi,
-                      'swap',
-                      [],
-                      { value: this.from.weiAmount, onTransactionHash }
-                  );
+            const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                await this.getContractParams(options);
+            console.log({ contractAddress, contractAbi, methodName, methodArguments, value });
+
+            const receipt = await this.web3Private.tryExecuteContractMethod(
+                contractAddress,
+                contractAbi,
+                methodName,
+                methodArguments,
+                { value, onTransactionHash }
+            );
 
             await Injector.httpClient.post(
                 bitgertApiUrl.baseUrl + bitgertApiUrl.swap[this.from.symbol],
@@ -132,16 +124,28 @@ export class BitgertCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    public getContractParams(options: {
+    public async getContractParams(_options: {
         fromAddress?: string | undefined;
         receiverAddress?: string | undefined;
     }): Promise<ContractParams> {
-        console.log(options);
-        throw new Error('Method not implemented.');
+        return this.from.isNative
+            ? {
+                  contractAddress: this.fromContractAddress,
+                  contractAbi: bitgertNativeBridgeAbi,
+                  methodName: 'swap',
+                  methodArguments: [] as unknown[],
+                  value: this.from.stringWeiAmount
+              }
+            : {
+                  contractAddress: this.fromContractAddress,
+                  contractAbi: bitgertBridgeAbi,
+                  methodName: 'swap',
+                  methodArguments: [this.from.stringWeiAmount],
+                  value: '0'
+              };
     }
 
-    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
-        console.log(fromUsd);
+    public getTradeAmountRatio(_fromUsd: BigNumber): BigNumber {
         return new BigNumber(1);
     }
 }

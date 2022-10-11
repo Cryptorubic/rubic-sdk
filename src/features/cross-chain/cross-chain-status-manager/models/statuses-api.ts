@@ -56,6 +56,10 @@ export interface CelerXtransferStatusResponse {
 }
 
 export interface BitgertStatusResponse {
+    msg: {
+        status: boolean;
+        hash: string;
+    };
     status: BitgertTransferStatus;
     tx_hash: string;
 }

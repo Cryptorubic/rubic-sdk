@@ -29,7 +29,6 @@ import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getSrcTxStatus } from 'src/features/common/status-manager/utils/get-src-tx-status';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { BitgertTransferStatus } from './models/bitgert-transfer-status.enum';
 import { blockchainNameToBitgertBlockchain } from '../providers/bitgert-provider/constants/blockchain-name-to-bitgert-blockchain';
 import { BitgertCrossChainSupportedBlockchain } from '../providers/bitgert-provider/constants/bitgert-cross-chain-supported-blockchain';
 
@@ -413,7 +412,7 @@ export class CrossChainStatusManager {
 
     private async getBitgertDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
-            const { status, tx_hash } = await Injector.httpClient.post<BitgertStatusResponse>(
+            const { msg } = await Injector.httpClient.post<BitgertStatusResponse>(
                 'https://dev-bitgert.rubic.exchange/api/get_transaction',
                 {
                     address: Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address,
@@ -424,16 +423,18 @@ export class CrossChainStatusManager {
                         ]
                 }
             );
-            const dstTxData: TxStatusData = {
-                status:
-                    status === BitgertTransferStatus.CREATED ||
-                    status === BitgertTransferStatus.PENDING
-                        ? TxStatus.PENDING
-                        : TxStatus.SUCCESS,
-                hash: tx_hash || null
-            };
 
-            return dstTxData;
+            if (!msg.status && !msg.hash) {
+                return {
+                    status: TxStatus.PENDING,
+                    hash: null
+                };
+            }
+
+            return {
+                status: msg.status === true ? TxStatus.SUCCESS : TxStatus.FAIL,
+                hash: msg.hash || null
+            };
         } catch (error) {
             console.debug('[Bitgert Trade] error retrieving tx status', error);
             return {

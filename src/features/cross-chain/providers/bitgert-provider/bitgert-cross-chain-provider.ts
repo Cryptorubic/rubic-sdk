@@ -3,12 +3,17 @@ import BigNumber from 'bignumber.js';
 import {
     CrossChainIsUnavailableError,
     MaxAmountError,
+    MinAmountError,
     UnsupportedReceiverAddressError,
     UnsupportedTokenPairError
 } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BlockchainName,
+    BLOCKCHAIN_NAME,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -49,19 +54,6 @@ export class BitgertCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    public checkTokenPair(from: PriceTokenAmount, to: PriceTokenAmount): void {
-        const fromSymbol = from.symbol.toUpperCase();
-        const toSymbol = to.symbol.toUpperCase();
-        const isSupportedTokenPair =
-            fromSymbol === toSymbol &&
-            supportedTokens[from.blockchain]!.includes(fromSymbol) &&
-            supportedTokens[to.blockchain]!.includes(toSymbol);
-
-        if (!isSupportedTokenPair) {
-            throw new UnsupportedTokenPairError();
-        }
-    }
-
     public async calculate(
         fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceTokenAmount<EvmBlockchainName>,
@@ -84,7 +76,7 @@ export class BitgertCrossChainProvider extends CrossChainProvider {
         try {
             this.checkTokenPair(fromToken, toToken);
             await this.checkBitgertBridgesState(fromToken, toToken);
-            await this.checkDestinationContractBalance(fromToken, toToken);
+            await this.checkMinMaxErrors(fromToken, toToken);
             const nativeToken = nativeTokensList[fromBlockchain];
             const cryptoFeeToken = await PriceTokenAmount.createFromToken({
                 ...nativeToken,
@@ -121,21 +113,51 @@ export class BitgertCrossChainProvider extends CrossChainProvider {
         }
     }
 
-    public async checkDestinationContractBalance(
+    public checkTokenPair(from: PriceTokenAmount, to: PriceTokenAmount): void {
+        const fromSymbol = from.symbol.toUpperCase();
+        const toSymbol = to.symbol.toUpperCase();
+        const isSupportedTokenPair =
+            fromSymbol === toSymbol &&
+            supportedTokens[from.blockchain]!.includes(fromSymbol) &&
+            supportedTokens[to.blockchain]!.includes(toSymbol);
+
+        if (!isSupportedTokenPair) {
+            throw new UnsupportedTokenPairError();
+        }
+    }
+
+    public async checkMinMaxErrors(
         fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceTokenAmount<EvmBlockchainName>
     ): Promise<void> {
+        const tokenPrice =
+            fromToken.blockchain === BLOCKCHAIN_NAME.BITGERT
+                ? await Injector.coingeckoApi.getTokenPrice({
+                      address: toToken.address,
+                      blockchain: toToken.blockchain
+                  })
+                : await Injector.coingeckoApi.getTokenPrice({
+                      address: fromToken.address,
+                      blockchain: fromToken.blockchain
+                  });
+        const minFromTokenAmount = new BigNumber(10).dividedBy(tokenPrice);
         const targetContract =
             bitgertBridges[toToken.symbol]![
                 toToken.blockchain as BitgertCrossChainSupportedBlockchain
             ];
-        const tokenBalance = await Injector.web3PublicService
+        const targetContractTokenBalance = await Injector.web3PublicService
             .getWeb3Public(toToken.blockchain)
             .getTokenBalance(targetContract, toToken.address);
 
-        if (Web3Pure.fromWei(tokenBalance, toToken.decimals).lt(fromToken.tokenAmount)) {
+        if (fromToken.tokenAmount.lt(minFromTokenAmount)) {
+            throw new MinAmountError(minFromTokenAmount, fromToken.symbol);
+        }
+
+        if (
+            Web3Pure.fromWei(targetContractTokenBalance, toToken.decimals).lt(fromToken.tokenAmount)
+        ) {
             throw new MaxAmountError(
-                Web3Pure.fromWei(tokenBalance, toToken.decimals),
+                Web3Pure.fromWei(targetContractTokenBalance, toToken.decimals),
                 fromToken.symbol
             );
         }
@@ -196,24 +218,6 @@ export class BitgertCrossChainProvider extends CrossChainProvider {
         ]);
 
         if (srcContractPaused || dstContractPaused) {
-            throw new CrossChainIsUnavailableError();
-        }
-    }
-
-    public async checkBitgertBridgeState(
-        token: PriceTokenAmount<EvmBlockchainName>
-    ): Promise<void> {
-        const web3PublicService = Injector.web3PublicService.getWeb3Public(token.blockchain);
-        const targetContract =
-            bitgertBridges[token.symbol]![token.blockchain as BitgertCrossChainSupportedBlockchain];
-
-        const isPaused = await web3PublicService.callContractMethod<boolean>(
-            targetContract as string,
-            bitgertBridgeAbi,
-            'paused'
-        );
-
-        if (isPaused) {
             throw new CrossChainIsUnavailableError();
         }
     }
