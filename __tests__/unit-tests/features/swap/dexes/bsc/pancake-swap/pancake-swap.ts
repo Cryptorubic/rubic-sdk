@@ -1,6 +1,6 @@
-import { PancakeSwapProvider } from 'src/features/on-chain/providers/dexes/bsc/pancake-swap/pancake-swap-provider';
-import { PancakeSwapTrade } from 'src/features/on-chain/providers/dexes/bsc/pancake-swap/pancake-swap-trade';
-import { PANCAKE_SWAP_PROVIDER_CONFIGURATION } from 'src/features/on-chain/providers/dexes/bsc/pancake-swap/constants';
+import { PancakeSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/pancake-swap/pancake-swap-provider';
+import { PancakeSwapTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/pancake-swap/pancake-swap-trade';
+import { PANCAKE_SWAP_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/pancake-swap/constants';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const pancakeSwapBscProviderSpec = () => {

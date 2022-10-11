@@ -3,7 +3,7 @@ import {
     BridgersUpdateDataAndStatusResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-update-data-and-status-api';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
-import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
+import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { Injector } from 'src/core/injector/injector';
 import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import {

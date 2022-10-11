@@ -1,5 +1,5 @@
-import { SushiSwapEthereumProvider } from 'src/features/on-chain/providers/dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider';
-import { SUSHI_SWAP_ETHEREUM_PROVIDER_CONFIGURATION } from 'src/features/on-chain/providers/dexes/ethereum/sushi-swap-ethereum/constants';
+import { SushiSwapEthereumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider';
+import { SUSHI_SWAP_ETHEREUM_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/sushi-swap-ethereum/constants';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const sushiSwapProviderEthereumSpec = () => {
