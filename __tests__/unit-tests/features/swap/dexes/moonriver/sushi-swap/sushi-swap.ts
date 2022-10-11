@@ -1,6 +1,6 @@
-import { SushiSwapMoonriverProvider } from 'src/features/on-chain/providers/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
-import { SushiSwapMoonriverTrade } from 'src/features/on-chain/providers/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-trade';
-import { SUSHI_SWAP_MOONRIVER_PROVIDER_CONFIGURATION } from 'src/features/on-chain/providers/dexes/moonriver/sushi-swap-moonriver/constants';
+import { SushiSwapMoonriverProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
+import { SushiSwapMoonriverTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-trade';
+import { SUSHI_SWAP_MOONRIVER_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/sushi-swap-moonriver/constants';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export const sushiSwapMoonriverProviderSpec = () => {

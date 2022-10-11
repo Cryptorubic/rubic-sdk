@@ -17,10 +17,10 @@ import {
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
-import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
-import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
-import { CrossChainProvider } from '../common/cross-chain-provider';
-import { CalculationResult } from '../common/models/calculation-result';
+import { RequiredCrossChainOptions } from '../../calculation-manager/models/cross-chain-options';
+import { CROSS_CHAIN_TRADE_TYPE } from '../../calculation-manager/models/cross-chain-trade-type';
+import { CrossChainProvider } from '../../calculation-manager/providers/common/cross-chain-provider';
+import { CalculationResult } from '../../calculation-manager/providers/common/models/calculation-result';
 import { BitgertCrossChainTrade } from './bitgert-cross-chain-trade';
 import { bitgertBridgeAbi } from './constants/bitgert-bridge-abi';
 import {
@@ -34,23 +34,20 @@ const bitgertStableFeePercent = 0.02;
 const bitgertAltcointFeePercent = 0.002;
 
 export class BitgertCrossChainProvider extends CrossChainProvider {
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.BITGERT_BRIDGE;
-
-    public static isSupportedBlockchain(
-        blockchain: BlockchainName
-    ): blockchain is BitgertCrossChainSupportedBlockchain {
+    public isSupportedBlockchain(fromBlockchain: BlockchainName): boolean {
         return bitgertCrossChainSupportedBlockchains.some(
-            supportedBlockchain => supportedBlockchain === blockchain
+            supportedBlockchain => supportedBlockchain === fromBlockchain
         );
     }
+
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.BITGERT_BRIDGE;
 
     public isSupportedBlockchains(
         fromBlockchain: BlockchainName,
         toBlockchain: BlockchainName
     ): boolean {
         return (
-            BitgertCrossChainProvider.isSupportedBlockchain(fromBlockchain) &&
-            BitgertCrossChainProvider.isSupportedBlockchain(toBlockchain)
+            this.isSupportedBlockchain(fromBlockchain) && this.isSupportedBlockchain(toBlockchain)
         );
     }
 
@@ -67,8 +64,8 @@ export class BitgertCrossChainProvider extends CrossChainProvider {
         const toBlockchain = toToken.blockchain;
 
         if (
-            !BitgertCrossChainProvider.isSupportedBlockchain(fromBlockchain) ||
-            !BitgertCrossChainProvider.isSupportedBlockchain(toBlockchain)
+            !this.isSupportedBlockchain(fromBlockchain) ||
+            !this.isSupportedBlockchain(toBlockchain)
         ) {
             return null;
         }
