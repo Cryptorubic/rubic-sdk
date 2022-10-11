@@ -14,7 +14,8 @@ import {
     OptionsGasParams,
     TransactionGasParams
 } from '@rsdk-features/instant-trades/models/gas-params';
-import { Cache, UnnecessaryApproveError } from 'src/common';
+import { Cache } from '@rsdk-common/decorators/cache.decorator';
+import { UnnecessaryApproveError } from 'src/common';
 import { TradeType } from 'src/features';
 import { parseError } from '@rsdk-common/utils/errors';
 import { Token, TransactionOptions } from 'src/core';

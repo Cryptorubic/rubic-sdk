@@ -7,7 +7,7 @@ import {
 } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
 import { InstantTrade } from '@rsdk-features/instant-trades/instant-trade';
 import { Injector } from '@rsdk-core/sdk/injector';
-import { Cache } from 'src/common';
+import { Cache } from '@rsdk-common/decorators/cache.decorator';
 import { TRADE_TYPE, TradeType } from 'src/features/instant-trades/models/trade-type';
 import { TransactionReceipt } from 'web3-eth';
 import { RubicSdkError } from '@rsdk-common/errors/rubic-sdk.error';

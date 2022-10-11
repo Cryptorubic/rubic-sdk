@@ -1,5 +1,5 @@
 import { AxiosInstance } from 'axios';
-import { Cache } from 'src/common';
+import { Cache } from '@rsdk-common/decorators/cache.decorator';
 
 export class DefaultHttpClient {
     @Cache

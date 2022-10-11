@@ -17,7 +17,8 @@ import { UniswapV2ProviderConfiguration } from '@rsdk-features/instant-trades/de
 import { UniswapV2TradeClass } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-class';
 import { UniswapV2AbstractTrade } from '@rsdk-features/instant-trades/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import BigNumber from 'bignumber.js';
-import { Cache, RubicSdkError } from 'src/common';
+import { Cache } from '@rsdk-common/decorators/cache.decorator';
+import { RubicSdkError } from 'src/common';
 import { Exact } from '@rsdk-features/instant-trades/models/exact';
 import { hasLengthAtLeast } from '@rsdk-features/instant-trades/utils/type-guards';
 

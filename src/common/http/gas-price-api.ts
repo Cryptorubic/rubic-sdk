@@ -1,7 +1,7 @@
 import pTimeout from '@rsdk-common/utils/p-timeout';
 import { BLOCKCHAIN_NAME, BlockchainName } from '@rsdk-core/blockchain/models/blockchain-name';
 import { Injector } from '@rsdk-core/sdk/injector';
-import { Cache } from 'src/common';
+import { Cache } from '@rsdk-common/decorators/cache.decorator';
 import BigNumber from 'bignumber.js';
 import { HttpClient } from '@rsdk-common/models/http-client';
 import { Web3Pure } from '@rsdk-core/blockchain/web3-pure/web3-pure';

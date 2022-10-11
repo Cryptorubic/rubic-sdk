@@ -5,7 +5,7 @@ import { CrossChainContractData } from '@rsdk-features/cross-chain/providers/com
 import { celerCrossChainContractAbi } from '@rsdk-features/cross-chain/providers/celer-trade-provider/constants/celer-cross-chain-contract-abi';
 import { BlockchainsInfo, PriceToken } from 'src/core';
 import { CellerMessageBusController } from '@rsdk-features/cross-chain/providers/celer-trade-provider/celer-message-bus-controller/celler-message-bus-controller';
-import { Cache } from 'src/common';
+import { Cache } from '@rsdk-common/decorators/cache.decorator';
 import { Token } from '@rsdk-core/blockchain/tokens/token';
 import { rubicCrossChainContractAbi } from '@rsdk-features/cross-chain/providers/rubic-trade-provider/constants/rubic-cross-chain-contract-abi';
 import BigNumber from 'bignumber.js';

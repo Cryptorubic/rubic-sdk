@@ -1,5 +1,6 @@
 import { PriceTokenAmount, Web3Public } from 'src/core';
-import { Cache, CrossChainIsUnavailableError, MaxGasPriceOverflowError } from 'src/common';
+import { CrossChainIsUnavailableError, MaxGasPriceOverflowError } from 'src/common';
+import { Cache } from '@rsdk-common/decorators/cache.decorator';
 import { CrossChainContractTrade } from '@rsdk-features/cross-chain/providers/common/celer-rubic/cross-chain-contract-trade';
 import { Injector } from '@rsdk-core/sdk/injector';
 import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';

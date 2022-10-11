@@ -13,7 +13,7 @@ import { ZrxQuoteResponse } from '@rsdk-features/instant-trades/dexes/common/zrx
 import { getZrxApiBaseUrl } from '@rsdk-features/instant-trades/dexes/common/zrx-common/utils';
 import BigNumber from 'bignumber.js';
 import { ZrxTrade } from '@rsdk-features/instant-trades/dexes/common/zrx-common/zrx-trade';
-import { Cache } from 'src/common';
+import { Cache } from '@rsdk-common/decorators/cache.decorator';
 import { EMPTY_ADDRESS } from '@rsdk-core/blockchain/constants/empty-address';
 import { TRADE_TYPE, TradeType } from 'src/features';
 import { combineOptions } from 'src/common/utils/options';

@@ -19,7 +19,7 @@ import {
     SwapCalculationOptions
 } from '@rsdk-features/instant-trades/models/swap-calculation-options';
 import { createTokenNativeAddressProxy } from '@rsdk-features/instant-trades/dexes/common/utils/token-native-address-proxy';
-import { Cache } from 'src/common';
+import { Cache } from '@rsdk-common/decorators/cache.decorator';
 import { BlockchainsInfo } from 'src/core';
 import { TRADE_TYPE, TradeType } from 'src/features';
 import { MarkRequired } from 'ts-essentials';
