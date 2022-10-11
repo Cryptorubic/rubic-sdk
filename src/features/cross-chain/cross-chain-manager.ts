@@ -215,10 +215,9 @@ export class CrossChainManager {
                 }) as [CrossChainTradeType, CrossChainProvider][];
 
                 const providerData: CrossChainProviderData = {
-                    bestProvider: null,
-                    totalProviders: providers.length,
-                    calculatedProviders: -1,
-                    allProviders: []
+                    total: providers.length,
+                    calculated: -1,
+                    data: []
                 };
 
                 if (!providers.length) {
@@ -253,25 +252,27 @@ export class CrossChainManager {
                                 return {
                                     trade: null,
                                     tradeType: type,
-                                    error: err
+                                    error: err,
+                                    tags: []
                                 };
                             }
                         })
                     )
                 );
 
+                let bestProvider: WrappedTradeOrNull = null;
+
                 return tradeObservable$.pipe(
                     mergeMap(el => el),
                     map(wrappedTrade => {
-                        providerData.calculatedProviders += 1;
-                        console.log(wrappedTrade);
-                        providerData.bestProvider = this.chooseBestProvider(
+                        providerData.calculated += 1;
+                        bestProvider = CrossChainManager.chooseBestProvider(
                             wrappedTrade,
-                            providerData.bestProvider
+                            bestProvider
                         );
-                        providerData.allProviders = wrappedTrade
-                            ? [...providerData.allProviders, wrappedTrade]
-                            : providerData.allProviders;
+                        providerData.data = wrappedTrade
+                            ? [...providerData.data, wrappedTrade]
+                            : providerData.data;
 
                         return providerData;
                     })
@@ -285,7 +286,7 @@ export class CrossChainManager {
      * @param nextWrappedTrade New trade to compare.
      * @param prevWrappedTrade Old trade to compare.
      */
-    private chooseBestProvider(
+    public static chooseBestProvider(
         nextWrappedTrade: WrappedTradeOrNull,
         prevWrappedTrade: WrappedTradeOrNull
     ): WrappedTradeOrNull {
@@ -444,7 +445,8 @@ export class CrossChainManager {
                 return {
                     trade: null,
                     tradeType: provider.type,
-                    error: CrossChainProvider.parseError(err)
+                    error: CrossChainProvider.parseError(err),
+                    tags: []
                 };
             }
         });

@@ -166,7 +166,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        const { data, value } = await this.getSwapData(options?.receiverAddress);
+        const { data, value: providerValue } = await this.getSwapData(options?.receiverAddress);
         const toChainId = blockchainId[this.to.blockchain];
         const fromContracts = lifiContractAddress[this.fromBlockchain];
 
@@ -190,15 +190,14 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         }
         methodArguments.push(data);
 
-        const fixedFee = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
-        const msgValue = new BigNumber(value ? `${value}` : 0).plus(fixedFee).toFixed(0);
+        const value = this.getSwapValue(providerValue);
 
         return {
             contractAddress: this.fromContractAddress,
             contractAbi: evmCommonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,
-            value: msgValue
+            value
         };
     }
 

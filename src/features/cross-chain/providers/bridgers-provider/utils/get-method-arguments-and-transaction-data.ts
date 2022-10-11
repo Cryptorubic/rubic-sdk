@@ -22,9 +22,8 @@ import {
 export async function getMethodArgumentsAndTransactionData<
     T extends EvmBridgersTransactionData | TronBridgersTransactionData
 >(
-    from: PriceTokenAmount<BridgersCrossChainSupportedBlockchain>,
+    fromWithoutFee: PriceTokenAmount<BridgersCrossChainSupportedBlockchain>,
     to: PriceTokenAmount<BridgersCrossChainSupportedBlockchain>,
-    fromAmountWithoutFeeWei: string,
     toTokenAmountMin: BigNumber,
     walletAddress: string,
     options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
@@ -33,7 +32,10 @@ export async function getMethodArgumentsAndTransactionData<
     transactionData: T;
 }> {
     const amountOutMin = Web3Pure.toWei(toTokenAmountMin, to.decimals);
-    const fromTokenAddress = createTokenNativeAddressProxy(from, bridgersNativeAddress).address;
+    const fromTokenAddress = createTokenNativeAddressProxy(
+        fromWithoutFee,
+        bridgersNativeAddress
+    ).address;
     const toTokenAddress = createTokenNativeAddressProxy(to, bridgersNativeAddress).address;
     const fromAddress = options.fromAddress || walletAddress;
     const swapRequest: BridgersSwapRequest = {
@@ -41,9 +43,9 @@ export async function getMethodArgumentsAndTransactionData<
         toTokenAddress,
         fromAddress,
         toAddress: options.receiverAddress,
-        fromTokenChain: toBridgersBlockchain[from.blockchain],
+        fromTokenChain: toBridgersBlockchain[fromWithoutFee.blockchain],
         toTokenChain: toBridgersBlockchain[to.blockchain],
-        fromTokenAmount: fromAmountWithoutFeeWei,
+        fromTokenAmount: fromWithoutFee.stringWeiAmount,
         amountOutMin,
         equipmentNo: fromAddress.slice(0, 32),
         sourceFlag: 'rubic'
@@ -64,8 +66,8 @@ export async function getMethodArgumentsAndTransactionData<
     const methodArguments: unknown[] = [
         'native:bridgers',
         [
-            from.address,
-            from.stringWeiAmount,
+            fromWithoutFee.address,
+            fromWithoutFee.stringWeiAmount,
             blockchainId[to.blockchain],
             dstTokenAddress,
             amountOutMin,
@@ -74,7 +76,7 @@ export async function getMethodArgumentsAndTransactionData<
             transactionData.to
         ]
     ];
-    if (!from.isNative) {
+    if (!fromWithoutFee.isNative) {
         methodArguments.push(transactionData.to);
     }
 

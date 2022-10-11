@@ -86,10 +86,10 @@ export class SDK {
         ]);
         Injector.createInjector(web3PublicService, web3PrivateService, httpClient);
 
+        const { providerAddress } = configuration;
         return new SDK({
-            [CHAIN_TYPE.EVM]: EvmWeb3Pure.EMPTY_ADDRESS,
-            [CHAIN_TYPE.TRON]: TronWeb3Pure.EMPTY_ADDRESS,
-            ...configuration.providerAddress
+            [CHAIN_TYPE.EVM]: providerAddress?.[CHAIN_TYPE.EVM] || EvmWeb3Pure.EMPTY_ADDRESS,
+            [CHAIN_TYPE.TRON]: providerAddress?.[CHAIN_TYPE.TRON] || TronWeb3Pure.EMPTY_ADDRESS
         });
     }
 

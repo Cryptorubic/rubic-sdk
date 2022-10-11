@@ -32,6 +32,7 @@ import {
     BridgersQuoteRequest,
     BridgersQuoteResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
+import { getFromWithoutFee } from 'src/features/cross-chain/utils/get-from-without-fee';
 
 export class BridgersCrossChainProvider extends CrossChainProvider {
     public static isSupportedBlockchain(
@@ -83,13 +84,7 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 from,
                 contractAbi
             );
-
-            const feeAmount = Web3Pure.toWei(
-                from.tokenAmount.multipliedBy(feeInfo.platformFee!.percent).dividedBy(100),
-                from.decimals,
-                1
-            );
-            const fromAmountWithoutFeeWei = from.weiAmount.minus(feeAmount).toFixed();
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
 
             const fromTokenAddress = createTokenNativeAddressProxy(
                 from,
@@ -102,7 +97,7 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
             const quoteRequest: BridgersQuoteRequest = {
                 fromTokenAddress,
                 toTokenAddress,
-                fromTokenAmount: fromAmountWithoutFeeWei,
+                fromTokenAmount: fromWithoutFee.stringWeiAmount,
                 fromTokenChain: toBridgersBlockchain[fromBlockchain],
                 toTokenChain: toBridgersBlockchain[toBlockchain]
             };
@@ -165,7 +160,6 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                         ? await EvmBridgersCrossChainTrade.getGasData(
                               from as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
                               to as PriceTokenAmount<TronBlockchainName>,
-                              fromAmountWithoutFeeWei,
                               options.receiverAddress
                           )
                         : null;
@@ -175,7 +169,6 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                         {
                             from: from as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
                             to: to as PriceTokenAmount<TronBlockchainName>,
-                            fromAmountWithoutFeeWei,
                             toTokenAmountMin,
                             feeInfo,
                             gasData
@@ -189,7 +182,6 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                     {
                         from: from as PriceTokenAmount<TronBlockchainName>,
                         to: to as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
-                        fromAmountWithoutFeeWei,
                         toTokenAmountMin,
                         feeInfo
                     },
