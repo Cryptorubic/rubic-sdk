@@ -91,7 +91,11 @@ export class ViaCrossChainProvider extends CrossChainProvider {
             const wrappedRoutes = await via.getRoutes({
                 ...params
             });
-            const routes = wrappedRoutes.routes.filter(route => this.parseBridge(route));
+            const routes = wrappedRoutes.routes.filter(route => {
+                const bridge = this.parseBridge(route);
+                const provider = route.actions[0]?.provider;
+                return Boolean(bridge) && provider !== 10 && provider !== 11;
+            });
             if (!routes.length) {
                 return null;
             }
