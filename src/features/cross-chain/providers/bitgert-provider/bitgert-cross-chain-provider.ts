@@ -11,8 +11,8 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import {
     BlockchainName,
-    BLOCKCHAIN_NAME,
-    EvmBlockchainName
+    EvmBlockchainName,
+    BLOCKCHAIN_NAME
 } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -22,7 +22,8 @@ import { CROSS_CHAIN_TRADE_TYPE } from '../../calculation-manager/models/cross-c
 import { CrossChainProvider } from '../../calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from '../../calculation-manager/providers/common/models/calculation-result';
 import { BitgertCrossChainTrade } from './bitgert-cross-chain-trade';
-import { bitgertBridgeAbi } from './constants/bitgert-bridge-abi';
+import { bitgertAltcoinBridgeAbi } from './constants/bitgert-altcoin-bridge-abi';
+import { bitgertApiUrl } from './constants/bitgert-api-url';
 import {
     BitgertCrossChainSupportedBlockchain,
     bitgertCrossChainSupportedBlockchains
@@ -30,8 +31,8 @@ import {
 import { bitgertBridges } from './constants/contract-address';
 import { supportedTokens } from './constants/supported-tokens';
 
-const bitgertStableFeePercent = 0.02;
-const bitgertAltcointFeePercent = 0.002;
+const altcoinBridgeFee = 0.02;
+const nativeBridgeFee = 0.002;
 
 export class BitgertCrossChainProvider extends CrossChainProvider {
     public isSupportedBlockchain(fromBlockchain: BlockchainName): boolean {
@@ -56,6 +57,8 @@ export class BitgertCrossChainProvider extends CrossChainProvider {
         toToken: PriceTokenAmount<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
+        await this.proxyHealthcheck();
+
         if (options.receiverAddress) {
             throw new UnsupportedReceiverAddressError();
         }
@@ -79,7 +82,7 @@ export class BitgertCrossChainProvider extends CrossChainProvider {
                 ...nativeToken,
                 weiAmount: new BigNumber(0)
             });
-            const { to, comission } = this.getOutputTokenAndComission(fromToken, toToken);
+            const { to, feePercent } = this.getOutputTokenAndFeePercent(fromToken, toToken);
             const trade = new BitgertCrossChainTrade(
                 {
                     from: fromToken as PriceTokenAmount<BitgertCrossChainSupportedBlockchain>,
@@ -92,7 +95,7 @@ export class BitgertCrossChainProvider extends CrossChainProvider {
                     feeInfo: {
                         fixedFee: null,
                         platformFee: {
-                            percent: comission * 100,
+                            percent: feePercent * 100,
                             tokenSymbol: toToken.symbol
                         },
                         cryptoFee: null
@@ -111,8 +114,8 @@ export class BitgertCrossChainProvider extends CrossChainProvider {
     }
 
     public checkTokenPair(from: PriceTokenAmount, to: PriceTokenAmount): void {
-        const fromSymbol = from.symbol.toUpperCase();
-        const toSymbol = to.symbol.toUpperCase();
+        const fromSymbol = from.symbol.toLowerCase();
+        const toSymbol = to.symbol.toLowerCase();
         const isSupportedTokenPair =
             fromSymbol === toSymbol &&
             supportedTokens[from.blockchain]!.includes(fromSymbol) &&
@@ -137,14 +140,18 @@ export class BitgertCrossChainProvider extends CrossChainProvider {
                       address: fromToken.address,
                       blockchain: fromToken.blockchain
                   });
-        const minFromTokenAmount = new BigNumber(10).dividedBy(tokenPrice);
+        const minFromTokenAmount = new BigNumber(2).dividedBy(tokenPrice);
         const targetContract =
             bitgertBridges[toToken.symbol]![
                 toToken.blockchain as BitgertCrossChainSupportedBlockchain
             ];
-        const targetContractTokenBalance = await Injector.web3PublicService
-            .getWeb3Public(toToken.blockchain)
-            .getTokenBalance(targetContract, toToken.address);
+        const targetContractTokenBalance = toToken.isNative
+            ? await Injector.web3PublicService
+                  .getWeb3Public(toToken.blockchain)
+                  .getBalance(targetContract)
+            : await Injector.web3PublicService
+                  .getWeb3Public(toToken.blockchain)
+                  .getTokenBalance(targetContract, toToken.address);
 
         if (fromToken.tokenAmount.lt(minFromTokenAmount)) {
             throw new MinAmountError(minFromTokenAmount, fromToken.symbol);
@@ -160,27 +167,27 @@ export class BitgertCrossChainProvider extends CrossChainProvider {
         }
     }
 
-    public getOutputTokenAndComission(
+    public getOutputTokenAndFeePercent(
         fromToken: PriceTokenAmount,
         toToken: PriceTokenAmount
-    ): { to: PriceTokenAmount; comission: number } {
+    ): { to: PriceTokenAmount; feePercent: number } {
         const inputAmount = fromToken.tokenAmount;
         let toAmount = inputAmount;
-        let comission = bitgertStableFeePercent;
+        let feePercent = 0;
 
         if (['USDC', 'USDT', 'BUSD', 'SHIB', 'MATIC'].includes(fromToken.symbol)) {
-            toAmount = inputAmount.multipliedBy(1 - bitgertStableFeePercent);
-            comission = bitgertStableFeePercent;
+            toAmount = inputAmount.multipliedBy(1 - altcoinBridgeFee);
+            feePercent = altcoinBridgeFee;
         }
 
         if (['BNB', 'ETH'].includes(fromToken.symbol)) {
-            toAmount = inputAmount.multipliedBy(1 - bitgertAltcointFeePercent);
-            comission = bitgertAltcointFeePercent;
+            toAmount = inputAmount.multipliedBy(1 - nativeBridgeFee);
+            feePercent = nativeBridgeFee;
         }
 
         return {
             to: new PriceTokenAmount({ ...toToken.asStruct, tokenAmount: toAmount }),
-            comission
+            feePercent
         };
     }
 
@@ -188,6 +195,10 @@ export class BitgertCrossChainProvider extends CrossChainProvider {
         fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceTokenAmount<EvmBlockchainName>
     ): Promise<void> {
+        if (fromToken.symbol === 'BRISE' || toToken.symbol === 'BRISE') {
+            return;
+        }
+
         const srcBridgeContract =
             bitgertBridges[fromToken.symbol]![
                 fromToken.blockchain as BitgertCrossChainSupportedBlockchain
@@ -202,19 +213,27 @@ export class BitgertCrossChainProvider extends CrossChainProvider {
                 .getWeb3Public(fromToken.blockchain)
                 .callContractMethod<boolean>(
                     srcBridgeContract as string,
-                    bitgertBridgeAbi,
+                    bitgertAltcoinBridgeAbi,
                     'paused'
                 ),
             Injector.web3PublicService
                 .getWeb3Public(toToken.blockchain)
                 .callContractMethod<boolean>(
                     dstBridgeContract as string,
-                    bitgertBridgeAbi,
+                    bitgertAltcoinBridgeAbi,
                     'paused'
                 )
         ]);
 
         if (srcContractPaused || dstContractPaused) {
+            throw new CrossChainIsUnavailableError();
+        }
+    }
+
+    private async proxyHealthcheck(): Promise<void> {
+        try {
+            await Injector.httpClient.get(bitgertApiUrl.baseUrl + bitgertApiUrl.healthcheck);
+        } catch (error) {
             throw new CrossChainIsUnavailableError();
         }
     }

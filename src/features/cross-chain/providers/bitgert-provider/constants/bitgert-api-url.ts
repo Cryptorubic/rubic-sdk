@@ -1,16 +1,20 @@
 export const bitgertApiUrl: {
     baseUrl: string;
+    healthcheck: string;
+    transactionStatus: string;
     swap: Record<string, string>;
 } = {
-    baseUrl: 'https://dev-bitgert.rubic.exchange/api/',
+    baseUrl: 'https://bitgert.rubic.exchange/api/',
+    healthcheck: 'healthcheck',
+    transactionStatus: 'get_transaction',
     swap: {
-        BRISE: 'swap',
-        BNB: 'swapBnb',
-        BUSD: 'swapbusd',
-        ETH: 'swapEth',
-        MATIC: 'swapMatic',
-        SHIB: 'swapShib',
-        USDC: 'swapUsdc',
-        USDT: 'swapUsdt'
+        BRISE: 'proxy/swap',
+        BNB: 'proxy/swapBnb',
+        BUSD: 'proxy/swapbusd',
+        ETH: 'proxy/swapEth',
+        MATIC: 'proxy/swapMatic',
+        SHIB: 'proxy/swapShib',
+        USDC: 'proxy/swapUsdc',
+        USDT: 'proxy/swapUsdt'
     }
 };

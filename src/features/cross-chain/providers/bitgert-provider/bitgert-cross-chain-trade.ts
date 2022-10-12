@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../calculation-manager/models/cross-chain-trade-type';
@@ -10,7 +11,8 @@ import { ContractParams } from '../../calculation-manager/providers/common/model
 import { FeeInfo } from '../../calculation-manager/providers/common/models/fee';
 import { ItType } from '../../calculation-manager/providers/common/models/it-type';
 import { bitgertApiUrl } from './constants/bitgert-api-url';
-import { bitgertBridgeAbi } from './constants/bitgert-bridge-abi';
+import { bitgertAltcoinBridgeAbi } from './constants/bitgert-altcoin-bridge-abi';
+import { bitgertBriseBridgeAbi } from './constants/bitgert-brise-bridge-abi';
 import { BitgertCrossChainSupportedBlockchain } from './constants/bitgert-cross-chain-supported-blockchain';
 import { bitgertNativeBridgeAbi } from './constants/bitgert-native-bridge-abi';
 import { blockchainNameToBitgertBlockchain } from './constants/blockchain-name-to-bitgert-blockchain';
@@ -128,6 +130,15 @@ export class BitgertCrossChainTrade extends EvmCrossChainTrade {
         fromAddress?: string | undefined;
         receiverAddress?: string | undefined;
     }): Promise<ContractParams> {
+        if (this.from.symbol === 'BRISE' && this.from.blockchain === BLOCKCHAIN_NAME.BITGERT) {
+            return {
+                contractAddress: this.fromContractAddress,
+                contractAbi: bitgertBriseBridgeAbi,
+                methodName: 'Swap',
+                methodArguments: [this.from.stringWeiAmount],
+                value: this.from.stringWeiAmount
+            };
+        }
         return this.from.isNative
             ? {
                   contractAddress: this.fromContractAddress,
@@ -138,7 +149,7 @@ export class BitgertCrossChainTrade extends EvmCrossChainTrade {
               }
             : {
                   contractAddress: this.fromContractAddress,
-                  contractAbi: bitgertBridgeAbi,
+                  contractAbi: bitgertAltcoinBridgeAbi,
                   methodName: 'swap',
                   methodArguments: [this.from.stringWeiAmount],
                   value: '0'

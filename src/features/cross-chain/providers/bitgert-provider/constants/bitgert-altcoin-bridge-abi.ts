@@ -1,6 +1,6 @@
 import { AbiItem } from 'web3-utils';
 
-export const bitgertBridgeAbi: AbiItem[] = [
+export const bitgertAltcoinBridgeAbi: AbiItem[] = [
     {
         inputs: [],
         name: 'paused',
