@@ -41,7 +41,7 @@ export abstract class CrossChainProvider {
         from: PriceTokenAmount,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<CalculationResult>;
+    ): Promise<CalculationResult | CalculationResult[]>;
 
     protected getWalletAddress(blockchain: Web3PrivateSupportedBlockchain): string {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(blockchain).address;

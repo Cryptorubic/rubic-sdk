@@ -24,6 +24,8 @@ import { defaultCrossChainCalculationOptions } from 'src/features/cross-chain/ca
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { fromPromise } from 'rxjs/internal/observable/innerFrom';
 import { compareCrossChainTrades } from 'src/features/cross-chain/calculation-manager/utils/compare-cross-chain-trades';
+import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
+import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-trade';
 
 /**
  * Contains method to calculate best cross-chain trade.
@@ -114,7 +116,7 @@ export class CrossChainManager {
         const calculationPromises = providers.map(provider =>
             this.getProviderCalculationPromise(provider, from, to, providerOptions)
         );
-        const wrappedTrades = (await Promise.all(calculationPromises)).filter(notNull);
+        const wrappedTrades = (await Promise.all(calculationPromises)).flat().filter(notNull);
         if (!wrappedTrades?.length) {
             throw new RubicSdkError('No success providers calculation for the trade');
         }
@@ -207,11 +209,10 @@ export class CrossChainManager {
                 ).pipe(
                     map(wrappedTrade => {
                         providerData.calculated += 1;
-                        if (wrappedTrade) {
-                            providerData.trades = [...providerData.trades, wrappedTrade].sort(
-                                compareCrossChainTrades
-                            );
-                        }
+                        const filteredTrades = wrappedTrade.filter(notNull);
+                        providerData.trades = [...providerData.trades, ...filteredTrades].sort(
+                            compareCrossChainTrades
+                        );
 
                         return { ...providerData };
                     }),
@@ -260,30 +261,44 @@ export class CrossChainManager {
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<WrappedTradeOrNull> {
+    ): Promise<WrappedTradeOrNull[]> {
         try {
             const wrappedTrade = await pTimeout(
                 provider.calculate(from, to, options),
                 options.timeout
             );
             if (!wrappedTrade) {
-                return null;
+                return [null];
             }
 
-            return {
-                ...wrappedTrade,
-                tradeType: provider.type
-            };
+            if (Array.isArray(wrappedTrade)) {
+                return (wrappedTrade as CalculationResult[]).map(trade => ({
+                    ...(trade as {
+                        trade: CrossChainTrade;
+                        error?: RubicSdkError;
+                        tradeType?: CrossChainTradeType;
+                    }),
+                    tradeType: provider.type
+                }));
+            }
+            return [
+                {
+                    ...wrappedTrade,
+                    tradeType: provider.type
+                }
+            ];
         } catch (err: unknown) {
             console.debug(
                 `[RUBIC_SDK] Trade calculation error occurred for ${provider.type} trade provider.`,
                 err
             );
-            return {
-                trade: null,
-                tradeType: provider.type,
-                error: CrossChainProvider.parseError(err)
-            };
+            return [
+                {
+                    trade: null,
+                    tradeType: provider.type,
+                    error: CrossChainProvider.parseError(err)
+                }
+            ];
         }
     }
 }

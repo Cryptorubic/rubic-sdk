@@ -55,7 +55,7 @@ export class ViaCrossChainProvider extends CrossChainProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<CalculationResult> {
+    ): Promise<CalculationResult[] | CalculationResult> {
         const fromBlockchain = from.blockchain as ViaCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as ViaCrossChainSupportedBlockchain;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
@@ -66,7 +66,7 @@ export class ViaCrossChainProvider extends CrossChainProvider {
             const fromChainId = blockchainId[fromBlockchain];
             const toChainId = blockchainId[toBlockchain];
 
-            let feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
             const fromWithoutFee = getFromWithoutFee(from, feeInfo);
 
             const via = new Via({
@@ -107,70 +107,74 @@ export class ViaCrossChainProvider extends CrossChainProvider {
                 },
                 { address: EvmWeb3Pure.nativeTokenAddress }
             ]);
-            const bestRoute = await this.getBestRoute(from, toToken, nativeTokenPrice!, routes);
-            if (!bestRoute) {
+            const sortedRoutes = await this.getBestRoute(from, toToken, nativeTokenPrice!, routes);
+            if (!sortedRoutes.length) {
                 return null;
             }
 
-            from = new PriceTokenAmount({
-                ...from.asStructWithAmount,
-                price: fromTokenPrice!
-            });
-            const to = new PriceTokenAmount({
-                ...toToken.asStruct,
-                weiAmount: new BigNumber(bestRoute.toTokenAmount)
-            });
-            const toTokenAmountMin = Web3Pure.fromWei(
-                to.weiAmountMinusSlippage((bestRoute.slippage || 0) / 100),
-                to.decimals
+            return await Promise.all(
+                sortedRoutes.map(async bestRoute => {
+                    const fromA = new PriceTokenAmount({
+                        ...from.asStructWithAmount,
+                        price: fromTokenPrice!
+                    });
+                    const to = new PriceTokenAmount({
+                        ...toToken.asStruct,
+                        weiAmount: new BigNumber(bestRoute.toTokenAmount)
+                    });
+                    const toTokenAmountMin = Web3Pure.fromWei(
+                        to.weiAmountMinusSlippage((bestRoute.slippage || 0) / 100),
+                        to.decimals
+                    );
+
+                    const gasData =
+                        options.gasCalculation === 'enabled'
+                            ? await ViaCrossChainTrade.getGasData(from, to, bestRoute)
+                            : null;
+
+                    const additionalFee = bestRoute.actions[0]?.additionalProviderFee;
+                    const cryptoFeeAmount = Web3Pure.fromWei(additionalFee?.amount.toString() || 0);
+                    const cryptoFeeSymbol = additionalFee?.token.symbol;
+                    const feeInfoA = {
+                        ...feeInfo,
+                        cryptoFee: additionalFee
+                            ? {
+                                  amount: cryptoFeeAmount,
+                                  tokenSymbol: cryptoFeeSymbol!
+                              }
+                            : null
+                    };
+
+                    const nativeToken = nativeTokensList[from.blockchain];
+                    const cryptoFeeToken = new PriceTokenAmount({
+                        ...nativeToken,
+                        price: nativeTokenPrice || new BigNumber(0),
+                        tokenAmount: cryptoFeeAmount
+                    });
+
+                    const itType = this.parseItProviders(bestRoute);
+                    const bridgeType = this.parseBridge(bestRoute)!;
+
+                    return {
+                        trade: new ViaCrossChainTrade(
+                            {
+                                from: fromA,
+                                to,
+                                route: bestRoute,
+                                gasData,
+                                priceImpact: 0, // @TODO add price impact
+                                toTokenAmountMin,
+                                feeInfo: feeInfoA,
+                                cryptoFeeToken,
+                                itType,
+                                bridgeType
+                            },
+                            options.providerAddress,
+                            fromAddress
+                        )
+                    };
+                })
             );
-
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await ViaCrossChainTrade.getGasData(from, to, bestRoute)
-                    : null;
-
-            const additionalFee = bestRoute.actions[0]?.additionalProviderFee;
-            const cryptoFeeAmount = Web3Pure.fromWei(additionalFee?.amount.toString() || 0);
-            const cryptoFeeSymbol = additionalFee?.token.symbol;
-            feeInfo = {
-                ...feeInfo,
-                cryptoFee: additionalFee
-                    ? {
-                          amount: cryptoFeeAmount,
-                          tokenSymbol: cryptoFeeSymbol!
-                      }
-                    : null
-            };
-
-            const nativeToken = nativeTokensList[from.blockchain];
-            const cryptoFeeToken = new PriceTokenAmount({
-                ...nativeToken,
-                price: nativeTokenPrice || new BigNumber(0),
-                tokenAmount: cryptoFeeAmount
-            });
-
-            const itType = this.parseItProviders(bestRoute);
-            const bridgeType = this.parseBridge(bestRoute)!;
-
-            return {
-                trade: new ViaCrossChainTrade(
-                    {
-                        from,
-                        to,
-                        route: bestRoute,
-                        gasData,
-                        priceImpact: 0, // @TODO add price impact
-                        toTokenAmountMin,
-                        feeInfo,
-                        cryptoFeeToken,
-                        itType,
-                        bridgeType
-                    },
-                    options.providerAddress,
-                    fromAddress
-                )
-            };
         } catch (err: unknown) {
             return {
                 trade: null,
@@ -184,7 +188,7 @@ export class ViaCrossChainProvider extends CrossChainProvider {
         toToken: PriceToken,
         nativeTokenPrice: BigNumber | null,
         routes: IRoute[]
-    ): Promise<IRoute | undefined> {
+    ): Promise<IRoute[]> {
         const toTokenPrice = (await this.getTokensPrice(toToken.blockchain, [toToken]))[0];
 
         const filteredRoutes = routes.filter(route => {
@@ -212,7 +216,7 @@ export class ViaCrossChainProvider extends CrossChainProvider {
 
             return routeProfitB.comparedTo(routeProfitA);
         });
-        return sortedRoutes[0];
+        return sortedRoutes;
     }
 
     private async getTokensPrice(
