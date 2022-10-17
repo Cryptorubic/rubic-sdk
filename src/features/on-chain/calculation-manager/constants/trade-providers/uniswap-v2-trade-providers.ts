@@ -24,6 +24,8 @@ import { OolongSwapProvider } from 'src/features/on-chain/calculation-manager/pr
 import { UniSwapV2EthereumPowProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum-pow/uni-swap-v2-ethereum-pow/uni-swap-v2-ethereum-pow-provider';
 
 import { SushiSwapEthereumPowProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum-pow/sushi-swap-ethereum-pow/sushi-swap-ethereum-pow-provider';
+import { JupiterSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/jupiter-swap/jupiter-swap-provider';
+import { PhotonSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/photon-swap/photon-swap-provider';
 
 export const UniswapV2TradeProviders = [
     // ethereum
@@ -62,5 +64,8 @@ export const UniswapV2TradeProviders = [
     OolongSwapProvider,
     // Ethereum PoW
     UniSwapV2EthereumPowProvider,
-    SushiSwapEthereumPowProvider
+    SushiSwapEthereumPowProvider,
+    // Kava
+    JupiterSwapProvider,
+    PhotonSwapProvider
 ] as const;

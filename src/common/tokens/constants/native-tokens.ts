@@ -159,6 +159,13 @@ export const nativeTokensList = {
         symbol: 'ETHW',
         decimals: 18
     }),
+    [BLOCKCHAIN_NAME.KAVA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.KAVA,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'KAVA',
+        symbol: 'KAVA',
+        decimals: 18
+    }),
     [BLOCKCHAIN_NAME.BITCOIN]: new Token({
         blockchain: BLOCKCHAIN_NAME.BITCOIN,
         address: BitcoinWeb3Pure.nativeTokenAddress,
