@@ -29,9 +29,9 @@ import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getSrcTxStatus } from 'src/features/common/status-manager/utils/get-src-tx-status';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { blockchainNameToBitgertBlockchain } from '../providers/bitgert-provider/constants/blockchain-name-to-bitgert-blockchain';
-import { BitgertCrossChainSupportedBlockchain } from '../providers/bitgert-provider/constants/bitgert-cross-chain-supported-blockchain';
-import { bitgertApiUrl } from '../providers/bitgert-provider/constants/bitgert-api-url';
+import { blockchainNameToBitgertBlockchain } from '../calculation-manager/providers/bitgert-provider/constants/blockchain-name-to-bitgert-blockchain';
+import { BitgertCrossChainSupportedBlockchain } from '../calculation-manager/providers/bitgert-provider/constants/bitgert-cross-chain-supported-blockchain';
+import { bitgertApiUrl } from '../calculation-manager/providers/bitgert-provider/constants/bitgert-api-url';
 
 /**
  * Contains methods for getting cross-chain trade statuses.

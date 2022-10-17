@@ -17,10 +17,10 @@ import {
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
-import { RequiredCrossChainOptions } from '../../calculation-manager/models/cross-chain-options';
-import { CROSS_CHAIN_TRADE_TYPE } from '../../calculation-manager/models/cross-chain-trade-type';
-import { CrossChainProvider } from '../../calculation-manager/providers/common/cross-chain-provider';
-import { CalculationResult } from '../../calculation-manager/providers/common/models/calculation-result';
+import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
+import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
+import { CrossChainProvider } from '../common/cross-chain-provider';
+import { CalculationResult } from '../common/models/calculation-result';
 import { BitgertCrossChainTrade } from './bitgert-cross-chain-trade';
 import { bitgertAltcoinBridgeAbi } from './constants/bitgert-altcoin-bridge-abi';
 import { bitgertApiUrl } from './constants/bitgert-api-url';
@@ -114,8 +114,8 @@ export class BitgertCrossChainProvider extends CrossChainProvider {
     }
 
     public checkTokenPair(from: PriceTokenAmount, to: PriceTokenAmount): void {
-        const fromSymbol = from.symbol.toLowerCase();
-        const toSymbol = to.symbol.toLowerCase();
+        const fromSymbol = from.symbol.toUpperCase();
+        const toSymbol = to.symbol.toUpperCase();
         const isSupportedTokenPair =
             fromSymbol === toSymbol &&
             supportedTokens[from.blockchain]!.includes(fromSymbol) &&

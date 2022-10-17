@@ -7553,7 +7553,7 @@ tronweb@^4.3.0:
     semver "^5.6.0"
     validator "^13.7.0"
 
-ts-essentials@^9.0.0:
+ts-essentials@^9.3.0:
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/ts-essentials/-/ts-essentials-9.3.0.tgz#7e639c1a76b1805c3c60d6e1b5178da2e70aea02"
   integrity sha512-XeiCboEyBG8UqXZtXl59bWEi4ZgOqRsogFDI6WDGIF1LmzbYiAkIwjkXN6zZWWl4re/lsOqMlYfe8KA0XiiEPw==
