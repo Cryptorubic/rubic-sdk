@@ -28,13 +28,18 @@ import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getSrcTxStatus } from 'src/features/common/status-manager/utils/get-src-tx-status';
 
+type SupportedCrossChainTradeType = Exclude<
+    CrossChainTradeType,
+    typeof CROSS_CHAIN_TRADE_TYPE.MULTICHAIN
+>;
+
 /**
  * Contains methods for getting cross-chain trade statuses.
  */
 export class CrossChainStatusManager {
     private readonly httpClient = Injector.httpClient;
 
-    private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, GetDstTxDataFn> = {
+    private readonly getDstTxStatusFnMap: Record<SupportedCrossChainTradeType, GetDstTxDataFn> = {
         [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
@@ -67,7 +72,7 @@ export class CrossChainStatusManager {
      */
     public async getCrossChainStatus(
         data: CrossChainTradeData,
-        provider: CrossChainTradeType
+        provider: SupportedCrossChainTradeType
     ): Promise<CrossChainStatus> {
         const { fromBlockchain, srcTxHash } = data;
         let srcTxStatus = await getSrcTxStatus(fromBlockchain, srcTxHash);
@@ -95,7 +100,7 @@ export class CrossChainStatusManager {
     private async getDstTxData(
         srcTxStatus: TxStatus,
         tradeData: CrossChainTradeData,
-        provider: CrossChainTradeType
+        provider: SupportedCrossChainTradeType
     ): Promise<TxStatusData> {
         if (srcTxStatus === TxStatus.FAIL) {
             return { hash: null, status: TxStatus.FAIL };

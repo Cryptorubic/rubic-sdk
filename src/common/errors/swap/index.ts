@@ -14,3 +14,4 @@ export * from './unnecessary-approve.error';
 export * from './wallet-not-connected.error';
 export * from './wrong-network.error';
 export * from './bridgers-pair-is-unavailable.error';
+export * from './not-supported-tokens.error';

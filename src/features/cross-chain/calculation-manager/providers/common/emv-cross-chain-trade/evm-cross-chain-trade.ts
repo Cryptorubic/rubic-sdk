@@ -11,6 +11,7 @@ import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-ser
 import { TransactionReceipt } from 'web3-eth';
 import {
     FailedToCheckForTransactionReceiptError,
+    NotWhitelistedProviderError,
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { TransactionConfig } from 'web3-core';
@@ -21,6 +22,8 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { compareAddresses } from 'src/common/utils/blockchain';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 
 export abstract class EvmCrossChainTrade extends CrossChainTrade {
     public abstract readonly from: PriceTokenAmount<EvmBlockchainName>;
@@ -172,4 +175,26 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
     protected abstract getContractParams(
         options: GetContractParamsOptions
     ): Promise<ContractParams>;
+
+    protected async checkProviderIsWhitelisted(providerRouter: string, providerGateway?: string) {
+        const whitelistedContracts = await Injector.web3PublicService
+            .getWeb3Public(this.from.blockchain)
+            .callContractMethod<string[]>(
+                this.fromContractAddress,
+                evmCommonCrossChainAbi,
+                'getAvailableRouters'
+            );
+
+        if (
+            !whitelistedContracts.find(whitelistedContract =>
+                compareAddresses(whitelistedContract, providerRouter)
+            ) ||
+            (providerGateway &&
+                !whitelistedContracts.find(whitelistedContract =>
+                    compareAddresses(whitelistedContract, providerGateway)
+                ))
+        ) {
+            throw new NotWhitelistedProviderError(providerRouter, providerGateway);
+        }
+    }
 }
