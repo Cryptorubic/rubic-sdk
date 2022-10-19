@@ -1,8 +1,6 @@
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
-import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-cross-chain-supported-blockchain';
-import { viaContractAddress } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/contract-data';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 
@@ -18,15 +16,12 @@ import {
     MultichainCrossChainSupportedBlockchain,
     multichainCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/constants/multichain-cross-chain-supported-blockchain';
-import {
-    MultichainSourceToken,
-    MultichainTargetToken,
-    MultichainTokensResponse
-} from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/tokens-api';
+import { MultichainTokensResponse } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/tokens-api';
 import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
 import { isMultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/is-multichain-method-name';
 import { MultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-trade';
 import { MultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/multichain-method-name';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 
 export class MultichainCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.MULTICHAIN;
@@ -53,15 +48,14 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
         try {
             const fromChainId = blockchainId[fromBlockchain];
             const toChainId = blockchainId[toBlockchain];
-            const tokensList = this.httpClient.get<MultichainTokensResponse>(
+            const tokensList = await this.httpClient.get<MultichainTokensResponse>(
                 `https://bridgeapi.anyswap.exchange/v4/tokenlistv4/${fromChainId}`
             );
-            const sourceToken = (
-                Object.entries(tokensList) as [string, MultichainSourceToken][]
-            ).find(([address, token]) => {
+            const sourceToken = Object.entries(tokensList).find(([address, token]) => {
                 return (
-                    (from.isNative && token.tokenType === 'NATIVE') ||
-                    address.toLowerCase().endsWith(from.address.toLowerCase())
+                    (token.tokenType === 'NATIVE' && from.isNative) ||
+                    (token.tokenType === 'TOKEN' &&
+                        address.toLowerCase().endsWith(from.address.toLowerCase()))
                 );
             })?.[1];
             const dstChainInformation = sourceToken?.destChains[toChainId.toString()];
@@ -72,9 +66,7 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 };
             }
 
-            const targetToken = (
-                Object.entries(dstChainInformation) as [string, MultichainTargetToken][]
-            ).find(([_hash, token]) => {
+            const targetToken = Object.entries(dstChainInformation).find(([_hash, token]) => {
                 const routerAbi = token.routerABI;
                 return isMultichainMethodName(routerAbi.split('(')[0]!);
             })?.[1];
@@ -171,7 +163,7 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
     }
 
     protected override async getFeeInfo(
-        fromBlockchain: ViaCrossChainSupportedBlockchain,
+        fromBlockchain: MultichainCrossChainSupportedBlockchain,
         providerAddress: string,
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
@@ -180,7 +172,7 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 amount: await this.getFixedFee(
                     fromBlockchain,
                     providerAddress,
-                    viaContractAddress[fromBlockchain],
+                    rubicProxyContractAddress[fromBlockchain],
                     evmCommonCrossChainAbi
                 ),
                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
@@ -189,7 +181,7 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 percent: await this.getFeePercent(
                     fromBlockchain,
                     providerAddress,
-                    viaContractAddress[fromBlockchain],
+                    rubicProxyContractAddress[fromBlockchain],
                     evmCommonCrossChainAbi
                 ),
                 tokenSymbol: percentFeeToken.symbol
