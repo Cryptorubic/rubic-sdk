@@ -13,7 +13,7 @@ export class ZappyTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.ZAPPY;
     }
 
-    protected readonly contractAddress = ZAPPY_CONTRACT_ADDRESS;
+    public readonly contractAddress = ZAPPY_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);

@@ -13,7 +13,7 @@ export class SpiritSwapTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.SPIRIT_SWAP;
     }
 
-    protected readonly contractAddress = SPIRIT_SWAP_CONTRACT_ADDRESS;
+    public readonly contractAddress = SPIRIT_SWAP_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);

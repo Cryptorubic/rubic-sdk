@@ -13,7 +13,7 @@ export class SushiSwapEthereumPowTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.SUSHI_SWAP;
     }
 
-    protected readonly contractAddress = SUSHI_SWAP_ETHEREUM_POW_CONTRACT_ADDRESS;
+    public readonly contractAddress = SUSHI_SWAP_ETHEREUM_POW_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);

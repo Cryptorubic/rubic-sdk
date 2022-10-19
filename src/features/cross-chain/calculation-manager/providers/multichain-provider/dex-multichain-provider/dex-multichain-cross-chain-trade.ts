@@ -2,24 +2,23 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
-import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-cross-chain-supported-blockchain';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { MultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/multichain-method-name';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
-import { multichainContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/constants/multichain-contract-abi';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { MultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-trade';
+import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/on-chain-trade';
+import { multichainProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-address';
+import { MultichainProxyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/models/supported-blockchain';
+import { multichainDexContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-abi';
 import { ItType } from 'src/features/cross-chain/calculation-manager/providers/common/models/it-type';
 
-export class MultichainCrossChainTrade extends EvmCrossChainTrade {
+export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -27,7 +26,8 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
         routerAddress: string,
         spenderAddress: string,
         multichainMethodName: MultichainMethodName,
-        anyTokenAddress: string
+        anyTokenAddress: string,
+        onChainTrade?: OnChainTrade | null
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain;
         const walletAddress =
@@ -38,7 +38,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
 
         try {
             const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                await new MultichainCrossChainTrade(
+                await new DexMultichainCrossChainTrade(
                     {
                         from,
                         to,
@@ -53,7 +53,8 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
                         routerAddress,
                         spenderAddress,
                         routerMethodName: multichainMethodName,
-                        anyTokenAddress
+                        anyTokenAddress,
+                        onChainTrade: onChainTrade!
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -87,30 +88,25 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.MULTICHAIN;
 
-    public readonly from: PriceTokenAmount<EvmBlockchainName>;
+    public readonly itType: ItType;
 
-    public readonly to: PriceTokenAmount;
-
-    public readonly priceImpact: number;
-
-    public readonly toTokenAmountMin: BigNumber;
-
-    public readonly gasData: GasData;
-
-    public readonly feeInfo: FeeInfo;
-
-    public readonly itType: ItType = { from: undefined, to: undefined };
-
-    protected readonly routerAddress: string;
-
-    private readonly spenderAddress: string;
-
-    private readonly routerMethodName: MultichainMethodName;
-
-    protected readonly anyTokenAddress: string;
+    private readonly onChainTrade: OnChainTrade | null;
 
     protected get fromContractAddress(): string {
-        return rubicProxyContractAddress[this.from.blockchain as ViaCrossChainSupportedBlockchain];
+        return multichainProxyContractAddress[
+            this.from.blockchain as MultichainProxyCrossChainSupportedBlockchain
+        ];
+    }
+
+    protected get methodName(): string {
+        let baseMethodName = 'multiBridge';
+        if (this.onChainTrade) {
+            baseMethodName += 'Swap';
+        }
+        if (this.from.isNative) {
+            baseMethodName += 'Native';
+        }
+        return baseMethodName;
     }
 
     constructor(
@@ -125,28 +121,25 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
             spenderAddress: string;
             routerMethodName: MultichainMethodName;
             anyTokenAddress: string;
+
+            onChainTrade: OnChainTrade | null;
         },
         providerAddress: string
     ) {
-        super(providerAddress);
+        super(crossChainTrade, providerAddress);
 
-        this.from = crossChainTrade.from;
-        this.to = crossChainTrade.to;
-        this.gasData = crossChainTrade.gasData;
-        this.priceImpact = crossChainTrade.priceImpact;
-        this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
-        this.feeInfo = crossChainTrade.feeInfo;
-        this.routerAddress = crossChainTrade.routerAddress;
-        this.spenderAddress = crossChainTrade.spenderAddress;
-        this.routerMethodName = crossChainTrade.routerMethodName;
-        this.anyTokenAddress = crossChainTrade.anyTokenAddress;
+        this.itType = crossChainTrade.onChainTrade
+            ? { from: crossChainTrade.onChainTrade.type, to: undefined }
+            : { from: undefined, to: undefined };
+        this.onChainTrade = crossChainTrade.onChainTrade;
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
+        const fromTokenAddress = this.onChainTrade ? this.from.address : this.anyTokenAddress;
         const toChainId = blockchainId[this.to.blockchain];
         const receiverAddress = options?.receiverAddress || this.walletAddress;
         const swapArguments = [
-            this.anyTokenAddress,
+            fromTokenAddress,
             this.from.stringWeiAmount,
             toChainId,
             this.to.address,
@@ -156,37 +149,26 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
             this.routerAddress
         ];
 
-        const methodArguments: unknown[] = ['native:multichain', swapArguments];
-        if (!this.from.isNative) {
-            methodArguments.push(this.spenderAddress);
-        }
-
-        const fromAmountWithoutFee = getFromWithoutFee(this.from, this.feeInfo).stringWeiAmount;
-        let multichainMethodArguments: unknown[];
-        if (this.routerMethodName === 'anySwapOutNative') {
-            multichainMethodArguments = [this.anyTokenAddress, receiverAddress, toChainId];
-        } else {
-            multichainMethodArguments = [
+        const methodArguments: unknown[] = [swapArguments];
+        if (this.onChainTrade) {
+            const encodedData = this.onChainTrade.encode({
+                fromAddress: options.fromAddress || this.walletAddress,
+                receiverAddress
+            });
+            methodArguments.push(
+                this.onChainTrade.contractAddress,
                 this.anyTokenAddress,
-                receiverAddress,
-                fromAmountWithoutFee,
-                toChainId
-            ];
+                encodedData
+            );
         }
-        const encodedData = EvmWeb3Pure.encodeFunctionCall(
-            multichainContractAbi,
-            this.routerMethodName,
-            multichainMethodArguments
-        );
-        methodArguments.push(encodedData);
 
-        await this.checkProviderIsWhitelisted(this.routerAddress, this.spenderAddress);
+        await this.checkProviderIsWhitelisted(this.routerAddress);
 
         const value = this.getSwapValue();
 
         return {
             contractAddress: this.fromContractAddress,
-            contractAbi: evmCommonCrossChainAbi,
+            contractAbi: multichainDexContractAbi,
             methodName: this.methodName,
             methodArguments,
             value

@@ -13,7 +13,7 @@ export class JupiterSwapTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.JUPITER_SWAP;
     }
 
-    protected readonly contractAddress = JUPITER_SWAP_CONTRACT_ADDRESS;
+    public readonly contractAddress = JUPITER_SWAP_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);
