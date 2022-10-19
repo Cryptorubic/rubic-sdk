@@ -27,11 +27,7 @@ import { CelerTransferStatus } from 'src/features/cross-chain/status-manager/mod
 import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils/get-bridgers-trade-status';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getSrcTxStatus } from 'src/features/common/status-manager/utils/get-src-tx-status';
-
-type SupportedCrossChainTradeType = Exclude<
-    CrossChainTradeType,
-    typeof CROSS_CHAIN_TRADE_TYPE.MULTICHAIN
->;
+import { RubicSdkError } from 'src/common/errors';
 
 /**
  * Contains methods for getting cross-chain trade statuses.
@@ -39,14 +35,15 @@ type SupportedCrossChainTradeType = Exclude<
 export class CrossChainStatusManager {
     private readonly httpClient = Injector.httpClient;
 
-    private readonly getDstTxStatusFnMap: Record<SupportedCrossChainTradeType, GetDstTxDataFn> = {
+    private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, GetDstTxDataFn | null> = {
         [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.VIA]: this.getViaDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.BRIDGERS]: this.getBridgersDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.BRIDGERS]: this.getBridgersDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: null
     };
 
     /**
@@ -72,7 +69,7 @@ export class CrossChainStatusManager {
      */
     public async getCrossChainStatus(
         data: CrossChainTradeData,
-        provider: SupportedCrossChainTradeType
+        provider: CrossChainTradeType
     ): Promise<CrossChainStatus> {
         const { fromBlockchain, srcTxHash } = data;
         let srcTxStatus = await getSrcTxStatus(fromBlockchain, srcTxHash);
@@ -100,7 +97,7 @@ export class CrossChainStatusManager {
     private async getDstTxData(
         srcTxStatus: TxStatus,
         tradeData: CrossChainTradeData,
-        provider: SupportedCrossChainTradeType
+        provider: CrossChainTradeType
     ): Promise<TxStatusData> {
         if (srcTxStatus === TxStatus.FAIL) {
             return { hash: null, status: TxStatus.FAIL };
@@ -110,7 +107,12 @@ export class CrossChainStatusManager {
             return { hash: null, status: TxStatus.PENDING };
         }
 
-        return this.getDstTxStatusFnMap[provider].call(this, tradeData);
+        const getDstTxStatusFn = this.getDstTxStatusFnMap[provider];
+        if (!getDstTxStatusFn) {
+            throw new RubicSdkError('Unsupported cross chain provider');
+        }
+
+        return getDstTxStatusFn.call(this, tradeData);
     }
 
     /**
