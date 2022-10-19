@@ -118,7 +118,8 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
             await this.getContractParams(options);
 
         try {
-            await this.web3Private.tryExecuteContractMethod(
+            // @todo return
+            await this.web3Private.executeContractMethod(
                 contractAddress,
                 contractAbi,
                 methodName,

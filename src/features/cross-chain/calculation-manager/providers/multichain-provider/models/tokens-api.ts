@@ -1,4 +1,5 @@
 export interface MultichainTargetToken {
+    address: string;
     fromanytoken: {
         address: string;
     };
@@ -13,6 +14,7 @@ export interface MultichainTargetToken {
 }
 
 export interface MultichainSourceToken {
+    symbol: string;
     tokenType: 'NATIVE' | 'TOKEN';
     price: number;
     destChains: {

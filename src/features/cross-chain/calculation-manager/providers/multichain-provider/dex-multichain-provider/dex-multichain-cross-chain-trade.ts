@@ -15,7 +15,7 @@ import { MultichainCrossChainTrade } from 'src/features/cross-chain/calculation-
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/on-chain-trade';
 import { multichainProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-address';
 import { MultichainProxyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/models/supported-blockchain';
-import { multichainDexContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-abi';
+import { multichainProxyContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-abi';
 import { ItType } from 'src/features/cross-chain/calculation-manager/providers/common/models/it-type';
 
 export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
@@ -162,13 +162,11 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
             );
         }
 
-        await this.checkProviderIsWhitelisted(this.routerAddress);
-
         const value = this.getSwapValue();
 
         return {
             contractAddress: this.fromContractAddress,
-            contractAbi: multichainDexContractAbi,
+            contractAbi: multichainProxyContractAbi,
             methodName: this.methodName,
             methodArguments,
             value

@@ -1,6 +1,6 @@
 import { AbiItem } from 'web3-utils';
 
-export const multichainDexContractAbi = [
+export const multichainProxyContractAbi = [
     {
         inputs: [
             {
@@ -97,6 +97,40 @@ export const multichainDexContractAbi = [
         name: 'multiBridgeSwapNative',
         outputs: [],
         stateMutability: 'payable',
+        type: 'function'
+    },
+    {
+        inputs: [{ internalType: 'address', name: '', type: 'address' }],
+        name: 'integratorToFeeInfo',
+        outputs: [
+            { internalType: 'bool', name: 'isIntegrator', type: 'bool' },
+            { internalType: 'uint32', name: 'tokenFee', type: 'uint32' },
+            { internalType: 'uint32', name: 'RubicTokenShare', type: 'uint32' },
+            { internalType: 'uint32', name: 'RubicFixedCryptoShare', type: 'uint32' },
+            { internalType: 'uint128', name: 'fixedFeeAmount', type: 'uint128' }
+        ],
+        stateMutability: 'view',
+        type: 'function'
+    },
+    {
+        inputs: [],
+        name: 'fixedCryptoFee',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function'
+    },
+    {
+        inputs: [],
+        name: 'RubicPlatformFee',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function'
+    },
+    {
+        inputs: [],
+        name: 'getAvailableRouters',
+        outputs: [{ internalType: 'address[]', name: '', type: 'address[]' }],
+        stateMutability: 'view',
         type: 'function'
     }
 ] as AbiItem[];
