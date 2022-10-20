@@ -12,11 +12,11 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { MultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/multichain-method-name';
 import { MultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-trade';
-import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/on-chain-trade';
 import { multichainProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-address';
 import { MultichainProxyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/models/supported-blockchain';
 import { multichainProxyContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-abi';
 import { ItType } from 'src/features/cross-chain/calculation-manager/providers/common/models/it-type';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
     /** @internal */
@@ -27,7 +27,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
         spenderAddress: string,
         multichainMethodName: MultichainMethodName,
         anyTokenAddress: string,
-        onChainTrade?: OnChainTrade | null
+        onChainTrade?: EvmOnChainTrade | null
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain;
         const walletAddress =
@@ -90,7 +90,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
 
     public readonly itType: ItType;
 
-    private readonly onChainTrade: OnChainTrade | null;
+    private readonly onChainTrade: EvmOnChainTrade | null;
 
     protected get fromContractAddress(): string {
         return multichainProxyContractAddress[
@@ -122,7 +122,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
             routerMethodName: MultichainMethodName;
             anyTokenAddress: string;
 
-            onChainTrade: OnChainTrade | null;
+            onChainTrade: EvmOnChainTrade | null;
         },
         providerAddress: string
     ) {
@@ -151,10 +151,12 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
 
         const methodArguments: unknown[] = [swapArguments];
         if (this.onChainTrade) {
-            const encodedData = this.onChainTrade.encode({
-                fromAddress: options.fromAddress || this.walletAddress,
-                receiverAddress
-            });
+            const encodedData = (
+                await this.onChainTrade.encode({
+                    fromAddress: options.fromAddress || this.walletAddress,
+                    receiverAddress
+                })
+            ).data;
             methodArguments.push(
                 this.onChainTrade.contractAddress,
                 this.anyTokenAddress,
