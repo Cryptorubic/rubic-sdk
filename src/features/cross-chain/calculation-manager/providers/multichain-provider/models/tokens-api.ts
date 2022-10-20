@@ -1,5 +1,8 @@
 export interface MultichainTargetToken {
     address: string;
+    tokenType: 'NATIVE' | 'TOKEN';
+    symbol: string;
+
     fromanytoken: {
         address: string;
     };

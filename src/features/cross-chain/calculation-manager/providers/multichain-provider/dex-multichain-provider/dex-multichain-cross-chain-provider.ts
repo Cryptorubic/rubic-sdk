@@ -6,14 +6,11 @@ import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import BigNumber from 'bignumber.js';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
-import { MultichainTokensResponse } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/tokens-api';
-import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
+import { NotSupportedTokensError } from 'src/common/errors';
 import { isMultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/is-multichain-method-name';
 import { MultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-trade';
-import { MultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/multichain-method-name';
 import {
     MultichainProxyCrossChainSupportedBlockchain,
     multichainProxyCrossChainSupportedBlockchains
@@ -24,10 +21,13 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 import { Injector } from 'src/core/injector/injector';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { DexMultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/dex-multichain-cross-chain-trade';
-import { getMultichainTokens } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/utils/get-multichain-tokens';
+import { getMultichainTokens } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/get-multichain-tokens';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { MultichainCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-provider';
+import { MultichainTargetToken } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/tokens-api';
+import { getToFeeAmount } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/get-to-fee-amount';
 
-export class DexMultichainCrossChainProvider extends CrossChainProvider {
+export class DexMultichainCrossChainProvider extends MultichainCrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.MULTICHAIN;
 
     public isSupportedBlockchain(
@@ -50,74 +50,45 @@ export class DexMultichainCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            const fromChainId = blockchainId[fromBlockchain];
-            const sourceTransitTokenAddress = await this.getTransitTokenAddress(
-                fromBlockchain,
-                toToken
-            );
-            if (!sourceTransitTokenAddress) {
+            const sourceTransitToken = await this.getSourceTransitToken(fromBlockchain, toToken);
+            if (!sourceTransitToken) {
                 return {
                     trade: null,
                     error: new NotSupportedTokensError()
                 };
             }
 
-            const toChainId = blockchainId[toBlockchain];
-            const tokensList = await this.httpClient.get<MultichainTokensResponse>(
-                `https://bridgeapi.anyswap.exchange/v4/tokenlistv4/${fromChainId}`
+            const tokens = await getMultichainTokens(
+                {
+                    blockchain: fromBlockchain,
+                    address: sourceTransitToken.address,
+                    isNative: sourceTransitToken.tokenType === 'NATIVE'
+                },
+                toBlockchain
             );
-            const sourceToken = Object.entries(tokensList).find(([address, token]) => {
-                return (
-                    (token.tokenType === 'NATIVE' && from.isNative) ||
-                    (token.tokenType === 'TOKEN' &&
-                        address.toLowerCase().endsWith(from.address.toLowerCase()))
-                );
-            })?.[1];
-            const dstChainInformation = sourceToken?.destChains[toChainId.toString()];
-            if (!sourceToken || !dstChainInformation) {
+            const routerMethodName = tokens?.targetToken.routerABI.split('(')[0]!;
+            if (!tokens || !isMultichainMethodName(routerMethodName)) {
                 return {
                     trade: null,
                     error: new NotSupportedTokensError()
                 };
             }
-
-            const targetToken = Object.entries(dstChainInformation).find(([_hash, token]) => {
-                const routerAbi = token.routerABI;
-                return isMultichainMethodName(routerAbi.split('(')[0]!);
-            })?.[1];
-            if (!targetToken) {
-                return {
-                    trade: null,
-                    error: new NotSupportedTokensError()
-                };
-            }
-            const routerMethodName = targetToken.routerABI.split('(')[0]! as MultichainMethodName;
+            const { targetToken } = tokens;
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
             const fromWithoutFee = getFromWithoutFee(from, feeInfo);
 
             let onChainTrade: EvmOnChainTrade | null = null;
             let transitTokenAmount: BigNumber;
-            let toAmount: BigNumber;
-            if (compareAddresses(from.address, sourceTransitTokenAddress)) {
+            if (
+                (from.isNative && sourceTransitToken.tokenType === 'NATIVE') ||
+                compareAddresses(from.address, sourceTransitToken.address)
+            ) {
                 transitTokenAmount = fromWithoutFee.tokenAmount;
-                const feeAmount = BigNumber.min(
-                    BigNumber.max(
-                        transitTokenAmount.multipliedBy(targetToken.SwapFeeRatePerMillion / 100),
-                        new BigNumber(targetToken.MinimumSwapFee)
-                    ),
-                    new BigNumber(targetToken.MaximumSwapFee)
-                );
-                toAmount = transitTokenAmount.minus(feeAmount);
-
-                from = new PriceTokenAmount({
-                    ...from.asStructWithAmount,
-                    price: new BigNumber(sourceToken.price)
-                });
             } else {
                 onChainTrade = await this.getOnChainTrade(
                     fromWithoutFee,
-                    sourceTransitTokenAddress,
+                    sourceTransitToken.address,
                     options.slippageTolerance
                 );
                 if (!onChainTrade) {
@@ -127,18 +98,10 @@ export class DexMultichainCrossChainProvider extends CrossChainProvider {
                     };
                 }
 
-                // @todo add from price
-
                 transitTokenAmount = onChainTrade.to.tokenAmount;
-                const feeAmount = BigNumber.min(
-                    BigNumber.max(
-                        transitTokenAmount.multipliedBy(targetToken.SwapFeeRatePerMillion / 100),
-                        new BigNumber(targetToken.MinimumSwapFee)
-                    ),
-                    new BigNumber(targetToken.MaximumSwapFee)
-                );
-                toAmount = transitTokenAmount.minus(feeAmount);
             }
+            const feeToAmount = getToFeeAmount(transitTokenAmount, targetToken);
+            const toAmount = transitTokenAmount.minus(feeToAmount);
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -178,28 +141,19 @@ export class DexMultichainCrossChainProvider extends CrossChainProvider {
                 options.providerAddress
             );
 
-            if (transitTokenAmount.lt(targetToken.MinimumSwap)) {
-                const minimumAmount = new BigNumber(targetToken.MinimumSwap)
-                    .dividedBy(1 - (feeInfo.platformFee?.percent || 0) / 100)
-                    .toFixed(5, 0);
+            try {
+                this.checkMinMaxErrors(
+                    { tokenAmount: transitTokenAmount, symbol: sourceTransitToken.symbol },
+                    targetToken,
+                    feeInfo
+                );
+            } catch (error) {
                 return {
                     trade,
-                    error: new MinAmountError(new BigNumber(minimumAmount), sourceToken.symbol)
+                    error
                 };
             }
-            if (transitTokenAmount.gt(targetToken.MaximumSwap)) {
-                const maximumAmount = new BigNumber(targetToken.MaximumSwap)
-                    .dividedBy(1 - (feeInfo.platformFee?.percent || 0) / 100)
-                    .toFixed(5, 1);
-                return {
-                    trade,
-                    error: new MaxAmountError(new BigNumber(maximumAmount), sourceToken.symbol)
-                };
-            }
-
-            return {
-                trade
-            };
+            return { trade };
         } catch (err: unknown) {
             return {
                 trade: null,
@@ -208,15 +162,15 @@ export class DexMultichainCrossChainProvider extends CrossChainProvider {
         }
     }
 
-    private async getTransitTokenAddress(
+    private async getSourceTransitToken(
         fromBlockchain: BlockchainName,
         toToken: Token
-    ): Promise<string | null> {
+    ): Promise<MultichainTargetToken | null> {
         const tokens = await getMultichainTokens(toToken, fromBlockchain);
         if (!tokens) {
             return null;
         }
-        return tokens.targetToken.address;
+        return tokens.targetToken;
     }
 
     private async getOnChainTrade(

@@ -4,12 +4,15 @@ import {
     MultichainTargetToken,
     MultichainTokensResponse
 } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/tokens-api';
-import { Token } from 'src/common/tokens';
 import { Injector } from 'src/core/injector/injector';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export async function getMultichainTokens(
-    from: Token,
+    from: {
+        blockchain: BlockchainName;
+        address: string;
+        isNative: boolean;
+    },
     toBlockchain: BlockchainName
 ): Promise<{ sourceToken: MultichainSourceToken; targetToken: MultichainTargetToken } | null> {
     const fromChainId = blockchainId[from.blockchain];

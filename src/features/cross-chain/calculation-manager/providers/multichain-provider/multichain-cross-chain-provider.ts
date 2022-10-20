@@ -3,25 +3,23 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import BigNumber from 'bignumber.js';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
 import {
     MultichainCrossChainSupportedBlockchain,
     multichainCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/constants/multichain-cross-chain-supported-blockchain';
-import { MultichainTokensResponse } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/tokens-api';
 import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
-import { isMultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/is-multichain-method-name';
 import { MultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-trade';
-import { MultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/multichain-method-name';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { getMultichainTokens } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/get-multichain-tokens';
+import { isMultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/is-multichain-method-name';
+import { getToFeeAmount } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/get-to-fee-amount';
+import { MultichainTargetToken } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/tokens-api';
 
 export class MultichainCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.MULTICHAIN;
@@ -46,50 +44,21 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            const fromChainId = blockchainId[fromBlockchain];
-            const toChainId = blockchainId[toBlockchain];
-            const tokensList = await this.httpClient.get<MultichainTokensResponse>(
-                `https://bridgeapi.anyswap.exchange/v4/tokenlistv4/${fromChainId}`
-            );
-            const sourceToken = Object.entries(tokensList).find(([address, token]) => {
-                return (
-                    (token.tokenType === 'NATIVE' && from.isNative) ||
-                    (token.tokenType === 'TOKEN' &&
-                        address.toLowerCase().endsWith(from.address.toLowerCase()))
-                );
-            })?.[1];
-            const dstChainInformation = sourceToken?.destChains[toChainId.toString()];
-            if (!sourceToken || !dstChainInformation) {
+            const tokens = await getMultichainTokens(from, toBlockchain);
+            const routerMethodName = tokens?.targetToken.routerABI.split('(')[0]!;
+            if (!tokens || !isMultichainMethodName(routerMethodName)) {
                 return {
                     trade: null,
                     error: new NotSupportedTokensError()
                 };
             }
-
-            const targetToken = Object.entries(dstChainInformation).find(([_hash, token]) => {
-                const routerAbi = token.routerABI;
-                return isMultichainMethodName(routerAbi.split('(')[0]!);
-            })?.[1];
-            if (!targetToken) {
-                return {
-                    trade: null,
-                    error: new NotSupportedTokensError()
-                };
-            }
-            const routerMethodName = targetToken.routerABI.split('(')[0]! as MultichainMethodName;
+            const { sourceToken, targetToken } = tokens;
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
             const fromWithoutFee = getFromWithoutFee(from, feeInfo);
-            const feeAmount = BigNumber.min(
-                BigNumber.max(
-                    fromWithoutFee.tokenAmount.multipliedBy(
-                        targetToken.SwapFeeRatePerMillion / 100
-                    ),
-                    new BigNumber(targetToken.MinimumSwapFee)
-                ),
-                new BigNumber(targetToken.MaximumSwapFee)
-            );
-            const toAmount = fromWithoutFee.tokenAmount.minus(feeAmount);
+
+            const toFeeAmount = getToFeeAmount(fromWithoutFee.tokenAmount, targetToken);
+            const toAmount = fromWithoutFee.tokenAmount.minus(toFeeAmount);
 
             from = new PriceTokenAmount({
                 ...from.asStructWithAmount,
@@ -132,33 +101,40 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 options.providerAddress
             );
 
-            if (fromWithoutFee.tokenAmount.lt(targetToken.MinimumSwap)) {
-                const minimumAmount = new BigNumber(targetToken.MinimumSwap)
-                    .dividedBy(1 - (feeInfo.platformFee?.percent || 0) / 100)
-                    .toFixed(5, 0);
+            try {
+                this.checkMinMaxErrors(fromWithoutFee, targetToken, feeInfo);
+            } catch (error) {
                 return {
                     trade,
-                    error: new MinAmountError(new BigNumber(minimumAmount), from.symbol)
+                    error
                 };
             }
-            if (fromWithoutFee.tokenAmount.gt(targetToken.MaximumSwap)) {
-                const maximumAmount = new BigNumber(targetToken.MaximumSwap)
-                    .dividedBy(1 - (feeInfo.platformFee?.percent || 0) / 100)
-                    .toFixed(5, 1);
-                return {
-                    trade,
-                    error: new MaxAmountError(new BigNumber(maximumAmount), from.symbol)
-                };
-            }
-
-            return {
-                trade
-            };
+            return { trade };
         } catch (err: unknown) {
             return {
                 trade: null,
                 error: CrossChainProvider.parseError(err)
             };
+        }
+    }
+
+    protected checkMinMaxErrors(
+        fromWithoutFee: { tokenAmount: BigNumber; symbol: string },
+        targetToken: MultichainTargetToken,
+        feeInfo: FeeInfo
+    ): void {
+        if (fromWithoutFee.tokenAmount.lt(targetToken.MinimumSwap)) {
+            const minimumAmount = new BigNumber(targetToken.MinimumSwap)
+                .dividedBy(1 - (feeInfo.platformFee?.percent || 0) / 100)
+                .toFixed(5, 0);
+            throw new MinAmountError(new BigNumber(minimumAmount), fromWithoutFee.symbol);
+        }
+
+        if (fromWithoutFee.tokenAmount.gt(targetToken.MaximumSwap)) {
+            const maximumAmount = new BigNumber(targetToken.MaximumSwap)
+                .dividedBy(1 - (feeInfo.platformFee?.percent || 0) / 100)
+                .toFixed(5, 1);
+            throw new MaxAmountError(new BigNumber(maximumAmount), fromWithoutFee.symbol);
         }
     }
 
