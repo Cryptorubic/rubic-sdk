@@ -12,7 +12,7 @@ import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/
 import {
     MultichainCrossChainSupportedBlockchain,
     multichainCrossChainSupportedBlockchains
-} from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/constants/multichain-cross-chain-supported-blockchain';
+} from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/supported-blockchain';
 import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
 import { MultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-trade';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';

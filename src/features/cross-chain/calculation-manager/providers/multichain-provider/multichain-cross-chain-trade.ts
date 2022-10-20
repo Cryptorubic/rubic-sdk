@@ -15,7 +15,7 @@ import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { MultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/multichain-method-name';
 import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
-import { multichainContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/constants/multichain-contract-abi';
+import { multichainContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/constants/contract-abi';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { ItType } from 'src/features/cross-chain/calculation-manager/providers/common/models/it-type';
 
