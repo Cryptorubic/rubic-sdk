@@ -149,7 +149,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
             this.routerAddress
         ];
 
-        const methodArguments: unknown[] = [swapArguments];
+        const methodArguments: unknown[] = [];
         if (this.onChainTrade) {
             const encodedData = (
                 await this.onChainTrade.encode({
@@ -163,6 +163,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
                 encodedData
             );
         }
+        methodArguments.push(swapArguments);
 
         const value = this.getSwapValue();
 

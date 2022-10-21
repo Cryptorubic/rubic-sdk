@@ -8,9 +8,8 @@ import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager
 import BigNumber from 'bignumber.js';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
-import { NotSupportedTokensError } from 'src/common/errors';
+import { NotSupportedTokensError, NotWhitelistedProviderError } from 'src/common/errors';
 import { isMultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/is-multichain-method-name';
-import { MultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-trade';
 import {
     MultichainProxyCrossChainSupportedBlockchain,
     multichainProxyCrossChainSupportedBlockchains
@@ -75,6 +74,18 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             }
             const { targetToken } = tokens;
 
+            const whitelistedAddresses = await this.getWhitelistedAddresses(fromBlockchain);
+            if (
+                !whitelistedAddresses.some(whitelistedAddress =>
+                    compareAddresses(whitelistedAddress, targetToken.router)
+                )
+            ) {
+                return {
+                    trade: null,
+                    error: new NotWhitelistedProviderError(targetToken.router)
+                };
+            }
+
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
             const fromWithoutFee = getFromWithoutFee(from, feeInfo);
 
@@ -89,6 +100,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                 onChainTrade = await this.getOnChainTrade(
                     fromWithoutFee,
                     sourceTransitToken.address,
+                    whitelistedAddresses,
                     options.slippageTolerance
                 );
                 if (!onChainTrade) {
@@ -114,13 +126,14 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             const anyTokenAddress = targetToken.fromanytoken.address;
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await MultichainCrossChainTrade.getGasData(
+                    ? await DexMultichainCrossChainTrade.getGasData(
                           from,
                           to,
                           routerAddress,
                           spenderAddress,
                           routerMethodName,
-                          anyTokenAddress
+                          anyTokenAddress,
+                          onChainTrade
                       )
                     : null;
 
@@ -173,18 +186,24 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
         return tokens.targetToken;
     }
 
-    private async getOnChainTrade(
-        from: PriceTokenAmount,
-        transitTokenAddress: string,
-        slippageTolerance: number
-    ): Promise<EvmOnChainTrade | null> {
-        const fromBlockchain = from.blockchain as MultichainProxyCrossChainSupportedBlockchain;
+    private getWhitelistedAddresses(
+        fromBlockchain: MultichainProxyCrossChainSupportedBlockchain
+    ): Promise<string[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-        const availableDexes = await web3Public.callContractMethod<string[]>(
+        return web3Public.callContractMethod<string[]>(
             multichainProxyContractAddress[fromBlockchain],
             multichainProxyContractAbi,
             'getAvailableRouters'
         );
+    }
+
+    private async getOnChainTrade(
+        from: PriceTokenAmount,
+        transitTokenAddress: string,
+        availableDexes: string[],
+        slippageTolerance: number
+    ): Promise<EvmOnChainTrade | null> {
+        const fromBlockchain = from.blockchain as MultichainProxyCrossChainSupportedBlockchain;
 
         // @todo add filter
         const dexes = Object.values(typedTradeProviders[fromBlockchain]);

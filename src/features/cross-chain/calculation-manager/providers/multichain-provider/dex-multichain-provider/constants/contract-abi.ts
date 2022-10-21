@@ -49,6 +49,9 @@ export const multichainProxyContractAbi = [
     },
     {
         inputs: [
+            { internalType: 'address', name: '_dex', type: 'address' },
+            { internalType: 'address', name: '_anyTokenOut', type: 'address' },
+            { internalType: 'bytes', name: '_swapData', type: 'bytes' },
             {
                 components: [
                     { internalType: 'address', name: 'srcInputToken', type: 'address' },
@@ -63,10 +66,7 @@ export const multichainProxyContractAbi = [
                 internalType: 'struct BridgeBase.BaseCrossChainParams',
                 name: '_params',
                 type: 'tuple'
-            },
-            { internalType: 'address', name: '_dex', type: 'address' },
-            { internalType: 'address', name: '_tokenOut', type: 'address' },
-            { internalType: 'bytes', name: '_swapData', type: 'bytes' }
+            }
         ],
         name: 'multiBridgeSwap',
         outputs: [],
@@ -75,6 +75,9 @@ export const multichainProxyContractAbi = [
     },
     {
         inputs: [
+            { internalType: 'address', name: '_dex', type: 'address' },
+            { internalType: 'address', name: '_anyTokenOut', type: 'address' },
+            { internalType: 'bytes', name: '_swapData', type: 'bytes' },
             {
                 components: [
                     { internalType: 'address', name: 'srcInputToken', type: 'address' },
@@ -89,10 +92,7 @@ export const multichainProxyContractAbi = [
                 internalType: 'struct BridgeBase.BaseCrossChainParams',
                 name: '_params',
                 type: 'tuple'
-            },
-            { internalType: 'address', name: '_dex', type: 'address' },
-            { internalType: 'address', name: '_tokenOut', type: 'address' },
-            { internalType: 'bytes', name: '_swapData', type: 'bytes' }
+            }
         ],
         name: 'multiBridgeSwapNative',
         outputs: [],

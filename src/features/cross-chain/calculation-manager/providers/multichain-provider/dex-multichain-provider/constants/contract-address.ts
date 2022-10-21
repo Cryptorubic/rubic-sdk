@@ -8,9 +8,12 @@ export const multichainProxyContractAddress: Record<
     MultichainProxyCrossChainSupportedBlockchain,
     string
 > = multichainProxyCrossChainSupportedBlockchains.reduce((acc, blockchain) => {
-    let routerAddress = '0x4c4bF5f46071ff2a5846395fc22ba7B2C782eEd5';
+    let routerAddress = '0x41e7056A16B35E5E09214d6F7d43C90D9DEC1630';
+    if (blockchain === BLOCKCHAIN_NAME.POLYGON) {
+        routerAddress = '0xC85A61d178bBdDc7752C6618bA498074cD6FA9f1';
+    }
     if (blockchain === BLOCKCHAIN_NAME.KAVA) {
-        routerAddress = '0x0C8f0d522094689E9eFeB2576AB60d54B85209dF';
+        routerAddress = '0x7a3bAc61d5b3b476cC774fa2209f1035BD01a4eF';
     }
     return {
         ...acc,
