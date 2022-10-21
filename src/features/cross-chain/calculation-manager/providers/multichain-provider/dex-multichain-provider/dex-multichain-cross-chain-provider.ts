@@ -25,6 +25,7 @@ import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/provi
 import { MultichainCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-provider';
 import { MultichainTargetToken } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/tokens-api';
 import { getToFeeAmount } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/get-to-fee-amount';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export class DexMultichainCrossChainProvider extends MultichainCrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.MULTICHAIN;
@@ -99,7 +100,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             } else {
                 onChainTrade = await this.getOnChainTrade(
                     fromWithoutFee,
-                    sourceTransitToken.address,
+                    sourceTransitToken,
                     whitelistedAddresses,
                     options.slippageTolerance
                 );
@@ -199,7 +200,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
 
     private async getOnChainTrade(
         from: PriceTokenAmount,
-        transitTokenAddress: string,
+        transitToken: MultichainTargetToken,
         availableDexes: string[],
         slippageTolerance: number
     ): Promise<EvmOnChainTrade | null> {
@@ -208,7 +209,10 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
         // @todo add filter
         const dexes = Object.values(typedTradeProviders[fromBlockchain]);
         const to = await PriceToken.createToken({
-            address: transitTokenAddress,
+            address:
+                transitToken.tokenType === 'NATIVE'
+                    ? EvmWeb3Pure.nativeTokenAddress
+                    : transitToken.address,
             blockchain: fromBlockchain
         });
         const onChainTrades = (
