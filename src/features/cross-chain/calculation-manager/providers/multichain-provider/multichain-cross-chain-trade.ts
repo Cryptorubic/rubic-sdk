@@ -180,8 +180,6 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
         );
         methodArguments.push(encodedData);
 
-        await this.checkProviderIsWhitelisted(this.routerAddress, this.spenderAddress);
-
         const value = this.getSwapValue();
 
         return {

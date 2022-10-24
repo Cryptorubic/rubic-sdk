@@ -177,7 +177,10 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         options: GetContractParamsOptions
     ): Promise<ContractParams>;
 
-    protected async checkProviderIsWhitelisted(providerRouter: string, providerGateway?: string) {
+    protected async checkProviderIsWhitelisted(
+        providerRouter: string,
+        providerGateway?: string
+    ): Promise<void> {
         const whitelistedContracts = await Injector.web3PublicService
             .getWeb3Public(this.from.blockchain)
             .callContractMethod<string[]>(

@@ -13,13 +13,21 @@ import {
     MultichainCrossChainSupportedBlockchain,
     multichainCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/supported-blockchain';
-import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
+import {
+    MaxAmountError,
+    MinAmountError,
+    NotSupportedTokensError,
+    NotWhitelistedProviderError
+} from 'src/common/errors';
 import { MultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-trade';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { getMultichainTokens } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/get-multichain-tokens';
 import { isMultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/is-multichain-method-name';
 import { getToFeeAmount } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/get-to-fee-amount';
 import { MultichainTargetToken } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/tokens-api';
+import { Injector } from 'src/core/injector/injector';
+import { compareAddresses } from 'src/common/utils/blockchain';
+import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 
 export class MultichainCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.MULTICHAIN;
@@ -53,6 +61,19 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 };
             }
             const { sourceToken, targetToken } = tokens;
+
+            try {
+                await this.checkProviderIsWhitelisted(
+                    fromBlockchain,
+                    targetToken.router,
+                    targetToken.spender
+                );
+            } catch (error) {
+                return {
+                    trade: null,
+                    error
+                };
+            }
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
             const fromWithoutFee = getFromWithoutFee(from, feeInfo);
@@ -135,6 +156,32 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 .dividedBy(1 - (feeInfo.platformFee?.percent || 0) / 100)
                 .toFixed(5, 1);
             throw new MaxAmountError(new BigNumber(maximumAmount), fromWithoutFee.symbol);
+        }
+    }
+
+    protected async checkProviderIsWhitelisted(
+        fromBlockchain: Web3PublicSupportedBlockchain,
+        providerRouter: string,
+        providerGateway: string
+    ): Promise<void> {
+        const whitelistedContracts = await Injector.web3PublicService
+            .getWeb3Public(fromBlockchain)
+            .callContractMethod<string[]>(
+                rubicProxyContractAddress[fromBlockchain],
+                evmCommonCrossChainAbi,
+                'getAvailableRouters'
+            );
+
+        if (
+            !whitelistedContracts.find(whitelistedContract =>
+                compareAddresses(whitelistedContract, providerRouter)
+            ) ||
+            (providerGateway &&
+                !whitelistedContracts.find(whitelistedContract =>
+                    compareAddresses(whitelistedContract, providerGateway)
+                ))
+        ) {
+            throw new NotWhitelistedProviderError(providerRouter, providerGateway);
         }
     }
 
