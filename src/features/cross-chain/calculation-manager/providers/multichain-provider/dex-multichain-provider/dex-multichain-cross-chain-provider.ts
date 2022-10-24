@@ -155,18 +155,18 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                 options.providerAddress
             );
 
-            try {
-                this.checkMinMaxErrors(
-                    { tokenAmount: transitTokenAmount, symbol: sourceTransitToken.symbol },
-                    targetToken,
-                    feeInfo
-                );
-            } catch (error) {
-                return {
-                    trade,
-                    error
-                };
-            }
+            // try { todo return
+            //     this.checkMinMaxErrors(
+            //         { tokenAmount: transitTokenAmount, symbol: sourceTransitToken.symbol },
+            //         targetToken,
+            //         feeInfo
+            //     );
+            // } catch (error) {
+            //     return {
+            //         trade,
+            //         error
+            //     };
+            // }
             return { trade };
         } catch (err: unknown) {
             return {

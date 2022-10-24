@@ -154,7 +154,8 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
             const encodedData = (
                 await this.onChainTrade.encode({
                     fromAddress: options.fromAddress || this.walletAddress,
-                    receiverAddress: this.fromContractAddress
+                    receiverAddress: this.fromContractAddress,
+                    supportFee: false
                 })
             ).data;
             methodArguments.push(
