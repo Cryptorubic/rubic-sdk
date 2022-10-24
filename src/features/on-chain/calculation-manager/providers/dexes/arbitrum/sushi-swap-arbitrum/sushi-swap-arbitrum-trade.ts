@@ -13,7 +13,7 @@ export class SushiSwapArbitrumTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.SUSHI_SWAP;
     }
 
-    protected readonly contractAddress = SUSHI_SWAP_ARBITRUM_CONTRACT_ADDRESS;
+    public readonly contractAddress = SUSHI_SWAP_ARBITRUM_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);

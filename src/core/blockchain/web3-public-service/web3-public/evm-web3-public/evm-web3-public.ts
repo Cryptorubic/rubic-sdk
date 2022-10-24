@@ -349,4 +349,35 @@ export class EvmWeb3Public extends Web3Public {
             toBlock: blockNumber
         });
     }
+
+    public async staticCallContractMethod(
+        contractAddress: string,
+        contractAbi: AbiItem[],
+        methodName: string,
+        methodArguments: unknown[],
+        options: { from: string; value: string }
+    ): Promise<TransactionReceipt> {
+        const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
+
+        return new Promise((resolve, reject) => {
+            contract.methods[methodName](...methodArguments).call(
+                {
+                    from: options?.from,
+                    ...(options?.value && { value: options.value })
+                },
+                (
+                    error: { code: number; message: string; data: string },
+                    result: TransactionReceipt | PromiseLike<TransactionReceipt>
+                ) => {
+                    if (result) {
+                        resolve(result);
+                    }
+
+                    if (error) {
+                        reject(error);
+                    }
+                }
+            );
+        });
+    }
 }
