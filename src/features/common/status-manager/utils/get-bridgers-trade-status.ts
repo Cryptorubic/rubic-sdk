@@ -15,13 +15,15 @@ import { TxStatusData } from 'src/features/common/status-manager/models/tx-statu
 export async function getBridgersTradeStatus(
     srcTxHash: string,
     fromBlockchain: BridgersCrossChainSupportedBlockchain,
-    sourceFlag: 'rubic' | 'rubic_widget'
+    sourceFlag: 'rubic' | 'rubic_widget',
+    amountOutMin?: string
 ): Promise<TxStatusData> {
     try {
         const updateDataAndStatusRequest: BridgersUpdateDataAndStatusRequest = {
             hash: srcTxHash,
             fromTokenChain: toBridgersBlockchain[fromBlockchain],
-            sourceFlag
+            sourceFlag,
+            amountOutMin
         };
         const updateDataAndStatusResponse =
             await Injector.httpClient.post<BridgersUpdateDataAndStatusResponse>(
