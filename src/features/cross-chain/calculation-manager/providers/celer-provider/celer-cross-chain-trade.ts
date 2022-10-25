@@ -2,12 +2,14 @@ import {
     celerSourceTransitTokenFeeMultiplier,
     celerTargetTransitTokenFeeMultiplier
 } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-cross-chain-fee-multipliers';
+import { TransactionReceipt } from 'web3-eth';
 import {
     CrossChainIsUnavailableError,
-    InsufficientFundsGasPriceValueError
+    InsufficientFundsGasPriceValueError,
+    UnnecessaryApproveError
 } from 'src/common/errors';
 import { CelerCrossChainContractData } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-cross-chain-contract-data';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { CelerDirectContractTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-direct-contract-trade/celer-direct-contract-trade';
@@ -25,6 +27,7 @@ import { Cache } from 'src/common/utils/decorators';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 
 /**
@@ -300,5 +303,39 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
             this.cryptoFeeToken.tokenAmount
         );
         return fromUsd.plus(cryptoFeeCost).dividedBy(this.to.tokenAmount);
+    }
+
+    public async approve(
+        options: EvmBasicTransactionOptions,
+        checkNeedApprove = true
+    ): Promise<TransactionReceipt> {
+        if (checkNeedApprove) {
+            const needApprove = await this.needApprove();
+            if (!needApprove) {
+                throw new UnnecessaryApproveError();
+            }
+        }
+
+        this.checkWalletConnected();
+        await this.checkBlockchainCorrect();
+
+        await this.deflationTokenManager.checkToken({
+            address: this.to.address,
+            blockchain: this.to.blockchain,
+            symbol: this.to.symbol
+        });
+
+        const approveAmount =
+            this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ||
+            this.from.blockchain === BLOCKCHAIN_NAME.CRONOS
+                ? this.from.weiAmount
+                : 'infinity';
+
+        return this.web3Private.approveTokens(
+            this.from.address,
+            this.fromContractAddress,
+            approveAmount,
+            options
+        );
     }
 }
