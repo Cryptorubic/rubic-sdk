@@ -25,6 +25,7 @@ import { Cache } from 'src/common/utils/decorators';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 
 /**
  * Calculated Celer cross-chain trade.
@@ -118,6 +119,8 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly cryptoFeeToken: PriceTokenAmount;
 
+    private readonly deflationTokenManager = new DeflationTokenManager();
+
     /**
      * Gets price impact in source and target blockchains, based on tokens usd prices.
      */
@@ -189,6 +192,11 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         try {
+            await this.deflationTokenManager.checkToken({
+                address: this.to.address,
+                blockchain: this.to.blockchain,
+                symbol: this.to.symbol
+            });
             return await super.swap(options);
         } catch (err) {
             return this.parseSwapErrors(err);
@@ -212,6 +220,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     private parseSwapErrors(err: Error): never {
         const errMessage = err?.message || err?.toString?.();
+        console.error('CELER ERROR', err);
         if (errMessage?.includes('swapContract: Not enough amount of tokens')) {
             throw new CrossChainIsUnavailableError();
         }

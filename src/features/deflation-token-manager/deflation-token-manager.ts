@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import BigNumber from 'bignumber.js';
 import { BigNumber as EthersBigNumber } from 'ethers';
+import { DeflationTokenError } from 'src/common/errors';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
@@ -44,7 +45,8 @@ export class DeflationTokenManager {
     public async checkToken(token: {
         address: string;
         blockchain: BlockchainName;
-    }): Promise<boolean> {
+        symbol: string;
+    }): Promise<void> {
         let isDeflationToken = false;
         const tokenBlockchain = token.blockchain as EvmBlockchainName;
         const tokenAddress = token.address;
@@ -67,7 +69,7 @@ export class DeflationTokenManager {
 
         console.log({ onChainTrades, bestTrade });
         if (!bestTrade) {
-            return false;
+            return;
         }
 
         try {
@@ -130,7 +132,7 @@ export class DeflationTokenManager {
             );
         } catch (error) {
             if (!error?.data?.includes(ERROR_SELECTOR)) {
-                return false;
+                return;
             }
 
             if (error.data) {
@@ -157,10 +159,11 @@ export class DeflationTokenManager {
                     deflationPercent: deflationPercent.toString(),
                     isDeflationToken
                 });
+                if (deflationPercent.gt(0)) {
+                    throw new DeflationTokenError(token.symbol, deflationPercent.toFixed(2));
+                }
             }
         }
-
-        return isDeflationToken;
     }
 
     private async simulateTransferWithSwap(
