@@ -418,7 +418,8 @@ export class CrossChainStatusManager {
         return getBridgersTradeStatus(
             data.srcTxHash,
             data.fromBlockchain as BridgersCrossChainSupportedBlockchain,
-            'rubic'
+            'rubic',
+            data.amountOutMin
         );
     }
 
