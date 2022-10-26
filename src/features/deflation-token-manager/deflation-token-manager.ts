@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import BigNumber from 'bignumber.js';
 import { BigNumber as EthersBigNumber } from 'ethers';
 import { DeflationTokenError } from 'src/common/errors';

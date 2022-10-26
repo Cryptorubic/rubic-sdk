@@ -10,7 +10,7 @@ import {
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { CelerCrossChainContractData } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-cross-chain-contract-data';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { CelerDirectContractTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-direct-contract-trade/celer-direct-contract-trade';
