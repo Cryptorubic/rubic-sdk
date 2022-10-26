@@ -76,6 +76,8 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
             }
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+            const cryptoFee = this.getProtocolFee(targetToken, from.weiAmount);
+
             const fromWithoutFee = getFromWithoutFee(from, feeInfo);
 
             const toFeeAmount = getToFeeAmount(fromWithoutFee.tokenAmount, targetToken);
@@ -113,7 +115,10 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                     gasData,
                     priceImpact: from.calculatePriceImpactPercent(to) || 0,
                     toTokenAmountMin,
-                    feeInfo,
+                    feeInfo: {
+                        ...feeInfo,
+                        cryptoFee
+                    },
                     routerAddress,
                     spenderAddress,
                     routerMethodName,
@@ -144,6 +149,7 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
         targetToken: MultichainTargetToken,
         feeInfo: FeeInfo
     ): void {
+        // @TODO Add conversion from transit token to source.
         if (fromWithoutFee.tokenAmount.lt(targetToken.MinimumSwap)) {
             const minimumAmount = new BigNumber(targetToken.MinimumSwap)
                 .dividedBy(1 - (feeInfo.platformFee?.percent || 0) / 100)
@@ -210,6 +216,29 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 tokenSymbol: percentFeeToken.symbol
             },
             cryptoFee: null
+        };
+    }
+
+    protected getProtocolFee(
+        targetToken: MultichainTargetToken,
+        fromAmount: BigNumber
+    ): { amount: BigNumber; tokenSymbol: string } {
+        const minFee = targetToken.MinimumSwapFee;
+        const maxFee = targetToken.MaximumSwapFee;
+
+        let amount = fromAmount.multipliedBy(targetToken.SwapFeeRatePerMillion).dividedBy(100);
+
+        if (amount.gte(maxFee)) {
+            amount = new BigNumber(maxFee);
+        }
+
+        if (amount.lte(minFee)) {
+            amount = new BigNumber(minFee);
+        }
+
+        return {
+            amount,
+            tokenSymbol: targetToken.symbol
         };
     }
 }

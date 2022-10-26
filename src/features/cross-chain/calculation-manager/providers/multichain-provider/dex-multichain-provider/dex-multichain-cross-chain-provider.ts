@@ -89,6 +89,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
             const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+            const cryptoFee = this.getProtocolFee(targetToken, from.weiAmount);
 
             let onChainTrade: EvmOnChainTrade | null = null;
             let transitTokenAmount: BigNumber;
@@ -145,7 +146,10 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                     gasData,
                     priceImpact: from.calculatePriceImpactPercent(to) || 0,
                     toTokenAmountMin,
-                    feeInfo,
+                    feeInfo: {
+                        ...feeInfo,
+                        cryptoFee
+                    },
                     routerAddress,
                     spenderAddress,
                     routerMethodName,
@@ -155,18 +159,18 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                 options.providerAddress
             );
 
-            // try { todo return
-            //     this.checkMinMaxErrors(
-            //         { tokenAmount: transitTokenAmount, symbol: sourceTransitToken.symbol },
-            //         targetToken,
-            //         feeInfo
-            //     );
-            // } catch (error) {
-            //     return {
-            //         trade,
-            //         error
-            //     };
-            // }
+            try {
+                this.checkMinMaxErrors(
+                    { tokenAmount: transitTokenAmount, symbol: sourceTransitToken.symbol },
+                    targetToken,
+                    feeInfo
+                );
+            } catch (error) {
+                return {
+                    trade,
+                    error
+                };
+            }
             return { trade };
         } catch (err: unknown) {
             return {
@@ -206,7 +210,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
     ): Promise<EvmOnChainTrade | null> {
         const fromBlockchain = from.blockchain as MultichainProxyCrossChainSupportedBlockchain;
 
-        // @todo add filter
+        // @TODO Add filter before promise resolving.
         const dexes = Object.values(typedTradeProviders[fromBlockchain]);
         const to = await PriceToken.createToken({
             address:

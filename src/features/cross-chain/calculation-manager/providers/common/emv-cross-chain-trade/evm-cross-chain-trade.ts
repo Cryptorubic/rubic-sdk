@@ -97,7 +97,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        // await this.checkTradeErrors(); todo return
+        await this.checkTradeErrors();
         this.checkReceiverAddress(
             options.receiverAddress,
             !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
@@ -118,7 +118,6 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
             await this.getContractParams(options);
 
         try {
-            // @todo return
             await this.web3Private.executeContractMethod(
                 contractAddress,
                 contractAbi,

@@ -140,6 +140,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
         this.spenderAddress = crossChainTrade.spenderAddress;
         this.routerMethodName = crossChainTrade.routerMethodName;
         this.anyTokenAddress = crossChainTrade.anyTokenAddress;
+        this.priceImpact = crossChainTrade.priceImpact;
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
