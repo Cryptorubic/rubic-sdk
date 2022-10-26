@@ -28,6 +28,8 @@ import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getSrcTxStatus } from 'src/features/common/status-manager/utils/get-src-tx-status';
 import { RubicSdkError } from 'src/common/errors';
+import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
+import { MultichainStatusMapping } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
 
 /**
  * Contains methods for getting cross-chain trade statuses.
@@ -43,7 +45,7 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.VIA]: this.getViaDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.BRIDGERS]: this.getBridgersDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: null
+        [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: this.getMultichainDstSwapStatus
     };
 
     /**
@@ -455,5 +457,25 @@ export class CrossChainStatusManager {
         }
 
         return dstTxData;
+    }
+
+    private async getMultichainDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        try {
+            const {
+                info: { status, swaptx }
+            } = await this.httpClient.get<MultichainStatusApiResponse>(
+                `https://bridgeapi.anyswap.exchange/v2/history/details?params=${data.srcTxHash}`
+            );
+
+            return {
+                status: MultichainStatusMapping?.[status] || TxStatus.UNKNOWN,
+                hash: swaptx || null
+            };
+        } catch {
+            return {
+                status: TxStatus.PENDING,
+                hash: null
+            };
+        }
     }
 }
