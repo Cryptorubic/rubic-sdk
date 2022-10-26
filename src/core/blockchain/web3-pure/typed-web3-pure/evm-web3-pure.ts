@@ -104,6 +104,13 @@ export class EvmWeb3Pure {
         return toChecksumAddress(address);
     }
 
+    /**
+     * Decodes data by ABI.
+     * @param functionName Function name in ABI.
+     * @param functionArguments Array of function's inputs.
+     * @param data Data (hex string).
+     * @returns Decoded data.
+     */
     public static decodeData<T>(
         functionName: string,
         functionArguments: Array<[type: string, name: string]>,

@@ -5,6 +5,7 @@ import {
 import { TransactionReceipt } from 'web3-eth';
 import {
     CrossChainIsUnavailableError,
+    DeflationTokenError,
     InsufficientFundsGasPriceValueError,
     UnnecessaryApproveError
 } from 'src/common/errors';
@@ -124,6 +125,8 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly deflationTokenManager = new DeflationTokenManager();
 
+    public isDeflationTokenInTargetNetwork = false;
+
     /**
      * Gets price impact in source and target blockchains, based on tokens usd prices.
      */
@@ -202,6 +205,10 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
             });
             return await super.swap(options);
         } catch (err) {
+            if (err instanceof DeflationTokenError) {
+                this.isDeflationTokenInTargetNetwork = true;
+            }
+
             return this.parseSwapErrors(err);
         }
     }
@@ -223,7 +230,6 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     private parseSwapErrors(err: Error): never {
         const errMessage = err?.message || err?.toString?.();
-        console.error('CELER ERROR', err);
         if (errMessage?.includes('swapContract: Not enough amount of tokens')) {
             throw new CrossChainIsUnavailableError();
         }
@@ -309,33 +315,35 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
         options: EvmBasicTransactionOptions,
         checkNeedApprove = true
     ): Promise<TransactionReceipt> {
-        if (checkNeedApprove) {
-            const needApprove = await this.needApprove();
-            if (!needApprove) {
-                throw new UnnecessaryApproveError();
+        try {
+            if (checkNeedApprove) {
+                const needApprove = await this.needApprove();
+                if (!needApprove) {
+                    throw new UnnecessaryApproveError();
+                }
             }
+
+            this.checkWalletConnected();
+            await this.checkBlockchainCorrect();
+
+            await this.deflationTokenManager.checkToken({
+                address: this.to.address,
+                blockchain: this.to.blockchain,
+                symbol: this.to.symbol
+            });
+
+            return this.web3Private.approveTokens(
+                this.from.address,
+                this.fromContractAddress,
+                'infinity',
+                options
+            );
+        } catch (error) {
+            if (error instanceof DeflationTokenError) {
+                this.isDeflationTokenInTargetNetwork = true;
+            }
+
+            throw error;
         }
-
-        this.checkWalletConnected();
-        await this.checkBlockchainCorrect();
-
-        await this.deflationTokenManager.checkToken({
-            address: this.to.address,
-            blockchain: this.to.blockchain,
-            symbol: this.to.symbol
-        });
-
-        const approveAmount =
-            this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ||
-            this.from.blockchain === BLOCKCHAIN_NAME.CRONOS
-                ? this.from.weiAmount
-                : 'infinity';
-
-        return this.web3Private.approveTokens(
-            this.from.address,
-            this.fromContractAddress,
-            approveAmount,
-            options
-        );
     }
 }
