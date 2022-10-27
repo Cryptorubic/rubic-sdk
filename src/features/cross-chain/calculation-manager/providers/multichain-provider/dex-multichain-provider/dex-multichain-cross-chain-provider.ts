@@ -93,11 +93,14 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
 
             let onChainTrade: EvmOnChainTrade | null = null;
             let transitTokenAmount: BigNumber;
+            let transitMinAmount: BigNumber;
+
             if (
                 (from.isNative && sourceTransitToken.tokenType === 'NATIVE') ||
                 compareAddresses(from.address, sourceTransitToken.address)
             ) {
                 transitTokenAmount = fromWithoutFee.tokenAmount;
+                transitMinAmount = transitTokenAmount;
             } else {
                 onChainTrade = await this.getOnChainTrade(
                     fromWithoutFee,
@@ -113,6 +116,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                 }
 
                 transitTokenAmount = onChainTrade.to.tokenAmount;
+                transitMinAmount = onChainTrade.toTokenAmountMin.tokenAmount;
             }
             const feeToAmount = getToFeeAmount(transitTokenAmount, targetToken);
             const toAmount = transitTokenAmount.minus(feeToAmount);
@@ -121,7 +125,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                 ...toToken.asStruct,
                 tokenAmount: toAmount
             });
-            const toTokenAmountMin = to.tokenAmount;
+            const toTokenAmountMin = transitMinAmount.minus(feeToAmount);
 
             const routerAddress = targetToken.router;
             const spenderAddress = targetToken.spender;

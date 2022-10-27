@@ -90,7 +90,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
 
     public readonly itType: ItType;
 
-    private readonly onChainTrade: EvmOnChainTrade | null;
+    public readonly onChainTrade: EvmOnChainTrade | null;
 
     protected get fromContractAddress(): string {
         return multichainProxyContractAddress[
