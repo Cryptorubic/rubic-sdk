@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "3.0.2-alpha.25",
+  "version": "3.0.2-alpha.26",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -58,7 +58,9 @@
     "test": "cd ./scripts && bash test-runner.sh",
     "build:publish": "yarn compile && yarn build && npm publish --access public",
     "analyze": "webpack --profile --json > stats.json &&  webpack-bundle-analyzer stats.json",
-    "docs": "typedoc"
+    "docs": "typedoc",
+    "publish": "yarn publish --access public",
+    "publish:alpha": "yarn publish --access public --tag alpha"
   },
   "dependencies": {
     "@lifi/sdk": "^1.0.2",

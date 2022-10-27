@@ -26,6 +26,8 @@ import { UniSwapV2EthereumPowProvider } from 'src/features/on-chain/calculation-
 import { SushiSwapEthereumPowProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum-pow/sushi-swap-ethereum-pow/sushi-swap-ethereum-pow-provider';
 import { JupiterSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/jupiter-swap/jupiter-swap-provider';
 import { PhotonSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/photon-swap/photon-swap-provider';
+import { SoulSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/soul-swap/soul-swap-provider';
+import { ApeSwapTelosProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/ape-swap/ape-swap-telos-provider';
 
 export const UniswapV2TradeProviders = [
     // ethereum
@@ -47,6 +49,7 @@ export const UniswapV2TradeProviders = [
     // fantom
     SpiritSwapProvider,
     SpookySwapProvider,
+    SoulSwapProvider,
     SushiSwapFantomProvider,
     // harmony
     SushiSwapHarmonyProvider,
@@ -60,6 +63,7 @@ export const UniswapV2TradeProviders = [
     // telos
     SushiSwapTelosProvider,
     ZappyProvider,
+    ApeSwapTelosProvider,
     // Boba
     OolongSwapProvider,
     // Ethereum PoW
