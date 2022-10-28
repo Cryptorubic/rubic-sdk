@@ -50,6 +50,11 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
         }
 
         try {
+            await this.checkContractState(
+                fromBlockchain,
+                multichainProxyContractAddress[fromBlockchain],
+                multichainProxyContractAbi
+            );
             const sourceTransitToken = await this.getSourceTransitToken(fromBlockchain, toToken);
             if (!sourceTransitToken) {
                 return {
