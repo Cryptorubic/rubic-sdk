@@ -227,8 +227,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
     }
 
     private checkBridgeTypes(notAllowedBridgeTypes: LifiBridgeTypes[]): boolean {
-        return notAllowedBridgeTypes.every(bridgeType =>
-            Object.values(LifiBridgeTypes).includes(bridgeType)
-        );
+        const lifiBridgeTypes = Object.values(LifiBridgeTypes);
+        return notAllowedBridgeTypes.every(bridgeType => lifiBridgeTypes.includes(bridgeType));
     }
 }
