@@ -350,6 +350,15 @@ export class EvmWeb3Public extends Web3Public {
         });
     }
 
+    /**
+     * Will call smart contract method in the EVM without sending any transaction.
+     * @param contractAddress Contract address.
+     * @param contractAbi Contract ABI.
+     * @param methodName Method name.
+     * @param methodArguments Method arguments.
+     * @param options Sender address and value.
+     * @returns Transaction receipt.
+     */
     public async staticCallContractMethod(
         contractAddress: string,
         contractAbi: AbiItem[],
