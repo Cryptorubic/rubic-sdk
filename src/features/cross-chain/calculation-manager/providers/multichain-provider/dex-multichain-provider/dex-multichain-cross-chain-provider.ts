@@ -94,7 +94,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
             const fromWithoutFee = getFromWithoutFee(from, feeInfo);
-            const cryptoFee = this.getProtocolFee(targetToken, from.weiAmount);
+            const cryptoFee = this.getProtocolFee(targetToken, from.tokenAmount);
 
             let onChainTrade: EvmOnChainTrade | null = null;
             let transitTokenAmount: BigNumber;
@@ -153,7 +153,9 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                     from,
                     to,
                     gasData,
-                    priceImpact: from.calculatePriceImpactPercent(to) || 0,
+                    priceImpact: onChainTrade?.from
+                        ? from.calculatePriceImpactPercent(onChainTrade?.from) || 0
+                        : 0,
                     toTokenAmountMin,
                     feeInfo: {
                         ...feeInfo,
@@ -171,6 +173,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             try {
                 this.checkMinMaxErrors(
                     { tokenAmount: transitTokenAmount, symbol: sourceTransitToken.symbol },
+                    { tokenAmount: transitMinAmount, symbol: sourceTransitToken.symbol },
                     targetToken,
                     feeInfo
                 );

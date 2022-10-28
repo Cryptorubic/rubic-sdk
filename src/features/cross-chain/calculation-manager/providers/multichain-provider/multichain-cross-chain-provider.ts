@@ -128,7 +128,7 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
             );
 
             try {
-                this.checkMinMaxErrors(fromWithoutFee, targetToken, feeInfo);
+                this.checkMinMaxErrors(fromWithoutFee, fromWithoutFee, targetToken, feeInfo);
             } catch (error) {
                 return {
                     trade,
@@ -145,23 +145,24 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
     }
 
     protected checkMinMaxErrors(
-        fromWithoutFee: { tokenAmount: BigNumber; symbol: string },
+        amount: { tokenAmount: BigNumber; symbol: string },
+        minAmount: { tokenAmount: BigNumber; symbol: string },
         targetToken: MultichainTargetToken,
         feeInfo: FeeInfo
     ): void {
         // @TODO Add conversion from transit token to source.
-        if (fromWithoutFee.tokenAmount.lt(targetToken.MinimumSwap)) {
+        if (minAmount.tokenAmount.lt(targetToken.MinimumSwap)) {
             const minimumAmount = new BigNumber(targetToken.MinimumSwap)
                 .dividedBy(1 - (feeInfo.platformFee?.percent || 0) / 100)
                 .toFixed(5, 0);
-            throw new MinAmountError(new BigNumber(minimumAmount), fromWithoutFee.symbol);
+            throw new MinAmountError(new BigNumber(minimumAmount), minAmount.symbol);
         }
 
-        if (fromWithoutFee.tokenAmount.gt(targetToken.MaximumSwap)) {
+        if (amount.tokenAmount.gt(targetToken.MaximumSwap)) {
             const maximumAmount = new BigNumber(targetToken.MaximumSwap)
                 .dividedBy(1 - (feeInfo.platformFee?.percent || 0) / 100)
                 .toFixed(5, 1);
-            throw new MaxAmountError(new BigNumber(maximumAmount), fromWithoutFee.symbol);
+            throw new MaxAmountError(new BigNumber(maximumAmount), amount.symbol);
         }
     }
 
