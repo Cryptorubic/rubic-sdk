@@ -3,6 +3,7 @@ import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { GasPriceApi } from 'src/core/gas-price-api/gas-price-api';
 import { CoingeckoApi } from 'src/core/coingecko-api/coingecko-api';
+import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 
 export class Injector {
     private static injector: Injector;
@@ -27,13 +28,18 @@ export class Injector {
         return Injector.injector.gasPriceApi;
     }
 
+    public static get deflationTokenManager(): DeflationTokenManager {
+        return Injector.injector.deflationTokenManager;
+    }
+
     public static createInjector(
         web3PublicService: Web3PublicService,
         web3PrivateService: Web3PrivateService,
-        httpClient: HttpClient
+        httpClient: HttpClient,
+        deflationTokenManager: DeflationTokenManager
     ): void {
         // eslint-disable-next-line no-new
-        new Injector(web3PublicService, web3PrivateService, httpClient);
+        new Injector(web3PublicService, web3PrivateService, httpClient, deflationTokenManager);
     }
 
     private readonly coingeckoApi: CoingeckoApi;
@@ -43,10 +49,12 @@ export class Injector {
     private constructor(
         private readonly web3PublicService: Web3PublicService,
         private readonly web3PrivateService: Web3PrivateService,
-        private readonly httpClient: HttpClient
+        private readonly httpClient: HttpClient,
+        private readonly deflationTokenManager: DeflationTokenManager
     ) {
         this.coingeckoApi = new CoingeckoApi(httpClient);
         this.gasPriceApi = new GasPriceApi(httpClient);
+        this.deflationTokenManager = new DeflationTokenManager();
         Injector.injector = this;
     }
 }
