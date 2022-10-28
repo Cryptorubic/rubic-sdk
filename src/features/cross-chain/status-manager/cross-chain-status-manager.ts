@@ -27,6 +27,7 @@ import { CelerTransferStatus } from 'src/features/cross-chain/status-manager/mod
 import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils/get-bridgers-trade-status';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getSrcTxStatus } from 'src/features/common/status-manager/utils/get-src-tx-status';
+import { RubicSdkError } from 'src/common/errors';
 
 /**
  * Contains methods for getting cross-chain trade statuses.
@@ -411,10 +412,14 @@ export class CrossChainStatusManager {
      * @returns Cross-chain transaction status.
      */
     private getBridgersDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        if (!data.amountOutMin) {
+            throw new RubicSdkError('field amountOutMin is not set.');
+        }
         return getBridgersTradeStatus(
             data.srcTxHash,
             data.fromBlockchain as BridgersCrossChainSupportedBlockchain,
-            'rubic'
+            'rubic',
+            data.amountOutMin
         );
     }
 

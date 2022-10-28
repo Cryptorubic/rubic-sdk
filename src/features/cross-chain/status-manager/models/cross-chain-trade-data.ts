@@ -39,4 +39,9 @@ export interface CrossChainTradeData {
      * Rango request id.
      */
     rangoRequestId?: string;
+
+    /**
+     * Expected minimum output amount.
+     */
+    amountOutMin?: string;
 }
