@@ -182,10 +182,8 @@ export class CrossChainManager {
 
         return from(getPriceTokensFromInputTokens(fromToken, fromAmount, toToken)).pipe(
             switchMap(({ from, to }) => {
-                const { disabledProviders, ...providerOptions } = this.getFullOptions(
-                    from.blockchain,
-                    options
-                );
+                const { disabledProviders, disabledBridgeTypes, ...providerOptions } =
+                    this.getFullOptions(from.blockchain, options);
 
                 const providers = this.getNotDisabledProviders(
                     from.blockchain,
@@ -201,7 +199,14 @@ export class CrossChainManager {
                 return merge(
                     ...providers.map(provider =>
                         fromPromise(
-                            this.getProviderCalculationPromise(provider, from, to, providerOptions)
+                            this.getProviderCalculationPromise(provider, from, to, {
+                                ...providerOptions,
+                                ...(disabledBridgeTypes[provider.type as 'RANGO' | 'LIFI']
+                                    ?.length && {
+                                    notAllowedBridgeTypes:
+                                        disabledBridgeTypes[provider.type as 'RANGO' | 'LIFI']
+                                })
+                            })
                         )
                     )
                 ).pipe(

@@ -26,6 +26,7 @@ import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
+import { LifiBridgeTypes } from './models/lifi-bridge-types';
 
 /**
  * Calculated Celer cross-chain trade.
@@ -63,7 +64,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                             from: ON_CHAIN_TRADE_TYPE.ONE_INCH,
                             to: ON_CHAIN_TRADE_TYPE.ONE_INCH
                         },
-                        bridgeType: BRIDGE_TYPE.CONNEXT
+                        bridgeType: BRIDGE_TYPE.CONNEXT,
+                        notAllowedBridgeTypes: []
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -107,6 +109,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly route: Route;
 
+    private readonly notAllowedBridgeTypes: LifiBridgeTypes[];
+
     public readonly itType: {
         from: OnChainTradeType | undefined;
         to: OnChainTradeType | undefined;
@@ -137,6 +141,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             priceImpact: number;
             itType: { from: OnChainTradeType | undefined; to: OnChainTradeType | undefined };
             bridgeType: BridgeType | undefined;
+            notAllowedBridgeTypes: LifiBridgeTypes[];
         },
         providerAddress: string
     ) {
@@ -149,6 +154,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.bridgeType = crossChainTrade.bridgeType;
         this.feeInfo = crossChainTrade.feeInfo;
+        this.notAllowedBridgeTypes = crossChainTrade.notAllowedBridgeTypes;
 
         this.priceImpact = crossChainTrade.priceImpact;
         this.itType = crossChainTrade.itType;
