@@ -52,7 +52,9 @@ export interface CrossChainOptions {
      */
     timeout?: number;
 
-    notAllowedBridgeTypes?: LifiBridgeTypes[] | RangoBridgeTypes[];
+    rangoDisabledBridgeTypes?: RangoBridgeTypes[];
+
+    lifiDisabledBridgeTypes?: LifiBridgeTypes[];
 }
 
 export type RequiredCrossChainOptions = MarkRequired<
@@ -64,5 +66,4 @@ export type RequiredCrossChainOptions = MarkRequired<
     | 'deadline'
     | 'providerAddress'
     | 'timeout'
-    | 'notAllowedBridgeTypes'
 >;

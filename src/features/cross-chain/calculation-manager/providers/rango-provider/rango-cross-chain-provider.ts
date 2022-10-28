@@ -154,7 +154,8 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                             }
                         },
                         cryptoFeeToken,
-                        gasData
+                        gasData,
+                        allowedSwappers: request.swappers as RangoBridgeTypes[]
                     },
                     this.rango,
                     options.providerAddress
@@ -175,15 +176,12 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         toToken: PriceToken,
         options: RequiredCrossChainOptions
     ): Promise<SwapRequest> {
-        const allowedSwappers =
-            options.notAllowedBridgeTypes && options.notAllowedBridgeTypes?.length
-                ? (await this.rango.meta()).swappers.filter(
-                      swapper =>
-                          !(options.notAllowedBridgeTypes as RangoBridgeTypes[]).includes(
-                              swapper.id as RangoBridgeTypes
-                          )
-                  )
-                : undefined;
+        const allowedSwappers = options.rangoDisabledBridgeTypes
+            ? (await this.rango.meta()).swappers.filter(
+                  swapper =>
+                      !options.rangoDisabledBridgeTypes?.includes(swapper.id as RangoBridgeTypes)
+              )
+            : undefined;
         const fromAddress =
             this.getWalletAddress(from.blockchain as RangoCrossChainSupportedBlockchain) ||
             EvmWeb3Pure.EMPTY_ADDRESS;

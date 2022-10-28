@@ -65,7 +65,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                             to: ON_CHAIN_TRADE_TYPE.ONE_INCH
                         },
                         bridgeType: BRIDGE_TYPE.CONNEXT,
-                        notAllowedBridgeTypes: []
+                        disabledBridgeTypes: []
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -109,7 +109,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly route: Route;
 
-    private readonly notAllowedBridgeTypes: LifiBridgeTypes[];
+    private readonly disabledBridgeTypes: LifiBridgeTypes[] | undefined;
 
     public readonly itType: {
         from: OnChainTradeType | undefined;
@@ -141,7 +141,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             priceImpact: number;
             itType: { from: OnChainTradeType | undefined; to: OnChainTradeType | undefined };
             bridgeType: BridgeType | undefined;
-            notAllowedBridgeTypes: LifiBridgeTypes[];
+            disabledBridgeTypes: LifiBridgeTypes[] | undefined;
         },
         providerAddress: string
     ) {
@@ -154,7 +154,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.bridgeType = crossChainTrade.bridgeType;
         this.feeInfo = crossChainTrade.feeInfo;
-        this.notAllowedBridgeTypes = crossChainTrade.notAllowedBridgeTypes;
+        this.disabledBridgeTypes = crossChainTrade.disabledBridgeTypes;
 
         this.priceImpact = crossChainTrade.priceImpact;
         this.itType = crossChainTrade.itType;

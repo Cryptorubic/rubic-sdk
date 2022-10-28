@@ -61,8 +61,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         );
 
         if (
-            options.notAllowedBridgeTypes?.length &&
-            !this.checkBridgeTypes(options.notAllowedBridgeTypes as LifiBridgeTypes[])
+            options.lifiDisabledBridgeTypes?.length &&
+            !this.checkBridgeTypes(options.lifiDisabledBridgeTypes)
         ) {
             throw new RubicSdkError('Incorrect bridges filter param');
         }
@@ -72,7 +72,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             order: 'RECOMMENDED',
             allowSwitchChain: false,
             bridges: {
-                deny: options.notAllowedBridgeTypes
+                deny: options.lifiDisabledBridgeTypes
             }
         };
 
@@ -139,7 +139,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                 priceImpact,
                 itType,
                 bridgeType,
-                notAllowedBridgeTypes: []
+                disabledBridgeTypes: options.lifiDisabledBridgeTypes
             },
             options.providerAddress
         );
