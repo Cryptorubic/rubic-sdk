@@ -468,7 +468,7 @@ export class CrossChainStatusManager {
             );
 
             return {
-                status: MultichainStatusMapping?.[status] || TxStatus.UNKNOWN,
+                status: MultichainStatusMapping?.[status] || TxStatus.PENDING,
                 hash: swaptx || null
             };
         } catch {
