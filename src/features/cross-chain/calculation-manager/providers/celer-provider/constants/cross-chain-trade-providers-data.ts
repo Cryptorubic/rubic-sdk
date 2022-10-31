@@ -32,6 +32,8 @@ import { UniSwapV3PolygonProvider } from 'src/features/on-chain/calculation-mana
 import { SushiSwapHarmonyProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-provider';
 import { UniSwapV3ArbitrumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/arbitrum/uni-swap-v3-arbitrum/uni-swap-v3-arbitrum-provider';
 import { SushiSwapFantomProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-provider';
+import { SoulSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/soul-swap/soul-swap-provider';
+import { ApeSwapTelosProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/ape-swap/ape-swap-telos-provider';
 
 /**
  * Stores contracts info.
@@ -140,6 +142,10 @@ export const crossChainTradeProvidersData: DeepReadonly<
         {
             ProviderClass: OneinchFantomProvider,
             methodSuffix: 'Inch'
+        },
+        {
+            ProviderClass: SoulSwapProvider,
+            methodSuffix: '3'
         }
     ],
     [BLOCKCHAIN_NAME.HARMONY]: [
@@ -184,6 +190,10 @@ export const crossChainTradeProvidersData: DeepReadonly<
         {
             ProviderClass: ZappyProvider,
             methodSuffix: '1'
+        },
+        {
+            ProviderClass: ApeSwapTelosProvider,
+            methodSuffix: '2'
         }
     ]
 } as const;
