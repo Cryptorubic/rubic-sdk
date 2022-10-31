@@ -125,7 +125,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly deflationTokenManager = new DeflationTokenManager();
 
-    public isDeflationTokenInTargetNetwork: boolean | undefined;
+    public isDeflationTokenInTargetNetwork: boolean = false;
 
     /**
      * Gets price impact in source and target blockchains, based on tokens usd prices.
@@ -198,13 +198,11 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         try {
-            if (this.isDeflationTokenInTargetNetwork === undefined) {
-                await this.deflationTokenManager.checkToken({
-                    address: this.to.address,
-                    blockchain: this.to.blockchain,
-                    symbol: this.to.symbol
-                });
-            }
+            await this.deflationTokenManager.checkToken({
+                address: this.to.address,
+                blockchain: this.to.blockchain,
+                symbol: this.to.symbol
+            });
             return await super.swap(options);
         } catch (err) {
             this.isDeflationTokenInTargetNetwork = err instanceof DeflationTokenError;
@@ -325,13 +323,11 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
             this.checkWalletConnected();
             await this.checkBlockchainCorrect();
 
-            if (this.isDeflationTokenInTargetNetwork === undefined) {
-                await this.deflationTokenManager.checkToken({
-                    address: this.to.address,
-                    blockchain: this.to.blockchain,
-                    symbol: this.to.symbol
-                });
-            }
+            await this.deflationTokenManager.checkToken({
+                address: this.to.address,
+                blockchain: this.to.blockchain,
+                symbol: this.to.symbol
+            });
 
             return this.web3Private.approveTokens(
                 this.from.address,
