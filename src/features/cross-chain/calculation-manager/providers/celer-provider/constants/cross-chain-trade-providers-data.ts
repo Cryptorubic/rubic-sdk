@@ -34,6 +34,7 @@ import { UniSwapV3ArbitrumProvider } from 'src/features/on-chain/calculation-man
 import { SushiSwapFantomProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-provider';
 import { SoulSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/soul-swap/soul-swap-provider';
 import { ApeSwapTelosProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/ape-swap/ape-swap-telos-provider';
+import { QuickSwapV3Provider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/quick-swap-v3-provider';
 
 /**
  * Stores contracts info.
@@ -79,6 +80,10 @@ export const crossChainTradeProvidersData: DeepReadonly<
     [BLOCKCHAIN_NAME.POLYGON]: [
         {
             ProviderClass: QuickSwapProvider,
+            methodSuffix: ''
+        },
+        {
+            ProviderClass: QuickSwapV3Provider,
             methodSuffix: ''
         },
         {

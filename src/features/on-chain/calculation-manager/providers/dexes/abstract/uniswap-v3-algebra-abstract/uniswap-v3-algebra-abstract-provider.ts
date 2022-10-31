@@ -25,6 +25,7 @@ import BigNumber from 'bignumber.js';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/models/exact';
 import { UniswapV3AlgebraCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-calculation-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
+import { QuickSwapV3Trade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/quick-swap-v3-trade';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
@@ -33,7 +34,10 @@ export abstract class UniswapV3AlgebraAbstractProvider<
 
     protected abstract readonly contractAddress: string;
 
-    protected abstract readonly OnChainTradeClass: UniswapV3TradeClass<T> | typeof AlgebraTrade;
+    protected abstract readonly OnChainTradeClass:
+        | UniswapV3TradeClass<T>
+        | typeof AlgebraTrade
+        | typeof QuickSwapV3Trade;
 
     protected abstract readonly quoterController: UniswapV3AlgebraQuoterController;
 
