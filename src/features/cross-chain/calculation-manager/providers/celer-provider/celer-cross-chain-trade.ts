@@ -125,7 +125,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly deflationTokenManager = new DeflationTokenManager();
 
-    public isDeflationTokenInTargetNetwork = false;
+    public isDeflationTokenInTargetNetwork: boolean | undefined;
 
     /**
      * Gets price impact in source and target blockchains, based on tokens usd prices.
@@ -198,17 +198,16 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         try {
-            await this.deflationTokenManager.checkToken({
-                address: this.to.address,
-                blockchain: this.to.blockchain,
-                symbol: this.to.symbol
-            });
+            if (this.isDeflationTokenInTargetNetwork === undefined) {
+                await this.deflationTokenManager.checkToken({
+                    address: this.to.address,
+                    blockchain: this.to.blockchain,
+                    symbol: this.to.symbol
+                });
+            }
             return await super.swap(options);
         } catch (err) {
-            if (err instanceof DeflationTokenError) {
-                this.isDeflationTokenInTargetNetwork = true;
-            }
-
+            this.isDeflationTokenInTargetNetwork = err instanceof DeflationTokenError;
             return this.parseSwapErrors(err);
         }
     }
@@ -326,11 +325,13 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
             this.checkWalletConnected();
             await this.checkBlockchainCorrect();
 
-            await this.deflationTokenManager.checkToken({
-                address: this.to.address,
-                blockchain: this.to.blockchain,
-                symbol: this.to.symbol
-            });
+            if (this.isDeflationTokenInTargetNetwork === undefined) {
+                await this.deflationTokenManager.checkToken({
+                    address: this.to.address,
+                    blockchain: this.to.blockchain,
+                    symbol: this.to.symbol
+                });
+            }
 
             return this.web3Private.approveTokens(
                 this.from.address,
@@ -339,10 +340,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
                 options
             );
         } catch (error) {
-            if (error instanceof DeflationTokenError) {
-                this.isDeflationTokenInTargetNetwork = true;
-            }
-
+            this.isDeflationTokenInTargetNetwork = error instanceof DeflationTokenError;
             throw error;
         }
     }
