@@ -29,6 +29,7 @@ import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
+import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 
 /**
  * Calculated Celer cross-chain trade.
@@ -122,6 +123,8 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly cryptoFeeToken: PriceTokenAmount;
 
+    private readonly deflationTokenManager = new DeflationTokenManager();
+
     public isDeflationTokenInTargetNetwork = false;
 
     /**
@@ -195,7 +198,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         try {
-            await Injector.deflationTokenManager.checkToken({
+            await this.deflationTokenManager.checkToken({
                 address: this.to.address,
                 blockchain: this.to.blockchain,
                 symbol: this.to.symbol
