@@ -154,7 +154,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                     to,
                     gasData,
                     priceImpact: onChainTrade?.from
-                        ? from.calculatePriceImpactPercent(onChainTrade?.from) || 0
+                        ? from.calculatePriceImpactPercent(onChainTrade?.to) || 0
                         : 0,
                     toTokenAmountMin,
                     feeInfo: {
