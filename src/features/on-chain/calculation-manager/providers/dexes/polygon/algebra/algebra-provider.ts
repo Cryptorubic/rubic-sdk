@@ -15,7 +15,7 @@ import {
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider<AlgebraTrade> {
-    protected readonly contractAddress = ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS;
+    public readonly contractAddress = ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS;
 
     protected readonly contractAbi = ALGEBRA_SWAP_ROUTER_CONTRACT_ABI;
 

@@ -69,7 +69,7 @@ export class LifiTrade extends EvmOnChainTrade {
 
     public readonly slippageTolerance: number;
 
-    protected readonly contractAddress: string;
+    public readonly contractAddress: string;
 
     public readonly type: OnChainTradeType;
 

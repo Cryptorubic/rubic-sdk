@@ -16,6 +16,7 @@ import { OnChainStatusManager } from 'src/features/on-chain/status-manager/on-ch
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { ProviderAddress } from 'src/core/sdk/models/provider-address';
+import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 
 /**
  * Base class to work with sdk.
@@ -45,6 +46,11 @@ export class SDK {
      * Cross-chain symbiosis manager object. Use it to get pending trades in symbiosis and revert them.
      */
     public readonly crossChainSymbiosisManager: CrossChainSymbiosisManager;
+
+    /**
+     * Deflation token manager object. Use it to check specific token for fees or deflation.
+     */
+    public readonly deflationTokenManager: DeflationTokenManager;
 
     /**
      * Can be used to get `Web3Public` instance by blockchain name to get public information from blockchain.
@@ -111,7 +117,7 @@ export class SDK {
     private constructor(providerAddress: ProviderAddress) {
         this.onChainManager = new OnChainManager();
         this.crossChainManager = new CrossChainManager(providerAddress);
-
+        this.deflationTokenManager = new DeflationTokenManager();
         this.onChainStatusManager = new OnChainStatusManager();
         this.crossChainStatusManager = new CrossChainStatusManager();
         this.crossChainSymbiosisManager = new CrossChainSymbiosisManager();

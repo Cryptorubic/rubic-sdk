@@ -26,7 +26,7 @@ export class AlgebraTrade extends UniswapV3AlgebraAbstractTrade {
         return ON_CHAIN_TRADE_TYPE.ALGEBRA;
     }
 
-    protected readonly contractAddress = ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS;
+    public readonly contractAddress = ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS;
 
     protected readonly contractAbi = ALGEBRA_SWAP_ROUTER_CONTRACT_ABI;
 

@@ -35,7 +35,7 @@ export class ZrxTrade extends EvmOnChainTrade {
 
     private readonly apiTradeData: ZrxQuoteResponse;
 
-    protected readonly contractAddress: string;
+    public readonly contractAddress: string;
 
     public readonly path: ReadonlyArray<Token>;
 

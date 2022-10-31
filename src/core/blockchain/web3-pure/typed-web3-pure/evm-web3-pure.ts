@@ -6,6 +6,10 @@ import { TransactionGasParams } from 'src/features/on-chain/calculation-manager/
 import { TransactionConfig } from 'web3-core';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { RubicSdkError } from 'src/common/errors';
+import { ethers } from 'ethers';
+import { FunctionFragment, Result } from 'ethers/lib/utils';
+
+export type DecodeResult<T> = Result & T;
 
 @staticImplements<TypedWeb3Pure>()
 export class EvmWeb3Pure {
@@ -98,5 +102,24 @@ export class EvmWeb3Pure {
      */
     public static toChecksumAddress(address: string): string {
         return toChecksumAddress(address);
+    }
+
+    /**
+     * Decodes data by ABI.
+     * @param functionName Function name in ABI.
+     * @param functionArguments Array of function's inputs.
+     * @param data Data (hex string).
+     * @returns Decoded data.
+     */
+    public static decodeData<T>(
+        functionName: string,
+        functionArguments: Array<[type: string, name: string]>,
+        data: string
+    ): T {
+        const argumentsString = functionArguments.map(arg => arg.join(' ')).join(', ');
+        const abiString = `function ${functionName}(${argumentsString})`;
+        const abi = new ethers.utils.Interface([abiString]);
+        const abiFunctionKey = Object.keys(abi.functions)[0] as string;
+        return abi.decodeFunctionData(abi.functions[abiFunctionKey] as FunctionFragment, data) as T;
     }
 }
