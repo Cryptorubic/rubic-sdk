@@ -179,5 +179,12 @@ export const nativeTokensList = {
         name: 'TRX',
         symbol: 'TRX',
         decimals: 6
+    }),
+    [BLOCKCHAIN_NAME.BITGERT]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BITGERT,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Brise',
+        symbol: 'BRISE',
+        decimals: 18
     })
 };

@@ -20,7 +20,8 @@ export const multichainCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.CELO,
     BLOCKCHAIN_NAME.BOBA,
     BLOCKCHAIN_NAME.ETHEREUM_POW,
-    BLOCKCHAIN_NAME.KAVA
+    BLOCKCHAIN_NAME.KAVA,
+    BLOCKCHAIN_NAME.BITGERT
 ] as const;
 
 export type MultichainCrossChainSupportedBlockchain =

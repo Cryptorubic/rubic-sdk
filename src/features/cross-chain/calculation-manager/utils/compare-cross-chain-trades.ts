@@ -10,6 +10,7 @@ import { RangoCrossChainTrade } from 'src/features/cross-chain/calculation-manag
 import { DexMultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/dex-multichain-cross-chain-trade';
 import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-trade';
 
+// @TODO add typing
 const getUsdPrice = (prevTrade: CrossChainTrade | null): BigNumber => {
     if (prevTrade instanceof CelerCrossChainTrade) {
         return prevTrade.fromTrade.toToken.tokenAmount;
