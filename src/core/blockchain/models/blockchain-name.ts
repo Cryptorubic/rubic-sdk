@@ -18,7 +18,9 @@ export const EVM_BLOCKCHAIN_NAME = {
     CELO: 'CELO',
     BOBA: 'BOBA',
     ASTAR: 'ASTAR',
-    ETHEREUM_POW: 'ETHW'
+    ETHEREUM_POW: 'ETHW',
+    KAVA: 'KAVA',
+    BITGERT: 'BITGERT'
 } as const;
 
 export const BLOCKCHAIN_NAME = {

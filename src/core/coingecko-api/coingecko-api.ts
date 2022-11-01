@@ -20,7 +20,8 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.TELOS,
     BLOCKCHAIN_NAME.BOBA,
     BLOCKCHAIN_NAME.BITCOIN,
-    BLOCKCHAIN_NAME.ETHEREUM_POW
+    BLOCKCHAIN_NAME.ETHEREUM_POW,
+    BLOCKCHAIN_NAME.KAVA
 ] as const;
 
 type SupportedBlockchain = typeof supportedBlockchains[number];
@@ -55,7 +56,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.TELOS]: 'tlos',
             [BLOCKCHAIN_NAME.BOBA]: 'ethereum',
             [BLOCKCHAIN_NAME.BITCOIN]: 'bitcoin',
-            [BLOCKCHAIN_NAME.ETHEREUM_POW]: 'ethereum-pow-iou'
+            [BLOCKCHAIN_NAME.ETHEREUM_POW]: 'ethereum-pow-iou',
+            [BLOCKCHAIN_NAME.KAVA]: 'kava'
         };
 
         this.tokenBlockchainId = {
@@ -71,7 +73,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.TELOS]: 'telos',
             [BLOCKCHAIN_NAME.BOBA]: 'boba-network',
             [BLOCKCHAIN_NAME.BITCOIN]: 'bitcoin',
-            [BLOCKCHAIN_NAME.ETHEREUM_POW]: 'ethereum-pow-iou'
+            [BLOCKCHAIN_NAME.ETHEREUM_POW]: 'ethereum-pow-iou',
+            [BLOCKCHAIN_NAME.KAVA]: 'kava'
         };
     }
 

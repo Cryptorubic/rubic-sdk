@@ -4,11 +4,10 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
-import { NotWhitelistedProviderError, UnsupportedReceiverAddressError } from 'src/common/errors';
+import { UnsupportedReceiverAddressError } from 'src/common/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { compareAddresses } from 'src/common/utils/blockchain';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { BridgeType } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
@@ -235,24 +234,6 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         this.requestId = response.requestId;
 
         return response.tx as EvmTransaction;
-    }
-
-    private async checkProviderIsWhitelisted(providerRouter: string): Promise<void> {
-        const whitelistedContracts = await Injector.web3PublicService
-            .getWeb3Public(this.from.blockchain)
-            .callContractMethod<string[]>(
-                this.fromContractAddress,
-                evmCommonCrossChainAbi,
-                'getAvailableRouters'
-            );
-
-        if (
-            !whitelistedContracts.find(whitelistedContract =>
-                compareAddresses(whitelistedContract, providerRouter)
-            )
-        ) {
-            throw new NotWhitelistedProviderError(providerRouter);
-        }
     }
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
