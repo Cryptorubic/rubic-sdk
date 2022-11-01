@@ -17,7 +17,8 @@ import {
     MaxAmountError,
     MinAmountError,
     NotSupportedTokensError,
-    NotWhitelistedProviderError
+    NotWhitelistedProviderError,
+    RubicSdkError
 } from 'src/common/errors';
 import { MultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-trade';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
@@ -92,6 +93,11 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
 
             const toFeeAmount = getToFeeAmount(fromWithoutFee.tokenAmount, targetToken);
             const toAmount = fromWithoutFee.tokenAmount.minus(toFeeAmount);
+            if (toAmount.lte(0)) {
+                throw new RubicSdkError(
+                    'Calculation result is lesser then provider fee. Please, increase from amount.'
+                );
+            }
 
             from = new PriceTokenAmount({
                 ...from.asStructWithAmount,
