@@ -7,16 +7,15 @@ import { Injector } from 'src/core/injector/injector';
 import { ROUTER_TOKENS } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/utils/quoter-controller/constants/router-tokens';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
+import { AlgebraRoute } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/models/algebra-route';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/models/exact';
-
-import BigNumber from 'bignumber.js';
-import { QuickSwapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/models/quick-swap-v3-route';
-
 import {
-    QUICK_SWAP_V3_QUOTER_CONTRACT_ABI,
-    QUICK_SWAP_V3_QUOTER_CONTRACT_ADDRESS
-} from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/utils/quoter-controller/constants/quoter-contract-data';
+    ALGEBRA_QUOTER_CONTRACT_ABI,
+    ALGEBRA_QUOTER_CONTRACT_ADDRESS
+} from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/utils/quoter-controller/constants/quoter-contract-data';
+import BigNumber from 'bignumber.js';
+import { AbiItem } from 'web3-utils';
 
 interface GetQuoterMethodsDataOptions {
     routesTokens: Token[];
@@ -29,8 +28,20 @@ interface GetQuoterMethodsDataOptions {
 /**
  * Works with requests, related to Uniswap v3 liquidity pools.
  */
-export class QuickSwapV3QuoterController implements UniswapV3AlgebraQuoterController {
+export class AbstractAlgebraQuoterController implements UniswapV3AlgebraQuoterController {
     private routerTokens: Token[] | undefined;
+
+    private readonly quoterContractABI: AbiItem[];
+
+    private readonly quoterContractAddress: string;
+
+    constructor(
+        quoterContractABI: AbiItem[] = ALGEBRA_QUOTER_CONTRACT_ABI,
+        quoterContractAddress: string = ALGEBRA_QUOTER_CONTRACT_ADDRESS
+    ) {
+        this.quoterContractABI = quoterContractABI;
+        this.quoterContractAddress = quoterContractAddress;
+    }
 
     /**
      * Converts algebra route to encoded bytes string to pass it to contract.
@@ -79,7 +90,10 @@ export class QuickSwapV3QuoterController implements UniswapV3AlgebraQuoterContro
             path,
             methodData: {
                 methodName,
-                methodArguments: [QuickSwapV3QuoterController.getEncodedPath(tokensPath), weiAmount]
+                methodArguments: [
+                    AbstractAlgebraQuoterController.getEncodedPath(tokensPath),
+                    weiAmount
+                ]
             }
         };
     }
@@ -102,7 +116,7 @@ export class QuickSwapV3QuoterController implements UniswapV3AlgebraQuoterContro
         exact: Exact,
         weiAmount: string,
         routeMaxTransitTokens: number
-    ): Promise<QuickSwapV3Route[]> {
+    ): Promise<AlgebraRoute[]> {
         const routesTokens = (await this.getOrCreateRouterTokens()).filter(
             token => !token.isEqualToTokens([from, to])
         );
@@ -126,8 +140,8 @@ export class QuickSwapV3QuoterController implements UniswapV3AlgebraQuoterContro
             .flat();
 
         const results = await this.web3Public.multicallContractMethods<string>(
-            QUICK_SWAP_V3_QUOTER_CONTRACT_ADDRESS,
-            QUICK_SWAP_V3_QUOTER_CONTRACT_ABI,
+            this.quoterContractAddress,
+            this.quoterContractABI,
             quoterMethodsData.map(quoterMethodData => quoterMethodData.methodData)
         );
 
@@ -159,7 +173,11 @@ export class QuickSwapV3QuoterController implements UniswapV3AlgebraQuoterContro
 
         if (path.length === maxTransitTokens + 1) {
             return [
-                QuickSwapV3QuoterController.getQuoterMethodData(path.concat(to), exact, weiAmount)
+                AbstractAlgebraQuoterController.getQuoterMethodData(
+                    path.concat(to),
+                    exact,
+                    weiAmount
+                )
             ];
         }
 

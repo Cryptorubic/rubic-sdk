@@ -11,8 +11,12 @@ import {
     QUICK_SWAP_V3_ROUTER_CONTRACT_ADDRESS
 } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/constants/swap-router-contract-data';
 import { QUICK_SWAP_V3_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/constants/provider-configuration';
-import { QuickSwapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/utils/quoter-controller/quick-swap-v3-quoter-controller';
 import { QuickSwapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/models/quick-swap-v3-route';
+import { AbstractAlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/algebra/abstract-algebra-quoter-controller';
+import {
+    QUICK_SWAP_V3_QUOTER_CONTRACT_ABI,
+    QUICK_SWAP_V3_QUOTER_CONTRACT_ADDRESS
+} from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/utils/quoter-controller/constants/quoter-contract-data';
 
 export class QuickSwapV3Provider extends UniswapV3AlgebraAbstractProvider<QuickSwapV3Trade> {
     protected readonly contractAddress = QUICK_SWAP_V3_ROUTER_CONTRACT_ADDRESS;
@@ -23,7 +27,10 @@ export class QuickSwapV3Provider extends UniswapV3AlgebraAbstractProvider<QuickS
 
     protected readonly OnChainTradeClass = QuickSwapV3Trade;
 
-    protected readonly quoterController = new QuickSwapV3QuoterController();
+    protected readonly quoterController = new AbstractAlgebraQuoterController(
+        QUICK_SWAP_V3_QUOTER_CONTRACT_ABI,
+        QUICK_SWAP_V3_QUOTER_CONTRACT_ADDRESS
+    );
 
     public readonly providerConfiguration = QUICK_SWAP_V3_PROVIDER_CONFIGURATION;
 

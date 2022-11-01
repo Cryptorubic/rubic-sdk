@@ -1,4 +1,3 @@
-import { AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/utils/quoter-controller/algebra-quoter-controller';
 import { UniswapV3AlgebraAbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
 import {
     ALGEBRA_SWAP_ROUTER_CONTRACT_ABI,
@@ -13,6 +12,7 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { AbstractAlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/algebra/abstract-algebra-quoter-controller';
 
 export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider<AlgebraTrade> {
     protected readonly contractAddress = ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS;
@@ -23,7 +23,7 @@ export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider<AlgebraTra
 
     protected readonly OnChainTradeClass = AlgebraTrade;
 
-    protected readonly quoterController = new AlgebraQuoterController();
+    protected readonly quoterController = new AbstractAlgebraQuoterController();
 
     public readonly providerConfiguration = ALGEBRA_V3_PROVIDER_CONFIGURATION;
 
