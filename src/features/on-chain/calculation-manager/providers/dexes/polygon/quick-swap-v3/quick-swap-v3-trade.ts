@@ -15,7 +15,7 @@ import {
     QUICK_SWAP_V3_ROUTER_CONTRACT_ABI,
     QUICK_SWAP_V3_ROUTER_CONTRACT_ADDRESS
 } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/constants/swap-router-contract-data';
-import { QuickSwapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/utils/quoter-controller/quick-swap-v3-quoter-controller';
+import { AbstractAlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/algebra/abstract-algebra-quoter-controller';
 
 export interface QuickSwapV3TradeStruct extends UniswapV3AlgebraTradeStruct {
     route: QuickSwapV3Route;
@@ -80,7 +80,7 @@ export class QuickSwapV3Trade extends UniswapV3AlgebraAbstractTrade {
             methodName,
             methodArguments: [
                 [
-                    QuickSwapV3QuoterController.getEncodedPath(this.route.path),
+                    AbstractAlgebraQuoterController.getEncodedPath(this.route.path),
                     walletAddress,
                     this.deadlineMinutesTimestamp,
                     ...amountParams
