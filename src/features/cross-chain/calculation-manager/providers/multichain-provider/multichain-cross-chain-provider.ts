@@ -62,6 +62,13 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
             }
             const { sourceToken, targetToken } = tokens;
 
+            if (!compareAddresses(targetToken.address, toToken.address)) {
+                return {
+                    trade: null,
+                    error: new NotSupportedTokensError()
+                };
+            }
+
             // @TODO Remove comments after contracts whitelist.
             // try {
             //     await this.checkProviderIsWhitelisted(
@@ -116,7 +123,7 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                     from,
                     to,
                     gasData,
-                    priceImpact: from.calculatePriceImpactPercent(to) || 0,
+                    priceImpact: 0,
                     toTokenAmountMin,
                     feeInfo: {
                         ...feeInfo,
