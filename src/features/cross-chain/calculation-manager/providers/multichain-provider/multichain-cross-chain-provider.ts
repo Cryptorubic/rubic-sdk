@@ -62,20 +62,23 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
             }
             const { sourceToken, targetToken } = tokens;
 
-            try {
-                await this.checkProviderIsWhitelisted(
-                    fromBlockchain,
-                    targetToken.router,
-                    targetToken.spender
-                );
-            } catch (error) {
-                return {
-                    trade: null,
-                    error
-                };
-            }
-
-            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+            // @TODO Remove comments after contracts whitelist.
+            // try {
+            //     await this.checkProviderIsWhitelisted(
+            //         fromBlockchain,
+            //         targetToken.router,
+            //         targetToken.spender
+            //     );
+            // } catch (error) {
+            //     return {
+            //         trade: null,
+            //         error
+            //     };
+            // }
+            //
+            //
+            // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+            const feeInfo: FeeInfo = { platformFee: null, fixedFee: null, cryptoFee: null };
             const cryptoFee = this.getProtocolFee(targetToken, from.weiAmount);
 
             const fromWithoutFee = getFromWithoutFee(from, feeInfo);
@@ -117,6 +120,9 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                     toTokenAmountMin,
                     feeInfo: {
                         ...feeInfo,
+                        // @TODO Remove
+                        fixedFee: null,
+                        platformFee: null,
                         cryptoFee
                     },
                     routerAddress,
