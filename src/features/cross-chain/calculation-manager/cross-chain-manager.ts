@@ -5,9 +5,9 @@ import {
     RequiredCrossChainManagerCalculationOptions
 } from 'src/features/cross-chain/calculation-manager/models/cross-chain-manager-options';
 import { from, map, merge, Observable, startWith, switchMap } from 'rxjs';
-import { CrossChainProviderData } from 'src/features/cross-chain/calculation-manager/models/cross-chain-provider-data';
+import { CrossChainReactivelyCalculatedTradeData } from 'src/features/cross-chain/calculation-manager/models/cross-chain-reactively-calculated-trade-data';
 import { CrossChainTypedTradeProviders } from 'src/features/cross-chain/calculation-manager/models/cross-chain-typed-trade-provider';
-import { WrappedTradeOrNull } from 'src/features/cross-chain/calculation-manager/providers/common/models/wrapped-trade-or-null';
+import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculation-manager/models/wrapped-cross-chain-trade-or-null';
 import { notNull } from 'src/common/utils/object';
 import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
@@ -24,6 +24,7 @@ import { defaultCrossChainCalculationOptions } from 'src/features/cross-chain/ca
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { fromPromise } from 'rxjs/internal/observable/innerFrom';
 import { compareCrossChainTrades } from 'src/features/cross-chain/calculation-manager/utils/compare-cross-chain-trades';
+import BigNumber from 'bignumber.js';
 
 /**
  * Contains method to calculate best cross-chain trade.
@@ -86,7 +87,7 @@ export class CrossChainManager {
                   address: string;
                   blockchain: BlockchainName;
               },
-        fromAmount: string | number,
+        fromAmount: string | number | BigNumber,
         toToken:
             | Token
             | {
@@ -142,13 +143,15 @@ export class CrossChainManager {
      *     fromAmount,
      *     { blockchain: toBlockchain, address: toTokenAddress }
      * ).subscribe(tradeData => {
-     *     console.log(tradeData.totalProviders) // 3
-     *     console.log(tradeData.calculatedProviders) // 0 -> 1 -> ... -> totalProviders
-     *      if (tradeData.bestTrade.trade) {
-     *        console.log(wrappedTrade.tradeType, `to amount: ${wrappedTrade.trade.to.tokenAmount.toFormat(3)}`));
-     *    }
-     *    if (tradeData.bestTrade.error) {
-     *        console.error(wrappedTrade.tradeType, 'error: wrappedTrade.error');
+     *     console.log(tradeData.total) // 3
+     *     console.log(tradeData.calculated) // 0 or 1 ... or tradeData.total
+     *
+     *     const wrappedTrade = tradeData.wrappedTrade;
+     *     if (wrappedTrade) {
+     *         console.log(wrappedTrade.tradeType, `to amount: ${wrappedTrade.trade.to.tokenAmount.toFormat(3)}`));
+     *         if (wrappedTrade.error) {
+     *             console.error(wrappedTrade.tradeType, 'error: wrappedTrade.error');
+     *         }
      *    }
      * });
      *
@@ -167,7 +170,7 @@ export class CrossChainManager {
                   address: string;
                   blockchain: BlockchainName;
               },
-        fromAmount: string | number,
+        fromAmount: string | number | BigNumber,
         toToken:
             | Token
             | {
@@ -175,7 +178,7 @@ export class CrossChainManager {
                   blockchain: BlockchainName;
               },
         options?: CrossChainManagerCalculationOptions
-    ): Observable<CrossChainProviderData> {
+    ): Observable<CrossChainReactivelyCalculatedTradeData> {
         if (toToken instanceof Token && fromToken.blockchain === toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be different.');
         }
@@ -192,11 +195,8 @@ export class CrossChainManager {
                     to.blockchain,
                     disabledProviders
                 );
-                const providerData: CrossChainProviderData = {
-                    total: providers.length,
-                    calculated: 0,
-                    trades: []
-                };
+                const totalTrades = providers.length;
+                let calculatedTrades = 0;
 
                 return merge(
                     ...providers.map(provider =>
@@ -206,16 +206,18 @@ export class CrossChainManager {
                     )
                 ).pipe(
                     map(wrappedTrade => {
-                        providerData.calculated += 1;
-                        if (wrappedTrade) {
-                            providerData.trades = [...providerData.trades, wrappedTrade].sort(
-                                compareCrossChainTrades
-                            );
-                        }
-
-                        return { ...providerData };
+                        calculatedTrades += 1;
+                        return {
+                            total: totalTrades,
+                            calculated: calculatedTrades,
+                            wrappedTrade
+                        };
                     }),
-                    startWith({ ...providerData })
+                    startWith({
+                        total: totalTrades,
+                        calculated: 0,
+                        wrappedTrade: null
+                    })
                 );
             })
         );
@@ -260,7 +262,7 @@ export class CrossChainManager {
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<WrappedTradeOrNull> {
+    ): Promise<WrappedCrossChainTradeOrNull> {
         try {
             const wrappedTrade = await pTimeout(
                 provider.calculate(from, to, options),

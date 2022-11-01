@@ -1,6 +1,6 @@
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import BigNumber from 'bignumber.js';
@@ -20,6 +20,7 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { TransactionConfig } from 'web3-core';
 import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 
 export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -91,7 +92,12 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly feeInfo: FeeInfo;
 
-    public readonly itType = { from: undefined, to: undefined };
+    public readonly onChainSubtype = { from: undefined, to: undefined };
+
+    public readonly bridgeSubtype = {
+        type: BRIDGE_TYPE.BRIDGERS,
+        isNative: true
+    };
 
     public readonly priceImpact: number | null;
 

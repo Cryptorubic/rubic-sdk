@@ -4,7 +4,7 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { MaxAmountError, MinAmountError, UnsupportedReceiverAddressError } from 'src/common/errors';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
 import {
@@ -22,7 +22,10 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { RANGO_BLOCKCHAIN_NAME } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-blockchain-name';
 import { RANGO_CONTRACT_ADDRESSES } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/contract-address';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { BridgeType } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import {
+    BRIDGE_TYPE,
+    BridgeType
+} from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { rangoProviders } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-providers';
 import { RANGO_TRADE_BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/models/rango-providers';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -129,7 +132,9 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                         ? await RangoCrossChainTrade.getGasData(from, to)
                         : null;
 
-                const { bridgeType, itType } = this.parseTradeTypes(route as QuoteSimulationResult);
+                const { bridgeType, onChainType } = this.parseTradeTypes(
+                    route as QuoteSimulationResult
+                );
 
                 const rangoTrade = new RangoCrossChainTrade(
                     {
@@ -137,7 +142,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                         to,
                         toTokenAmountMin: Web3Pure.fromWei(route.outputAmount, toToken.decimals),
                         priceImpact: from.calculatePriceImpactPercent(to),
-                        itType,
+                        onChainSubtype: onChainType,
                         bridgeType,
                         slippageTolerance: options.slippageTolerance as number,
                         feeInfo: {
@@ -202,15 +207,15 @@ export class RangoCrossChainProvider extends CrossChainProvider {
     }
 
     private parseTradeTypes(route: QuoteSimulationResult): {
-        bridgeType: BridgeType | undefined;
-        itType: { from: OnChainTradeType | undefined; to: OnChainTradeType | undefined };
+        bridgeType: BridgeType;
+        onChainType: { from: OnChainTradeType | undefined; to: OnChainTradeType | undefined };
     } {
         const { path, swapper } = route;
 
         if (!path) {
             return {
-                itType: { from: undefined, to: undefined },
-                bridgeType: RANGO_TRADE_BRIDGE_TYPE[swapper.id]
+                onChainType: { from: undefined, to: undefined },
+                bridgeType: RANGO_TRADE_BRIDGE_TYPE[swapper.id] || BRIDGE_TYPE.RANGO
             };
         }
 
@@ -220,12 +225,15 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         const dexes = path
             .filter(item => item.swapperType === 'DEX')
             .map((item: QuotePath) => item.swapper.id);
-        const itType = {
+        const onChainType = {
             from: dexes[0] ? rangoProviders[dexes[0]] : undefined,
             to: dexes[1] ? rangoProviders[dexes[1]] : undefined
         };
 
-        return { itType, bridgeType: RANGO_TRADE_BRIDGE_TYPE[swapperId as string] };
+        return {
+            onChainType,
+            bridgeType: RANGO_TRADE_BRIDGE_TYPE[swapperId as string] || BRIDGE_TYPE.RANGO
+        };
     }
 
     protected async getFeeInfo(

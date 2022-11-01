@@ -1,4 +1,4 @@
-import { WrappedTradeOrNull } from 'src/features/cross-chain/calculation-manager/providers/common/models/wrapped-trade-or-null';
+import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculation-manager/models/wrapped-cross-chain-trade-or-null';
 import { MaxAmountError, MinAmountError, RubicSdkError } from 'src/common/errors';
 import BigNumber from 'bignumber.js';
 import { CelerCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-cross-chain-trade';
@@ -12,8 +12,8 @@ import { RangoCrossChainTrade } from 'src/features/cross-chain/calculation-manag
  * Compares two cross chain trades for sorting algorithm.
  */
 export function compareCrossChainTrades(
-    nextWrappedTrade: WrappedTradeOrNull,
-    prevWrappedTrade: WrappedTradeOrNull
+    nextWrappedTrade: WrappedCrossChainTradeOrNull,
+    prevWrappedTrade: WrappedCrossChainTradeOrNull
 ): -1 | 1 {
     if (
         prevWrappedTrade?.error instanceof MinAmountError &&

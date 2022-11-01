@@ -1,13 +1,14 @@
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+
 export const BRIDGE_TYPE = {
-    ACROSS: 'across',
+    ...CROSS_CHAIN_TRADE_TYPE,
+
+    ACROSS: 'accross',
     ANY_SWAP: 'anyswap',
     ARBITRUM_BRIDGE: 'arbitrum',
     AVALANCHE_BRIDGE: 'avalanche',
 
-    CELER_BRIDGE: 'cbridge',
     CONNEXT: 'connext',
-
-    DE_BRIDGE: 'debridge',
 
     HOP: 'hop',
     HYPHEN: 'hyphen',
@@ -36,5 +37,10 @@ export const BRIDGE_TYPE = {
 } as const;
 
 export type BridgeType = typeof BRIDGE_TYPE[keyof typeof BRIDGE_TYPE];
+
+export type BridgeSubtype = {
+    type: BridgeType;
+    isNative: boolean;
+};
 
 export const bridges = Object.values(BRIDGE_TYPE);
