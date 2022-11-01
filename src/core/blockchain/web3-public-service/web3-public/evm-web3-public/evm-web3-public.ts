@@ -349,4 +349,44 @@ export class EvmWeb3Public extends Web3Public {
             toBlock: blockNumber
         });
     }
+
+    /**
+     * Will call smart contract method in the EVM without sending any transaction.
+     * @param contractAddress Contract address.
+     * @param contractAbi Contract ABI.
+     * @param methodName Method name.
+     * @param methodArguments Method arguments.
+     * @param options Sender address and value.
+     * @returns Transaction receipt.
+     */
+    public async staticCallContractMethod(
+        contractAddress: string,
+        contractAbi: AbiItem[],
+        methodName: string,
+        methodArguments: unknown[],
+        options: { from: string; value: string }
+    ): Promise<TransactionReceipt> {
+        const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
+
+        return new Promise((resolve, reject) => {
+            contract.methods[methodName](...methodArguments).call(
+                {
+                    from: options?.from,
+                    ...(options?.value && { value: options.value })
+                },
+                (
+                    error: { code: number; message: string; data: string },
+                    result: TransactionReceipt | PromiseLike<TransactionReceipt>
+                ) => {
+                    if (result) {
+                        resolve(result);
+                    }
+
+                    if (error) {
+                        reject(error);
+                    }
+                }
+            );
+        });
+    }
 }

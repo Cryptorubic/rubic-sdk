@@ -13,7 +13,7 @@ export class QuickSwapTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.QUICK_SWAP;
     }
 
-    protected readonly contractAddress = QUICK_SWAP_CONTRACT_ADDRESS;
+    public readonly contractAddress = QUICK_SWAP_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);

@@ -13,7 +13,7 @@ export class PancakeSwapTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.PANCAKE_SWAP;
     }
 
-    protected readonly contractAddress = PANCAKE_SWAP_CONTRACT_ADDRESS;
+    public readonly contractAddress = PANCAKE_SWAP_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);

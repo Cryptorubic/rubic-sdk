@@ -205,7 +205,7 @@ export class OneinchTrade extends EvmOnChainTrade {
         }
     }
 
-    private getTradeData(
+    public getTradeData(
         disableEstimate = false,
         fromAddress?: string,
         receiverAddress?: string

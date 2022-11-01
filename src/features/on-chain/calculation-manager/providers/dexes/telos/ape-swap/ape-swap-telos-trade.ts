@@ -13,7 +13,7 @@ export class ApeSwapTelosTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.APE_SWAP;
     }
 
-    protected readonly contractAddress = APE_SWAP_TELOS_CONTRACT_ADDRESS;
+    public readonly contractAddress = APE_SWAP_TELOS_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);
