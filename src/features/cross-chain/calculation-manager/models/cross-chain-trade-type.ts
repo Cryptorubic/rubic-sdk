@@ -5,7 +5,8 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     DEBRIDGE: 'debridge',
     VIA: 'via',
     RANGO: 'rango',
-    BRIDGERS: 'bridgers'
+    BRIDGERS: 'bridgers',
+    MULTICHAIN: 'multichain'
 } as const;
 
 export type CrossChainTradeType =

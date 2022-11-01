@@ -13,7 +13,7 @@ export class ViperSwapHarmonyTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.VIPER_SWAP;
     }
 
-    protected readonly contractAddress = VIPER_SWAP_HARMONY_CONTRACT_ADDRESS;
+    public readonly contractAddress = VIPER_SWAP_HARMONY_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);

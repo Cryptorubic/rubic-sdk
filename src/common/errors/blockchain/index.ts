@@ -5,3 +5,4 @@ export * from './transaction-reverted.error';
 export * from './user-reject.error';
 export * from './wrong-from-address.error';
 export * from './wrong-receiver-address.error';
+export * from './deflation-token.error';

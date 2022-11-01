@@ -5,10 +5,7 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-default-api-key';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
-import {
-    viaContractAbi,
-    viaContractAddress
-} from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/contract-data';
+import { viaContractAddress } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/contract-data';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -18,7 +15,7 @@ import {
     BridgeType
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { Via } from '@viaprotocol/router-sdk';
-import { NotWhitelistedProviderError, RubicSdkError, SwapRequestError } from 'src/common/errors';
+import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
 import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-cross-chain-supported-blockchain';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -240,28 +237,6 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
             methodArguments,
             value
         };
-    }
-
-    private async checkProviderIsWhitelisted(providerRouter: string, providerGateway?: string) {
-        const whitelistedContracts = await Injector.web3PublicService
-            .getWeb3Public(this.from.blockchain)
-            .callContractMethod<string[]>(
-                this.fromContractAddress,
-                viaContractAbi,
-                'getAvailableRouters'
-            );
-
-        if (
-            !whitelistedContracts.find(whitelistedContract =>
-                compareAddresses(whitelistedContract, providerRouter)
-            ) ||
-            (providerGateway &&
-                !whitelistedContracts.find(whitelistedContract =>
-                    compareAddresses(whitelistedContract, providerGateway)
-                ))
-        ) {
-            throw new NotWhitelistedProviderError(providerRouter, providerGateway);
-        }
     }
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {

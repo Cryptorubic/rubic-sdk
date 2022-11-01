@@ -3,7 +3,12 @@ import {
     rangoCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { MaxAmountError, MinAmountError, UnsupportedReceiverAddressError } from 'src/common/errors';
+import {
+    MaxAmountError,
+    MinAmountError,
+    RubicSdkError,
+    UnsupportedReceiverAddressError
+} from 'src/common/errors';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
@@ -22,10 +27,7 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { RANGO_BLOCKCHAIN_NAME } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-blockchain-name';
 import { RANGO_CONTRACT_ADDRESSES } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/contract-address';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import {
-    BRIDGE_TYPE,
-    BridgeType
-} from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { BridgeType } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { rangoProviders } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-providers';
 import { RANGO_TRADE_BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/models/rango-providers';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -213,9 +215,13 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         const { path, swapper } = route;
 
         if (!path) {
+            const bridgeType = RANGO_TRADE_BRIDGE_TYPE?.[swapper.id];
+            if (!bridgeType) {
+                throw new RubicSdkError('Unknown bridgeType in rango provider.');
+            }
             return {
                 onChainType: { from: undefined, to: undefined },
-                bridgeType: RANGO_TRADE_BRIDGE_TYPE[swapper.id] || BRIDGE_TYPE.RANGO
+                bridgeType
             };
         }
 
@@ -229,10 +235,14 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             from: dexes[0] ? rangoProviders[dexes[0]] : undefined,
             to: dexes[1] ? rangoProviders[dexes[1]] : undefined
         };
+        const bridgeType = RANGO_TRADE_BRIDGE_TYPE?.[swapperId!];
+        if (!bridgeType) {
+            throw new RubicSdkError('Unknown bridgeType in rango provider.');
+        }
 
         return {
             onChainType,
-            bridgeType: RANGO_TRADE_BRIDGE_TYPE[swapperId as string] || BRIDGE_TYPE.RANGO
+            bridgeType
         };
     }
 

@@ -13,7 +13,7 @@ export class WannaSwapAuroraTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.WANNA_SWAP;
     }
 
-    protected readonly contractAddress = WANNA_SWAP_AURORA_CONTRACT_ADDRESS;
+    public readonly contractAddress = WANNA_SWAP_AURORA_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);

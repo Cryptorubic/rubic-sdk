@@ -13,7 +13,7 @@ export class SoulSwapTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.SOUL_SWAP;
     }
 
-    protected readonly contractAddress = SOUL_SWAP_CONTRACT_ADDRESS;
+    public readonly contractAddress = SOUL_SWAP_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);

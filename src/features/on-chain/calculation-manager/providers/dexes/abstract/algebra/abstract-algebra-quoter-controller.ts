@@ -15,6 +15,7 @@ import {
     ALGEBRA_QUOTER_CONTRACT_ADDRESS
 } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/utils/quoter-controller/constants/quoter-contract-data';
 import BigNumber from 'bignumber.js';
+import { AbiItem } from 'web3-utils';
 
 interface GetQuoterMethodsDataOptions {
     routesTokens: Token[];
@@ -27,8 +28,20 @@ interface GetQuoterMethodsDataOptions {
 /**
  * Works with requests, related to Uniswap v3 liquidity pools.
  */
-export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController {
+export class AbstractAlgebraQuoterController implements UniswapV3AlgebraQuoterController {
     private routerTokens: Token[] | undefined;
+
+    private readonly quoterContractABI: AbiItem[];
+
+    private readonly quoterContractAddress: string;
+
+    constructor(
+        quoterContractABI: AbiItem[] = ALGEBRA_QUOTER_CONTRACT_ABI,
+        quoterContractAddress: string = ALGEBRA_QUOTER_CONTRACT_ADDRESS
+    ) {
+        this.quoterContractABI = quoterContractABI;
+        this.quoterContractAddress = quoterContractAddress;
+    }
 
     /**
      * Converts algebra route to encoded bytes string to pass it to contract.
@@ -77,7 +90,10 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
             path,
             methodData: {
                 methodName,
-                methodArguments: [AlgebraQuoterController.getEncodedPath(tokensPath), weiAmount]
+                methodArguments: [
+                    AbstractAlgebraQuoterController.getEncodedPath(tokensPath),
+                    weiAmount
+                ]
             }
         };
     }
@@ -124,8 +140,8 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
             .flat();
 
         const results = await this.web3Public.multicallContractMethods<string>(
-            ALGEBRA_QUOTER_CONTRACT_ADDRESS,
-            ALGEBRA_QUOTER_CONTRACT_ABI,
+            this.quoterContractAddress,
+            this.quoterContractABI,
             quoterMethodsData.map(quoterMethodData => quoterMethodData.methodData)
         );
 
@@ -156,7 +172,13 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
         const { routesTokens, to, exact, weiAmount, maxTransitTokens } = options;
 
         if (path.length === maxTransitTokens + 1) {
-            return [AlgebraQuoterController.getQuoterMethodData(path.concat(to), exact, weiAmount)];
+            return [
+                AbstractAlgebraQuoterController.getQuoterMethodData(
+                    path.concat(to),
+                    exact,
+                    weiAmount
+                )
+            ];
         }
 
         return routesTokens
