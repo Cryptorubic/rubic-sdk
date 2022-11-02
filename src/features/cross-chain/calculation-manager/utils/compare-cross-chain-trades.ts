@@ -8,7 +8,7 @@ import { LifiCrossChainTrade } from 'src/features/cross-chain/calculation-manage
 import { ViaCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/via-provider/via-cross-chain-trade';
 import { RangoCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/rango-cross-chain-trade';
 import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-trade';
-import { MultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-trade';
+import { DexMultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/dex-multichain-cross-chain-trade';
 
 // @TODO add typing
 const getUsdPrice = (prevTrade: CrossChainTrade | null): BigNumber => {
@@ -25,7 +25,7 @@ const getUsdPrice = (prevTrade: CrossChainTrade | null): BigNumber => {
         prevTrade instanceof LifiCrossChainTrade ||
         prevTrade instanceof ViaCrossChainTrade ||
         prevTrade instanceof RangoCrossChainTrade ||
-        prevTrade instanceof MultichainCrossChainTrade
+        prevTrade instanceof DexMultichainCrossChainTrade
     ) {
         return prevTrade.from.price.multipliedBy(prevTrade.from.tokenAmount);
     }
