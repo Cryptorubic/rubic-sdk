@@ -16,7 +16,7 @@ import {
     BridgeType
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { MinAmountError } from 'src/common/errors';
+import { MinAmountError, RubicSdkError } from 'src/common/errors';
 import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-providers';
 import { lifiContractAddress } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-contract-data';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -92,7 +92,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         );
 
         if (!bestRoute) {
-            return null;
+            return { trade: null, error: new RubicSdkError('No available routs') };
         }
 
         const { fromAmountUSD, toAmountUSD } = bestRoute;
