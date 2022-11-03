@@ -1,6 +1,7 @@
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export const blockchainId: Record<BlockchainName, number> = {
+    // EVN blockchains
     [BLOCKCHAIN_NAME.ETHEREUM]: 1,
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: 56,
     [BLOCKCHAIN_NAME.POLYGON]: 137,
@@ -21,8 +22,11 @@ export const blockchainId: Record<BlockchainName, number> = {
     [BLOCKCHAIN_NAME.BOBA]: 288,
     [BLOCKCHAIN_NAME.ASTAR]: 592,
     [BLOCKCHAIN_NAME.ETHEREUM_POW]: 10001,
-    [BLOCKCHAIN_NAME.BITCOIN]: 5555,
+    [BLOCKCHAIN_NAME.KAVA]: 2222,
     [BLOCKCHAIN_NAME.TRON]: 195,
+    [BLOCKCHAIN_NAME.BITGERT]: 32520,
+    // Non EVN blockchains
+    [BLOCKCHAIN_NAME.BITCOIN]: 5555,
     [BLOCKCHAIN_NAME.SOLANA]: NaN,
     [BLOCKCHAIN_NAME.NEAR]: NaN
 };

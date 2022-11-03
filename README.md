@@ -74,8 +74,10 @@
     export interface AppWindow extends Window {
       process: Process;
       Buffer: Buffer;
+      global?: unknown;
     }
    
+   (window as AppWindow).global = window;
    (window as AppWindow).process = window.process || require('process');
    (window as AppWindow).Buffer = (window as any).Buffer || require('buffer').Buffer;
    ```

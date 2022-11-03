@@ -7,8 +7,14 @@ export function getFromWithoutFee<T extends BlockchainName>(
     from: PriceTokenAmount<T>,
     feeInfo: FeeInfo
 ): PriceTokenAmount<T> {
+    if (!feeInfo?.platformFee?.percent) {
+        return new PriceTokenAmount({
+            ...from.asStruct,
+            weiAmount: from.weiAmount
+        });
+    }
     const feeAmount = Web3Pure.toWei(
-        from.tokenAmount.multipliedBy(feeInfo.platformFee!.percent).dividedBy(100),
+        from.tokenAmount.multipliedBy(feeInfo.platformFee.percent).dividedBy(100),
         from.decimals,
         1
     );

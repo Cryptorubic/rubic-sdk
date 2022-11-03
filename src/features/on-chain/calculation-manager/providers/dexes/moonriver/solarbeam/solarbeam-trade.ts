@@ -38,7 +38,7 @@ export class SolarbeamTrade extends UniswapV2AbstractTrade {
 
     private static readonly feeParameter = '25';
 
-    protected readonly contractAddress = SOLARBEAM_CONTRACT_ADDRESS;
+    public readonly contractAddress = SOLARBEAM_CONTRACT_ADDRESS;
 
     constructor(tradeStruct: UniswapV2TradeStruct) {
         super(tradeStruct);

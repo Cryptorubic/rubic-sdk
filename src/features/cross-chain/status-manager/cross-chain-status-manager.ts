@@ -27,6 +27,9 @@ import { CelerTransferStatus } from 'src/features/cross-chain/status-manager/mod
 import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils/get-bridgers-trade-status';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getSrcTxStatus } from 'src/features/common/status-manager/utils/get-src-tx-status';
+import { RubicSdkError } from 'src/common/errors';
+import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
+import { MultichainStatusMapping } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
 
 /**
  * Contains methods for getting cross-chain trade statuses.
@@ -34,14 +37,15 @@ import { getSrcTxStatus } from 'src/features/common/status-manager/utils/get-src
 export class CrossChainStatusManager {
     private readonly httpClient = Injector.httpClient;
 
-    private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, GetDstTxDataFn> = {
+    private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, GetDstTxDataFn | null> = {
         [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.VIA]: this.getViaDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.BRIDGERS]: this.getBridgersDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.BRIDGERS]: this.getBridgersDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: this.getMultichainDstSwapStatus
     };
 
     /**
@@ -105,7 +109,12 @@ export class CrossChainStatusManager {
             return { hash: null, status: TxStatus.PENDING };
         }
 
-        return this.getDstTxStatusFnMap[provider].call(this, tradeData);
+        const getDstTxStatusFn = this.getDstTxStatusFnMap[provider];
+        if (!getDstTxStatusFn) {
+            throw new RubicSdkError('Unsupported cross chain provider');
+        }
+
+        return getDstTxStatusFn.call(this, tradeData);
     }
 
     /**
@@ -411,10 +420,14 @@ export class CrossChainStatusManager {
      * @returns Cross-chain transaction status.
      */
     private getBridgersDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        if (!data.amountOutMin) {
+            throw new RubicSdkError('field amountOutMin is not set.');
+        }
         return getBridgersTradeStatus(
             data.srcTxHash,
             data.fromBlockchain as BridgersCrossChainSupportedBlockchain,
-            'rubic'
+            'rubic',
+            data.amountOutMin
         );
     }
 
@@ -448,5 +461,25 @@ export class CrossChainStatusManager {
         }
 
         return dstTxData;
+    }
+
+    private async getMultichainDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        try {
+            const {
+                info: { status, swaptx }
+            } = await this.httpClient.get<MultichainStatusApiResponse>(
+                `https://bridgeapi.anyswap.exchange/v2/history/details?params=${data.srcTxHash}`
+            );
+
+            return {
+                status: MultichainStatusMapping?.[status] || TxStatus.PENDING,
+                hash: swaptx || null
+            };
+        } catch {
+            return {
+                status: TxStatus.PENDING,
+                hash: null
+            };
+        }
     }
 }

@@ -1,4 +1,3 @@
-import { AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/utils/quoter-controller/algebra-quoter-controller';
 import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/utils/token-native-address-proxy';
 import {
     ALGEBRA_SWAP_ROUTER_CONTRACT_ABI,
@@ -16,6 +15,7 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { Token } from 'src/common/tokens';
+import { AbstractAlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/algebra/abstract-algebra-quoter-controller';
 
 export interface AlgebraTradeStruct extends UniswapV3AlgebraTradeStruct {
     route: AlgebraRoute;
@@ -26,7 +26,7 @@ export class AlgebraTrade extends UniswapV3AlgebraAbstractTrade {
         return ON_CHAIN_TRADE_TYPE.ALGEBRA;
     }
 
-    protected readonly contractAddress = ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS;
+    public readonly contractAddress = ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS;
 
     protected readonly contractAbi = ALGEBRA_SWAP_ROUTER_CONTRACT_ABI;
 
@@ -80,7 +80,7 @@ export class AlgebraTrade extends UniswapV3AlgebraAbstractTrade {
             methodName,
             methodArguments: [
                 [
-                    AlgebraQuoterController.getEncodedPath(this.route.path),
+                    AbstractAlgebraQuoterController.getEncodedPath(this.route.path),
                     walletAddress,
                     this.deadlineMinutesTimestamp,
                     ...amountParams

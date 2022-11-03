@@ -15,5 +15,6 @@ export const RANGO_TRADE_BRIDGE_TYPE: Partial<Record<string, BridgeType>> = {
     Hop: BRIDGE_TYPE.HOP,
     Hyphen: BRIDGE_TYPE.HYPHEN,
     'Optimism Bridge': BRIDGE_TYPE.OPTIMISM_GATEWAY,
-    stargate: BRIDGE_TYPE.STARGATE
+    stargate: BRIDGE_TYPE.STARGATE,
+    Symbiosis: BRIDGE_TYPE.SYMBIOSIS
 };

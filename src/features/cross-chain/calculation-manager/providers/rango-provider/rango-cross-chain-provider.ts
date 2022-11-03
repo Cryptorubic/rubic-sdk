@@ -3,7 +3,12 @@ import {
     rangoCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { MaxAmountError, MinAmountError, UnsupportedReceiverAddressError } from 'src/common/errors';
+import {
+    MaxAmountError,
+    MinAmountError,
+    RubicSdkError,
+    UnsupportedReceiverAddressError
+} from 'src/common/errors';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
@@ -217,10 +222,11 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         const { path, swapper } = route;
 
         if (!path) {
-            return {
-                itType: { from: undefined, to: undefined },
-                bridgeType: RANGO_TRADE_BRIDGE_TYPE[swapper.id]
-            };
+            const bridgeType = RANGO_TRADE_BRIDGE_TYPE?.[swapper.id];
+            if (!bridgeType) {
+                throw new RubicSdkError('Unknown bridgeType in rango provider.');
+            }
+            return { itType: { from: undefined, to: undefined }, bridgeType };
         }
 
         const swapperId = path.find(
@@ -233,8 +239,11 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             from: dexes[0] ? rangoProviders[dexes[0]] : undefined,
             to: dexes[1] ? rangoProviders[dexes[1]] : undefined
         };
-
-        return { itType, bridgeType: RANGO_TRADE_BRIDGE_TYPE[swapperId as string] };
+        const bridgeType = RANGO_TRADE_BRIDGE_TYPE?.[swapperId!];
+        if (!bridgeType) {
+            throw new RubicSdkError('Unknown bridgeType in rango provider.');
+        }
+        return { itType, bridgeType };
     }
 
     protected async getFeeInfo(

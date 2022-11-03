@@ -84,11 +84,11 @@ export abstract class CrossChainProvider {
         contractAddress: string,
         contractAbi: AbiItem[]
     ): Promise<BigNumber> {
-        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+        const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
         const fromChainType = BlockchainsInfo.getChainType(fromBlockchain);
 
         if (!Web3Pure[fromChainType].isEmptyAddress(providerAddress)) {
-            const integratorInfo = await web3PublicService.callContractMethod<{
+            const integratorInfo = await web3Public.callContractMethod<{
                 isIntegrator: boolean;
                 fixedFeeAmount: string;
             }>(contractAddress, contractAbi, 'integratorToFeeInfo', [providerAddress]);
@@ -98,7 +98,7 @@ export abstract class CrossChainProvider {
         }
 
         return Web3Pure.fromWei(
-            await web3PublicService.callContractMethod<string>(
+            await web3Public.callContractMethod<string>(
                 contractAddress,
                 contractAbi,
                 'fixedCryptoFee'
@@ -121,11 +121,11 @@ export abstract class CrossChainProvider {
         contractAddress: string,
         contractAbi: AbiItem[]
     ): Promise<number> {
-        const web3PublicService = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+        const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
         const fromChainType = BlockchainsInfo.getChainType(fromBlockchain);
 
         if (!Web3Pure[fromChainType].isEmptyAddress(providerAddress)) {
-            const integratorInfo = await web3PublicService.callContractMethod<{
+            const integratorInfo = await web3Public.callContractMethod<{
                 isIntegrator: boolean;
                 tokenFee: string;
             }>(contractAddress, contractAbi, 'integratorToFeeInfo', [providerAddress]);
@@ -136,7 +136,7 @@ export abstract class CrossChainProvider {
 
         return (
             new BigNumber(
-                await web3PublicService.callContractMethod<string>(
+                await web3Public.callContractMethod<string>(
                     contractAddress,
                     contractAbi,
                     'RubicPlatformFee'
