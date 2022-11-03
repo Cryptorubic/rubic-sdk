@@ -206,6 +206,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
                 blockchain: this.to.blockchain,
                 symbol: this.to.symbol
             });
+
             return await super.swap(options);
         } catch (err) {
             this.isDeflationTokenInTargetNetwork = err instanceof DeflationTokenError;
