@@ -17,7 +17,7 @@ import {
     BridgeType
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { MinAmountError } from 'src/common/errors';
+import { MinAmountError, RubicSdkError } from 'src/common/errors';
 import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-providers';
 import { lifiContractAddress } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-contract-data';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -27,6 +27,7 @@ import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/prov
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { LifiBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
 
 export class LifiCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
@@ -60,10 +61,20 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             evmCommonCrossChainAbi
         );
 
+        if (
+            options.lifiDisabledBridgeTypes?.length &&
+            !this.checkBridgeTypes(options.lifiDisabledBridgeTypes)
+        ) {
+            throw new RubicSdkError('Incorrect bridges filter param');
+        }
+
         const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
             order: 'RECOMMENDED',
-            allowSwitchChain: false
+            allowSwitchChain: false,
+            bridges: {
+                deny: options.lifiDisabledBridgeTypes
+            }
         };
 
         const fromChainId = blockchainId[fromBlockchain];
@@ -213,5 +224,10 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             onChainType,
             bridgeType
         };
+    }
+
+    private checkBridgeTypes(notAllowedBridgeTypes: LifiBridgeTypes[]): boolean {
+        const lifiBridgeTypes = Object.values(LifiBridgeTypes);
+        return notAllowedBridgeTypes.every(bridgeType => lifiBridgeTypes.includes(bridgeType));
     }
 }
