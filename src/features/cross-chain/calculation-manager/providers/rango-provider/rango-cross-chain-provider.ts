@@ -37,6 +37,7 @@ import BigNumber from 'bignumber.js';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { RangoBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/models/rango-bridge-types';
 
 export class RangoCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RANGO;
@@ -87,7 +88,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         try {
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
             const fromWithoutFee = getFromWithoutFee(from, feeInfo);
-            const request = this.getRequestParams(fromWithoutFee, toToken, options);
+            const request = await this.getRequestParams(fromWithoutFee, toToken, options);
 
             const { route, resultType, tx } = await this.rango.swap(request);
 
@@ -158,7 +159,8 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                             }
                         },
                         cryptoFeeToken,
-                        gasData
+                        gasData,
+                        allowedSwappers: request.swappers as RangoBridgeTypes[]
                     },
                     this.rango,
                     options.providerAddress
@@ -174,11 +176,17 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         }
     }
 
-    private getRequestParams(
+    private async getRequestParams(
         from: PriceTokenAmount,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
-    ): SwapRequest {
+    ): Promise<SwapRequest> {
+        const allowedSwappers = options.rangoDisabledBridgeTypes
+            ? (await this.rango.meta()).swappers.filter(
+                  swapper =>
+                      !options.rangoDisabledBridgeTypes?.includes(swapper.id as RangoBridgeTypes)
+              )
+            : undefined;
         const fromAddress =
             this.getWalletAddress(from.blockchain as RangoCrossChainSupportedBlockchain) ||
             EvmWeb3Pure.EMPTY_ADDRESS;
@@ -202,7 +210,8 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             fromAddress,
             toAddress,
             referrerAddress: null,
-            referrerFee: null
+            referrerFee: null,
+            ...(allowedSwappers && { swappers: allowedSwappers.map(swapper => swapper.id) })
         };
     }
 
