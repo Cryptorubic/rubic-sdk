@@ -26,7 +26,7 @@ import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/prov
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
-import { LifiBridgeTypes } from './models/lifi-bridge-types';
+import { LifiBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
 
 export class LifiCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
@@ -138,8 +138,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                 feeInfo,
                 priceImpact,
                 itType,
-                bridgeType,
-                disabledBridgeTypes: options.lifiDisabledBridgeTypes
+                bridgeType
             },
             options.providerAddress
         );

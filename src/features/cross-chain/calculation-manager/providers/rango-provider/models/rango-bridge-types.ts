@@ -10,5 +10,6 @@ export enum RangoBridgeTypes {
     HOP = 'Hop',
     HYPHEN = 'Hyphen',
     OPTIMISM_BRIDGE = 'Optimism Bridge',
-    STARGATE = 'stargate'
+    STARGATE = 'stargate',
+    SYMBIOSIS = 'Symbiosis'
 }
