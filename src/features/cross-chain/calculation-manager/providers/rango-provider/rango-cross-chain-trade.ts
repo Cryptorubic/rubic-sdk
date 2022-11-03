@@ -22,7 +22,7 @@ import { RANGO_BLOCKCHAIN_NAME } from 'src/features/cross-chain/calculation-mana
 import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
 import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
 import { RANGO_CONTRACT_ADDRESSES } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/contract-address';
-import { RangoBridgeTypes } from './models/rango-bridge-types';
+import { RangoBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/models/rango-bridge-types';
 
 export class RangoCrossChainTrade extends EvmCrossChainTrade {
     /**  @internal */
