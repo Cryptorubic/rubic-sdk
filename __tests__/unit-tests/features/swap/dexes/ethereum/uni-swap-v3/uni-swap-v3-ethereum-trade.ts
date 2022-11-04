@@ -2,13 +2,13 @@ import { Chain } from '__tests__/utils/chain';
 import { mockInjector } from '__tests__/utils/mock-injector';
 import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
 import { Utils } from '__tests__/unit-tests/features/swap/utils/utils';
-import { Injector } from '@rsdk-core/sdk/injector';
+import { Injector } from 'src/core/injector/injector';
 import BigNumber from 'bignumber.js';
 import { Web3Public } from 'src/core';
-import { PriceTokenAmount } from 'src/core/blockchain/tokens/price-token-amount';
-import { PriceToken } from 'src/core/blockchain/tokens/price-token';
-import { UniSwapV3EthereumProvider } from 'src/features/instant-trades/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
-import { BLOCKCHAIN_NAME } from '@rsdk-core/blockchain/models/blockchain-name';
+import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
+import { PriceToken } from 'src/common/tokens/price-token';
+import { UniSwapV3EthereumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/uni-swap-v3-ethereum/uni-swap-v3-ethereum-provider';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import fn = jest.fn;
 
 const TOKENS = ALL_TOKENS[BLOCKCHAIN_NAME.ETHEREUM];
@@ -30,7 +30,7 @@ export const uniswapV3EthTradeSpec = () =>
             const configuration = await chain.getConfiguration();
             await mockInjector(configuration);
             web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ETHEREUM);
-            userAddress = Injector.web3Private.address;
+            userAddress = Injector.web3PrivateService.address;
             utils = new Utils(chain, web3Public);
         });
 

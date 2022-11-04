@@ -1,4 +1,4 @@
-import { RubicSdkError } from 'src/common';
+import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
 
 /**
  * Thrown, when passed wrong receiver address.
