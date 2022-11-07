@@ -18,7 +18,7 @@ import Web3 from 'web3';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
 import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private/models/web3.error';
 import { WalletProviderCore } from 'src/core/sdk/models/wallet-provider';

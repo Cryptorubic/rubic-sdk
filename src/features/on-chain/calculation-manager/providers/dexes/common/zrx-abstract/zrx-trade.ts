@@ -6,10 +6,10 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { TransactionConfig } from 'web3-core';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 
 interface ZrxTradeStruct {
     from: PriceTokenAmount<EvmBlockchainName>;
@@ -54,7 +54,7 @@ export class ZrxTrade extends EvmOnChainTrade {
         this.path = tradeStruct.path;
     }
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         if (options?.receiverAddress) {
             throw new UnsupportedReceiverAddressError();
         }

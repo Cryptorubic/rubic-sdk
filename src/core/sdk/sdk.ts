@@ -5,7 +5,7 @@ import { CrossChainSymbiosisManager } from 'src/features/cross-chain/symbiosis-m
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
 import { Web3PrivateService } from 'src/core/blockchain/web3-private-service/web3-private-service';
 import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { CrossChainManager } from 'src/features/cross-chain/calculation-manager/cross-chain-manager';
 import { CrossChainStatusManager } from 'src/features/cross-chain/status-manager/cross-chain-status-manager';
 import { OnChainManager } from 'src/features/on-chain/calculation-manager/on-chain-manager';

@@ -25,6 +25,7 @@ import {
     onChainProxyContractAddress
 } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/constants/on-chain-proxy-contract';
 import { parseError } from 'src/common/utils/errors';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 
 export abstract class EvmOnChainTrade extends OnChainTrade {
     public abstract readonly from: PriceTokenAmount<EvmBlockchainName>;
@@ -112,15 +113,18 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         };
 
         const receiverAddress = options.receiverAddress || this.walletAddress;
-        const txConfig = await this.encodeDirect({
+        const directTransactionConfig = await this.encodeDirect({
             fromAddress: this.walletAddress,
             receiverAddress
         });
-        const { gas, gasPrice } = txConfig;
+        const { gas, gasPrice } = directTransactionConfig;
 
         const contractAddress = onChainProxyContractAddress[this.from.blockchain];
         const methodName = this.from.isNative ? 'instantTradeNative' : 'instantTrade';
-        const methodArguments = this.getProxyMethodArguments(receiverAddress, txConfig.data!);
+        const methodArguments = this.getProxyMethodArguments(
+            receiverAddress,
+            directTransactionConfig.data
+        );
         const value = this.from.isNative ? this.from.stringWeiAmount : '0';
 
         try {
@@ -129,7 +133,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 onChainProxyContractAbi,
                 methodName,
                 methodArguments,
-                { onTransactionHash, value, gas, gasPrice: gasPrice as string }
+                { onTransactionHash, value, gas, gasPrice }
             );
 
             return transactionHash!;
@@ -154,7 +158,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 this.to.address,
                 this.toTokenAmountMin.stringWeiAmount,
                 receiverAddress,
-                // this.providerAddress, todo
+                this.providerAddress,
                 this.contractAddress
             ],
             data
@@ -164,14 +168,22 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     /**
      * Encodes trade to swap it directly through dex contract.
      */
-    // @todo update type TransactionConfig
-    public abstract encodeDirect(options: EncodeTransactionOptions): Promise<TransactionConfig>;
+    public abstract encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig>;
 
-    protected getGasParams(options: OptionsGasParams): TransactionGasParams {
-        // @todo add check on null
+    protected getGasParams(
+        options: OptionsGasParams,
+        calculatedGasFee: OptionsGasParams = {
+            gasLimit: this.gasFeeInfo?.gasLimit?.toFixed(),
+            gasPrice: this.gasFeeInfo?.gasPrice?.toFixed()
+        }
+    ): TransactionGasParams {
         return {
-            gas: options.gasLimit || this.gasFeeInfo?.gasLimit?.toFixed(),
-            gasPrice: options.gasPrice || this.gasFeeInfo?.gasPrice?.toFixed()
+            gas:
+                (options.gasLimit === undefined ? calculatedGasFee.gasLimit : options.gasLimit) ||
+                undefined,
+            gasPrice:
+                (options.gasPrice === undefined ? calculatedGasFee.gasPrice : options.gasPrice) ||
+                undefined
         };
     }
 }

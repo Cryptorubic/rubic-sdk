@@ -1,6 +1,6 @@
 export interface OptionsGasParams {
-    gasPrice?: string;
-    gasLimit?: string;
+    gasPrice?: string | null;
+    gasLimit?: string | null;
 }
 
 export interface TransactionGasParams {

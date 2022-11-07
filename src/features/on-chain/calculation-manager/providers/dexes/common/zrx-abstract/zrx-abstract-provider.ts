@@ -16,7 +16,7 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { ZrxCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-calculation-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 
 export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
     protected readonly gasMargin = 1.4;

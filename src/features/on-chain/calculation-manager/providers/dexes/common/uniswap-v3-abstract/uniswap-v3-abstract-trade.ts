@@ -17,7 +17,7 @@ import { UniswapV3QuoterController } from 'src/features/on-chain/calculation-man
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { Cache } from 'src/common/utils/decorators';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Token } from 'src/common/tokens';
 
 export interface UniswapV3TradeStruct extends UniswapV3AlgebraTradeStruct {

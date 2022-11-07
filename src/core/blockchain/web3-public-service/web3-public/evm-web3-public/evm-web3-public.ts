@@ -19,7 +19,7 @@ import { provider as Provider, HttpProvider, BlockNumber } from 'web3-core';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import pTimeout from 'src/common/utils/p-timeout';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import BigNumber from 'bignumber.js';
 import { EventData } from 'web3-eth-contract';

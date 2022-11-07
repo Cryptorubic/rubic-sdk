@@ -10,13 +10,9 @@ import {
 } from 'src/features/common/utils/token-native-address-proxy';
 import { OneinchSwapResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-response';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import {
-    OptionsGasParams,
-    TransactionGasParams
-} from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-params';
+
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
-import { TransactionConfig } from 'web3-core';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import {
     ON_CHAIN_TRADE_TYPE,
@@ -29,7 +25,8 @@ import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/pr
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { parseError } from 'src/common/utils/errors';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 
 type OneinchTradeStruct = {
     contractAddress: string;
@@ -122,7 +119,7 @@ export class OneinchTrade extends EvmOnChainTrade {
         );
     }
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         this.checkFromAddress(options.fromAddress, true);
         this.checkReceiverAddress(options.receiverAddress);
 
@@ -132,7 +129,10 @@ export class OneinchTrade extends EvmOnChainTrade {
                 options.fromAddress,
                 options.receiverAddress
             );
-            const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, apiTradeData);
+            const { gas, gasPrice } = this.getGasParams(options, {
+                gasLimit: apiTradeData.tx.gas.toString(),
+                gasPrice: apiTradeData.tx.gasPrice
+            });
 
             return {
                 ...apiTradeData.tx,
@@ -170,16 +170,6 @@ export class OneinchTrade extends EvmOnChainTrade {
         };
 
         return this.httpClient.get<OneinchSwapResponse>(`${this.apiBaseUrl}/swap`, swapRequest);
-    }
-
-    private getGasParamsFromApiTradeData(
-        options: OptionsGasParams,
-        apiTradeData: OneinchSwapResponse
-    ): TransactionGasParams {
-        return this.getGasParams({
-            gasLimit: options.gasLimit || apiTradeData.tx.gas.toString(),
-            gasPrice: options.gasPrice || apiTradeData.tx.gasPrice
-        });
     }
 
     private specifyError(err: {

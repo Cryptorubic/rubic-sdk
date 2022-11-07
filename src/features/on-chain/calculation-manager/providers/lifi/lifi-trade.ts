@@ -1,5 +1,4 @@
 import { Route } from '@lifi/sdk';
-import { TransactionConfig } from 'web3-core';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import {
@@ -17,7 +16,8 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 
 interface LifiTransactionRequest {
     data: string;
@@ -116,21 +116,25 @@ export class LifiTrade extends EvmOnChainTrade {
         this.route = tradeStruct.route;
     }
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         if (options?.receiverAddress) {
             throw new UnsupportedReceiverAddressError();
         }
         this.checkFromAddress(options.fromAddress, true);
 
         try {
-            const { data, gasLimit, gasPrice } = await this.getTransactionData(options.fromAddress);
+            const transactionData = await this.getTransactionData(options.fromAddress);
+            const { gas, gasPrice } = this.getGasParams(options, {
+                gasLimit: transactionData.gasLimit,
+                gasPrice: transactionData.gasPrice
+            });
 
             return {
                 to: this.contractAddress,
-                data: data!,
+                data: transactionData.data,
                 value: this.from.isNative ? this.from.stringWeiAmount : '0',
-                gas: options.gasLimit || gasLimit,
-                gasPrice: options.gasPrice || gasPrice
+                gas,
+                gasPrice
             };
         } catch (err) {
             if ([400, 500, 503].includes(err.code)) {
