@@ -30,7 +30,7 @@ export class CelerOneinchTrade implements CelerOnChainTrade {
         methodArguments: unknown[][],
         walletAddress: string
     ): Promise<void> {
-        const { data } = await this.oneinchTrade.encode({ fromAddress: walletAddress });
+        const { data } = await this.oneinchTrade.encodeDirect({ fromAddress: walletAddress });
         if (!methodArguments?.[0]) {
             throw new RubicSdkError('Method arguments array must not be empty');
         }

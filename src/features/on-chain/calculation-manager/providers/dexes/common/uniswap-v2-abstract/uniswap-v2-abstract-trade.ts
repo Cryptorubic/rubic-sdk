@@ -1,5 +1,5 @@
 import { DefaultEstimatedGas } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
-import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/token-native-address-proxy';
+import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/common/utils/token-native-address-proxy';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
@@ -159,8 +159,8 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         return 'TOKENS_TO_TOKENS';
     }
 
-    protected constructor(tradeStruct: UniswapV2TradeStruct) {
-        super();
+    public constructor(tradeStruct: UniswapV2TradeStruct, providerAddress: string) {
+        super(providerAddress);
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;

@@ -7,7 +7,7 @@ import {
 import {
     createTokenNativeAddressProxy,
     createTokenNativeAddressProxyInPathStartAndEnd
-} from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/token-native-address-proxy';
+} from 'src/features/common/utils/token-native-address-proxy';
 import { OneinchSwapResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-response';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import {
@@ -29,6 +29,7 @@ import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/pr
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { parseError } from 'src/common/utils/errors';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 type OneinchTradeStruct = {
     contractAddress: string;
@@ -46,9 +47,12 @@ export class OneinchTrade extends EvmOnChainTrade {
     public static async checkIfNeedApproveAndThrowError(
         from: PriceTokenAmount
     ): Promise<void | never> {
-        const needApprove = await new OneinchTrade({
-            from
-        } as OneinchTradeStruct).needApprove();
+        const needApprove = await new OneinchTrade(
+            {
+                from
+            } as OneinchTradeStruct,
+            EvmWeb3Pure.EMPTY_ADDRESS
+        ).needApprove();
         if (needApprove) {
             throw new RubicSdkError('Approve is needed');
         }
@@ -93,8 +97,8 @@ export class OneinchTrade extends EvmOnChainTrade {
         return getOneinchApiBaseUrl(this.from.blockchain);
     }
 
-    constructor(oneinchTradeStruct: OneinchTradeStruct) {
-        super();
+    constructor(oneinchTradeStruct: OneinchTradeStruct, providerAddress: string) {
+        super(providerAddress);
 
         this.contractAddress = oneinchTradeStruct.contractAddress;
         this.from = oneinchTradeStruct.from;

@@ -18,6 +18,7 @@ import {
     isAlgebraTrade,
     isUniswapV3LikeTrade
 } from 'src/features/on-chain/calculation-manager/utils/type-guards';
+import { ProviderAddress } from 'src/core/sdk/models/provider-address';
 import { CelerCrossChainSupportedBlockchain } from '../cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
 import { OneinchTrade } from '../on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/oneinch-trade';
 import { UniswapV2AbstractTrade } from '../on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
@@ -42,7 +43,7 @@ const nativeTokenAmount: Record<CelerCrossChainSupportedBlockchain, number> = {
  * Contains method to check token for deflation.
  */
 export class DeflationTokenManager {
-    private readonly onChainManager = new OnChainManager();
+    private readonly onChainManager = new OnChainManager({} as ProviderAddress);
 
     public async checkToken(token: {
         address: string;

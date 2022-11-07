@@ -1,5 +1,5 @@
 import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
-import { createTokenNativeAddressProxy } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/token-native-address-proxy';
+import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { zrxApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/constants';
 import { ZrxQuoteRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-quote-request';
 import { ZrxQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-types';
@@ -16,13 +16,15 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { ZrxCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-calculation-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
     protected readonly gasMargin = 1.4;
 
     private readonly defaultOptions: ZrxCalculationOptions = {
         slippageTolerance: 0.02,
-        gasCalculation: 'calculate'
+        gasCalculation: 'calculate',
+        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS
     };
 
     public get type(): OnChainTradeType {
@@ -68,16 +70,19 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
             path: [from, to]
         };
         if (fullOptions.gasCalculation === 'disabled') {
-            return new ZrxTrade(tradeStruct);
+            return new ZrxTrade(tradeStruct, fullOptions.providerAddress);
         }
 
         const gasPriceInfo = await this.getGasPriceInfo();
         const gasFeeInfo = await this.getGasFeeInfo(apiTradeData.gas, gasPriceInfo);
 
-        return new ZrxTrade({
-            ...tradeStruct,
-            gasFeeInfo
-        });
+        return new ZrxTrade(
+            {
+                ...tradeStruct,
+                gasFeeInfo
+            },
+            fullOptions.providerAddress
+        );
     }
 
     /**

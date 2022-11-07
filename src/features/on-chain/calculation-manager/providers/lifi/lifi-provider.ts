@@ -13,13 +13,15 @@ import { combineOptions } from 'src/common/utils/options';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export class LifiProvider {
     private readonly lifi = new LIFI();
 
     private readonly defaultOptions: Required<LifiCalculationOptions> = {
         gasCalculation: 'calculate',
-        slippageTolerance: 0.02
+        slippageTolerance: 0.02,
+        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS
     };
 
     constructor() {}
@@ -90,17 +92,20 @@ export class LifiProvider {
                         this.getPath(step, from, to)
                     ]);
 
-                    return new LifiTrade({
-                        from,
-                        to,
-                        gasFeeInfo,
-                        slippageTolerance: fullOptions.slippageTolerance,
-                        contractAddress,
-                        type,
-                        path,
-                        route,
-                        toTokenWeiAmountMin: new BigNumber(route.toAmountMin)
-                    });
+                    return new LifiTrade(
+                        {
+                            from,
+                            to,
+                            gasFeeInfo,
+                            slippageTolerance: fullOptions.slippageTolerance,
+                            contractAddress,
+                            type,
+                            path,
+                            route,
+                            toTokenWeiAmountMin: new BigNumber(route.toAmountMin)
+                        },
+                        fullOptions.providerAddress
+                    );
                 })
             )
         ).filter(notNull);

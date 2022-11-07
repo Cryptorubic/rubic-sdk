@@ -19,6 +19,7 @@ import { Cache } from 'src/common/utils/decorators';
 import BigNumber from 'bignumber.js';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
 import { UniswapV2CalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-calculation-options';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export interface PathFactoryStruct {
     readonly from: PriceToken<EvmBlockchainName>;
@@ -205,20 +206,23 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             const fromAmount = this.exact === 'input' ? this.weiAmount : route.outputAbsoluteAmount;
             const toAmount = this.exact === 'output' ? this.weiAmount : route.outputAbsoluteAmount;
 
-            return new this.UniswapV2TradeClass({
-                from: new PriceTokenAmount({
-                    ...this.from.asStruct,
-                    weiAmount: fromAmount
-                }),
-                to: new PriceTokenAmount({
-                    ...this.to.asStruct,
-                    weiAmount: toAmount
-                }),
-                wrappedPath: route.path,
-                exact: this.exact,
-                deadlineMinutes: this.options.deadlineMinutes,
-                slippageTolerance: this.options.slippageTolerance
-            });
+            return new this.UniswapV2TradeClass(
+                {
+                    from: new PriceTokenAmount({
+                        ...this.from.asStruct,
+                        weiAmount: fromAmount
+                    }),
+                    to: new PriceTokenAmount({
+                        ...this.to.asStruct,
+                        weiAmount: toAmount
+                    }),
+                    wrappedPath: route.path,
+                    exact: this.exact,
+                    deadlineMinutes: this.options.deadlineMinutes,
+                    slippageTolerance: this.options.slippageTolerance
+                },
+                EvmWeb3Pure.EMPTY_ADDRESS
+            );
         });
     }
 

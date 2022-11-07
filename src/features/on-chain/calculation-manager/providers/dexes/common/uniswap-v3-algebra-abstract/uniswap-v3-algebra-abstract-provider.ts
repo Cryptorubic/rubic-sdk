@@ -13,7 +13,7 @@ import { AlgebraTrade } from 'src/features/on-chain/calculation-manager/provider
 import { UniswapV3AlgebraRoute } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
 import { UniswapV3AlgebraProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-provider-configuration';
 import { InsufficientLiquidityError, RubicSdkError } from 'src/common/errors';
-import { createTokenNativeAddressProxy } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/token-native-address-proxy';
+import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { getFromToTokensAmountsByExact } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { AbiItem } from 'web3-utils';
@@ -26,6 +26,7 @@ import { Exact } from 'src/features/on-chain/calculation-manager/providers/commo
 import { UniswapV3AlgebraCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-calculation-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { QuickSwapV3Trade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/quick-swap-v3-trade';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
@@ -51,12 +52,14 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         slippageTolerance: 0.02,
         deadlineMinutes: 20,
         gasCalculation: 'calculate',
-        disableMultihops: false
+        disableMultihops: false,
+        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS
     };
 
     protected abstract createTradeInstance(
         tradeStruct: UniswapV3AlgebraTradeStruct,
-        route: UniswapV3AlgebraRoute
+        route: UniswapV3AlgebraRoute,
+        providerAddress: string
     ): T;
 
     public async calculate(
@@ -143,7 +146,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             deadlineMinutes: fullOptions.deadlineMinutes
         };
         if (fullOptions.gasCalculation === 'disabled') {
-            return this.createTradeInstance(tradeStruct, route);
+            return this.createTradeInstance(tradeStruct, route, fullOptions.providerAddress);
         }
 
         const gasFeeInfo = this.getGasFeeInfo(estimatedGas, gasPriceInfo!);
@@ -152,7 +155,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
                 ...tradeStruct,
                 gasFeeInfo
             },
-            route
+            route,
+            fullOptions.providerAddress
         );
     }
 

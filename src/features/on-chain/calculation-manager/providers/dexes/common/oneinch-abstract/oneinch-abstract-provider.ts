@@ -4,7 +4,7 @@ import { OneinchQuoteResponse } from 'src/features/on-chain/calculation-manager/
 import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { OneinchTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/oneinch-trade';
 import { RubicSdkError } from 'src/common/errors';
-import { createTokenNativeAddressProxy } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/token-native-address-proxy';
+import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import {
     ON_CHAIN_TRADE_TYPE,
@@ -20,13 +20,15 @@ import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/pr
 import BigNumber from 'bignumber.js';
 import { OneinchCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-calculation-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
     private readonly defaultOptions: Omit<OneinchCalculationOptions, 'fromAddress'> = {
         gasCalculation: 'calculate',
         disableMultihops: false,
         slippageTolerance: 0.02,
-        wrappedAddress: oneinchApiParams.nativeAddress
+        wrappedAddress: oneinchApiParams.nativeAddress,
+        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS
     };
 
     protected readonly gasMargin = 1;
@@ -95,15 +97,18 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             data
         };
         if (fullOptions.gasCalculation === 'disabled') {
-            return new OneinchTrade(oneinchTradeStruct);
+            return new OneinchTrade(oneinchTradeStruct, fullOptions.providerAddress);
         }
 
         const gasPriceInfo = await this.getGasPriceInfo();
         const gasFeeInfo = this.getGasFeeInfo(estimatedGas, gasPriceInfo);
-        return new OneinchTrade({
-            ...oneinchTradeStruct,
-            gasFeeInfo
-        });
+        return new OneinchTrade(
+            {
+                ...oneinchTradeStruct,
+                gasFeeInfo
+            },
+            fullOptions.providerAddress
+        );
     }
 
     private async getTradeInfo(

@@ -187,8 +187,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         return estimatedGas.plus(this.to.isNative ? WETH_TO_ETH_ESTIMATED_GAS : 0);
     }
 
-    protected constructor(tradeStruct: UniswapV3AlgebraTradeStruct) {
-        super();
+    protected constructor(tradeStruct: UniswapV3AlgebraTradeStruct, providerAddress: string) {
+        super(providerAddress);
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;

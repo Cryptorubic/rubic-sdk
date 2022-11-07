@@ -18,10 +18,11 @@ import { combineOptions } from 'src/common/utils/options';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
+import { ProviderAddress } from 'src/core/sdk/models/provider-address';
 
-export type RequiredOnChainManagerCalculationOptions = MarkRequired<
+type RequiredOnChainManagerCalculationOptions = MarkRequired<
     OnChainManagerCalculationOptions,
-    'timeout' | 'disabledProviders'
+    'timeout' | 'disabledProviders' | 'providerAddress'
 >;
 
 /**
@@ -30,21 +31,14 @@ export type RequiredOnChainManagerCalculationOptions = MarkRequired<
 export class OnChainManager {
     public static readonly defaultCalculationTimeout = 10_000;
 
-    private static getFullOptions(
-        options?: OnChainManagerCalculationOptions
-    ): RequiredOnChainManagerCalculationOptions {
-        return combineOptions<RequiredOnChainManagerCalculationOptions>(options, {
-            timeout: OnChainManager.defaultCalculationTimeout,
-            disabledProviders: []
-        });
-    }
-
     /**
      * List of all on-chain trade providers, combined by blockchains.
      */
     public readonly tradeProviders: OnChainTypedTradeProviders = typedTradeProviders;
 
     public readonly lifiProvider = new LifiProvider();
+
+    public constructor(private readonly providerAddress: ProviderAddress) {}
 
     /**
      * Calculates on-chain trades, sorted by output amount.
@@ -99,7 +93,23 @@ export class OnChainManager {
             toToken
         );
 
-        return this.calculateTradeFromTokens(from, to, OnChainManager.getFullOptions(options));
+        return this.calculateTradeFromTokens(
+            from,
+            to,
+            this.getFullOptions(from.blockchain, options)
+        );
+    }
+
+    private getFullOptions(
+        fromBlockchain: BlockchainName,
+        options?: OnChainManagerCalculationOptions
+    ): RequiredOnChainManagerCalculationOptions {
+        const chainType = BlockchainsInfo.getChainType(fromBlockchain) as keyof ProviderAddress;
+        return combineOptions<RequiredOnChainManagerCalculationOptions>(options, {
+            timeout: OnChainManager.defaultCalculationTimeout,
+            disabledProviders: [],
+            providerAddress: this.providerAddress[chainType]
+        });
     }
 
     private async calculateTradeFromTokens(
@@ -187,7 +197,8 @@ export class OnChainManager {
             disabledProviders,
             {
                 slippageTolerance: options.slippageTolerance,
-                gasCalculation: options.gasCalculation === 'disabled' ? 'disabled' : 'calculate'
+                gasCalculation: options.gasCalculation === 'disabled' ? 'disabled' : 'calculate',
+                providerAddress: options.providerAddress
             }
         );
     }

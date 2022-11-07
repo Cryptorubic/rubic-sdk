@@ -1,4 +1,4 @@
-import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/token-native-address-proxy';
+import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/common/utils/token-native-address-proxy';
 import {
     ALGEBRA_SWAP_ROUTER_CONTRACT_ABI,
     ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS
@@ -38,8 +38,8 @@ export class AlgebraTrade extends UniswapV3AlgebraAbstractTrade {
 
     public readonly path: ReadonlyArray<Token>;
 
-    constructor(tradeStruct: AlgebraTradeStruct) {
-        super(tradeStruct);
+    constructor(tradeStruct: AlgebraTradeStruct, providerAddress: string) {
+        super(tradeStruct, providerAddress);
 
         this.route = tradeStruct.route;
 

@@ -33,11 +33,15 @@ export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider<AlgebraTra
 
     protected createTradeInstance(
         tradeStruct: UniswapV3AlgebraTradeStruct,
-        route: AlgebraRoute
+        route: AlgebraRoute,
+        providerAddress: string
     ): AlgebraTrade {
-        return new AlgebraTrade({
-            ...tradeStruct,
-            route
-        });
+        return new AlgebraTrade(
+            {
+                ...tradeStruct,
+                route
+            },
+            providerAddress
+        );
     }
 }

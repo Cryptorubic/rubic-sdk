@@ -115,7 +115,7 @@ export class SDK {
     }
 
     private constructor(providerAddress: ProviderAddress) {
-        this.onChainManager = new OnChainManager();
+        this.onChainManager = new OnChainManager(providerAddress);
         this.crossChainManager = new CrossChainManager(providerAddress);
         this.deflationTokenManager = new DeflationTokenManager();
         this.onChainStatusManager = new OnChainStatusManager();

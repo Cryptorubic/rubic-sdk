@@ -1,3 +1,5 @@
+import { MarkRequired } from 'ts-essentials';
+
 /**
  * Stores options for calculating trade.
  */
@@ -39,4 +41,11 @@ export interface OnChainCalculationOptions {
      * Wrapped native address.
      */
     readonly wrappedAddress?: string;
+
+    readonly providerAddress?: string;
 }
+
+export type RequiredOnChainCalculationOptions = MarkRequired<
+    OnChainCalculationOptions,
+    'slippageTolerance' | 'gasCalculation' | 'providerAddress'
+>;

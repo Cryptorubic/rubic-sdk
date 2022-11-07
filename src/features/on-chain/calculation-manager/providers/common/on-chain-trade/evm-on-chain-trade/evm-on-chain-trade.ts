@@ -165,7 +165,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
      * Encodes trade to swap it directly through dex contract.
      */
     // @todo update type TransactionConfig
-    protected abstract encodeDirect(options: EncodeTransactionOptions): Promise<TransactionConfig>;
+    public abstract encodeDirect(options: EncodeTransactionOptions): Promise<TransactionConfig>;
 
     protected getGasParams(options: OptionsGasParams): TransactionGasParams {
         // @todo add check on null

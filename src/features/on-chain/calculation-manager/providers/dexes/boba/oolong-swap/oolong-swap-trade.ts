@@ -1,7 +1,4 @@
-import {
-    UniswapV2AbstractTrade,
-    UniswapV2TradeStruct
-} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { UniswapV2AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { OOLONG_SWAP_CONTRACT_ADDRESS } from 'src/features/on-chain/calculation-manager/providers/dexes/boba/oolong-swap/constants';
 import {
     ON_CHAIN_TRADE_TYPE,
@@ -14,8 +11,4 @@ export class OolongSwapTrade extends UniswapV2AbstractTrade {
     }
 
     public readonly contractAddress = OOLONG_SWAP_CONTRACT_ADDRESS;
-
-    constructor(tradeStruct: UniswapV2TradeStruct) {
-        super(tradeStruct);
-    }
 }

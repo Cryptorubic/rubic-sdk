@@ -152,7 +152,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
         const methodArguments: unknown[] = [];
         if (this.onChainTrade) {
             const encodedData = (
-                await this.onChainTrade.encode({
+                await this.onChainTrade.encodeDirect({
                     fromAddress: options.fromAddress || this.walletAddress,
                     receiverAddress: this.fromContractAddress,
                     supportFee: false

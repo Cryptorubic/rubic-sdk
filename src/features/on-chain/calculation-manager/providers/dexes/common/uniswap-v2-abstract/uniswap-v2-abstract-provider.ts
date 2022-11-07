@@ -5,7 +5,7 @@ import { PathFactory } from 'src/features/on-chain/calculation-manager/providers
 import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { UniswapCalculatedInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
-import { createTokenNativeAddressProxy } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/token-native-address-proxy';
+import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/models/gas-price-info';
 import { combineOptions } from 'src/common/utils/options';
 import { UniswapV2AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
@@ -14,6 +14,7 @@ import BigNumber from 'bignumber.js';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
 import { UniswapV2CalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-calculation-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 export abstract class UniswapV2AbstractProvider<
     T extends UniswapV2AbstractTrade = UniswapV2AbstractTrade
@@ -32,7 +33,8 @@ export abstract class UniswapV2AbstractProvider<
         slippageTolerance: 0.02,
         deadlineMinutes: 20,
         gasCalculation: 'calculate',
-        disableMultihops: false
+        disableMultihops: false,
+        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS
     };
 
     protected readonly gasMargin = 1.2;
@@ -110,17 +112,20 @@ export abstract class UniswapV2AbstractProvider<
         const fromAmount = exact === 'input' ? weiAmount : route.outputAbsoluteAmount;
         const toAmount = exact === 'output' ? weiAmount : route.outputAbsoluteAmount;
 
-        const uniswapV2Trade: UniswapV2AbstractTrade = new this.UniswapV2TradeClass({
-            from: new PriceTokenAmount({
-                ...from.asStruct,
-                weiAmount: fromAmount
-            }),
-            to: new PriceTokenAmount({ ...to.asStruct, weiAmount: toAmount }),
-            exact,
-            wrappedPath: route.path,
-            deadlineMinutes: fullOptions.deadlineMinutes,
-            slippageTolerance: fullOptions.slippageTolerance
-        });
+        const uniswapV2Trade: UniswapV2AbstractTrade = new this.UniswapV2TradeClass(
+            {
+                from: new PriceTokenAmount({
+                    ...from.asStruct,
+                    weiAmount: fromAmount
+                }),
+                to: new PriceTokenAmount({ ...to.asStruct, weiAmount: toAmount }),
+                exact,
+                wrappedPath: route.path,
+                deadlineMinutes: fullOptions.deadlineMinutes,
+                slippageTolerance: fullOptions.slippageTolerance
+            },
+            fullOptions.providerAddress
+        );
 
         if (fullOptions.gasCalculation === 'disabled') {
             return uniswapV2Trade;

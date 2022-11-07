@@ -17,6 +17,7 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 
 interface LifiTransactionRequest {
     data: string;
@@ -35,17 +36,20 @@ export class LifiTrade extends EvmOnChainTrade {
         gasPrice: BigNumber;
     } | null> {
         try {
-            const transactionData = await new LifiTrade({
-                from,
-                to,
-                gasFeeInfo: null,
-                slippageTolerance: NaN,
-                contractAddress: '',
-                type: ON_CHAIN_TRADE_TYPE.ONE_INCH,
-                path: [],
-                route,
-                toTokenWeiAmountMin: new BigNumber(NaN)
-            }).getTransactionData();
+            const transactionData = await new LifiTrade(
+                {
+                    from,
+                    to,
+                    gasFeeInfo: null,
+                    slippageTolerance: NaN,
+                    contractAddress: '',
+                    type: ON_CHAIN_TRADE_TYPE.ONE_INCH,
+                    path: [],
+                    route,
+                    toTokenWeiAmountMin: new BigNumber(NaN)
+                },
+                EvmWeb3Pure.EMPTY_ADDRESS
+            ).getTransactionData();
 
             if (!transactionData.gasLimit || !transactionData.gasPrice) {
                 return null;
@@ -82,18 +86,21 @@ export class LifiTrade extends EvmOnChainTrade {
         return this._toTokenAmountMin;
     }
 
-    constructor(tradeStruct: {
-        from: PriceTokenAmount<EvmBlockchainName>;
-        to: PriceTokenAmount<EvmBlockchainName>;
-        gasFeeInfo: GasFeeInfo | null;
-        slippageTolerance: number;
-        contractAddress: string;
-        type: OnChainTradeType;
-        path: ReadonlyArray<Token>;
-        route: Route;
-        toTokenWeiAmountMin: BigNumber;
-    }) {
-        super();
+    constructor(
+        tradeStruct: {
+            from: PriceTokenAmount<EvmBlockchainName>;
+            to: PriceTokenAmount<EvmBlockchainName>;
+            gasFeeInfo: GasFeeInfo | null;
+            slippageTolerance: number;
+            contractAddress: string;
+            type: OnChainTradeType;
+            path: ReadonlyArray<Token>;
+            route: Route;
+            toTokenWeiAmountMin: BigNumber;
+        },
+        providerAddress: string
+    ) {
+        super(providerAddress);
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;

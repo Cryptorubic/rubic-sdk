@@ -1,7 +1,4 @@
-import {
-    UniswapV2AbstractTrade,
-    UniswapV2TradeStruct
-} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { UniswapV2AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { VIPER_SWAP_HARMONY_CONTRACT_ADDRESS } from 'src/features/on-chain/calculation-manager/providers/dexes/harmony/viper-swap-harmony/constants';
 import {
     ON_CHAIN_TRADE_TYPE,
@@ -14,8 +11,4 @@ export class ViperSwapHarmonyTrade extends UniswapV2AbstractTrade {
     }
 
     public readonly contractAddress = VIPER_SWAP_HARMONY_CONTRACT_ADDRESS;
-
-    constructor(tradeStruct: UniswapV2TradeStruct) {
-        super(tradeStruct);
-    }
 }

@@ -74,7 +74,7 @@ export abstract class OnChainTrade {
         return this.from.calculatePriceImpactPercent(this.to);
     }
 
-    protected constructor() {}
+    protected constructor(protected readonly providerAddress: string) {}
 
     /**
      * Returns true, if allowance is not enough.
@@ -107,6 +107,21 @@ export abstract class OnChainTrade {
     ): Promise<unknown>;
 
     /**
+     * Builds encoded approve transaction config.
+     * @param tokenAddress Address of the smart-contract corresponding to the token.
+     * @param spenderAddress Wallet or contract address to approve.
+     * @param value Token amount to approve in wei.
+     * @param [options] Additional options.
+     * @returns Encoded approve transaction config.
+     */
+    public abstract encodeApprove(
+        tokenAddress: string,
+        spenderAddress: string,
+        value: BigNumber | 'infinity',
+        options: BasicTransactionOptions
+    ): Promise<unknown>;
+
+    /**
      * Sends swap transaction with connected wallet.
      * If user has not enough allowance, then approve transaction will be called first.
      *
@@ -125,21 +140,6 @@ export abstract class OnChainTrade {
      * @param options Encode transaction options.
      */
     public abstract encode(options: EncodeTransactionOptions): Promise<unknown>;
-
-    /**
-     * Builds encoded approve transaction config.
-     * @param tokenAddress Address of the smart-contract corresponding to the token.
-     * @param spenderAddress Wallet or contract address to approve.
-     * @param value Token amount to approve in wei.
-     * @param [options] Additional options.
-     * @returns Encoded approve transaction config.
-     */
-    public abstract encodeApprove(
-        tokenAddress: string,
-        spenderAddress: string,
-        value: BigNumber | 'infinity',
-        options: BasicTransactionOptions
-    ): Promise<unknown>;
 
     protected async checkWalletState(): Promise<void> {
         this.checkWalletConnected();

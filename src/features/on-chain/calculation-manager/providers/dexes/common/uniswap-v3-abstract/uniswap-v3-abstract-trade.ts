@@ -1,5 +1,5 @@
 import { UniswapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
-import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/token-native-address-proxy';
+import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/common/utils/token-native-address-proxy';
 import {
     UniswapV3AlgebraAbstractTrade,
     UniswapV3AlgebraTradeStruct
@@ -65,8 +65,8 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
         return createTokenNativeAddressProxyInPathStartAndEnd(path, EvmWeb3Pure.nativeTokenAddress);
     }
 
-    protected constructor(tradeStruct: UniswapV3TradeStruct) {
-        super(tradeStruct);
+    public constructor(tradeStruct: UniswapV3TradeStruct, providerAddress: string) {
+        super(tradeStruct, providerAddress);
 
         this.route = tradeStruct.route;
     }

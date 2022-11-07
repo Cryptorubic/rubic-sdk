@@ -39,11 +39,15 @@ export abstract class UniswapV3AbstractProvider<
 
     protected createTradeInstance(
         tradeStruct: UniswapV3AlgebraTradeStruct,
-        route: UniswapV3Route
+        route: UniswapV3Route,
+        providerAddress: string
     ): T {
-        return new this.OnChainTradeClass({
-            ...tradeStruct,
-            route
-        });
+        return new this.OnChainTradeClass(
+            {
+                ...tradeStruct,
+                route
+            },
+            providerAddress
+        );
     }
 }

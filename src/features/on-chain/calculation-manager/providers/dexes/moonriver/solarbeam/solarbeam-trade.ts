@@ -2,10 +2,7 @@ import {
     SOLARBEAM_CONTRACT_ABI,
     SOLARBEAM_CONTRACT_ADDRESS
 } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/solarbeam/constants';
-import {
-    UniswapV2AbstractTrade,
-    UniswapV2TradeStruct
-} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { UniswapV2AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
@@ -39,8 +36,4 @@ export class SolarbeamTrade extends UniswapV2AbstractTrade {
     private static readonly feeParameter = '25';
 
     public readonly contractAddress = SOLARBEAM_CONTRACT_ADDRESS;
-
-    constructor(tradeStruct: UniswapV2TradeStruct) {
-        super(tradeStruct);
-    }
 }

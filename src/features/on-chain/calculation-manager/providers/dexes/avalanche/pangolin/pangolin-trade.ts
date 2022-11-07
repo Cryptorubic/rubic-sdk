@@ -1,7 +1,4 @@
-import {
-    UniswapV2AbstractTrade,
-    UniswapV2TradeStruct
-} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { UniswapV2AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { PANGOLIN_CONTRACT_ADDRESS } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/pangolin/constants';
 import { AVAX_ABI } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/avax-abi';
 import { AVALANCHE_SWAP_METHOD } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/swap-methods';
@@ -20,8 +17,4 @@ export class PangolinTrade extends UniswapV2AbstractTrade {
     }
 
     public readonly contractAddress = PANGOLIN_CONTRACT_ADDRESS;
-
-    constructor(tradeStruct: UniswapV2TradeStruct) {
-        super(tradeStruct);
-    }
 }

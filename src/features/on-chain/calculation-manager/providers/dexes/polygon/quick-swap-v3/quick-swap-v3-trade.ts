@@ -1,4 +1,4 @@
-import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/token-native-address-proxy';
+import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/common/utils/token-native-address-proxy';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import {
     UniswapV3AlgebraAbstractTrade,
@@ -38,8 +38,8 @@ export class QuickSwapV3Trade extends UniswapV3AlgebraAbstractTrade {
 
     public readonly path: ReadonlyArray<Token>;
 
-    constructor(tradeStruct: QuickSwapV3TradeStruct) {
-        super(tradeStruct);
+    constructor(tradeStruct: QuickSwapV3TradeStruct, providerAddress: string) {
+        super(tradeStruct, providerAddress);
 
         this.route = tradeStruct.route;
 

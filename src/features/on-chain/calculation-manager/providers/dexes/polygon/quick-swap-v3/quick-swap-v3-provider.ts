@@ -40,11 +40,15 @@ export class QuickSwapV3Provider extends UniswapV3AlgebraAbstractProvider<QuickS
 
     protected createTradeInstance(
         tradeStruct: UniswapV3AlgebraTradeStruct,
-        route: QuickSwapV3Route
+        route: QuickSwapV3Route,
+        providerAddress: string
     ): QuickSwapV3Trade {
-        return new QuickSwapV3Trade({
-            ...tradeStruct,
-            route
-        });
+        return new QuickSwapV3Trade(
+            {
+                ...tradeStruct,
+                route
+            },
+            providerAddress
+        );
     }
 }
