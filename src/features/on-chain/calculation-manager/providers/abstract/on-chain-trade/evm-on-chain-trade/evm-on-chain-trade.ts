@@ -6,7 +6,10 @@ import { Injector } from 'src/core/injector/injector';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { TransactionReceipt } from 'web3-eth';
-import { UnnecessaryApproveError } from 'src/common/errors';
+import {
+    FailedToCheckForTransactionReceiptError,
+    UnnecessaryApproveError
+} from 'src/common/errors';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import BigNumber from 'bignumber.js';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
@@ -17,6 +20,11 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/models/gas-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import {
+    onChainProxyContractAbi,
+    onChainProxyContractAddress
+} from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/constants/on-chain-proxy-contract';
+import { parseError } from 'src/common/utils/errors';
 
 export abstract class EvmOnChainTrade extends OnChainTrade {
     public abstract readonly from: PriceTokenAmount<EvmBlockchainName>;
@@ -64,6 +72,15 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         );
     }
 
+    public async encodeApprove(
+        tokenAddress: string,
+        spenderAddress: string,
+        value: BigNumber | 'infinity',
+        options: EvmTransactionOptions = {}
+    ): Promise<TransactionConfig> {
+        return this.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
+    }
+
     protected async checkAllowanceAndApprove(
         options?: Omit<SwapTransactionOptions, 'onConfirm' | 'gasLimit'>
     ): Promise<void> {
@@ -81,20 +98,77 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         await this.approve(approveOptions, false);
     }
 
-    public abstract swap(options?: SwapTransactionOptions): Promise<string | never>;
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        await this.checkWalletState();
+        await this.checkAllowanceAndApprove(options);
 
-    public abstract encode(options: EncodeTransactionOptions): Promise<TransactionConfig>;
+        const { onConfirm } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
 
-    public async encodeApprove(
-        tokenAddress: string,
-        spenderAddress: string,
-        value: BigNumber | 'infinity',
-        options: EvmTransactionOptions = {}
-    ): Promise<TransactionConfig> {
-        return this.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
+        const receiverAddress = options.receiverAddress || this.walletAddress;
+        const txConfig = await this.encodeDirect({
+            fromAddress: this.walletAddress,
+            receiverAddress
+        });
+        const { gas, gasPrice } = txConfig;
+
+        const contractAddress = onChainProxyContractAddress[this.from.blockchain];
+        const methodName = this.from.isNative ? 'instantTradeNative' : 'instantTrade';
+        const methodArguments = this.getProxyMethodArguments(receiverAddress, txConfig.data!);
+        const value = this.from.isNative ? this.from.stringWeiAmount : '0';
+
+        try {
+            await this.web3Private.tryExecuteContractMethod(
+                contractAddress,
+                onChainProxyContractAbi,
+                methodName,
+                methodArguments,
+                { onTransactionHash, value, gas, gasPrice: gasPrice as string }
+            );
+
+            return transactionHash!;
+        } catch (err) {
+            if (err instanceof FailedToCheckForTransactionReceiptError) {
+                return transactionHash!;
+            }
+            throw parseError(err);
+        }
     }
 
+    public async encode(_options: EncodeTransactionOptions): Promise<TransactionConfig> {
+        // @todo
+        return {} as TransactionConfig;
+    }
+
+    private getProxyMethodArguments(receiverAddress: string, data: string): unknown[] {
+        return [
+            [
+                this.from.address,
+                this.from.stringWeiAmount,
+                this.to.address,
+                this.toTokenAmountMin.stringWeiAmount,
+                receiverAddress,
+                // this.providerAddress, todo
+                this.contractAddress
+            ],
+            data
+        ];
+    }
+
+    /**
+     * Encodes trade to swap it directly through dex contract.
+     */
+    // @todo update type TransactionConfig
+    protected abstract encodeDirect(options: EncodeTransactionOptions): Promise<TransactionConfig>;
+
     protected getGasParams(options: OptionsGasParams): TransactionGasParams {
+        // @todo add check on null
         return {
             gas: options.gasLimit || this.gasFeeInfo?.gasLimit?.toFixed(),
             gasPrice: options.gasPrice || this.gasFeeInfo?.gasPrice?.toFixed()

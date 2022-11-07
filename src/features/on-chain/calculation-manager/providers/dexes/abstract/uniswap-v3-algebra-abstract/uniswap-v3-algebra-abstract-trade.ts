@@ -20,7 +20,6 @@ import { Exact } from 'src/features/on-chain/calculation-manager/providers/abstr
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
 import BigNumber from 'bignumber.js';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 export interface UniswapV3AlgebraTradeStruct {
@@ -214,24 +213,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
      */
     protected abstract getSwapRouterExactInputMethodData(walletAddress: string): MethodData;
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        await this.checkWalletState();
-        this.checkReceiverAddress(options.receiverAddress);
-
-        await this.checkAllowanceAndApprove(options);
-
-        const { data, value, gas, gasPrice } = await this.encode({
-            fromAddress: this.walletAddress
-        });
-
-        if (!data || !value) {
-            throw new RubicSdkError('Cant create trade.');
-        }
-
-        return this.createProxyTrade(options, data, value.toString(), gas, gasPrice?.toString());
-    }
-
-    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encodeDirect(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         this.checkFromAddress(options.fromAddress, true);
         this.checkReceiverAddress(options.receiverAddress);
 

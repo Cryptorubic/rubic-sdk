@@ -5,8 +5,6 @@ import {
     WrongFromAddressError,
     WrongReceiverAddressError
 } from 'src/common/errors';
-import { parseError } from 'src/common/utils/errors';
-
 import { Injector } from 'src/core/injector/injector';
 import { Cache } from 'src/common/utils/decorators';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
@@ -188,9 +186,5 @@ export abstract class OnChainTrade {
         if (!isAddressCorrect(receiverAddress, this.to.blockchain)) {
             throw new WrongReceiverAddressError();
         }
-    }
-
-    protected parseError(err: unknown): RubicSdkError {
-        return parseError(err, 'Cannot calculate instant trade');
     }
 }

@@ -28,6 +28,7 @@ interface GetQuoterMethodsDataOptions {
 /**
  * Works with requests, related to Uniswap v3 liquidity pools.
  */
+// @todo rename
 export class AbstractAlgebraQuoterController implements UniswapV3AlgebraQuoterController {
     private routerTokens: Token[] | undefined;
 

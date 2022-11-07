@@ -29,6 +29,7 @@ import BigNumber from 'bignumber.js';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { parseError } from 'src/common/utils/errors';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount<EvmBlockchainName>;
@@ -188,38 +189,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         return { amountIn, amountOut };
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        await this.checkWalletState();
-        this.checkReceiverAddress(options.receiverAddress);
-
-        await this.checkAllowanceAndApprove(options);
-
-        return this.createAnyToAnyTrade(options);
-    }
-
-    private async createAnyToAnyTrade(options: SwapTransactionOptions): Promise<string | never> {
-        const {
-            data,
-            value: sourceValue,
-            gas,
-            gasPrice
-        } = await this.encode({
-            fromAddress: this.walletAddress
-        });
-        if (!data || !sourceValue) {
-            // @TODO fix
-            throw new RubicSdkError('Cant create trade');
-        }
-        return this.createProxyTrade(
-            options,
-            data,
-            sourceValue.toString(),
-            gas,
-            gasPrice?.toString()
-        );
-    }
-
-    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encodeDirect(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         this.checkFromAddress(options.fromAddress, true);
         this.checkReceiverAddress(options.receiverAddress);
 
@@ -307,7 +277,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
             return this.supportedFeeSwapMethod;
         }
 
-        throw this.parseError(regularMethodResult.error);
+        throw parseError(regularMethodResult.error);
     }
 
     private getSwapParametersByMethod(

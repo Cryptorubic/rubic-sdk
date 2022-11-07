@@ -16,7 +16,6 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 interface LifiTransactionRequest {
@@ -110,39 +109,7 @@ export class LifiTrade extends EvmOnChainTrade {
         this.route = tradeStruct.route;
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        if (options?.receiverAddress) {
-            throw new UnsupportedReceiverAddressError();
-        }
-
-        await this.checkWalletState();
-        await this.checkAllowanceAndApprove(options);
-
-        try {
-            const { data, gasLimit, gasPrice } = await this.getTransactionData();
-
-            const receipt = await this.createProxyTrade(
-                options,
-                data,
-                this.from.isNative ? this.from.stringWeiAmount : '0',
-                options.gasLimit || gasLimit,
-                options.gasPrice || gasPrice
-            );
-            return receipt.transactionHash;
-        } catch (err) {
-            if ([400, 500, 503].includes(err.code)) {
-                throw new SwapRequestError();
-            }
-
-            if (err instanceof RubicSdkError) {
-                throw err;
-            }
-
-            throw new LifiPairIsUnavailableError();
-        }
-    }
-
-    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encodeDirect(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         if (options?.receiverAddress) {
             throw new UnsupportedReceiverAddressError();
         }
@@ -159,7 +126,13 @@ export class LifiTrade extends EvmOnChainTrade {
                 gasPrice: options.gasPrice || gasPrice
             };
         } catch (err) {
-            throw this.parseError(err);
+            if ([400, 500, 503].includes(err.code)) {
+                throw new SwapRequestError();
+            }
+            if (err instanceof RubicSdkError) {
+                throw err;
+            }
+            throw new LifiPairIsUnavailableError();
         }
     }
 

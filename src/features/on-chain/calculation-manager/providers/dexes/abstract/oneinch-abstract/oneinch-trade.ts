@@ -27,8 +27,8 @@ import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/prov
 import { Cache } from 'src/common/utils/decorators';
 import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/oneinch-abstract/models/oneinch-swap-request';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { parseError } from 'src/common/utils/errors';
 
 type OneinchTradeStruct = {
     contractAddress: string;
@@ -54,7 +54,6 @@ export class OneinchTrade extends EvmOnChainTrade {
         }
     }
 
-    /** @internal */
     public readonly contractAddress: string;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
@@ -119,59 +118,7 @@ export class OneinchTrade extends EvmOnChainTrade {
         );
     }
 
-    public async needApprove(): Promise<boolean> {
-        this.checkWalletConnected();
-
-        if (this.nativeSupportedFrom.isNative) {
-            return false;
-        }
-
-        const allowance = await this.web3Public.getAllowance(
-            this.nativeSupportedFrom.address,
-            this.walletAddress,
-            this.commonContractAddress
-        );
-
-        return allowance.lt(this.nativeSupportedFrom.weiAmount);
-    }
-
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        await this.checkWalletState();
-        this.checkReceiverAddress(options.receiverAddress);
-
-        await this.checkAllowanceAndApprove(options);
-
-        try {
-            const apiTradeData = await this.getTradeData(
-                false,
-                undefined,
-                options.receiverAddress
-            ).catch(err => {
-                throw new Error(err?.response?.data?.description || err.message);
-            });
-
-            const { gas, gasPrice } = this.getGasParamsFromApiTradeData(options, apiTradeData);
-            const value = this.nativeSupportedFrom.isNative
-                ? this.nativeSupportedFrom.stringWeiAmount
-                : '0';
-
-            const receipt = await this.createProxyTrade(options, apiTradeData.tx.data, value, gas, gasPrice);
-            return receipt.transactionHash;
-        } catch (err) {
-            const inchSpecificError = this.specifyError(err);
-            if (inchSpecificError) {
-                throw inchSpecificError;
-            }
-
-            if ([400, 500, 503].includes(err.code)) {
-                throw new SwapRequestError();
-            }
-
-            throw this.parseError(err);
-        }
-    }
-
-    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encodeDirect(options: EncodeTransactionOptions): Promise<TransactionConfig> {
         this.checkFromAddress(options.fromAddress, true);
         this.checkReceiverAddress(options.receiverAddress);
 
@@ -193,11 +140,14 @@ export class OneinchTrade extends EvmOnChainTrade {
             if (inchSpecificError) {
                 throw inchSpecificError;
             }
-            throw new RubicSdkError(err.message || err.toString());
+            if ([400, 500, 503].includes(err.code)) {
+                throw new SwapRequestError();
+            }
+            throw parseError(err, err?.response?.data?.description || err.message);
         }
     }
 
-    public getTradeData(
+    private getTradeData(
         disableEstimate = false,
         fromAddress?: string,
         receiverAddress?: string
