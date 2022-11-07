@@ -1,4 +1,6 @@
 import { MarkRequired } from 'ts-essentials';
+import { LifiBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
+import { RangoBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/models/rango-bridge-types';
 
 export interface CrossChainOptions {
     /**
@@ -49,6 +51,10 @@ export interface CrossChainOptions {
      * Timeout for each cross-chain provider. Calculation for provider is cancelled, after timeout is passed.
      */
     timeout?: number;
+
+    rangoDisabledBridgeTypes?: RangoBridgeTypes[];
+
+    lifiDisabledBridgeTypes?: LifiBridgeTypes[];
 }
 
 export type RequiredCrossChainOptions = MarkRequired<

@@ -21,6 +21,7 @@ import { RANGO_BLOCKCHAIN_NAME } from 'src/features/cross-chain/calculation-mana
 import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
 import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
 import { RANGO_CONTRACT_ADDRESSES } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/contract-address';
+import { RangoBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/models/rango-bridge-types';
 
 export class RangoCrossChainTrade extends EvmCrossChainTrade {
     /**  @internal */
@@ -60,7 +61,8 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
                         gasData: {
                             gasLimit: new BigNumber(0),
                             gasPrice: new BigNumber(0)
-                        }
+                        },
+                        allowedSwappers: undefined
                     },
                     new RangoClient(RANGO_API_KEY),
                     EvmWeb3Pure.EMPTY_ADDRESS
@@ -122,6 +124,8 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly cryptoFeeToken: PriceTokenAmount;
 
+    private readonly allowedSwappers: RangoBridgeTypes[] | undefined;
+
     public get fromBlockchain(): RangoCrossChainSupportedBlockchain {
         return this.from.blockchain as RangoCrossChainSupportedBlockchain;
     }
@@ -142,6 +146,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             priceImpact: number | null;
             cryptoFeeToken: PriceTokenAmount;
             gasData: GasData | null;
+            allowedSwappers: RangoBridgeTypes[] | undefined;
         },
         rangoClientRef: RangoClient,
         providerAddress: string
@@ -157,6 +162,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         this.priceImpact = crossChainTrade.priceImpact;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.gasData = crossChainTrade.gasData;
+        this.allowedSwappers = crossChainTrade.allowedSwappers;
 
         this.rangoClientRef = rangoClientRef;
     }
@@ -229,7 +235,8 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             fromAddress: this.walletAddress,
             toAddress: this.walletAddress,
             referrerAddress: null,
-            referrerFee: null
+            referrerFee: null,
+            swappers: this.allowedSwappers
         });
         this.requestId = response.requestId;
 
