@@ -94,7 +94,7 @@ export class ViaCrossChainProvider extends CrossChainProvider {
             });
             const routes = wrappedRoutes.routes.filter(route => this.parseBridge(route));
             if (!routes.length) {
-                return { trade: null, error: new RubicSdkError('No available routs') };
+                return { trade: null, error: new RubicSdkError('No available routes') };
             }
 
             const [fromTokenPrice, nativeTokenPrice] = await this.getTokensPrice(fromBlockchain, [
