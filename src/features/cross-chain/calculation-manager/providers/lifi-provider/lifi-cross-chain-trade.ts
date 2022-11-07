@@ -4,7 +4,7 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import {
     BRIDGE_TYPE,
     BridgeType

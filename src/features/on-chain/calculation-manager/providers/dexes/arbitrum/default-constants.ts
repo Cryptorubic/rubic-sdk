@@ -1,4 +1,4 @@
-import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultArbitrumRoutingProvidersAddresses = [
     '0x82af49447d8a07e3bd95bd0d56f35241523fbab1', // WETH

@@ -1,4 +1,4 @@
-import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultAvalancheRoutingProvidersAddresses = [
     '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7', // WAVAX

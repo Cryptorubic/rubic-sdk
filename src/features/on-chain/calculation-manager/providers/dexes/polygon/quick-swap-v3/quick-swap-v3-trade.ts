@@ -1,13 +1,13 @@
-import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/utils/token-native-address-proxy';
+import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/token-native-address-proxy';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import {
     UniswapV3AlgebraAbstractTrade,
     UniswapV3AlgebraTradeStruct
-} from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
+} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { Token } from 'src/common/tokens';
 import { QuickSwapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/models/quick-swap-v3-route';
@@ -15,7 +15,7 @@ import {
     QUICK_SWAP_V3_ROUTER_CONTRACT_ABI,
     QUICK_SWAP_V3_ROUTER_CONTRACT_ADDRESS
 } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/constants/swap-router-contract-data';
-import { AbstractAlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/algebra/abstract-algebra-quoter-controller';
+import { AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/algebra/algebra-quoter-controller';
 
 export interface QuickSwapV3TradeStruct extends UniswapV3AlgebraTradeStruct {
     route: QuickSwapV3Route;
@@ -80,7 +80,7 @@ export class QuickSwapV3Trade extends UniswapV3AlgebraAbstractTrade {
             methodName,
             methodArguments: [
                 [
-                    AbstractAlgebraQuoterController.getEncodedPath(this.route.path),
+                    AlgebraQuoterController.getEncodedPath(this.route.path),
                     walletAddress,
                     this.deadlineMinutesTimestamp,
                     ...amountParams

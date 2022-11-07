@@ -1,16 +1,16 @@
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/models/on-chain-calculation-options';
+import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { TronOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/on-chain-provider/tron-on-chain-provider/tron-on-chain-provider';
+import { TronOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/tron-on-chain-provider/tron-on-chain-provider';
 import { BridgersTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/tron/bridgers/bridgers-trade';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
-import { createTokenNativeAddressProxy } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/utils/token-native-address-proxy';
+import { createTokenNativeAddressProxy } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/token-native-address-proxy';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
-import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/on-chain-provider/on-chain-provider';
+import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
 import { BridgersPairIsUnavailableError, MaxAmountError, MinAmountError } from 'src/common/errors';
 import BigNumber from 'bignumber.js';
 import { BridgersCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/tron/bridgers/models/bridgers-calculation-options';

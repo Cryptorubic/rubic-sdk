@@ -1,4 +1,4 @@
-import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultBscRoutingProvidersAddresses = [
     '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c', // WBNB

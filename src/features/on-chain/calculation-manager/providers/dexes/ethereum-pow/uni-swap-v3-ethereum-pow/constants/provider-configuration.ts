@@ -1,4 +1,4 @@
-import { UniswapV3AlgebraProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-provider-configuration';
+import { UniswapV3AlgebraProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-provider-configuration';
 
 export const UNI_SWAP_V3_ETHEREUM_POW_PROVIDER_CONFIGURATION: UniswapV3AlgebraProviderConfiguration =
     {

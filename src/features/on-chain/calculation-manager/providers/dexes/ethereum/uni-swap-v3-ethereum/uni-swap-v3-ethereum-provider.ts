@@ -1,4 +1,4 @@
-import { UniswapV3AbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v3-abstract/uniswap-v3-abstract-provider';
+import { UniswapV3AbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-provider';
 import { UNI_SWAP_V3_ETHEREUM_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/uni-swap-v3-ethereum/constants/provider-configuration';
 import { UNI_SWAP_V3_ETHEREUM_ROUTER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/uni-swap-v3-ethereum/constants/router-configuration';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';

@@ -1,4 +1,4 @@
-import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultFantomRoutingProvidersAddresses = [
     '0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83', // wFTM

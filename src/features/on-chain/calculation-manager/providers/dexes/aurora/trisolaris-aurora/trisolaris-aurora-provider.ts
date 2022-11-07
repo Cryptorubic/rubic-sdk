@@ -1,5 +1,5 @@
 import { TrisolarisAuroraTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/aurora/trisolaris-aurora/trisolaris-aurora-trade';
-import { UniswapV2AbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v2-abstract/uniswap-v2-abstract-provider';
+import { UniswapV2AbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { TRISOLARIS_AURORA_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/aurora/trisolaris-aurora/constants';
 

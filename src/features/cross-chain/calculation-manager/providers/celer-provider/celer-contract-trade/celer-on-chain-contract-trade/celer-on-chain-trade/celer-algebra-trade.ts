@@ -6,7 +6,7 @@ import { DestinationCelerSwapInfo } from 'src/features/cross-chain/calculation-m
 import { SwapVersion } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/models/provider-type.enum';
 import { v3LikeCelerSwapInfo } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/models/v3-like-celer-swap-info';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { AbstractAlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/algebra/abstract-algebra-quoter-controller';
+import { AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/algebra/algebra-quoter-controller';
 
 export class CelerAlgebraTrade implements CelerOnChainTrade {
     readonly defaultDeadline = 999999999999999;
@@ -14,7 +14,7 @@ export class CelerAlgebraTrade implements CelerOnChainTrade {
     constructor(private readonly algebraTrade: AlgebraTrade) {}
 
     public getFirstPath(): string {
-        return AbstractAlgebraQuoterController.getEncodedPath(Array.from(this.algebraTrade.path));
+        return AlgebraQuoterController.getEncodedPath(Array.from(this.algebraTrade.path));
     }
 
     public getSecondPath(): string[] {

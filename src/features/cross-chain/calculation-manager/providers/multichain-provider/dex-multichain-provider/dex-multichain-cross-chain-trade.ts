@@ -16,7 +16,7 @@ import { multichainProxyContractAddress } from 'src/features/cross-chain/calcula
 import { MultichainProxyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/models/supported-blockchain';
 import { multichainProxyContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-abi';
 import { ItType } from 'src/features/cross-chain/calculation-manager/providers/common/models/it-type';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
     /** @internal */

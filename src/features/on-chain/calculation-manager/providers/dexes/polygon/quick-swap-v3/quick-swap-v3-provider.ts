@@ -1,10 +1,10 @@
-import { UniswapV3AlgebraAbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
-import { UniswapV3AlgebraTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
+import { UniswapV3AlgebraAbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
+import { UniswapV3AlgebraTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 import { QuickSwapV3Trade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/quick-swap-v3-trade';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import {
     QUICK_SWAP_V3_ROUTER_CONTRACT_ABI,
@@ -12,7 +12,7 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/constants/swap-router-contract-data';
 import { QUICK_SWAP_V3_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/constants/provider-configuration';
 import { QuickSwapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/models/quick-swap-v3-route';
-import { AbstractAlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/algebra/abstract-algebra-quoter-controller';
+import { AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/algebra/algebra-quoter-controller';
 import {
     QUICK_SWAP_V3_QUOTER_CONTRACT_ABI,
     QUICK_SWAP_V3_QUOTER_CONTRACT_ADDRESS
@@ -27,7 +27,7 @@ export class QuickSwapV3Provider extends UniswapV3AlgebraAbstractProvider<QuickS
 
     protected readonly OnChainTradeClass = QuickSwapV3Trade;
 
-    protected readonly quoterController = new AbstractAlgebraQuoterController(
+    protected readonly quoterController = new AlgebraQuoterController(
         QUICK_SWAP_V3_QUOTER_CONTRACT_ABI,
         QUICK_SWAP_V3_QUOTER_CONTRACT_ADDRESS
     );

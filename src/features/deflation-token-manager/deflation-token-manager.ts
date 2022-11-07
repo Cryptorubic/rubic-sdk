@@ -11,16 +11,16 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { OnChainManager } from 'src/features/on-chain/calculation-manager/on-chain-manager';
-import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/on-chain-trade';
-import { defaultUniswapV2Abi } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v2-abstract/constants/uniswap-v2-abi';
+import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
+import { defaultUniswapV2Abi } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi';
 import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/lifi/lifi-trade';
 import {
     isAlgebraTrade,
     isUniswapV3LikeTrade
 } from 'src/features/on-chain/calculation-manager/utils/type-guards';
 import { CelerCrossChainSupportedBlockchain } from '../cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
-import { OneinchTrade } from '../on-chain/calculation-manager/providers/dexes/abstract/oneinch-abstract/oneinch-trade';
-import { UniswapV2AbstractTrade } from '../on-chain/calculation-manager/providers/dexes/abstract/uniswap-v2-abstract/uniswap-v2-abstract-trade';
+import { OneinchTrade } from '../on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/oneinch-trade';
+import { UniswapV2AbstractTrade } from '../on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { simulatorContractAbi } from './constants/simulator-contract-abi';
 import { simulatorContractAddress } from './constants/simulator-contract-address';
 

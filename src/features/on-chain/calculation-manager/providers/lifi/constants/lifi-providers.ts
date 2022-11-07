@@ -1,7 +1,7 @@
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 export const lifiProviders: Record<string, OnChainTradeType> = {
     '0x': ON_CHAIN_TRADE_TYPE.ZRX,

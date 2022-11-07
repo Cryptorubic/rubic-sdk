@@ -2,7 +2,7 @@ import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typ
 import Web3 from 'web3';
 import { staticImplements } from 'src/common/utils/decorators';
 import { AbiItem, fromAscii, isAddress, toChecksumAddress } from 'web3-utils';
-import { TransactionGasParams } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/models/gas-params';
+import { TransactionGasParams } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-params';
 import { TransactionConfig } from 'web3-core';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { RubicSdkError } from 'src/common/errors';
