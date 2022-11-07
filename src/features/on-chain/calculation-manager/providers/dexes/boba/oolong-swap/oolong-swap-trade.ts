@@ -10,5 +10,5 @@ export class OolongSwapTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.OOLONG_SWAP;
     }
 
-    public readonly contractAddress = OOLONG_SWAP_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = OOLONG_SWAP_CONTRACT_ADDRESS;
 }

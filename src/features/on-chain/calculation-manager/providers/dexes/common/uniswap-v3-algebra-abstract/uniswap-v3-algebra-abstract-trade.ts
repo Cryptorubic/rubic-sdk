@@ -223,7 +223,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         const gasParams = this.getGasParams(options);
 
         return EvmWeb3Pure.encodeMethodCall(
-            this.contractAddress,
+            this.dexContractAddress,
             this.contractAbi,
             methodName,
             methodArguments,

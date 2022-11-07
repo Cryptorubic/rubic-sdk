@@ -22,7 +22,7 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import {
     onChainProxyContractAbi,
     onChainProxyContractAddress
-} from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/constants/on-chain-proxy-contract';
+} from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
 import { parseError } from 'src/common/utils/errors';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
@@ -36,6 +36,12 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
      * Gas fee info, including gas limit and gas price.
      */
     public abstract gasFeeInfo: GasFeeInfo | null;
+
+    public abstract readonly dexContractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
+
+    public get contractAddress(): string {
+        return onChainProxyContractAddress[this.from.blockchain];
+    }
 
     protected get web3Public(): EvmWeb3Public {
         return Injector.web3PublicService.getWeb3Public(this.from.blockchain);
@@ -85,7 +91,6 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     protected async checkAllowanceAndApprove(
         options?: Omit<SwapTransactionOptions, 'onConfirm' | 'gasLimit'>
     ): Promise<void> {
-        // @todo update contractAddress to dexContractAddress
         const needApprove = await this.needApprove();
         if (!needApprove) {
             return;
@@ -159,7 +164,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 this.toTokenAmountMin.stringWeiAmount,
                 receiverAddress,
                 this.providerAddress,
-                this.contractAddress
+                this.dexContractAddress
             ],
             data
         ];

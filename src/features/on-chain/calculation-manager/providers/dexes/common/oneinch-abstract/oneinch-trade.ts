@@ -29,7 +29,7 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 type OneinchTradeStruct = {
-    contractAddress: string;
+    dexContractAddress: string;
     from: PriceTokenAmount<EvmBlockchainName>;
     to: PriceTokenAmount<EvmBlockchainName>;
     slippageTolerance: number;
@@ -55,7 +55,7 @@ export class OneinchTrade extends EvmOnChainTrade {
         }
     }
 
-    public readonly contractAddress: string;
+    public readonly dexContractAddress: string;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
@@ -97,7 +97,7 @@ export class OneinchTrade extends EvmOnChainTrade {
     constructor(oneinchTradeStruct: OneinchTradeStruct, providerAddress: string) {
         super(providerAddress);
 
-        this.contractAddress = oneinchTradeStruct.contractAddress;
+        this.dexContractAddress = oneinchTradeStruct.dexContractAddress;
         this.from = oneinchTradeStruct.from;
         this.to = oneinchTradeStruct.to;
         this.nativeSupportedFrom = createTokenNativeAddressProxy(

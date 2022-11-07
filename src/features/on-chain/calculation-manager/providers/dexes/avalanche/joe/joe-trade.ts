@@ -16,5 +16,5 @@ export class JoeTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.JOE;
     }
 
-    public readonly contractAddress = JOE_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = JOE_CONTRACT_ADDRESS;
 }

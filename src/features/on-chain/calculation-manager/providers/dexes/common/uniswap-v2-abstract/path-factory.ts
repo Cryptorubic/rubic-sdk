@@ -114,7 +114,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             if (this.walletAddress) {
                 const estimatedGasLimits = await this.web3Public.batchEstimatedGas(
                     this.UniswapV2TradeClass.contractAbi,
-                    this.UniswapV2TradeClass.getContractAddress(this.from.blockchain),
+                    this.UniswapV2TradeClass.getDexContractAddress(this.from.blockchain),
                     this.walletAddress,
                     this.getGasRequests(routes)
                 );
@@ -172,7 +172,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             }
             const estimatedGas = await this.web3Public.getEstimatedGas(
                 this.UniswapV2TradeClass.contractAbi,
-                this.UniswapV2TradeClass.getContractAddress(this.from.blockchain),
+                this.UniswapV2TradeClass.getDexContractAddress(this.from.blockchain),
                 callData.contractMethod,
                 callData.params,
                 this.walletAddress,

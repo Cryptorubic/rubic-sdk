@@ -44,17 +44,17 @@ export type UniswapV2TradeStruct = {
 export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
     /** @internal */
     @Cache
-    public static getContractAddress(blockchain: BlockchainName): string {
+    public static getDexContractAddress(blockchain: BlockchainName): string {
         // see https://github.com/microsoft/TypeScript/issues/34516
         // @ts-ignore
         const instance = new this({
             from: { blockchain },
             wrappedPath: [{ isNative: () => false }, { isNative: () => false }]
         });
-        if (!instance.contractAddress) {
+        if (!instance.dexContractAddress) {
             throw new RubicSdkError('Trying to read abstract class field');
         }
-        return instance.contractAddress;
+        return instance.dexContractAddress;
     }
 
     public static get type(): OnChainTradeType {
@@ -78,7 +78,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
         const methodName = exact === 'input' ? 'getAmountsOut' : 'getAmountsIn';
         return web3Public.multicallContractMethod<string[]>(
-            this.getContractAddress(blockchain),
+            this.getDexContractAddress(blockchain),
             this.contractAbi,
             methodName,
             routesMethodArguments
@@ -217,7 +217,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         const gasParams = this.getGasParams(options);
 
         return EvmWeb3Pure.encodeMethodCall(
-            this.contractAddress,
+            this.dexContractAddress,
             (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
             methodName,
             this.getCallParameters(options.receiverAddress || options.fromAddress),
@@ -287,7 +287,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         const value = this.nativeValueToSend;
 
         return [
-            this.contractAddress,
+            this.dexContractAddress,
             (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
             method,
             this.getCallParameters(options?.receiverAddress),

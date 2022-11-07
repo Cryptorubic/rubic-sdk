@@ -10,5 +10,5 @@ export class QuickSwapTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.QUICK_SWAP;
     }
 
-    public readonly contractAddress = QUICK_SWAP_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = QUICK_SWAP_CONTRACT_ADDRESS;
 }

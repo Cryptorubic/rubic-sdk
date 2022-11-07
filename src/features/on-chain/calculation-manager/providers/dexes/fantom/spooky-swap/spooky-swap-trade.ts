@@ -10,5 +10,5 @@ export class SpookySwapTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.SPOOKY_SWAP;
     }
 
-    public readonly contractAddress = SPOOKY_SWAP_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = SPOOKY_SWAP_CONTRACT_ADDRESS;
 }

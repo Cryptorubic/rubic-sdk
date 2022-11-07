@@ -10,5 +10,5 @@ export class SushiSwapBscTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.SUSHI_SWAP;
     }
 
-    public readonly contractAddress = SUSHI_SWAP_BSC_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = SUSHI_SWAP_BSC_CONTRACT_ADDRESS;
 }

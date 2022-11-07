@@ -41,7 +41,7 @@ export class CelerOneinchTrade implements CelerOnChainTrade {
         if (!this.oneinchTrade.transactionData) {
             throw new RubicSdkError(`Can't estimate 1inch trade`);
         }
-        const dex = this.oneinchTrade.contractAddress;
+        const dex = this.oneinchTrade.dexContractAddress;
         const [tokenIn, ...restPath] = this.oneinchTrade.path.map(token => token.address);
         const isOneInchNative =
             oneinchApiParams.nativeAddress === tokenIn || tokenIn === EvmWeb3Pure.EMPTY_ADDRESS;

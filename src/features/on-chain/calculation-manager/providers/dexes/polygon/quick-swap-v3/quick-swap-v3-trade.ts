@@ -26,7 +26,7 @@ export class QuickSwapV3Trade extends UniswapV3AlgebraAbstractTrade {
         return ON_CHAIN_TRADE_TYPE.QUICK_SWAP_V3;
     }
 
-    public readonly contractAddress = QUICK_SWAP_V3_ROUTER_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = QUICK_SWAP_V3_ROUTER_CONTRACT_ADDRESS;
 
     protected readonly contractAbi = QUICK_SWAP_V3_ROUTER_CONTRACT_ABI;
 

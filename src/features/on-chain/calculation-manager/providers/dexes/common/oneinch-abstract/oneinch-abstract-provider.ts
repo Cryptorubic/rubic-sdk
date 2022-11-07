@@ -76,7 +76,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         const fromTokenClone = createTokenNativeAddressProxy(from, oneinchApiParams.nativeAddress);
         const toTokenClone = createTokenNativeAddressProxy(toToken, oneinchApiParams.nativeAddress);
 
-        const [contractAddress, { toTokenAmountInWei, estimatedGas, path, data }] =
+        const [dexContractAddress, { toTokenAmountInWei, estimatedGas, path, data }] =
             await Promise.all([
                 this.loadContractAddress(),
                 this.getTradeInfo(fromTokenClone, toTokenClone, fullOptions)
@@ -85,7 +85,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         path[path.length - 1] = toToken;
 
         const oneinchTradeStruct = {
-            contractAddress,
+            dexContractAddress,
             from,
             to: new PriceTokenAmount({
                 ...toToken.asStruct,

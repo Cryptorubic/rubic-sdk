@@ -10,5 +10,5 @@ export class SushiSwapTelosTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.SUSHI_SWAP;
     }
 
-    public readonly contractAddress = SUSHI_SWAP_TELOS_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = SUSHI_SWAP_TELOS_CONTRACT_ADDRESS;
 }

@@ -10,5 +10,5 @@ export class UniSwapV2EthereumPowTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.UNISWAP_V2;
     }
 
-    public readonly contractAddress = UNISWAP_V2_ETHEREUM_POW_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = UNISWAP_V2_ETHEREUM_POW_CONTRACT_ADDRESS;
 }

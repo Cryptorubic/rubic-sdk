@@ -26,7 +26,7 @@ export class SolarbeamTrade extends UniswapV2AbstractTrade {
     ): Promise<ContractMulticallResponse<string[]>[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
         return web3Public.multicallContractMethod<string[]>(
-            this.getContractAddress(blockchain),
+            this.getDexContractAddress(blockchain),
             this.contractAbi,
             exact === 'input' ? 'getAmountsOut' : 'getAmountsIn',
             routesMethodArguments.map(args => args.concat(this.feeParameter))
@@ -35,5 +35,5 @@ export class SolarbeamTrade extends UniswapV2AbstractTrade {
 
     private static readonly feeParameter = '25';
 
-    public readonly contractAddress = SOLARBEAM_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = SOLARBEAM_CONTRACT_ADDRESS;
 }

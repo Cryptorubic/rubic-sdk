@@ -15,7 +15,7 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/algebra/algebra-quoter-controller';
 
 export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider<AlgebraTrade> {
-    public readonly contractAddress = ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS;
 
     protected readonly contractAbi = ALGEBRA_SWAP_ROUTER_CONTRACT_ABI;
 

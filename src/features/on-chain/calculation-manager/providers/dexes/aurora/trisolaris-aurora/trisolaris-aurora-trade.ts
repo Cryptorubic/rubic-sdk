@@ -10,5 +10,5 @@ export class TrisolarisAuroraTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.TRISOLARIS;
     }
 
-    public readonly contractAddress = TRISOLARIS_AURORA_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = TRISOLARIS_AURORA_CONTRACT_ADDRESS;
 }

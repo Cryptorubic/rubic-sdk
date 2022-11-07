@@ -159,7 +159,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
                 })
             ).data;
             methodArguments.push(
-                this.onChainTrade.contractAddress,
+                this.onChainTrade.dexContractAddress,
                 this.anyTokenAddress,
                 encodedData
             );

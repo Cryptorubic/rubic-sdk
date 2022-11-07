@@ -10,5 +10,5 @@ export class ZappyTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.ZAPPY;
     }
 
-    public readonly contractAddress = ZAPPY_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = ZAPPY_CONTRACT_ADDRESS;
 }

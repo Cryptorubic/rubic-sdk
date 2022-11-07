@@ -42,7 +42,7 @@ export class LifiTrade extends EvmOnChainTrade {
                     to,
                     gasFeeInfo: null,
                     slippageTolerance: NaN,
-                    contractAddress: '',
+                    dexContractAddress: '',
                     type: ON_CHAIN_TRADE_TYPE.ONE_INCH,
                     path: [],
                     route,
@@ -72,7 +72,7 @@ export class LifiTrade extends EvmOnChainTrade {
 
     public readonly slippageTolerance: number;
 
-    public readonly contractAddress: string;
+    public readonly dexContractAddress: string;
 
     public readonly type: OnChainTradeType;
 
@@ -92,7 +92,7 @@ export class LifiTrade extends EvmOnChainTrade {
             to: PriceTokenAmount<EvmBlockchainName>;
             gasFeeInfo: GasFeeInfo | null;
             slippageTolerance: number;
-            contractAddress: string;
+            dexContractAddress: string;
             type: OnChainTradeType;
             path: ReadonlyArray<Token>;
             route: Route;
@@ -110,7 +110,7 @@ export class LifiTrade extends EvmOnChainTrade {
         });
         this.gasFeeInfo = tradeStruct.gasFeeInfo;
         this.slippageTolerance = tradeStruct.slippageTolerance;
-        this.contractAddress = tradeStruct.contractAddress;
+        this.dexContractAddress = tradeStruct.dexContractAddress;
         this.type = tradeStruct.type;
         this.path = tradeStruct.path;
         this.route = tradeStruct.route;
@@ -130,7 +130,7 @@ export class LifiTrade extends EvmOnChainTrade {
             });
 
             return {
-                to: this.contractAddress,
+                to: this.dexContractAddress,
                 data: transactionData.data,
                 value: this.from.isNative ? this.from.stringWeiAmount : '0',
                 gas,

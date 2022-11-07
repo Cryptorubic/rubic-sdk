@@ -10,5 +10,5 @@ export class SoulSwapTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.SOUL_SWAP;
     }
 
-    public readonly contractAddress = SOUL_SWAP_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = SOUL_SWAP_CONTRACT_ADDRESS;
 }

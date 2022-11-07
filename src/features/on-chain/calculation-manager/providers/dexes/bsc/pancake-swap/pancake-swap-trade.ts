@@ -10,5 +10,5 @@ export class PancakeSwapTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.PANCAKE_SWAP;
     }
 
-    public readonly contractAddress = PANCAKE_SWAP_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = PANCAKE_SWAP_CONTRACT_ADDRESS;
 }

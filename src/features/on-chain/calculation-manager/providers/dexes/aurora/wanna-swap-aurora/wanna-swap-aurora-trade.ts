@@ -10,5 +10,5 @@ export class WannaSwapAuroraTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.WANNA_SWAP;
     }
 
-    public readonly contractAddress = WANNA_SWAP_AURORA_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = WANNA_SWAP_AURORA_CONTRACT_ADDRESS;
 }

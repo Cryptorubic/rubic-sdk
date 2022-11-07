@@ -25,7 +25,7 @@ export interface UniswapV3TradeStruct extends UniswapV3AlgebraTradeStruct {
 }
 
 export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTrade {
-    public readonly contractAddress = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS;
 
     protected readonly contractAbi = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
 

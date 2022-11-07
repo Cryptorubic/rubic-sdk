@@ -10,5 +10,5 @@ export class ViperSwapHarmonyTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.VIPER_SWAP;
     }
 
-    public readonly contractAddress = VIPER_SWAP_HARMONY_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = VIPER_SWAP_HARMONY_CONTRACT_ADDRESS;
 }

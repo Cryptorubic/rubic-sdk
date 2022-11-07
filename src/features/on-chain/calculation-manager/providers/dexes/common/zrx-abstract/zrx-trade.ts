@@ -34,7 +34,7 @@ export class ZrxTrade extends EvmOnChainTrade {
 
     private readonly apiTradeData: ZrxQuoteResponse;
 
-    public readonly contractAddress: string;
+    public readonly dexContractAddress: string;
 
     public readonly path: ReadonlyArray<Token>;
 
@@ -50,7 +50,7 @@ export class ZrxTrade extends EvmOnChainTrade {
         this.gasFeeInfo = tradeStruct.gasFeeInfo || null;
         this.slippageTolerance = tradeStruct.slippageTolerance;
         this.apiTradeData = tradeStruct.apiTradeData;
-        this.contractAddress = this.apiTradeData.to;
+        this.dexContractAddress = this.apiTradeData.to;
         this.path = tradeStruct.path;
     }
 

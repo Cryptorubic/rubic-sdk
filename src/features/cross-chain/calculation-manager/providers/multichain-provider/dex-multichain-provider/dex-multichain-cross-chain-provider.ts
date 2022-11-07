@@ -245,7 +245,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             .map(value => (value as PromiseFulfilledResult<EvmOnChainTrade>).value)
             .filter(onChainTrade =>
                 availableDexes.some(availableDex =>
-                    compareAddresses(availableDex, onChainTrade.contractAddress)
+                    compareAddresses(availableDex, onChainTrade.dexContractAddress)
                 )
             )
             .sort((a, b) => b.to.tokenAmount.comparedTo(a.to.tokenAmount));

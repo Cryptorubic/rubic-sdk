@@ -84,7 +84,7 @@ export class DeflationTokenManager {
                 DEADLINE
             ];
             const { data } = EvmWeb3Pure.encodeMethodCall(
-                bestTrade.contractAddress,
+                bestTrade.dexContractAddress,
                 defaultUniswapV2Abi,
                 'swapExactETHForTokens',
                 args,
@@ -92,7 +92,7 @@ export class DeflationTokenManager {
             );
 
             await this.simulateTransferWithSwap(
-                bestTrade.contractAddress,
+                bestTrade.dexContractAddress,
                 { address: tokenAddress, blockchain: tokenBlockchain },
                 data!,
                 Web3Pure.toWei(nativeAmount, nativeToken.decimals)

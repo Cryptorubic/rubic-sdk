@@ -79,7 +79,7 @@ export class LifiProvider {
                         weiAmount: new BigNumber(route.toAmount)
                     });
 
-                    const contractAddress = step.estimate.approvalAddress;
+                    const dexContractAddress = step.estimate.approvalAddress;
                     const type = lifiProviders[step.toolDetails.name.toLowerCase()];
                     if (!type) {
                         return null;
@@ -98,7 +98,7 @@ export class LifiProvider {
                             to,
                             gasFeeInfo,
                             slippageTolerance: fullOptions.slippageTolerance,
-                            contractAddress,
+                            dexContractAddress,
                             type,
                             path,
                             route,

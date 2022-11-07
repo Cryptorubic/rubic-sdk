@@ -16,5 +16,5 @@ export class PangolinTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.PANGOLIN;
     }
 
-    public readonly contractAddress = PANGOLIN_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = PANGOLIN_CONTRACT_ADDRESS;
 }

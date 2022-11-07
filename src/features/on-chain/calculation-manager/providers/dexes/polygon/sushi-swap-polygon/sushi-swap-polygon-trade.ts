@@ -10,5 +10,5 @@ export class SushiSwapPolygonTrade extends UniswapV2AbstractTrade {
         return ON_CHAIN_TRADE_TYPE.SUSHI_SWAP;
     }
 
-    public readonly contractAddress = SUSHI_SWAP_POLYGON_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = SUSHI_SWAP_POLYGON_CONTRACT_ADDRESS;
 }
