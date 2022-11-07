@@ -23,10 +23,10 @@ import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/prov
 import { Cache } from 'src/common/utils/decorators';
 import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-request';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { parseError } from 'src/common/utils/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 type OneinchTradeStruct = {
     contractAddress: string;

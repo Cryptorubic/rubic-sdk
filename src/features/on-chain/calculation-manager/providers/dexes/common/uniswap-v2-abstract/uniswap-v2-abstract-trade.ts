@@ -27,9 +27,9 @@ import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/prov
 import BigNumber from 'bignumber.js';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { parseError } from 'src/common/utils/errors';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount<EvmBlockchainName>;
@@ -285,19 +285,13 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         options: SwapTransactionOptions
     ): Parameters<InstanceType<typeof EvmWeb3Private>['executeContractMethod']> {
         const value = this.nativeValueToSend;
-        const { gas, gasPrice } = this.getGasParams(options);
 
         return [
             this.contractAddress,
             (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
             method,
             this.getCallParameters(options?.receiverAddress),
-            {
-                onTransactionHash: options.onConfirm,
-                value,
-                ...(method === this.regularSwapMethod && { gas }),
-                gasPrice
-            }
+            { value }
         ];
     }
 

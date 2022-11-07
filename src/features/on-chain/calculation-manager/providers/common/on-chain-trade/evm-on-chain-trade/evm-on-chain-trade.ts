@@ -18,7 +18,6 @@ import {
     OptionsGasParams,
     TransactionGasParams
 } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-params';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import {
     onChainProxyContractAbi,
@@ -26,6 +25,7 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/constants/on-chain-proxy-contract';
 import { parseError } from 'src/common/utils/errors';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 
 export abstract class EvmOnChainTrade extends OnChainTrade {
     public abstract readonly from: PriceTokenAmount<EvmBlockchainName>;
@@ -85,6 +85,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     protected async checkAllowanceAndApprove(
         options?: Omit<SwapTransactionOptions, 'onConfirm' | 'gasLimit'>
     ): Promise<void> {
+        // @todo update contractAddress to dexContractAddress
         const needApprove = await this.needApprove();
         if (!needApprove) {
             return;
@@ -117,7 +118,6 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             fromAddress: this.walletAddress,
             receiverAddress
         });
-        const { gas, gasPrice } = directTransactionConfig;
 
         const contractAddress = onChainProxyContractAddress[this.from.blockchain];
         const methodName = this.from.isNative ? 'instantTradeNative' : 'instantTrade';
@@ -133,7 +133,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 onChainProxyContractAbi,
                 methodName,
                 methodArguments,
-                { onTransactionHash, value, gas, gasPrice }
+                { onTransactionHash, value, gas: options.gasLimit, gasPrice: options.gasPrice }
             );
 
             return transactionHash!;
@@ -178,12 +178,8 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         }
     ): TransactionGasParams {
         return {
-            gas:
-                (options.gasLimit === undefined ? calculatedGasFee.gasLimit : options.gasLimit) ||
-                undefined,
-            gasPrice:
-                (options.gasPrice === undefined ? calculatedGasFee.gasPrice : options.gasPrice) ||
-                undefined
+            gas: options.gasLimit || calculatedGasFee.gasLimit,
+            gasPrice: options.gasPrice || calculatedGasFee.gasPrice
         };
     }
 }

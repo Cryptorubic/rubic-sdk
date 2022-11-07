@@ -8,8 +8,8 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 interface ZrxTradeStruct {
     from: PriceTokenAmount<EvmBlockchainName>;

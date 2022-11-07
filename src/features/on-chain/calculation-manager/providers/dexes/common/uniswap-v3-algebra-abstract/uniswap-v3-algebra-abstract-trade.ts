@@ -13,13 +13,13 @@ import { getFromToTokensAmountsByExact } from 'src/features/on-chain/calculation
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { AbiItem } from 'web3-utils';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
-import { TransactionConfig } from 'web3-core';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import BigNumber from 'bignumber.js';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 export interface UniswapV3AlgebraTradeStruct {
@@ -213,7 +213,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
      */
     protected abstract getSwapRouterExactInputMethodData(walletAddress: string): MethodData;
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         this.checkFromAddress(options.fromAddress, true);
         this.checkReceiverAddress(options.receiverAddress);
 
