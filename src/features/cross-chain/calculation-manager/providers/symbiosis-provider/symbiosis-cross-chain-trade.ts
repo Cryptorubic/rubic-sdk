@@ -171,7 +171,9 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             this.from.address,
             this.from.stringWeiAmount,
             toChainId,
-            this.to.address,
+            this.to.blockchain === BLOCKCHAIN_NAME.BITCOIN
+                ? EvmWeb3Pure.EMPTY_ADDRESS
+                : this.to.address,
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
             this.to.blockchain === BLOCKCHAIN_NAME.BITCOIN
                 ? EvmWeb3Pure.EMPTY_ADDRESS

@@ -36,6 +36,7 @@ import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { RubicSdkError } from 'src/common/errors';
 
 interface ToolType extends IActionStepTool {
     type: 'swap' | 'cross';
@@ -94,7 +95,7 @@ export class ViaCrossChainProvider extends CrossChainProvider {
             });
             const routes = wrappedRoutes.routes.filter(route => this.parseBridge(route));
             if (!routes.length) {
-                return null;
+                return { trade: null, error: new RubicSdkError('No available routes') };
             }
 
             const [fromTokenPrice, nativeTokenPrice] = await this.getTokensPrice(fromBlockchain, [
