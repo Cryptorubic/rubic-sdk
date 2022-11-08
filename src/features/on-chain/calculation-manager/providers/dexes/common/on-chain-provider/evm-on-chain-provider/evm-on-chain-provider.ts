@@ -10,11 +10,15 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import BigNumber from 'bignumber.js';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
+import { OnChainIsUnavailableError } from 'src/common/errors/on-chain';
 
 export abstract class EvmOnChainProvider extends OnChainProvider {
     public abstract readonly blockchain: EvmBlockchainName;
 
     protected abstract readonly gasMargin: number;
+
+    protected readonly onChainProxyService = new OnChainProxyService();
 
     protected get walletAddress(): string {
         return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address;
@@ -29,6 +33,13 @@ export abstract class EvmOnChainProvider extends OnChainProvider {
         to: PriceToken<EvmBlockchainName>,
         options?: OnChainCalculationOptions
     ): Promise<EvmOnChainTrade>;
+
+    protected async checkContractState(fromBlockchain: EvmBlockchainName): Promise<void | never> {
+        const isPaused = await this.onChainProxyService.isContractPaused(fromBlockchain);
+        if (isPaused) {
+            throw new OnChainIsUnavailableError();
+        }
+    }
 
     protected async getGasPriceInfo(): Promise<GasPriceInfo> {
         const [gasPrice, nativeCoinPrice] = await Promise.all([

@@ -17,20 +17,6 @@ export const onChainProxyContractAddress: Record<BlockchainName, string> = Objec
 export const onChainProxyContractAbi = [
     {
         inputs: [],
-        name: 'RubicPlatformFee',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function'
-    },
-    {
-        inputs: [],
-        name: 'fixedCryptoFee',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function'
-    },
-    {
-        inputs: [],
         name: 'getAvailableRouters',
         outputs: [{ internalType: 'address[]', name: '', type: 'address[]' }],
         stateMutability: 'view',
@@ -92,6 +78,20 @@ export const onChainProxyContractAbi = [
             { internalType: 'uint32', name: 'RubicFixedCryptoShare', type: 'uint32' },
             { internalType: 'uint128', name: 'fixedFeeAmount', type: 'uint128' }
         ],
+        stateMutability: 'view',
+        type: 'function'
+    },
+    {
+        inputs: [],
+        name: 'RubicPlatformFee',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function'
+    },
+    {
+        inputs: [],
+        name: 'fixedCryptoFee',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function'
     },

@@ -190,7 +190,6 @@ export class OnChainManager {
         }
 
         const disabledProviders = providers.concat(options.disabledProviders);
-
         return this.lifiProvider.calculate(
             from as PriceTokenAmount<EvmBlockchainName>,
             to as PriceTokenAmount<EvmBlockchainName>,

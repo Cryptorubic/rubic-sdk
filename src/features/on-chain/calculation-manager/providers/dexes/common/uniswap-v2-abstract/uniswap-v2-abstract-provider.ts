@@ -92,6 +92,8 @@ export abstract class UniswapV2AbstractProvider<
     ): Promise<UniswapV2AbstractTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
+        await this.checkContractState(from.blockchain);
+
         const fromProxy = createTokenNativeAddressProxy(from, this.providerSettings.wethAddress);
         const toProxy = createTokenNativeAddressProxy(to, this.providerSettings.wethAddress);
 

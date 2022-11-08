@@ -73,6 +73,8 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             fromAddress: this.walletAddress
         });
 
+        await this.checkContractState(from.blockchain);
+
         const fromTokenClone = createTokenNativeAddressProxy(from, oneinchApiParams.nativeAddress);
         const toTokenClone = createTokenNativeAddressProxy(toToken, oneinchApiParams.nativeAddress);
 

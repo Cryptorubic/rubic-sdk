@@ -43,6 +43,8 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
     ): Promise<ZrxTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
+        await this.checkContractState(from.blockchain);
+
         const fromClone = createTokenNativeAddressProxy(from, zrxApiParams.nativeTokenAddress);
         const toClone = createTokenNativeAddressProxy(to, zrxApiParams.nativeTokenAddress);
 

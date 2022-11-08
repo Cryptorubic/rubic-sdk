@@ -14,9 +14,13 @@ import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/prov
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
+import { OnChainIsUnavailableError } from 'src/common/errors/on-chain';
 
 export class LifiProvider {
     private readonly lifi = new LIFI();
+
+    private readonly onChainProxyService = new OnChainProxyService();
 
     private readonly defaultOptions: Required<LifiCalculationOptions> = {
         gasCalculation: 'calculate',
@@ -36,6 +40,8 @@ export class LifiProvider {
             options,
             this.defaultOptions
         );
+
+        await this.checkContractState(from.blockchain);
 
         const fromChainId = blockchainId[from.blockchain];
         const toChainId = blockchainId[toToken.blockchain];
@@ -109,6 +115,13 @@ export class LifiProvider {
                 })
             )
         ).filter(notNull);
+    }
+
+    private async checkContractState(fromBlockchain: EvmBlockchainName): Promise<void | never> {
+        const isPaused = await this.onChainProxyService.isContractPaused(fromBlockchain);
+        if (isPaused) {
+            throw new OnChainIsUnavailableError();
+        }
     }
 
     private async getGasFeeInfo(

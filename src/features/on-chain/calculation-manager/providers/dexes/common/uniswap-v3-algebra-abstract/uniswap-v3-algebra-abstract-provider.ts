@@ -107,6 +107,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
     ): Promise<T> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
+        await this.checkContractState(fromToken.blockchain);
+
         const fromClone = createTokenNativeAddressProxy(
             fromToken,
             this.providerConfiguration.wethAddress
