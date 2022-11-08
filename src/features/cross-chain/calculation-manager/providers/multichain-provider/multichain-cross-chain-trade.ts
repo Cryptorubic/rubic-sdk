@@ -15,6 +15,7 @@ import { MultichainMethodName } from 'src/features/cross-chain/calculation-manag
 import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
 import { multichainContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/constants/contract-abi';
 import { ItType } from 'src/features/cross-chain/calculation-manager/providers/common/models/it-type';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 export class MultichainCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -50,7 +51,8 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
                         routerAddress,
                         spenderAddress,
                         routerMethodName: multichainMethodName,
-                        anyTokenAddress
+                        anyTokenAddress,
+                        slippage: 0
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -106,6 +108,8 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
 
     protected readonly anyTokenAddress: string;
 
+    private readonly slippage: number;
+
     protected get fromContractAddress(): string {
         return this.routerAddress;
     }
@@ -122,6 +126,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
             spenderAddress: string;
             routerMethodName: MultichainMethodName;
             anyTokenAddress: string;
+            slippage: number;
         },
         providerAddress: string
     ) {
@@ -138,6 +143,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
         this.routerMethodName = crossChainTrade.routerMethodName;
         this.anyTokenAddress = crossChainTrade.anyTokenAddress;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.slippage = crossChainTrade.slippage;
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -193,5 +199,18 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         return fromUsd.dividedBy(this.to.tokenAmount);
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.from.price.multipliedBy(this.from.tokenAmount);
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: { total: this.priceImpact },
+            slippage: { total: this.slippage }
+        };
     }
 }

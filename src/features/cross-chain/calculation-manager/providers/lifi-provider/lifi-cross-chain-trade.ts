@@ -26,6 +26,7 @@ import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 /**
  * Calculated Celer cross-chain trade.
@@ -63,7 +64,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                             from: ON_CHAIN_TRADE_TYPE.ONE_INCH,
                             to: ON_CHAIN_TRADE_TYPE.ONE_INCH
                         },
-                        bridgeType: BRIDGE_TYPE.CONNEXT
+                        bridgeType: BRIDGE_TYPE.CONNEXT,
+                        slippage: 0
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -118,6 +120,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly feeInfo: FeeInfo;
 
+    private readonly slippage: number;
+
     private get fromBlockchain(): LifiCrossChainSupportedBlockchain {
         return this.from.blockchain as LifiCrossChainSupportedBlockchain;
     }
@@ -137,6 +141,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             priceImpact: number;
             itType: { from: OnChainTradeType | undefined; to: OnChainTradeType | undefined };
             bridgeType: BridgeType | undefined;
+            slippage: number;
         },
         providerAddress: string
     ) {
@@ -149,7 +154,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.bridgeType = crossChainTrade.bridgeType;
         this.feeInfo = crossChainTrade.feeInfo;
-
+        this.slippage = crossChainTrade.slippage;
         this.priceImpact = crossChainTrade.priceImpact;
         this.itType = crossChainTrade.itType;
     }
@@ -233,5 +238,18 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         return fromUsd.dividedBy(this.to.tokenAmount);
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.from.price.multipliedBy(this.from.tokenAmount);
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: { total: this.priceImpact },
+            slippage: { total: this.slippage }
+        };
     }
 }

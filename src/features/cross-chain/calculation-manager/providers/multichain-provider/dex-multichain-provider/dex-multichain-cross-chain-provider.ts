@@ -165,7 +165,8 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                     spenderAddress,
                     routerMethodName,
                     anyTokenAddress,
-                    onChainTrade
+                    onChainTrade,
+                    slippage: options.slippageTolerance
                 },
                 options.providerAddress
             );

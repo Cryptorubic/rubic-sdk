@@ -21,6 +21,7 @@ import { TransactionRequest } from 'src/features/cross-chain/calculation-manager
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 /**
  * Calculated DeBridge cross-chain trade.
@@ -32,6 +33,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     private readonly cryptoFeeToken: PriceTokenAmount;
 
     private readonly transactionRequest: TransactionRequest;
+
+    private readonly slippage: number;
 
     /** @internal */
     public static async getGasData(
@@ -139,6 +142,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         this.transactionRequest = crossChainTrade.transactionRequest;
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.slippage = crossChainTrade.slippage;
 
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
         this.feeInfo = crossChainTrade.feeInfo;
@@ -209,5 +213,18 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             { params }
         );
         return tx;
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.transitAmount;
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: { total: this.priceImpact },
+            slippage: { total: this.slippage }
+        };
     }
 }

@@ -27,6 +27,7 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 export class ViaCrossChainTrade extends EvmCrossChainTrade {
     private readonly calculationWalletAddress: string;
@@ -61,7 +62,8 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
                         },
                         cryptoFeeToken: {} as PriceTokenAmount,
                         itType: { from: undefined, to: undefined },
-                        bridgeType: BRIDGE_TYPE.DE_BRIDGE
+                        bridgeType: BRIDGE_TYPE.DE_BRIDGE,
+                        slippage: 0
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS,
                     EvmWeb3Pure.EMPTY_ADDRESS
@@ -118,6 +120,8 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly bridgeType: BridgeType;
 
+    private readonly slippage: number;
+
     protected get fromContractAddress(): string {
         return viaContractAddress[this.from.blockchain as ViaCrossChainSupportedBlockchain];
     }
@@ -138,6 +142,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
             cryptoFeeToken: PriceTokenAmount;
             itType: ItType;
             bridgeType: BridgeType;
+            slippage: number;
         },
         providerAddress: string,
         calculationWalletAddress: string
@@ -155,6 +160,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
         this.itType = crossChainTrade.itType;
         this.bridgeType = crossChainTrade.bridgeType;
         this.calculationWalletAddress = calculationWalletAddress;
+        this.slippage = crossChainTrade.slippage;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -252,5 +258,18 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
         throw new RubicSdkError(
             'Calculation and swap wallet addresses are different. You should recalculate trade.'
         );
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.from.price.multipliedBy(this.from.tokenAmount);
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: { total: this.priceImpact },
+            slippage: { total: this.slippage }
+        };
     }
 }

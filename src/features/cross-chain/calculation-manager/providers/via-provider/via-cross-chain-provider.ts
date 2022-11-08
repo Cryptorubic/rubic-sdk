@@ -161,7 +161,8 @@ export class ViaCrossChainProvider extends CrossChainProvider {
                         feeInfo,
                         cryptoFeeToken,
                         itType,
-                        bridgeType
+                        bridgeType,
+                        slippage: bestRoute.slippage || 0
                     },
                     options.providerAddress,
                     fromAddress

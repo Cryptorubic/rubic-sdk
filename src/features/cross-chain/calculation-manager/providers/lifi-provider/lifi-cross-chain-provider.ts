@@ -138,7 +138,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                 feeInfo,
                 priceImpact,
                 itType,
-                bridgeType
+                bridgeType,
+                slippage: options.slippageTolerance
             },
             options.providerAddress
         );

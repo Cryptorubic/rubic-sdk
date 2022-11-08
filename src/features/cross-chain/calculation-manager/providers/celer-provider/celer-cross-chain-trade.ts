@@ -30,6 +30,7 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 /**
  * Calculated Celer cross-chain trade.
@@ -339,5 +340,31 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
             this.isDeflationTokenInTargetNetwork = error instanceof DeflationTokenError;
             throw error;
         }
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.fromTrade.toToken.tokenAmount;
+    }
+
+    public getTradeInfo(): TradeInfo {
+        const fromSlippage =
+            this.fromTrade instanceof CelerOnChainContractTrade ? this.fromTrade.slippage : 0;
+        const toSlippage =
+            this.fromTrade instanceof CelerOnChainContractTrade ? this.fromTrade.slippage : 0;
+
+        const fromPriceImpact = this.fromTrade.fromToken.calculatePriceImpactPercent(
+            this.fromTrade.toToken
+        );
+
+        const toPriceImpact = this.toTrade.fromToken.calculatePriceImpactPercent(
+            this.toTrade.toToken
+        );
+
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: { from: fromPriceImpact, to: toPriceImpact },
+            slippage: { from: fromSlippage, to: toSlippage }
+        };
     }
 }
