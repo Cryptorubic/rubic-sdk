@@ -224,7 +224,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: { total: this.priceImpact },
-            slippage: { total: this.slippage }
+            slippage: { total: this.slippage * 100 }
         };
     }
 }

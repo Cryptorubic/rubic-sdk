@@ -64,7 +64,8 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
                             fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
                             platformFee: { percent: 0, tokenSymbol: '' },
                             cryptoFee: null
-                        }
+                        },
+                        slippage: 0
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS,
                     maxSlippage
@@ -128,6 +129,8 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     public isDeflationTokenInTargetNetwork: boolean = false;
 
+    private readonly slippage: number;
+
     /**
      * Gets price impact in source and target blockchains, based on tokens usd prices.
      */
@@ -159,6 +162,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
             gasData: GasData | null;
             feeInPercents: number;
             feeInfo: FeeInfo;
+            slippage: number;
         },
         providerAddress: string,
         private readonly maxSlippage: number
@@ -171,7 +175,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
         this.gasData = crossChainTrade.gasData;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.feeInfo = crossChainTrade.feeInfo;
-
+        this.slippage = crossChainTrade.slippage;
         this.transitFeeToken = crossChainTrade.transitFeeToken;
 
         this.from = this.fromTrade.fromToken;
@@ -347,11 +351,6 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public getTradeInfo(): TradeInfo {
-        const fromSlippage =
-            this.fromTrade instanceof CelerOnChainContractTrade ? this.fromTrade.slippage : 0;
-        const toSlippage =
-            this.fromTrade instanceof CelerOnChainContractTrade ? this.fromTrade.slippage : 0;
-
         const fromPriceImpact = this.fromTrade.fromToken.calculatePriceImpactPercent(
             this.fromTrade.toToken
         );
@@ -364,7 +363,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: { from: fromPriceImpact, to: toPriceImpact },
-            slippage: { from: fromSlippage, to: toSlippage }
+            slippage: { total: this.slippage * 100 }
         };
     }
 }

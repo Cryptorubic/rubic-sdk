@@ -102,7 +102,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
             estimatedGas: null,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ? { total: this.priceImpact } : null,
-            slippage: { total: this.slippage }
+            slippage: { total: this.slippage * 100 }
         };
     }
 }
