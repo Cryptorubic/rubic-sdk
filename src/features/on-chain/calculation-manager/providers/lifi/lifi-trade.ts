@@ -20,6 +20,7 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 interface LifiTransactionRequest {
+    to: string;
     data: string;
     gasLimit?: string;
     gasPrice?: string;
@@ -41,7 +42,6 @@ export class LifiTrade extends EvmOnChainTrade {
                 to,
                 gasFeeInfo: null,
                 slippageTolerance: NaN,
-                contractAddress: '',
                 type: ON_CHAIN_TRADE_TYPE.ONE_INCH,
                 path: [],
                 route,
@@ -69,6 +69,7 @@ export class LifiTrade extends EvmOnChainTrade {
 
     public readonly slippageTolerance: number;
 
+    // provider gateway
     public readonly contractAddress: string;
 
     public readonly type: OnChainTradeType;
@@ -88,7 +89,6 @@ export class LifiTrade extends EvmOnChainTrade {
         to: PriceTokenAmount<EvmBlockchainName>;
         gasFeeInfo: GasFeeInfo | null;
         slippageTolerance: number;
-        contractAddress: string;
         type: OnChainTradeType;
         path: ReadonlyArray<Token>;
         route: Route;
@@ -104,10 +104,10 @@ export class LifiTrade extends EvmOnChainTrade {
         });
         this.gasFeeInfo = tradeStruct.gasFeeInfo;
         this.slippageTolerance = tradeStruct.slippageTolerance;
-        this.contractAddress = tradeStruct.contractAddress;
         this.type = tradeStruct.type;
         this.path = tradeStruct.path;
         this.route = tradeStruct.route;
+        this.contractAddress = this.route.steps[0]!.estimate.approvalAddress;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -119,10 +119,10 @@ export class LifiTrade extends EvmOnChainTrade {
         await this.checkAllowanceAndApprove(options);
 
         try {
-            const { data, gasLimit, gasPrice } = await this.getTransactionData();
+            const { to, data, gasLimit, gasPrice } = await this.getTransactionData();
 
             const receipt = await this.web3Private.trySendTransaction(
-                this.contractAddress,
+                to,
                 this.from.isNative ? this.from.stringWeiAmount : '0',
                 {
                     data,
@@ -152,10 +152,12 @@ export class LifiTrade extends EvmOnChainTrade {
         this.checkFromAddress(options.fromAddress, true);
 
         try {
-            const { data, gasLimit, gasPrice } = await this.getTransactionData(options.fromAddress);
+            const { to, data, gasLimit, gasPrice } = await this.getTransactionData(
+                options.fromAddress
+            );
 
             return {
-                to: this.contractAddress,
+                to,
                 data: data!,
                 value: this.from.isNative ? this.from.stringWeiAmount : '0',
                 gas: options.gasLimit || gasLimit,
@@ -201,6 +203,7 @@ export class LifiTrade extends EvmOnChainTrade {
             transactionRequest.gasPrice && parseInt(transactionRequest.gasPrice, 16).toString();
 
         return {
+            to: transactionRequest.to,
             data: transactionRequest.data,
             gasLimit,
             gasPrice
