@@ -27,6 +27,9 @@ import { parseError } from 'src/common/utils/errors';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 
+import { ContractParams } from 'src/features/common/models/contract-params';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+
 export abstract class EvmOnChainTrade extends OnChainTrade {
     public abstract readonly from: PriceTokenAmount<EvmBlockchainName>;
 
@@ -118,24 +121,15 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             transactionHash = hash;
         };
 
+        const fromAddress = this.walletAddress;
         const receiverAddress = options.receiverAddress || this.walletAddress;
-        const directTransactionConfig = await this.encodeDirect({
-            fromAddress: this.walletAddress,
-            receiverAddress
-        });
-
-        const contractAddress = onChainProxyContractAddress[this.from.blockchain];
-        const methodName = this.from.isNative ? 'instantTradeNative' : 'instantTrade';
-        const methodArguments = this.getProxyMethodArguments(
-            receiverAddress,
-            directTransactionConfig.data
-        );
-        const value = this.from.isNative ? this.from.stringWeiAmount : '0';
+        const { contractAddress, contractAbi, methodName, methodArguments, value } =
+            await this.getProxyContractParams({ fromAddress, receiverAddress });
 
         try {
             await this.web3Private.tryExecuteContractMethod(
                 contractAddress,
-                onChainProxyContractAbi,
+                contractAbi,
                 methodName,
                 methodArguments,
                 { onTransactionHash, value, gas: options.gasLimit, gasPrice: options.gasPrice }
@@ -150,24 +144,52 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         }
     }
 
-    public async encode(_options: EncodeTransactionOptions): Promise<TransactionConfig> {
-        // @todo
-        return {} as TransactionConfig;
+    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+        this.checkFromAddress(options.fromAddress, true);
+        this.checkReceiverAddress(options.receiverAddress);
+
+        const { contractAddress, contractAbi, methodName, methodArguments, value } =
+            await this.getProxyContractParams(options);
+        const gasParams = this.getGasParams(options);
+
+        return EvmWeb3Pure.encodeMethodCall(
+            contractAddress,
+            contractAbi,
+            methodName,
+            methodArguments,
+            value,
+            gasParams
+        );
     }
 
-    private getProxyMethodArguments(receiverAddress: string, data: string): unknown[] {
-        return [
+    private async getProxyContractParams(
+        options: EncodeTransactionOptions
+    ): Promise<ContractParams> {
+        const methodName = this.from.isNative ? 'instantTradeNative' : 'instantTrade';
+
+        const directTransactionConfig = await this.encodeDirect(options);
+        const methodArguments = [
             [
                 this.from.address,
                 this.from.stringWeiAmount,
                 this.to.address,
                 this.toTokenAmountMin.stringWeiAmount,
-                receiverAddress,
+                options.receiverAddress,
                 this.providerAddress,
                 this.dexContractAddress
             ],
-            data
+            directTransactionConfig.data
         ];
+
+        const value = this.from.isNative ? this.from.stringWeiAmount : '0';
+
+        return {
+            contractAddress: this.contractAddress,
+            contractAbi: onChainProxyContractAbi,
+            methodName,
+            methodArguments,
+            value
+        };
     }
 
     /**
