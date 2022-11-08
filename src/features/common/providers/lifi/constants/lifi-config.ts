@@ -19,6 +19,7 @@ export function getLifiConfig(): ConfigUpdate {
     );
 
     return {
+        apiUrl: 'https://staging.li.quest/v1/',
         rpcs,
         defaultRouteOptions: {
             integrator: 'rubic'

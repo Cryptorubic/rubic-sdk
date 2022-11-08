@@ -1,4 +1,4 @@
-import { getLifiConfig } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-config';
+import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
 import { LifiCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/lifi-cross-chain-trade';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import {
