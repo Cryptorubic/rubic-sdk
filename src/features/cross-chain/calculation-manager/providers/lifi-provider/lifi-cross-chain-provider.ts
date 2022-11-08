@@ -103,7 +103,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         );
 
         if (!bestRoute) {
-            return null;
+            return { trade: null, error: new RubicSdkError('No available routes') };
         }
 
         const { fromAmountUSD, toAmountUSD } = bestRoute;
