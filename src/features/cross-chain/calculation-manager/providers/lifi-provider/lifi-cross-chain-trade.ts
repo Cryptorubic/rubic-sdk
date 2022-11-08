@@ -107,7 +107,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly route: Route;
 
-    private readonly lifiContractAddress: string;
+    private readonly providerGateway: string;
 
     public readonly itType: {
         from: OnChainTradeType | undefined;
@@ -147,7 +147,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
         this.route = crossChainTrade.route;
-        this.lifiContractAddress = this.route.steps[0]!.estimate.approvalAddress;
+        this.providerGateway = this.route.steps[0]!.estimate.approvalAddress;
 
         this.gasData = crossChainTrade.gasData;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
@@ -170,7 +170,13 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        const { data, value: providerValue } = await this.getSwapData(options?.receiverAddress);
+        const {
+            data,
+            value: providerValue,
+            to: providerRouter
+        } = await this.getSwapData(options?.receiverAddress);
+        await this.checkProviderIsWhitelisted(providerRouter, this.providerGateway);
+
         const toChainId = blockchainId[this.to.blockchain];
 
         const swapArguments = [
@@ -181,7 +187,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
             options?.receiverAddress || this.walletAddress,
             this.providerAddress,
-            this.lifiContractAddress
+            providerRouter
         ];
 
         const methodArguments: unknown[] = [
@@ -189,7 +195,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             swapArguments
         ];
         if (!this.from.isNative) {
-            methodArguments.push(this.lifiContractAddress);
+            methodArguments.push(this.providerGateway);
         }
         methodArguments.push(data);
 

@@ -108,8 +108,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             throw new RubicSdkError('No available routes');
         }
 
-        const lifiContractAddress = bestRoute.steps[0]!.estimate.approvalAddress;
-        await this.checkProviderIsWhitelisted(from.blockchain, lifiContractAddress);
+        const providerGateway = bestRoute.steps[0]!.estimate.approvalAddress;
+        await this.checkProviderIsWhitelisted(from.blockchain, providerGateway);
 
         const { fromAmountUSD, toAmountUSD } = bestRoute;
         const priceImpact = new BigNumber(fromAmountUSD)
