@@ -193,11 +193,11 @@ export class OnChainManager {
         return this.lifiProvider.calculate(
             from as PriceTokenAmount<EvmBlockchainName>,
             to as PriceTokenAmount<EvmBlockchainName>,
-            disabledProviders,
             {
                 slippageTolerance: options.slippageTolerance,
                 gasCalculation: options.gasCalculation === 'disabled' ? 'disabled' : 'calculate',
-                providerAddress: options.providerAddress
+                providerAddress: options.providerAddress,
+                disabledProviders
             }
         );
     }

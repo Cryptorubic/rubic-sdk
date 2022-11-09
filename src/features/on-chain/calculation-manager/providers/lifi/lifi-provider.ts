@@ -1,7 +1,10 @@
 import LIFI, { Route, RouteOptions, RoutesRequest, Step } from '@lifi/sdk';
 import { notNull } from 'src/common/utils/object';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
+import {
+    LifiCalculationOptions,
+    RequiredLifiCalculationOptions
+} from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/lifi/lifi-trade';
@@ -22,7 +25,7 @@ export class LifiProvider {
 
     private readonly onChainProxyService = new OnChainProxyService();
 
-    private readonly defaultOptions: Required<LifiCalculationOptions> = {
+    private readonly defaultOptions: Omit<RequiredLifiCalculationOptions, 'disabledProviders'> = {
         gasCalculation: 'calculate',
         slippageTolerance: 0.02,
         providerAddress: EvmWeb3Pure.EMPTY_ADDRESS
@@ -33,19 +36,19 @@ export class LifiProvider {
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
-        disabledProviders: OnChainTradeType[],
-        options?: LifiCalculationOptions
+        options: LifiCalculationOptions
     ): Promise<OnChainTrade[]> {
-        const fullOptions: Required<LifiCalculationOptions> = combineOptions(
-            options,
-            this.defaultOptions
-        );
+        const fullOptions = combineOptions(options, {
+            ...this.defaultOptions,
+            disabledProviders: options.disabledProviders
+        });
 
         await this.checkContractState(from.blockchain);
 
         const fromChainId = blockchainId[from.blockchain];
         const toChainId = blockchainId[toToken.blockchain];
 
+        const { disabledProviders } = fullOptions;
         const lifiDisabledProviders = Object.entries(lifiProviders)
             .filter(([_lifiProviderKey, tradeType]: [string, OnChainTradeType]) =>
                 disabledProviders.includes(tradeType)
