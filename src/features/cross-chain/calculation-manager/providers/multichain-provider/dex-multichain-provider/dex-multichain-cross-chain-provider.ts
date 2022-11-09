@@ -8,7 +8,7 @@ import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager
 import BigNumber from 'bignumber.js';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
-import { NotSupportedTokensError, NotWhitelistedProviderError } from 'src/common/errors';
+import { NotSupportedTokensError } from 'src/common/errors';
 import { isMultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/is-multichain-method-name';
 import {
     MultichainProxyCrossChainSupportedBlockchain,
@@ -80,17 +80,18 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             }
             const { targetToken } = tokens;
 
-            const whitelistedAddresses = await this.getWhitelistedAddresses(fromBlockchain);
-            if (
-                !whitelistedAddresses.some(whitelistedAddress =>
-                    compareAddresses(whitelistedAddress, targetToken.router)
-                )
-            ) {
-                return {
-                    trade: null,
-                    error: new NotWhitelistedProviderError(targetToken.router)
-                };
-            }
+            const whitelistedDexes = await this.getWhitelistedDexes(fromBlockchain);
+            // @TODO Return after new contracts deploy.
+            // if (
+            //     !whitelistedAddresses.some(whitelistedAddress =>
+            //         compareAddresses(whitelistedAddress, targetToken.router)
+            //     )
+            // ) {
+            //     return {
+            //         trade: null,
+            //         error: new NotWhitelistedProviderError(targetToken.router)
+            //     };
+            // }
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
             const fromWithoutFee = getFromWithoutFee(from, feeInfo);
@@ -110,7 +111,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                 onChainTrade = await this.getOnChainTrade(
                     fromWithoutFee,
                     sourceTransitToken,
-                    whitelistedAddresses,
+                    whitelistedDexes,
                     options.slippageTolerance
                 );
                 if (!onChainTrade) {
@@ -203,7 +204,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
         return tokens.targetToken;
     }
 
-    private getWhitelistedAddresses(
+    private getWhitelistedDexes(
         fromBlockchain: MultichainProxyCrossChainSupportedBlockchain
     ): Promise<string[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
