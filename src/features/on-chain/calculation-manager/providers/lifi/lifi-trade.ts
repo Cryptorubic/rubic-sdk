@@ -192,7 +192,7 @@ export class LifiTrade extends EvmOnChainTrade {
 
         const swapResponse: {
             transactionRequest: LifiTransactionRequest;
-        } = await this.httpClient.post('https://staging.li.quest/v1/advanced/stepTransaction', {
+        } = await this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
             ...step
         });
 
