@@ -2,11 +2,7 @@ import BigNumber from 'bignumber.js';
 import { BigNumber as EthersBigNumber } from 'ethers';
 import { DeflationTokenError } from 'src/common/errors';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import {
-    BlockchainName,
-    BLOCKCHAIN_NAME,
-    EvmBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -47,10 +43,10 @@ export class DeflationTokenManager {
 
     public async checkToken(token: {
         address: string;
-        blockchain: BlockchainName;
+        blockchain: EvmBlockchainName;
         symbol: string;
-    }): Promise<void> {
-        const tokenBlockchain = token.blockchain as EvmBlockchainName;
+    }): Promise<void | never> {
+        const tokenBlockchain = token.blockchain;
         const tokenAddress = token.address;
         const nativeToken = nativeTokensList[token.blockchain];
         const nativeAmount =

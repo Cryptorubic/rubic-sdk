@@ -43,9 +43,11 @@ export interface OnChainCalculationOptions {
     readonly wrappedAddress?: string;
 
     readonly providerAddress?: string;
+
+    readonly isWithDeflation?: boolean;
 }
 
 export type RequiredOnChainCalculationOptions = MarkRequired<
     OnChainCalculationOptions,
-    'slippageTolerance' | 'gasCalculation' | 'providerAddress'
+    'slippageTolerance' | 'gasCalculation' | 'providerAddress' | 'isWithDeflation'
 >;

@@ -34,7 +34,8 @@ export abstract class UniswapV2AbstractProvider<
         deadlineMinutes: 20,
         gasCalculation: 'calculate',
         disableMultihops: false,
-        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS
+        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
+        isWithDeflation: false
     };
 
     protected readonly gasMargin = 1.2;
@@ -92,7 +93,9 @@ export abstract class UniswapV2AbstractProvider<
     ): Promise<UniswapV2AbstractTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
-        await this.checkContractState(from.blockchain);
+        if (!fullOptions.isWithDeflation) {
+            await this.checkContractState(from.blockchain);
+        }
 
         const fromProxy = createTokenNativeAddressProxy(from, this.providerSettings.wethAddress);
         const toProxy = createTokenNativeAddressProxy(to, this.providerSettings.wethAddress);

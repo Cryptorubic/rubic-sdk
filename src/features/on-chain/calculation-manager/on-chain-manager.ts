@@ -15,6 +15,7 @@ import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/c
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
 import { ProviderAddress } from 'src/core/sdk/models/provider-address';
+import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 
 type RequiredOnChainManagerCalculationOptions = MarkRequired<
     OnChainManagerCalculationOptions,
@@ -33,6 +34,8 @@ export class OnChainManager {
     public readonly tradeProviders: OnChainTypedTradeProviders = typedTradeProviders;
 
     public readonly lifiProvider = new LifiProvider();
+
+    public readonly deflationTokenManager = new DeflationTokenManager();
 
     public constructor(private readonly providerAddress: ProviderAddress) {}
 
@@ -113,15 +116,24 @@ export class OnChainManager {
         to: PriceToken,
         options: RequiredOnChainManagerCalculationOptions
     ): Promise<Array<OnChainTrade | OnChainTradeError>> {
+        const isWithDeflation = await this.isWithDeflation(from, to);
+
         const dexesProviders = Object.entries(this.tradeProviders[from.blockchain]).filter(
             ([type]) => !options.disabledProviders.includes(type as OnChainTradeType)
         ) as [OnChainTradeType, OnChainProvider][];
-        const dexesTradesPromise = this.calculateDexes(from, to, dexesProviders, options);
+        const dexesTradesPromise = this.calculateDexes(
+            from,
+            to,
+            dexesProviders,
+            isWithDeflation,
+            options
+        );
 
         const lifiTradesPromise = this.calculateLifiTrades(
             from,
             to,
             dexesProviders.map(dexProvider => dexProvider[0]),
+            isWithDeflation,
             options
         );
 
@@ -137,17 +149,33 @@ export class OnChainManager {
         });
     }
 
+    private async isWithDeflation(from: Token, to: Token): Promise<boolean> {
+        try {
+            await Promise.all([
+                this.deflationTokenManager.checkToken(from),
+                this.deflationTokenManager.checkToken(to)
+            ]);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
     private async calculateDexes(
         from: PriceTokenAmount,
         to: PriceToken,
         dexesProviders: [OnChainTradeType, OnChainProvider][],
+        isWithDeflation: boolean,
         options: RequiredOnChainManagerCalculationOptions
     ): Promise<Array<OnChainTrade | OnChainTradeError>> {
         const { timeout, ...providersOptions } = options;
         return Promise.all(
             dexesProviders.map(async ([type, provider]) => {
                 try {
-                    return await pTimeout(provider.calculate(from, to, providersOptions), timeout);
+                    return await pTimeout(
+                        provider.calculate(from, to, { ...providersOptions, isWithDeflation }),
+                        timeout
+                    );
                 } catch (e) {
                     console.debug(
                         `[RUBIC_SDK] Trade calculation error occurred for ${type} trade provider.`,
@@ -163,6 +191,7 @@ export class OnChainManager {
         from: PriceTokenAmount,
         to: PriceToken,
         dexesProvidersTypes: OnChainTradeType[],
+        isWithDeflation: boolean,
         options: RequiredOnChainManagerCalculationOptions
     ): Promise<OnChainTrade[]> {
         if (!BlockchainsInfo.isEvmBlockchainName(from.blockchain)) {
@@ -179,6 +208,7 @@ export class OnChainManager {
                     gasCalculation:
                         options.gasCalculation === 'disabled' ? 'disabled' : 'calculate',
                     providerAddress: options.providerAddress,
+                    isWithDeflation,
                     disabledProviders
                 }
             );

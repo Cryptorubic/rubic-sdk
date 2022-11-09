@@ -28,7 +28,8 @@ export class LifiProvider {
     private readonly defaultOptions: Omit<RequiredLifiCalculationOptions, 'disabledProviders'> = {
         gasCalculation: 'calculate',
         slippageTolerance: 0.02,
-        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS
+        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
+        isWithDeflation: false
     };
 
     constructor() {}
@@ -43,7 +44,9 @@ export class LifiProvider {
             disabledProviders: options.disabledProviders
         });
 
-        await this.checkContractState(from.blockchain);
+        if (!fullOptions.isWithDeflation) {
+            await this.checkContractState(from.blockchain);
+        }
 
         const fromChainId = blockchainId[from.blockchain];
         const toChainId = blockchainId[toToken.blockchain];

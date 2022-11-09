@@ -26,7 +26,8 @@ export class BridgersProvider extends TronOnChainProvider {
     private readonly defaultOptions: BridgersCalculationOptions = {
         slippageTolerance: 0.02,
         gasCalculation: 'disabled',
-        providerAddress: TronWeb3Pure.EMPTY_ADDRESS
+        providerAddress: TronWeb3Pure.EMPTY_ADDRESS,
+        isWithDeflation: false
     };
 
     public get type(): OnChainTradeType {

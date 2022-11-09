@@ -28,7 +28,8 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         disableMultihops: false,
         slippageTolerance: 0.02,
         wrappedAddress: oneinchApiParams.nativeAddress,
-        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS
+        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
+        isWithDeflation: false
     };
 
     protected readonly gasMargin = 1;
@@ -73,7 +74,9 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             fromAddress: this.walletAddress
         });
 
-        await this.checkContractState(from.blockchain);
+        if (!fullOptions.isWithDeflation) {
+            await this.checkContractState(from.blockchain);
+        }
 
         const fromTokenClone = createTokenNativeAddressProxy(from, oneinchApiParams.nativeAddress);
         const toTokenClone = createTokenNativeAddressProxy(toToken, oneinchApiParams.nativeAddress);

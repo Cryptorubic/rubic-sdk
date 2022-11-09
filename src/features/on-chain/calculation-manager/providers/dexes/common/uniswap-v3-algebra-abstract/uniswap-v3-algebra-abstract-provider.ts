@@ -53,7 +53,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         deadlineMinutes: 20,
         gasCalculation: 'calculate',
         disableMultihops: false,
-        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS
+        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
+        isWithDeflation: false
     };
 
     protected abstract createTradeInstance(
@@ -107,7 +108,9 @@ export abstract class UniswapV3AlgebraAbstractProvider<
     ): Promise<T> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
-        await this.checkContractState(fromToken.blockchain);
+        if (!fullOptions.isWithDeflation) {
+            await this.checkContractState(fromToken.blockchain);
+        }
 
         const fromClone = createTokenNativeAddressProxy(
             fromToken,

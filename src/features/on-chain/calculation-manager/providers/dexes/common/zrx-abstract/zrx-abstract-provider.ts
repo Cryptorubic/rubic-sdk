@@ -24,7 +24,8 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
     private readonly defaultOptions: ZrxCalculationOptions = {
         slippageTolerance: 0.02,
         gasCalculation: 'calculate',
-        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS
+        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
+        isWithDeflation: false
     };
 
     public get type(): OnChainTradeType {
@@ -43,7 +44,9 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
     ): Promise<ZrxTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
-        await this.checkContractState(from.blockchain);
+        if (!fullOptions.isWithDeflation) {
+            await this.checkContractState(from.blockchain);
+        }
 
         const fromClone = createTokenNativeAddressProxy(from, zrxApiParams.nativeTokenAddress);
         const toClone = createTokenNativeAddressProxy(to, zrxApiParams.nativeTokenAddress);
