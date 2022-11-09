@@ -12,7 +12,6 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import {
     BRIDGE_TYPE,
-    BridgeSubtype,
     BridgeType
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -103,6 +102,8 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RANGO;
 
+    public readonly isAggregator = true;
+
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount<EvmBlockchainName>;
@@ -117,7 +118,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly onChainSubtype: OnChainSubtype;
 
-    public readonly bridgeSubtype: BridgeSubtype;
+    public readonly bridgeType: BridgeType;
 
     public readonly rangoClientRef: RangoClient;
 
@@ -164,10 +165,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         this.allowedSwappers = crossChainTrade.allowedSwappers;
 
         this.onChainSubtype = crossChainTrade.onChainSubtype;
-        this.bridgeSubtype = {
-            type: crossChainTrade.bridgeType,
-            isNative: false
-        };
+        this.bridgeType = crossChainTrade.bridgeType;
 
         this.rangoClientRef = rangoClientRef;
     }
@@ -197,7 +195,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         ];
 
         const methodArguments: unknown[] = [
-            `${this.type.toLowerCase()}:${this.bridgeSubtype.type}`,
+            `${this.type.toLowerCase()}:${this.bridgeType}`,
             routerCallParams
         ];
 

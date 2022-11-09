@@ -11,7 +11,6 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { PriceTokenAmount } from 'src/common/tokens';
 import {
     BRIDGE_TYPE,
-    BridgeSubtype,
     BridgeType
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { Via } from '@viaprotocol/router-sdk';
@@ -30,8 +29,6 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 
 export class ViaCrossChainTrade extends EvmCrossChainTrade {
-    private readonly calculationWalletAddress: string;
-
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -97,6 +94,8 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.VIA;
 
+    public readonly isAggregator = false;
+
     private readonly via = new Via(VIA_DEFAULT_CONFIG);
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
@@ -117,7 +116,9 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly onChainSubtype: OnChainSubtype;
 
-    public readonly bridgeSubtype: BridgeSubtype;
+    public readonly bridgeType: BridgeType;
+
+    private readonly calculationWalletAddress: string;
 
     protected get fromContractAddress(): string {
         return viaContractAddress[this.from.blockchain as ViaCrossChainSupportedBlockchain];
@@ -156,10 +157,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
         this.calculationWalletAddress = calculationWalletAddress;
 
         this.onChainSubtype = crossChainTrade.onChainSubtype;
-        this.bridgeSubtype = {
-            type: crossChainTrade.bridgeType,
-            isNative: false
-        };
+        this.bridgeType = crossChainTrade.bridgeType;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -207,7 +205,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
         ];
 
         const methodArguments: unknown[] = [
-            `${this.type.toLowerCase()}:${this.bridgeSubtype.type}`,
+            `${this.type.toLowerCase()}:${this.bridgeType}`,
             swapArguments
         ];
         let providerGateway: string | undefined;

@@ -89,12 +89,11 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
 
+    public readonly isAggregator = false;
+
     public readonly onChainSubtype: OnChainSubtype;
 
-    public readonly bridgeSubtype = {
-        type: BRIDGE_TYPE.SYMBIOSIS,
-        isNative: true
-    };
+    public readonly bridgeType = BRIDGE_TYPE.SYMBIOSIS;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 

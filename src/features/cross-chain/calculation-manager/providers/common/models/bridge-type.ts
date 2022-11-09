@@ -38,9 +38,4 @@ export const BRIDGE_TYPE = {
 
 export type BridgeType = typeof BRIDGE_TYPE[keyof typeof BRIDGE_TYPE];
 
-export type BridgeSubtype = {
-    type: BridgeType;
-    isNative: boolean;
-};
-
 export const bridges = Object.values(BRIDGE_TYPE);

@@ -99,12 +99,11 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
 
+    public readonly isAggregator = false;
+
     public readonly onChainSubtype: OnChainSubtype;
 
-    public readonly bridgeSubtype = {
-        type: BRIDGE_TYPE.CELER,
-        isNative: true
-    };
+    public readonly bridgeType = BRIDGE_TYPE.CELER;
 
     public readonly feeInPercents: number;
 

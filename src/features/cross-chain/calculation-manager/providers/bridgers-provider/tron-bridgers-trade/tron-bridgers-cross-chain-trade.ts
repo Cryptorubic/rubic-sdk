@@ -19,6 +19,8 @@ import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/provid
 export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;
 
+    public readonly isAggregator = false;
+
     public readonly from: PriceTokenAmount<TronBlockchainName>;
 
     public readonly to: PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>;
@@ -29,10 +31,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
 
     public readonly onChainSubtype = { from: undefined, to: undefined };
 
-    public readonly bridgeSubtype = {
-        type: BRIDGE_TYPE.BRIDGERS,
-        isNative: true
-    };
+    public readonly bridgeType = BRIDGE_TYPE.BRIDGERS;
 
     public readonly priceImpact: number | null;
 

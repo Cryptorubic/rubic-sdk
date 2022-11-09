@@ -85,6 +85,8 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.MULTICHAIN;
 
+    public readonly isAggregator = false;
+
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount;
@@ -99,10 +101,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly onChainSubtype: OnChainSubtype = { from: undefined, to: undefined };
 
-    public readonly bridgeSubtype = {
-        type: BRIDGE_TYPE.MULTICHAIN,
-        isNative: true
-    };
+    public readonly bridgeType = BRIDGE_TYPE.MULTICHAIN;
 
     protected readonly routerAddress: string;
 

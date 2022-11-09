@@ -94,15 +94,14 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.DEBRIDGE;
 
+    public readonly isAggregator = false;
+
     public readonly onChainSubtype = {
         from: ON_CHAIN_TRADE_TYPE.ONE_INCH,
         to: ON_CHAIN_TRADE_TYPE.ONE_INCH
     };
 
-    public readonly bridgeSubtype = {
-        type: BRIDGE_TYPE.DEBRIDGE,
-        isNative: true
-    };
+    public readonly bridgeType = BRIDGE_TYPE.DEBRIDGE;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 

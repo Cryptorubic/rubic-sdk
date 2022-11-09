@@ -3,7 +3,6 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { PriceTokenAmount } from 'src/common/tokens';
 import {
     BRIDGE_TYPE,
-    BridgeSubtype,
     BridgeType
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
@@ -95,6 +94,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
 
+    public readonly isAggregator = true;
+
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount<EvmBlockchainName>;
@@ -107,7 +108,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly onChainSubtype: OnChainSubtype;
 
-    public readonly bridgeSubtype: BridgeSubtype;
+    public readonly bridgeType: BridgeType;
 
     public readonly priceImpact: number;
 
@@ -146,10 +147,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
         this.priceImpact = crossChainTrade.priceImpact;
         this.onChainSubtype = crossChainTrade.onChainSubtype;
-        this.bridgeSubtype = {
-            type: crossChainTrade.bridgeType || BRIDGE_TYPE.LIFI,
-            isNative: false
-        };
+        this.bridgeType = crossChainTrade.bridgeType;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -180,7 +178,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         ];
 
         const methodArguments: unknown[] = [
-            `${this.type.toLowerCase()}:${this.bridgeSubtype.type}`,
+            `${this.type.toLowerCase()}:${this.bridgeType}`,
             swapArguments
         ];
         if (!this.from.isNative) {

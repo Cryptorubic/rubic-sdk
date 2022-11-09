@@ -82,6 +82,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;
 
+    public readonly isAggregator = false;
+
     public readonly from: PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>;
 
     public readonly to: PriceTokenAmount<TronBlockchainName>;
@@ -94,10 +96,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly onChainSubtype = { from: undefined, to: undefined };
 
-    public readonly bridgeSubtype = {
-        type: BRIDGE_TYPE.BRIDGERS,
-        isNative: true
-    };
+    public readonly bridgeType = BRIDGE_TYPE.BRIDGERS;
 
     public readonly priceImpact: number | null;
 

@@ -5,7 +5,6 @@ import { Injector } from 'src/core/injector/injector';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -85,8 +84,6 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
             return null;
         }
     }
-
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.MULTICHAIN;
 
     public readonly onChainSubtype: OnChainSubtype;
 

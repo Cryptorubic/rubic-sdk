@@ -18,7 +18,7 @@ import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-servic
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { isAddressCorrect } from 'src/features/common/utils/check-address';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { BridgeSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { BridgeType } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 
 /**
  * Abstract class for all cross-chain providers' trades.
@@ -57,7 +57,12 @@ export abstract class CrossChainTrade {
     /**
      * Contains bridge provider's type used in route.
      */
-    public abstract readonly bridgeSubtype: BridgeSubtype;
+    public abstract readonly bridgeType: BridgeType;
+
+    /**
+     * True, if provider is aggregator.
+     */
+    public abstract readonly isAggregator: boolean;
 
     protected abstract get fromContractAddress(): string;
 
