@@ -196,7 +196,6 @@ export class CrossChainManager {
                     disabledProviders
                 );
                 const totalTrades = providers.length;
-                let calculatedTrades = 0;
 
                 return merge(
                     ...providers.map(provider =>
@@ -205,11 +204,10 @@ export class CrossChainManager {
                         )
                     )
                 ).pipe(
-                    map(wrappedTrade => {
-                        calculatedTrades += 1;
+                    map((wrappedTrade, index) => {
                         return {
                             total: totalTrades,
-                            calculated: calculatedTrades,
+                            calculated: index + 1,
                             wrappedTrade
                         };
                     }),
