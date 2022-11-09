@@ -89,9 +89,9 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const routesRequest: RoutesRequest = {
             fromChainId,
             fromAmount: fromWithoutFee.stringWeiAmount,
-            fromToken: from.address,
+            fromTokenAddress: from.address,
             toChainId,
-            toToken: toToken.address,
+            toTokenAddress: toToken.address,
             options: routeOptions,
             ...(fromAddress && { fromAddress }),
             ...(toAddress && { toAddress })
