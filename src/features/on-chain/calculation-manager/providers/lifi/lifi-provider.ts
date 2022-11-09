@@ -56,9 +56,9 @@ export class LifiProvider {
         const routesRequest: RoutesRequest = {
             fromChainId,
             fromAmount: from.stringWeiAmount,
-            fromTokenAddress: from.address,
+            fromToken: from.address,
             toChainId,
-            toTokenAddress: toToken.address,
+            toToken: toToken.address,
             options: routeOptions
         };
 
