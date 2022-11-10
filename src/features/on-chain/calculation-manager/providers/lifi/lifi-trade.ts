@@ -20,6 +20,7 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 interface LifiTransactionRequest {
+    to: string;
     data: string;
     gasLimit?: string;
     gasPrice?: string;
@@ -36,20 +37,16 @@ export class LifiTrade extends EvmOnChainTrade {
         gasPrice: BigNumber;
     } | null> {
         try {
-            const transactionData = await new LifiTrade(
-                {
-                    from,
-                    to,
-                    gasFeeInfo: null,
-                    slippageTolerance: NaN,
-                    dexContractAddress: '',
-                    type: ON_CHAIN_TRADE_TYPE.ONE_INCH,
-                    path: [],
-                    route,
-                    toTokenWeiAmountMin: new BigNumber(NaN)
-                },
-                EvmWeb3Pure.EMPTY_ADDRESS
-            ).getTransactionData();
+            const transactionData = await new LifiTrade({
+                from,
+                to,
+                gasFeeInfo: null,
+                slippageTolerance: NaN,
+                type: ON_CHAIN_TRADE_TYPE.ONE_INCH,
+                path: [],
+                route,
+                toTokenWeiAmountMin: new BigNumber(NaN)
+            }).getTransactionData();
 
             if (!transactionData.gasLimit || !transactionData.gasPrice) {
                 return null;
@@ -72,7 +69,8 @@ export class LifiTrade extends EvmOnChainTrade {
 
     public readonly slippageTolerance: number;
 
-    public readonly dexContractAddress: string;
+    // provider gateway
+    public readonly contractAddress: string;
 
     public readonly type: OnChainTradeType;
 
@@ -86,21 +84,17 @@ export class LifiTrade extends EvmOnChainTrade {
         return this._toTokenAmountMin;
     }
 
-    constructor(
-        tradeStruct: {
-            from: PriceTokenAmount<EvmBlockchainName>;
-            to: PriceTokenAmount<EvmBlockchainName>;
-            gasFeeInfo: GasFeeInfo | null;
-            slippageTolerance: number;
-            dexContractAddress: string;
-            type: OnChainTradeType;
-            path: ReadonlyArray<Token>;
-            route: Route;
-            toTokenWeiAmountMin: BigNumber;
-        },
-        providerAddress: string
-    ) {
-        super(providerAddress);
+    constructor(tradeStruct: {
+        from: PriceTokenAmount<EvmBlockchainName>;
+        to: PriceTokenAmount<EvmBlockchainName>;
+        gasFeeInfo: GasFeeInfo | null;
+        slippageTolerance: number;
+        type: OnChainTradeType;
+        path: ReadonlyArray<Token>;
+        route: Route;
+        toTokenWeiAmountMin: BigNumber;
+    }) {
+        super();
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
@@ -110,10 +104,10 @@ export class LifiTrade extends EvmOnChainTrade {
         });
         this.gasFeeInfo = tradeStruct.gasFeeInfo;
         this.slippageTolerance = tradeStruct.slippageTolerance;
-        this.dexContractAddress = tradeStruct.dexContractAddress;
         this.type = tradeStruct.type;
         this.path = tradeStruct.path;
         this.route = tradeStruct.route;
+        this.contractAddress = this.route.steps[0]!.estimate.approvalAddress;
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
@@ -130,7 +124,7 @@ export class LifiTrade extends EvmOnChainTrade {
             });
 
             return {
-                to: this.dexContractAddress,
+                to: transactionData.to,
                 data: transactionData.data,
                 value: this.from.isNative ? this.from.stringWeiAmount : '0',
                 gas,
@@ -182,6 +176,7 @@ export class LifiTrade extends EvmOnChainTrade {
             transactionRequest.gasPrice && parseInt(transactionRequest.gasPrice, 16).toString();
 
         return {
+            to: transactionRequest.to,
             data: transactionRequest.data,
             gasLimit,
             gasPrice

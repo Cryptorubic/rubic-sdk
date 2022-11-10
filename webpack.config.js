@@ -19,6 +19,12 @@ module.exports = function(env, argv) {
                         },
                     ], 
                     exclude: ['/node_modules', '/lib'],
+                },
+                {
+                    test: /\.m?js/,
+                    resolve: {
+                        fullySpecified: false
+                    }
                 }
             ]
         },

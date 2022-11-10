@@ -19,9 +19,10 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
 import { OnChainIsUnavailableError } from 'src/common/errors/on-chain';
+import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
 
 export class LifiProvider {
-    private readonly lifi = new LIFI();
+    private readonly lifi = new LIFI(getLifiConfig());
 
     private readonly onChainProxyService = new OnChainProxyService();
 
@@ -91,7 +92,6 @@ export class LifiProvider {
                         weiAmount: new BigNumber(route.toAmount)
                     });
 
-                    const dexContractAddress = step.estimate.approvalAddress;
                     const type = lifiProviders[step.toolDetails.name.toLowerCase()];
                     if (!type) {
                         return null;
@@ -104,20 +104,16 @@ export class LifiProvider {
                         this.getPath(step, from, to)
                     ]);
 
-                    return new LifiTrade(
-                        {
-                            from,
-                            to,
-                            gasFeeInfo,
-                            slippageTolerance: fullOptions.slippageTolerance,
-                            dexContractAddress,
-                            type,
-                            path,
-                            route,
-                            toTokenWeiAmountMin: new BigNumber(route.toAmountMin)
-                        },
-                        fullOptions.providerAddress
-                    );
+                    return new LifiTrade({
+                        from,
+                        to,
+                        gasFeeInfo,
+                        slippageTolerance: fullOptions.slippageTolerance,
+                        type,
+                        path,
+                        route,
+                        toTokenWeiAmountMin: new BigNumber(route.toAmountMin)
+                    });
                 })
             )
         ).filter(notNull);

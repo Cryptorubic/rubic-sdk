@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { ContractParams } from 'src/features/common/models/contract-params';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
@@ -10,8 +10,9 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { BridgeType } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { BRIDGE_TYPE,
+    BridgeType
+} from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
@@ -21,6 +22,7 @@ import { RANGO_BLOCKCHAIN_NAME } from 'src/features/cross-chain/calculation-mana
 import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
 import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
 import { RANGO_CONTRACT_ADDRESSES } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/contract-address';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { RangoBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/models/rango-bridge-types';
 
 export class RangoCrossChainTrade extends EvmCrossChainTrade {
@@ -52,11 +54,11 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
                             fixedFee: null,
                             platformFee: null
                         },
-                        itType: {
+                        onChainSubtype: {
                             from: undefined,
                             to: undefined
                         },
-                        bridgeType: undefined,
+                        bridgeType: BRIDGE_TYPE.RANGO,
                         priceImpact: null,
                         gasData: {
                             gasLimit: new BigNumber(0),
@@ -99,6 +101,8 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RANGO;
 
+    public readonly isAggregator = true;
+
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount<EvmBlockchainName>;
@@ -111,14 +115,11 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly toTokenAmountMin: BigNumber;
 
-    public readonly itType: {
-        from: OnChainTradeType | undefined;
-        to: OnChainTradeType | undefined;
-    };
+    public readonly onChainSubtype: OnChainSubtype;
+
+    public readonly bridgeType: BridgeType;
 
     public readonly rangoClientRef: RangoClient;
-
-    public readonly bridgeType: BridgeType | undefined;
 
     public requestId: string | undefined;
 
@@ -141,8 +142,8 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             toTokenAmountMin: BigNumber;
             slippageTolerance: number;
             feeInfo: FeeInfo;
-            itType: { from: OnChainTradeType | undefined; to: OnChainTradeType | undefined };
-            bridgeType: BridgeType | undefined;
+            onChainSubtype: OnChainSubtype;
+            bridgeType: BridgeType;
             priceImpact: number | null;
             cryptoFeeToken: PriceTokenAmount;
             gasData: GasData | null;
@@ -157,12 +158,13 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.feeInfo = crossChainTrade.feeInfo;
         this.slippageTolerance = crossChainTrade.slippageTolerance;
-        this.bridgeType = crossChainTrade.bridgeType;
-        this.itType = crossChainTrade.itType;
         this.priceImpact = crossChainTrade.priceImpact;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.gasData = crossChainTrade.gasData;
         this.allowedSwappers = crossChainTrade.allowedSwappers;
+
+        this.onChainSubtype = crossChainTrade.onChainSubtype;
+        this.bridgeType = crossChainTrade.bridgeType;
 
         this.rangoClientRef = rangoClientRef;
     }

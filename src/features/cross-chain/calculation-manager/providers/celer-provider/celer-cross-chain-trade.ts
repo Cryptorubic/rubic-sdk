@@ -11,7 +11,7 @@ import {
 } from 'src/common/errors';
 import { CelerCrossChainContractData } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-cross-chain-contract-data';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { CelerDirectContractTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-direct-contract-trade/celer-direct-contract-trade';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -21,13 +21,14 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CelerOnChainContractTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-on-chain-contract-trade/celer-on-chain-contract-trade';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import BigNumber from 'bignumber.js';
 import { CelerContractTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-contract-trade';
 import { Cache } from 'src/common/utils/decorators';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
+import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 
@@ -98,10 +99,11 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
 
-    public readonly itType: {
-        from: OnChainTradeType | undefined;
-        to: OnChainTradeType | undefined;
-    };
+    public readonly isAggregator = false;
+
+    public readonly onChainSubtype: OnChainSubtype;
+
+    public readonly bridgeType = BRIDGE_TYPE.CELER;
 
     public readonly feeInPercents: number;
 
@@ -182,7 +184,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
             weiAmount: this.toTrade.toToken.weiAmount.dividedBy(1 - fromSlippage).dp(0)
         });
 
-        this.itType = {
+        this.onChainSubtype = {
             from:
                 crossChainTrade.fromTrade instanceof CelerDirectContractTrade
                     ? undefined
@@ -203,6 +205,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
                 blockchain: this.to.blockchain,
                 symbol: this.to.symbol
             });
+
             return await super.swap(options);
         } catch (err) {
             this.isDeflationTokenInTargetNetwork = err instanceof DeflationTokenError;
