@@ -3,7 +3,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 export const BRIDGE_TYPE = {
     ...CROSS_CHAIN_TRADE_TYPE,
 
-    ACROSS: 'accross',
+    ACROSS: 'across',
     ANY_SWAP: 'anyswap',
     ARBITRUM_BRIDGE: 'arbitrum',
     AVALANCHE_BRIDGE: 'avalanche',
