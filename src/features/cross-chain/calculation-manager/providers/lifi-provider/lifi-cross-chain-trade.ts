@@ -1,10 +1,6 @@
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { PriceTokenAmount } from 'src/common/tokens';
-import {
-    ON_CHAIN_TRADE_TYPE,
-    OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
 import {
     BRIDGE_TYPE,
     BridgeType
@@ -12,7 +8,6 @@ import {
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
 import { SwapRequestError } from 'src/common/errors';
 import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
-import { lifiContractAddress } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-contract-data';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -26,6 +21,8 @@ import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 
 /**
  * Calculated Celer cross-chain trade.
@@ -59,11 +56,11 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                             cryptoFee: null
                         },
                         priceImpact: 0,
-                        itType: {
-                            from: ON_CHAIN_TRADE_TYPE.ONE_INCH,
-                            to: ON_CHAIN_TRADE_TYPE.ONE_INCH
+                        onChainSubtype: {
+                            from: undefined,
+                            to: undefined
                         },
-                        bridgeType: BRIDGE_TYPE.CONNEXT
+                        bridgeType: BRIDGE_TYPE.LIFI
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -97,6 +94,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
 
+    public readonly isAggregator = true;
+
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount<EvmBlockchainName>;
@@ -107,14 +106,13 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly route: Route;
 
-    public readonly itType: {
-        from: OnChainTradeType | undefined;
-        to: OnChainTradeType | undefined;
-    };
+    private readonly providerGateway: string;
+
+    public readonly onChainSubtype: OnChainSubtype;
+
+    public readonly bridgeType: BridgeType;
 
     public readonly priceImpact: number;
-
-    public readonly bridgeType: BridgeType | undefined;
 
     public readonly feeInfo: FeeInfo;
 
@@ -123,7 +121,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public get fromContractAddress(): string {
-        return lifiContractAddress[this.fromBlockchain].rubicRouter;
+        return rubicProxyContractAddress[this.fromBlockchain];
     }
 
     constructor(
@@ -135,8 +133,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
             priceImpact: number;
-            itType: { from: OnChainTradeType | undefined; to: OnChainTradeType | undefined };
-            bridgeType: BridgeType | undefined;
+            onChainSubtype: OnChainSubtype;
+            bridgeType: BridgeType;
         },
         providerAddress: string
     ) {
@@ -145,13 +143,15 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
         this.route = crossChainTrade.route;
+        this.providerGateway = this.route.steps[0]!.estimate.approvalAddress;
+
         this.gasData = crossChainTrade.gasData;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
-        this.bridgeType = crossChainTrade.bridgeType;
         this.feeInfo = crossChainTrade.feeInfo;
 
         this.priceImpact = crossChainTrade.priceImpact;
-        this.itType = crossChainTrade.itType;
+        this.onChainSubtype = crossChainTrade.onChainSubtype;
+        this.bridgeType = crossChainTrade.bridgeType;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -166,9 +166,14 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        const { data, value: providerValue } = await this.getSwapData(options?.receiverAddress);
+        const {
+            data,
+            value: providerValue,
+            to: providerRouter
+        } = await this.getSwapData(options?.receiverAddress);
+        await this.checkProviderIsWhitelisted(providerRouter, this.providerGateway);
+
         const toChainId = blockchainId[this.to.blockchain];
-        const fromContracts = lifiContractAddress[this.fromBlockchain];
 
         const swapArguments = [
             this.from.address,
@@ -178,7 +183,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
             options?.receiverAddress || this.walletAddress,
             this.providerAddress,
-            fromContracts.providerRouter
+            providerRouter
         ];
 
         const methodArguments: unknown[] = [
@@ -186,7 +191,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             swapArguments
         ];
         if (!this.from.isNative) {
-            methodArguments.push(fromContracts.providerGateway);
+            methodArguments.push(this.providerGateway);
         }
         methodArguments.push(data);
 

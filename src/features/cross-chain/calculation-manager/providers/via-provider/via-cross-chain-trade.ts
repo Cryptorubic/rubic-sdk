@@ -1,7 +1,7 @@
 import { MethodDecoder } from 'src/features/cross-chain/calculation-manager/utils/decode-method';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { IRoute } from '@viaprotocol/router-sdk/dist/types';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-default-api-key';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
@@ -18,7 +18,7 @@ import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
 import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-cross-chain-supported-blockchain';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { ItType } from 'src/features/cross-chain/calculation-manager/providers/common/models/it-type';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
@@ -29,8 +29,6 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 
 export class ViaCrossChainTrade extends EvmCrossChainTrade {
-    private readonly calculationWalletAddress: string;
-
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -60,8 +58,8 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
                             cryptoFee: null
                         },
                         cryptoFeeToken: {} as PriceTokenAmount,
-                        itType: { from: undefined, to: undefined },
-                        bridgeType: BRIDGE_TYPE.DE_BRIDGE
+                        onChainSubtype: { from: undefined, to: undefined },
+                        bridgeType: BRIDGE_TYPE.VIA
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS,
                     EvmWeb3Pure.EMPTY_ADDRESS
@@ -96,6 +94,8 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.VIA;
 
+    public readonly isAggregator = false;
+
     private readonly via = new Via(VIA_DEFAULT_CONFIG);
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
@@ -114,9 +114,11 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly cryptoFeeToken: PriceTokenAmount;
 
-    public readonly itType: ItType;
+    public readonly onChainSubtype: OnChainSubtype;
 
     public readonly bridgeType: BridgeType;
+
+    private readonly calculationWalletAddress: string;
 
     protected get fromContractAddress(): string {
         return viaContractAddress[this.from.blockchain as ViaCrossChainSupportedBlockchain];
@@ -136,7 +138,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
             cryptoFeeToken: PriceTokenAmount;
-            itType: ItType;
+            onChainSubtype: OnChainSubtype;
             bridgeType: BridgeType;
         },
         providerAddress: string,
@@ -152,9 +154,10 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.feeInfo = crossChainTrade.feeInfo;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
-        this.itType = crossChainTrade.itType;
-        this.bridgeType = crossChainTrade.bridgeType;
         this.calculationWalletAddress = calculationWalletAddress;
+
+        this.onChainSubtype = crossChainTrade.onChainSubtype;
+        this.bridgeType = crossChainTrade.bridgeType;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {

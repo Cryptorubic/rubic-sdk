@@ -13,9 +13,10 @@ import { combineOptions } from 'src/common/utils/options';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
 
 export class LifiProvider {
-    private readonly lifi = new LIFI();
+    private readonly lifi = new LIFI(getLifiConfig());
 
     private readonly defaultOptions: Required<LifiCalculationOptions> = {
         gasCalculation: 'calculate',
@@ -77,7 +78,6 @@ export class LifiProvider {
                         weiAmount: new BigNumber(route.toAmount)
                     });
 
-                    const contractAddress = step.estimate.approvalAddress;
                     const type = lifiProviders[step.toolDetails.name.toLowerCase()];
                     if (!type) {
                         return null;
@@ -95,7 +95,6 @@ export class LifiProvider {
                         to,
                         gasFeeInfo,
                         slippageTolerance: fullOptions.slippageTolerance,
-                        contractAddress,
                         type,
                         path,
                         route,
