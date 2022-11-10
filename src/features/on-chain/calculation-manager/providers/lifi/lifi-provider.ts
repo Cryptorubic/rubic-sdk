@@ -104,16 +104,19 @@ export class LifiProvider {
                         this.getPath(step, from, to)
                     ]);
 
-                    return new LifiTrade({
-                        from,
-                        to,
-                        gasFeeInfo,
-                        slippageTolerance: fullOptions.slippageTolerance,
-                        type,
-                        path,
-                        route,
-                        toTokenWeiAmountMin: new BigNumber(route.toAmountMin)
-                    });
+                    return new LifiTrade(
+                        {
+                            from,
+                            to,
+                            gasFeeInfo,
+                            slippageTolerance: fullOptions.slippageTolerance,
+                            type,
+                            path,
+                            route,
+                            toTokenWeiAmountMin: new BigNumber(route.toAmountMin)
+                        },
+                        fullOptions.providerAddress
+                    );
                 })
             )
         ).filter(notNull);

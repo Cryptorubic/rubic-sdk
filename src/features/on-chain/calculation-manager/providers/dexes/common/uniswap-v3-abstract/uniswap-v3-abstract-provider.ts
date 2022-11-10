@@ -18,7 +18,7 @@ import { Cache } from 'src/common/utils/decorators';
 export abstract class UniswapV3AbstractProvider<
     T extends UniswapV3AbstractTrade = UniswapV3AbstractTrade
 > extends UniswapV3AlgebraAbstractProvider<T> {
-    public readonly dexContractAddress = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS;
+    public readonly contractAddress = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS;
 
     protected readonly contractAbi = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
 
