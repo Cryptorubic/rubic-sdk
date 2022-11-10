@@ -4,7 +4,7 @@ import {
     IGetRoutesRequestParams,
     IRoute
 } from '@viaprotocol/router-sdk/dist/types';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import {
     ViaCrossChainSupportedBlockchain,
@@ -17,6 +17,7 @@ import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-man
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import {
+    BRIDGE_TYPE,
     bridges,
     BridgeType
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
@@ -28,7 +29,7 @@ import {
 import { Via } from '@viaprotocol/router-sdk';
 import { ViaCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/via-provider/via-cross-chain-trade';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { ItType } from 'src/features/cross-chain/calculation-manager/providers/common/models/it-type';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
@@ -147,8 +148,8 @@ export class ViaCrossChainProvider extends CrossChainProvider {
                 tokenAmount: cryptoFeeAmount
             });
 
-            const itType = this.parseItProviders(bestRoute);
-            const bridgeType = this.parseBridge(bestRoute)!;
+            const onChainType = this.parseOnChainProviders(bestRoute);
+            const bridgeType = this.parseBridge(bestRoute);
 
             return {
                 trade: new ViaCrossChainTrade(
@@ -161,7 +162,7 @@ export class ViaCrossChainProvider extends CrossChainProvider {
                         toTokenAmountMin,
                         feeInfo,
                         cryptoFeeToken,
-                        itType,
+                        onChainSubtype: onChainType,
                         bridgeType
                     },
                     options.providerAddress,
@@ -236,7 +237,7 @@ export class ViaCrossChainProvider extends CrossChainProvider {
         }
     }
 
-    private parseItProviders(route: IRoute): ItType {
+    private parseOnChainProviders(route: IRoute): OnChainSubtype {
         const steps = route.actions[0]?.steps;
 
         const firstStep = steps?.[0];
@@ -286,15 +287,19 @@ export class ViaCrossChainProvider extends CrossChainProvider {
         }
     }
 
-    private parseBridge(route: IRoute): BridgeType | undefined {
+    private parseBridge(route: IRoute): BridgeType {
         const bridgeApi = route.actions[0]?.steps.find(
             step => (step.tool as ToolType).type === 'cross'
         )?.tool.name;
         if (!bridgeApi) {
-            return undefined;
+            return BRIDGE_TYPE.VIA;
         }
 
-        return bridges.find(bridge => bridge === bridgeApi.split(' ')[0]?.toLowerCase());
+        return (
+            bridges.find(
+                bridge => bridge.toLowerCase() === bridgeApi.split(' ')[0]?.toLowerCase()
+            ) || BRIDGE_TYPE.VIA
+        );
     }
 
     protected override async getFeeInfo(

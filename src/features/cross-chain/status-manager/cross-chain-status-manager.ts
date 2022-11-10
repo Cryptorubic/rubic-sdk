@@ -59,24 +59,24 @@ export class CrossChainStatusManager {
      *   txTimestamp: 1658241570024,
      *   srxTxHash: '0xd2263ca82ac0fce606cb75df27d7f0dc94909d41a58c37563bd6772496cb8924'
      * };
-     * const provider = CROSS_CHAIN_TRADE_TYPE.VIA;
-     * const crossChainStatus = await sdk.crossChainStatusManager.getCrossChainStatus(tradeData, provider);
+     * const tradeType = CROSS_CHAIN_TRADE_TYPE.VIA;
+     * const crossChainStatus = await sdk.crossChainStatusManager.getCrossChainStatus(tradeData, tradeType);
      * console.log('Source transaction status', crossChainStatus.srcTxStatus);
      * console.log('Destination transaction status', crossChainStatus.dstTxStatus);
      * console.log('Destination transaction hash', crossChainStatus.dstTxHash);
      * ```
      * @param data Data needed to calculate statuses.
-     * @param provider Cross-chain trade type.
+     * @param tradeType Cross-chain trade type.
      * @returns Object with transaction statuses and hash.
      */
     public async getCrossChainStatus(
         data: CrossChainTradeData,
-        provider: CrossChainTradeType
+        tradeType: CrossChainTradeType
     ): Promise<CrossChainStatus> {
         const { fromBlockchain, srcTxHash } = data;
         let srcTxStatus = await getSrcTxStatus(fromBlockchain, srcTxHash);
 
-        const dstTxData = await this.getDstTxData(srcTxStatus, data, provider);
+        const dstTxData = await this.getDstTxData(srcTxStatus, data, tradeType);
         if (dstTxData.status === TxStatus.FAIL && srcTxStatus === TxStatus.PENDING) {
             srcTxStatus = TxStatus.FAIL;
         }
@@ -90,16 +90,16 @@ export class CrossChainStatusManager {
 
     /**
      * Get destination transaction status and hash based on source transaction status,
-     * source transaction receipt, trade data and provider type.
+     * source transaction receipt, trade data and type.
      * @param srcTxStatus Source transaction status.
      * @param tradeData Trade data.
-     * @param provider Cross-chain trade type.
+     * @param tradeType Cross-chain trade type.
      * @returns Cross-chain transaction status and hash.
      */
     private async getDstTxData(
         srcTxStatus: TxStatus,
         tradeData: CrossChainTradeData,
-        provider: CrossChainTradeType
+        tradeType: CrossChainTradeType
     ): Promise<TxStatusData> {
         if (srcTxStatus === TxStatus.FAIL) {
             return { hash: null, status: TxStatus.FAIL };
@@ -109,7 +109,7 @@ export class CrossChainStatusManager {
             return { hash: null, status: TxStatus.PENDING };
         }
 
-        const getDstTxStatusFn = this.getDstTxStatusFnMap[provider];
+        const getDstTxStatusFn = this.getDstTxStatusFnMap[tradeType];
         if (!getDstTxStatusFn) {
             throw new RubicSdkError('Unsupported cross chain provider');
         }

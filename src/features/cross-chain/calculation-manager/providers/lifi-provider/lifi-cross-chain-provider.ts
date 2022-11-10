@@ -6,12 +6,13 @@ import {
     lifiCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
 import LIFI, { LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import {
+    BRIDGE_TYPE,
     bridges,
     BridgeType
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
@@ -131,7 +132,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                 ? await LifiCrossChainTrade.getGasData(from, to, bestRoute)
                 : null;
 
-        const { itType, bridgeType } = this.parseTradeTypes(bestRoute);
+        const { onChainType, bridgeType } = this.parseTradeTypes(bestRoute);
 
         const trade = new LifiCrossChainTrade(
             {
@@ -142,8 +143,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                 toTokenAmountMin: Web3Pure.fromWei(bestRoute.toAmountMin, to.decimals),
                 feeInfo,
                 priceImpact,
-                itType,
-                bridgeType
+                onChainSubtype: onChainType,
+                bridgeType: bridgeType || BRIDGE_TYPE.LIFI
             },
             options.providerAddress
         );
@@ -224,7 +225,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
     }
 
     private parseTradeTypes(route: Route): {
-        itType: { from: OnChainTradeType | undefined; to: OnChainTradeType | undefined };
+        onChainType: { from: OnChainTradeType | undefined; to: OnChainTradeType | undefined };
         bridgeType: BridgeType | undefined;
     } {
         const steps =
@@ -245,14 +246,14 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             ?.find(provider => provider.action.fromChainId !== provider.action.toChainId)
             ?.tool.toLowerCase();
 
-        const itType = {
+        const onChainType = {
             from: sourceDex ? lifiProviders[sourceDex] : undefined,
             to: targetDex ? lifiProviders[targetDex] : undefined
         };
-        const bridgeType = bridges.find(bridge => bridge === subType);
+        const bridgeType = bridges.find(bridge => bridge.toLowerCase() === subType);
 
         return {
-            itType,
+            onChainType,
             bridgeType
         };
     }

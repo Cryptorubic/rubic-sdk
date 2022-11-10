@@ -1,5 +1,5 @@
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';

@@ -1,10 +1,6 @@
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { PriceTokenAmount } from 'src/common/tokens';
-import {
-    ON_CHAIN_TRADE_TYPE,
-    OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
 import {
     BRIDGE_TYPE,
     BridgeType
@@ -26,6 +22,7 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 
 /**
  * Calculated Celer cross-chain trade.
@@ -59,11 +56,11 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                             cryptoFee: null
                         },
                         priceImpact: 0,
-                        itType: {
-                            from: ON_CHAIN_TRADE_TYPE.ONE_INCH,
-                            to: ON_CHAIN_TRADE_TYPE.ONE_INCH
+                        onChainSubtype: {
+                            from: undefined,
+                            to: undefined
                         },
-                        bridgeType: BRIDGE_TYPE.CONNEXT
+                        bridgeType: BRIDGE_TYPE.LIFI
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -97,6 +94,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
 
+    public readonly isAggregator = true;
+
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount<EvmBlockchainName>;
@@ -109,14 +108,11 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly providerGateway: string;
 
-    public readonly itType: {
-        from: OnChainTradeType | undefined;
-        to: OnChainTradeType | undefined;
-    };
+    public readonly onChainSubtype: OnChainSubtype;
+
+    public readonly bridgeType: BridgeType;
 
     public readonly priceImpact: number;
-
-    public readonly bridgeType: BridgeType | undefined;
 
     public readonly feeInfo: FeeInfo;
 
@@ -137,8 +133,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
             priceImpact: number;
-            itType: { from: OnChainTradeType | undefined; to: OnChainTradeType | undefined };
-            bridgeType: BridgeType | undefined;
+            onChainSubtype: OnChainSubtype;
+            bridgeType: BridgeType;
         },
         providerAddress: string
     ) {
@@ -151,11 +147,11 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
         this.gasData = crossChainTrade.gasData;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
-        this.bridgeType = crossChainTrade.bridgeType;
         this.feeInfo = crossChainTrade.feeInfo;
 
         this.priceImpact = crossChainTrade.priceImpact;
-        this.itType = crossChainTrade.itType;
+        this.onChainSubtype = crossChainTrade.onChainSubtype;
+        this.bridgeType = crossChainTrade.bridgeType;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
