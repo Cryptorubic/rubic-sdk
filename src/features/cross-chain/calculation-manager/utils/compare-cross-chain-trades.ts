@@ -21,7 +21,7 @@ export function compareCrossChainTrades(
         return prevWrappedTrade.error.maxAmount.gte(nextWrappedTrade.error.maxAmount) ? 1 : -1;
     }
 
-    if (!prevWrappedTrade || prevWrappedTrade.error) {
+    if (!prevWrappedTrade || !prevWrappedTrade?.trade || prevWrappedTrade.error) {
         if (
             nextWrappedTrade?.trade ||
             nextWrappedTrade?.error instanceof MinAmountError ||
