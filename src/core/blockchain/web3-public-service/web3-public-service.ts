@@ -118,7 +118,12 @@ export class Web3PublicService {
 
                 if (typeof target[prop] === 'function') {
                     return async function method(...params: unknown[]): Promise<unknown> {
-                        const curRpc = rpcProvider.rpcList[0]!;
+                        const curRpc = rpcProvider.rpcList[0];
+                        if (!curRpc) {
+                            throw new RubicSdkError(
+                                `There is no working rpc left for ${blockchainName}.`
+                            );
+                        }
 
                         const methodParams = structuredClone(params);
                         const callMethod = () => (target[prop] as Function).call(target, ...params);

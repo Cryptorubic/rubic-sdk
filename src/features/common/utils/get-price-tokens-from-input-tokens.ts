@@ -10,7 +10,7 @@ export async function getPriceTokensFromInputTokens<T extends BlockchainName = B
               address: string;
               blockchain: T;
           },
-    fromAmount: string | number,
+    fromAmount: string | number | BigNumber,
     to:
         | Token<T>
         | string

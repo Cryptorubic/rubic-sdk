@@ -1,5 +1,5 @@
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -14,7 +14,8 @@ import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-m
 import { MultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/multichain-method-name';
 import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
 import { multichainContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/constants/contract-abi';
-import { ItType } from 'src/features/cross-chain/calculation-manager/providers/common/models/it-type';
+import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 export class MultichainCrossChainTrade extends EvmCrossChainTrade {
@@ -86,6 +87,8 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.MULTICHAIN;
 
+    public readonly isAggregator = false;
+
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount;
@@ -98,7 +101,9 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly feeInfo: FeeInfo;
 
-    public readonly itType: ItType = { from: undefined, to: undefined };
+    public readonly onChainSubtype: OnChainSubtype = { from: undefined, to: undefined };
+
+    public readonly bridgeType = BRIDGE_TYPE.MULTICHAIN;
 
     protected readonly routerAddress: string;
 

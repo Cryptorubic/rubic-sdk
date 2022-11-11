@@ -5,7 +5,7 @@ import {
 import { OnChainCalculatedTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/on-chain-calculated-trade';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CelerContractTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-contract-trade';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CelerDirectContractTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-direct-contract-trade/celer-direct-contract-trade';
 import {

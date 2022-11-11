@@ -1,12 +1,12 @@
-import { WrappedTradeOrNull } from 'src/features/cross-chain/calculation-manager/providers/common/models/wrapped-trade-or-null';
+import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculation-manager/models/wrapped-cross-chain-trade-or-null';
 import { MaxAmountError, MinAmountError } from 'src/common/errors';
 
 /**
  * Compares two cross chain trades for sorting algorithm.
  */
 export function compareCrossChainTrades(
-    nextWrappedTrade: WrappedTradeOrNull,
-    prevWrappedTrade: WrappedTradeOrNull
+    nextWrappedTrade: WrappedCrossChainTradeOrNull,
+    prevWrappedTrade: WrappedCrossChainTradeOrNull
 ): -1 | 1 {
     if (
         prevWrappedTrade?.error instanceof MinAmountError &&
@@ -21,11 +21,18 @@ export function compareCrossChainTrades(
         return prevWrappedTrade.error.maxAmount.gte(nextWrappedTrade.error.maxAmount) ? 1 : -1;
     }
 
-    if (!nextWrappedTrade || nextWrappedTrade.error) {
+    if (!prevWrappedTrade || prevWrappedTrade.error) {
+        if (
+            nextWrappedTrade?.trade ||
+            nextWrappedTrade?.error instanceof MinAmountError ||
+            nextWrappedTrade?.error instanceof MaxAmountError
+        ) {
+            return -1;
+        }
         return 1;
     }
-    if (!prevWrappedTrade || !prevWrappedTrade.trade || prevWrappedTrade.error) {
-        return -1;
+    if (!nextWrappedTrade || nextWrappedTrade.error) {
+        return 1;
     }
 
     const fromUsd = prevWrappedTrade.trade.getUsdPrice();

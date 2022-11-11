@@ -1,11 +1,8 @@
 import { SYMBIOSIS_CONTRACT_ADDRESS } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/contract-address';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { PriceTokenAmount } from 'src/common/tokens';
-import {
-    ON_CHAIN_TRADE_TYPE,
-    OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
+import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
 import { TransactionRequest } from '@ethersproject/abstract-provider';
 import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
@@ -19,6 +16,8 @@ import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
+import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 /**
@@ -91,7 +90,11 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
 
-    public readonly itType: { from: OnChainTradeType; to: OnChainTradeType };
+    public readonly isAggregator = false;
+
+    public readonly onChainSubtype: OnChainSubtype;
+
+    public readonly bridgeType = BRIDGE_TYPE.SYMBIOSIS;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
@@ -150,7 +153,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         this.slippage = crossChainTrade.slippage;
         this.transitAmount = crossChainTrade.transitAmount;
 
-        this.itType = {
+        this.onChainSubtype = {
             from: ON_CHAIN_TRADE_TYPE.ONE_INCH,
             to:
                 crossChainTrade.to.blockchain === BLOCKCHAIN_NAME.BITCOIN
@@ -170,7 +173,9 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             this.from.address,
             this.from.stringWeiAmount,
             toChainId,
-            this.to.address,
+            this.to.blockchain === BLOCKCHAIN_NAME.BITCOIN
+                ? EvmWeb3Pure.EMPTY_ADDRESS
+                : this.to.address,
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
             this.to.blockchain === BLOCKCHAIN_NAME.BITCOIN
                 ? EvmWeb3Pure.EMPTY_ADDRESS
