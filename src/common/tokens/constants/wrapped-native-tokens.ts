@@ -1,8 +1,7 @@
 import { Token } from 'src/common/tokens/token';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { BlockchainName, BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
-export const wrappedNativeTokensList = {
+export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: new Token({
         blockchain: BLOCKCHAIN_NAME.ETHEREUM,
         address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
@@ -62,14 +61,14 @@ export const wrappedNativeTokensList = {
     [BLOCKCHAIN_NAME.AURORA]: new Token({
         blockchain: BLOCKCHAIN_NAME.AURORA,
         address: '0xC9BdeEd33CD01541e1eeD10f90519d2C06Fe3feB',
-        name: 'WETH',
+        name: 'Wrapped Ether',
         symbol: 'WETH',
         decimals: 18
     }),
     [BLOCKCHAIN_NAME.TELOS]: new Token({
         blockchain: BLOCKCHAIN_NAME.TELOS,
         address: '0xd102ce6a4db07d247fcc28f366a623df0938ca9e',
-        name: 'Wrapped TLOS',
+        name: 'Wrapped Telos',
         symbol: 'WTLOS',
         decimals: 18
     }),
@@ -132,9 +131,9 @@ export const wrappedNativeTokensList = {
     // TODO wrap address
     [BLOCKCHAIN_NAME.CELO]: new Token({
         blockchain: BLOCKCHAIN_NAME.CELO,
-        address: EvmWeb3Pure.nativeTokenAddress,
-        name: 'CELO',
-        symbol: 'CELO',
+        address: '0x122013fd7df1c6f636a5bb8f03108e876548b455',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
         decimals: 18
     }),
     [BLOCKCHAIN_NAME.BOBA]: new Token({
@@ -147,21 +146,21 @@ export const wrappedNativeTokensList = {
     [BLOCKCHAIN_NAME.ASTAR]: new Token({
         blockchain: BLOCKCHAIN_NAME.ASTAR,
         address: '0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720',
-        name: 'Wrapped ASTR',
+        name: 'Wrapped Astar',
         symbol: 'WASTR',
         decimals: 18
     }),
     [BLOCKCHAIN_NAME.ETHEREUM_POW]: new Token({
         blockchain: BLOCKCHAIN_NAME.ETHEREUM_POW,
         address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
-        name: 'Wrapped Ether',
-        symbol: 'WETH',
+        name: 'Wrapped Ether PoW',
+        symbol: 'WETHw',
         decimals: 18
     }),
     [BLOCKCHAIN_NAME.KAVA]: new Token({
         blockchain: BLOCKCHAIN_NAME.KAVA,
         address: '0xc86c7C0eFbd6A49B35E8714C5f59D99De09A225b',
-        name: 'Wrapped KAVA',
+        name: 'Wrapped Kava',
         symbol: 'WKAVA',
         decimals: 18
     }),
