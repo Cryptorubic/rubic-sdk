@@ -15,6 +15,7 @@ import { Exact } from 'src/features/on-chain/calculation-manager/providers/commo
 import { UniswapV2CalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-calculation-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 
 export abstract class UniswapV2AbstractProvider<
     T extends UniswapV2AbstractTrade = UniswapV2AbstractTrade
@@ -37,8 +38,6 @@ export abstract class UniswapV2AbstractProvider<
         providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
         useProxy: false
     };
-
-    protected readonly gasMargin = 1.2;
 
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -137,7 +136,7 @@ export abstract class UniswapV2AbstractProvider<
             return uniswapV2Trade;
         }
 
-        uniswapV2Trade.gasFeeInfo = this.getGasFeeInfo(estimatedGas, gasPriceInfo!);
+        uniswapV2Trade.gasFeeInfo = getGasFeeInfo(estimatedGas, gasPriceInfo!);
         return uniswapV2Trade;
     }
 

@@ -27,6 +27,7 @@ import { UniswapV3AlgebraCalculationOptions } from 'src/features/on-chain/calcul
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { QuickSwapV3Trade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/quick-swap-v3-trade';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
@@ -44,9 +45,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
 
     protected abstract readonly providerConfiguration: UniswapV3AlgebraProviderConfiguration;
 
-    protected readonly isRubicOptimisationEnabled: boolean = true;
-
-    protected readonly gasMargin = 1.2;
+    protected readonly isRubicOptimisationEnabled: boolean = false;
 
     protected readonly defaultOptions: UniswapV3AlgebraCalculationOptions = {
         slippageTolerance: 0.02,
@@ -160,7 +159,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             );
         }
 
-        const gasFeeInfo = this.getGasFeeInfo(estimatedGas, gasPriceInfo!);
+        const gasFeeInfo = getGasFeeInfo(estimatedGas, gasPriceInfo!);
         return this.createTradeInstance(
             {
                 ...tradeStruct,
@@ -205,7 +204,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         }
 
         if (
-            !this.isRubicOptimisationEnabled &&
+            this.isRubicOptimisationEnabled &&
             options.gasCalculation === 'rubicOptimisation' &&
             to.price?.isFinite() &&
             gasPriceInUsd
@@ -216,9 +215,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
                 exact,
                 weiAmount,
                 options,
-                routes,
-                this.contractAbi,
-                this.contractAddress
+                routes
             );
 
             const calculatedProfits: UniswapV3AlgebraCalculatedInfoWithProfit[] = routes.map(
@@ -258,9 +255,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             exact,
             weiAmount,
             options,
-            route,
-            this.contractAbi,
-            this.contractAddress
+            route
         );
         return {
             route,

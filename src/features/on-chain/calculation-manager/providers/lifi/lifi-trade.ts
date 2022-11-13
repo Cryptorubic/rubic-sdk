@@ -18,6 +18,7 @@ import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/provi
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { Injector } from 'src/core/injector/injector';
 
 interface LifiTransactionRequest {
     to: string;
@@ -28,16 +29,21 @@ interface LifiTransactionRequest {
 
 export class LifiTrade extends EvmOnChainTrade {
     /** @internal */
-    public static async getGasData(
+    public static async getGasLimit(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
-        route: Route
-    ): Promise<{
-        gasLimit: BigNumber;
-        gasPrice: BigNumber;
-    } | null> {
+        route: Route,
+        useProxy: boolean
+    ): Promise<BigNumber | null> {
+        const fromBlockchain = from.blockchain;
+        const walletAddress =
+            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
+        if (!walletAddress) {
+            return null;
+        }
+
         try {
-            const transactionData = await new LifiTrade(
+            const transactionConfig = await new LifiTrade(
                 {
                     from,
                     to,
@@ -48,18 +54,19 @@ export class LifiTrade extends EvmOnChainTrade {
                     route,
                     toTokenWeiAmountMin: new BigNumber(NaN)
                 },
-                false,
+                useProxy,
                 EvmWeb3Pure.EMPTY_ADDRESS
-            ).getTransactionData();
+            ).encode({ fromAddress: walletAddress });
 
-            if (!transactionData.gasLimit || !transactionData.gasPrice) {
+            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+            const gasLimit = (
+                await web3Public.batchEstimatedGas(walletAddress, [transactionConfig])
+            )[0];
+
+            if (!gasLimit?.isFinite()) {
                 return null;
             }
-
-            return {
-                gasLimit: new BigNumber(transactionData.gasLimit),
-                gasPrice: new BigNumber(transactionData.gasPrice)
-            };
+            return gasLimit;
         } catch (_err) {
             return null;
         }

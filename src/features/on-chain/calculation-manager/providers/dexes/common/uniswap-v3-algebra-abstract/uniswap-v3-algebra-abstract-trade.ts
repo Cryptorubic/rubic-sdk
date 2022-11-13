@@ -47,9 +47,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         exact: Exact,
         weiAmount: BigNumber,
         options: EstimateGasOptions,
-        route: UniswapV3AlgebraRoute,
-        contractAbi: AbiItem[],
-        contractAddress: string
+        route: UniswapV3AlgebraRoute
     ): Promise<BigNumber> {
         const { from, to } = getFromToTokensAmountsByExact(
             fromToken,
@@ -59,7 +57,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
             route.outputAbsoluteAmount
         );
 
-        const estimateGasParams = this.getEstimateGasParams(from, to, exact, options, route);
+        const estimateGasParams = await this.getEstimateGasParams(from, to, exact, options, route);
         let gasLimit = estimateGasParams.defaultGasLimit;
 
         const walletAddress = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
@@ -67,14 +65,9 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         ).address;
         if (walletAddress && estimateGasParams.callData) {
             const web3Public = Injector.web3PublicService.getWeb3Public(fromToken.blockchain);
-            const estimatedGas = await web3Public.getEstimatedGas(
-                contractAbi,
-                contractAddress,
-                estimateGasParams.callData.contractMethod,
-                estimateGasParams.callData.params,
-                walletAddress,
-                estimateGasParams.callData.value
-            );
+            const estimatedGas = (
+                await web3Public.batchEstimatedGas(walletAddress, [estimateGasParams.callData])
+            )[0];
             if (estimatedGas?.isFinite()) {
                 gasLimit = estimatedGas;
             }
@@ -89,20 +82,20 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         exact: Exact,
         weiAmount: BigNumber,
         options: EstimateGasOptions,
-        routes: UniswapV3AlgebraRoute[],
-        contractAbi: AbiItem[],
-        contractAddress: string
+        routes: UniswapV3AlgebraRoute[]
     ): Promise<BigNumber[]> {
-        const routesEstimateGasParams = routes.map(route => {
-            const { from, to } = getFromToTokensAmountsByExact(
-                fromToken,
-                toToken,
-                exact,
-                weiAmount,
-                route.outputAbsoluteAmount
-            );
-            return this.getEstimateGasParams(from, to, exact, options, route);
-        });
+        const routesEstimateGasParams = await Promise.all(
+            routes.map(route => {
+                const { from, to } = getFromToTokensAmountsByExact(
+                    fromToken,
+                    toToken,
+                    exact,
+                    weiAmount,
+                    route.outputAbsoluteAmount
+                );
+                return this.getEstimateGasParams(from, to, exact, options, route);
+            })
+        );
         const gasLimits = routesEstimateGasParams.map(
             estimateGasParams => estimateGasParams.defaultGasLimit
         );
@@ -116,10 +109,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         ) {
             const web3Public = Injector.web3PublicService.getWeb3Public(fromToken.blockchain);
             const estimatedGasLimits = await web3Public.batchEstimatedGas(
-                contractAbi,
-                contractAddress,
                 walletAddress,
-                routesEstimateGasParams.map(estimateGasParams => estimateGasParams.callData)
+                routesEstimateGasParams.map(estimateGasParams => estimateGasParams.callData!)
             );
             estimatedGasLimits.forEach((elem, index) => {
                 if (elem?.isFinite()) {
@@ -137,7 +128,10 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         exact: Exact,
         options: EstimateGasOptions,
         route: UniswapV3AlgebraRoute
-    ) {
+    ): Promise<{
+        callData: BatchCall | null;
+        defaultGasLimit: BigNumber;
+    }> {
         try {
             // @ts-ignore
             return new this(
@@ -273,16 +267,14 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
     /**
      * Returns encoded data of estimated gas function and default estimated gas.
      */
-    private getEstimateGasParams(): { callData: BatchCall | null; defaultGasLimit: BigNumber } {
+    private async getEstimateGasParams(): Promise<{
+        callData: BatchCall | null;
+        defaultGasLimit: BigNumber;
+    }> {
         try {
-            const { methodName, methodArguments } = this.getSwapRouterMethodData();
-
+            const transactionConfig = await this.encode({ fromAddress: this.walletAddress });
             return {
-                callData: {
-                    contractMethod: methodName,
-                    params: methodArguments,
-                    value: this.from.isNative ? this.from.stringWeiAmount : undefined
-                },
+                callData: transactionConfig,
                 defaultGasLimit: this.defaultEstimatedGas
             };
         } catch (_err) {

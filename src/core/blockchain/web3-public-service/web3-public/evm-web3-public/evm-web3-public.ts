@@ -209,8 +209,6 @@ export class EvmWeb3Public extends Web3Public {
 
     /**
      * Get estimated gas of several contract method executions via rpc batch request.
-     * @param abi Contract ABI.
-     * @param contractAddress Contract address.
      * @param fromAddress Sender address.
      * @param callsData Transactions parameters.
      * @returns List of contract execution estimated gases.
@@ -219,26 +217,18 @@ export class EvmWeb3Public extends Web3Public {
      * Else (if you have not enough balance, allowance ...) then the list item would be equal to null.
      */
     public async batchEstimatedGas(
-        abi: AbiItem[],
-        contractAddress: string,
         fromAddress: string,
         callsData: BatchCall[]
     ): Promise<(BigNumber | null)[]> {
         try {
-            const contract = new this.web3.eth.Contract(abi, contractAddress);
-
-            const dataList = callsData.map(callData =>
-                contract.methods[callData.contractMethod](...callData.params).encodeABI()
-            );
-
-            const rpcCallsData = dataList.map((data, index) => ({
+            const rpcCallsData = callsData.map(callData => ({
                 rpcMethod: 'eth_estimateGas',
                 params: {
                     from: fromAddress,
-                    to: contractAddress,
-                    data,
-                    ...(callsData?.[index]?.value && {
-                        value: `0x${parseInt(callsData?.[index]?.value!).toString(16)}`
+                    to: callData.to,
+                    data: callData.data,
+                    ...(callData.value && {
+                        value: `0x${parseInt(callData.value).toString(16)}`
                     })
                 }
             }));

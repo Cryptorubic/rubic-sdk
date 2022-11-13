@@ -315,8 +315,8 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
     }
 
     /** @internal */
-    public getEstimatedGasCallData(): BatchCall {
-        return this.estimateGasForAnyToAnyTrade();
+    public async getEstimatedGasCallData(): Promise<BatchCall> {
+        return this.encode({ fromAddress: this.walletAddress });
     }
 
     /** @internal */
@@ -339,14 +339,5 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
 
         const gasLimit = gasLimitAmount.toFixed(0);
         return new BigNumber(gasLimit);
-    }
-
-    private estimateGasForAnyToAnyTrade(): BatchCall {
-        const value = this.nativeValueToSend;
-        return {
-            contractMethod: this.regularSwapMethod,
-            params: this.getCallParameters(),
-            ...(value && { value })
-        };
     }
 }

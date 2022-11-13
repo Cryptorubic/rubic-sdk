@@ -112,11 +112,10 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             const gasLimits = this.getDefaultGases(routes);
 
             if (this.walletAddress) {
+                const gasRequests = await Promise.all(this.getGasRequests(routes));
                 const estimatedGasLimits = await this.web3Public.batchEstimatedGas(
-                    this.UniswapV2TradeClass.contractAbi,
-                    this.UniswapV2TradeClass.getDexContractAddress(this.from.blockchain),
                     this.walletAddress,
-                    this.getGasRequests(routes)
+                    gasRequests
                 );
                 estimatedGasLimits.forEach((elem, index) => {
                     if (elem?.isFinite()) {
@@ -166,18 +165,13 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         let gasLimit = this.getDefaultGases(routes.slice(0, 1))[0];
 
         if (this.walletAddress) {
-            const callData = this.getGasRequests(routes.slice(0, 1))[0];
+            const callData = await this.getGasRequests(routes.slice(0, 1))[0];
             if (!callData) {
                 throw new RubicSdkError('Call data has to be defined');
             }
-            const estimatedGas = await this.web3Public.getEstimatedGas(
-                this.UniswapV2TradeClass.contractAbi,
-                this.UniswapV2TradeClass.getDexContractAddress(this.from.blockchain),
-                callData.contractMethod,
-                callData.params,
-                this.walletAddress,
-                callData.value
-            );
+            const estimatedGas = (
+                await this.web3Public.batchEstimatedGas(this.walletAddress, [callData])
+            )[0];
             if (estimatedGas?.isFinite()) {
                 gasLimit = estimatedGas;
             }
@@ -193,7 +187,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         };
     }
 
-    private getGasRequests(routes: UniswapRoute[]): BatchCall[] {
+    private getGasRequests(routes: UniswapRoute[]): Promise<BatchCall>[] {
         return this.getTradesByRoutes(routes).map(trade => trade.getEstimatedGasCallData());
     }
 
@@ -221,7 +215,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
                     deadlineMinutes: this.options.deadlineMinutes,
                     slippageTolerance: this.options.slippageTolerance
                 },
-                false, // @todo update
+                this.options.useProxy,
                 EvmWeb3Pure.EMPTY_ADDRESS
             );
         });

@@ -17,10 +17,9 @@ import { Cache } from 'src/common/utils/decorators';
 import { ZrxCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-calculation-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 
 export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
-    protected readonly gasMargin = 1.4;
-
     private readonly defaultOptions: ZrxCalculationOptions = {
         slippageTolerance: 0.02,
         gasCalculation: 'calculate',
@@ -39,7 +38,7 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
 
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceToken<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         options?: OnChainCalculationOptions
     ): Promise<ZrxTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
@@ -49,7 +48,7 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
         }
 
         const fromClone = createTokenNativeAddressProxy(from, zrxApiParams.nativeTokenAddress);
-        const toClone = createTokenNativeAddressProxy(to, zrxApiParams.nativeTokenAddress);
+        const toClone = createTokenNativeAddressProxy(toToken, zrxApiParams.nativeTokenAddress);
 
         const affiliateAddress = fullOptions.zrxAffiliateAddress;
         const quoteParams: ZrxQuoteRequest = {
@@ -61,15 +60,16 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
                 ...(affiliateAddress && { affiliateAddress })
             }
         };
-
         const apiTradeData = await this.getTradeData(quoteParams);
+
+        const to = new PriceTokenAmount({
+            ...toToken.asStruct,
+            weiAmount: new BigNumber(apiTradeData.buyAmount)
+        });
 
         const tradeStruct = {
             from,
-            to: new PriceTokenAmount({
-                ...to.asStruct,
-                weiAmount: new BigNumber(apiTradeData.buyAmount)
-            }),
+            to,
             slippageTolerance: fullOptions.slippageTolerance,
             apiTradeData,
             path: [from, to]
@@ -79,7 +79,10 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
         }
 
         const gasPriceInfo = await this.getGasPriceInfo();
-        const gasFeeInfo = await this.getGasFeeInfo(apiTradeData.gas, gasPriceInfo);
+        const gasLimit =
+            (await ZrxTrade.getGasLimit(from, to, apiTradeData, fullOptions.useProxy)) ||
+            apiTradeData.gas;
+        const gasFeeInfo = await getGasFeeInfo(gasLimit, gasPriceInfo);
 
         return new ZrxTrade(
             {

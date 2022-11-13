@@ -10,8 +10,6 @@ import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/lifi/lifi-trade';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-providers';
-import { Injector } from 'src/core/injector/injector';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { combineOptions } from 'src/common/utils/options';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import BigNumber from 'bignumber.js';
@@ -20,6 +18,8 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
 import { OnChainIsUnavailableError } from 'src/common/errors/on-chain';
 import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
+import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
+import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 
 export class LifiProvider {
     private readonly lifi = new LIFI(getLifiConfig());
@@ -100,7 +100,7 @@ export class LifiProvider {
                     const [gasFeeInfo, path] = await Promise.all([
                         fullOptions.gasCalculation === 'disabled'
                             ? null
-                            : this.getGasFeeInfo(from, to, route),
+                            : this.getGasFeeInfo(from, to, route, fullOptions.useProxy),
                         this.getPath(step, from, to)
                     ]);
 
@@ -133,33 +133,12 @@ export class LifiProvider {
     private async getGasFeeInfo(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
-        route: Route
+        route: Route,
+        useProxy: boolean
     ): Promise<GasFeeInfo | null> {
-        try {
-            const gasData = await LifiTrade.getGasData(from, to, route);
-            if (!gasData) {
-                return null;
-            }
-
-            const { gasLimit, gasPrice } = gasData;
-
-            const nativeCoinPrice = await Injector.coingeckoApi.getNativeCoinPrice(from.blockchain);
-
-            const gasPriceInEth = Web3Pure.fromWei(gasPrice);
-            const gasPriceInUsd = gasPriceInEth.multipliedBy(nativeCoinPrice);
-
-            const gasFeeInEth = gasPriceInEth.multipliedBy(gasLimit);
-            const gasFeeInUsd = gasPriceInUsd.multipliedBy(gasLimit);
-
-            return {
-                gasLimit: new BigNumber(gasLimit),
-                gasPrice: new BigNumber(gasPrice),
-                gasFeeInEth,
-                gasFeeInUsd
-            };
-        } catch (_err) {
-            return null;
-        }
+        const gasPriceInfo = await getGasPriceInfo(from.blockchain);
+        const gasLimit = await LifiTrade.getGasLimit(from, to, route, useProxy);
+        return getGasFeeInfo(gasLimit, gasPriceInfo);
     }
 
     private async getPath(

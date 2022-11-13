@@ -1,5 +1,5 @@
 export interface BatchCall {
-    contractMethod: string;
-    params: unknown[];
+    to: string;
+    data: string;
     value?: string;
 }

@@ -21,6 +21,7 @@ import BigNumber from 'bignumber.js';
 import { OneinchCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-calculation-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 
 export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
     private readonly defaultOptions: Omit<OneinchCalculationOptions, 'fromAddress'> = {
@@ -31,8 +32,6 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
         useProxy: false
     };
-
-    protected readonly gasMargin = 1;
 
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.ONE_INCH;
@@ -89,13 +88,15 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         path[0] = from;
         path[path.length - 1] = toToken;
 
+        const to = new PriceTokenAmount({
+            ...toToken.asStruct,
+            weiAmount: toTokenAmountInWei
+        });
+
         const oneinchTradeStruct = {
             dexContractAddress,
             from,
-            to: new PriceTokenAmount({
-                ...toToken.asStruct,
-                weiAmount: toTokenAmountInWei
-            }),
+            to,
             slippageTolerance: fullOptions.slippageTolerance,
             disableMultihops: fullOptions.disableMultihops,
             path,
@@ -110,7 +111,14 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         }
 
         const gasPriceInfo = await this.getGasPriceInfo();
-        const gasFeeInfo = this.getGasFeeInfo(estimatedGas, gasPriceInfo);
+        const gasLimit =
+            (await OneinchTrade.getGasLimit(
+                from,
+                to,
+                fullOptions.disableMultihops,
+                fullOptions.useProxy
+            )) || estimatedGas;
+        const gasFeeInfo = getGasFeeInfo(gasLimit, gasPriceInfo);
         return new OneinchTrade(
             {
                 ...oneinchTradeStruct,

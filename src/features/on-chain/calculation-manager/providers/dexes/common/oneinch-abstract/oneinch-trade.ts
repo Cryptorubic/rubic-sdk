@@ -27,6 +27,8 @@ import { parseError } from 'src/common/utils/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { Injector } from 'src/core/injector/injector';
+import BigNumber from 'bignumber.js';
 
 type OneinchTradeStruct = {
     dexContractAddress: string;
@@ -40,6 +42,50 @@ type OneinchTradeStruct = {
 };
 
 export class OneinchTrade extends EvmOnChainTrade {
+    /** @internal */
+    public static async getGasLimit(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        to: PriceTokenAmount<EvmBlockchainName>,
+        disableMultihops: boolean,
+        useProxy: boolean
+    ): Promise<BigNumber | null> {
+        const fromBlockchain = from.blockchain;
+        const walletAddress =
+            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
+        if (!walletAddress) {
+            return null;
+        }
+
+        try {
+            const transactionConfig = await new OneinchTrade(
+                {
+                    from,
+                    to,
+                    dexContractAddress: '',
+                    slippageTolerance: 0.02,
+                    disableMultihops,
+                    path: [],
+                    gasFeeInfo: null,
+                    data: null
+                },
+                useProxy,
+                EvmWeb3Pure.EMPTY_ADDRESS
+            ).encode({ fromAddress: walletAddress });
+
+            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+            const gasLimit = (
+                await web3Public.batchEstimatedGas(walletAddress, [transactionConfig])
+            )[0];
+
+            if (!gasLimit?.isFinite()) {
+                return null;
+            }
+            return gasLimit;
+        } catch (_err) {
+            return null;
+        }
+    }
+
     /** @internal */
     public static async checkIfNeedApproveAndThrowError(
         from: PriceTokenAmount
