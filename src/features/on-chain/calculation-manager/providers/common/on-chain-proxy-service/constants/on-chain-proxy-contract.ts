@@ -4,9 +4,9 @@ import { AbiItem } from 'web3-utils';
 export const onChainProxyContractAddress: Record<BlockchainName, string> = Object.values(
     BLOCKCHAIN_NAME
 ).reduce((acc, blockchain) => {
-    let contractAddress = '0x47E431E9Abc299515Ef100A9e7c04D47E434f616';
+    let contractAddress = '0x4B888D9756E9a3538E65b020f22ADFeE969bff61';
     if (blockchain === BLOCKCHAIN_NAME.POLYGON) {
-        contractAddress = '0xe5eF516b28d71E19B6724E9c4942313Ec76dd128';
+        contractAddress = '0x1cBb985D2623C3AB4F671CAe1a0f115E5Ba30e9c';
     }
     return {
         ...acc,
@@ -15,13 +15,6 @@ export const onChainProxyContractAddress: Record<BlockchainName, string> = Objec
 }, {} as Record<BlockchainName, string>);
 
 export const onChainProxyContractAbi = [
-    {
-        inputs: [],
-        name: 'getAvailableRouters',
-        outputs: [{ internalType: 'address[]', name: '', type: 'address[]' }],
-        stateMutability: 'view',
-        type: 'function'
-    },
     {
         inputs: [
             {
@@ -92,6 +85,13 @@ export const onChainProxyContractAbi = [
         inputs: [],
         name: 'fixedCryptoFee',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function'
+    },
+    {
+        inputs: [],
+        name: 'getAvailableRouters',
+        outputs: [{ internalType: 'address[]', name: '', type: 'address[]' }],
         stateMutability: 'view',
         type: 'function'
     },
