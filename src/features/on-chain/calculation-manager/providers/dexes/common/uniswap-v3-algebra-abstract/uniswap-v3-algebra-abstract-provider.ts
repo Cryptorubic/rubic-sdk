@@ -54,7 +54,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         gasCalculation: 'calculate',
         disableMultihops: false,
         providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
-        isWithDeflation: false
+        useProxy: false
     };
 
     protected abstract createTradeInstance(
@@ -108,7 +108,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
     ): Promise<T> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
-        if (!fullOptions.isWithDeflation) {
+        if (fullOptions.useProxy) {
             await this.checkContractState(fromToken.blockchain);
         }
 

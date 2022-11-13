@@ -35,7 +35,7 @@ export abstract class UniswapV2AbstractProvider<
         gasCalculation: 'calculate',
         disableMultihops: false,
         providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
-        isWithDeflation: false
+        useProxy: false
     };
 
     protected readonly gasMargin = 1.2;
@@ -93,7 +93,7 @@ export abstract class UniswapV2AbstractProvider<
     ): Promise<UniswapV2AbstractTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
-        if (!fullOptions.isWithDeflation) {
+        if (fullOptions.useProxy) {
             await this.checkContractState(from.blockchain);
         }
 

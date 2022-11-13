@@ -25,7 +25,7 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
         slippageTolerance: 0.02,
         gasCalculation: 'calculate',
         providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
-        isWithDeflation: false
+        useProxy: false
     };
 
     public get type(): OnChainTradeType {
@@ -44,7 +44,7 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
     ): Promise<ZrxTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
-        if (!fullOptions.isWithDeflation) {
+        if (fullOptions.useProxy) {
             await this.checkContractState(from.blockchain);
         }
 

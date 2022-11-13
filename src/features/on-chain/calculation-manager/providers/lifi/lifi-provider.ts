@@ -30,7 +30,7 @@ export class LifiProvider {
         gasCalculation: 'calculate',
         slippageTolerance: 0.02,
         providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
-        isWithDeflation: false
+        useProxy: false
     };
 
     constructor() {}
@@ -45,7 +45,7 @@ export class LifiProvider {
             disabledProviders: options.disabledProviders
         });
 
-        if (!fullOptions.isWithDeflation) {
+        if (fullOptions.useProxy) {
             await this.checkContractState(from.blockchain);
         }
 

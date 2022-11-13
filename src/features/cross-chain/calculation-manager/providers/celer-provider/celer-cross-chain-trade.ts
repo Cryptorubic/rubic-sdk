@@ -200,11 +200,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         try {
-            await this.deflationTokenManager.checkToken({
-                address: this.to.address,
-                blockchain: this.to.blockchain,
-                symbol: this.to.symbol
-            });
+            await this.deflationTokenManager.checkToken(this.to);
 
             return await super.swap(options);
         } catch (err) {
@@ -326,11 +322,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
             this.checkWalletConnected();
             await this.checkBlockchainCorrect();
 
-            await this.deflationTokenManager.checkToken({
-                address: this.to.address,
-                blockchain: this.to.blockchain,
-                symbol: this.to.symbol
-            });
+            await this.deflationTokenManager.checkToken(this.to);
 
             return this.web3Private.approveTokens(
                 this.from.address,

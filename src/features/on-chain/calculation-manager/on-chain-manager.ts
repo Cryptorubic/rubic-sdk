@@ -168,13 +168,17 @@ export class OnChainManager {
         isWithDeflation: boolean,
         options: RequiredOnChainManagerCalculationOptions
     ): Promise<Array<OnChainTrade | OnChainTradeError>> {
-        const { timeout, ...providersOptions } = options;
+        const useProxy = !isWithDeflation;
+        const calculateOptions = {
+            ...options,
+            useProxy
+        };
         return Promise.all(
             dexesProviders.map(async ([type, provider]) => {
                 try {
                     return await pTimeout(
-                        provider.calculate(from, to, { ...providersOptions, isWithDeflation }),
-                        timeout
+                        provider.calculate(from, to, calculateOptions),
+                        options.timeout
                     );
                 } catch (e) {
                     console.debug(
@@ -200,6 +204,7 @@ export class OnChainManager {
 
         try {
             const disabledProviders = dexesProvidersTypes.concat(options.disabledProviders);
+            const useProxy = !isWithDeflation;
             return await this.lifiProvider.calculate(
                 from as PriceTokenAmount<EvmBlockchainName>,
                 to as PriceTokenAmount<EvmBlockchainName>,
@@ -208,7 +213,7 @@ export class OnChainManager {
                     gasCalculation:
                         options.gasCalculation === 'disabled' ? 'disabled' : 'calculate',
                     providerAddress: options.providerAddress,
-                    isWithDeflation,
+                    useProxy,
                     disabledProviders
                 }
             );

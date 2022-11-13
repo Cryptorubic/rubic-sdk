@@ -44,10 +44,16 @@ export interface OnChainCalculationOptions {
 
     readonly providerAddress?: string;
 
-    readonly isWithDeflation?: boolean;
+    /**
+     * @internal
+     * True, if trade must be swapped through on-chain proxy contract.
+     * False, if trade must be swapped through dex directly.
+     * Default is false.
+     */
+    readonly useProxy?: boolean;
 }
 
 export type RequiredOnChainCalculationOptions = MarkRequired<
     OnChainCalculationOptions,
-    'slippageTolerance' | 'gasCalculation' | 'providerAddress' | 'isWithDeflation'
+    'slippageTolerance' | 'gasCalculation' | 'providerAddress' | 'useProxy'
 >;

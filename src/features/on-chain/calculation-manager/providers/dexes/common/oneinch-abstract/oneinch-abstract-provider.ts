@@ -29,7 +29,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         slippageTolerance: 0.02,
         wrappedAddress: oneinchApiParams.nativeAddress,
         providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
-        isWithDeflation: false
+        useProxy: false
     };
 
     protected readonly gasMargin = 1;
@@ -74,7 +74,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             fromAddress: this.walletAddress
         });
 
-        if (!fullOptions.isWithDeflation) {
+        if (fullOptions.useProxy) {
             await this.checkContractState(from.blockchain);
         }
 
