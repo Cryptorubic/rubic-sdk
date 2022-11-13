@@ -139,14 +139,14 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         };
 
         const fromAddress = this.walletAddress;
-        const receiverAddress = options.receiverAddress || this.walletAddress;
+        const { receiverAddress } = options;
 
         try {
             const transactionConfig = await this.encode({
                 fromAddress,
                 receiverAddress
             });
-            await this.web3Private.trySendTransaction(transactionConfig.to, {
+            await this.web3Private.sendTransaction(transactionConfig.to, {
                 onTransactionHash,
                 data: transactionConfig.data,
                 value: transactionConfig.value,
@@ -193,7 +193,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     ): Promise<ContractParams> {
         const methodName = this.from.isNative ? 'instantTradeNative' : 'instantTrade';
 
-        const directTransactionConfig = await this.encodeDirect(options);
+        const directTransactionConfig = await this.encodeDirect({ ...options, supportFee: false });
         const methodArguments = [
             [
                 this.from.address,

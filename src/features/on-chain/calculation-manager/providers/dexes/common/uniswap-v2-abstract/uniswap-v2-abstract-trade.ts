@@ -316,7 +316,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
 
     /** @internal */
     public async getEstimatedGasCallData(): Promise<BatchCall> {
-        return this.encode({ fromAddress: this.walletAddress });
+        return this.encode({ fromAddress: this.walletAddress, supportFee: false });
     }
 
     /** @internal */
