@@ -65,8 +65,12 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
         return createTokenNativeAddressProxyInPathStartAndEnd(path, EvmWeb3Pure.nativeTokenAddress);
     }
 
-    public constructor(tradeStruct: UniswapV3TradeStruct, providerAddress: string) {
-        super(tradeStruct, providerAddress);
+    public constructor(
+        tradeStruct: UniswapV3TradeStruct,
+        useProxy: boolean,
+        providerAddress: string
+    ) {
+        super(tradeStruct, useProxy, providerAddress);
 
         this.route = tradeStruct.route;
     }

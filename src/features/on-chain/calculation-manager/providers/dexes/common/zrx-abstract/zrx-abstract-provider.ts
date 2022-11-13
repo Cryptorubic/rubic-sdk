@@ -75,7 +75,7 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
             path: [from, to]
         };
         if (fullOptions.gasCalculation === 'disabled') {
-            return new ZrxTrade(tradeStruct, fullOptions.providerAddress);
+            return new ZrxTrade(tradeStruct, fullOptions.useProxy, fullOptions.providerAddress);
         }
 
         const gasPriceInfo = await this.getGasPriceInfo();
@@ -86,6 +86,7 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
                 ...tradeStruct,
                 gasFeeInfo
             },
+            fullOptions.useProxy,
             fullOptions.providerAddress
         );
     }

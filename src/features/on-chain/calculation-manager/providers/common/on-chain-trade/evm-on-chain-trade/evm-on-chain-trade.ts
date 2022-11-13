@@ -42,8 +42,15 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
     public abstract readonly dexContractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
+    /**
+     * True, if trade must be swapped through on-chain proxy contract.
+     */
+    private readonly useProxy: boolean;
+
     public get contractAddress(): string {
-        return onChainProxyContractAddress[this.from.blockchain];
+        return this.useProxy
+            ? onChainProxyContractAddress[this.from.blockchain]
+            : this.dexContractAddress;
     }
 
     protected get web3Public(): EvmWeb3Public {
@@ -52,6 +59,12 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
     protected get web3Private(): EvmWeb3Private {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
+    }
+
+    protected constructor(useProxy: boolean, providerAddress: string) {
+        super(providerAddress);
+
+        this.useProxy = useProxy;
     }
 
     public async approve(
@@ -123,17 +136,19 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
         const fromAddress = this.walletAddress;
         const receiverAddress = options.receiverAddress || this.walletAddress;
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getProxyContractParams({ fromAddress, receiverAddress });
 
         try {
-            await this.web3Private.tryExecuteContractMethod(
-                contractAddress,
-                contractAbi,
-                methodName,
-                methodArguments,
-                { onTransactionHash, value, gas: options.gasLimit, gasPrice: options.gasPrice }
-            );
+            const transactionConfig = await this.encode({
+                fromAddress,
+                receiverAddress
+            });
+            await this.web3Private.trySendTransaction(transactionConfig.to, {
+                onTransactionHash,
+                data: transactionConfig.data,
+                value: transactionConfig.value,
+                gas: options.gasLimit,
+                gasPrice: options.gasPrice
+            });
 
             return transactionHash!;
         } catch (err) {
@@ -144,10 +159,17 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         }
     }
 
-    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encode(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         this.checkFromAddress(options.fromAddress, true);
         this.checkReceiverAddress(options.receiverAddress);
 
+        if (this.useProxy) {
+            return this.encodeProxy(options);
+        }
+        return this.encodeDirect(options);
+    }
+
+    private async encodeProxy(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getProxyContractParams(options);
         const gasParams = this.getGasParams(options);

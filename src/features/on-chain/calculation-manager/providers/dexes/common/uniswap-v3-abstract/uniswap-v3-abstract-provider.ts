@@ -40,6 +40,7 @@ export abstract class UniswapV3AbstractProvider<
     protected createTradeInstance(
         tradeStruct: UniswapV3AlgebraTradeStruct,
         route: UniswapV3Route,
+        useProxy: boolean,
         providerAddress: string
     ): T {
         return new this.OnChainTradeClass(
@@ -47,6 +48,7 @@ export abstract class UniswapV3AbstractProvider<
                 ...tradeStruct,
                 route
             },
+            useProxy,
             providerAddress
         );
     }

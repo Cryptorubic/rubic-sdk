@@ -60,6 +60,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
     protected abstract createTradeInstance(
         tradeStruct: UniswapV3AlgebraTradeStruct,
         route: UniswapV3AlgebraRoute,
+        useProxy: boolean,
         providerAddress: string
     ): T;
 
@@ -151,7 +152,12 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             deadlineMinutes: fullOptions.deadlineMinutes
         };
         if (fullOptions.gasCalculation === 'disabled') {
-            return this.createTradeInstance(tradeStruct, route, fullOptions.providerAddress);
+            return this.createTradeInstance(
+                tradeStruct,
+                route,
+                fullOptions.useProxy,
+                fullOptions.providerAddress
+            );
         }
 
         const gasFeeInfo = this.getGasFeeInfo(estimatedGas, gasPriceInfo!);
@@ -161,6 +167,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
                 gasFeeInfo
             },
             route,
+            fullOptions.useProxy,
             fullOptions.providerAddress
         );
     }

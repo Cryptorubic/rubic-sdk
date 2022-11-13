@@ -115,6 +115,7 @@ export class LifiProvider {
                             route,
                             toTokenWeiAmountMin: new BigNumber(route.toAmountMin)
                         },
+                        fullOptions.useProxy,
                         fullOptions.providerAddress
                     );
                 })

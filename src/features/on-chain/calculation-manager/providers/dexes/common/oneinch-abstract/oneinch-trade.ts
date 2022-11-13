@@ -48,6 +48,7 @@ export class OneinchTrade extends EvmOnChainTrade {
             {
                 from
             } as OneinchTradeStruct,
+            false,
             EvmWeb3Pure.EMPTY_ADDRESS
         ).needApprove();
         if (needApprove) {
@@ -94,8 +95,12 @@ export class OneinchTrade extends EvmOnChainTrade {
         return getOneinchApiBaseUrl(this.from.blockchain);
     }
 
-    constructor(oneinchTradeStruct: OneinchTradeStruct, providerAddress: string) {
-        super(providerAddress);
+    constructor(
+        oneinchTradeStruct: OneinchTradeStruct,
+        useProxy: boolean,
+        providerAddress: string
+    ) {
+        super(useProxy, providerAddress);
 
         this.dexContractAddress = oneinchTradeStruct.dexContractAddress;
         this.from = oneinchTradeStruct.from;

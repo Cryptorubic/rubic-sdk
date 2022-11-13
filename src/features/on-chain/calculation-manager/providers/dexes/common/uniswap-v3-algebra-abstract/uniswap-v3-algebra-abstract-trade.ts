@@ -140,14 +140,17 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
     ) {
         try {
             // @ts-ignore
-            return new this({
-                from,
-                to,
-                exact,
-                slippageTolerance: options.slippageTolerance,
-                deadlineMinutes: options.deadlineMinutes,
-                route
-            }).getEstimateGasParams();
+            return new this(
+                {
+                    from,
+                    to,
+                    exact,
+                    slippageTolerance: options.slippageTolerance,
+                    deadlineMinutes: options.deadlineMinutes,
+                    route
+                },
+                false
+            ).getEstimateGasParams();
         } catch (err) {
             throw new RubicSdkError('Trying to call abstract class method');
         }
@@ -187,8 +190,12 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         return estimatedGas.plus(this.to.isNative ? WETH_TO_ETH_ESTIMATED_GAS : 0);
     }
 
-    protected constructor(tradeStruct: UniswapV3AlgebraTradeStruct, providerAddress: string) {
-        super(providerAddress);
+    protected constructor(
+        tradeStruct: UniswapV3AlgebraTradeStruct,
+        useProxy: boolean,
+        providerAddress: string
+    ) {
+        super(useProxy, providerAddress);
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;

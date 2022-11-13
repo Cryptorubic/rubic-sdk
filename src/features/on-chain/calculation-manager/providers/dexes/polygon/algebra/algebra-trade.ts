@@ -38,8 +38,8 @@ export class AlgebraTrade extends UniswapV3AlgebraAbstractTrade {
 
     public readonly path: ReadonlyArray<Token>;
 
-    constructor(tradeStruct: AlgebraTradeStruct, providerAddress: string) {
-        super(tradeStruct, providerAddress);
+    constructor(tradeStruct: AlgebraTradeStruct, useProxy: boolean, providerAddress: string) {
+        super(tradeStruct, useProxy, providerAddress);
 
         this.route = tradeStruct.route;
 

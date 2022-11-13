@@ -102,7 +102,11 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             data
         };
         if (fullOptions.gasCalculation === 'disabled') {
-            return new OneinchTrade(oneinchTradeStruct, fullOptions.providerAddress);
+            return new OneinchTrade(
+                oneinchTradeStruct,
+                fullOptions.useProxy,
+                fullOptions.providerAddress
+            );
         }
 
         const gasPriceInfo = await this.getGasPriceInfo();
@@ -112,6 +116,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
                 ...oneinchTradeStruct,
                 gasFeeInfo
             },
+            fullOptions.useProxy,
             fullOptions.providerAddress
         );
     }

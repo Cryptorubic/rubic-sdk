@@ -129,6 +129,7 @@ export abstract class UniswapV2AbstractProvider<
                 deadlineMinutes: fullOptions.deadlineMinutes,
                 slippageTolerance: fullOptions.slippageTolerance
             },
+            fullOptions.useProxy,
             fullOptions.providerAddress
         );
 

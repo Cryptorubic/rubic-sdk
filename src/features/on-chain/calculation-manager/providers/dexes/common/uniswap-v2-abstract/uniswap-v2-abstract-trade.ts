@@ -47,10 +47,13 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
     public static getDexContractAddress(blockchain: BlockchainName): string {
         // see https://github.com/microsoft/TypeScript/issues/34516
         // @ts-ignore
-        const instance = new this({
-            from: { blockchain },
-            wrappedPath: [{ isNative: () => false }, { isNative: () => false }]
-        });
+        const instance = new this(
+            {
+                from: { blockchain },
+                wrappedPath: [{ isNative: () => false }, { isNative: () => false }]
+            },
+            false
+        );
         if (!instance.dexContractAddress) {
             throw new RubicSdkError('Trying to read abstract class field');
         }
@@ -159,8 +162,12 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         return 'TOKENS_TO_TOKENS';
     }
 
-    public constructor(tradeStruct: UniswapV2TradeStruct, providerAddress: string) {
-        super(providerAddress);
+    public constructor(
+        tradeStruct: UniswapV2TradeStruct,
+        useProxy: boolean,
+        providerAddress: string
+    ) {
+        super(useProxy, providerAddress);
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;

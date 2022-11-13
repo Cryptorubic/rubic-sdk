@@ -221,6 +221,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
                     deadlineMinutes: this.options.deadlineMinutes,
                     slippageTolerance: this.options.slippageTolerance
                 },
+                false, // @todo update
                 EvmWeb3Pure.EMPTY_ADDRESS
             );
         });

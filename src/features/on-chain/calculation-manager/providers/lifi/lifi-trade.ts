@@ -48,6 +48,7 @@ export class LifiTrade extends EvmOnChainTrade {
                     route,
                     toTokenWeiAmountMin: new BigNumber(NaN)
                 },
+                false,
                 EvmWeb3Pure.EMPTY_ADDRESS
             ).getTransactionData();
 
@@ -101,9 +102,10 @@ export class LifiTrade extends EvmOnChainTrade {
             route: Route;
             toTokenWeiAmountMin: BigNumber;
         },
+        useProxy: boolean,
         providerAddress: string
     ) {
-        super(providerAddress);
+        super(useProxy, providerAddress);
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;

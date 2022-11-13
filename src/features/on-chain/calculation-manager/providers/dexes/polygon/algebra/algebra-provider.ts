@@ -34,6 +34,7 @@ export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider<AlgebraTra
     protected createTradeInstance(
         tradeStruct: UniswapV3AlgebraTradeStruct,
         route: AlgebraRoute,
+        useProxy: boolean,
         providerAddress: string
     ): AlgebraTrade {
         return new AlgebraTrade(
@@ -41,6 +42,7 @@ export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider<AlgebraTra
                 ...tradeStruct,
                 route
             },
+            useProxy,
             providerAddress
         );
     }

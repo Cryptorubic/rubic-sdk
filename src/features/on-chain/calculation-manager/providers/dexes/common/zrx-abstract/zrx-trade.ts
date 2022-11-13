@@ -42,8 +42,8 @@ export class ZrxTrade extends EvmOnChainTrade {
         return ON_CHAIN_TRADE_TYPE.ZRX;
     }
 
-    constructor(tradeStruct: ZrxTradeStruct, providerAddress: string) {
-        super(providerAddress);
+    constructor(tradeStruct: ZrxTradeStruct, useProxy: boolean, providerAddress: string) {
+        super(useProxy, providerAddress);
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;

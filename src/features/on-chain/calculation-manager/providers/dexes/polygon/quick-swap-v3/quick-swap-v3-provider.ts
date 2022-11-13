@@ -41,6 +41,7 @@ export class QuickSwapV3Provider extends UniswapV3AlgebraAbstractProvider<QuickS
     protected createTradeInstance(
         tradeStruct: UniswapV3AlgebraTradeStruct,
         route: QuickSwapV3Route,
+        useProxy: boolean,
         providerAddress: string
     ): QuickSwapV3Trade {
         return new QuickSwapV3Trade(
@@ -48,6 +49,7 @@ export class QuickSwapV3Provider extends UniswapV3AlgebraAbstractProvider<QuickS
                 ...tradeStruct,
                 route
             },
+            useProxy,
             providerAddress
         );
     }

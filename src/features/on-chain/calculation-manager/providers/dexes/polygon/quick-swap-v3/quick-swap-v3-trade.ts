@@ -38,8 +38,8 @@ export class QuickSwapV3Trade extends UniswapV3AlgebraAbstractTrade {
 
     public readonly path: ReadonlyArray<Token>;
 
-    constructor(tradeStruct: QuickSwapV3TradeStruct, providerAddress: string) {
-        super(tradeStruct, providerAddress);
+    constructor(tradeStruct: QuickSwapV3TradeStruct, useProxy: boolean, providerAddress: string) {
+        super(tradeStruct, useProxy, providerAddress);
 
         this.route = tradeStruct.route;
 
