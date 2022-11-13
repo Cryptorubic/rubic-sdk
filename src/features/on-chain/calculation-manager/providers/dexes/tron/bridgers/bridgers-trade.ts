@@ -30,7 +30,7 @@ export class BridgersTrade extends TronOnChainTrade {
 
     public readonly slippageTolerance: number;
 
-    public readonly contractAddress: string;
+    private readonly contractAddress: string;
 
     public readonly cryptoFeeToken: TokenAmountSymbol;
 
@@ -38,6 +38,10 @@ export class BridgersTrade extends TronOnChainTrade {
 
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.BRIDGERS;
+    }
+
+    public get spenderAddress(): string {
+        return this.contractAddress;
     }
 
     public get toTokenAmountMin(): PriceTokenAmount {

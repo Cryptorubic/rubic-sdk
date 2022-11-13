@@ -19,6 +19,7 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { onChainProxyContractAddress } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
 
 interface LifiTransactionRequest {
     to: string;
@@ -89,6 +90,12 @@ export class LifiTrade extends EvmOnChainTrade {
     private readonly route: Route;
 
     private readonly _toTokenAmountMin: PriceTokenAmount;
+
+    public get spenderAddress(): string {
+        return this.useProxy
+            ? onChainProxyContractAddress[this.from.blockchain]
+            : this.providerGateway;
+    }
 
     public get dexContractAddress(): string {
         throw new RubicSdkError('Dex address is unknown before swap is started');

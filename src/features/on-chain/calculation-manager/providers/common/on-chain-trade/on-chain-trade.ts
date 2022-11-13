@@ -33,7 +33,7 @@ export abstract class OnChainTrade {
 
     public abstract readonly slippageTolerance: number;
 
-    public abstract readonly contractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
+    public abstract readonly spenderAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
     public abstract readonly path: ReadonlyArray<Token>;
 
@@ -91,7 +91,7 @@ export abstract class OnChainTrade {
         const allowance = await this.web3Public.getAllowance(
             this.from.address,
             fromAddress || this.walletAddress,
-            this.contractAddress
+            this.spenderAddress
         );
         return allowance.lt(this.from.weiAmount);
     }

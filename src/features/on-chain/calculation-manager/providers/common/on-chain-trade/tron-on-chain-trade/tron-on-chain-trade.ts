@@ -40,7 +40,7 @@ export abstract class TronOnChainTrade extends OnChainTrade {
 
         return this.web3Private.approveTokens(
             this.from.address,
-            this.contractAddress,
+            this.spenderAddress,
             'infinity',
             options
         );

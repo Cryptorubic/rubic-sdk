@@ -45,12 +45,16 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     /**
      * True, if trade must be swapped through on-chain proxy contract.
      */
-    private readonly useProxy: boolean;
+    protected readonly useProxy: boolean;
 
     public get contractAddress(): string {
         return this.useProxy
             ? onChainProxyContractAddress[this.from.blockchain]
             : this.dexContractAddress;
+    }
+
+    public get spenderAddress(): string {
+        return this.contractAddress;
     }
 
     protected get web3Public(): EvmWeb3Public {
@@ -89,7 +93,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
         return this.web3Private.approveTokens(
             this.from.address,
-            this.contractAddress,
+            this.spenderAddress,
             approveAmount,
             options
         );
