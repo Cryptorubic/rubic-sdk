@@ -100,7 +100,7 @@ export class OneinchTrade extends EvmOnChainTrade {
 
     public readonly to: PriceTokenAmount<EvmBlockchainName>;
 
-    private readonly nativeSupportedFrom: PriceTokenAmount;
+    private readonly nativeSupportedFromWithoutFee: PriceTokenAmount;
 
     private readonly nativeSupportedTo: PriceTokenAmount;
 
@@ -147,14 +147,6 @@ export class OneinchTrade extends EvmOnChainTrade {
         this.dexContractAddress = oneinchTradeStruct.dexContractAddress;
         this.from = oneinchTradeStruct.from;
         this.to = oneinchTradeStruct.to;
-        this.nativeSupportedFrom = createTokenNativeAddressProxy(
-            oneinchTradeStruct.from,
-            oneinchApiParams.nativeAddress
-        );
-        this.nativeSupportedTo = createTokenNativeAddressProxy(
-            oneinchTradeStruct.to,
-            oneinchApiParams.nativeAddress
-        );
         this.gasFeeInfo = oneinchTradeStruct.gasFeeInfo || null;
         this.slippageTolerance = oneinchTradeStruct.slippageTolerance;
         this.disableMultihops = oneinchTradeStruct.disableMultihops;
@@ -166,6 +158,15 @@ export class OneinchTrade extends EvmOnChainTrade {
         );
         this.proxyFeeInfo = oneinchTradeStruct.proxyFeeInfo;
         this.fromWithoutFee = oneinchTradeStruct.fromWithoutFee;
+
+        this.nativeSupportedFromWithoutFee = createTokenNativeAddressProxy(
+            oneinchTradeStruct.fromWithoutFee,
+            oneinchApiParams.nativeAddress
+        );
+        this.nativeSupportedTo = createTokenNativeAddressProxy(
+            oneinchTradeStruct.to,
+            oneinchApiParams.nativeAddress
+        );
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
@@ -207,9 +208,9 @@ export class OneinchTrade extends EvmOnChainTrade {
     ): Promise<OneinchSwapResponse> {
         const swapRequest: OneinchSwapRequest = {
             params: {
-                fromTokenAddress: this.nativeSupportedFrom.address,
+                fromTokenAddress: this.nativeSupportedFromWithoutFee.address,
                 toTokenAddress: this.nativeSupportedTo.address,
-                amount: this.nativeSupportedFrom.stringWeiAmount,
+                amount: this.nativeSupportedFromWithoutFee.stringWeiAmount,
                 slippage: (this.slippageTolerance * 100).toString(),
                 fromAddress: fromAddress || this.walletAddress,
                 disableEstimate,
@@ -234,8 +235,7 @@ export class OneinchTrade extends EvmOnChainTrade {
         if (inchError) {
             if ('message' in inchError) {
                 if (inchError.message?.includes('cannot estimate')) {
-                    const nativeToken =
-                        nativeTokensList[this.nativeSupportedFrom.blockchain]?.symbol;
+                    const nativeToken = nativeTokensList[this.from.blockchain]?.symbol;
                     const message = `1inch sets increased costs on gas fee. For transaction enter less ${nativeToken} amount or top up your ${nativeToken} balance.`;
                     return new RubicSdkError(message);
                 }

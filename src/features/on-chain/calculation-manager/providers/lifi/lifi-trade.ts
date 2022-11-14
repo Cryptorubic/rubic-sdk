@@ -132,7 +132,7 @@ export class LifiTrade extends EvmOnChainTrade {
             return {
                 to: transactionData.to,
                 data: transactionData.data,
-                value: this.from.isNative ? this.from.stringWeiAmount : '0',
+                value: this.fromWithoutFee.isNative ? this.fromWithoutFee.stringWeiAmount : '0',
                 gas,
                 gasPrice
             };

@@ -194,11 +194,11 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
     }
 
     private getAmountInAndAmountOut(): { amountIn: string; amountOut: string } {
-        let amountIn = this.from.stringWeiAmount;
+        let amountIn = this.fromWithoutFee.stringWeiAmount;
         let amountOut = this.toTokenAmountMin.stringWeiAmount;
 
         if (this.exact === 'output') {
-            amountIn = this.from.weiAmountPlusSlippage(this.slippageTolerance).toFixed(0);
+            amountIn = this.fromWithoutFee.weiAmountPlusSlippage(this.slippageTolerance).toFixed(0);
             amountOut = this.to.stringWeiAmount;
         }
 

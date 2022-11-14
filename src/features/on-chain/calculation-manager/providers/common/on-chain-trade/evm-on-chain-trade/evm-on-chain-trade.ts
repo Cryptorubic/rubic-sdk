@@ -215,7 +215,9 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             directTransactionConfig.data
         ];
 
-        const value = this.from.isNative ? this.from.stringWeiAmount : '0';
+        const value = new BigNumber(this.proxyFeeInfo?.fixedCryptoFeeWei || 0)
+            .plus(this.from.isNative ? this.from.weiAmount : '0')
+            .toFixed(0);
 
         return {
             contractAddress: this.contractAddress,

@@ -213,10 +213,12 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
     protected getAmountParams(): [string, string] {
         if (this.exact === 'input') {
             const amountOutMin = this.to.weiAmountMinusSlippage(this.slippageTolerance).toFixed(0);
-            return [this.from.stringWeiAmount, amountOutMin];
+            return [this.fromWithoutFee.stringWeiAmount, amountOutMin];
         }
 
-        const amountInMax = this.from.weiAmountPlusSlippage(this.slippageTolerance).toFixed(0);
+        const amountInMax = this.fromWithoutFee
+            .weiAmountPlusSlippage(this.slippageTolerance)
+            .toFixed(0);
         return [this.to.stringWeiAmount, amountInMax];
     }
 
@@ -239,7 +241,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
             this.contractAbi,
             methodName,
             methodArguments,
-            this.from.isNative ? this.from.stringWeiAmount : '0',
+            this.fromWithoutFee.isNative ? this.fromWithoutFee.stringWeiAmount : '0',
             gasParams
         );
     }
