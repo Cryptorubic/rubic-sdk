@@ -30,6 +30,7 @@ import { getSrcTxStatus } from 'src/features/common/status-manager/utils/get-src
 import { RubicSdkError } from 'src/common/errors';
 import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
 import { MultichainStatusMapping } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
+import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
 /**
  * Contains methods for getting cross-chain trade statuses.
@@ -45,7 +46,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.VIA]: this.getViaDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.BRIDGERS]: this.getBridgersDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: this.getMultichainDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: this.getMultichainDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus
     };
 
     /**
@@ -480,6 +482,27 @@ export class CrossChainStatusManager {
                 status: TxStatus.PENDING,
                 hash: null
             };
+        }
+    }
+
+    private async getXyDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        try {
+            const { isSuccess, status, txHash } = await this.httpClient.get<XyApiResponse>(
+                `https://open-api.xy.finance/v1/crossChainStatus?srcChainId=${
+                    blockchainId[data.fromBlockchain]
+                }&transactionHash=${data.srcTxHash}`
+            );
+
+            if (isSuccess && status === 'Done') {
+                return { status: TxStatus.SUCCESS, hash: txHash };
+            }
+
+            if (!isSuccess) {
+                return { status: TxStatus.FAIL, hash: null };
+            }
+            return { status: TxStatus.PENDING, hash: null };
+        } catch {
+            return { status: TxStatus.PENDING, hash: null };
         }
     }
 }
