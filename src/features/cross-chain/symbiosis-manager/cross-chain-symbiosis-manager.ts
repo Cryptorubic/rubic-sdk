@@ -95,6 +95,7 @@ export class CrossChainSymbiosisManager {
 
         return this.web3Private.trySendTransaction(transactionRequest.to!, {
             data: transactionRequest.data!.toString(),
+            value: transactionRequest.value?.toString() || '0',
             onTransactionHash,
             gas: gasLimit,
             gasPrice

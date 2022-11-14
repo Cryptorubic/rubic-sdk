@@ -47,13 +47,13 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
      */
     protected readonly useProxy: boolean;
 
-    public get contractAddress(): string {
+    private get contractAddress(): string {
         return this.useProxy
             ? onChainProxyContractAddress[this.from.blockchain]
             : this.dexContractAddress;
     }
 
-    public get spenderAddress(): string {
+    protected get spenderAddress(): string {
         return this.contractAddress;
     }
 
@@ -173,6 +173,9 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         return this.encodeDirect(options);
     }
 
+    /**
+     * Encodes trade to swap it through on-chain proxy.
+     */
     private async encodeProxy(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getProxyContractParams(options);

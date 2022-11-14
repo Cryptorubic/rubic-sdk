@@ -91,7 +91,7 @@ export class LifiTrade extends EvmOnChainTrade {
 
     private readonly _toTokenAmountMin: PriceTokenAmount;
 
-    public get spenderAddress(): string {
+    protected get spenderAddress(): string {
         return this.useProxy
             ? onChainProxyContractAddress[this.from.blockchain]
             : this.providerGateway;

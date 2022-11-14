@@ -40,7 +40,7 @@ export class BridgersTrade extends TronOnChainTrade {
         return ON_CHAIN_TRADE_TYPE.BRIDGERS;
     }
 
-    public get spenderAddress(): string {
+    protected get spenderAddress(): string {
         return this.contractAddress;
     }
 

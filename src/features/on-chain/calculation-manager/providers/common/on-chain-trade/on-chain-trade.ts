@@ -33,7 +33,7 @@ export abstract class OnChainTrade {
 
     public abstract readonly slippageTolerance: number;
 
-    public abstract readonly spenderAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
+    protected abstract readonly spenderAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
     public abstract readonly path: ReadonlyArray<Token>;
 
