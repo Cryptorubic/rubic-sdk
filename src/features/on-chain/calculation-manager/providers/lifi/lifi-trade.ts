@@ -1,12 +1,7 @@
 import { Route } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
-import {
-    SwapRequestError,
-    LifiPairIsUnavailableError,
-    RubicSdkError,
-    UnsupportedReceiverAddressError
-} from 'src/common/errors';
+import { SwapRequestError, LifiPairIsUnavailableError, RubicSdkError } from 'src/common/errors';
 import { Token } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
@@ -19,6 +14,7 @@ import { Injector } from 'src/core/injector/injector';
 import { onChainProxyContractAddress } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-trade-struct';
+import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 
 interface LifiTransactionRequest {
     to: string;
@@ -117,9 +113,7 @@ export class LifiTrade extends EvmOnChainTrade {
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        if (options?.receiverAddress) {
-            throw new UnsupportedReceiverAddressError();
-        }
+        checkUnsupportedReceiverAddress(options?.receiverAddress, this.walletAddress);
         this.checkFromAddress(options.fromAddress, true);
 
         try {

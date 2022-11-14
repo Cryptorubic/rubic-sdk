@@ -4,7 +4,6 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { EvmTransaction, RangoClient } from 'rango-sdk-basic/lib';
-import { UnsupportedReceiverAddressError } from 'src/common/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -25,6 +24,7 @@ import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/cal
 import { RANGO_CONTRACT_ADDRESSES } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/contract-address';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { RangoBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/models/rango-bridge-types';
+import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 
 export class RangoCrossChainTrade extends EvmCrossChainTrade {
     /**  @internal */
@@ -171,9 +171,8 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        if (options?.receiverAddress) {
-            throw new UnsupportedReceiverAddressError();
-        }
+        this.checkWalletConnected();
+        checkUnsupportedReceiverAddress(options?.receiverAddress, this.walletAddress);
 
         return super.swap(options);
     }

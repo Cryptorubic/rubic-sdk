@@ -73,7 +73,8 @@ export class DeflationTokenManager {
             uniswapV2Providers.map(uniswapV2Provider =>
                 uniswapV2Provider.calculate(from, to, {
                     slippageTolerance: 1,
-                    deadlineMinutes: DEADLINE
+                    deadlineMinutes: DEADLINE,
+                    gasCalculation: 'disabled'
                 })
             )
         );

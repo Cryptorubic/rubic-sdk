@@ -188,7 +188,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                               ...transitToken,
                               price: new BigNumber(1),
                               tokenAmount: new BigNumber(1)
-                          })
+                          }),
+                          {
+                              gasCalculation: 'disabled'
+                          }
                       )
                   ).to.tokenAmount;
 

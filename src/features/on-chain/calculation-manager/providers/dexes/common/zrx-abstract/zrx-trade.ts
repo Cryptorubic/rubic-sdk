@@ -1,6 +1,5 @@
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ZrxQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-types';
-import { UnsupportedReceiverAddressError } from 'src/common/errors';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import {
     ON_CHAIN_TRADE_TYPE,
@@ -14,6 +13,7 @@ import BigNumber from 'bignumber.js';
 import { Injector } from 'src/core/injector/injector';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
+import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 
 interface ZrxTradeStruct {
     from: PriceTokenAmount<EvmBlockchainName>;
@@ -100,9 +100,7 @@ export class ZrxTrade extends EvmOnChainTrade {
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        if (options?.receiverAddress) {
-            throw new UnsupportedReceiverAddressError();
-        }
+        checkUnsupportedReceiverAddress(options?.receiverAddress, this.walletAddress);
 
         const { gas, gasPrice } = this.getGasParams(options);
 

@@ -3,18 +3,12 @@ import {
     rangoCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import {
-    MaxAmountError,
-    MinAmountError,
-    RubicSdkError,
-    UnsupportedReceiverAddressError
-} from 'src/common/errors';
+import { MaxAmountError, MinAmountError, RubicSdkError } from 'src/common/errors';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
 import {
     EvmTransaction,
-    MetaResponse,
     QuotePath,
     QuoteSimulationResult,
     RangoClient,
@@ -38,13 +32,12 @@ import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/prov
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RangoBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/models/rango-bridge-types';
+import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 
 export class RangoCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.RANGO;
 
     public readonly rango = new RangoClient(RANGO_API_KEY);
-
-    public meta: MetaResponse | null = null;
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
@@ -59,9 +52,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
-        if (options.receiverAddress) {
-            throw new UnsupportedReceiverAddressError();
-        }
+        checkUnsupportedReceiverAddress(options.receiverAddress);
 
         const fromBlockchain = from.blockchain as RangoCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as RangoCrossChainSupportedBlockchain;

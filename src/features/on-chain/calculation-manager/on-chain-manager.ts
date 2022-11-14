@@ -155,9 +155,9 @@ export class OnChainManager {
                 this.deflationTokenManager.checkToken(from),
                 this.deflationTokenManager.checkToken(to)
             ]);
-            return true;
-        } catch {
             return false;
+        } catch {
+            return true;
         }
     }
 

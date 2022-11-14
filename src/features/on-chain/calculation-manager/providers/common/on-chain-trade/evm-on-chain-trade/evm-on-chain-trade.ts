@@ -144,7 +144,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         };
 
         const fromAddress = this.walletAddress;
-        const { receiverAddress } = options;
+        const receiverAddress = options.receiverAddress || this.walletAddress;
 
         try {
             const transactionConfig = await this.encode({
@@ -202,15 +202,16 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         const methodName = this.from.isNative ? 'instantTradeNative' : 'instantTrade';
 
         const directTransactionConfig = await this.encodeDirect({ ...options, supportFee: false });
+        const receiverAddress = options.receiverAddress || options.fromAddress;
         const methodArguments = [
             [
                 this.from.address,
                 this.from.stringWeiAmount,
                 this.to.address,
                 this.toTokenAmountMin.stringWeiAmount,
-                options.receiverAddress,
+                receiverAddress,
                 this.providerAddress,
-                this.dexContractAddress
+                directTransactionConfig.to
             ],
             directTransactionConfig.data
         ];
