@@ -13,6 +13,7 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import BigNumber from 'bignumber.js';
 import { Injector } from 'src/core/injector/injector';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 
 interface ZrxTradeStruct {
     from: PriceTokenAmount<EvmBlockchainName>;
@@ -21,17 +22,17 @@ interface ZrxTradeStruct {
     apiTradeData: ZrxQuoteResponse;
     path: ReadonlyArray<Token>;
     gasFeeInfo?: GasFeeInfo;
+    proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+    fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 }
 
 export class ZrxTrade extends EvmOnChainTrade {
     /** @internal */
     public static async getGasLimit(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        apiTradeData: ZrxQuoteResponse,
+        zrxTradeStruct: ZrxTradeStruct,
         useProxy: boolean
     ): Promise<BigNumber | null> {
-        const fromBlockchain = from.blockchain;
+        const fromBlockchain = zrxTradeStruct.from.blockchain;
         const walletAddress =
             Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
         if (!walletAddress) {
@@ -40,13 +41,7 @@ export class ZrxTrade extends EvmOnChainTrade {
 
         try {
             const transactionConfig = await new ZrxTrade(
-                {
-                    from,
-                    to,
-                    slippageTolerance: 0.02,
-                    apiTradeData,
-                    path: []
-                },
+                zrxTradeStruct,
                 useProxy,
                 EvmWeb3Pure.EMPTY_ADDRESS
             ).encode({ fromAddress: walletAddress });
@@ -82,6 +77,10 @@ export class ZrxTrade extends EvmOnChainTrade {
 
     public readonly path: ReadonlyArray<Token>;
 
+    protected readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+
+    protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
+
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.ZRX;
     }
@@ -96,6 +95,8 @@ export class ZrxTrade extends EvmOnChainTrade {
         this.apiTradeData = tradeStruct.apiTradeData;
         this.dexContractAddress = this.apiTradeData.to;
         this.path = tradeStruct.path;
+        this.proxyFeeInfo = tradeStruct.proxyFeeInfo;
+        this.fromWithoutFee = tradeStruct.fromWithoutFee;
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {

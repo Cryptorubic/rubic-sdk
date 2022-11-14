@@ -19,7 +19,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { TransactionConfig } from 'web3-core';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 
 export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
@@ -139,7 +139,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     protected async getContractParams(
         options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
     ): Promise<ContractParams> {
-        const fromWithoutFee = getFromWithoutFee(this.from, this.feeInfo);
+        const fromWithoutFee = getFromWithoutFee(this.from, this.feeInfo?.platformFee?.percent);
         const { methodArguments, transactionData } =
             await getMethodArgumentsAndTransactionData<EvmBridgersTransactionData>(
                 fromWithoutFee,

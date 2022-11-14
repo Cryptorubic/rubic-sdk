@@ -1,4 +1,4 @@
-import LIFI, { Route, RouteOptions, RoutesRequest, Step } from '@lifi/sdk';
+import LIFI, { RouteOptions, RoutesRequest, Step } from '@lifi/sdk';
 import { notNull } from 'src/common/utils/object';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import {
@@ -20,6 +20,10 @@ import { OnChainIsUnavailableError } from 'src/common/errors/on-chain';
 import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
 import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
+import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
+import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-trade-struct';
 
 export class LifiProvider {
     private readonly lifi = new LIFI(getLifiConfig());
@@ -45,9 +49,7 @@ export class LifiProvider {
             disabledProviders: options.disabledProviders
         });
 
-        if (fullOptions.useProxy) {
-            await this.checkContractState(from.blockchain);
-        }
+        const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
 
         const fromChainId = blockchainId[from.blockchain];
         const toChainId = blockchainId[toToken.blockchain];
@@ -69,8 +71,8 @@ export class LifiProvider {
 
         const routesRequest: RoutesRequest = {
             fromChainId,
-            fromAmount: from.stringWeiAmount,
-            fromTokenAddress: from.address,
+            fromAmount: fromWithoutFee.stringWeiAmount,
+            fromTokenAddress: fromWithoutFee.address,
             toChainId,
             toTokenAddress: toToken.address,
             options: routeOptions
@@ -86,35 +88,41 @@ export class LifiProvider {
                     if (!step) {
                         return null;
                     }
-
-                    const to = new PriceTokenAmount({
-                        ...toToken.asStruct,
-                        weiAmount: new BigNumber(route.toAmount)
-                    });
-
                     const type = lifiProviders[step.toolDetails.name.toLowerCase()];
                     if (!type) {
                         return null;
                     }
 
-                    const [gasFeeInfo, path] = await Promise.all([
+                    const to = new PriceTokenAmount({
+                        ...toToken.asStruct,
+                        weiAmount: new BigNumber(route.toAmount)
+                    });
+                    const path = await this.getPath(step, from, to);
+
+                    let lifiTradeStruct: LifiTradeStruct = {
+                        from,
+                        to,
+                        gasFeeInfo: null,
+                        slippageTolerance: fullOptions.slippageTolerance,
+                        type,
+                        path,
+                        route,
+                        toTokenWeiAmountMin: new BigNumber(route.toAmountMin),
+                        proxyFeeInfo,
+                        fromWithoutFee
+                    };
+
+                    const gasFeeInfo =
                         fullOptions.gasCalculation === 'disabled'
                             ? null
-                            : this.getGasFeeInfo(from, to, route, fullOptions.useProxy),
-                        this.getPath(step, from, to)
-                    ]);
+                            : await this.getGasFeeInfo(lifiTradeStruct, fullOptions.useProxy);
+                    lifiTradeStruct = {
+                        ...lifiTradeStruct,
+                        gasFeeInfo
+                    };
 
                     return new LifiTrade(
-                        {
-                            from,
-                            to,
-                            gasFeeInfo,
-                            slippageTolerance: fullOptions.slippageTolerance,
-                            type,
-                            path,
-                            route,
-                            toTokenWeiAmountMin: new BigNumber(route.toAmountMin)
-                        },
+                        lifiTradeStruct,
                         fullOptions.useProxy,
                         fullOptions.providerAddress
                     );
@@ -130,14 +138,38 @@ export class LifiProvider {
         }
     }
 
-    private async getGasFeeInfo(
+    protected async handleProxyContract(
         from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        route: Route,
+        fullOptions: RequiredOnChainCalculationOptions
+    ): Promise<{
+        fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
+        proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+    }> {
+        let fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
+        let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+        if (fullOptions.useProxy) {
+            await this.checkContractState(from.blockchain);
+
+            proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
+                from.blockchain,
+                fullOptions.providerAddress
+            );
+            fromWithoutFee = getFromWithoutFee(from, proxyFeeInfo.platformFeePercent);
+        } else {
+            fromWithoutFee = from;
+        }
+        return {
+            fromWithoutFee,
+            proxyFeeInfo
+        };
+    }
+
+    private async getGasFeeInfo(
+        lifiTradeStruct: LifiTradeStruct,
         useProxy: boolean
     ): Promise<GasFeeInfo | null> {
-        const gasPriceInfo = await getGasPriceInfo(from.blockchain);
-        const gasLimit = await LifiTrade.getGasLimit(from, to, route, useProxy);
+        const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
+        const gasLimit = await LifiTrade.getGasLimit(lifiTradeStruct, useProxy);
         return getGasFeeInfo(gasLimit, gasPriceInfo);
     }
 

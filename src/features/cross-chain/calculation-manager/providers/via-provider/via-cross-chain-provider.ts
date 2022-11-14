@@ -35,7 +35,7 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RubicSdkError } from 'src/common/errors';
 
 interface ToolType extends IActionStepTool {
@@ -69,7 +69,7 @@ export class ViaCrossChainProvider extends CrossChainProvider {
             const toChainId = blockchainId[toBlockchain];
 
             let feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo?.platformFee?.percent);
 
             const via = new Via({
                 ...VIA_DEFAULT_CONFIG,

@@ -73,11 +73,12 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             fromAddress: this.walletAddress
         });
 
-        if (fullOptions.useProxy) {
-            await this.checkContractState(from.blockchain);
-        }
+        const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
 
-        const fromTokenClone = createTokenNativeAddressProxy(from, oneinchApiParams.nativeAddress);
+        const fromTokenClone = createTokenNativeAddressProxy(
+            fromWithoutFee,
+            oneinchApiParams.nativeAddress
+        );
         const toTokenClone = createTokenNativeAddressProxy(toToken, oneinchApiParams.nativeAddress);
 
         const [dexContractAddress, { toTokenAmountInWei, estimatedGas, path, data }] =
@@ -100,7 +101,9 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             slippageTolerance: fullOptions.slippageTolerance,
             disableMultihops: fullOptions.disableMultihops,
             path,
-            data
+            data,
+            proxyFeeInfo,
+            fromWithoutFee
         };
         if (fullOptions.gasCalculation === 'disabled') {
             return new OneinchTrade(
@@ -112,12 +115,8 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
 
         const gasPriceInfo = await this.getGasPriceInfo();
         const gasLimit =
-            (await OneinchTrade.getGasLimit(
-                from,
-                to,
-                fullOptions.disableMultihops,
-                fullOptions.useProxy
-            )) || estimatedGas;
+            (await OneinchTrade.getGasLimit(oneinchTradeStruct, fullOptions.useProxy)) ||
+            estimatedGas;
         const gasFeeInfo = getGasFeeInfo(gasLimit, gasPriceInfo);
         return new OneinchTrade(
             {

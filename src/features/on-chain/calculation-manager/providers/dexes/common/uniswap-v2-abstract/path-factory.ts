@@ -5,7 +5,7 @@ import { notNull } from 'src/common/utils/object';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
 import { InsufficientLiquidityError, RubicSdkError } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { PriceToken, Token } from 'src/common/tokens';
 import {
     UniswapCalculatedInfo,
     UniswapCalculatedInfoWithProfit
@@ -20,6 +20,8 @@ import BigNumber from 'bignumber.js';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
 import { UniswapV2CalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-calculation-options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
+import { getFromToTokensAmountsByExact } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
 
 export interface PathFactoryStruct {
     readonly from: PriceToken<EvmBlockchainName>;
@@ -27,6 +29,7 @@ export interface PathFactoryStruct {
     readonly weiAmount: BigNumber;
     readonly exact: Exact;
     readonly options: UniswapV2CalculationOptions;
+    readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
 }
 
 export interface UniswapV2AbstractProviderStruct<T extends UniswapV2AbstractTrade> {
@@ -46,6 +49,8 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
     private readonly exact: Exact;
 
     private readonly options: UniswapV2CalculationOptions;
+
+    private readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
 
     private readonly UniswapV2TradeClass: UniswapV2TradeClass<T>;
 
@@ -81,6 +86,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         this.maxTransitTokens = pathFactoryStruct.options.disableMultihops
             ? 0
             : uniswapProviderStruct.providerSettings.maxTransitTokens;
+        this.proxyFeeInfo = pathFactoryStruct.proxyFeeInfo;
     }
 
     public async getAmountAndPath(
@@ -197,23 +203,25 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
     private getTradesByRoutes(routes: UniswapRoute[]): UniswapV2AbstractTrade[] {
         return routes.map(route => {
-            const fromAmount = this.exact === 'input' ? this.weiAmount : route.outputAbsoluteAmount;
-            const toAmount = this.exact === 'output' ? this.weiAmount : route.outputAbsoluteAmount;
+            const { from, to, fromWithoutFee } = getFromToTokensAmountsByExact(
+                this.from,
+                this.to,
+                this.exact,
+                this.weiAmount,
+                this.weiAmount,
+                route.outputAbsoluteAmount
+            );
 
             return new this.UniswapV2TradeClass(
                 {
-                    from: new PriceTokenAmount({
-                        ...this.from.asStruct,
-                        weiAmount: fromAmount
-                    }),
-                    to: new PriceTokenAmount({
-                        ...this.to.asStruct,
-                        weiAmount: toAmount
-                    }),
+                    from,
+                    to,
                     wrappedPath: route.path,
                     exact: this.exact,
                     deadlineMinutes: this.options.deadlineMinutes,
-                    slippageTolerance: this.options.slippageTolerance
+                    slippageTolerance: this.options.slippageTolerance,
+                    proxyFeeInfo: this.proxyFeeInfo,
+                    fromWithoutFee
                 },
                 this.options.useProxy,
                 EvmWeb3Pure.EMPTY_ADDRESS

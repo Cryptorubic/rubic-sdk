@@ -21,6 +21,7 @@ import BigNumber from 'bignumber.js';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 
 export interface UniswapV3AlgebraTradeStruct {
     from: PriceTokenAmount<EvmBlockchainName>;
@@ -29,6 +30,8 @@ export interface UniswapV3AlgebraTradeStruct {
     slippageTolerance: number;
     deadlineMinutes: number;
     gasFeeInfo?: GasFeeInfo | null;
+    proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+    fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 }
 
 interface EstimateGasOptions {
@@ -53,6 +56,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
             fromToken,
             toToken,
             exact,
+            weiAmount,
             weiAmount,
             route.outputAbsoluteAmount
         );
@@ -90,6 +94,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
                     fromToken,
                     toToken,
                     exact,
+                    weiAmount,
                     weiAmount,
                     route.outputAbsoluteAmount
                 );
@@ -168,6 +173,10 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
 
     public abstract readonly path: ReadonlyArray<Token>;
 
+    protected readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+
+    protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
+
     public get type(): OnChainTradeType {
         return (<typeof UniswapV3AbstractTrade>this.constructor).type;
     }
@@ -197,6 +206,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         this.gasFeeInfo = tradeStruct.gasFeeInfo || null;
         this.slippageTolerance = tradeStruct.slippageTolerance;
         this.deadlineMinutes = tradeStruct.deadlineMinutes;
+        this.proxyFeeInfo = tradeStruct.proxyFeeInfo;
+        this.fromWithoutFee = tradeStruct.fromWithoutFee;
     }
 
     protected getAmountParams(): [string, string] {

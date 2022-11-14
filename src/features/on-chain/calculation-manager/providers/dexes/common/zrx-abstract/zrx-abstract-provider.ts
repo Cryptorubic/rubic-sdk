@@ -43,11 +43,12 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
     ): Promise<ZrxTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
-        if (fullOptions.useProxy) {
-            await this.checkContractState(from.blockchain);
-        }
+        const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
 
-        const fromClone = createTokenNativeAddressProxy(from, zrxApiParams.nativeTokenAddress);
+        const fromClone = createTokenNativeAddressProxy(
+            fromWithoutFee,
+            zrxApiParams.nativeTokenAddress
+        );
         const toClone = createTokenNativeAddressProxy(toToken, zrxApiParams.nativeTokenAddress);
 
         const affiliateAddress = fullOptions.zrxAffiliateAddress;
@@ -72,7 +73,9 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
             to,
             slippageTolerance: fullOptions.slippageTolerance,
             apiTradeData,
-            path: [from, to]
+            path: [from, to],
+            proxyFeeInfo,
+            fromWithoutFee
         };
         if (fullOptions.gasCalculation === 'disabled') {
             return new ZrxTrade(tradeStruct, fullOptions.useProxy, fullOptions.providerAddress);
@@ -80,8 +83,7 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
 
         const gasPriceInfo = await this.getGasPriceInfo();
         const gasLimit =
-            (await ZrxTrade.getGasLimit(from, to, apiTradeData, fullOptions.useProxy)) ||
-            apiTradeData.gas;
+            (await ZrxTrade.getGasLimit(tradeStruct, fullOptions.useProxy)) || apiTradeData.gas;
         const gasFeeInfo = await getGasFeeInfo(gasLimit, gasPriceInfo);
 
         return new ZrxTrade(

@@ -8,10 +8,12 @@ export function getFromToTokensAmountsByExact<T extends BlockchainName>(
     toToken: PriceToken<T>,
     exact: Exact,
     initialWeiAmount: BigNumber,
+    weiAmountWithoutFee: BigNumber,
     routeWeiAmount: BigNumber
 ): {
     from: PriceTokenAmount<T>;
     to: PriceTokenAmount<T>;
+    fromWithoutFee: PriceTokenAmount<T>;
 } {
     const fromAmount = exact === 'input' ? initialWeiAmount : routeWeiAmount;
     const toAmount = exact === 'output' ? initialWeiAmount : routeWeiAmount;
@@ -23,6 +25,10 @@ export function getFromToTokensAmountsByExact<T extends BlockchainName>(
         ...toToken.asStruct,
         weiAmount: toAmount
     });
+    const fromWithoutFee = new PriceTokenAmount({
+        ...fromToken.asStruct,
+        weiAmount: weiAmountWithoutFee
+    });
 
-    return { from, to };
+    return { from, to, fromWithoutFee };
 }

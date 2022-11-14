@@ -6,6 +6,7 @@ import {
     onChainProxyContractAddress
 } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
 import { Cache } from 'src/common/utils/decorators';
+import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 
 export class OnChainProxyService {
     @Cache({
@@ -29,10 +30,7 @@ export class OnChainProxyService {
     public async getFeeInfo(
         fromBlockchain: EvmBlockchainName,
         providerAddress: string
-    ): Promise<{
-        fixedCryptoFeeWei: string;
-        platformFeePercent: number;
-    }> {
+    ): Promise<OnChainProxyFeeInfo> {
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
         const contractAddress = onChainProxyContractAddress[fromBlockchain];
 

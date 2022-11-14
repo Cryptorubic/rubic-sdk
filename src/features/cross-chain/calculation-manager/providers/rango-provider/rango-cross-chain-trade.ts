@@ -10,14 +10,15 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { BRIDGE_TYPE,
+import {
+    BRIDGE_TYPE,
     BridgeType
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RANGO_BLOCKCHAIN_NAME } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-blockchain-name';
 import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
 import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
@@ -215,7 +216,10 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
     }
 
     private async refetchTxData(): Promise<EvmTransaction> {
-        const amountWithoutFee = getFromWithoutFee(this.from, this.feeInfo).stringWeiAmount;
+        const amountWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo?.platformFee?.percent
+        ).stringWeiAmount;
         const response = await this.rangoClientRef.swap({
             from: {
                 blockchain:

@@ -29,6 +29,7 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { Injector } from 'src/core/injector/injector';
 import BigNumber from 'bignumber.js';
+import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 
 type OneinchTradeStruct = {
     dexContractAddress: string;
@@ -39,17 +40,17 @@ type OneinchTradeStruct = {
     path: ReadonlyArray<Token>;
     gasFeeInfo?: GasFeeInfo | null;
     data: string | null;
+    proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+    fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 };
 
 export class OneinchTrade extends EvmOnChainTrade {
     /** @internal */
     public static async getGasLimit(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        disableMultihops: boolean,
+        oneinchTradeStruct: OneinchTradeStruct,
         useProxy: boolean
     ): Promise<BigNumber | null> {
-        const fromBlockchain = from.blockchain;
+        const fromBlockchain = oneinchTradeStruct.from.blockchain;
         const walletAddress =
             Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
         if (!walletAddress) {
@@ -58,16 +59,7 @@ export class OneinchTrade extends EvmOnChainTrade {
 
         try {
             const transactionConfig = await new OneinchTrade(
-                {
-                    from,
-                    to,
-                    dexContractAddress: '',
-                    slippageTolerance: 0.02,
-                    disableMultihops,
-                    path: [],
-                    gasFeeInfo: null,
-                    data: null
-                },
+                oneinchTradeStruct,
                 useProxy,
                 EvmWeb3Pure.EMPTY_ADDRESS
             ).encode({ fromAddress: walletAddress });
@@ -123,6 +115,10 @@ export class OneinchTrade extends EvmOnChainTrade {
      */
     public readonly path: ReadonlyArray<Token>;
 
+    protected readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+
+    protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
+
     /**
      * @internal
      * Path with wrapped native address.
@@ -168,6 +164,8 @@ export class OneinchTrade extends EvmOnChainTrade {
             this.path,
             oneinchApiParams.nativeAddress
         );
+        this.proxyFeeInfo = oneinchTradeStruct.proxyFeeInfo;
+        this.fromWithoutFee = oneinchTradeStruct.fromWithoutFee;
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {

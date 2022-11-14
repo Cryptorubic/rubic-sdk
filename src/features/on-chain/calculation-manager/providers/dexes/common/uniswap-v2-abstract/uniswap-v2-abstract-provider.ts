@@ -16,6 +16,8 @@ import { UniswapV2CalculationOptions } from 'src/features/on-chain/calculation-m
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
+import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
+import { getFromToTokensAmountsByExact } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
 
 export abstract class UniswapV2AbstractProvider<
     T extends UniswapV2AbstractTrade = UniswapV2AbstractTrade
@@ -77,27 +79,40 @@ export abstract class UniswapV2AbstractProvider<
 
     /**
      * Calculates on-chain trade.
-     * @param from Token to sell.
-     * @param to Token to get.
+     * @param fromToken Token to sell.
+     * @param toToken Token to get.
      * @param weiAmount Amount to sell or to get in wei.
      * @param exact Defines, whether to call 'exactInput' or 'exactOutput' method.
      * @param options Additional options.
      */
     public async calculateDifficultTrade(
-        from: PriceToken<EvmBlockchainName>,
-        to: PriceToken<EvmBlockchainName>,
+        fromToken: PriceToken<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         weiAmount: BigNumber,
         exact: Exact,
         options?: OnChainCalculationOptions
     ): Promise<UniswapV2AbstractTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
+        let weiAmountWithoutFee = weiAmount;
+        let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
         if (fullOptions.useProxy) {
-            await this.checkContractState(from.blockchain);
+            const proxyContractInfo = await this.handleProxyContract(
+                new PriceTokenAmount({
+                    ...fromToken.asStruct,
+                    weiAmount
+                }),
+                fullOptions
+            );
+            weiAmountWithoutFee = proxyContractInfo.fromWithoutFee.weiAmount;
+            proxyFeeInfo = proxyContractInfo.proxyFeeInfo;
         }
 
-        const fromProxy = createTokenNativeAddressProxy(from, this.providerSettings.wethAddress);
-        const toProxy = createTokenNativeAddressProxy(to, this.providerSettings.wethAddress);
+        const fromProxy = createTokenNativeAddressProxy(
+            fromToken,
+            this.providerSettings.wethAddress
+        );
+        const toProxy = createTokenNativeAddressProxy(toToken, this.providerSettings.wethAddress);
 
         let gasPriceInfo: GasPriceInfo | undefined;
         if (fullOptions.gasCalculation !== 'disabled') {
@@ -107,26 +122,32 @@ export abstract class UniswapV2AbstractProvider<
         const { route, estimatedGas } = await this.getAmountAndPath(
             fromProxy,
             toProxy,
-            weiAmount,
+            weiAmountWithoutFee,
             exact,
             fullOptions,
+            proxyFeeInfo,
             gasPriceInfo?.gasPriceInUsd
         );
 
-        const fromAmount = exact === 'input' ? weiAmount : route.outputAbsoluteAmount;
-        const toAmount = exact === 'output' ? weiAmount : route.outputAbsoluteAmount;
+        const { from, to, fromWithoutFee } = getFromToTokensAmountsByExact(
+            fromToken,
+            toToken,
+            exact,
+            weiAmount,
+            weiAmountWithoutFee,
+            route.outputAbsoluteAmount
+        );
 
         const uniswapV2Trade: UniswapV2AbstractTrade = new this.UniswapV2TradeClass(
             {
-                from: new PriceTokenAmount({
-                    ...from.asStruct,
-                    weiAmount: fromAmount
-                }),
-                to: new PriceTokenAmount({ ...to.asStruct, weiAmount: toAmount }),
+                from,
+                to,
                 exact,
                 wrappedPath: route.path,
                 deadlineMinutes: fullOptions.deadlineMinutes,
-                slippageTolerance: fullOptions.slippageTolerance
+                slippageTolerance: fullOptions.slippageTolerance,
+                proxyFeeInfo,
+                fromWithoutFee
             },
             fullOptions.useProxy,
             fullOptions.providerAddress
@@ -146,9 +167,17 @@ export abstract class UniswapV2AbstractProvider<
         weiAmount: BigNumber,
         exact: Exact,
         options: UniswapV2CalculationOptions,
+        proxyFeeInfo: OnChainProxyFeeInfo | undefined,
         gasPriceInUsd: BigNumber | undefined
     ): Promise<UniswapCalculatedInfo> {
-        const pathFactory = new PathFactory(this, { from, to, weiAmount, exact, options });
+        const pathFactory = new PathFactory(this, {
+            from,
+            to,
+            weiAmount,
+            exact,
+            options,
+            proxyFeeInfo
+        });
         return pathFactory.getAmountAndPath(gasPriceInUsd);
     }
 }

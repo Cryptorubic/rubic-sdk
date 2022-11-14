@@ -30,6 +30,7 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { parseError } from 'src/common/utils/errors';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 
 export type UniswapV2TradeStruct = {
     from: PriceTokenAmount<EvmBlockchainName>;
@@ -39,6 +40,8 @@ export type UniswapV2TradeStruct = {
     deadlineMinutes: number;
     slippageTolerance: number;
     gasFeeInfo?: GasFeeInfo | null;
+    proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+    fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 };
 
 export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
@@ -117,6 +120,10 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
      */
     public readonly exact: Exact;
 
+    protected readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+
+    protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
+
     public get type(): OnChainTradeType {
         return (this.constructor as typeof UniswapV2AbstractTrade).type;
     }
@@ -175,6 +182,8 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         this.deadlineMinutes = tradeStruct.deadlineMinutes;
         this.exact = tradeStruct.exact;
         this.slippageTolerance = tradeStruct.slippageTolerance;
+        this.proxyFeeInfo = tradeStruct.proxyFeeInfo;
+        this.fromWithoutFee = tradeStruct.fromWithoutFee;
 
         this.wrappedPath = tradeStruct.wrappedPath;
 

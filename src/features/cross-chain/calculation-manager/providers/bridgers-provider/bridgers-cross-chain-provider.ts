@@ -32,7 +32,7 @@ import {
     BridgersQuoteRequest,
     BridgersQuoteResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 export class BridgersCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;
@@ -82,7 +82,7 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 from,
                 contractAbi
             );
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo?.platformFee?.percent);
 
             const fromTokenAddress = createTokenNativeAddressProxy(
                 from,

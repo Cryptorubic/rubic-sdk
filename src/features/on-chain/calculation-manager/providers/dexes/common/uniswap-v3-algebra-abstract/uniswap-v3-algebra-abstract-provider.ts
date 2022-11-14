@@ -28,6 +28,7 @@ import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/pr
 import { QuickSwapV3Trade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/quick-swap-v3-trade';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
+import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
@@ -108,8 +109,18 @@ export abstract class UniswapV3AlgebraAbstractProvider<
     ): Promise<T> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
+        let weiAmountWithoutFee = weiAmount;
+        let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
         if (fullOptions.useProxy) {
-            await this.checkContractState(fromToken.blockchain);
+            const proxyContractInfo = await this.handleProxyContract(
+                new PriceTokenAmount({
+                    ...fromToken.asStruct,
+                    weiAmount
+                }),
+                fullOptions
+            );
+            weiAmountWithoutFee = proxyContractInfo.fromWithoutFee.weiAmount;
+            proxyFeeInfo = proxyContractInfo.proxyFeeInfo;
         }
 
         const fromClone = createTokenNativeAddressProxy(
@@ -130,16 +141,17 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             fromClone,
             toClone,
             exact,
-            weiAmount,
+            weiAmountWithoutFee,
             fullOptions,
             gasPriceInfo?.gasPriceInUsd
         );
 
-        const { from, to } = getFromToTokensAmountsByExact(
+        const { from, to, fromWithoutFee } = getFromToTokensAmountsByExact(
             fromToken,
             toToken,
             exact,
             weiAmount,
+            weiAmountWithoutFee,
             route.outputAbsoluteAmount
         );
 
@@ -148,7 +160,9 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             to,
             exact,
             slippageTolerance: fullOptions.slippageTolerance,
-            deadlineMinutes: fullOptions.deadlineMinutes
+            deadlineMinutes: fullOptions.deadlineMinutes,
+            proxyFeeInfo,
+            fromWithoutFee
         };
         if (fullOptions.gasCalculation === 'disabled') {
             return this.createTradeInstance(

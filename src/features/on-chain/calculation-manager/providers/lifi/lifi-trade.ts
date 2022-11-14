@@ -10,16 +10,15 @@ import {
 import { Token } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
-import {
-    ON_CHAIN_TRADE_TYPE,
-    OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { onChainProxyContractAddress } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
+import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
+import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-trade-struct';
 
 interface LifiTransactionRequest {
     to: string;
@@ -31,12 +30,10 @@ interface LifiTransactionRequest {
 export class LifiTrade extends EvmOnChainTrade {
     /** @internal */
     public static async getGasLimit(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        route: Route,
+        lifiTradeStruct: LifiTradeStruct,
         useProxy: boolean
     ): Promise<BigNumber | null> {
-        const fromBlockchain = from.blockchain;
+        const fromBlockchain = lifiTradeStruct.from.blockchain;
         const walletAddress =
             Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
         if (!walletAddress) {
@@ -45,16 +42,7 @@ export class LifiTrade extends EvmOnChainTrade {
 
         try {
             const transactionConfig = await new LifiTrade(
-                {
-                    from,
-                    to,
-                    gasFeeInfo: null,
-                    slippageTolerance: NaN,
-                    type: ON_CHAIN_TRADE_TYPE.ONE_INCH,
-                    path: [],
-                    route,
-                    toTokenWeiAmountMin: new BigNumber(NaN)
-                },
+                lifiTradeStruct,
                 useProxy,
                 EvmWeb3Pure.EMPTY_ADDRESS
             ).encode({ fromAddress: walletAddress });
@@ -91,6 +79,10 @@ export class LifiTrade extends EvmOnChainTrade {
 
     private readonly _toTokenAmountMin: PriceTokenAmount;
 
+    protected readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+
+    protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
+
     protected get spenderAddress(): string {
         return this.useProxy
             ? onChainProxyContractAddress[this.from.blockchain]
@@ -105,20 +97,7 @@ export class LifiTrade extends EvmOnChainTrade {
         return this._toTokenAmountMin;
     }
 
-    constructor(
-        tradeStruct: {
-            from: PriceTokenAmount<EvmBlockchainName>;
-            to: PriceTokenAmount<EvmBlockchainName>;
-            gasFeeInfo: GasFeeInfo | null;
-            slippageTolerance: number;
-            type: OnChainTradeType;
-            path: ReadonlyArray<Token>;
-            route: Route;
-            toTokenWeiAmountMin: BigNumber;
-        },
-        useProxy: boolean,
-        providerAddress: string
-    ) {
+    constructor(tradeStruct: LifiTradeStruct, useProxy: boolean, providerAddress: string) {
         super(useProxy, providerAddress);
 
         this.from = tradeStruct.from;
@@ -133,6 +112,8 @@ export class LifiTrade extends EvmOnChainTrade {
         this.path = tradeStruct.path;
         this.route = tradeStruct.route;
         this.providerGateway = this.route.steps[0]!.estimate.approvalAddress;
+        this.proxyFeeInfo = tradeStruct.proxyFeeInfo;
+        this.fromWithoutFee = tradeStruct.fromWithoutFee;
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {

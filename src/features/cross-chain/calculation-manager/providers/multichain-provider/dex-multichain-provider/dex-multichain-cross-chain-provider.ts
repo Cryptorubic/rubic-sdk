@@ -7,7 +7,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import BigNumber from 'bignumber.js';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { NotSupportedTokensError } from 'src/common/errors';
 import { isMultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/is-multichain-method-name';
 import {
@@ -94,7 +94,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             // }
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo?.platformFee?.percent);
             const cryptoFee = this.getProtocolFee(targetToken, from.tokenAmount);
 
             let onChainTrade: EvmOnChainTrade | null = null;

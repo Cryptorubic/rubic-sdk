@@ -29,6 +29,7 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 
 export abstract class EvmOnChainTrade extends OnChainTrade {
     public abstract readonly from: PriceTokenAmount<EvmBlockchainName>;
@@ -46,6 +47,10 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
      * True, if trade must be swapped through on-chain proxy contract.
      */
     protected readonly useProxy: boolean;
+
+    protected abstract readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+
+    protected abstract readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 
     private get contractAddress(): string {
         return this.useProxy
