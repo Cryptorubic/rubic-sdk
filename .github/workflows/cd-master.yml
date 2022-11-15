@@ -12,39 +12,6 @@ permissions:
   contents: read
 
 jobs:
-  publish:
-    name: Publish package to NPM
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Read .nvmrc
-        run: echo ::set-output name=NVMRC::$(cat .nvmrc)
-        id: nvm
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '${{ steps.nvm.outputs.NVMRC }}'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Set up yarn
-        run: npm install --global yarn
-
-      - name: Set up dependencies
-        run: yarn ci
-
-      - name: Compile lib
-        run: yarn compile
-
-      - name: Build bundle
-        run: yarn build
-
-      - name: Publish package
-        run: yarn publish --access public --tag alpha
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   draft:
     name: Draft release
     permissions:
