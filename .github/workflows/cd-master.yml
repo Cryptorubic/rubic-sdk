@@ -52,15 +52,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Get version from package.json
-        run: echo "PACKAGE_VERSION=$(yarn info rubic-sdk version --silent)" >> $GITHUB_ENV
-
+        id: release
+        run: echo "::set-output name=version::$(yarn info rubic-sdk version --silent)"
 
       - name: Draft release
         uses: release-drafter/release-drafter@v5
         with:
-          tag: v${{ env.PACKAGE_VERSION }}
-          name: Rubic SDK ${{ env.PACKAGE_VERSION }}
-          version: v${{ env.PACKAGE_VERSION }}
+          tag: v${{ steps.release.outputs.version }}
+          name: Rubic SDK ${{ steps.release.outputs.version }}
+          version: v${{ steps.release.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PACKAGE_VERSION: $(yarn info rubic-sdk version --silent)
