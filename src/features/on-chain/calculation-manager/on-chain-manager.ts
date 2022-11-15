@@ -16,10 +16,11 @@ import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/bloc
 import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
 import { ProviderAddress } from 'src/core/sdk/models/provider-address';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
+import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
 
 type RequiredOnChainManagerCalculationOptions = MarkRequired<
     OnChainManagerCalculationOptions,
-    'timeout' | 'disabledProviders' | 'providerAddress'
+    'timeout' | 'disabledProviders' | 'providerAddress' | 'useProxy'
 >;
 
 /**
@@ -92,22 +93,30 @@ export class OnChainManager {
             toToken
         );
 
-        return this.calculateTradeFromTokens(
-            from,
-            to,
-            this.getFullOptions(from.blockchain, options)
-        );
+        const fullOptions = await this.getFullOptions(from, to, options);
+        return this.calculateTradeFromTokens(from, to, fullOptions);
     }
 
-    private getFullOptions(
-        fromBlockchain: BlockchainName,
+    private async getFullOptions(
+        from: PriceTokenAmount,
+        to: PriceToken,
         options?: OnChainManagerCalculationOptions
-    ): RequiredOnChainManagerCalculationOptions {
-        const chainType = BlockchainsInfo.getChainType(fromBlockchain) as keyof ProviderAddress;
+    ): Promise<RequiredOnChainManagerCalculationOptions> {
+        const chainType = BlockchainsInfo.getChainType(from.blockchain) as keyof ProviderAddress;
+
+        let useProxy: boolean;
+        if (options?.useProxy !== undefined) {
+            useProxy = options.useProxy;
+        } else {
+            const isWithDeflation = await this.isWithDeflation(from, to);
+            useProxy = !isWithDeflation;
+        }
+
         return combineOptions<RequiredOnChainManagerCalculationOptions>(options, {
             timeout: OnChainManager.defaultCalculationTimeout,
             disabledProviders: [],
-            providerAddress: this.providerAddress[chainType]
+            providerAddress: this.providerAddress[chainType],
+            useProxy
         });
     }
 
@@ -116,24 +125,15 @@ export class OnChainManager {
         to: PriceToken,
         options: RequiredOnChainManagerCalculationOptions
     ): Promise<Array<OnChainTrade | OnChainTradeError>> {
-        const isWithDeflation = await this.isWithDeflation(from, to);
-
         const dexesProviders = Object.entries(this.tradeProviders[from.blockchain]).filter(
             ([type]) => !options.disabledProviders.includes(type as OnChainTradeType)
         ) as [OnChainTradeType, OnChainProvider][];
-        const dexesTradesPromise = this.calculateDexes(
-            from,
-            to,
-            dexesProviders,
-            isWithDeflation,
-            options
-        );
+        const dexesTradesPromise = this.calculateDexes(from, to, dexesProviders, options);
 
         const lifiTradesPromise = this.calculateLifiTrades(
             from,
             to,
             dexesProviders.map(dexProvider => dexProvider[0]),
-            isWithDeflation,
             options
         );
 
@@ -165,21 +165,12 @@ export class OnChainManager {
         from: PriceTokenAmount,
         to: PriceToken,
         dexesProviders: [OnChainTradeType, OnChainProvider][],
-        isWithDeflation: boolean,
         options: RequiredOnChainManagerCalculationOptions
     ): Promise<Array<OnChainTrade | OnChainTradeError>> {
-        const useProxy = !isWithDeflation;
-        const calculateOptions = {
-            ...options,
-            useProxy
-        };
         return Promise.all(
             dexesProviders.map(async ([type, provider]) => {
                 try {
-                    return await pTimeout(
-                        provider.calculate(from, to, calculateOptions),
-                        options.timeout
-                    );
+                    return await pTimeout(provider.calculate(from, to, options), options.timeout);
                 } catch (e) {
                     console.debug(
                         `[RUBIC_SDK] Trade calculation error occurred for ${type} trade provider.`,
@@ -195,7 +186,6 @@ export class OnChainManager {
         from: PriceTokenAmount,
         to: PriceToken,
         dexesProvidersTypes: OnChainTradeType[],
-        isWithDeflation: boolean,
         options: RequiredOnChainManagerCalculationOptions
     ): Promise<OnChainTrade[]> {
         if (!BlockchainsInfo.isEvmBlockchainName(from.blockchain)) {
@@ -204,18 +194,15 @@ export class OnChainManager {
 
         try {
             const disabledProviders = dexesProvidersTypes.concat(options.disabledProviders);
-            const useProxy = !isWithDeflation;
+            const calculationOptions: LifiCalculationOptions = {
+                ...options,
+                gasCalculation: options.gasCalculation === 'disabled' ? 'disabled' : 'calculate',
+                disabledProviders
+            };
             return await this.lifiProvider.calculate(
                 from as PriceTokenAmount<EvmBlockchainName>,
                 to as PriceTokenAmount<EvmBlockchainName>,
-                {
-                    slippageTolerance: options.slippageTolerance,
-                    gasCalculation:
-                        options.gasCalculation === 'disabled' ? 'disabled' : 'calculate',
-                    providerAddress: options.providerAddress,
-                    useProxy,
-                    disabledProviders
-                }
+                calculationOptions
             );
         } catch (err) {
             console.debug(`[RUBIC_SDK] Trade calculation error occurred for lifi.`, err);
