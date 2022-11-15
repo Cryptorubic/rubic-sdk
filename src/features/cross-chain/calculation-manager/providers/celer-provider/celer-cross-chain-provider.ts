@@ -190,7 +190,8 @@ export class CelerCrossChainProvider extends CrossChainProvider {
                     cryptoFeeToken,
                     from,
                     providerAddress
-                )
+                ),
+                slippage: options.slippageTolerance
             },
             providerAddress,
             Number.parseInt((celerSlippage * 10 ** 6 * 100).toFixed())

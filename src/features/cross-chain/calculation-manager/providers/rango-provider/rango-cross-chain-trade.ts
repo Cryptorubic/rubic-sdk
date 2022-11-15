@@ -25,6 +25,7 @@ import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/cal
 import { RANGO_CONTRACT_ADDRESSES } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/contract-address';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { RangoBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/models/rango-bridge-types';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 export class RangoCrossChainTrade extends EvmCrossChainTrade {
     /**  @internal */
@@ -251,5 +252,18 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             this.cryptoFeeToken.tokenAmount
         );
         return fromUsd.plus(usdCryptoFee.isNaN() ? 0 : usdCryptoFee).dividedBy(this.to.tokenAmount);
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.from.price.multipliedBy(this.from.tokenAmount);
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: this.priceImpact ? { total: this.priceImpact } : null,
+            slippage: { total: this.slippageTolerance }
+        };
     }
 }
