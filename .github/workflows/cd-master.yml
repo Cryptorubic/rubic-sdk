@@ -47,11 +47,13 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   draft:
+    name: Draft release
+    runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
-      runs-on: ubuntu-latest
-      steps:
-        - uses: release-drafter/release-drafter@v5
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: release-drafter/release-drafter@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
