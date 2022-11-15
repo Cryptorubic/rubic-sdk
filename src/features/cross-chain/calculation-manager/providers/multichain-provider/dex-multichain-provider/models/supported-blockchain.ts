@@ -18,7 +18,9 @@ export const multichainProxyCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.GNOSIS,
     BLOCKCHAIN_NAME.OPTIMISM,
     BLOCKCHAIN_NAME.AVALANCHE,
-    BLOCKCHAIN_NAME.ETHEREUM
+    BLOCKCHAIN_NAME.ETHEREUM,
+    BLOCKCHAIN_NAME.OASIS,
+    BLOCKCHAIN_NAME.METIS
 ] as const;
 
 export type MultichainProxyCrossChainSupportedBlockchain =
