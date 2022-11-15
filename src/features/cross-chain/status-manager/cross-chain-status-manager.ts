@@ -30,6 +30,9 @@ import { getSrcTxStatus } from 'src/features/common/status-manager/utils/get-src
 import { RubicSdkError } from 'src/common/errors';
 import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
 import { MultichainStatusMapping } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
+import { getChaingeRequestHeaders } from '../calculation-manager/providers/chainge-provider/utils/get-chainge-request-parameters';
+import { ChaingeStatusApiResponse } from './models/chainge-status-api-response';
+import { chaingeApiBaseUrl } from '../calculation-manager/providers/chainge-provider/constants/chainge-api-base-url';
 
 /**
  * Contains methods for getting cross-chain trade statuses.
@@ -45,7 +48,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.VIA]: this.getViaDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.BRIDGERS]: this.getBridgersDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: this.getMultichainDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: this.getMultichainDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.CHAINGE]: this.getChaingeDstSwapStatus
     };
 
     /**
@@ -475,6 +479,24 @@ export class CrossChainStatusManager {
                 status: MultichainStatusMapping?.[status] || TxStatus.PENDING,
                 hash: swaptx || null
             };
+        } catch {
+            return {
+                status: TxStatus.PENDING,
+                hash: null
+            };
+        }
+    }
+
+    private async getChaingeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        try {
+            const headers = getChaingeRequestHeaders({});
+            const response = await this.httpClient.get<ChaingeStatusApiResponse>(
+                `${chaingeApiBaseUrl}open/v1/order/getOrderDetail`,
+                { headers: { ...headers, sn: data.sn as string } }
+            );
+            // eslint-disable-next-line no-console
+            console.log(response);
+            return { status: TxStatus.PENDING, hash: null };
         } catch {
             return {
                 status: TxStatus.PENDING,

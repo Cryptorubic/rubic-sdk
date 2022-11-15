@@ -44,4 +44,9 @@ export interface CrossChainTradeData {
      * Expected minimum output amount.
      */
     amountOutMin?: string;
+
+    /**
+     * Chainge tx serial number.
+     */
+    sn?: string;
 }

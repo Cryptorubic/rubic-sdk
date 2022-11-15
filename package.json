@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "3.4.10",
+  "version": "3.4.53",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -65,11 +65,13 @@
   "dependencies": {
     "@chainge/sdk": "^0.1.2",
     "@lifi/sdk": "^1.6.3",
+    "@types/crypto-js": "^4.1.1",
     "@viaprotocol/router-sdk": "^1.0.7",
     "assert": "^2.0.0",
     "axios": "^0.26.1",
     "bignumber.js": "9.1.0",
     "bitcoin-address-validation": "2.2.1",
+    "crypto-js": "^4.1.1",
     "ethers": "^5.6.8",
     "rango-sdk-basic": "^0.0.7",
     "rxjs": "^7.5.7",
