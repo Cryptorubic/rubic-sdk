@@ -53,7 +53,8 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
                         spenderAddress,
                         routerMethodName: multichainMethodName,
                         anyTokenAddress,
-                        onChainTrade: onChainTrade!
+                        onChainTrade: onChainTrade!,
+                        slippage: 0
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -118,7 +119,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
             spenderAddress: string;
             routerMethodName: MultichainMethodName;
             anyTokenAddress: string;
-
+            slippage: number;
             onChainTrade: EvmOnChainTrade | null;
         },
         providerAddress: string
