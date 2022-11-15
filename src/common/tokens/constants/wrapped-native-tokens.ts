@@ -128,7 +128,6 @@ export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
         symbol: 'WGLMR',
         decimals: 18
     }),
-    // TODO wrap address
     [BLOCKCHAIN_NAME.CELO]: new Token({
         blockchain: BLOCKCHAIN_NAME.CELO,
         address: '0x122013fd7df1c6f636a5bb8f03108e876548b455',
