@@ -33,7 +33,7 @@ jobs:
         run: npm install --global yarn
 
       - name: Set up dependencies
-        run: yarn
+        run: yarn ci
 
       - name: Compile lib
         run: yarn compile
@@ -45,14 +45,12 @@ jobs:
         run: yarn publish --access public --tag alpha
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
   draft:
     name: Draft release
-    runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
-
+    runs-on: ubuntu-latest
     steps:
       - uses: release-drafter/release-drafter@v5
         env:
