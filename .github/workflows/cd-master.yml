@@ -61,5 +61,6 @@ jobs:
           tag: v${{ steps.release.outputs.version }}
           name: Rubic SDK ${{ steps.release.outputs.version }}
           version: v${{ steps.release.outputs.version }}
+          footer: ${{ github.event.body }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

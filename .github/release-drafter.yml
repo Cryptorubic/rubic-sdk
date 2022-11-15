@@ -1,5 +1,3 @@
 change-template: '$BODY'
 template: |
   ## Change log
-
-  $CHANGES
