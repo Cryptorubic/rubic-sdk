@@ -24,7 +24,7 @@ import { XyStatusCode } from 'src/features/cross-chain/calculation-manager/provi
 import { InsufficientLiquidityError, MinAmountError, RubicSdkError } from 'src/common/errors';
 
 export class XyCrossChainProvider extends CrossChainProvider {
-    public static readonly apiEndpoint = 'https://dev-proxy.rubic.exchange/api/v1';
+    public static readonly apiEndpoint = 'https://open-api.xy.finance/v1';
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.XY;
 

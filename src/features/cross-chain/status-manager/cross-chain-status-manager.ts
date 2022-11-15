@@ -32,6 +32,8 @@ import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-man
 import { MultichainStatusMapping } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
+import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
+
 /**
  * Contains methods for getting cross-chain trade statuses.
  */
@@ -488,7 +490,7 @@ export class CrossChainStatusManager {
     private async getXyDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
             const { isSuccess, status, txHash } = await this.httpClient.get<XyApiResponse>(
-                `https://open-api.xy.finance/v1/crossChainStatus?srcChainId=${
+                `${XyCrossChainProvider.apiEndpoint}/crossChainStatus?srcChainId=${
                     blockchainId[data.fromBlockchain]
                 }&transactionHash=${data.srcTxHash}`
             );
