@@ -2,9 +2,9 @@ name: Publish package and draft release
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
+#  push:
+#    branches:
+#      - master
   pull_request:
     types: [ opened, reopened, synchronize ]
 
