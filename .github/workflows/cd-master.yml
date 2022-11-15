@@ -5,8 +5,6 @@ on:
   push:
     branches:
       - master
-  pull_request:
-    types: [ opened, reopened, synchronize ]
 
 permissions:
   contents: read
@@ -33,7 +31,7 @@ jobs:
         run: npm install --global yarn
 
       - name: Set up dependencies
-        run: yarn ci
+        run: yarn
 
       - name: Compile lib
         run: yarn compile
@@ -56,4 +54,3 @@ jobs:
       - uses: release-drafter/release-drafter@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
