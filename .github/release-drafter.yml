@@ -1,3 +1,5 @@
-change-template: '$BODY'
+change-template: ''
 template: |
   ## Change log
+  
+  $CHANGES
