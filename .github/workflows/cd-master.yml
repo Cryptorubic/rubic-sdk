@@ -63,3 +63,4 @@ jobs:
           version: v${{ env.PACKAGE_VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PACKAGE_VERSION: $(yarn info rubic-sdk version --silent)
