@@ -40,7 +40,7 @@ jobs:
         run: yarn build
 
       - name: Publish package
-        run: yarn publish --access public --tag alpha
+        run: yarn publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -66,5 +66,6 @@ jobs:
           name: Rubic SDK ${{ steps.release.outputs.version }}
           version: v${{ steps.release.outputs.version }}
           footer: ${{ steps.PR.outputs.pr_body }}
+          publish: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
