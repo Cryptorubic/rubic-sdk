@@ -1,5 +1,2 @@
-change-template: ''
 template: |
   ## Change log
-  
-  $CHANGES
