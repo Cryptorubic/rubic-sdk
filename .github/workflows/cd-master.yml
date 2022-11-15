@@ -51,6 +51,15 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: release-drafter/release-drafter@v5
+      - name: Get version from package.json
+        id: release
+        run: echo "::set-output name=version::$(npm run get-version --silent)"
+
+      - name: Draft release
+        uses: release-drafter/release-drafter@v5
+        with:
+          tag: v${{ steps.release.outputs.version }}
+          name: Rubic SDK ${{ steps.release.outputs.version }}
+          version: v${{ steps.release.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
