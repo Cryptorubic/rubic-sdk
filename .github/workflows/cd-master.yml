@@ -56,7 +56,7 @@ jobs:
         run: echo "::set-output name=version::$(yarn info rubic-sdk version --silent)"
 
       - name: Get PR description
-      - uses: 8BitJonny/gh-get-current-pr@2.1.3
+        uses: 8BitJonny/gh-get-current-pr@2.1.3
         id: PR
 
       - name: Draft release
