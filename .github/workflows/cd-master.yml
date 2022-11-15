@@ -53,7 +53,7 @@ jobs:
     steps:
       - name: Get version from package.json
         id: release
-        run: echo "::set-output name=version::$(npm run get-version --silent)"
+        run: echo "::set-output name=version::$(yarn info rubic-sdk version)"
 
       - name: Draft release
         uses: release-drafter/release-drafter@v5
@@ -61,5 +61,6 @@ jobs:
           tag: v${{ steps.release.outputs.version }}
           name: Rubic SDK ${{ steps.release.outputs.version }}
           version: v${{ steps.release.outputs.version }}
+          change-template: '$BODY'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
