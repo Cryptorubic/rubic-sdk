@@ -1,10 +1,12 @@
 import { defaultAvalancheProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/default-constants';
 import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { wrappedNativeTokensList } from 'src/common/tokens';
 
 export const PANGOLIN_CONTRACT_ADDRESS = '0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106';
 
 const routingProvidersAddresses = [
-    '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7', // WAVAX
+    wrappedNativeTokensList[BLOCKCHAIN_NAME.AVALANCHE].address, // WAVAX
     '0xc7198437980c041c805A1EDcbA50c1Ce5db95118', // USDT
     '0x60781C2586D68229fde47564546784ab3fACA982', // PNG
     '0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB', // WETH
