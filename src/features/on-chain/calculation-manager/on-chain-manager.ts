@@ -105,19 +105,22 @@ export class OnChainManager {
         const chainType = BlockchainsInfo.getChainType(from.blockchain) as keyof ProviderAddress;
 
         let useProxy: boolean;
-        if (options?.useProxy !== undefined) {
+        if (options?.useProxy === false) {
             useProxy = options.useProxy;
         } else {
             const isWithDeflation = await this.isWithDeflation(from, to);
             useProxy = !isWithDeflation;
         }
 
-        return combineOptions<RequiredOnChainManagerCalculationOptions>(options, {
-            timeout: OnChainManager.defaultCalculationTimeout,
-            disabledProviders: [],
-            providerAddress: this.providerAddress[chainType],
-            useProxy
-        });
+        return combineOptions<RequiredOnChainManagerCalculationOptions>(
+            { ...options, useProxy },
+            {
+                timeout: OnChainManager.defaultCalculationTimeout,
+                disabledProviders: [],
+                providerAddress: this.providerAddress[chainType],
+                useProxy
+            }
+        );
     }
 
     private async calculateTradeFromTokens(
