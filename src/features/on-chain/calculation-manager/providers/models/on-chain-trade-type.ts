@@ -47,6 +47,8 @@ export const ON_CHAIN_TRADE_TYPE = {
     MM_FINANCE: 'MM_FINANCE',
     MOJITO_SWAP: 'MOJITO_SWAP',
 
+    NET_SWAP: 'NET_SWAP',
+
     ONE_INCH: 'ONE_INCH',
     ONE_MOON: 'ONE_MOON',
     ONE_SOL: 'ONE_SOL',

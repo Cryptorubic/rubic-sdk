@@ -30,6 +30,7 @@ import { SoulSwapProvider } from 'src/features/on-chain/calculation-manager/prov
 import { ApeSwapTelosProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/ape-swap/ape-swap-telos-provider';
 import { OmnidexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/omnidex/omnidex-provider';
 import { YuzuSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/oasis/yuzu-swap/yuzu-swap-provider';
+import { NetSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/metis/net-swap/net-swap-provider';
 
 export const UniswapV2TradeProviders = [
     // ethereum
@@ -76,5 +77,7 @@ export const UniswapV2TradeProviders = [
     JupiterSwapProvider,
     PhotonSwapProvider,
     // Oasis
-    YuzuSwapProvider
+    YuzuSwapProvider,
+    // Metis
+    NetSwapProvider
 ] as const;

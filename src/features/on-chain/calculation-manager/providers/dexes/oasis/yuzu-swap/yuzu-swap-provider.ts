@@ -4,7 +4,7 @@ import { YuzuSwapTrade } from 'src/features/on-chain/calculation-manager/provide
 import { YUZU_SWAP_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/oasis/yuzu-swap/constants';
 
 export class YuzuSwapProvider extends UniswapV2AbstractProvider<YuzuSwapTrade> {
-    public readonly blockchain = BLOCKCHAIN_NAME.BOBA;
+    public readonly blockchain = BLOCKCHAIN_NAME.OASIS;
 
     public readonly UniswapV2TradeClass = YuzuSwapTrade;
 

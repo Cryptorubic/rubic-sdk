@@ -3,7 +3,7 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { wrappedNativeTokensList } from 'src/common/tokens';
 
 const defaultOasisRoutingProvidersAddresses = [
-    wrappedNativeTokensList[BLOCKCHAIN_NAME.OASIS].address, // WETH
+    wrappedNativeTokensList[BLOCKCHAIN_NAME.OASIS].address, // WROSE
     '0x94fbfFe5698DB6f54d6Ca524DbE673a7729014Be', // USDC
     '0x6Cb9750a92643382e020eA9a170AbB83Df05F30B', // USDT
     '0x2bF9b864cdc97b08B6D79ad4663e71B8aB65c45c' // DAI
