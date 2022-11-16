@@ -17,3 +17,12 @@ export const defaultKavaProviderConfiguration: UniswapV2ProviderConfiguration = 
     routingProvidersAddresses: defaultKavaRoutingProvidersAddresses,
     wethAddress: defaultKavaWethAddress
 };
+
+export const kavaProviderConfiguration: UniswapV2ProviderConfiguration = {
+    ...defaultKavaProviderConfiguration,
+    routingProvidersAddresses: [
+        ...defaultKavaRoutingProvidersAddresses,
+        '0xeEeEEb57642040bE42185f49C52F7E9B38f8eeeE', // ELK
+        '0x0f428d528b4f00c82a8ad032580d605cf5f122ee' // TIDE
+    ]
+};
