@@ -1,5 +1,5 @@
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
@@ -141,7 +141,8 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                     routerAddress,
                     spenderAddress,
                     routerMethodName,
-                    anyTokenAddress
+                    anyTokenAddress,
+                    slippage: 0
                 },
                 options.providerAddress
             );

@@ -11,7 +11,7 @@ import {
 } from 'src/common/errors';
 import { CelerCrossChainContractData } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-cross-chain-contract-data';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { CelerDirectContractTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-direct-contract-trade/celer-direct-contract-trade';
 import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
@@ -21,15 +21,17 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CelerOnChainContractTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-on-chain-contract-trade/celer-on-chain-contract-trade';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
 import BigNumber from 'bignumber.js';
 import { CelerContractTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-contract-trade';
 import { Cache } from 'src/common/utils/decorators';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
+import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 /**
  * Calculated Celer cross-chain trade.
@@ -63,7 +65,8 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
                             fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
                             platformFee: { percent: 0, tokenSymbol: '' },
                             cryptoFee: null
-                        }
+                        },
+                        slippage: 0
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS,
                     maxSlippage
@@ -98,10 +101,11 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
 
-    public readonly itType: {
-        from: OnChainTradeType | undefined;
-        to: OnChainTradeType | undefined;
-    };
+    public readonly isAggregator = false;
+
+    public readonly onChainSubtype: OnChainSubtype;
+
+    public readonly bridgeType = BRIDGE_TYPE.CELER;
 
     public readonly feeInPercents: number;
 
@@ -126,6 +130,8 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
     private readonly deflationTokenManager = new DeflationTokenManager();
 
     public isDeflationTokenInTargetNetwork: boolean = false;
+
+    private readonly slippage: number;
 
     /**
      * Gets price impact in source and target blockchains, based on tokens usd prices.
@@ -158,6 +164,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
             gasData: GasData | null;
             feeInPercents: number;
             feeInfo: FeeInfo;
+            slippage: number;
         },
         providerAddress: string,
         private readonly maxSlippage: number
@@ -170,7 +177,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
         this.gasData = crossChainTrade.gasData;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.feeInfo = crossChainTrade.feeInfo;
-
+        this.slippage = crossChainTrade.slippage;
         this.transitFeeToken = crossChainTrade.transitFeeToken;
 
         this.from = this.fromTrade.fromToken;
@@ -182,7 +189,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
             weiAmount: this.toTrade.toToken.weiAmount.dividedBy(1 - fromSlippage).dp(0)
         });
 
-        this.itType = {
+        this.onChainSubtype = {
             from:
                 crossChainTrade.fromTrade instanceof CelerDirectContractTrade
                     ? undefined
@@ -203,6 +210,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
                 blockchain: this.to.blockchain,
                 symbol: this.to.symbol
             });
+
             return await super.swap(options);
         } catch (err) {
             this.isDeflationTokenInTargetNetwork = err instanceof DeflationTokenError;
@@ -339,5 +347,26 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
             this.isDeflationTokenInTargetNetwork = error instanceof DeflationTokenError;
             throw error;
         }
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.fromTrade.toToken.tokenAmount;
+    }
+
+    public getTradeInfo(): TradeInfo {
+        const fromPriceImpact = this.fromTrade.fromToken.calculatePriceImpactPercent(
+            this.fromTrade.toToken
+        );
+
+        const toPriceImpact = this.toTrade.fromToken.calculatePriceImpactPercent(
+            this.toTrade.toToken
+        );
+
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: { from: fromPriceImpact, to: toPriceImpact },
+            slippage: { total: this.slippage * 100 }
+        };
     }
 }

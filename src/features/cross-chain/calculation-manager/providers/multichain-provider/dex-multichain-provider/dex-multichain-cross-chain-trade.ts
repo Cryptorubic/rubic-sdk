@@ -1,11 +1,10 @@
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -15,8 +14,8 @@ import { MultichainCrossChainTrade } from 'src/features/cross-chain/calculation-
 import { multichainProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-address';
 import { MultichainProxyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/models/supported-blockchain';
 import { multichainProxyContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-abi';
-import { ItType } from 'src/features/cross-chain/calculation-manager/providers/common/models/it-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 
 export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
     /** @internal */
@@ -54,7 +53,8 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
                         spenderAddress,
                         routerMethodName: multichainMethodName,
                         anyTokenAddress,
-                        onChainTrade: onChainTrade!
+                        onChainTrade: onChainTrade!,
+                        slippage: 0
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -86,9 +86,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
         }
     }
 
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.MULTICHAIN;
-
-    public readonly itType: ItType;
+    public readonly onChainSubtype: OnChainSubtype;
 
     public readonly onChainTrade: EvmOnChainTrade | null;
 
@@ -121,14 +119,14 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
             spenderAddress: string;
             routerMethodName: MultichainMethodName;
             anyTokenAddress: string;
-
+            slippage: number;
             onChainTrade: EvmOnChainTrade | null;
         },
         providerAddress: string
     ) {
         super(crossChainTrade, providerAddress);
 
-        this.itType = crossChainTrade.onChainTrade
+        this.onChainSubtype = crossChainTrade.onChainTrade
             ? { from: crossChainTrade.onChainTrade.type, to: undefined }
             : { from: undefined, to: undefined };
         this.onChainTrade = crossChainTrade.onChainTrade;

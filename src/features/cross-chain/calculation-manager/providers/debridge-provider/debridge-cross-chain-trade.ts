@@ -1,12 +1,9 @@
 import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-cross-chain-supported-blockchain';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/contract-address';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { PriceTokenAmount } from 'src/common/tokens';
-import {
-    ON_CHAIN_TRADE_TYPE,
-    OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
+import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
 import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
 import { TransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
@@ -21,6 +18,8 @@ import { TransactionRequest } from 'src/features/cross-chain/calculation-manager
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 /**
  * Calculated DeBridge cross-chain trade.
@@ -32,6 +31,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     private readonly cryptoFeeToken: PriceTokenAmount;
 
     private readonly transactionRequest: TransactionRequest;
+
+    private readonly slippage: number;
 
     /** @internal */
     public static async getGasData(
@@ -96,7 +97,14 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.DEBRIDGE;
 
-    public readonly itType: { from: OnChainTradeType; to: OnChainTradeType };
+    public readonly isAggregator = false;
+
+    public readonly onChainSubtype = {
+        from: ON_CHAIN_TRADE_TYPE.ONE_INCH,
+        to: ON_CHAIN_TRADE_TYPE.ONE_INCH
+    };
+
+    public readonly bridgeType = BRIDGE_TYPE.DEBRIDGE;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
@@ -139,6 +147,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         this.transactionRequest = crossChainTrade.transactionRequest;
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.slippage = crossChainTrade.slippage;
 
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
         this.feeInfo = crossChainTrade.feeInfo;
@@ -146,8 +155,6 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
 
         this.transitAmount = crossChainTrade.transitAmount;
-
-        this.itType = { from: ON_CHAIN_TRADE_TYPE.ONE_INCH, to: ON_CHAIN_TRADE_TYPE.ONE_INCH };
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -209,5 +216,18 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             { params }
         );
         return tx;
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.transitAmount;
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: { total: this.priceImpact },
+            slippage: { total: this.slippage * 100 }
+        };
     }
 }

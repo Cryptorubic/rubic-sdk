@@ -9,7 +9,7 @@ import {
     RubicSdkError,
     UnsupportedReceiverAddressError
 } from 'src/common/errors';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
 import {
@@ -135,7 +135,9 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                         ? await RangoCrossChainTrade.getGasData(from, to)
                         : null;
 
-                const { bridgeType, itType } = this.parseTradeTypes(route as QuoteSimulationResult);
+                const { bridgeType, onChainType } = this.parseTradeTypes(
+                    route as QuoteSimulationResult
+                );
 
                 const rangoTrade = new RangoCrossChainTrade(
                     {
@@ -143,7 +145,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                         to,
                         toTokenAmountMin: Web3Pure.fromWei(route.outputAmount, toToken.decimals),
                         priceImpact: from.calculatePriceImpactPercent(to),
-                        itType,
+                        onChainSubtype: onChainType,
                         bridgeType,
                         slippageTolerance: options.slippageTolerance as number,
                         feeInfo: {
@@ -216,8 +218,8 @@ export class RangoCrossChainProvider extends CrossChainProvider {
     }
 
     private parseTradeTypes(route: QuoteSimulationResult): {
-        bridgeType: BridgeType | undefined;
-        itType: { from: OnChainTradeType | undefined; to: OnChainTradeType | undefined };
+        bridgeType: BridgeType;
+        onChainType: { from: OnChainTradeType | undefined; to: OnChainTradeType | undefined };
     } {
         const { path, swapper } = route;
 
@@ -226,7 +228,10 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             if (!bridgeType) {
                 throw new RubicSdkError('Unknown bridgeType in rango provider.');
             }
-            return { itType: { from: undefined, to: undefined }, bridgeType };
+            return {
+                onChainType: { from: undefined, to: undefined },
+                bridgeType
+            };
         }
 
         const swapperId = path.find(
@@ -235,7 +240,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         const dexes = path
             .filter(item => item.swapperType === 'DEX')
             .map((item: QuotePath) => item.swapper.id);
-        const itType = {
+        const onChainType = {
             from: dexes[0] ? rangoProviders[dexes[0]] : undefined,
             to: dexes[1] ? rangoProviders[dexes[1]] : undefined
         };
@@ -243,7 +248,11 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         if (!bridgeType) {
             throw new RubicSdkError('Unknown bridgeType in rango provider.');
         }
-        return { itType, bridgeType };
+
+        return {
+            onChainType,
+            bridgeType
+        };
     }
 
     protected async getFeeInfo(

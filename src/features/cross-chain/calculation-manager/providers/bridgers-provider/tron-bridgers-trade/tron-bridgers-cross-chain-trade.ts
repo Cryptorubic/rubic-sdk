@@ -2,7 +2,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { TronCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/tron-cross-chain-trade';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import BigNumber from 'bignumber.js';
@@ -14,9 +14,13 @@ import { getMethodArgumentsAndTransactionData } from 'src/features/cross-chain/c
 
 import { TronBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/models/tron-bridgers-transaction-data';
 import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;
+
+    public readonly isAggregator = false;
 
     public readonly from: PriceTokenAmount<TronBlockchainName>;
 
@@ -26,9 +30,13 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
 
     public readonly feeInfo: FeeInfo;
 
-    public readonly itType = { from: undefined, to: undefined };
+    public readonly onChainSubtype = { from: undefined, to: undefined };
+
+    public readonly bridgeType = BRIDGE_TYPE.BRIDGERS;
 
     public readonly priceImpact: number | null;
+
+    private readonly slippage: number;
 
     protected get fromContractAddress(): string {
         return rubicProxyContractAddress[this.from.blockchain];
@@ -40,6 +48,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
             to: PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>;
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
+            slippage: number;
         },
         providerAddress: string
     ) {
@@ -50,6 +59,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.feeInfo = crossChainTrade.feeInfo;
         this.priceImpact = this.from.calculatePriceImpactPercent(this.to);
+        this.slippage = crossChainTrade.slippage;
     }
 
     protected async getContractParams(
@@ -84,7 +94,20 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
         };
     }
 
-    getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
+    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         return fromUsd.dividedBy(this.to.tokenAmount);
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.from.price.multipliedBy(this.from.tokenAmount);
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: null,
+            feeInfo: this.feeInfo,
+            priceImpact: this.priceImpact ? { total: this.priceImpact } : null,
+            slippage: { total: this.slippage * 100 }
+        };
     }
 }

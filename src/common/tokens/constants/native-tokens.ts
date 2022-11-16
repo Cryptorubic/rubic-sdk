@@ -186,5 +186,19 @@ export const nativeTokensList = {
         name: 'Brise',
         symbol: 'BRISE',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.OASIS]: new Token({
+        blockchain: BLOCKCHAIN_NAME.OASIS,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ROSE',
+        symbol: 'ROSE',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.METIS]: new Token({
+        blockchain: BLOCKCHAIN_NAME.METIS,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Metis token',
+        symbol: 'METIS',
+        decimals: 18
     })
 };

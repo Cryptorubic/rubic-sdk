@@ -20,7 +20,9 @@ export const EVM_BLOCKCHAIN_NAME = {
     ASTAR: 'ASTAR',
     ETHEREUM_POW: 'ETHW',
     KAVA: 'KAVA',
-    BITGERT: 'BITGERT'
+    BITGERT: 'BITGERT',
+    OASIS: 'OASIS',
+    METIS: 'METIS'
 } as const;
 
 export const BLOCKCHAIN_NAME = {

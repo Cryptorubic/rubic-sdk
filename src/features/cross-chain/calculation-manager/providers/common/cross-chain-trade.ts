@@ -1,4 +1,4 @@
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { Injector } from 'src/core/injector/injector';
 import {
     RubicSdkError,
@@ -15,9 +15,11 @@ import { HttpClient } from 'src/core/http-client/models/http-client';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
-import { ItType } from 'src/features/cross-chain/calculation-manager/providers/common/models/it-type';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { isAddressCorrect } from 'src/features/common/utils/check-address';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { BridgeType } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 /**
  * Abstract class for all cross-chain providers' trades.
@@ -48,7 +50,20 @@ export abstract class CrossChainTrade {
      */
     public abstract readonly feeInfo: FeeInfo;
 
-    public abstract readonly itType: ItType;
+    /**
+     * Contains on-chain providers' type used in route.
+     */
+    public abstract readonly onChainSubtype: OnChainSubtype;
+
+    /**
+     * Contains bridge provider's type used in route.
+     */
+    public abstract readonly bridgeType: BridgeType;
+
+    /**
+     * True, if provider is aggregator.
+     */
+    public abstract readonly isAggregator: boolean;
 
     protected abstract get fromContractAddress(): string;
 
@@ -221,4 +236,8 @@ export abstract class CrossChainTrade {
 
         return new BigNumber(fromValue).plus(fixedFeeValue).toFixed(0, 0);
     }
+
+    public abstract getUsdPrice(): BigNumber;
+
+    public abstract getTradeInfo(): TradeInfo;
 }
