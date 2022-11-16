@@ -18,6 +18,7 @@ import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 /**
  * Calculated Symbiosis cross-chain trade.
@@ -108,6 +109,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly gasData: GasData | null;
 
+    private readonly slippage: number;
+
     private readonly getTransactionRequest: (
         fromAddress: string,
         receiver?: string
@@ -147,7 +150,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
         this.feeInfo = crossChainTrade.feeInfo;
         this.priceImpact = crossChainTrade.priceImpact;
-
+        this.slippage = crossChainTrade.slippage;
         this.transitAmount = crossChainTrade.transitAmount;
 
         this.onChainSubtype = {
@@ -200,5 +203,18 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         return fromUsd.dividedBy(this.to.tokenAmount);
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.transitAmount;
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: { total: this.priceImpact },
+            slippage: { total: this.slippage * 100 }
+        };
     }
 }

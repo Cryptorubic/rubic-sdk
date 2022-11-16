@@ -19,6 +19,7 @@ import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/pro
 import { isAddressCorrect } from 'src/features/common/utils/check-address';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { BridgeType } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 /**
  * Abstract class for all cross-chain providers' trades.
@@ -235,4 +236,8 @@ export abstract class CrossChainTrade {
 
         return new BigNumber(fromValue).plus(fixedFeeValue).toFixed(0, 0);
     }
+
+    public abstract getUsdPrice(): BigNumber;
+
+    public abstract getTradeInfo(): TradeInfo;
 }

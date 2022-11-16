@@ -141,7 +141,8 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                     routerAddress,
                     spenderAddress,
                     routerMethodName,
-                    anyTokenAddress
+                    anyTokenAddress,
+                    slippage: 0
                 },
                 options.providerAddress
             );

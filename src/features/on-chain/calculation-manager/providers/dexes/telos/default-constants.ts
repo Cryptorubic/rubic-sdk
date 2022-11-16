@@ -1,14 +1,16 @@
 import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { wrappedNativeTokensList } from 'src/common/tokens';
 
 const defaultTelosRoutingProvidersAddresses = [
-    '0xD102cE6A4dB07D247fcc28F366A623Df0938CA9E', // WTLOS
+    wrappedNativeTokensList[BLOCKCHAIN_NAME.TELOS].address, // WTLOS
     '0xeFAeeE334F0Fd1712f9a8cc375f427D9Cdd40d73', // USDT
     '0x818ec0A7Fe18Ff94269904fCED6AE3DaE6d6dC0b', // USDC
     '0xf390830DF829cf22c53c8840554B98eafC5dCBc2', // BTC
     '0xfA9343C3897324496A05fC75abeD6bAC29f8A40f' // ETH
 ];
 
-const defaultTelosWethAddress = '0xD102cE6A4dB07D247fcc28F366A623Df0938CA9E';
+const defaultTelosWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.TELOS].address;
 
 export const defaultTelosProviderConfiguration: UniswapV2ProviderConfiguration = {
     maxTransitTokens: 1,

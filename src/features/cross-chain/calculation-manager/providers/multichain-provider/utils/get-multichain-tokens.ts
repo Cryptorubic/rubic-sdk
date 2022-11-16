@@ -6,6 +6,10 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/tokens-api';
 import { Injector } from 'src/core/injector/injector';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    MultichainMethodName,
+    multichainMethodNames
+} from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/multichain-method-name';
 
 export async function getMultichainTokens(
     from: {
@@ -35,8 +39,13 @@ export async function getMultichainTokens(
     if (!sourceToken || !dstChainInformation) {
         return null;
     }
+    const dstTokens = Object.values(dstChainInformation);
 
-    const targetToken = Object.values(dstChainInformation)[0];
+    const anyToken = dstTokens.find(token => {
+        const method = token.routerABI.split('(')[0]!;
+        return multichainMethodNames.includes(method as MultichainMethodName);
+    });
+    const targetToken = anyToken || dstTokens[0];
     if (!targetToken) {
         return null;
     }

@@ -21,7 +21,9 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.BOBA,
     BLOCKCHAIN_NAME.BITCOIN,
     BLOCKCHAIN_NAME.ETHEREUM_POW,
-    BLOCKCHAIN_NAME.KAVA
+    BLOCKCHAIN_NAME.KAVA,
+    BLOCKCHAIN_NAME.OASIS,
+    BLOCKCHAIN_NAME.METIS
 ] as const;
 
 type SupportedBlockchain = typeof supportedBlockchains[number];
@@ -57,7 +59,9 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.BOBA]: 'ethereum',
             [BLOCKCHAIN_NAME.BITCOIN]: 'bitcoin',
             [BLOCKCHAIN_NAME.ETHEREUM_POW]: 'ethereum-pow-iou',
-            [BLOCKCHAIN_NAME.KAVA]: 'kava'
+            [BLOCKCHAIN_NAME.KAVA]: 'kava',
+            [BLOCKCHAIN_NAME.OASIS]: 'rose',
+            [BLOCKCHAIN_NAME.METIS]: 'metis'
         };
 
         this.tokenBlockchainId = {
@@ -74,7 +78,9 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.BOBA]: 'boba-network',
             [BLOCKCHAIN_NAME.BITCOIN]: 'bitcoin',
             [BLOCKCHAIN_NAME.ETHEREUM_POW]: 'ethereum-pow-iou',
-            [BLOCKCHAIN_NAME.KAVA]: 'kava'
+            [BLOCKCHAIN_NAME.KAVA]: 'kava',
+            [BLOCKCHAIN_NAME.OASIS]: 'oasis',
+            [BLOCKCHAIN_NAME.METIS]: 'metis'
         };
     }
 

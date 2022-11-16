@@ -31,6 +31,7 @@ import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/pro
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 /**
  * Calculated Celer cross-chain trade.
@@ -64,7 +65,8 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
                             fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
                             platformFee: { percent: 0, tokenSymbol: '' },
                             cryptoFee: null
-                        }
+                        },
+                        slippage: 0
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS,
                     maxSlippage
@@ -129,6 +131,8 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     public isDeflationTokenInTargetNetwork: boolean = false;
 
+    private readonly slippage: number;
+
     /**
      * Gets price impact in source and target blockchains, based on tokens usd prices.
      */
@@ -160,6 +164,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
             gasData: GasData | null;
             feeInPercents: number;
             feeInfo: FeeInfo;
+            slippage: number;
         },
         providerAddress: string,
         private readonly maxSlippage: number
@@ -172,7 +177,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
         this.gasData = crossChainTrade.gasData;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.feeInfo = crossChainTrade.feeInfo;
-
+        this.slippage = crossChainTrade.slippage;
         this.transitFeeToken = crossChainTrade.transitFeeToken;
 
         this.from = this.fromTrade.fromToken;
@@ -334,5 +339,26 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
             this.isDeflationTokenInTargetNetwork = error instanceof DeflationTokenError;
             throw error;
         }
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.fromTrade.toToken.tokenAmount;
+    }
+
+    public getTradeInfo(): TradeInfo {
+        const fromPriceImpact = this.fromTrade.fromToken.calculatePriceImpactPercent(
+            this.fromTrade.toToken
+        );
+
+        const toPriceImpact = this.toTrade.fromToken.calculatePriceImpactPercent(
+            this.toTrade.toToken
+        );
+
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: { from: fromPriceImpact, to: toPriceImpact },
+            slippage: { total: this.slippage * 100 }
+        };
     }
 }

@@ -169,7 +169,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                             to: to as PriceTokenAmount<TronBlockchainName>,
                             toTokenAmountMin,
                             feeInfo,
-                            gasData
+                            gasData,
+                            slippage: options.slippageTolerance
                         },
                         options.providerAddress
                     )
@@ -181,7 +182,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                         from: from as PriceTokenAmount<TronBlockchainName>,
                         to: to as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
                         toTokenAmountMin,
-                        feeInfo
+                        feeInfo,
+                        slippage: options.slippageTolerance
                     },
                     options.providerAddress
                 )
