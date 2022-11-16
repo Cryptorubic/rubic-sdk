@@ -87,7 +87,7 @@ export class DeflationTokenManager {
             price: new BigNumber(NaN)
         });
 
-        const uniswapV2Trades = await Promise.all(
+        const uniswapV2Trades = await Promise.allSettled(
             uniswapV2Providers.map(uniswapV2Provider =>
                 uniswapV2Provider.calculate(from, to, {
                     slippageTolerance: 1,
@@ -96,7 +96,9 @@ export class DeflationTokenManager {
                 })
             )
         );
-        return uniswapV2Trades.filter(trade => !('error' in trade))[0];
+        return uniswapV2Trades
+            .map(trade => (trade.status === 'fulfilled' ? trade.value : null))
+            .filter(notNull)[0];
     }
 
     private async simulateTransferWithSwap(
