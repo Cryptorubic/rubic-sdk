@@ -99,7 +99,9 @@ export const ON_CHAIN_TRADE_TYPE = {
 
     ZAPPY: 'ZAPPY',
     ZIP_SWAP: 'ZIP_SWAP',
-    ZRX: 'ZRX'
+    ZRX: 'ZRX',
+
+    YUZU_SWAP: 'YUZU_SWAP'
 } as const;
 
 /**

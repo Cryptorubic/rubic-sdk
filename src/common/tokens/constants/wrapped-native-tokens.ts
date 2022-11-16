@@ -186,7 +186,7 @@ export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
     }),
     [BLOCKCHAIN_NAME.OASIS]: new Token({
         blockchain: BLOCKCHAIN_NAME.OASIS,
-        address: '',
+        address: '0x21C718C22D52d0F3a789b752D4c2fD5908a8A733',
         name: 'Wrapped ROSE',
         symbol: 'WROSE',
         decimals: 18
