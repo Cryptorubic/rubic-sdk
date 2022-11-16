@@ -120,7 +120,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
      */
     public readonly exact: Exact;
 
-    protected readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+    public readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
 
     protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 

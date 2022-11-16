@@ -115,7 +115,7 @@ export class OneinchTrade extends EvmOnChainTrade {
      */
     public readonly path: ReadonlyArray<Token>;
 
-    protected readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+    public readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
 
     protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 

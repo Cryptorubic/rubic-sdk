@@ -1,4 +1,4 @@
-import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { PriceTokenAmount, Token, TokenAmount } from 'src/common/tokens';
 import { TronOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/tron-on-chain-trade/tron-on-chain-trade';
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import {
@@ -19,7 +19,7 @@ import {
     BridgersSwapRequest,
     BridgersSwapResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-swap-api';
-import { TokenAmountSymbol } from 'src/common/tokens/models/token-amount-symbol';
+import { OnChainPlatformFee } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 
 export class BridgersTrade extends TronOnChainTrade {
     public readonly from: PriceTokenAmount<TronBlockchainName>;
@@ -32,9 +32,9 @@ export class BridgersTrade extends TronOnChainTrade {
 
     private readonly contractAddress: string;
 
-    public readonly cryptoFeeToken: TokenAmountSymbol;
+    public readonly cryptoFeeToken: TokenAmount;
 
-    public readonly platformFeePercent: number;
+    public readonly platformFee: OnChainPlatformFee;
 
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.BRIDGERS;
@@ -54,8 +54,8 @@ export class BridgersTrade extends TronOnChainTrade {
             to: PriceTokenAmount<TronBlockchainName>;
             slippageTolerance: number;
             contractAddress: string;
-            cryptoFeeToken: TokenAmountSymbol;
-            platformFeePercent: number;
+            cryptoFeeToken: TokenAmount;
+            platformFee: OnChainPlatformFee;
         },
         providerAddress: string
     ) {
@@ -66,7 +66,7 @@ export class BridgersTrade extends TronOnChainTrade {
         this.slippageTolerance = tradeStruct.slippageTolerance;
         this.contractAddress = tradeStruct.contractAddress;
         this.cryptoFeeToken = tradeStruct.cryptoFeeToken;
-        this.platformFeePercent = tradeStruct.platformFeePercent;
+        this.platformFee = tradeStruct.platformFee;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {

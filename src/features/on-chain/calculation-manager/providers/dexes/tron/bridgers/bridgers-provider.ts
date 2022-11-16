@@ -4,7 +4,7 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList, PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { TronOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/tron-on-chain-provider/tron-on-chain-provider';
 import { BridgersTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/tron/bridgers/bridgers-trade';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
@@ -19,8 +19,8 @@ import {
     BridgersQuoteRequest,
     BridgersQuoteResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
-import { TokenAmountSymbol } from 'src/common/tokens/models/token-amount-symbol';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
+import { OnChainPlatformFee } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 
 export class BridgersProvider extends TronOnChainProvider {
     private readonly defaultOptions: BridgersCalculationOptions = {
@@ -74,11 +74,18 @@ export class BridgersProvider extends TronOnChainProvider {
             tokenAmount: new BigNumber(transactionData.toTokenAmount)
         });
 
-        const cryptoFeeToken: TokenAmountSymbol = {
-            tokenAmount: new BigNumber(transactionData.chainFee),
-            symbol: toToken.symbol
-        };
+        const cryptoFeeToken = new TokenAmount({
+            ...nativeTokensList[from.blockchain],
+            tokenAmount: new BigNumber(transactionData.chainFee)
+        });
         const platformFeePercent = transactionData.fee * 100;
+        const platformFee: OnChainPlatformFee = {
+            percent: platformFeePercent,
+            token: new TokenAmount({
+                ...from,
+                tokenAmount: from.tokenAmount.multipliedBy(platformFeePercent / 100)
+            })
+        };
 
         return new BridgersTrade(
             {
@@ -87,7 +94,7 @@ export class BridgersProvider extends TronOnChainProvider {
                 slippageTolerance: fullOptions.slippageTolerance,
                 contractAddress: transactionData.contractAddress,
                 cryptoFeeToken,
-                platformFeePercent
+                platformFee
             },
             fullOptions.providerAddress
         );

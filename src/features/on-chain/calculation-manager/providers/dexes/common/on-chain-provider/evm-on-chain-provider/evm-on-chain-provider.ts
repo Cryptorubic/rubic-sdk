@@ -55,10 +55,10 @@ export abstract class EvmOnChainProvider extends OnChainProvider {
             await this.checkContractState(from.blockchain);
 
             proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
-                from.blockchain,
+                from,
                 fullOptions.providerAddress
             );
-            fromWithoutFee = getFromWithoutFee(from, proxyFeeInfo.platformFeePercent);
+            fromWithoutFee = getFromWithoutFee(from, proxyFeeInfo.platformFee.percent);
         } else {
             fromWithoutFee = from;
         }

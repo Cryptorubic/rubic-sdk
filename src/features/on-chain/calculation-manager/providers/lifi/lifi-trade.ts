@@ -75,7 +75,7 @@ export class LifiTrade extends EvmOnChainTrade {
 
     private readonly _toTokenAmountMin: PriceTokenAmount;
 
-    protected readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+    public readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
 
     protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 

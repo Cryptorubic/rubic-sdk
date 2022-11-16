@@ -48,7 +48,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
      */
     protected readonly useProxy: boolean;
 
-    protected abstract readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+    public abstract readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
 
     protected abstract readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 
@@ -216,7 +216,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             directTransactionConfig.data
         ];
 
-        const value = new BigNumber(this.proxyFeeInfo?.fixedCryptoFeeWei || 0)
+        const value = new BigNumber(this.proxyFeeInfo?.fixedFeeToken.stringWeiAmount || 0)
             .plus(this.from.isNative ? this.from.weiAmount : '0')
             .toFixed(0);
 

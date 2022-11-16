@@ -6,7 +6,12 @@ import {
     onChainProxyContractAddress
 } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
 import { Cache } from 'src/common/utils/decorators';
-import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
+import {
+    OnChainPlatformFee,
+    OnChainProxyFeeInfo
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
+import { nativeTokensList, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import BigNumber from 'bignumber.js';
 
 export class OnChainProxyService {
     @Cache({
@@ -28,12 +33,15 @@ export class OnChainProxyService {
         maxAge: 15_000
     })
     public async getFeeInfo(
-        fromBlockchain: EvmBlockchainName,
+        from: PriceTokenAmount<EvmBlockchainName>,
         providerAddress: string
     ): Promise<OnChainProxyFeeInfo> {
+        const fromBlockchain = from.blockchain;
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
         const contractAddress = onChainProxyContractAddress[fromBlockchain];
 
+        let fixedCryptoFeeWei: string | undefined;
+        let platformFeePercent: number;
         if (providerAddress !== EvmWeb3Pure.EMPTY_ADDRESS) {
             const integratorToFeeInfo = await web3Public.callContractMethod<{
                 isIntegrator: boolean;
@@ -42,30 +50,44 @@ export class OnChainProxyService {
             }>(contractAddress, onChainProxyContractAbi, 'integratorToFeeInfo', [providerAddress]);
 
             if (integratorToFeeInfo.isIntegrator) {
-                return {
-                    fixedCryptoFeeWei: integratorToFeeInfo.fixedFeeAmount,
-                    platformFeePercent: parseInt(integratorToFeeInfo.tokenFee) / 10_000
-                };
+                fixedCryptoFeeWei = integratorToFeeInfo.fixedFeeAmount;
+                platformFeePercent = parseInt(integratorToFeeInfo.tokenFee) / 10_000;
             }
         }
+        if (fixedCryptoFeeWei === undefined) {
+            const feeInfo = await Promise.all([
+                web3Public.callContractMethod<string>(
+                    contractAddress,
+                    onChainProxyContractAbi,
+                    'fixedCryptoFee',
+                    []
+                ),
+                web3Public.callContractMethod<string>(
+                    contractAddress,
+                    onChainProxyContractAbi,
+                    'RubicPlatformFee',
+                    []
+                )
+            ]);
+            fixedCryptoFeeWei = feeInfo[0];
+            platformFeePercent = parseInt(feeInfo[1]) / 10_000;
+        }
 
-        const [fixedCryptoFeeWei, platformFee] = await Promise.all([
-            web3Public.callContractMethod<string>(
-                contractAddress,
-                onChainProxyContractAbi,
-                'fixedCryptoFee',
-                []
-            ),
-            web3Public.callContractMethod<string>(
-                contractAddress,
-                onChainProxyContractAbi,
-                'RubicPlatformFee',
-                []
-            )
-        ]);
+        const fixedFeeToken = new TokenAmount({
+            ...nativeTokensList[fromBlockchain],
+            weiAmount: new BigNumber(fixedCryptoFeeWei)
+        });
+        const platformFee: OnChainPlatformFee = {
+            percent: platformFeePercent!,
+            token: new TokenAmount({
+                ...from,
+                tokenAmount: from.tokenAmount.multipliedBy(platformFeePercent! / 100)
+            })
+        };
+
         return {
-            fixedCryptoFeeWei,
-            platformFeePercent: parseInt(platformFee) / 10_000
+            fixedFeeToken,
+            platformFee
         };
     }
 }
