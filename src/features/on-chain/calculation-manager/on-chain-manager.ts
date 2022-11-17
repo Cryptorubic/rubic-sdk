@@ -108,9 +108,7 @@ export class OnChainManager {
         if (options?.useProxy === false) {
             useProxy = options.useProxy;
         } else {
-            useProxy =
-                (!isDeflationFrom.isDeflation || isDeflationFrom.isWhitelisted) &&
-                (!isDeflationTo.isDeflation || isDeflationTo.isWhitelisted);
+            useProxy = !isDeflationFrom.isDeflation || isDeflationFrom.isWhitelisted;
         }
 
         return combineOptions<RequiredOnChainManagerCalculationOptions>(
