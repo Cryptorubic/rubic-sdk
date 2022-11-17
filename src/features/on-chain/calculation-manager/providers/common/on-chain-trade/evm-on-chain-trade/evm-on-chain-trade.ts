@@ -52,7 +52,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     /**
      * True, if trade must be swapped through on-chain proxy contract.
      */
-    protected readonly useProxy: boolean;
+    public readonly useProxy: boolean;
 
     public readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
 
