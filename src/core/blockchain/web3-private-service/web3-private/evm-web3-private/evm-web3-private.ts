@@ -237,7 +237,6 @@ export class EvmWeb3Private extends Web3Private {
 
     private shouldIgnoreError(error: Web3Error): boolean {
         const ignoreCallErrors = [
-            'execution reverted: TransferHelper: TRANSFER_FROM_FAILED',
             'STF',
             'execution reverted: ERC20: transfer amount exceeds allowance',
             'Anyswaperc20: request exceed allowance',
