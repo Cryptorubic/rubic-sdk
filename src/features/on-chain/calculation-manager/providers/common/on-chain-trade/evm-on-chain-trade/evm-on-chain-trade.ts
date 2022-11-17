@@ -199,7 +199,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             }
             if (
                 (this.withDeflation.from.isDeflation || this.withDeflation.to.isDeflation) &&
-                this.slippageTolerance < 12
+                this.slippageTolerance < 0.12
             ) {
                 throw new LowSlippageDeflationaryTokenError();
             }
