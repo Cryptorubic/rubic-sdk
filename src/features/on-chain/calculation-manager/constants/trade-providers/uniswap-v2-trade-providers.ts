@@ -28,6 +28,8 @@ import { JupiterSwapProvider } from 'src/features/on-chain/calculation-manager/p
 import { PhotonSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/photon-swap/photon-swap-provider';
 import { SoulSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/soul-swap/soul-swap-provider';
 import { ApeSwapTelosProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/ape-swap/ape-swap-telos-provider';
+import { ElkProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/elk/elk-provider';
+import { SurfdexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/surfdex/surfdex-provider';
 
 export const UniswapV2TradeProviders = [
     // ethereum
@@ -71,5 +73,7 @@ export const UniswapV2TradeProviders = [
     SushiSwapEthereumPowProvider,
     // Kava
     JupiterSwapProvider,
-    PhotonSwapProvider
+    PhotonSwapProvider,
+    ElkProvider,
+    SurfdexProvider
 ] as const;
