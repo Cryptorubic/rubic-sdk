@@ -157,6 +157,9 @@ export class DeflationTokenManager {
         const expected = new BigNumber(decoded.amountExpected.toHexString());
         const percent = new BigNumber(1).minus(received.dividedBy(expected)).multipliedBy(100);
 
+        if (percent.eq(0)) {
+            return { isDeflation: false };
+        }
         return {
             isDeflation: true,
             percent,
