@@ -1,4 +1,7 @@
-import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
+import {
+    OnChainCalculationOptions,
+    RequiredOnChainCalculationOptions
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { zrxApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/constants';
 import { ZrxQuoteRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-quote-request';
@@ -14,18 +17,13 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
-import { ZrxCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-calculation-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
+import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
+import { ZrxTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-trade-struct';
 
 export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
-    private readonly defaultOptions: ZrxCalculationOptions = {
-        slippageTolerance: 0.02,
-        gasCalculation: 'calculate',
-        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
-        useProxy: false
-    };
+    private readonly defaultOptions: RequiredOnChainCalculationOptions = evmProviderDefaultOptions;
 
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.ZRX;
@@ -68,22 +66,23 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
             weiAmount: new BigNumber(apiTradeData.buyAmount)
         });
 
-        const tradeStruct = {
+        const tradeStruct: ZrxTradeStruct = {
             from,
             to,
             slippageTolerance: fullOptions.slippageTolerance,
+            gasFeeInfo: null,
             apiTradeData,
             path: [from, to],
+            useProxy: fullOptions.useProxy,
             proxyFeeInfo,
             fromWithoutFee
         };
         if (fullOptions.gasCalculation === 'disabled') {
-            return new ZrxTrade(tradeStruct, fullOptions.useProxy, fullOptions.providerAddress);
+            return new ZrxTrade(tradeStruct, fullOptions.providerAddress);
         }
 
         const gasPriceInfo = await this.getGasPriceInfo();
-        const gasLimit =
-            (await ZrxTrade.getGasLimit(tradeStruct, fullOptions.useProxy)) || apiTradeData.gas;
+        const gasLimit = (await ZrxTrade.getGasLimit(tradeStruct)) || apiTradeData.gas;
         const gasFeeInfo = await getGasFeeInfo(gasLimit, gasPriceInfo);
 
         return new ZrxTrade(
@@ -91,7 +90,6 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
                 ...tradeStruct,
                 gasFeeInfo
             },
-            fullOptions.useProxy,
             fullOptions.providerAddress
         );
     }

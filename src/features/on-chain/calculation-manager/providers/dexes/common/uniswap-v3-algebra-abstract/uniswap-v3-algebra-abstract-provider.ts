@@ -4,10 +4,7 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-calculated-info';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { UniswapV3TradeClass } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-class';
-import {
-    UniswapV3AlgebraAbstractTrade,
-    UniswapV3AlgebraTradeStruct
-} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
+import { UniswapV3AlgebraAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { AlgebraTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/algebra-trade';
 import { UniswapV3AlgebraRoute } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
@@ -19,16 +16,17 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { AbiItem } from 'web3-utils';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { UniswapV3AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
-import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/models/gas-price-info';
+import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/models/gas-price-info';
 import { combineOptions } from 'src/common/utils/options';
 import BigNumber from 'bignumber.js';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
 import { UniswapV3AlgebraCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-calculation-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { QuickSwapV3Trade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/quick-swap-v3-trade';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
+import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
+import { UniswapV3AlgebraTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
@@ -49,18 +47,14 @@ export abstract class UniswapV3AlgebraAbstractProvider<
     protected readonly isRubicOptimisationEnabled: boolean = false;
 
     protected readonly defaultOptions: UniswapV3AlgebraCalculationOptions = {
-        slippageTolerance: 0.02,
+        ...evmProviderDefaultOptions,
         deadlineMinutes: 20,
-        gasCalculation: 'calculate',
-        disableMultihops: false,
-        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
-        useProxy: false
+        disableMultihops: false
     };
 
     protected abstract createTradeInstance(
         tradeStruct: UniswapV3AlgebraTradeStruct,
         route: UniswapV3AlgebraRoute,
-        useProxy: boolean,
         providerAddress: string
     ): T;
 
@@ -155,22 +149,20 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             route.outputAbsoluteAmount
         );
 
-        const tradeStruct = {
+        const tradeStruct: UniswapV3AlgebraTradeStruct = {
             from,
             to,
+            gasFeeInfo: null,
             exact,
             slippageTolerance: fullOptions.slippageTolerance,
             deadlineMinutes: fullOptions.deadlineMinutes,
+            path: [], // will be updated in children
+            useProxy: fullOptions.useProxy,
             proxyFeeInfo,
             fromWithoutFee
         };
         if (fullOptions.gasCalculation === 'disabled') {
-            return this.createTradeInstance(
-                tradeStruct,
-                route,
-                fullOptions.useProxy,
-                fullOptions.providerAddress
-            );
+            return this.createTradeInstance(tradeStruct, route, fullOptions.providerAddress);
         }
 
         const gasFeeInfo = getGasFeeInfo(estimatedGas, gasPriceInfo!);
@@ -180,7 +172,6 @@ export abstract class UniswapV3AlgebraAbstractProvider<
                 gasFeeInfo
             },
             route,
-            fullOptions.useProxy,
             fullOptions.providerAddress
         );
     }

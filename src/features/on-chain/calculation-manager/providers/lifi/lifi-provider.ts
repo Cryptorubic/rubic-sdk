@@ -14,7 +14,6 @@ import { combineOptions } from 'src/common/utils/options';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
 import { OnChainIsUnavailableError } from 'src/common/errors/on-chain';
 import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
@@ -24,6 +23,7 @@ import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calcula
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-trade-struct';
+import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
 export class LifiProvider {
     private readonly lifi = new LIFI(getLifiConfig());
@@ -31,10 +31,8 @@ export class LifiProvider {
     private readonly onChainProxyService = new OnChainProxyService();
 
     private readonly defaultOptions: Omit<RequiredLifiCalculationOptions, 'disabledProviders'> = {
-        gasCalculation: 'calculate',
-        slippageTolerance: 0.02,
-        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
-        useProxy: false
+        ...evmProviderDefaultOptions,
+        gasCalculation: 'calculate'
     };
 
     constructor() {}
@@ -108,6 +106,7 @@ export class LifiProvider {
                         path,
                         route,
                         toTokenWeiAmountMin: new BigNumber(route.toAmountMin),
+                        useProxy: fullOptions.useProxy,
                         proxyFeeInfo,
                         fromWithoutFee
                     };
@@ -115,17 +114,13 @@ export class LifiProvider {
                     const gasFeeInfo =
                         fullOptions.gasCalculation === 'disabled'
                             ? null
-                            : await this.getGasFeeInfo(lifiTradeStruct, fullOptions.useProxy);
+                            : await this.getGasFeeInfo(lifiTradeStruct);
                     lifiTradeStruct = {
                         ...lifiTradeStruct,
                         gasFeeInfo
                     };
 
-                    return new LifiTrade(
-                        lifiTradeStruct,
-                        fullOptions.useProxy,
-                        fullOptions.providerAddress
-                    );
+                    return new LifiTrade(lifiTradeStruct, fullOptions.providerAddress);
                 })
             )
         ).filter(notNull);
@@ -164,12 +159,9 @@ export class LifiProvider {
         };
     }
 
-    private async getGasFeeInfo(
-        lifiTradeStruct: LifiTradeStruct,
-        useProxy: boolean
-    ): Promise<GasFeeInfo | null> {
+    private async getGasFeeInfo(lifiTradeStruct: LifiTradeStruct): Promise<GasFeeInfo | null> {
         const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
-        const gasLimit = await LifiTrade.getGasLimit(lifiTradeStruct, useProxy);
+        const gasLimit = await LifiTrade.getGasLimit(lifiTradeStruct);
         return getGasFeeInfo(gasLimit, gasPriceInfo);
     }
 

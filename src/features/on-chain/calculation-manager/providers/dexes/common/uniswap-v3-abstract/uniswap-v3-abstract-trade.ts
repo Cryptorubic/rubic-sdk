@@ -1,9 +1,5 @@
 import { UniswapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
-import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/common/utils/token-native-address-proxy';
-import {
-    UniswapV3AlgebraAbstractTrade,
-    UniswapV3AlgebraTradeStruct
-} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
+import { UniswapV3AlgebraAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
@@ -16,13 +12,7 @@ import { RubicSdkError } from 'src/common/errors';
 import { UniswapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { Cache } from 'src/common/utils/decorators';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { Token } from 'src/common/tokens';
-
-export interface UniswapV3TradeStruct extends UniswapV3AlgebraTradeStruct {
-    route: UniswapV3Route;
-}
+import { UniswapV3TradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-struct';
 
 export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTrade {
     public readonly dexContractAddress = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS;
@@ -37,40 +27,8 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
         return ON_CHAIN_TRADE_TYPE.UNI_SWAP_V3;
     }
 
-    @Cache
-    public get path(): ReadonlyArray<Token> {
-        const initialPool = this.route.poolsPath[0];
-        if (!initialPool) {
-            throw new RubicSdkError('Initial pool has to be defined');
-        }
-        const path: Token[] = [
-            compareAddresses(initialPool.token0.address, this.route.initialTokenAddress)
-                ? initialPool.token0
-                : initialPool.token1
-        ];
-
-        const lastToken = path[path.length - 1];
-        if (!lastToken) {
-            throw new RubicSdkError('Last token has to be defined');
-        }
-
-        this.route.poolsPath.forEach(pool => {
-            path.push(
-                !compareAddresses(pool.token0.address, lastToken.address)
-                    ? pool.token0
-                    : pool.token1
-            );
-        });
-
-        return createTokenNativeAddressProxyInPathStartAndEnd(path, EvmWeb3Pure.nativeTokenAddress);
-    }
-
-    public constructor(
-        tradeStruct: UniswapV3TradeStruct,
-        useProxy: boolean,
-        providerAddress: string
-    ) {
-        super(tradeStruct, useProxy, providerAddress);
+    public constructor(tradeStruct: UniswapV3TradeStruct, providerAddress: string) {
+        super(tradeStruct, providerAddress);
 
         this.route = tradeStruct.route;
     }

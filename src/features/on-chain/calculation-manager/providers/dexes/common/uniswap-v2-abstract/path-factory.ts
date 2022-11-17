@@ -216,14 +216,16 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
                 {
                     from,
                     to,
+                    path: route.path,
                     wrappedPath: route.path,
                     exact: this.exact,
                     deadlineMinutes: this.options.deadlineMinutes,
                     slippageTolerance: this.options.slippageTolerance,
+                    gasFeeInfo: null,
+                    useProxy: this.options.useProxy,
                     proxyFeeInfo: this.proxyFeeInfo,
                     fromWithoutFee
                 },
-                this.options.useProxy,
                 EvmWeb3Pure.EMPTY_ADDRESS
             );
         });

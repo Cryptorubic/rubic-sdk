@@ -2,9 +2,6 @@ import { Route } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { SwapRequestError, LifiPairIsUnavailableError, RubicSdkError } from 'src/common/errors';
-import { Token } from 'src/common/tokens';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -12,7 +9,6 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { onChainProxyContractAddress } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
-import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-trade-struct';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 
@@ -25,10 +21,7 @@ interface LifiTransactionRequest {
 
 export class LifiTrade extends EvmOnChainTrade {
     /** @internal */
-    public static async getGasLimit(
-        lifiTradeStruct: LifiTradeStruct,
-        useProxy: boolean
-    ): Promise<BigNumber | null> {
+    public static async getGasLimit(lifiTradeStruct: LifiTradeStruct): Promise<BigNumber | null> {
         const fromBlockchain = lifiTradeStruct.from.blockchain;
         const walletAddress =
             Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
@@ -39,7 +32,6 @@ export class LifiTrade extends EvmOnChainTrade {
         try {
             const transactionConfig = await new LifiTrade(
                 lifiTradeStruct,
-                useProxy,
                 EvmWeb3Pure.EMPTY_ADDRESS
             ).encode({ fromAddress: walletAddress });
 
@@ -57,27 +49,13 @@ export class LifiTrade extends EvmOnChainTrade {
         }
     }
 
-    public readonly from: PriceTokenAmount<EvmBlockchainName>;
-
-    public readonly to: PriceTokenAmount<EvmBlockchainName>;
-
-    public readonly gasFeeInfo: GasFeeInfo | null;
-
-    public readonly slippageTolerance: number;
-
     public readonly providerGateway: string;
 
     public readonly type: OnChainTradeType;
 
-    public readonly path: ReadonlyArray<Token>;
-
     private readonly route: Route;
 
     private readonly _toTokenAmountMin: PriceTokenAmount;
-
-    public readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-
-    protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 
     protected get spenderAddress(): string {
         return this.useProxy
@@ -93,23 +71,16 @@ export class LifiTrade extends EvmOnChainTrade {
         return this._toTokenAmountMin;
     }
 
-    constructor(tradeStruct: LifiTradeStruct, useProxy: boolean, providerAddress: string) {
-        super(useProxy, providerAddress);
+    constructor(tradeStruct: LifiTradeStruct, providerAddress: string) {
+        super(tradeStruct, providerAddress);
 
-        this.from = tradeStruct.from;
-        this.to = tradeStruct.to;
         this._toTokenAmountMin = new PriceTokenAmount({
             ...this.to.asStruct,
             weiAmount: tradeStruct.toTokenWeiAmountMin
         });
-        this.gasFeeInfo = tradeStruct.gasFeeInfo;
-        this.slippageTolerance = tradeStruct.slippageTolerance;
         this.type = tradeStruct.type;
-        this.path = tradeStruct.path;
         this.route = tradeStruct.route;
         this.providerGateway = this.route.steps[0]!.estimate.approvalAddress;
-        this.proxyFeeInfo = tradeStruct.proxyFeeInfo;
-        this.fromWithoutFee = tradeStruct.fromWithoutFee;
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {

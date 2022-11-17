@@ -1,4 +1,4 @@
-import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import {
     DEFAULT_ESTIMATED_GAS,
     WETH_TO_ETH_ESTIMATED_GAS
@@ -12,7 +12,6 @@ import { Injector } from 'src/core/injector/injector';
 import { getFromToTokensAmountsByExact } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { AbiItem } from 'web3-utils';
-import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
@@ -21,18 +20,7 @@ import BigNumber from 'bignumber.js';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
-
-export interface UniswapV3AlgebraTradeStruct {
-    from: PriceTokenAmount<EvmBlockchainName>;
-    to: PriceTokenAmount<EvmBlockchainName>;
-    exact: Exact;
-    slippageTolerance: number;
-    deadlineMinutes: number;
-    gasFeeInfo?: GasFeeInfo | null;
-    proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-    fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
-}
+import { UniswapV3AlgebraTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
 
 interface EstimateGasOptions {
     slippageTolerance: number;
@@ -148,7 +136,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
                     deadlineMinutes: options.deadlineMinutes,
                     route
                 },
-                false
+                EvmWeb3Pure.EMPTY_ADDRESS
             ).getEstimateGasParams();
         } catch (err) {
             throw new RubicSdkError('Trying to call abstract class method');
@@ -159,23 +147,9 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
 
     protected abstract readonly unwrapWethMethodName: 'unwrapWETH9' | 'unwrapWNativeToken';
 
-    public readonly from: PriceTokenAmount<EvmBlockchainName>;
-
-    public readonly to: PriceTokenAmount<EvmBlockchainName>;
-
     protected readonly exact: Exact;
 
-    public readonly gasFeeInfo: GasFeeInfo | null;
-
-    public slippageTolerance: number;
-
     public deadlineMinutes: number;
-
-    public abstract readonly path: ReadonlyArray<Token>;
-
-    public readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-
-    protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 
     public get type(): OnChainTradeType {
         return (<typeof UniswapV3AbstractTrade>this.constructor).type;
@@ -193,21 +167,11 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         return estimatedGas.plus(this.to.isNative ? WETH_TO_ETH_ESTIMATED_GAS : 0);
     }
 
-    protected constructor(
-        tradeStruct: UniswapV3AlgebraTradeStruct,
-        useProxy: boolean,
-        providerAddress: string
-    ) {
-        super(useProxy, providerAddress);
+    protected constructor(tradeStruct: UniswapV3AlgebraTradeStruct, providerAddress: string) {
+        super(tradeStruct, providerAddress);
 
-        this.from = tradeStruct.from;
-        this.to = tradeStruct.to;
         this.exact = tradeStruct.exact;
-        this.gasFeeInfo = tradeStruct.gasFeeInfo || null;
-        this.slippageTolerance = tradeStruct.slippageTolerance;
         this.deadlineMinutes = tradeStruct.deadlineMinutes;
-        this.proxyFeeInfo = tradeStruct.proxyFeeInfo;
-        this.fromWithoutFee = tradeStruct.fromWithoutFee;
     }
 
     protected getAmountParams(): [string, string] {

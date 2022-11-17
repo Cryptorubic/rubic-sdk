@@ -9,10 +9,8 @@ import {
     createTokenNativeAddressProxyInPathStartAndEnd
 } from 'src/features/common/utils/token-native-address-proxy';
 import { OneinchSwapResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-response';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import {
     ON_CHAIN_TRADE_TYPE,
@@ -29,28 +27,12 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { Injector } from 'src/core/injector/injector';
 import BigNumber from 'bignumber.js';
-import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
-
-type OneinchTradeStruct = {
-    dexContractAddress: string;
-    from: PriceTokenAmount<EvmBlockchainName>;
-    to: PriceTokenAmount<EvmBlockchainName>;
-    slippageTolerance: number;
-    disableMultihops: boolean;
-    path: ReadonlyArray<Token>;
-    gasFeeInfo?: GasFeeInfo | null;
-    data: string | null;
-    proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-    fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
-};
+import { OneinchTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-trade-struct';
 
 export class OneinchTrade extends EvmOnChainTrade {
     /** @internal */
-    public static async getGasLimit(
-        oneinchTradeStruct: OneinchTradeStruct,
-        useProxy: boolean
-    ): Promise<BigNumber | null> {
-        const fromBlockchain = oneinchTradeStruct.from.blockchain;
+    public static async getGasLimit(tradeStruct: OneinchTradeStruct): Promise<BigNumber | null> {
+        const fromBlockchain = tradeStruct.from.blockchain;
         const walletAddress =
             Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
         if (!walletAddress) {
@@ -59,8 +41,7 @@ export class OneinchTrade extends EvmOnChainTrade {
 
         try {
             const transactionConfig = await new OneinchTrade(
-                oneinchTradeStruct,
-                useProxy,
+                tradeStruct,
                 EvmWeb3Pure.EMPTY_ADDRESS
             ).encode({ fromAddress: walletAddress });
 
@@ -80,13 +61,14 @@ export class OneinchTrade extends EvmOnChainTrade {
 
     /** @internal */
     public static async checkIfNeedApproveAndThrowError(
-        from: PriceTokenAmount
+        from: PriceTokenAmount,
+        useProxy: boolean
     ): Promise<void | never> {
         const needApprove = await new OneinchTrade(
             {
-                from
+                from,
+                useProxy
             } as OneinchTradeStruct,
-            false,
             EvmWeb3Pure.EMPTY_ADDRESS
         ).needApprove();
         if (needApprove) {
@@ -96,28 +78,11 @@ export class OneinchTrade extends EvmOnChainTrade {
 
     public readonly dexContractAddress: string;
 
-    public readonly from: PriceTokenAmount<EvmBlockchainName>;
-
-    public readonly to: PriceTokenAmount<EvmBlockchainName>;
-
     private readonly nativeSupportedFromWithoutFee: PriceTokenAmount;
 
     private readonly nativeSupportedTo: PriceTokenAmount;
 
-    public gasFeeInfo: GasFeeInfo | null;
-
-    public slippageTolerance: number;
-
     private readonly disableMultihops: boolean;
-
-    /**
-     * Path, through which tokens will be converted.
-     */
-    public readonly path: ReadonlyArray<Token>;
-
-    public readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-
-    protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 
     /**
      * @internal
@@ -137,34 +102,23 @@ export class OneinchTrade extends EvmOnChainTrade {
         return getOneinchApiBaseUrl(this.from.blockchain);
     }
 
-    constructor(
-        oneinchTradeStruct: OneinchTradeStruct,
-        useProxy: boolean,
-        providerAddress: string
-    ) {
-        super(useProxy, providerAddress);
+    constructor(tradeStruct: OneinchTradeStruct, providerAddress: string) {
+        super(tradeStruct, providerAddress);
 
-        this.dexContractAddress = oneinchTradeStruct.dexContractAddress;
-        this.from = oneinchTradeStruct.from;
-        this.to = oneinchTradeStruct.to;
-        this.gasFeeInfo = oneinchTradeStruct.gasFeeInfo || null;
-        this.slippageTolerance = oneinchTradeStruct.slippageTolerance;
-        this.disableMultihops = oneinchTradeStruct.disableMultihops;
-        this.path = oneinchTradeStruct.path;
-        this.transactionData = oneinchTradeStruct.data;
+        this.dexContractAddress = tradeStruct.dexContractAddress;
+        this.disableMultihops = tradeStruct.disableMultihops;
+        this.transactionData = tradeStruct.data;
         this.wrappedPath = createTokenNativeAddressProxyInPathStartAndEnd(
             this.path,
             oneinchApiParams.nativeAddress
         );
-        this.proxyFeeInfo = oneinchTradeStruct.proxyFeeInfo;
-        this.fromWithoutFee = oneinchTradeStruct.fromWithoutFee;
 
         this.nativeSupportedFromWithoutFee = createTokenNativeAddressProxy(
-            oneinchTradeStruct.fromWithoutFee,
+            tradeStruct.fromWithoutFee,
             oneinchApiParams.nativeAddress
         );
         this.nativeSupportedTo = createTokenNativeAddressProxy(
-            oneinchTradeStruct.to,
+            tradeStruct.to,
             oneinchApiParams.nativeAddress
         );
     }

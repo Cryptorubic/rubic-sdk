@@ -3,10 +3,5 @@ import { OnChainManagerCalculationOptions } from 'src/features/on-chain/calculat
 
 export type RequiredOnChainManagerCalculationOptions = MarkRequired<
     OnChainManagerCalculationOptions,
-    | 'timeout'
-    | 'disabledProviders'
-    | 'providerAddress'
-    | 'useProxy'
-    | 'isDeflationFrom'
-    | 'isDeflationTo'
+    'timeout' | 'disabledProviders' | 'providerAddress' | 'useProxy' | 'isDeflation'
 >;

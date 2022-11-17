@@ -8,7 +8,7 @@ import {
     OnChainCalculationOptions,
     RequiredOnChainCalculationOptions
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
-import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/models/gas-price-info';
+import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/models/gas-price-info';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
 import { OnChainIsUnavailableError } from 'src/common/errors/on-chain';

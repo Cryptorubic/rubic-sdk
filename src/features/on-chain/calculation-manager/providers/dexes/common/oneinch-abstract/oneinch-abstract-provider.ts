@@ -20,17 +20,15 @@ import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/pr
 import BigNumber from 'bignumber.js';
 import { OneinchCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-calculation-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
+import { OneinchTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-trade-struct';
+import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
 export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
     private readonly defaultOptions: Omit<OneinchCalculationOptions, 'fromAddress'> = {
-        gasCalculation: 'calculate',
+        ...evmProviderDefaultOptions,
         disableMultihops: false,
-        slippageTolerance: 0.02,
-        wrappedAddress: oneinchApiParams.nativeAddress,
-        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
-        useProxy: false
+        wrappedAddress: oneinchApiParams.nativeAddress
     };
 
     public get type(): OnChainTradeType {
@@ -94,36 +92,31 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             weiAmount: toTokenAmountInWei
         });
 
-        const oneinchTradeStruct = {
+        const oneinchTradeStruct: OneinchTradeStruct = {
             dexContractAddress,
             from,
             to,
             slippageTolerance: fullOptions.slippageTolerance,
             disableMultihops: fullOptions.disableMultihops,
             path,
+            gasFeeInfo: null,
             data,
+            useProxy: fullOptions.useProxy,
             proxyFeeInfo,
             fromWithoutFee
         };
         if (fullOptions.gasCalculation === 'disabled') {
-            return new OneinchTrade(
-                oneinchTradeStruct,
-                fullOptions.useProxy,
-                fullOptions.providerAddress
-            );
+            return new OneinchTrade(oneinchTradeStruct, fullOptions.providerAddress);
         }
 
         const gasPriceInfo = await this.getGasPriceInfo();
-        const gasLimit =
-            (await OneinchTrade.getGasLimit(oneinchTradeStruct, fullOptions.useProxy)) ||
-            estimatedGas;
+        const gasLimit = (await OneinchTrade.getGasLimit(oneinchTradeStruct)) || estimatedGas;
         const gasFeeInfo = getGasFeeInfo(gasLimit, gasPriceInfo);
         return new OneinchTrade(
             {
                 ...oneinchTradeStruct,
                 gasFeeInfo
             },
-            fullOptions.useProxy,
             fullOptions.providerAddress
         );
     }
@@ -161,7 +154,8 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             }
 
             if (options.gasCalculation !== 'disabled') {
-                await OneinchTrade.checkIfNeedApproveAndThrowError(from);
+                // @todo update
+                await OneinchTrade.checkIfNeedApproveAndThrowError(from, options.useProxy);
             }
 
             const swapTradeParams: OneinchSwapRequest = {

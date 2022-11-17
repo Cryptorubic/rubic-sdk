@@ -1,5 +1,8 @@
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
+import {
+    OnChainCalculationOptions,
+    RequiredOnChainCalculationOptions
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
@@ -13,22 +16,16 @@ import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/co
 import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
 import { BridgersPairIsUnavailableError, MaxAmountError, MinAmountError } from 'src/common/errors';
 import BigNumber from 'bignumber.js';
-import { BridgersCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/tron/bridgers/models/bridgers-calculation-options';
 import { combineOptions } from 'src/common/utils/options';
 import {
     BridgersQuoteRequest,
     BridgersQuoteResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
-import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { OnChainPlatformFee } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
+import { tronProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/tron-on-chain-provider/constants/tron-provider-default-options';
 
 export class BridgersProvider extends TronOnChainProvider {
-    private readonly defaultOptions: BridgersCalculationOptions = {
-        slippageTolerance: 0.02,
-        gasCalculation: 'disabled',
-        providerAddress: TronWeb3Pure.EMPTY_ADDRESS,
-        useProxy: false
-    };
+    private readonly defaultOptions: RequiredOnChainCalculationOptions = tronProviderDefaultOptions;
 
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.BRIDGERS;

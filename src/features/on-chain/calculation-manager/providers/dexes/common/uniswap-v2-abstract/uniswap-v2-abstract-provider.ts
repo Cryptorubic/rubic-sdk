@@ -5,8 +5,11 @@ import { PathFactory } from 'src/features/on-chain/calculation-manager/providers
 import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { UniswapCalculatedInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-calculated-info';
-import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
-import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/models/gas-price-info';
+import {
+    createTokenNativeAddressProxy,
+    createTokenNativeAddressProxyInPathStartAndEnd
+} from 'src/features/common/utils/token-native-address-proxy';
+import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/models/gas-price-info';
 import { combineOptions } from 'src/common/utils/options';
 import { UniswapV2AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
@@ -18,6 +21,8 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import { getFromToTokensAmountsByExact } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
+import { UniswapV2TradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-struct';
+import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
 export abstract class UniswapV2AbstractProvider<
     T extends UniswapV2AbstractTrade = UniswapV2AbstractTrade
@@ -33,12 +38,9 @@ export abstract class UniswapV2AbstractProvider<
     }
 
     protected readonly defaultOptions: UniswapV2CalculationOptions = {
-        slippageTolerance: 0.02,
+        ...evmProviderDefaultOptions,
         deadlineMinutes: 20,
-        gasCalculation: 'calculate',
-        disableMultihops: false,
-        providerAddress: EvmWeb3Pure.EMPTY_ADDRESS,
-        useProxy: false
+        disableMultihops: false
     };
 
     public async calculate(
@@ -138,27 +140,34 @@ export abstract class UniswapV2AbstractProvider<
             route.outputAbsoluteAmount
         );
 
-        const uniswapV2Trade: UniswapV2AbstractTrade = new this.UniswapV2TradeClass(
-            {
-                from,
-                to,
-                exact,
-                wrappedPath: route.path,
-                deadlineMinutes: fullOptions.deadlineMinutes,
-                slippageTolerance: fullOptions.slippageTolerance,
-                proxyFeeInfo,
-                fromWithoutFee
-            },
-            fullOptions.useProxy,
-            fullOptions.providerAddress
+        const wrappedPath = route.path;
+        const path = createTokenNativeAddressProxyInPathStartAndEnd(
+            wrappedPath,
+            EvmWeb3Pure.nativeTokenAddress
         );
+        const tradeStruct: UniswapV2TradeStruct = {
+            from,
+            to,
+            exact,
+            path,
+            wrappedPath,
+            deadlineMinutes: fullOptions.deadlineMinutes,
+            slippageTolerance: fullOptions.slippageTolerance,
+            gasFeeInfo: null,
+            useProxy: fullOptions.useProxy,
+            proxyFeeInfo,
+            fromWithoutFee
+        };
 
         if (fullOptions.gasCalculation === 'disabled') {
-            return uniswapV2Trade;
+            return new this.UniswapV2TradeClass(tradeStruct, fullOptions.providerAddress);
         }
 
-        uniswapV2Trade.gasFeeInfo = getGasFeeInfo(estimatedGas, gasPriceInfo!);
-        return uniswapV2Trade;
+        const gasFeeInfo = getGasFeeInfo(estimatedGas, gasPriceInfo!);
+        return new this.UniswapV2TradeClass(
+            { ...tradeStruct, gasFeeInfo },
+            fullOptions.providerAddress
+        );
     }
 
     private async getAmountAndPath(

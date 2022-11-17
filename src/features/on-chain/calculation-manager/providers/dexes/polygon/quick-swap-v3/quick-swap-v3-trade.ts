@@ -1,14 +1,9 @@
-import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/common/utils/token-native-address-proxy';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
-import {
-    UniswapV3AlgebraAbstractTrade,
-    UniswapV3AlgebraTradeStruct
-} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
+import { UniswapV3AlgebraAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Token } from 'src/common/tokens';
 import { QuickSwapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/models/quick-swap-v3-route';
 import {
@@ -16,10 +11,7 @@ import {
     QUICK_SWAP_V3_ROUTER_CONTRACT_ADDRESS
 } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/constants/swap-router-contract-data';
 import { AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/algebra/algebra-quoter-controller';
-
-export interface QuickSwapV3TradeStruct extends UniswapV3AlgebraTradeStruct {
-    route: QuickSwapV3Route;
-}
+import { QuickSwapV3TradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/models/quick-swap-v3-trade-struct';
 
 export class QuickSwapV3Trade extends UniswapV3AlgebraAbstractTrade {
     public static get type(): OnChainTradeType {
@@ -36,18 +28,12 @@ export class QuickSwapV3Trade extends UniswapV3AlgebraAbstractTrade {
 
     public readonly wrappedPath: ReadonlyArray<Token>;
 
-    public readonly path: ReadonlyArray<Token>;
-
-    constructor(tradeStruct: QuickSwapV3TradeStruct, useProxy: boolean, providerAddress: string) {
-        super(tradeStruct, useProxy, providerAddress);
+    constructor(tradeStruct: QuickSwapV3TradeStruct, providerAddress: string) {
+        super(tradeStruct, providerAddress);
 
         this.route = tradeStruct.route;
 
         this.wrappedPath = this.route.path;
-        this.path = createTokenNativeAddressProxyInPathStartAndEnd(
-            this.route.path,
-            EvmWeb3Pure.nativeTokenAddress
-        );
     }
 
     /**

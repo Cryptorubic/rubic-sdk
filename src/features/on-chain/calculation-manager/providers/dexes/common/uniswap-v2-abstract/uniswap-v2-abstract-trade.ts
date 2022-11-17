@@ -1,5 +1,4 @@
 import { DefaultEstimatedGas } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
-import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/common/utils/token-native-address-proxy';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
@@ -16,9 +15,8 @@ import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-servi
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { AbiItem } from 'web3-utils';
 import { tryExecuteAsync } from 'src/common/utils/functions';
-import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { defaultUniswapV2Abi } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi';
-import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { Token } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
@@ -30,19 +28,7 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { parseError } from 'src/common/utils/errors';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
-
-export type UniswapV2TradeStruct = {
-    from: PriceTokenAmount<EvmBlockchainName>;
-    to: PriceTokenAmount<EvmBlockchainName>;
-    exact: Exact;
-    wrappedPath: ReadonlyArray<Token> | Token[];
-    deadlineMinutes: number;
-    slippageTolerance: number;
-    gasFeeInfo?: GasFeeInfo | null;
-    proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-    fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
-};
+import { UniswapV2TradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-struct';
 
 export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
     /** @internal */
@@ -94,20 +80,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
     /**
      * Deadline for transaction in minutes.
      */
-    public deadlineMinutes: number;
-
-    public slippageTolerance: number;
-
-    public readonly from: PriceTokenAmount<EvmBlockchainName>;
-
-    public readonly to: PriceTokenAmount<EvmBlockchainName>;
-
-    public gasFeeInfo: GasFeeInfo | null;
-
-    /**
-     * Path, through which tokens will be converted.
-     */
-    public readonly path: ReadonlyArray<Token>;
+    public readonly deadlineMinutes: number;
 
     /**
      * @internal
@@ -120,20 +93,8 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
      */
     public readonly exact: Exact;
 
-    public readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-
-    protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
-
     public get type(): OnChainTradeType {
         return (this.constructor as typeof UniswapV2AbstractTrade).type;
-    }
-
-    /**
-     * Updates parameters in swap options.
-     */
-    public set settings(value: { deadlineMinutes?: number; slippageTolerance?: number }) {
-        this.deadlineMinutes = value.deadlineMinutes || this.deadlineMinutes;
-        this.slippageTolerance = value.slippageTolerance || this.slippageTolerance;
     }
 
     private get deadlineMinutesTimestamp(): number {
@@ -169,28 +130,12 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         return 'TOKENS_TO_TOKENS';
     }
 
-    public constructor(
-        tradeStruct: UniswapV2TradeStruct,
-        useProxy: boolean,
-        providerAddress: string
-    ) {
-        super(useProxy, providerAddress);
+    public constructor(tradeStruct: UniswapV2TradeStruct, providerAddress: string) {
+        super(tradeStruct, providerAddress);
 
-        this.from = tradeStruct.from;
-        this.to = tradeStruct.to;
-        this.gasFeeInfo = tradeStruct.gasFeeInfo || null;
         this.deadlineMinutes = tradeStruct.deadlineMinutes;
         this.exact = tradeStruct.exact;
-        this.slippageTolerance = tradeStruct.slippageTolerance;
-        this.proxyFeeInfo = tradeStruct.proxyFeeInfo;
-        this.fromWithoutFee = tradeStruct.fromWithoutFee;
-
         this.wrappedPath = tradeStruct.wrappedPath;
-
-        this.path = createTokenNativeAddressProxyInPathStartAndEnd(
-            this.wrappedPath,
-            EvmWeb3Pure.nativeTokenAddress
-        );
     }
 
     private getAmountInAndAmountOut(): { amountIn: string; amountOut: string } {

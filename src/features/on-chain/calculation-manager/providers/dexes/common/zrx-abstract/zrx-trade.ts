@@ -1,37 +1,20 @@
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ZrxQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-types';
-import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import BigNumber from 'bignumber.js';
 import { Injector } from 'src/core/injector/injector';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
-
-interface ZrxTradeStruct {
-    from: PriceTokenAmount<EvmBlockchainName>;
-    to: PriceTokenAmount<EvmBlockchainName>;
-    slippageTolerance: number;
-    apiTradeData: ZrxQuoteResponse;
-    path: ReadonlyArray<Token>;
-    gasFeeInfo?: GasFeeInfo;
-    proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-    fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
-}
+import { ZrxTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-trade-struct';
 
 export class ZrxTrade extends EvmOnChainTrade {
     /** @internal */
-    public static async getGasLimit(
-        zrxTradeStruct: ZrxTradeStruct,
-        useProxy: boolean
-    ): Promise<BigNumber | null> {
+    public static async getGasLimit(zrxTradeStruct: ZrxTradeStruct): Promise<BigNumber | null> {
         const fromBlockchain = zrxTradeStruct.from.blockchain;
         const walletAddress =
             Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
@@ -42,7 +25,6 @@ export class ZrxTrade extends EvmOnChainTrade {
         try {
             const transactionConfig = await new ZrxTrade(
                 zrxTradeStruct,
-                useProxy,
                 EvmWeb3Pure.EMPTY_ADDRESS
             ).encode({ fromAddress: walletAddress });
 
@@ -60,43 +42,19 @@ export class ZrxTrade extends EvmOnChainTrade {
         }
     }
 
-    public readonly from: PriceTokenAmount<EvmBlockchainName>;
-
-    public readonly to: PriceTokenAmount<EvmBlockchainName>;
-
-    /**
-     * In Zrx you can't change slippage after calculation is done.
-     */
-    public readonly slippageTolerance: number;
-
-    public gasFeeInfo: GasFeeInfo | null;
-
     private readonly apiTradeData: ZrxQuoteResponse;
 
     public readonly dexContractAddress: string;
-
-    public readonly path: ReadonlyArray<Token>;
-
-    public readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-
-    protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.ZRX;
     }
 
-    constructor(tradeStruct: ZrxTradeStruct, useProxy: boolean, providerAddress: string) {
-        super(useProxy, providerAddress);
+    constructor(tradeStruct: ZrxTradeStruct, providerAddress: string) {
+        super(tradeStruct, providerAddress);
 
-        this.from = tradeStruct.from;
-        this.to = tradeStruct.to;
-        this.gasFeeInfo = tradeStruct.gasFeeInfo || null;
-        this.slippageTolerance = tradeStruct.slippageTolerance;
         this.apiTradeData = tradeStruct.apiTradeData;
         this.dexContractAddress = this.apiTradeData.to;
-        this.path = tradeStruct.path;
-        this.proxyFeeInfo = tradeStruct.proxyFeeInfo;
-        this.fromWithoutFee = tradeStruct.fromWithoutFee;
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {

@@ -1,5 +1,5 @@
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
-import { PriceTokenAmount } from 'src/common/tokens';
+import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { Injector } from 'src/core/injector/injector';
@@ -30,27 +30,41 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
+import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 
 export abstract class EvmOnChainTrade extends OnChainTrade {
-    public abstract readonly from: PriceTokenAmount<EvmBlockchainName>;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
-    public abstract readonly to: PriceTokenAmount<EvmBlockchainName>;
+    public readonly to: PriceTokenAmount<EvmBlockchainName>;
+
+    public readonly slippageTolerance: number;
+
+    public readonly path: ReadonlyArray<Token>;
 
     /**
      * Gas fee info, including gas limit and gas price.
      */
-    public abstract gasFeeInfo: GasFeeInfo | null;
-
-    public abstract readonly dexContractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
+    public readonly gasFeeInfo: GasFeeInfo | null;
 
     /**
      * True, if trade must be swapped through on-chain proxy contract.
      */
     protected readonly useProxy: boolean;
 
-    public abstract readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
+    public readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
 
-    protected abstract readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
+    /**
+     * Contains from amount, from which proxy fees were subtracted.
+     * If proxy is not used, then amount is equal to from amount.
+     */
+    protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
+
+    // protected readonly isDeflation: {
+    //     from: IsDeflationToken;
+    //     to: IsDeflationToken;
+    // };
+
+    public abstract readonly dexContractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
     private get contractAddress(): string {
         return this.useProxy
@@ -70,10 +84,21 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
     }
 
-    protected constructor(useProxy: boolean, providerAddress: string) {
+    protected constructor(evmOnChainTradeStruct: EvmOnChainTradeStruct, providerAddress: string) {
         super(providerAddress);
 
-        this.useProxy = useProxy;
+        this.from = evmOnChainTradeStruct.from;
+        this.to = evmOnChainTradeStruct.to;
+
+        this.slippageTolerance = evmOnChainTradeStruct.slippageTolerance;
+        this.path = evmOnChainTradeStruct.path;
+
+        this.gasFeeInfo = evmOnChainTradeStruct.gasFeeInfo;
+
+        this.useProxy = evmOnChainTradeStruct.useProxy;
+        this.proxyFeeInfo = evmOnChainTradeStruct.proxyFeeInfo;
+        this.fromWithoutFee = evmOnChainTradeStruct.fromWithoutFee;
+        // this.isDeflation = evmOnChainTradeStruct.isDeflation;
     }
 
     public async approve(
