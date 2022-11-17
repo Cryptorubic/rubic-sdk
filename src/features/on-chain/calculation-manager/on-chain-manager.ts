@@ -9,7 +9,6 @@ import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/prov
 import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
 import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
 import pTimeout from 'src/common/utils/p-timeout';
-import { MarkRequired } from 'ts-essentials';
 import { combineOptions } from 'src/common/utils/options';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -17,11 +16,8 @@ import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-pri
 import { ProviderAddress } from 'src/core/sdk/models/provider-address';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
-
-type RequiredOnChainManagerCalculationOptions = MarkRequired<
-    OnChainManagerCalculationOptions,
-    'timeout' | 'disabledProviders' | 'providerAddress' | 'useProxy'
->;
+import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
+import { RequiredOnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/required-on-chain-manager-calculation-options';
 
 /**
  * Contains methods to calculate on-chain trades.
@@ -104,12 +100,17 @@ export class OnChainManager {
     ): Promise<RequiredOnChainManagerCalculationOptions> {
         const chainType = BlockchainsInfo.getChainType(from.blockchain) as keyof ProviderAddress;
 
+        const [isDeflationFrom, isDeflationTo] = await Promise.all([
+            this.isDeflationToken(from),
+            this.isDeflationToken(to)
+        ]);
         let useProxy: boolean;
         if (options?.useProxy === false) {
             useProxy = options.useProxy;
         } else {
-            const isWithDeflation = await this.isWithDeflation(from, to);
-            useProxy = !isWithDeflation;
+            useProxy =
+                (!isDeflationFrom.isDeflation || isDeflationFrom.isWhitelisted) &&
+                (!isDeflationTo.isDeflation || isDeflationTo.isWhitelisted);
         }
 
         return combineOptions<RequiredOnChainManagerCalculationOptions>(
@@ -118,7 +119,9 @@ export class OnChainManager {
                 timeout: OnChainManager.defaultCalculationTimeout,
                 disabledProviders: [],
                 providerAddress: this.providerAddress[chainType],
-                useProxy
+                useProxy,
+                isDeflationFrom,
+                isDeflationTo
             }
         );
     }
@@ -152,16 +155,8 @@ export class OnChainManager {
         });
     }
 
-    private async isWithDeflation(from: Token, to: Token): Promise<boolean> {
-        try {
-            await Promise.all([
-                this.deflationTokenManager.checkToken(from),
-                this.deflationTokenManager.checkToken(to)
-            ]);
-            return false;
-        } catch {
-            return true;
-        }
+    private isDeflationToken(token: Token): Promise<IsDeflationToken> {
+        return this.deflationTokenManager.isDeflationToken(token);
     }
 
     private async calculateDexes(

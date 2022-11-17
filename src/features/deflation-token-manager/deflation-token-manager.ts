@@ -15,6 +15,8 @@ import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { UniswapV2TradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/uniswap-v2-trade-providers';
 import { notNull } from 'src/common/utils/object';
+import { Cache } from 'src/common/utils/decorators';
+import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
 import { UniswapV2AbstractTrade } from '../on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { simulatorContractAbi } from './constants/simulator-contract-abi';
 import { simulatorContractAddress } from './constants/simulator-contract-address';
@@ -43,11 +45,19 @@ const NATIVE_TOKEN_AMOUNT: Record<EvmBlockchainName, number> = Object.values(
  */
 export class DeflationTokenManager {
     public async checkToken(token: Token): Promise<void | never> {
+        const isDeflationToken = await this.isDeflationToken(token);
+        if (isDeflationToken.isDeflation) {
+            throw new DeflationTokenError(token, isDeflationToken.percent);
+        }
+    }
+
+    @Cache
+    public async isDeflationToken(token: Token): Promise<IsDeflationToken> {
         if (
             !BlockchainsInfo.isEvmBlockchainName(token.blockchain) ||
             EvmWeb3Pure.isNativeAddress(token.address)
         ) {
-            return;
+            return { isDeflation: false };
         }
         const evmToken = new Token({
             ...token,
@@ -56,16 +66,17 @@ export class DeflationTokenManager {
 
         const bestTrade = await this.findUniswapV2Trade(evmToken);
         if (!bestTrade) {
-            return;
+            return { isDeflation: false };
         }
 
         try {
             await this.simulateTransferWithSwap(bestTrade, evmToken);
         } catch (error) {
             if (error?.data?.includes(ERROR_SELECTOR)) {
-                this.parseError(error.data, evmToken);
+                return this.parseError(error.data);
             }
         }
+        return { isDeflation: false };
     }
 
     private async findUniswapV2Trade(
@@ -127,7 +138,7 @@ export class DeflationTokenManager {
         );
     }
 
-    private parseError(errorData: string, evmToken: Token<EvmBlockchainName>): never | void {
+    private parseError(errorData: string): IsDeflationToken {
         const decoded = EvmWeb3Pure.decodeData<{
             isWhitelisted: boolean;
             amountReceived: EthersBigNumber;
@@ -141,18 +152,15 @@ export class DeflationTokenManager {
             ],
             errorData
         );
-        if (decoded.isWhitelisted) {
-            return;
-        }
 
         const received = new BigNumber(decoded.amountReceived.toHexString());
         const expected = new BigNumber(decoded.amountExpected.toHexString());
-        const deflationPercent = new BigNumber(1)
-            .minus(received.dividedBy(expected))
-            .multipliedBy(100);
+        const percent = new BigNumber(1).minus(received.dividedBy(expected)).multipliedBy(100);
 
-        if (deflationPercent.gt(0)) {
-            throw new DeflationTokenError(evmToken, deflationPercent.toFixed(2));
-        }
+        return {
+            isDeflation: true,
+            percent,
+            isWhitelisted: decoded.isWhitelisted
+        };
     }
 }

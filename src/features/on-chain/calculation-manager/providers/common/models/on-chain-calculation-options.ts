@@ -1,4 +1,5 @@
 import { MarkRequired } from 'ts-essentials';
+import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
 
 /**
  * Stores options for calculating trade.
@@ -36,13 +37,13 @@ export interface OnChainCalculationOptions {
      */
     readonly zrxAffiliateAddress?: string;
 
+    readonly providerAddress?: string;
+
     /**
      * @internal
      * Wrapped native address.
      */
     readonly wrappedAddress?: string;
-
-    readonly providerAddress?: string;
 
     /**
      * @internal
@@ -51,6 +52,18 @@ export interface OnChainCalculationOptions {
      * Default is false.
      */
     readonly useProxy?: boolean;
+
+    /**
+     * @internal
+     * Contains information whether from token is deflation or not.
+     */
+    readonly isDeflationFrom?: IsDeflationToken;
+
+    /**
+     * @internal
+     * Contains information whether to token is deflation or not.
+     */
+    readonly isDeflationTo?: IsDeflationToken;
 }
 
 export type RequiredOnChainCalculationOptions = MarkRequired<
