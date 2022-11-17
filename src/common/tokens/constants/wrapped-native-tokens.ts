@@ -186,14 +186,14 @@ export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
     }),
     [BLOCKCHAIN_NAME.OASIS]: new Token({
         blockchain: BLOCKCHAIN_NAME.OASIS,
-        address: '',
+        address: '0x21C718C22D52d0F3a789b752D4c2fD5908a8A733',
         name: 'Wrapped ROSE',
         symbol: 'WROSE',
         decimals: 18
     }),
     [BLOCKCHAIN_NAME.METIS]: new Token({
         blockchain: BLOCKCHAIN_NAME.METIS,
-        address: '0x75cb093e4d61d2a2e65d8e0bbb01de8d89b53481',
+        address: '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000',
         name: 'Wrapped METIS',
         symbol: 'WMETIS',
         decimals: 18
