@@ -193,7 +193,7 @@ export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
     }),
     [BLOCKCHAIN_NAME.METIS]: new Token({
         blockchain: BLOCKCHAIN_NAME.METIS,
-        address: '0x75cb093e4d61d2a2e65d8e0bbb01de8d89b53481',
+        address: '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000',
         name: 'Wrapped METIS',
         symbol: 'WMETIS',
         decimals: 18

@@ -9,7 +9,8 @@ const defaultMetisRoutingProvidersAddresses = [
     '0x721532bc0da5ffaeb0a6a45fb24271e8098629a7', // BYTE
     '0x420000000000000000000000000000000000000a', // WETH
     '0x90fe084f877c65e1b577c7b2ea64b8d8dd1ab278', // NETT
-    '0x2bf9b864cdc97b08b6d79ad4663e71b8ab65c45c' // BUSD
+    '0x2bf9b864cdc97b08b6d79ad4663e71b8ab65c45c', // BUSD
+    '0x75cb093e4d61d2a2e65d8e0bbb01de8d89b53481'
 ];
 
 const defaultMetisWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.METIS].address;
