@@ -31,6 +31,8 @@ import { ApeSwapTelosProvider } from 'src/features/on-chain/calculation-manager/
 import { OmnidexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/omnidex/omnidex-provider';
 import { YuzuSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/oasis/yuzu-swap/yuzu-swap-provider';
 import { NetSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/metis/net-swap/net-swap-provider';
+import { ElkProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/elk/elk-provider';
+import { SurfdexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/surfdex/surfdex-provider';
 
 export const UniswapV2TradeProviders = [
     // ethereum
@@ -76,6 +78,8 @@ export const UniswapV2TradeProviders = [
     // Kava
     JupiterSwapProvider,
     PhotonSwapProvider,
+    ElkProvider,
+    SurfdexProvider,
     // Oasis
     YuzuSwapProvider,
     // Metis
