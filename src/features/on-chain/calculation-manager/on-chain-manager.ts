@@ -191,6 +191,10 @@ export class OnChainManager {
         if (!BlockchainsInfo.isEvmBlockchainName(from.blockchain)) {
             return [];
         }
+        if (options.withDeflation.from.isDeflation) {
+            console.debug('[RUBIC_SDK] Lifi does not work if source token is deflation.');
+            return [];
+        }
 
         try {
             const disabledProviders = dexesProvidersTypes.concat(options.disabledProviders);
@@ -205,7 +209,7 @@ export class OnChainManager {
                 calculationOptions
             );
         } catch (err) {
-            console.debug(`[RUBIC_SDK] Trade calculation error occurred for lifi.`, err);
+            console.debug('[RUBIC_SDK] Trade calculation error occurred for lifi.', err);
             return [];
         }
     }
