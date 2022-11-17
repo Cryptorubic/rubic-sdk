@@ -88,7 +88,10 @@ export class LifiTrade extends EvmOnChainTrade {
         this.checkFromAddress(options.fromAddress, true);
 
         try {
-            const transactionData = await this.getTransactionData(options.fromAddress);
+            const transactionData = await this.getTransactionData(
+                options.fromAddress,
+                options.receiverAddress
+            );
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gasLimit,
                 gasPrice: transactionData.gasPrice
@@ -112,14 +115,17 @@ export class LifiTrade extends EvmOnChainTrade {
         }
     }
 
-    private async getTransactionData(fromAddress?: string): Promise<LifiTransactionRequest> {
+    private async getTransactionData(
+        fromAddress?: string,
+        receiverAddress?: string
+    ): Promise<LifiTransactionRequest> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
             action: {
                 ...firstStep.action,
                 fromAddress: fromAddress || this.walletAddress,
-                toAddress: fromAddress || this.walletAddress
+                toAddress: receiverAddress || fromAddress || this.walletAddress
             },
             execution: {
                 status: 'NOT_STARTED',
