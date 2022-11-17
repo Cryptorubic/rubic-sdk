@@ -224,7 +224,8 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
                     gasFeeInfo: null,
                     useProxy: this.options.useProxy,
                     proxyFeeInfo: this.proxyFeeInfo,
-                    fromWithoutFee
+                    fromWithoutFee,
+                    withDeflation: { from: { isDeflation: false }, to: { isDeflation: false } }
                 },
                 EvmWeb3Pure.EMPTY_ADDRESS
             );
