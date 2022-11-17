@@ -108,7 +108,8 @@ export class LifiProvider {
                         toTokenWeiAmountMin: new BigNumber(route.toAmountMin),
                         useProxy: fullOptions.useProxy,
                         proxyFeeInfo,
-                        fromWithoutFee
+                        fromWithoutFee,
+                        withDeflation: fullOptions.withDeflation
                     };
 
                     const gasFeeInfo =

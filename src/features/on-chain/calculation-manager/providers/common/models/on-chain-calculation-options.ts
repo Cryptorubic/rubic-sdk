@@ -57,7 +57,7 @@ export interface OnChainCalculationOptions {
      * @internal
      * Contains information whether tokens are deflation or not.
      */
-    readonly isDeflation?: {
+    readonly withDeflation?: {
         from: IsDeflationToken;
         to: IsDeflationToken;
     };
@@ -65,5 +65,5 @@ export interface OnChainCalculationOptions {
 
 export type RequiredOnChainCalculationOptions = MarkRequired<
     OnChainCalculationOptions,
-    'slippageTolerance' | 'gasCalculation' | 'providerAddress' | 'useProxy' | 'isDeflation'
+    'slippageTolerance' | 'gasCalculation' | 'providerAddress' | 'useProxy' | 'withDeflation'
 >;

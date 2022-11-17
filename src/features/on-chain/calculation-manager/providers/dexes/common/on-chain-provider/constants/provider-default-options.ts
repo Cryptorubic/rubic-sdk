@@ -6,7 +6,7 @@ export const providerDefaultOptions: Omit<
 > = {
     slippageTolerance: 0.02,
     useProxy: false,
-    isDeflation: {
+    withDeflation: {
         from: { isDeflation: false },
         to: { isDeflation: false }
     }

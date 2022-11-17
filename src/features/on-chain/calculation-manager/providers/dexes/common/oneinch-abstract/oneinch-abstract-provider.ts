@@ -108,7 +108,8 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             data,
             useProxy: fullOptions.useProxy,
             proxyFeeInfo,
-            fromWithoutFee
+            fromWithoutFee,
+            withDeflation: fullOptions.withDeflation
         };
         if (fullOptions.gasCalculation === 'disabled') {
             return new OneinchTrade(oneinchTradeStruct, fullOptions.providerAddress);

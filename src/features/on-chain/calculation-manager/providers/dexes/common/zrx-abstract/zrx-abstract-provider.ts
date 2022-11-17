@@ -75,7 +75,8 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
             path: [from, to],
             useProxy: fullOptions.useProxy,
             proxyFeeInfo,
-            fromWithoutFee
+            fromWithoutFee,
+            withDeflation: fullOptions.withDeflation
         };
         if (fullOptions.gasCalculation === 'disabled') {
             return new ZrxTrade(tradeStruct, fullOptions.providerAddress);

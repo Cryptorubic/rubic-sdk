@@ -8,6 +8,8 @@ import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-publ
 import { TransactionReceipt } from 'web3-eth';
 import {
     FailedToCheckForTransactionReceiptError,
+    LowSlippageDeflationaryTokenError,
+    RubicSdkError,
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
@@ -31,6 +33,7 @@ import { ContractParams } from 'src/features/common/models/contract-params';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
+import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
 
 export abstract class EvmOnChainTrade extends OnChainTrade {
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
@@ -59,10 +62,10 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
      */
     protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 
-    // protected readonly isDeflation: {
-    //     from: IsDeflationToken;
-    //     to: IsDeflationToken;
-    // };
+    protected readonly withDeflation: {
+        from: IsDeflationToken;
+        to: IsDeflationToken;
+    };
 
     public abstract readonly dexContractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
@@ -98,7 +101,8 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         this.useProxy = evmOnChainTradeStruct.useProxy;
         this.proxyFeeInfo = evmOnChainTradeStruct.proxyFeeInfo;
         this.fromWithoutFee = evmOnChainTradeStruct.fromWithoutFee;
-        // this.isDeflation = evmOnChainTradeStruct.isDeflation;
+
+        this.withDeflation = evmOnChainTradeStruct.withDeflation;
     }
 
     public async approve(
@@ -188,6 +192,16 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         } catch (err) {
             if (err instanceof FailedToCheckForTransactionReceiptError) {
                 return transactionHash!;
+            }
+
+            if (err instanceof RubicSdkError) {
+                throw err;
+            }
+            if (
+                (this.withDeflation.from.isDeflation || this.withDeflation.to.isDeflation) &&
+                this.slippageTolerance < 12
+            ) {
+                throw new LowSlippageDeflationaryTokenError();
             }
             throw parseError(err);
         }

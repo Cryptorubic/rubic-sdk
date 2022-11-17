@@ -120,7 +120,7 @@ export class OnChainManager {
                 disabledProviders: [],
                 providerAddress: this.providerAddress[chainType],
                 useProxy,
-                isDeflation: {
+                withDeflation: {
                     from: isDeflationFrom,
                     to: isDeflationTo
                 }
