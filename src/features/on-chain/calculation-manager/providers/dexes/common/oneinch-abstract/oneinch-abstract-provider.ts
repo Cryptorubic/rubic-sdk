@@ -23,6 +23,7 @@ import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/pr
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { OneinchTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-trade-struct';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
+import { onChainProxyContractAddress } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
 
 export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
     private readonly defaultOptions: Omit<OneinchCalculationOptions, 'fromAddress'> = {
@@ -66,9 +67,13 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options?: OnChainCalculationOptions
     ): Promise<OneinchTrade> {
+        const fromAddress =
+            options?.useProxy || this.defaultOptions.useProxy
+                ? onChainProxyContractAddress[from.blockchain]
+                : this.walletAddress;
         const fullOptions = combineOptions(options, {
             ...this.defaultOptions,
-            fromAddress: this.walletAddress
+            fromAddress
         });
 
         const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
@@ -149,13 +154,16 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         let toTokenAmount: string;
         let data: string | null = null;
         try {
-            if (!this.walletAddress) {
+            if (!options.fromAddress) {
                 throw new Error('Address is not set');
             }
 
             if (options.gasCalculation !== 'disabled') {
-                // @todo update
-                await OneinchTrade.checkIfNeedApproveAndThrowError(from, options.useProxy);
+                await OneinchTrade.checkIfNeedApproveAndThrowError(
+                    from,
+                    options.fromAddress,
+                    options.useProxy
+                );
             }
 
             const swapTradeParams: OneinchSwapRequest = {

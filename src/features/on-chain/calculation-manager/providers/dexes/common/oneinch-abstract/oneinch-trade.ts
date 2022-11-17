@@ -62,6 +62,7 @@ export class OneinchTrade extends EvmOnChainTrade {
     /** @internal */
     public static async checkIfNeedApproveAndThrowError(
         from: PriceTokenAmount,
+        fromAddress: string,
         useProxy: boolean
     ): Promise<void | never> {
         const needApprove = await new OneinchTrade(
@@ -70,7 +71,7 @@ export class OneinchTrade extends EvmOnChainTrade {
                 useProxy
             } as OneinchTradeStruct,
             EvmWeb3Pure.EMPTY_ADDRESS
-        ).needApprove();
+        ).needApprove(fromAddress);
         if (needApprove) {
             throw new RubicSdkError('Approve is needed');
         }

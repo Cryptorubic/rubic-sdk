@@ -226,7 +226,11 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     ): Promise<ContractParams> {
         const methodName = this.from.isNative ? 'instantTradeNative' : 'instantTrade';
 
-        const directTransactionConfig = await this.encodeDirect({ ...options, supportFee: false });
+        const directTransactionConfig = await this.encodeDirect({
+            ...options,
+            fromAddress: this.contractAddress,
+            supportFee: false
+        });
         const receiverAddress = options.receiverAddress || options.fromAddress;
         const methodArguments = [
             [
