@@ -33,16 +33,16 @@ export class ChaingeCrossChainProvider extends CrossChainProvider {
         const quoteRequest: ChaingeQuoteRequest = {
             fromAmount: from.tokenAmount.toNumber(),
             fromChain: from.blockchain,
-            fromToken: from.address,
+            fromToken: from.symbol,
             toChain: toToken.blockchain,
-            toToken: toToken.address,
+            toToken: toToken.symbol,
             feeLevel: 0
         };
         const headers = getChaingeRequestHeaders<ChaingeQuoteRequest>(quoteRequest);
         const response = await Injector.httpClient.post(
             `${chaingeApiBaseUrl}open/v1/order/getAggregateQuote`,
             quoteRequest,
-            { headers }
+            headers
         );
 
         console.log(response);
