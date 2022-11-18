@@ -23,7 +23,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     BITGERT: 'BITGERT',
     OASIS: 'OASIS',
     METIS: 'METIS',
-    DFK: 'DEFIKINGDOMS'
+    DFK: 'DEFIKINGDOMS',
+    KLAYTN: 'KLAYTN'
 } as const;
 
 export const BLOCKCHAIN_NAME = {

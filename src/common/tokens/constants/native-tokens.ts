@@ -207,5 +207,12 @@ export const nativeTokensList = {
         name: 'JEWEL',
         symbol: 'JEWEL',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.KLAYTN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.KLAYTN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Klaytn',
+        symbol: 'KLAY',
+        decimals: 18
     })
 };
