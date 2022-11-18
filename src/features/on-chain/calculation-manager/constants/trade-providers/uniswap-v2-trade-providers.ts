@@ -35,6 +35,7 @@ import { ElkProvider } from 'src/features/on-chain/calculation-manager/providers
 import { SurfdexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/surfdex/surfdex-provider';
 import { TradeDFKSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/defi-kingdoms/trader-dfk/trader-dfk-provider';
 import { TradeHarmonySwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/harmony/trader-harmony/trader-harmony-provider';
+import { ClaimSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/klaytn/claim-swap/claim-swap-provider';
 
 export const UniswapV2TradeProviders = [
     // ethereum
@@ -88,5 +89,7 @@ export const UniswapV2TradeProviders = [
     // Metis
     NetSwapProvider,
     // DeFi Kingdoms
-    TradeDFKSwapProvider
+    TradeDFKSwapProvider,
+    // Klaytn
+    ClaimSwapProvider
 ] as const;
