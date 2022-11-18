@@ -200,5 +200,12 @@ export const nativeTokensList = {
         name: 'Metis token',
         symbol: 'METIS',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.DFK]: new Token({
+        blockchain: BLOCKCHAIN_NAME.DFK,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'JEWEL',
+        symbol: 'JEWEL',
+        decimals: 18
     })
 };

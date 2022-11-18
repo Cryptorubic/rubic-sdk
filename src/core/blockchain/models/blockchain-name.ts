@@ -22,7 +22,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     KAVA: 'KAVA',
     BITGERT: 'BITGERT',
     OASIS: 'OASIS',
-    METIS: 'METIS'
+    METIS: 'METIS',
+    DFK: 'DEFIKINGDOMS'
 } as const;
 
 export const BLOCKCHAIN_NAME = {

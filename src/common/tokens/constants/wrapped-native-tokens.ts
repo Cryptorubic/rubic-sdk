@@ -197,5 +197,12 @@ export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
         name: 'Wrapped METIS',
         symbol: 'WMETIS',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.DFK]: new Token({
+        blockchain: BLOCKCHAIN_NAME.DFK,
+        address: '0xCCb93dABD71c8Dad03Fc4CE5559dC3D89F67a260',
+        name: 'Wrapped JEWEL',
+        symbol: 'WJEWEL',
+        decimals: 18
     })
 };
