@@ -302,6 +302,9 @@ export class EvmWeb3Public extends Web3Public {
     public async getTransactionStatus(hash: string): Promise<TxStatus> {
         const txReceipt = await this.getTransactionReceipt(hash);
 
+        if (txReceipt === undefined) {
+            return TxStatus.FAIL;
+        }
         if (txReceipt === null) {
             return TxStatus.PENDING;
         }
