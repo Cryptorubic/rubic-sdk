@@ -18,13 +18,12 @@ import { XyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calcul
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 import { XyTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-request';
 import { XyTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-response';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 /**
  * Calculated XY cross-chain trade.
  */
 export class XyCrossChainTrade extends EvmCrossChainTrade {
-    private readonly transactionRequest: XyTransactionRequest;
-
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -84,6 +83,8 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
+    public static readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+
     public readonly type = CROSS_CHAIN_TRADE_TYPE.XY;
 
     public readonly isAggregator = false;
@@ -105,6 +106,8 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly gasData: GasData | null;
 
+    private readonly transactionRequest: XyTransactionRequest;
+
     private get fromBlockchain(): XyCrossChainSupportedBlockchain {
         return this.from.blockchain as XyCrossChainSupportedBlockchain;
     }
@@ -114,6 +117,8 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public readonly feeInfo: FeeInfo;
+
+    private readonly slippage: number;
 
     constructor(
         crossChainTrade: {
@@ -134,7 +139,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         this.transactionRequest = crossChainTrade.transactionRequest;
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
-
+        this.slippage = crossChainTrade.slippage;
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
         this.feeInfo = crossChainTrade.feeInfo;
         this.priceImpact = crossChainTrade.priceImpact;
@@ -194,5 +199,18 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             { params: params as {} }
         );
         return tx!;
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.from.price.multipliedBy(this.from.tokenAmount);
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: this.priceImpact ? { total: this.priceImpact } : null,
+            slippage: { total: this.slippage }
+        };
     }
 }

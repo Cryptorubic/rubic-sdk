@@ -37,11 +37,11 @@ export class XyCrossChainProvider extends CrossChainProvider {
     }
 
     public async calculate(
-        from: PriceTokenAmount<EvmBlockchainName>,
+        fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
-        const fromBlockchain = from.blockchain as XyCrossChainSupportedBlockchain;
+        const fromBlockchain = fromToken.blockchain as XyCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as XyCrossChainSupportedBlockchain;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return null;
@@ -58,17 +58,21 @@ export class XyCrossChainProvider extends CrossChainProvider {
             );
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+            const fromWithoutFee = getFromWithoutFee(fromToken, feeInfo);
 
             const slippageTolerance = options.slippageTolerance * 100;
 
             const requestParams: XyTransactionRequest = {
                 srcChainId: String(blockchainId[fromBlockchain]),
-                fromTokenAddress: from.address,
+                fromTokenAddress: fromToken.isNative
+                    ? XyCrossChainTrade.nativeAddress
+                    : fromToken.address,
                 amount: fromWithoutFee.stringWeiAmount,
                 slippage: String(slippageTolerance),
                 destChainId: blockchainId[toBlockchain],
-                toTokenAddress: toToken.address,
+                toTokenAddress: toToken.isNative
+                    ? XyCrossChainTrade.nativeAddress
+                    : toToken.address,
                 receiveAddress: receiverAddress
             };
 
@@ -88,20 +92,20 @@ export class XyCrossChainProvider extends CrossChainProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await XyCrossChainTrade.getGasData(from, to, requestParams)
+                    ? await XyCrossChainTrade.getGasData(fromToken, to, requestParams)
                     : null;
 
             return {
                 trade: new XyCrossChainTrade(
                     {
-                        from,
+                        from: fromToken,
                         to,
                         transactionRequest: {
                             ...requestParams,
                             receiveAddress: receiverAddress
                         },
                         gasData,
-                        priceImpact: from.calculatePriceImpactPercent(to) || 0,
+                        priceImpact: fromToken.calculatePriceImpactPercent(to) || 0,
                         slippage: options.slippageTolerance,
                         feeInfo: {
                             ...feeInfo,
