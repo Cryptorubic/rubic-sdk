@@ -7,14 +7,14 @@ import {
 
 export const METIS_EXACT_INPUT_REGULAR_SWAP_METHOD: RegularSwapMethodsList = {
     TOKENS_TO_TOKENS: 'swapExactTokensForTokens',
-    ETH_TO_TOKENS: 'swapExactMETISForTokens',
-    TOKENS_TO_ETH: 'swapExactTokensForMETIS'
+    ETH_TO_TOKENS: 'swapExactMetisForTokens',
+    TOKENS_TO_ETH: 'swapExactTokensForMetis'
 };
 
 export const METIS_EXACT_INPUT_SUPPORTING_FEE_SWAP_METHOD: SupportingFeeSwapMethodsList = {
     TOKENS_TO_TOKENS_SUPPORTING_FEE: 'swapExactTokensForTokensSupportingFeeOnTransferTokens',
-    ETH_TO_TOKENS_SUPPORTING_FEE: 'swapExactMETISForTokensSupportingFeeOnTransferTokens',
-    TOKENS_TO_ETH_SUPPORTING_FEE: 'swapExactTokensForMETISSupportingFeeOnTransferTokens'
+    ETH_TO_TOKENS_SUPPORTING_FEE: 'swapExactMetisForTokensSupportingFeeOnTransferTokens',
+    TOKENS_TO_ETH_SUPPORTING_FEE: 'swapExactTokensForMetisSupportingFeeOnTransferTokens'
 };
 
 export const METIS_EXACT_INPUT_SWAP_METHOD: SwapMethodsList = {
@@ -24,14 +24,14 @@ export const METIS_EXACT_INPUT_SWAP_METHOD: SwapMethodsList = {
 
 export const METIS_EXACT_OUTPUT_REGULAR_SWAP_METHOD: RegularSwapMethodsList = {
     TOKENS_TO_TOKENS: 'swapTokensForExactTokens',
-    ETH_TO_TOKENS: 'swapMETISForExactTokens',
-    TOKENS_TO_ETH: 'swapTokensForExactMETIS'
+    ETH_TO_TOKENS: 'swapMetisForExactTokens',
+    TOKENS_TO_ETH: 'swapTokensForExactMetis'
 };
 
 export const METIS_EXACT_OUTPUT_SUPPORTING_FEE_SWAP_METHOD: SupportingFeeSwapMethodsList = {
     TOKENS_TO_TOKENS_SUPPORTING_FEE: 'swapTokensForExactTokensSupportingFeeOnTransferTokens',
-    ETH_TO_TOKENS_SUPPORTING_FEE: 'swapMETISForExactTokensSupportingFeeOnTransferTokens',
-    TOKENS_TO_ETH_SUPPORTING_FEE: 'swapTokensForExactMETISSupportingFeeOnTransferTokens'
+    ETH_TO_TOKENS_SUPPORTING_FEE: 'swapMetisForExactTokensSupportingFeeOnTransferTokens',
+    TOKENS_TO_ETH_SUPPORTING_FEE: 'swapTokensForExactMetisSupportingFeeOnTransferTokens'
 };
 
 export const METIS_EXACT_OUTPUT_SWAP_METHOD: SwapMethodsList = {
