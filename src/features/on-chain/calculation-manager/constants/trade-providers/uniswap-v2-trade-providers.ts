@@ -33,6 +33,8 @@ import { YuzuSwapProvider } from 'src/features/on-chain/calculation-manager/prov
 import { NetSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/metis/net-swap/net-swap-provider';
 import { ElkProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/elk/elk-provider';
 import { SurfdexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/surfdex/surfdex-provider';
+import { TradeDFKSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/defi-kingdoms/trader-dfk/trader-dfk-provider';
+import { TradeHarmonySwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/harmony/trader-harmony/trader-harmony-provider';
 
 export const UniswapV2TradeProviders = [
     // ethereum
@@ -59,6 +61,7 @@ export const UniswapV2TradeProviders = [
     // harmony
     SushiSwapHarmonyProvider,
     ViperSwapHarmonyProvider,
+    TradeHarmonySwapProvider,
     // arbitrum
     SushiSwapArbitrumProvider,
     UniSwapV3ArbitrumProvider,
@@ -83,5 +86,7 @@ export const UniswapV2TradeProviders = [
     // Oasis
     YuzuSwapProvider,
     // Metis
-    NetSwapProvider
+    NetSwapProvider,
+    // DeFi Kingdoms
+    TradeDFKSwapProvider
 ] as const;
