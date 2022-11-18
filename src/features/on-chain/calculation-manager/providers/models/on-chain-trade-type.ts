@@ -29,6 +29,8 @@ export const ON_CHAIN_TRADE_TYPE = {
     DODO: 'DODO',
     DYSTOPIA: 'DYSTOPIA',
 
+    ELK: 'ELK',
+
     HONEY_SWAP: 'HONEY_SWAP',
 
     JET_SWAP: 'JET_SWAP',
@@ -47,9 +49,12 @@ export const ON_CHAIN_TRADE_TYPE = {
     MM_FINANCE: 'MM_FINANCE',
     MOJITO_SWAP: 'MOJITO_SWAP',
 
+    NET_SWAP: 'NET_SWAP',
+
     ONE_INCH: 'ONE_INCH',
     ONE_MOON: 'ONE_MOON',
     ONE_SOL: 'ONE_SOL',
+    OMNIDEX: 'OMNIDEX',
     OOLONG_SWAP: 'OOLONG_SWAP',
     OPEN_OCEAN: 'OPEN_OCEAN',
     ORCA_SWAP: 'ORCA_SWAP',
@@ -79,6 +84,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     SPOOKY_SWAP: 'SPOOKY_SWAP',
     SOUL_SWAP: 'SOUL_SWAP',
     STELLA_SWAP: 'STELLA_SWAP',
+    SURFDEX: 'SURFDEX',
     SUSHI_SWAP: 'SUSHI_SWAP',
 
     TRISOLARIS: 'TRISOLARIS',
@@ -98,7 +104,9 @@ export const ON_CHAIN_TRADE_TYPE = {
 
     ZAPPY: 'ZAPPY',
     ZIP_SWAP: 'ZIP_SWAP',
-    ZRX: 'ZRX'
+    ZRX: 'ZRX',
+
+    YUZU_SWAP: 'YUZU_SWAP'
 } as const;
 
 /**
