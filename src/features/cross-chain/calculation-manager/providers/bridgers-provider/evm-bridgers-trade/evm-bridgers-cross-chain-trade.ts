@@ -21,6 +21,7 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import { TransactionConfig } from 'web3-core';
 import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -48,7 +49,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                             platformFee: null,
                             cryptoFee: null
                         },
-                        gasData: null
+                        gasData: null,
+                        slippage: 0
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({ receiverAddress });
@@ -100,6 +102,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly priceImpact: number | null;
 
+    private readonly slippage: number;
+
     protected get fromContractAddress(): string {
         return rubicProxyContractAddress[this.from.blockchain];
     }
@@ -111,6 +115,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
             gasData: GasData;
+            slippage: number;
         },
         providerAddress: string
     ) {
@@ -122,6 +127,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         this.feeInfo = crossChainTrade.feeInfo;
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = this.from.calculatePriceImpactPercent(this.to);
+        this.slippage = crossChainTrade.slippage;
     }
 
     public async swap(
@@ -163,7 +169,20 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
+    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         return fromUsd.dividedBy(this.to.tokenAmount);
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.from.price.multipliedBy(this.from.tokenAmount);
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: this.priceImpact ? { total: this.priceImpact } : null,
+            slippage: { total: this.slippage * 100 }
+        };
     }
 }
