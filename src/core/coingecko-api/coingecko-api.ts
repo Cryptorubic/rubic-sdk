@@ -25,7 +25,8 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.OASIS,
     BLOCKCHAIN_NAME.METIS,
     BLOCKCHAIN_NAME.DFK,
-    BLOCKCHAIN_NAME.KLAYTN
+    BLOCKCHAIN_NAME.KLAYTN,
+    BLOCKCHAIN_NAME.VELAS
 ] as const;
 
 type SupportedBlockchain = typeof supportedBlockchains[number];
@@ -65,7 +66,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.OASIS]: 'rose',
             [BLOCKCHAIN_NAME.METIS]: 'metis',
             [BLOCKCHAIN_NAME.DFK]: 'defi-kingdoms',
-            [BLOCKCHAIN_NAME.KLAYTN]: 'klaytn'
+            [BLOCKCHAIN_NAME.KLAYTN]: 'klaytn',
+            [BLOCKCHAIN_NAME.VELAS]: 'velas'
         };
 
         this.tokenBlockchainId = {
@@ -86,7 +88,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.OASIS]: 'oasis',
             [BLOCKCHAIN_NAME.METIS]: 'metis',
             [BLOCKCHAIN_NAME.DFK]: 'defi-kingdoms',
-            [BLOCKCHAIN_NAME.KLAYTN]: 'klaytn'
+            [BLOCKCHAIN_NAME.KLAYTN]: 'klaytn',
+            [BLOCKCHAIN_NAME.VELAS]: 'velas'
         };
     }
 

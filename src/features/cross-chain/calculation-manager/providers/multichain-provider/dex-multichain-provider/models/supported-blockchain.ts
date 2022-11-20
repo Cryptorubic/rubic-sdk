@@ -22,7 +22,8 @@ export const multichainProxyCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.OASIS,
     BLOCKCHAIN_NAME.METIS,
     BLOCKCHAIN_NAME.DFK,
-    BLOCKCHAIN_NAME.KLAYTN
+    BLOCKCHAIN_NAME.KLAYTN,
+    BLOCKCHAIN_NAME.VELAS
 ] as const;
 
 export type MultichainProxyCrossChainSupportedBlockchain =

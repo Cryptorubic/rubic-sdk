@@ -214,5 +214,12 @@ export const nativeTokensList = {
         name: 'Klaytn',
         symbol: 'KLAY',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.VELAS]: new Token({
+        blockchain: BLOCKCHAIN_NAME.VELAS,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Velas',
+        symbol: 'VLX',
+        decimals: 18
     })
 };

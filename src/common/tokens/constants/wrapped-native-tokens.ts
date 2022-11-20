@@ -211,5 +211,12 @@ export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
         name: 'Wrapped KLAY',
         symbol: 'WKLAY',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.VELAS]: new Token({
+        blockchain: BLOCKCHAIN_NAME.VELAS,
+        address: '0xc579D1f3CF86749E05CD06f7ADe17856c2CE3126',
+        name: 'Wrapped VLX',
+        symbol: 'WVLX',
+        decimals: 18
     })
 };

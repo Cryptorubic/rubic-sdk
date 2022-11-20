@@ -13,6 +13,9 @@ export const multichainProxyContractAddress: Record<
         case 'KLAYTN':
             address = '0x333BE852042F435431967664e09315CC63593333';
             break;
+        case 'VELAS':
+            address = '0x333BE852042F435431967664e09315CC63593333';
+            break;
         default:
             address = '0x333BE852042F435431967664e09315CC63593333';
             break;

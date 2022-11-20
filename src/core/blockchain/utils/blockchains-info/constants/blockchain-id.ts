@@ -29,6 +29,7 @@ export const blockchainId: Record<BlockchainName, number> = {
     [BLOCKCHAIN_NAME.METIS]: 1088,
     [BLOCKCHAIN_NAME.DFK]: 53935,
     [BLOCKCHAIN_NAME.KLAYTN]: 8217,
+    [BLOCKCHAIN_NAME.VELAS]: 106,
     // Non EVN blockchains
     [BLOCKCHAIN_NAME.BITCOIN]: 5555,
     [BLOCKCHAIN_NAME.SOLANA]: NaN,
