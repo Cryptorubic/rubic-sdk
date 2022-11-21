@@ -34,24 +34,27 @@ export class LifiTrade extends EvmOnChainTrade {
             return null;
         }
 
+        const lifiTrade = new LifiTrade(lifiTradeStruct, EvmWeb3Pure.EMPTY_ADDRESS);
         try {
-            const transactionConfig = await new LifiTrade(
-                lifiTradeStruct,
-                EvmWeb3Pure.EMPTY_ADDRESS
-            ).encode({ fromAddress: walletAddress });
+            const transactionConfig = await lifiTrade.encode({ fromAddress: walletAddress });
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const gasLimit = (
                 await web3Public.batchEstimatedGas(walletAddress, [transactionConfig])
             )[0];
 
-            if (!gasLimit?.isFinite()) {
-                return null;
+            if (gasLimit?.isFinite()) {
+                return gasLimit;
             }
-            return gasLimit;
-        } catch (_err) {
-            return null;
-        }
+        } catch {}
+        try {
+            const transactionData = await lifiTrade.getTransactionData(walletAddress);
+
+            if (transactionData.gasLimit) {
+                return new BigNumber(transactionData.gasLimit);
+            }
+        } catch {}
+        return null;
     }
 
     public readonly providerGateway: string;

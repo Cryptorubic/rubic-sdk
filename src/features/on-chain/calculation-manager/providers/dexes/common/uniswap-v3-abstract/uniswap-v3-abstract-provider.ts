@@ -18,7 +18,7 @@ import { RubicSdkError } from 'src/common/errors';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/common/utils/token-native-address-proxy';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { UniswapV3AlgebraTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
+import { UniswapV3AlgebraTradeStructOmitPath } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
 
 export abstract class UniswapV3AbstractProvider<
     T extends UniswapV3AbstractTrade = UniswapV3AbstractTrade
@@ -43,7 +43,7 @@ export abstract class UniswapV3AbstractProvider<
     }
 
     protected createTradeInstance(
-        tradeStruct: UniswapV3AlgebraTradeStruct,
+        tradeStruct: UniswapV3AlgebraTradeStructOmitPath,
         route: UniswapV3Route,
         providerAddress: string
     ): T {

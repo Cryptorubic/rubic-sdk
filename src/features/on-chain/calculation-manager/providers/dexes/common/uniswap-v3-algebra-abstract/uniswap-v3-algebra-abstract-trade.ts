@@ -20,7 +20,11 @@ import BigNumber from 'bignumber.js';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { UniswapV3AlgebraTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
+import {
+    UniswapV3AlgebraTradeStruct,
+    UniswapV3AlgebraTradeStructOmitPath
+} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
+import { CreateTradeInstance } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/create-trade-instance';
 
 interface EstimateGasOptions {
     slippageTolerance: number;
@@ -38,7 +42,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         exact: Exact,
         weiAmount: BigNumber,
         options: EstimateGasOptions,
-        route: UniswapV3AlgebraRoute
+        route: UniswapV3AlgebraRoute,
+        createTradeInstance: CreateTradeInstance
     ): Promise<BigNumber> {
         const { from, to } = getFromToTokensAmountsByExact(
             fromToken,
@@ -49,7 +54,14 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
             route.outputAbsoluteAmount
         );
 
-        const estimateGasParams = await this.getEstimateGasParams(from, to, exact, options, route);
+        const estimateGasParams = await this.getEstimateGasParams(
+            from,
+            to,
+            exact,
+            options,
+            route,
+            createTradeInstance
+        );
         let gasLimit = estimateGasParams.defaultGasLimit;
 
         const walletAddress = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
@@ -74,7 +86,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         exact: Exact,
         weiAmount: BigNumber,
         options: EstimateGasOptions,
-        routes: UniswapV3AlgebraRoute[]
+        routes: UniswapV3AlgebraRoute[],
+        createTradeInstance: CreateTradeInstance
     ): Promise<BigNumber[]> {
         const routesEstimateGasParams = await Promise.all(
             routes.map(route => {
@@ -86,7 +99,14 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
                     weiAmount,
                     route.outputAbsoluteAmount
                 );
-                return this.getEstimateGasParams(from, to, exact, options, route);
+                return this.getEstimateGasParams(
+                    from,
+                    to,
+                    exact,
+                    options,
+                    route,
+                    createTradeInstance
+                );
             })
         );
         const gasLimits = routesEstimateGasParams.map(
@@ -120,27 +140,23 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
         to: PriceTokenAmount,
         exact: Exact,
         options: EstimateGasOptions,
-        route: UniswapV3AlgebraRoute
+        route: UniswapV3AlgebraRoute,
+        createTradeInstance: CreateTradeInstance
     ): Promise<{
         callData: BatchCall | null;
         defaultGasLimit: BigNumber;
     }> {
-        try {
-            // @ts-ignore
-            return new this(
-                {
-                    from,
-                    to,
-                    exact,
-                    slippageTolerance: options.slippageTolerance,
-                    deadlineMinutes: options.deadlineMinutes,
-                    route
-                },
-                EvmWeb3Pure.EMPTY_ADDRESS
-            ).getEstimateGasParams();
-        } catch (err) {
-            throw new RubicSdkError('Trying to call abstract class method');
-        }
+        return createTradeInstance(
+            {
+                from,
+                to,
+                exact,
+                slippageTolerance: options.slippageTolerance,
+                deadlineMinutes: options.deadlineMinutes
+            } as UniswapV3AlgebraTradeStructOmitPath,
+            route,
+            EvmWeb3Pure.EMPTY_ADDRESS
+        ).getEstimateGasParams();
     }
 
     protected abstract readonly contractAbi: AbiItem[];

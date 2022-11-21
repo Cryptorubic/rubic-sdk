@@ -5,3 +5,5 @@ export interface UniswapV3AlgebraTradeStruct extends EvmOnChainTradeStruct {
     exact: Exact;
     deadlineMinutes: number;
 }
+
+export type UniswapV3AlgebraTradeStructOmitPath = Omit<UniswapV3AlgebraTradeStruct, 'path'>;

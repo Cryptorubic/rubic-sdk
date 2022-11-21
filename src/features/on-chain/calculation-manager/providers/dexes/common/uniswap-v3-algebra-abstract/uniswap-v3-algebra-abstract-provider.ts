@@ -26,7 +26,7 @@ import { QuickSwapV3Trade } from 'src/features/on-chain/calculation-manager/prov
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
-import { UniswapV3AlgebraTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
+import { UniswapV3AlgebraTradeStructOmitPath } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
@@ -53,7 +53,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
     };
 
     protected abstract createTradeInstance(
-        tradeStruct: UniswapV3AlgebraTradeStruct,
+        tradeStruct: UniswapV3AlgebraTradeStructOmitPath,
         route: UniswapV3AlgebraRoute,
         providerAddress: string
     ): T;
@@ -149,14 +149,13 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             route.outputAbsoluteAmount
         );
 
-        const tradeStruct: UniswapV3AlgebraTradeStruct = {
+        const tradeStruct: UniswapV3AlgebraTradeStructOmitPath = {
             from,
             to,
             gasFeeInfo: null,
             exact,
             slippageTolerance: fullOptions.slippageTolerance,
             deadlineMinutes: fullOptions.deadlineMinutes,
-            path: [], // will be updated in children
             useProxy: fullOptions.useProxy,
             proxyFeeInfo,
             fromWithoutFee,
@@ -221,7 +220,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
                 exact,
                 weiAmount,
                 options,
-                routes
+                routes,
+                this.createTradeInstance
             );
 
             const calculatedProfits: UniswapV3AlgebraCalculatedInfoWithProfit[] = routes.map(
@@ -261,7 +261,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             exact,
             weiAmount,
             options,
-            route
+            route,
+            this.createTradeInstance.bind(this)
         );
         return {
             route,

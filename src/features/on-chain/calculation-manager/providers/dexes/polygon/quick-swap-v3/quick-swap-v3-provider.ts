@@ -18,7 +18,7 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/utils/quoter-controller/constants/quoter-contract-data';
 import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/common/utils/token-native-address-proxy';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { UniswapV3AlgebraTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
+import { UniswapV3AlgebraTradeStructOmitPath } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
 
 export class QuickSwapV3Provider extends UniswapV3AlgebraAbstractProvider<QuickSwapV3Trade> {
     protected readonly contractAddress = QUICK_SWAP_V3_ROUTER_CONTRACT_ADDRESS;
@@ -41,7 +41,7 @@ export class QuickSwapV3Provider extends UniswapV3AlgebraAbstractProvider<QuickS
     }
 
     protected createTradeInstance(
-        tradeStruct: UniswapV3AlgebraTradeStruct,
+        tradeStruct: UniswapV3AlgebraTradeStructOmitPath,
         route: QuickSwapV3Route,
         providerAddress: string
     ): QuickSwapV3Trade {

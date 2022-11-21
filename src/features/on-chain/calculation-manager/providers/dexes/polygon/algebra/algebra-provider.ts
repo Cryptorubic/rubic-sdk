@@ -14,7 +14,7 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/algebra/algebra-quoter-controller';
 import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/common/utils/token-native-address-proxy';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { UniswapV3AlgebraTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
+import { UniswapV3AlgebraTradeStructOmitPath } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
 
 export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider<AlgebraTrade> {
     public readonly contractAddress = ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS;
@@ -34,7 +34,7 @@ export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider<AlgebraTra
     }
 
     protected createTradeInstance(
-        tradeStruct: UniswapV3AlgebraTradeStruct,
+        tradeStruct: UniswapV3AlgebraTradeStructOmitPath,
         route: AlgebraRoute,
         providerAddress: string
     ): AlgebraTrade {
