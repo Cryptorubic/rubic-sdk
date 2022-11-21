@@ -26,6 +26,9 @@ import { JupiterSwapProvider } from 'src/features/on-chain/calculation-manager/p
 import { PhotonSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/photon-swap/photon-swap-provider';
 import { SoulSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/soul-swap/soul-swap-provider';
 import { ApeSwapTelosProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/ape-swap/ape-swap-telos-provider';
+import { OmnidexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/omnidex/omnidex-provider';
+import { YuzuSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/oasis/yuzu-swap/yuzu-swap-provider';
+import { NetSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/metis/net-swap/net-swap-provider';
 import { ElkProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/elk/elk-provider';
 import { SurfdexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/surfdex/surfdex-provider';
 
@@ -63,6 +66,7 @@ export const UniswapV2TradeProviders = [
     SushiSwapTelosProvider,
     ZappyProvider,
     ApeSwapTelosProvider,
+    OmnidexProvider,
     // Boba
     OolongSwapProvider,
     // Ethereum PoW
@@ -72,5 +76,9 @@ export const UniswapV2TradeProviders = [
     JupiterSwapProvider,
     PhotonSwapProvider,
     ElkProvider,
-    SurfdexProvider
+    SurfdexProvider,
+    // Oasis
+    YuzuSwapProvider,
+    // Metis
+    NetSwapProvider
 ] as const;
