@@ -1,7 +1,12 @@
 import { Route } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
-import { SwapRequestError, LifiPairIsUnavailableError, RubicSdkError } from 'src/common/errors';
+import {
+    SwapRequestError,
+    LifiPairIsUnavailableError,
+    RubicSdkError,
+    LowSlippageDeflationaryTokenError
+} from 'src/common/errors';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -108,8 +113,8 @@ export class LifiTrade extends EvmOnChainTrade {
             if ([400, 500, 503].includes(err.code)) {
                 throw new SwapRequestError();
             }
-            if (err instanceof RubicSdkError) {
-                throw err;
+            if (this.isDeflationError()) {
+                throw new LowSlippageDeflationaryTokenError();
             }
             throw new LifiPairIsUnavailableError();
         }

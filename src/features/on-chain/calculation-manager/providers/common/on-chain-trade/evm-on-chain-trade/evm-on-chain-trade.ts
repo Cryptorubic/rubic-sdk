@@ -8,8 +8,6 @@ import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-publ
 import { TransactionReceipt } from 'web3-eth';
 import {
     FailedToCheckForTransactionReceiptError,
-    LowSlippageDeflationaryTokenError,
-    RubicSdkError,
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
@@ -194,15 +192,6 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 return transactionHash!;
             }
 
-            if (err instanceof RubicSdkError) {
-                throw err;
-            }
-            if (
-                (this.withDeflation.from.isDeflation || this.withDeflation.to.isDeflation) &&
-                this.slippageTolerance < 0.12
-            ) {
-                throw new LowSlippageDeflationaryTokenError();
-            }
             throw parseError(err);
         }
     }
@@ -276,6 +265,13 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
      * Encodes trade to swap it directly through dex contract.
      */
     public abstract encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig>;
+
+    protected isDeflationError(): boolean {
+        return (
+            (this.withDeflation.from.isDeflation || this.withDeflation.to.isDeflation) &&
+            this.slippageTolerance < 0.12
+        );
+    }
 
     protected getGasParams(
         options: OptionsGasParams,

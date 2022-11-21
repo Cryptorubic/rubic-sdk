@@ -170,21 +170,28 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
             }
         }
 
-        const methodName = await this.getMethodName(
-            options,
-            options.fromAddress,
-            options.supportFee
-        );
-        const gasParams = this.getGasParams(options);
+        try {
+            const methodName = await this.getMethodName(
+                options,
+                options.fromAddress,
+                options.supportFee
+            );
+            const gasParams = this.getGasParams(options);
 
-        return EvmWeb3Pure.encodeMethodCall(
-            this.dexContractAddress,
-            (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
-            methodName,
-            this.getCallParameters(options.receiverAddress || options.fromAddress),
-            this.nativeValueToSend,
-            gasParams
-        );
+            return EvmWeb3Pure.encodeMethodCall(
+                this.dexContractAddress,
+                (<typeof UniswapV2AbstractTrade>this.constructor).contractAbi,
+                methodName,
+                this.getCallParameters(options.receiverAddress || options.fromAddress),
+                this.nativeValueToSend,
+                gasParams
+            );
+        } catch (err) {
+            if (this.isDeflationError()) {
+                throw new LowSlippageDeflationaryTokenError();
+            }
+            throw parseError(err);
+        }
     }
 
     private getCallParameters(receiverAddress?: string) {

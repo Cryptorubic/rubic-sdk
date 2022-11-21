@@ -1,5 +1,6 @@
 import {
     InsufficientFundsOneinchError,
+    LowSlippageDeflationaryTokenError,
     LowSlippageError,
     RubicSdkError,
     SwapRequestError
@@ -151,6 +152,9 @@ export class OneinchTrade extends EvmOnChainTrade {
             }
             if ([400, 500, 503].includes(err.code)) {
                 throw new SwapRequestError();
+            }
+            if (this.isDeflationError()) {
+                throw new LowSlippageDeflationaryTokenError();
             }
             throw parseError(err, err?.response?.data?.description || err.message);
         }
