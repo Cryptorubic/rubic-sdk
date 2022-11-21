@@ -221,5 +221,12 @@ export const nativeTokensList = {
         name: 'Velas',
         symbol: 'VLX',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SYSCOIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SYSCOIN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Syscoin',
+        symbol: 'SYS',
+        decimals: 18
     })
 };

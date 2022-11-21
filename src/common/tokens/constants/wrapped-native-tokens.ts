@@ -218,5 +218,12 @@ export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
         name: 'Wrapped VLX',
         symbol: 'WVLX',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SYSCOIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SYSCOIN,
+        address: '0xd3e822f3ef011Ca5f17D82C956D952D8d7C3A1BB',
+        name: 'Wrapped SYS',
+        symbol: 'WSYS',
+        decimals: 18
     })
 };

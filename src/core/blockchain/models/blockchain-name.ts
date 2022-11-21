@@ -25,7 +25,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     METIS: 'METIS',
     DFK: 'DEFIKINGDOMS',
     KLAYTN: 'KLAYTN',
-    VELAS: 'VELAS'
+    VELAS: 'VELAS',
+    SYSCOIN: 'SYSCOIN'
 } as const;
 
 export const BLOCKCHAIN_NAME = {
