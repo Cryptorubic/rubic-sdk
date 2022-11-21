@@ -38,6 +38,7 @@ import { TradeHarmonySwapProvider } from 'src/features/on-chain/calculation-mana
 import { ClaimSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/klaytn/claim-swap/claim-swap-provider';
 import { WagyuSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/velas/wagyu-swap/wagyu-swap-provider';
 import { AstroSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/velas/astro-swap/astro-swap-provider';
+import { PegasysProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/syscoin/pegasys/pegasys-provider';
 
 export const UniswapV2TradeProviders = [
     // ethereum
@@ -96,5 +97,7 @@ export const UniswapV2TradeProviders = [
     ClaimSwapProvider,
     // Velas
     WagyuSwapProvider,
-    AstroSwapProvider
+    AstroSwapProvider,
+    // Syscoin
+    PegasysProvider
 ] as const;
