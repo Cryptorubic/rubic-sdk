@@ -49,7 +49,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.BRIDGERS]: this.getBridgersDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: this.getMultichainDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.CONNEXT]: this.getConnextDstSwapStatus
     };
 
     /**
@@ -506,5 +507,9 @@ export class CrossChainStatusManager {
         } catch {
             return { status: TxStatus.PENDING, hash: null };
         }
+    }
+
+    private async getConnextDstSwapStatus(_data: CrossChainTradeData): Promise<TxStatusData> {
+        return { status: TxStatus.PENDING, hash: null };
     }
 }

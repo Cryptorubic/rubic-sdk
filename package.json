@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "3.8.0",
+  "version": "3.8.107",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -64,6 +64,7 @@
     "publish:alpha": "yarn publish --access public --tag alpha"
   },
   "dependencies": {
+    "@connext/nxtp-sdk": "^0.2.1-beta.6",
     "@lifi/sdk": "^1.6.3",
     "@viaprotocol/router-sdk": "^1.0.7",
     "assert": "^2.0.0",
@@ -83,6 +84,8 @@
     "@typescript-eslint/eslint-plugin": "^5.36.2",
     "@typescript-eslint/parser": "^5.36.2",
     "bip39": "^3.0.4",
+    "browserify-fs": "^1.0.0",
+    "browserify-zlib": "^0.2.0",
     "cancelable-promise": "^4.2.1",
     "commander": "^8.3.0",
     "compression-webpack-plugin": "^9.2.0",

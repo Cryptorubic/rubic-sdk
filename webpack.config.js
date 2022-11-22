@@ -63,7 +63,9 @@ module.exports = function(env, argv) {
                 "http": require.resolve("http-browserify"),
                 "https": require.resolve("https-browserify"),
                 "stream": require.resolve("stream-browserify"),
-                "crypto": require.resolve("crypto-browserify")
+                "crypto": require.resolve("crypto-browserify"),
+                "zlib": require.resolve("browserify-zlib"),
+                "fs": require.resolve("browserify-fs")
             }
         },
         output: {

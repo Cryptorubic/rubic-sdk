@@ -7,6 +7,7 @@ import { ViaCrossChainProvider } from 'src/features/cross-chain/calculation-mana
 import { BridgersCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/bridgers-cross-chain-provider';
 import { DexMultichainCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/dex-multichain-cross-chain-provider';
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
+import { ConnextCrossChainProvider } from '../providers/connext-provider/connext-cross-chain-provider';
 
 export const CrossChainProviders = [
     CelerCrossChainProvider,
@@ -17,5 +18,6 @@ export const CrossChainProviders = [
     ViaCrossChainProvider,
     BridgersCrossChainProvider,
     DexMultichainCrossChainProvider,
-    XyCrossChainProvider
+    XyCrossChainProvider,
+    ConnextCrossChainProvider
 ] as const;
