@@ -16,7 +16,7 @@ import {
     XyCrossChainSupportedBlockchain,
     xySupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
-import { XyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-contract-address';
+import { xyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-contract-address';
 import { XyCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-trade';
 import { XyTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-request';
 import { XyTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-response';
@@ -53,7 +53,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
 
             await this.checkContractState(
                 fromBlockchain,
-                XyContractAddress[fromBlockchain].rubicRouter,
+                xyContractAddress[fromBlockchain].rubicRouter,
                 evmCommonCrossChainAbi
             );
 
@@ -80,7 +80,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 await Injector.httpClient.get<XyTransactionResponse>(
                     `${XyCrossChainProvider.apiEndpoint}/swap`,
                     {
-                        params: requestParams as {}
+                        params: { ...requestParams }
                     }
                 );
             this.analyzeStatusCode(statusCode, msg);
@@ -137,7 +137,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 amount: await this.getFixedFee(
                     fromBlockchain,
                     providerAddress,
-                    XyContractAddress[fromBlockchain].rubicRouter,
+                    xyContractAddress[fromBlockchain].rubicRouter,
                     evmCommonCrossChainAbi
                 ),
                 tokenSymbol: nativeTokensList[fromBlockchain].symbol
@@ -146,7 +146,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 percent: await this.getFeePercent(
                     fromBlockchain,
                     providerAddress,
-                    XyContractAddress[fromBlockchain].rubicRouter,
+                    xyContractAddress[fromBlockchain].rubicRouter,
                     evmCommonCrossChainAbi
                 ),
                 tokenSymbol: 'USDC'
@@ -170,7 +170,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
             case '10':
             case '99':
             default:
-                throw new RubicSdkError();
+                throw new RubicSdkError('Unknown Error.');
         }
     }
 }

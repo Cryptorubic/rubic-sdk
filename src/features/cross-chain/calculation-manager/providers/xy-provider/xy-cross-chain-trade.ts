@@ -13,7 +13,7 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
-import { XyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-contract-address';
+import { xyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-contract-address';
 import { XyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 import { XyTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-request';
@@ -113,7 +113,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return XyContractAddress[this.fromBlockchain].rubicRouter;
+        return xyContractAddress[this.fromBlockchain].rubicRouter;
     }
 
     public readonly feeInfo: FeeInfo;
@@ -146,12 +146,10 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        const { data, value: providerValue } = await this.getTransactionRequest(
-            options?.receiverAddress
-        );
+        const receiverAddress = options?.receiverAddress || this.walletAddress;
+        const { data, value: providerValue } = await this.getTransactionRequest(receiverAddress);
         const toChainId = blockchainId[this.to.blockchain];
-        const fromContracts =
-            XyContractAddress[this.from.blockchain as XyCrossChainSupportedBlockchain];
+        const fromContracts = xyContractAddress[this.fromBlockchain];
 
         const swapArguments = [
             this.from.address,
@@ -159,7 +157,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             toChainId,
             this.to.address,
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
-            options?.receiverAddress || this.walletAddress,
+            receiverAddress,
             this.providerAddress,
             fromContracts.providerRouter
         ];
@@ -196,7 +194,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
         const { tx } = await Injector.httpClient.get<XyTransactionResponse>(
             `${XyCrossChainProvider.apiEndpoint}/swap`,
-            { params: params as {} }
+            { params: { ...params } }
         );
         return tx!;
     }

@@ -5,7 +5,7 @@ import { UniversalContract } from 'src/features/cross-chain/calculation-manager/
 
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
-export const XyContractAddress: Record<XyCrossChainSupportedBlockchain, UniversalContract> = {
+export const xyContractAddress: Record<XyCrossChainSupportedBlockchain, UniversalContract> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
         providerGateway: '0x4315f344a905dC21a08189A117eFd6E1fcA37D57',
         providerRouter: '0x4315f344a905dC21a08189A117eFd6E1fcA37D57',
