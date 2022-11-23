@@ -4,19 +4,24 @@ import { DeflationTokenError } from 'src/common/errors';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import {
     BLOCKCHAIN_NAME,
+    BlockchainName,
     EVM_BLOCKCHAIN_NAME,
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { UniswapV2TradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/uniswap-v2-trade-providers';
 import { notNull } from 'src/common/utils/object';
 import { Cache } from 'src/common/utils/decorators';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
+
+import {
+    DeflationManagerSupportedBlockchain,
+    deflationManagerSupportedBlockchains
+} from 'src/features/deflation-token-manager/models/deflation-manager-supported-blockchain';
 import { UniswapV2AbstractTrade } from '../on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { simulatorContractAbi } from './constants/simulator-contract-abi';
 import { simulatorContractAddress } from './constants/simulator-contract-address';
@@ -44,6 +49,14 @@ const NATIVE_TOKEN_AMOUNT: Record<EvmBlockchainName, number> = Object.values(
  * Contains method to check token for deflation.
  */
 export class DeflationTokenManager {
+    public static isSupportedBlockchain(
+        blockchain: BlockchainName
+    ): blockchain is DeflationManagerSupportedBlockchain {
+        return deflationManagerSupportedBlockchains.some(
+            supportedBlockchain => supportedBlockchain === blockchain
+        );
+    }
+
     public async checkToken(token: Token): Promise<void | never> {
         const isDeflationToken = await this.isDeflationToken(token);
         if (isDeflationToken.isDeflation) {
@@ -54,7 +67,7 @@ export class DeflationTokenManager {
     @Cache
     public async isDeflationToken(token: Token): Promise<IsDeflationToken> {
         if (
-            !BlockchainsInfo.isEvmBlockchainName(token.blockchain) ||
+            !DeflationTokenManager.isSupportedBlockchain(token.blockchain) ||
             EvmWeb3Pure.isNativeAddress(token.address)
         ) {
             return { isDeflation: false };

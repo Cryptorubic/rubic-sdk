@@ -161,9 +161,13 @@ export class LifiProvider {
     }
 
     private async getGasFeeInfo(lifiTradeStruct: LifiTradeStruct): Promise<GasFeeInfo | null> {
-        const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
-        const gasLimit = await LifiTrade.getGasLimit(lifiTradeStruct);
-        return getGasFeeInfo(gasLimit, gasPriceInfo);
+        try {
+            const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
+            const gasLimit = await LifiTrade.getGasLimit(lifiTradeStruct);
+            return getGasFeeInfo(gasLimit, gasPriceInfo);
+        } catch {
+            return null;
+        }
     }
 
     private async getPath(

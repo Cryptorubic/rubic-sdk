@@ -10,6 +10,7 @@ export const lifiProviders: Record<string, OnChainTradeType> = {
     openocean: ON_CHAIN_TRADE_TYPE.OPEN_OCEAN,
     dodo: ON_CHAIN_TRADE_TYPE.DODO,
     sushiswap: ON_CHAIN_TRADE_TYPE.SUSHI_SWAP,
+    'sushiswap-fus': ON_CHAIN_TRADE_TYPE.SUSHI_SWAP,
     honeyswap: ON_CHAIN_TRADE_TYPE.HONEY_SWAP,
     stellaswap: ON_CHAIN_TRADE_TYPE.STELLA_SWAP,
     beamswap: ON_CHAIN_TRADE_TYPE.BEAM_SWAP,

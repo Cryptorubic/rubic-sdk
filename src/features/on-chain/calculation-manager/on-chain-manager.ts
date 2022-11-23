@@ -18,6 +18,7 @@ import { DeflationTokenManager } from 'src/features/deflation-token-manager/defl
 import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
 import { RequiredOnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/required-on-chain-manager-calculation-options';
+import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
 
 /**
  * Contains methods to calculate on-chain trades.
@@ -108,7 +109,9 @@ export class OnChainManager {
         if (options?.useProxy === false) {
             useProxy = options.useProxy;
         } else {
-            useProxy = !isDeflationFrom.isDeflation || isDeflationFrom.isWhitelisted;
+            useProxy =
+                OnChainProxyService.isSupportedBlockchain(from.blockchain) &&
+                (!isDeflationFrom.isDeflation || isDeflationFrom.isWhitelisted);
         }
 
         return combineOptions<RequiredOnChainManagerCalculationOptions>(
