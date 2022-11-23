@@ -15,8 +15,8 @@ import {
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { TransactionConfig } from 'web3-core';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';

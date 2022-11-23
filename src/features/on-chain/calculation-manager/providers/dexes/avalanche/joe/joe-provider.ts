@@ -1,5 +1,5 @@
 import { JOE_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/joe/constants';
-import { UniswapV2AbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v2-abstract/uniswap-v2-abstract-provider';
+import { UniswapV2AbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
 import { JoeTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/joe/joe-trade';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 

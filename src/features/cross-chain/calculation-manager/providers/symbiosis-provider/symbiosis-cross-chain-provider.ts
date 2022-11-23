@@ -38,8 +38,8 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-trade';
 import { getSymbiosisConfig } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-config';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/on-chain-provider/on-chain-provider';
-import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/oneinch-abstract/constants';
+import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
+import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { compareAddresses } from 'src/common/utils/blockchain';
@@ -48,7 +48,7 @@ import { TransactionRequest } from '@ethersproject/abstract-provider';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
@@ -120,7 +120,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             });
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo?.platformFee?.percent);
             const tokenAmountIn = new SymbiosisTokenAmount(tokenIn, fromWithoutFee.stringWeiAmount);
 
             const tokenOut = isBitcoinSwap
@@ -188,7 +188,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                               ...transitToken,
                               price: new BigNumber(1),
                               tokenAmount: new BigNumber(1)
-                          })
+                          }),
+                          {
+                              gasCalculation: 'disabled'
+                          }
                       )
                   ).to.tokenAmount;
 

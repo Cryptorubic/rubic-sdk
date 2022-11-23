@@ -18,7 +18,7 @@ import Web3 from 'web3';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
 import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private/models/web3.error';
 import { WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
@@ -78,13 +78,11 @@ export class EvmWeb3Private extends Web3Private {
     /**
      * Sends Eth in transaction and resolve the promise when the transaction is included in the block.
      * @param toAddress Eth receiver address.
-     * @param value Native token amount in wei.
      * @param [options] Additional options.
      * @returns Transaction receipt.
      */
     public async sendTransaction(
         toAddress: string,
-        value: BigNumber | string,
         options: EvmTransactionOptions = {}
     ): Promise<TransactionReceipt> {
         return new Promise((resolve, reject) => {
@@ -92,7 +90,7 @@ export class EvmWeb3Private extends Web3Private {
                 .sendTransaction({
                     from: this.address,
                     to: toAddress,
-                    value: Web3Private.stringifyAmount(value),
+                    value: Web3Private.stringifyAmount(options.value || 0),
                     ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                     ...(options.gasPrice && {
                         gasPrice: Web3Private.stringifyAmount(options.gasPrice)
@@ -111,27 +109,25 @@ export class EvmWeb3Private extends Web3Private {
     /**
      * Tries to send Eth in transaction and resolve the promise when the transaction is included in the block or rejects the error.
      * @param toAddress Eth receiver address.
-     * @param value Native token amount in wei.
      * @param [options] Additional options.
      * @returns Transaction receipt.
      */
     public async trySendTransaction(
         toAddress: string,
-        value: BigNumber | string,
         options: EvmTransactionOptions = {}
     ): Promise<TransactionReceipt> {
         try {
             const gas = await this.web3.eth.estimateGas({
                 from: this.address,
                 to: toAddress,
-                value: Web3Private.stringifyAmount(value),
+                value: Web3Private.stringifyAmount(options.value || 0),
                 ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
                 ...(options.gasPrice && {
                     gasPrice: Web3Private.stringifyAmount(options.gasPrice)
                 }),
                 ...(options.data && { data: options.data })
             });
-            return this.sendTransaction(toAddress, value, {
+            return this.sendTransaction(toAddress, {
                 ...options,
                 gas: options.gas || Web3Pure.calculateGasMargin(gas, 1.15)
             });
@@ -139,7 +135,7 @@ export class EvmWeb3Private extends Web3Private {
             console.debug('Call tokens transfer error', err);
             const shouldIgnore = this.shouldIgnoreError(err);
             if (shouldIgnore) {
-                return await this.sendTransaction(toAddress, value, options);
+                return this.sendTransaction(toAddress, options);
             }
             throw EvmWeb3Private.parseError(err as Web3Error);
         }
@@ -241,7 +237,6 @@ export class EvmWeb3Private extends Web3Private {
 
     private shouldIgnoreError(error: Web3Error): boolean {
         const ignoreCallErrors = [
-            'execution reverted: TransferHelper: TRANSFER_FROM_FAILED',
             'STF',
             'execution reverted: ERC20: transfer amount exceeds allowance',
             'Anyswaperc20: request exceed allowance',

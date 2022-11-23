@@ -4,8 +4,8 @@ import { GasData } from 'src/features/cross-chain/calculation-manager/providers/
 import { Injector } from 'src/core/injector/injector';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { ContractParams } from 'src/features/common/models/contract-params';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
@@ -14,7 +14,7 @@ import { MultichainCrossChainTrade } from 'src/features/cross-chain/calculation-
 import { multichainProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-address';
 import { MultichainProxyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/models/supported-blockchain';
 import { multichainProxyContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-abi';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 
 export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
@@ -150,14 +150,14 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
         const methodArguments: unknown[] = [];
         if (this.onChainTrade) {
             const encodedData = (
-                await this.onChainTrade.encode({
+                await this.onChainTrade.encodeDirect({
                     fromAddress: options.fromAddress || this.walletAddress,
                     receiverAddress: this.fromContractAddress,
                     supportFee: false
                 })
             ).data;
             methodArguments.push(
-                this.onChainTrade.contractAddress,
+                this.onChainTrade.dexContractAddress,
                 this.anyTokenAddress,
                 encodedData
             );

@@ -1,30 +1,31 @@
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/models/on-chain-calculation-options';
+import {
+    OnChainCalculationOptions,
+    RequiredOnChainCalculationOptions
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { TronOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/on-chain-provider/tron-on-chain-provider/tron-on-chain-provider';
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { nativeTokensList, PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import { TronOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/tron-on-chain-provider/tron-on-chain-provider';
 import { BridgersTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/tron/bridgers/bridgers-trade';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
-import { createTokenNativeAddressProxy } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/utils/token-native-address-proxy';
+import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
-import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/on-chain-provider/on-chain-provider';
+import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
 import { BridgersPairIsUnavailableError, MaxAmountError, MinAmountError } from 'src/common/errors';
 import BigNumber from 'bignumber.js';
-import { BridgersCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/tron/bridgers/models/bridgers-calculation-options';
 import { combineOptions } from 'src/common/utils/options';
 import {
     BridgersQuoteRequest,
     BridgersQuoteResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
-import { TokenAmountSymbol } from 'src/common/tokens/models/token-amount-symbol';
+import { OnChainPlatformFee } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
+import { tronProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/tron-on-chain-provider/constants/tron-provider-default-options';
 
 export class BridgersProvider extends TronOnChainProvider {
-    private readonly defaultOptions: BridgersCalculationOptions = {
-        slippageTolerance: 0.02
-    };
+    private readonly defaultOptions: RequiredOnChainCalculationOptions = tronProviderDefaultOptions;
 
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.BRIDGERS;
@@ -70,19 +71,29 @@ export class BridgersProvider extends TronOnChainProvider {
             tokenAmount: new BigNumber(transactionData.toTokenAmount)
         });
 
-        const cryptoFeeToken: TokenAmountSymbol = {
-            tokenAmount: new BigNumber(transactionData.chainFee),
-            symbol: toToken.symbol
-        };
-        const platformFeePercent = transactionData.fee * 100;
-
-        return new BridgersTrade({
-            from,
-            to,
-            slippageTolerance: fullOptions.slippageTolerance,
-            contractAddress: transactionData.contractAddress,
-            cryptoFeeToken,
-            platformFeePercent
+        const cryptoFeeToken = new TokenAmount({
+            ...nativeTokensList[from.blockchain],
+            tokenAmount: new BigNumber(transactionData.chainFee)
         });
+        const platformFeePercent = transactionData.fee * 100;
+        const platformFee: OnChainPlatformFee = {
+            percent: platformFeePercent,
+            token: new TokenAmount({
+                ...from,
+                tokenAmount: from.tokenAmount.multipliedBy(platformFeePercent / 100)
+            })
+        };
+
+        return new BridgersTrade(
+            {
+                from,
+                to,
+                slippageTolerance: fullOptions.slippageTolerance,
+                contractAddress: transactionData.contractAddress,
+                cryptoFeeToken,
+                platformFee
+            },
+            fullOptions.providerAddress
+        );
     }
 }

@@ -15,12 +15,12 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { Via } from '@viaprotocol/router-sdk';
 import { RubicSdkError, SwapRequestError } from 'src/common/errors';
-import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
+import { ContractParams } from 'src/features/common/models/contract-params';
 import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-cross-chain-supported-blockchain';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';

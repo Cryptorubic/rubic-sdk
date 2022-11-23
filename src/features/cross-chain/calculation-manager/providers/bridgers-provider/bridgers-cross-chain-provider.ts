@@ -22,7 +22,7 @@ import { TronBridgersCrossChainTrade } from 'src/features/cross-chain/calculatio
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
-import { createTokenNativeAddressProxy } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/utils/token-native-address-proxy';
+import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmBridgersCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/evm-bridgers-trade/evm-bridgers-cross-chain-trade';
 import { tronCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';
@@ -32,7 +32,7 @@ import {
     BridgersQuoteRequest,
     BridgersQuoteResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 export class BridgersCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;
@@ -82,7 +82,7 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 from,
                 contractAbi
             );
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo?.platformFee?.percent);
 
             const fromTokenAddress = createTokenNativeAddressProxy(
                 from,

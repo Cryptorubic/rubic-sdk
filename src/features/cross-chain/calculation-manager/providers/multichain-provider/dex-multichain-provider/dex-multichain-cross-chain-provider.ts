@@ -7,7 +7,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import BigNumber from 'bignumber.js';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { NotSupportedTokensError } from 'src/common/errors';
 import { isMultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/is-multichain-method-name';
 import {
@@ -21,11 +21,11 @@ import { Injector } from 'src/core/injector/injector';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { DexMultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/dex-multichain-cross-chain-trade';
 import { getMultichainTokens } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/get-multichain-tokens';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { MultichainCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-provider';
 import { MultichainTargetToken } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/tokens-api';
 import { getToFeeAmount } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/get-to-fee-amount';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 
 export class DexMultichainCrossChainProvider extends MultichainCrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.MULTICHAIN;
@@ -94,7 +94,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             // }
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo?.platformFee?.percent);
             const cryptoFee = this.getProtocolFee(targetToken, from.tokenAmount);
 
             let onChainTrade: EvmOnChainTrade | null = null;
@@ -247,7 +247,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             .map(value => (value as PromiseFulfilledResult<EvmOnChainTrade>).value)
             .filter(onChainTrade =>
                 availableDexes.some(availableDex =>
-                    compareAddresses(availableDex, onChainTrade.contractAddress)
+                    compareAddresses(availableDex, onChainTrade.dexContractAddress)
                 )
             )
             .sort((a, b) => b.to.tokenAmount.comparedTo(a.to.tokenAmount));

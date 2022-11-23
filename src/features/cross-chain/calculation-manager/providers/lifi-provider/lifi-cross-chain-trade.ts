@@ -7,13 +7,13 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
 import { SwapRequestError } from 'src/common/errors';
-import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
+import { ContractParams } from 'src/features/common/models/contract-params';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
 import { Route } from '@lifi/sdk';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';

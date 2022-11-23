@@ -8,7 +8,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import BigNumber from 'bignumber.js';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import {
     MultichainCrossChainSupportedBlockchain,
     multichainCrossChainSupportedBlockchains
@@ -89,7 +89,7 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
             const feeInfo: FeeInfo = { platformFee: null, fixedFee: null, cryptoFee: null };
             const cryptoFee = this.getProtocolFee(targetToken, from.weiAmount);
 
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo?.platformFee?.percent);
 
             const toFeeAmount = getToFeeAmount(fromWithoutFee.tokenAmount, targetToken);
             const toAmount = fromWithoutFee.tokenAmount.minus(toFeeAmount);
