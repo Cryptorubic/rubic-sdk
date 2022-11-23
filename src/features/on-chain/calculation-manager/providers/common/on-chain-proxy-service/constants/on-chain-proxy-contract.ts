@@ -4,9 +4,9 @@ import { AbiItem } from 'web3-utils';
 export const onChainProxyContractAddress: Record<BlockchainName, string> = Object.values(
     BLOCKCHAIN_NAME
 ).reduce((acc, blockchain) => {
-    let contractAddress = '0xc7F5c6d4fd9E646C26D47AD6F214D0A5d9B4993D';
-    if (blockchain === BLOCKCHAIN_NAME.POLYGON) {
-        contractAddress = '0xE08e2b2889E8E1227C4EA114c41F0a02Da393bA0';
+    let contractAddress = '0x333762311D3918d8B9CB23ec1b02aBD176353333';
+    if (blockchain === BLOCKCHAIN_NAME.AURORA) {
+        contractAddress = '0xC30877f01976cF1E710f902956200A901A2997f3';
     }
     return {
         ...acc,

@@ -1,5 +1,5 @@
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
 import {
     onChainProxyContractAbi,
@@ -12,8 +12,20 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import { nativeTokensList, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import BigNumber from 'bignumber.js';
+import {
+    OnChainProxySupportedBlockchain,
+    onChainProxySupportedBlockchains
+} from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/models/on-chain-proxy-supported-blockchain';
 
 export class OnChainProxyService {
+    public static isSupportedBlockchain(
+        blockchain: BlockchainName
+    ): blockchain is OnChainProxySupportedBlockchain {
+        return onChainProxySupportedBlockchains.some(
+            supportedBlockchain => supportedBlockchain === blockchain
+        );
+    }
+
     @Cache({
         maxAge: 15_000
     })
