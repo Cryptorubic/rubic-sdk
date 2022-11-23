@@ -15,7 +15,6 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { Injector } from 'src/core/injector/injector';
 import { onChainProxyContractAddress } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-trade-struct';
-import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 
 interface LifiTransactionRequest {
     to: string;
@@ -92,8 +91,8 @@ export class LifiTrade extends EvmOnChainTrade {
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        checkUnsupportedReceiverAddress(options?.receiverAddress, this.walletAddress);
         this.checkFromAddress(options.fromAddress, true);
+        this.checkReceiverAddress(options.receiverAddress);
 
         try {
             const transactionData = await this.getTransactionData(
