@@ -11,7 +11,6 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
 import {
     XyCrossChainSupportedBlockchain,
     xySupportedBlockchains
@@ -22,6 +21,7 @@ import { XyTransactionRequest } from 'src/features/cross-chain/calculation-manag
 import { XyTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-response';
 import { XyStatusCode } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-status-code';
 import { InsufficientLiquidityError, MinAmountError, RubicSdkError } from 'src/common/errors';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 export class XyCrossChainProvider extends CrossChainProvider {
     public static readonly apiEndpoint = 'https://open-api.xy.finance/v1';
@@ -58,7 +58,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
             );
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-            const fromWithoutFee = getFromWithoutFee(fromToken, feeInfo);
+            const fromWithoutFee = getFromWithoutFee(fromToken, feeInfo?.platformFee?.percent);
 
             const slippageTolerance = options.slippageTolerance * 100;
 
