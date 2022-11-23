@@ -31,6 +31,9 @@ jobs:
       - name: Run lint
         run: yarn lint
 
+      - name: Run tests
+        run: yarn run jest
+
       - name: Compile lib
         run: yarn compile
 
