@@ -1,5 +1,5 @@
 /* eslint-disable unused-imports/no-unused-vars */
-import { NxtpSdkBase } from '@connext/nxtp-sdk';
+import { NxtpSdkBase, NxtpSdkUtils } from '@connext/nxtp-sdk';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount, PriceToken } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -17,10 +17,16 @@ import {
 export class ConnextCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CONNEXT;
 
-    private connextSdk: NxtpSdkBase | undefined;
+    private connextBaseSdk: NxtpSdkBase | undefined;
 
-    public get connext(): NxtpSdkBase {
-        return this.connextSdk!;
+    public get connextBase(): NxtpSdkBase {
+        return this.connextBaseSdk!;
+    }
+
+    private connextUtilsSdk: NxtpSdkUtils | undefined;
+
+    public get connextUtils(): NxtpSdkUtils {
+        return this.connextUtilsSdk!;
     }
 
     public isSupportedBlockchain(blockchain: BlockchainName): boolean {
@@ -40,12 +46,10 @@ export class ConnextCrossChainProvider extends CrossChainProvider {
 
         const fromBlockchain = _from.blockchain as ConnextCrossChainSupportedBlockchain;
         const toBlockchain = _toToken.blockchain as ConnextCrossChainSupportedBlockchain;
+        await this.createConnextSdk(_from.blockchain);
 
         try {
             console.info('>>>>>>>>>>>>>> CONNEXT <<<<<<<<<<<<<<');
-            await this.createConnextSdk(_from.blockchain);
-            const relayerFee = await this.estimateRelayerFee(fromBlockchain, toBlockchain);
-            console.log({ relayerFee });
             return null;
         } catch (err: unknown) {
             return {
@@ -59,7 +63,7 @@ export class ConnextCrossChainProvider extends CrossChainProvider {
         fromBlockchain: ConnextCrossChainSupportedBlockchain,
         toBlockchain: ConnextCrossChainSupportedBlockchain
     ): Promise<BigNumber> {
-        const relayerFee = await this.connext.estimateRelayerFee({
+        const relayerFee = await this.connextBase.estimateRelayerFee({
             originDomain: connextDomainId[fromBlockchain].toString(),
             destinationDomain: connextDomainId[toBlockchain].toString()
         });
@@ -70,7 +74,14 @@ export class ConnextCrossChainProvider extends CrossChainProvider {
     public async createConnextSdk(fromBlockchain: EvmBlockchainName): Promise<void> {
         const walletAddress = this.getWalletAddress(fromBlockchain);
         const connextSdkConfig = createConnextConfig(walletAddress);
-        this.connextSdk = await NxtpSdkBase.create(connextSdkConfig);
+
+        if (!this.connextBaseSdk) {
+            this.connextBaseSdk = await NxtpSdkBase.create(connextSdkConfig);
+        }
+
+        if (!this.connextUtilsSdk) {
+            this.connextUtilsSdk = await NxtpSdkUtils.create(connextSdkConfig);
+        }
     }
 
     public async checkMinMaxErrors(): Promise<void> {}
