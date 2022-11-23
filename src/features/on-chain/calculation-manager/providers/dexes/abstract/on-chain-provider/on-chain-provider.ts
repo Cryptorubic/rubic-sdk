@@ -22,6 +22,8 @@ export abstract class OnChainProvider {
      */
     public abstract readonly blockchain: BlockchainName;
 
+    public readonly supportReceiverAddress: boolean = true;
+
     /**
      * Type of provider.
      */
