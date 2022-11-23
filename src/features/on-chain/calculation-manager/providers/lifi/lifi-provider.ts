@@ -18,6 +18,8 @@ import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi
 export class LifiProvider {
     private readonly lifi = new LIFI(getLifiConfig());
 
+    public readonly supportReceiverAddress = false;
+
     private readonly defaultOptions: Required<LifiCalculationOptions> = {
         gasCalculation: 'calculate',
         slippageTolerance: 0.02

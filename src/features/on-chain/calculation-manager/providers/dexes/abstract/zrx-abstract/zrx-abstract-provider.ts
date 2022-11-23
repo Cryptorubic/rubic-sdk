@@ -20,6 +20,8 @@ import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/pr
 export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
     protected readonly gasMargin = 1.4;
 
+    public readonly supportReceiverAddress = false;
+
     private readonly defaultOptions: ZrxCalculationOptions = {
         slippageTolerance: 0.02,
         gasCalculation: 'calculate'

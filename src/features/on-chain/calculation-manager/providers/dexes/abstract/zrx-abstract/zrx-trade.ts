@@ -39,8 +39,6 @@ export class ZrxTrade extends EvmOnChainTrade {
 
     public readonly path: ReadonlyArray<Token>;
 
-    public readonly supportReceiverAddress = false;
-
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.ZRX;
     }

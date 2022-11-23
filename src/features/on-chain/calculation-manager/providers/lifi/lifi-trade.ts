@@ -80,8 +80,6 @@ export class LifiTrade extends EvmOnChainTrade {
 
     private readonly _toTokenAmountMin: PriceTokenAmount;
 
-    public readonly supportReceiverAddress = false;
-
     public get toTokenAmountMin(): PriceTokenAmount {
         return this._toTokenAmountMin;
     }
