@@ -13,7 +13,7 @@ import { TronContractParams } from 'src/features/cross-chain/calculation-manager
 import { getMethodArgumentsAndTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/utils/get-method-arguments-and-transaction-data';
 
 import { TronBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/models/tron-bridgers-transaction-data';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
@@ -65,7 +65,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
     protected async getContractParams(
         options: TronGetContractParamsOptions
     ): Promise<TronContractParams> {
-        const fromWithoutFee = getFromWithoutFee(this.from, this.feeInfo);
+        const fromWithoutFee = getFromWithoutFee(this.from, this.feeInfo?.platformFee?.percent);
         const { methodArguments, transactionData } =
             await getMethodArgumentsAndTransactionData<TronBridgersTransactionData>(
                 fromWithoutFee,

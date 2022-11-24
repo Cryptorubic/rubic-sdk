@@ -3,7 +3,7 @@ import { wrappedNativeTokensList } from 'src/common/tokens';
 import {
     UniswapV3RouterConfiguration,
     UniswapV3RouterLiquidityPool
-} from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
+} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
 
 /**
  * Most popular tokens in uni v3 to use in a route.

@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "3.8.0-alpha.12",
+  "version": "3.9.0",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -112,7 +112,7 @@
     "tscpaths": "^0.0.9",
     "ttypescript": "^1.5.13",
     "typedoc": "^0.23.21",
-    "typescript": "^4.8.3",
+    "typescript": "~4.8.3",
     "typescript-transform-paths": "^3.3.1",
     "url": "^0.11.0",
     "webpack": "^5.65.0",
@@ -121,10 +121,10 @@
   },
   "overrides": {
     "ethers": {
-      "bignumber.js": "^9.1.0"
+      "bignumber.js": "9.1.0"
     },
     "symbiosis-js-sdk": {
-      "bignumber.js": "^9.1.0"
+      "bignumber.js": "9.1.0"
     }
   }
 }

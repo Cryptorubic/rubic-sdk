@@ -14,7 +14,6 @@ import { Injector } from 'src/core/injector/injector';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Token } from 'src/common/tokens';
 import { Log as EthersLog, TransactionReceipt as EthersReceipt } from '@ethersproject/providers';
-import BigNumber from 'bignumber.js';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
@@ -94,16 +93,13 @@ export class CrossChainSymbiosisManager {
             }
         };
 
-        return this.web3Private.trySendTransaction(
-            transactionRequest.to!,
-            new BigNumber(transactionRequest.value?.toString() || 0),
-            {
-                data: transactionRequest.data!.toString(),
-                onTransactionHash,
-                gas: gasLimit,
-                gasPrice
-            }
-        );
+        return this.web3Private.trySendTransaction(transactionRequest.to!, {
+            data: transactionRequest.data!.toString(),
+            value: transactionRequest.value?.toString() || '0',
+            onTransactionHash,
+            gas: gasLimit,
+            gasPrice
+        });
     }
 
     private getDirection(chainIdIn: ChainId, chainIdOut: ChainId): 'burn' | 'mint' {

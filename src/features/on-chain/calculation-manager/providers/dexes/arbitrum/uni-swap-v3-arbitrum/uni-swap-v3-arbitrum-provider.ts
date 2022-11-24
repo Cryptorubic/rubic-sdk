@@ -1,4 +1,4 @@
-import { UniswapV3AbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v3-abstract/uniswap-v3-abstract-provider';
+import { UniswapV3AbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-provider';
 import { UniSwapV3ArbitrumTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/arbitrum/uni-swap-v3-arbitrum/uni-swap-v3-arbitrum-trade';
 import { UNI_SWAP_V3_ARBITRUM_ROUTER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/arbitrum/uni-swap-v3-arbitrum/constants/router-configuration';
 import { UNI_SWAP_V3_ARBITRUM_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/arbitrum/uni-swap-v3-arbitrum/constants/provider-configuration';

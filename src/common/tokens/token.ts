@@ -58,10 +58,10 @@ export class Token<T extends BlockchainName = BlockchainName> {
     /**
      * Creates array of Tokens based on tokens' addresses and blockchain.
      */
-    public static async createTokens(
+    public static async createTokens<T extends BlockchainName = BlockchainName>(
         tokensAddresses: string[] | ReadonlyArray<string>,
-        blockchain: BlockchainName
-    ): Promise<Token[]> {
+        blockchain: T
+    ): Promise<Token<T>[]> {
         if (!Web3PublicService.isSupportedBlockchain(blockchain)) {
             throw new RubicSdkError(`${blockchain} blockchain is not supported in Token class`);
         }

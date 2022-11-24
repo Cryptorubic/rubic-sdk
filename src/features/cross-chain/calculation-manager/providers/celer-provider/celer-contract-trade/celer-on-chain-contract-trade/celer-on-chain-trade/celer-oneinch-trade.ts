@@ -1,12 +1,12 @@
 import { RubicSdkError } from 'src/common/errors';
-import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/oneinch-abstract/constants';
+import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
 import { InchCelerSwapInfo } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/models/inch-celer-swap-info';
 import { wrappedNative } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/wrapped-native';
 import { CelerOnChainTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-on-chain-contract-trade/celer-on-chain-trade/celer-on-chain-trade';
 import { DestinationCelerSwapInfo } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/models/destination-celer-swap-info';
-import { OneinchTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/oneinch-abstract/oneinch-trade';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { OneinchTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/oneinch-trade';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 
 export class CelerOneinchTrade implements CelerOnChainTrade {
     readonly defaultDeadline = 999999999999999;
@@ -30,7 +30,7 @@ export class CelerOneinchTrade implements CelerOnChainTrade {
         methodArguments: unknown[][],
         walletAddress: string
     ): Promise<void> {
-        const { data } = await this.oneinchTrade.encode({ fromAddress: walletAddress });
+        const { data } = await this.oneinchTrade.encodeDirect({ fromAddress: walletAddress });
         if (!methodArguments?.[0]) {
             throw new RubicSdkError('Method arguments array must not be empty');
         }
@@ -41,7 +41,7 @@ export class CelerOneinchTrade implements CelerOnChainTrade {
         if (!this.oneinchTrade.transactionData) {
             throw new RubicSdkError(`Can't estimate 1inch trade`);
         }
-        const dex = this.oneinchTrade.contractAddress;
+        const dex = this.oneinchTrade.dexContractAddress;
         const [tokenIn, ...restPath] = this.oneinchTrade.path.map(token => token.address);
         const isOneInchNative =
             oneinchApiParams.nativeAddress === tokenIn || tokenIn === EvmWeb3Pure.EMPTY_ADDRESS;

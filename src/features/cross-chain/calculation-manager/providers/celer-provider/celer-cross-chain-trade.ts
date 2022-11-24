@@ -14,13 +14,13 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { CelerDirectContractTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-direct-contract-trade/celer-direct-contract-trade';
-import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
+import { ContractParams } from 'src/features/common/models/contract-params';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { Injector } from 'src/core/injector/injector';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CelerOnChainContractTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-on-chain-contract-trade/celer-on-chain-contract-trade';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
 import { CelerContractTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-contract-trade';
 import { Cache } from 'src/common/utils/decorators';
@@ -205,11 +205,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         try {
-            await this.deflationTokenManager.checkToken({
-                address: this.to.address,
-                blockchain: this.to.blockchain,
-                symbol: this.to.symbol
-            });
+            await this.deflationTokenManager.checkToken(this.to);
 
             return await super.swap(options);
         } catch (err) {
@@ -331,11 +327,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
             this.checkWalletConnected();
             await this.checkBlockchainCorrect();
 
-            await this.deflationTokenManager.checkToken({
-                address: this.to.address,
-                blockchain: this.to.blockchain,
-                symbol: this.to.symbol
-            });
+            await this.deflationTokenManager.checkToken(this.to);
 
             return this.web3Private.approveTokens(
                 this.from.address,
