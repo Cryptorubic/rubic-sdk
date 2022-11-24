@@ -5,7 +5,7 @@ import {
     WrongFromAddressError,
     WrongReceiverAddressError
 } from 'src/common/errors';
-import { PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList, PriceTokenAmount } from 'src/common/tokens';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
@@ -219,7 +219,11 @@ export abstract class CrossChainTrade {
      * @param providerValue Value, returned from cross-chain provider.
      */
     protected getSwapValue(providerValue?: BigNumber | string | number | null): string {
-        const fixedFeeValue = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
+        const nativeToken = nativeTokensList[this.from.blockchain];
+        const fixedFeeValue = Web3Pure.toWei(
+            this.feeInfo?.fixedFee?.amount || 0,
+            nativeToken.decimals
+        );
 
         let fromValue: BigNumber;
         if (this.from.isNative) {
