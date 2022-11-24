@@ -200,5 +200,33 @@ export const nativeTokensList = {
         name: 'Metis token',
         symbol: 'METIS',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.DFK]: new Token({
+        blockchain: BLOCKCHAIN_NAME.DFK,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'JEWEL',
+        symbol: 'JEWEL',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.KLAYTN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.KLAYTN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Klaytn',
+        symbol: 'KLAY',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.VELAS]: new Token({
+        blockchain: BLOCKCHAIN_NAME.VELAS,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Velas',
+        symbol: 'VLX',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SYSCOIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SYSCOIN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Syscoin',
+        symbol: 'SYS',
+        decimals: 18
     })
 };

@@ -197,5 +197,33 @@ export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
         name: 'Wrapped METIS',
         symbol: 'WMETIS',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.DFK]: new Token({
+        blockchain: BLOCKCHAIN_NAME.DFK,
+        address: '0xCCb93dABD71c8Dad03Fc4CE5559dC3D89F67a260',
+        name: 'Wrapped JEWEL',
+        symbol: 'WJEWEL',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.KLAYTN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.KLAYTN,
+        address: '0xe4f05a66ec68b54a58b17c22107b02e0232cc817',
+        name: 'Wrapped KLAY',
+        symbol: 'WKLAY',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.VELAS]: new Token({
+        blockchain: BLOCKCHAIN_NAME.VELAS,
+        address: '0xc579D1f3CF86749E05CD06f7ADe17856c2CE3126',
+        name: 'Wrapped VLX',
+        symbol: 'WVLX',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SYSCOIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SYSCOIN,
+        address: '0xd3e822f3ef011Ca5f17D82C956D952D8d7C3A1BB',
+        name: 'Wrapped SYS',
+        symbol: 'WSYS',
+        decimals: 18
     })
 };

@@ -225,7 +225,9 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
         const fromBlockchain = from.blockchain as MultichainProxyCrossChainSupportedBlockchain;
 
         // @TODO Add filter before promise resolving.
-        const dexes = Object.values(typedTradeProviders[fromBlockchain]);
+        const dexes = Object.values(typedTradeProviders[fromBlockchain]).filter(
+            dex => dex.supportReceiverAddress
+        );
         const to = await PriceToken.createToken({
             address:
                 transitToken.tokenType === 'NATIVE'

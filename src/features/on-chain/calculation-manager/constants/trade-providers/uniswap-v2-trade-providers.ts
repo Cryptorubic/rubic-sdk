@@ -31,6 +31,11 @@ import { YuzuSwapProvider } from 'src/features/on-chain/calculation-manager/prov
 import { NetSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/metis/net-swap/net-swap-provider';
 import { ElkProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/elk/elk-provider';
 import { SurfdexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/surfdex/surfdex-provider';
+import { TradeHarmonySwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/harmony/trader-harmony/trader-harmony-provider';
+import { ClaimSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/klaytn/claim-swap/claim-swap-provider';
+import { WagyuSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/velas/wagyu-swap/wagyu-swap-provider';
+import { AstroSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/velas/astro-swap/astro-swap-provider';
+import { PegasysProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/syscoin/pegasys/pegasys-provider';
 
 export const UniswapV2TradeProviders = [
     // ethereum
@@ -57,6 +62,7 @@ export const UniswapV2TradeProviders = [
     // harmony
     SushiSwapHarmonyProvider,
     ViperSwapHarmonyProvider,
+    TradeHarmonySwapProvider,
     // arbitrum
     SushiSwapArbitrumProvider,
     // aurora
@@ -80,5 +86,12 @@ export const UniswapV2TradeProviders = [
     // Oasis
     YuzuSwapProvider,
     // Metis
-    NetSwapProvider
+    NetSwapProvider,
+    // Klaytn
+    ClaimSwapProvider,
+    // Velas
+    WagyuSwapProvider,
+    AstroSwapProvider,
+    // Syscoin
+    PegasysProvider
 ] as const;
