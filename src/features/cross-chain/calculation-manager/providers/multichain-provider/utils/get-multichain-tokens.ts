@@ -1,15 +1,15 @@
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { Injector } from 'src/core/injector/injector';
+import {
+    MultichainMethodName,
+    multichainMethodNames
+} from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/multichain-method-name';
 import {
     MultichainSourceToken,
     MultichainTargetToken,
     MultichainTokensResponse
 } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/tokens-api';
-import { Injector } from 'src/core/injector/injector';
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import {
-    MultichainMethodName,
-    multichainMethodNames
-} from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/multichain-method-name';
 
 export async function getMultichainTokens(
     from: {

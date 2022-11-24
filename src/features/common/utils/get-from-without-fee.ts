@@ -1,6 +1,6 @@
 import { PriceTokenAmount } from 'src/common/tokens';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
 export function getFromWithoutFee<T extends BlockchainName>(
     from: PriceTokenAmount<T>,

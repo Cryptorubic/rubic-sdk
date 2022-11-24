@@ -1,30 +1,30 @@
-import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
+import BigNumber from 'bignumber.js';
 import { RubicSdkError, TimeoutError } from 'src/common/errors';
-import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
-import { RpcResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/rpc-response';
-import { EvmMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-multicall-response';
-import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
+import pTimeout from 'src/common/utils/p-timeout';
 import {
     HEALTHCHECK,
     isBlockchainHealthcheckAvailable
 } from 'src/core/blockchain/constants/healthcheck';
-import { EVM_MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/evm-multicall-abi';
-import Web3 from 'web3';
-import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
-import { AbiItem } from 'web3-utils';
-import { EvmCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-call';
-import { TransactionReceipt, BlockTransactionString } from 'web3-eth';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { provider as Provider, HttpProvider, BlockNumber } from 'web3-core';
-import { HttpClient } from 'src/core/http-client/models/http-client';
-import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
-import pTimeout from 'src/common/utils/p-timeout';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
-import BigNumber from 'bignumber.js';
-import { EventData } from 'web3-eth-contract';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
+import { EVM_MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/evm-multicall-abi';
+import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
+import { EvmCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-call';
+import { EvmMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-multicall-response';
+import { RpcResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/rpc-response';
+import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
+import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
+import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
+import { HttpClient } from 'src/core/http-client/models/http-client';
+import Web3 from 'web3';
+import { BlockNumber, HttpProvider, provider as Provider } from 'web3-core';
+import { BlockTransactionString, TransactionReceipt } from 'web3-eth';
+import { EventData } from 'web3-eth-contract';
+import { AbiItem } from 'web3-utils';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.

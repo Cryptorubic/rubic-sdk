@@ -1,5 +1,5 @@
-import { Token } from 'src/common/tokens';
 import { RubicSdkError } from 'src/common/errors';
+import { Token } from 'src/common/tokens';
 
 export function createTokenNativeAddressProxy<T extends Token>(
     token: T,

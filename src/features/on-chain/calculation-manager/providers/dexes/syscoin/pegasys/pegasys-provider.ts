@@ -1,5 +1,5 @@
-import { UniswapV2AbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { UniswapV2AbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
 import { PEGASYS_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/syscoin/pegasys/constants';
 import { PegasysTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/syscoin/pegasys/pegasys-trade';
 

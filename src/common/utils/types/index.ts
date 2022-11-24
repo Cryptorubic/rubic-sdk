@@ -1,5 +1,5 @@
 export { AbstractConstructorParameters } from './abstract-constructor-parameters';
-export { Constructor } from './constructor';
-export { Mutable } from './mutable';
 export { Any } from './any';
+export { Constructor } from './constructor';
 export { InfiniteArray } from './infinite-array';
+export { Mutable } from './mutable';

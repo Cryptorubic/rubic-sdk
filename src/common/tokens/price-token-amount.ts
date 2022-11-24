@@ -1,9 +1,9 @@
+import BigNumber from 'bignumber.js';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { PriceToken, PriceTokenStruct } from 'src/common/tokens/price-token';
-import BigNumber from 'bignumber.js';
 import { TokenStruct } from 'src/common/tokens/token';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
 export type PriceTokenAmountStruct<T extends BlockchainName = BlockchainName> =
     PriceTokenStruct<T> & ({ weiAmount: BigNumber } | { tokenAmount: BigNumber });

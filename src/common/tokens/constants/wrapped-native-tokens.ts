@@ -1,5 +1,5 @@
 import { Token } from 'src/common/tokens/token';
-import { BlockchainName, BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: new Token({

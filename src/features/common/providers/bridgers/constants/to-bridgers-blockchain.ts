@@ -1,5 +1,5 @@
-import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
 
 export const toBridgersBlockchain: Record<BridgersCrossChainSupportedBlockchain, string> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: 'ETH',

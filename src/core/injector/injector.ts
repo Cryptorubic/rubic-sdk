@@ -1,8 +1,8 @@
 import { Web3PrivateService } from 'src/core/blockchain/web3-private-service/web3-private-service';
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
-import { HttpClient } from 'src/core/http-client/models/http-client';
-import { GasPriceApi } from 'src/core/gas-price-api/gas-price-api';
 import { CoingeckoApi } from 'src/core/coingecko-api/coingecko-api';
+import { GasPriceApi } from 'src/core/gas-price-api/gas-price-api';
+import { HttpClient } from 'src/core/http-client/models/http-client';
 
 export class Injector {
     private static injector: Injector;

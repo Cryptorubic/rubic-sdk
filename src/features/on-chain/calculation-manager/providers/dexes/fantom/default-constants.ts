@@ -1,6 +1,6 @@
-import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { wrappedNativeTokensList } from 'src/common/tokens';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultFantomRoutingProvidersAddresses = [
     wrappedNativeTokensList[BLOCKCHAIN_NAME.FANTOM].address, // wFTM

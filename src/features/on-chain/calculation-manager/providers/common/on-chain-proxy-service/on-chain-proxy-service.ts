@@ -1,17 +1,17 @@
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { Injector } from 'src/core/injector/injector';
-import {
-    onChainProxyContractAbi,
-    onChainProxyContractAddress
-} from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
+import BigNumber from 'bignumber.js';
+import { nativeTokensList, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { Injector } from 'src/core/injector/injector';
 import {
     OnChainPlatformFee,
     OnChainProxyFeeInfo
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
-import { nativeTokensList, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
-import BigNumber from 'bignumber.js';
+import {
+    onChainProxyContractAbi,
+    onChainProxyContractAddress
+} from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
 import {
     OnChainProxySupportedBlockchain,
     onChainProxySupportedBlockchains

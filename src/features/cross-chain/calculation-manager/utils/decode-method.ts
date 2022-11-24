@@ -1,6 +1,6 @@
-import { AbiItem } from 'web3-utils';
-import Web3 from 'web3';
 import BigNumber from 'bignumber.js';
+import Web3 from 'web3';
+import { AbiItem } from 'web3-utils';
 
 interface DecodedData {
     name: string;

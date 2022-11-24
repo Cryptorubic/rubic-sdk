@@ -1,6 +1,6 @@
-import { MarkRequired } from 'ts-essentials';
 import { LifiBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
 import { RangoBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/models/rango-bridge-types';
+import { MarkRequired } from 'ts-essentials';
 
 export interface CrossChainOptions {
     /**

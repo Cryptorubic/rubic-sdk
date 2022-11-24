@@ -1,5 +1,5 @@
-import { DefaultEstimatedGas } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
 import BigNumber from 'bignumber.js';
+import { DefaultEstimatedGas } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
 
 export const defaultEstimatedGas: DefaultEstimatedGas = {
     tokensToTokens: [

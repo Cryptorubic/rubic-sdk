@@ -1,10 +1,10 @@
+import BigNumber from 'bignumber.js';
+import { Cache } from 'src/common/utils/decorators';
 import pTimeout from 'src/common/utils/p-timeout';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { Injector } from 'src/core/injector/injector';
-import BigNumber from 'bignumber.js';
-import { HttpClient } from 'src/core/http-client/models/http-client';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { Cache } from 'src/common/utils/decorators';
+import { HttpClient } from 'src/core/http-client/models/http-client';
+import { Injector } from 'src/core/injector/injector';
 
 /**
  * Uses different api or web3 to retrieve current gas price.

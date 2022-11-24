@@ -1,5 +1,5 @@
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { wrappedNativeTokensList } from 'src/common/tokens';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
 /**
  * Most popular tokens in uni v3 to use in a route.
