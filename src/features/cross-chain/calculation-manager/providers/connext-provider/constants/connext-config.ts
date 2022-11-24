@@ -4,6 +4,8 @@ export const createConnextConfig = (signerAddress: string): NxtpSdkConfig => {
     return {
         logLevel: 'info',
         signerAddress,
+        environment: 'production',
+        network: 'mainnet',
         chains: {
             '1735353714': {
                 providers: ['https://goerli.infura.io/v3/19d34e1e01f849b482a6586994f60293'],
