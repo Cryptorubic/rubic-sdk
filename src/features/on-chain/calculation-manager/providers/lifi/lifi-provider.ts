@@ -30,6 +30,8 @@ export class LifiProvider {
 
     private readonly onChainProxyService = new OnChainProxyService();
 
+    public readonly supportReceiverAddress = false;
+
     private readonly defaultOptions: Omit<RequiredLifiCalculationOptions, 'disabledProviders'> = {
         ...evmProviderDefaultOptions,
         gasCalculation: 'calculate'

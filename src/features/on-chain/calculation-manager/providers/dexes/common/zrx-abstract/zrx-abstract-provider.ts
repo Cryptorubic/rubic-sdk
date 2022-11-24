@@ -25,6 +25,8 @@ import { ZrxTradeStruct } from 'src/features/on-chain/calculation-manager/provid
 export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
     private readonly defaultOptions: RequiredOnChainCalculationOptions = evmProviderDefaultOptions;
 
+    public readonly supportReceiverAddress = false;
+
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.ZRX;
     }
