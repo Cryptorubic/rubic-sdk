@@ -1,15 +1,15 @@
-import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
+import BigNumber from 'bignumber.js';
+import { UnnecessaryApproveError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { Injector } from 'src/core/injector/injector';
-import { UnnecessaryApproveError } from 'src/common/errors';
-import BigNumber from 'bignumber.js';
+import { TronTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-options';
 import { TronWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/tron-web3-private';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
-import { TronTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-options';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
+import { Injector } from 'src/core/injector/injector';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 
 export abstract class TronOnChainTrade extends OnChainTrade {
     public abstract readonly from: PriceTokenAmount<TronBlockchainName>;

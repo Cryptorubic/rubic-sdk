@@ -1,30 +1,30 @@
-import { WrappedCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/models/wrapped-cross-chain-trade';
+import BigNumber from 'bignumber.js';
+import { from, map, merge, Observable, startWith, switchMap } from 'rxjs';
+import { fromPromise } from 'rxjs/internal/observable/innerFrom';
 import { RubicSdkError } from 'src/common/errors';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { notNull } from 'src/common/utils/object';
+import { combineOptions } from 'src/common/utils/options';
+import pTimeout from 'src/common/utils/p-timeout';
+import { Mutable } from 'src/common/utils/types';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { ProviderAddress } from 'src/core/sdk/models/provider-address';
+import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
+import { CrossChainProviders } from 'src/features/cross-chain/calculation-manager/constants/cross-chain-providers';
+import { defaultCrossChainCalculationOptions } from 'src/features/cross-chain/calculation-manager/constants/default-cross-chain-calculation-options';
 import {
     CrossChainManagerCalculationOptions,
     RequiredCrossChainManagerCalculationOptions
 } from 'src/features/cross-chain/calculation-manager/models/cross-chain-manager-options';
-import { from, map, merge, Observable, startWith, switchMap } from 'rxjs';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CrossChainReactivelyCalculatedTradeData } from 'src/features/cross-chain/calculation-manager/models/cross-chain-reactively-calculated-trade-data';
+import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainTypedTradeProviders } from 'src/features/cross-chain/calculation-manager/models/cross-chain-typed-trade-provider';
 import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculation-manager/models/wrapped-cross-chain-trade-or-null';
-import { notNull } from 'src/common/utils/object';
-import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
-import { Mutable } from 'src/common/utils/types';
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import pTimeout from 'src/common/utils/p-timeout';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import { combineOptions } from 'src/common/utils/options';
-import { ProviderAddress } from 'src/core/sdk/models/provider-address';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { CrossChainProviders } from 'src/features/cross-chain/calculation-manager/constants/cross-chain-providers';
-import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
-import { defaultCrossChainCalculationOptions } from 'src/features/cross-chain/calculation-manager/constants/default-cross-chain-calculation-options';
-import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
-import { fromPromise } from 'rxjs/internal/observable/innerFrom';
+import { WrappedCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/models/wrapped-cross-chain-trade';
 import { compareCrossChainTrades } from 'src/features/cross-chain/calculation-manager/utils/compare-cross-chain-trades';
-import BigNumber from 'bignumber.js';
 
 /**
  * Contains method to calculate best cross-chain trade.

@@ -1,8 +1,8 @@
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import BigNumber from 'bignumber.js';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { Token, TokenStruct } from 'src/common/tokens/token';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
-import BigNumber from 'bignumber.js';
 
 export type PriceTokenStruct<T extends BlockchainName = BlockchainName> = TokenStruct<T> & {
     price: BigNumber;

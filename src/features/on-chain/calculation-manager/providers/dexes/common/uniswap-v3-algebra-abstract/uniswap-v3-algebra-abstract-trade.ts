@@ -1,30 +1,30 @@
+import BigNumber from 'bignumber.js';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { deadlineMinutesTimestamp } from 'src/common/utils/options';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
+import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { Injector } from 'src/core/injector/injector';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
+import { UniswapV3AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
 import {
     DEFAULT_ESTIMATED_GAS,
     WETH_TO_ETH_ESTIMATED_GAS
 } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/constants/estimated-gas';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
+import { CreateTradeInstance } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/create-trade-instance';
 import { UniswapV3AlgebraRoute } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-route';
-import { UniswapV3AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
-import { RubicSdkError } from 'src/common/errors';
-import { Injector } from 'src/core/injector/injector';
-import { getFromToTokensAmountsByExact } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
-import { deadlineMinutesTimestamp } from 'src/common/utils/options';
-import { AbiItem } from 'web3-utils';
-import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import BigNumber from 'bignumber.js';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import {
     UniswapV3AlgebraTradeStruct,
     UniswapV3AlgebraTradeStructOmitPath
 } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
-import { CreateTradeInstance } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/create-trade-instance';
+import { getFromToTokensAmountsByExact } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
+import { AbiItem } from 'web3-utils';
 
 interface EstimateGasOptions {
     slippageTolerance: number;

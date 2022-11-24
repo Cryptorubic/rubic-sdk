@@ -1,27 +1,27 @@
-import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
+import BigNumber from 'bignumber.js';
 import {
     FailedToCheckForTransactionReceiptError,
+    InsufficientFundsGasPriceValueError,
     LowGasError,
     LowSlippageError,
     RubicSdkError,
     TransactionRevertedError,
-    UserRejectError,
-    InsufficientFundsGasPriceValueError
+    UserRejectError
 } from 'src/common/errors';
-import { AbiItem } from 'web3-utils';
 import { parseError } from 'src/common/utils/errors';
-import { TransactionReceipt } from 'web3-eth';
-import { TransactionConfig } from 'web3-core';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import Web3 from 'web3';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private/models/web3.error';
+import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import BigNumber from 'bignumber.js';
-import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private/models/web3.error';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
+import Web3 from 'web3';
+import { TransactionConfig } from 'web3-core';
+import { TransactionReceipt } from 'web3-eth';
+import { AbiItem } from 'web3-utils';
 
 export class EvmWeb3Private extends Web3Private {
     /**

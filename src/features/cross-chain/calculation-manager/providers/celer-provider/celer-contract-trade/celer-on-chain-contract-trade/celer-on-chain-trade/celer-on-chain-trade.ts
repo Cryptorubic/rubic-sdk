@@ -1,5 +1,5 @@
-import { SourceCelerSwapInfo } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/models/source-celer-swap-info';
 import { DestinationCelerSwapInfo } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/models/destination-celer-swap-info';
+import { SourceCelerSwapInfo } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/models/source-celer-swap-info';
 
 export interface CelerOnChainTrade {
     readonly defaultDeadline: number;

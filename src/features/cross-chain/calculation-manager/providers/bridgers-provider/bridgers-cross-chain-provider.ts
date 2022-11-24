@@ -1,38 +1,38 @@
-import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import BigNumber from 'bignumber.js';
+import { BridgersPairIsUnavailableError, MaxAmountError, MinAmountError } from 'src/common/errors';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
-import {
-    BridgersCrossChainSupportedBlockchain,
-    bridgersCrossChainSupportedBlockchains,
-    BridgersEvmCrossChainSupportedBlockchain
-} from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
-import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
-import { BridgersPairIsUnavailableError, MaxAmountError, MinAmountError } from 'src/common/errors';
-import BigNumber from 'bignumber.js';
-import { TronBridgersCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/tron-bridgers-cross-chain-trade';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
-import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { EvmBridgersCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/evm-bridgers-trade/evm-bridgers-cross-chain-trade';
-import { tronCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { AbiItem } from 'web3-utils';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
+import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
 import {
     BridgersQuoteRequest,
     BridgersQuoteResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import {
+    BridgersCrossChainSupportedBlockchain,
+    bridgersCrossChainSupportedBlockchains,
+    BridgersEvmCrossChainSupportedBlockchain
+} from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
+import { EvmBridgersCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/evm-bridgers-trade/evm-bridgers-cross-chain-trade';
+import { TronBridgersCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/tron-bridgers-cross-chain-trade';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { tronCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';
+import { AbiItem } from 'web3-utils';
 
 export class BridgersCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;

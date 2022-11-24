@@ -1,26 +1,26 @@
+import BigNumber from 'bignumber.js';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { Cache } from 'src/common/utils/decorators';
+import { combineOptions } from 'src/common/utils/options';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import {
     OnChainCalculationOptions,
     RequiredOnChainCalculationOptions
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
-import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
-import { zrxApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/constants';
-import { ZrxQuoteRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-quote-request';
-import { ZrxQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-types';
-import { getZrxApiBaseUrl } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/utils';
-import BigNumber from 'bignumber.js';
-import { ZrxTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/zrx-trade';
-import { combineOptions } from 'src/common/utils/options';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { Cache } from 'src/common/utils/decorators';
-import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
+import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
+import { zrxApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/constants';
+import { ZrxQuoteRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-quote-request';
 import { ZrxTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-trade-struct';
+import { ZrxQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/models/zrx-types';
+import { getZrxApiBaseUrl } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/utils';
+import { ZrxTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/zrx-trade';
 
 export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
     private readonly defaultOptions: RequiredOnChainCalculationOptions = evmProviderDefaultOptions;

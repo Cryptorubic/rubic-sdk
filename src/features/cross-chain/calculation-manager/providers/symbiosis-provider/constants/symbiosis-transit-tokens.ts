@@ -1,6 +1,6 @@
-import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { TokenStruct } from 'src/common/tokens/token';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
 
 export const symbiosisTransitTokens: Record<SymbiosisCrossChainSupportedBlockchain, TokenStruct> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {

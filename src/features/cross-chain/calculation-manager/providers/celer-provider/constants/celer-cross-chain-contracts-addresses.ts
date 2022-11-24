@@ -1,5 +1,5 @@
-import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
 
 const commonAddress = '0x333e885469d29f623681d8157a2faad5bf4e3333';
 

@@ -1,27 +1,27 @@
 import BigNumber from 'bignumber.js';
 import { BigNumber as EthersBigNumber } from 'ethers';
-import { TRC20_CONTRACT_ABI } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/constants/trc-20-contract-abi';
-import { TronWebProvider } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-web-provider';
-import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
-import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
-import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
-import { TRON_MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/constants/tron-multicall-abi';
-import { TronMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-multicall-response';
-import { TronCall } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-call';
+import { TimeoutError } from 'src/common/errors';
+import pTimeout from 'src/common/utils/p-timeout';
 import {
     HEALTHCHECK,
     isBlockchainHealthcheckAvailable
 } from 'src/core/blockchain/constants/healthcheck';
-import pTimeout from 'src/common/utils/p-timeout';
-import { TimeoutError } from 'src/common/errors';
-import { AbiItem } from 'web3-utils';
-import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
-import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
-import { TronTransactionInfo } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-transaction-info';
+import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
-import { TronBlock } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-block';
+import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
+import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
+import { TRC20_CONTRACT_ABI } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/constants/trc-20-contract-abi';
+import { TRON_MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/constants/tron-multicall-abi';
+import { TronBlock } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-block';
+import { TronCall } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-call';
+import { TronMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-multicall-response';
+import { TronTransactionInfo } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-transaction-info';
+import { TronWebProvider } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-web-provider';
+import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
+import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
+import { AbiItem } from 'web3-utils';
 
 export class TronWeb3Public extends Web3Public {
     protected readonly tokenContractAbi = TRC20_CONTRACT_ABI;

@@ -1,11 +1,11 @@
 import { RubicSdkError } from 'src/common/errors';
+import { CelerCrossChainContractData } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-cross-chain-contract-data';
+import { celerCrossChainContractsAddresses } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-cross-chain-contracts-addresses';
+import { crossChainTradeProvidersData } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/cross-chain-trade-providers-data';
 import {
     CelerCrossChainSupportedBlockchain,
     celerCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
-import { CelerCrossChainContractData } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-cross-chain-contract-data';
-import { celerCrossChainContractsAddresses } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-cross-chain-contracts-addresses';
-import { crossChainTradeProvidersData } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/cross-chain-trade-providers-data';
 
 const celerCrossChainContracts: Record<
     CelerCrossChainSupportedBlockchain,

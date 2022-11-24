@@ -1,5 +1,5 @@
-import { MarkRequired } from 'ts-essentials';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
+import { MarkRequired } from 'ts-essentials';
 
 /**
  * Stores options for calculating trade.

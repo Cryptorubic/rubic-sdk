@@ -1,12 +1,12 @@
 import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
-import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
-import { Injector } from 'src/core/injector/injector';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { compareAddresses } from 'src/common/utils/blockchain';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Injector } from 'src/core/injector/injector';
 
 export type TokenStruct<T extends BlockchainName = BlockchainName> = {
     blockchain: T;

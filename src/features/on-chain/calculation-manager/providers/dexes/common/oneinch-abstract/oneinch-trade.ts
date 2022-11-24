@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import {
     InsufficientFundsOneinchError,
     LowSlippageDeflationaryTokenError,
@@ -5,30 +6,28 @@ import {
     RubicSdkError,
     SwapRequestError
 } from 'src/common/errors';
+import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { Cache } from 'src/common/utils/decorators';
+import { parseError } from 'src/common/utils/errors';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { Injector } from 'src/core/injector/injector';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import {
     createTokenNativeAddressProxy,
     createTokenNativeAddressProxyInPathStartAndEnd
 } from 'src/features/common/utils/token-native-address-proxy';
-import { OneinchSwapResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-response';
-
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { PriceTokenAmount, Token } from 'src/common/tokens';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { getOneinchApiBaseUrl } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/utils';
-import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
-import { Cache } from 'src/common/utils/decorators';
-import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-request';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { parseError } from 'src/common/utils/errors';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { Injector } from 'src/core/injector/injector';
-import BigNumber from 'bignumber.js';
+import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
+import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-request';
+import { OneinchSwapResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-response';
 import { OneinchTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-trade-struct';
+import { getOneinchApiBaseUrl } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/utils';
 
 export class OneinchTrade extends EvmOnChainTrade {
     /** @internal */

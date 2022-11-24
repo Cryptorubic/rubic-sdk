@@ -1,11 +1,11 @@
+import BigNumber from 'bignumber.js';
 import { RubicSdkError, TimeoutError } from 'src/common/errors';
-import { HttpClient } from 'src/core/http-client/models/http-client';
+import { Cache } from 'src/common/utils/decorators';
 import pTimeout from 'src/common/utils/p-timeout';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import BigNumber from 'bignumber.js';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { Cache } from 'src/common/utils/decorators';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { HttpClient } from 'src/core/http-client/models/http-client';
 
 const supportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,

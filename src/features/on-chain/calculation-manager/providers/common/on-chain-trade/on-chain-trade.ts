@@ -1,21 +1,21 @@
-import { PriceTokenAmount, Token } from 'src/common/tokens';
+import BigNumber from 'bignumber.js';
 import {
     RubicSdkError,
     WalletNotConnectedError,
     WrongFromAddressError,
     WrongReceiverAddressError
 } from 'src/common/errors';
-import { Injector } from 'src/core/injector/injector';
+import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import BigNumber from 'bignumber.js';
-import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
-import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { isAddressCorrect } from 'src/features/common/utils/check-address';
+import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
+import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { HttpClient } from 'src/core/http-client/models/http-client';
+import { Injector } from 'src/core/injector/injector';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { isAddressCorrect } from 'src/features/common/utils/check-address';
+import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 /**
  * Abstract class for all instant trade providers' trades.

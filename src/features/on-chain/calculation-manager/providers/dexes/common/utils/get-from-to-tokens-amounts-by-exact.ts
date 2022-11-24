@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
-import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
 
 export function getFromToTokensAmountsByExact<T extends BlockchainName>(
     fromToken: PriceToken<T>,

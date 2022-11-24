@@ -1,7 +1,11 @@
 import BigNumber from 'bignumber.js';
 import { BigNumber as EthersBigNumber } from 'ethers';
 import { DeflationTokenError } from 'src/common/errors';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
+import { Cache } from 'src/common/utils/decorators';
+import { notNull } from 'src/common/utils/object';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
@@ -11,17 +15,13 @@ import {
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
-import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
-import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
-import { UniswapV2TradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/uniswap-v2-trade-providers';
-import { notNull } from 'src/common/utils/object';
-import { Cache } from 'src/common/utils/decorators';
-import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
-
 import {
     DeflationManagerSupportedBlockchain,
     deflationManagerSupportedBlockchains
 } from 'src/features/deflation-token-manager/models/deflation-manager-supported-blockchain';
+import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
+import { UniswapV2TradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/uniswap-v2-trade-providers';
+
 import { UniswapV2AbstractTrade } from '../on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { simulatorContractAbi } from './constants/simulator-contract-abi';
 import { simulatorContractAddress } from './constants/simulator-contract-address';

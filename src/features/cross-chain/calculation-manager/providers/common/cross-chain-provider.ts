@@ -1,19 +1,19 @@
-import { AbiItem } from 'web3-utils';
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { parseError } from 'src/common/utils/errors';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
-import { CrossChainIsUnavailableError, RubicSdkError } from 'src/common/errors';
-import { Injector } from 'src/core/injector/injector';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import BigNumber from 'bignumber.js';
-import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
-import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
-import { HttpClient } from 'src/core/http-client/models/http-client';
-import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
+import { CrossChainIsUnavailableError, RubicSdkError } from 'src/common/errors';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { parseError } from 'src/common/utils/errors';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
+import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { HttpClient } from 'src/core/http-client/models/http-client';
+import { Injector } from 'src/core/injector/injector';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
+import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { AbiItem } from 'web3-utils';
 
 export abstract class CrossChainProvider {
     public static parseError(err: unknown): RubicSdkError {

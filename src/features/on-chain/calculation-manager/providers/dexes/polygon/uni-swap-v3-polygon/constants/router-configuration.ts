@@ -1,5 +1,5 @@
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { wrappedNativeTokensList } from 'src/common/tokens';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import {
     UniswapV3RouterConfiguration,
     UniswapV3RouterLiquidityPool

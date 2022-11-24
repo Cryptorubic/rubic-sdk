@@ -1,34 +1,34 @@
-import { DefaultEstimatedGas } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
-import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
+import BigNumber from 'bignumber.js';
 import { LowSlippageDeflationaryTokenError, RubicSdkError } from 'src/common/errors';
-import { defaultEstimatedGas } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/constants/default-estimated-gas';
+import { Token } from 'src/common/tokens';
+import { Cache } from 'src/common/utils/decorators';
+import { parseError } from 'src/common/utils/errors';
+import { tryExecuteAsync } from 'src/common/utils/functions';
+import { deadlineMinutesTimestamp } from 'src/common/utils/options';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
+import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
+import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
+import { defaultEstimatedGas } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/constants/default-estimated-gas';
 import {
     ExactInputOutputSwapMethodsList,
     RegularSwapMethod,
     SUPPORTING_FEE_SWAP_METHODS_MAPPING,
     SWAP_METHOD
 } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/constants/SWAP_METHOD';
-import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
-import { deadlineMinutesTimestamp } from 'src/common/utils/options';
-import { AbiItem } from 'web3-utils';
-import { tryExecuteAsync } from 'src/common/utils/functions';
 import { defaultUniswapV2Abi } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi';
-import { Token } from 'src/common/tokens';
-import { Cache } from 'src/common/utils/decorators';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
-import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import BigNumber from 'bignumber.js';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { parseError } from 'src/common/utils/errors';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { DefaultEstimatedGas } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
 import { UniswapV2TradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-struct';
+import { AbiItem } from 'web3-utils';
 
 export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
     /** @internal */

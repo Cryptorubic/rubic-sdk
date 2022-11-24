@@ -1,24 +1,24 @@
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { RubicSdkError } from 'src/common/errors';
-import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
-import { OnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/on-chain-manager-calculation-options';
-import { LifiProvider } from 'src/features/on-chain/calculation-manager/providers/lifi/lifi-provider';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
-import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
-import pTimeout from 'src/common/utils/p-timeout';
 import { combineOptions } from 'src/common/utils/options';
-import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
+import pTimeout from 'src/common/utils/p-timeout';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
 import { ProviderAddress } from 'src/core/sdk/models/provider-address';
+import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
-import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
+import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
+import { OnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/on-chain-manager-calculation-options';
+import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
+import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
 import { RequiredOnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/required-on-chain-manager-calculation-options';
+import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
+import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
+import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
+import { LifiProvider } from 'src/features/on-chain/calculation-manager/providers/lifi/lifi-provider';
+import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
 
 /**
  * Contains methods to calculate on-chain trades.

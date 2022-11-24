@@ -1,6 +1,6 @@
+import { RubicSdkError } from 'src/common/errors';
 import { CacheConfig } from 'src/common/utils/decorators/cache-decorator/models/cache-config';
 import { ConditionalResult } from 'src/common/utils/decorators/cache-decorator/models/conditional-result';
-import { RubicSdkError } from 'src/common/errors';
 
 type DecoratorSignature = <T>(
     _: Object,

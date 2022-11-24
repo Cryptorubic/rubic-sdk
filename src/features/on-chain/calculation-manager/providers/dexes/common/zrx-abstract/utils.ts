@@ -1,6 +1,6 @@
+import { RubicSdkError } from 'src/common/errors';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { zrxApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/zrx-abstract/constants';
-import { RubicSdkError } from 'src/common/errors';
 
 export function getZrxApiBaseUrl(blockchain: BlockchainName): string {
     const { apiBaseUrl } = zrxApiParams;

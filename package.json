@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "3.10.1",
+  "version": "3.10.2",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -94,6 +94,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-simple-import-sort": "^8.0.0",
     "eslint-plugin-unused-imports": "^1.1.4",
     "ethereumjs-wallet": "^1.0.2",
     "http-browserify": "^1.7.0",

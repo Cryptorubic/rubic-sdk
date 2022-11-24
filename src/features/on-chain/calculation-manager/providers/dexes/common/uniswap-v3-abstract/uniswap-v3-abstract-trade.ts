@@ -1,5 +1,6 @@
-import { UniswapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
-import { UniswapV3AlgebraAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
+import { RubicSdkError } from 'src/common/errors';
+import { compareAddresses } from 'src/common/utils/blockchain';
+import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
@@ -8,11 +9,10 @@ import {
     UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI,
     UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS
 } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
-import { RubicSdkError } from 'src/common/errors';
-import { UniswapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
-import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
-import { compareAddresses } from 'src/common/utils/blockchain';
+import { UniswapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
 import { UniswapV3TradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-struct';
+import { UniswapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
+import { UniswapV3AlgebraAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 
 export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTrade {
     public readonly dexContractAddress = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS;

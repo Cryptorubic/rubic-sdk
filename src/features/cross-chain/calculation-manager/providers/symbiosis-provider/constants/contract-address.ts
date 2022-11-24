@@ -1,7 +1,7 @@
-import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { UniversalContract } from 'src/features/cross-chain/calculation-manager/providers/common/models/universal-contract';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { UniversalContract } from 'src/features/cross-chain/calculation-manager/providers/common/models/universal-contract';
+import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
 
 export const SYMBIOSIS_CONTRACT_ADDRESS: Record<
     SymbiosisCrossChainSupportedBlockchain,

@@ -1,6 +1,6 @@
-import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
-import { CelerTransferStatus } from 'src/features/cross-chain/status-manager/models/celer-transfer-status.enum';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
+import { CelerTransferStatus } from 'src/features/cross-chain/status-manager/models/celer-transfer-status.enum';
+import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 
 export interface DeBridgeApiResponse {
     claim: {
