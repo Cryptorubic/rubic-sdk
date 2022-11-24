@@ -3,6 +3,6 @@ export interface OneinchQuoteRequest {
         fromTokenAddress: string;
         toTokenAddress: string;
         amount: string;
-        mainRouteParts?: string;
+        connectorTokens?: string;
     };
 }

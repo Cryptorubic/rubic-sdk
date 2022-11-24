@@ -141,12 +141,15 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         const isNative = from.isNative || from.address === oneinchApiParams.nativeAddress;
         const fromTokenAddress =
             isNative && !isDefaultWrappedAddress ? options.wrappedAddress : from.address;
+        const toTokenAddress = toToken.address;
         const quoteTradeParams: OneinchQuoteRequest = {
             params: {
                 fromTokenAddress,
-                toTokenAddress: toToken.address,
+                toTokenAddress,
                 amount: from.stringWeiAmount,
-                ...(options.disableMultihops && { mainRouteParts: '1' })
+                ...(options.disableMultihops && {
+                    connectorTokens: `${fromTokenAddress},${toTokenAddress}`
+                })
             }
         };
 

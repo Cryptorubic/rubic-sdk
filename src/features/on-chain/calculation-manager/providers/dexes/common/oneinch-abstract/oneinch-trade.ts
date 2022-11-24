@@ -165,15 +165,19 @@ export class OneinchTrade extends EvmOnChainTrade {
         fromAddress?: string,
         receiverAddress?: string
     ): Promise<OneinchSwapResponse> {
+        const fromTokenAddress = this.nativeSupportedFromWithoutFee.address;
+        const toTokenAddress = this.nativeSupportedTo.address;
         const swapRequest: OneinchSwapRequest = {
             params: {
-                fromTokenAddress: this.nativeSupportedFromWithoutFee.address,
-                toTokenAddress: this.nativeSupportedTo.address,
+                fromTokenAddress,
+                toTokenAddress,
                 amount: this.nativeSupportedFromWithoutFee.stringWeiAmount,
                 slippage: (this.slippageTolerance * 100).toString(),
                 fromAddress: fromAddress || this.walletAddress,
                 disableEstimate,
-                ...(this.disableMultihops && { mainRouteParts: '1' }),
+                ...(this.disableMultihops && {
+                    connectorTokens: `${fromTokenAddress},${toTokenAddress}`
+                }),
                 ...(receiverAddress && { destReceiver: receiverAddress })
             }
         };

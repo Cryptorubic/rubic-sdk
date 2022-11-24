@@ -6,7 +6,7 @@ export interface OneinchSwapRequest {
         slippage: string;
         fromAddress: string;
         disableEstimate: boolean;
-        mainRouteParts?: string;
+        connectorTokens?: string;
         destReceiver?: string;
         protocols?: string;
         referrerAddress?: string;
