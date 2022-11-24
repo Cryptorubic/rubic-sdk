@@ -12,20 +12,24 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { CelerSupportedOnChainTradeProvider } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-supported-on-chain-trade';
 import { RubicSdkError } from 'src/common/errors';
 import { Injector } from 'src/core/injector/injector';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 
 /**
  * Class to work with readable methods of cross-chain contract.
  */
 export class CelerCrossChainContractData {
-    private readonly web3Public = Injector.web3PublicService.getWeb3Public(this.blockchain);
+    private readonly web3Public: EvmWeb3Public;
 
-    private readonly messageBusController = new CelerMessageBusController(this.web3Public);
+    private readonly messageBusController: CelerMessageBusController;
 
     constructor(
         public readonly blockchain: CelerCrossChainSupportedBlockchain,
         public readonly address: string,
         public readonly providersData: ProviderData[]
-    ) {}
+    ) {
+        this.web3Public = Injector.web3PublicService.getWeb3Public(this.blockchain);
+        this.messageBusController = new CelerMessageBusController(this.web3Public);
+    }
 
     public getProvider(providerIndex: number): CelerSupportedOnChainTradeProvider {
         const provider = this.providersData?.[providerIndex]?.provider;

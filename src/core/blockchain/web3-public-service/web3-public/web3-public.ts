@@ -14,19 +14,24 @@ import { Token } from 'src/common/tokens';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/bitcoin-web3-pure';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
  * To send transaction or execute contract method use {@link Web3Private}.
  */
 export abstract class Web3Public {
-    protected readonly multicallAddress = MULTICALL_ADDRESSES[this.blockchainName];
+    protected readonly multicallAddress: string;
 
-    protected readonly Web3Pure = Web3Pure[BlockchainsInfo.getChainType(this.blockchainName)];
+    protected readonly Web3Pure: typeof EvmWeb3Pure | typeof BitcoinWeb3Pure | typeof TronWeb3Pure;
 
     protected abstract readonly tokenContractAbi: AbiItem[];
 
-    protected constructor(protected readonly blockchainName: Web3PublicSupportedBlockchain) {}
+    protected constructor(protected readonly blockchainName: Web3PublicSupportedBlockchain) {
+        this.multicallAddress = MULTICALL_ADDRESSES[this.blockchainName];
+        this.Web3Pure = Web3Pure[BlockchainsInfo.getChainType(this.blockchainName)];
+    }
 
     /**
      * Sets new provider to web3 instance.
