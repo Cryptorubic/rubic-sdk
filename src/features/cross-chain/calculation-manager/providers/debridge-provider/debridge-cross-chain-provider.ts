@@ -62,7 +62,10 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             );
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo?.platformFee?.percent);
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
 
             const slippageTolerance = options.slippageTolerance * 100;
 
@@ -124,9 +127,11 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         slippage: options.slippageTolerance,
                         feeInfo: {
                             ...feeInfo,
-                            cryptoFee: {
-                                amount: Web3Pure.fromWei(cryptoFeeAmount),
-                                tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                            provider: {
+                                cryptoFee: {
+                                    amount: Web3Pure.fromWei(cryptoFeeAmount),
+                                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                                }
                             }
                         },
                         transitAmount: Web3Pure.fromWei(transitToken.amount, transitToken.decimals),
@@ -151,25 +156,26 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         providerAddress: string
     ): Promise<FeeInfo> {
         return {
-            fixedFee: {
-                amount: await this.getFixedFee(
-                    fromBlockchain,
-                    providerAddress,
-                    DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-                    evmCommonCrossChainAbi
-                ),
-                tokenSymbol: nativeTokensList[fromBlockchain].symbol
-            },
-            platformFee: {
-                percent: await this.getFeePercent(
-                    fromBlockchain,
-                    providerAddress,
-                    DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-                    evmCommonCrossChainAbi
-                ),
-                tokenSymbol: 'USDC'
-            },
-            cryptoFee: null
+            rubicProxy: {
+                fixedFee: {
+                    amount: await this.getFixedFee(
+                        fromBlockchain,
+                        providerAddress,
+                        DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+                        evmCommonCrossChainAbi
+                    ),
+                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                },
+                platformFee: {
+                    percent: await this.getFeePercent(
+                        fromBlockchain,
+                        providerAddress,
+                        DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
+                        evmCommonCrossChainAbi
+                    ),
+                    tokenSymbol: 'USDC'
+                }
+            }
         };
     }
 

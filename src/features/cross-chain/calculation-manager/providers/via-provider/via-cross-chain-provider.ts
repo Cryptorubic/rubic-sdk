@@ -69,7 +69,10 @@ export class ViaCrossChainProvider extends CrossChainProvider {
             const toChainId = blockchainId[toBlockchain];
 
             let feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo?.platformFee?.percent);
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
 
             const via = new Via({
                 ...VIA_DEFAULT_CONFIG,
@@ -133,12 +136,14 @@ export class ViaCrossChainProvider extends CrossChainProvider {
             const cryptoFeeSymbol = additionalFee?.token.symbol;
             feeInfo = {
                 ...feeInfo,
-                cryptoFee: additionalFee
-                    ? {
-                          amount: cryptoFeeAmount,
-                          tokenSymbol: cryptoFeeSymbol!
-                      }
-                    : null
+                provider: {
+                    ...(additionalFee && {
+                        cryptoFee: {
+                            amount: cryptoFeeAmount,
+                            tokenSymbol: cryptoFeeSymbol!
+                        }
+                    })
+                }
             };
 
             const nativeToken = nativeTokensList[from.blockchain];
@@ -309,25 +314,26 @@ export class ViaCrossChainProvider extends CrossChainProvider {
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
         return {
-            fixedFee: {
-                amount: await this.getFixedFee(
-                    fromBlockchain,
-                    providerAddress,
-                    viaContractAddress[fromBlockchain],
-                    evmCommonCrossChainAbi
-                ),
-                tokenSymbol: nativeTokensList[fromBlockchain].symbol
-            },
-            platformFee: {
-                percent: await this.getFeePercent(
-                    fromBlockchain,
-                    providerAddress,
-                    viaContractAddress[fromBlockchain],
-                    evmCommonCrossChainAbi
-                ),
-                tokenSymbol: percentFeeToken.symbol
-            },
-            cryptoFee: null
+            rubicProxy: {
+                fixedFee: {
+                    amount: await this.getFixedFee(
+                        fromBlockchain,
+                        providerAddress,
+                        viaContractAddress[fromBlockchain],
+                        evmCommonCrossChainAbi
+                    ),
+                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                },
+                platformFee: {
+                    percent: await this.getFeePercent(
+                        fromBlockchain,
+                        providerAddress,
+                        viaContractAddress[fromBlockchain],
+                        evmCommonCrossChainAbi
+                    ),
+                    tokenSymbol: percentFeeToken.symbol
+                }
+            }
         };
     }
 }

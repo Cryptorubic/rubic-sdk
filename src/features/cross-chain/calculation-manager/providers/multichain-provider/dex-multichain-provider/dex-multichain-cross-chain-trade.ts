@@ -44,11 +44,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
                         gasData: null,
                         priceImpact: 0,
                         toTokenAmountMin: new BigNumber(0),
-                        feeInfo: {
-                            fixedFee: null,
-                            platformFee: null,
-                            cryptoFee: null
-                        },
+                        feeInfo: {},
                         routerAddress,
                         spenderAddress,
                         routerMethodName: multichainMethodName,

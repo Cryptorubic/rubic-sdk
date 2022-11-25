@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { CrossChainIsUnavailableError, RubicSdkError } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -62,11 +62,7 @@ export abstract class CrossChainProvider {
         _percentFeeToken: PriceToken,
         _contractAbi?: AbiItem[]
     ): Promise<FeeInfo> {
-        return {
-            fixedFee: null,
-            platformFee: null,
-            cryptoFee: null
-        };
+        return {};
     }
 
     /**
@@ -86,6 +82,7 @@ export abstract class CrossChainProvider {
     ): Promise<BigNumber> {
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
         const fromChainType = BlockchainsInfo.getChainType(fromBlockchain);
+        const nativeToken = nativeTokensList[fromBlockchain];
 
         if (!Web3Pure[fromChainType].isEmptyAddress(providerAddress)) {
             const integratorInfo = await web3Public.callContractMethod<{
@@ -93,7 +90,7 @@ export abstract class CrossChainProvider {
                 fixedFeeAmount: string;
             }>(contractAddress, contractAbi, 'integratorToFeeInfo', [providerAddress]);
             if (integratorInfo.isIntegrator) {
-                return Web3Pure.fromWei(integratorInfo.fixedFeeAmount);
+                return Web3Pure.fromWei(integratorInfo.fixedFeeAmount, nativeToken.decimals);
             }
         }
 
@@ -102,7 +99,8 @@ export abstract class CrossChainProvider {
                 contractAddress,
                 contractAbi,
                 'fixedCryptoFee'
-            )
+            ),
+            nativeToken.decimals
         );
     }
 

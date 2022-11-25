@@ -120,7 +120,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             });
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo?.platformFee?.percent);
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
             const tokenAmountIn = new SymbiosisTokenAmount(tokenIn, fromWithoutFee.stringWeiAmount);
 
             const tokenOut = isBitcoinSwap
@@ -206,9 +209,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                         slippage: options.slippageTolerance,
                         feeInfo: {
                             ...feeInfo,
-                            cryptoFee: {
-                                amount: new BigNumber(transitTokenFee.toFixed()),
-                                tokenSymbol: transitTokenFee.token.symbol || ''
+                            provider: {
+                                cryptoFee: {
+                                    amount: new BigNumber(transitTokenFee.toFixed()),
+                                    tokenSymbol: transitTokenFee.token.symbol || ''
+                                }
                             }
                         },
                         transitAmount
@@ -311,15 +316,16 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         );
 
         return {
-            fixedFee: {
-                amount: fixedFeeAmount,
-                tokenSymbol: nativeTokensList[fromBlockchain].symbol
-            },
-            platformFee: {
-                percent: feePercent,
-                tokenSymbol: percentFeeToken.symbol
-            },
-            cryptoFee: null
+            rubicProxy: {
+                fixedFee: {
+                    amount: fixedFeeAmount,
+                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                },
+                platformFee: {
+                    percent: feePercent,
+                    tokenSymbol: percentFeeToken.symbol
+                }
+            }
         };
     }
 

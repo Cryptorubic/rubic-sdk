@@ -57,11 +57,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                         gasData: null,
                         priceImpact: 0,
                         slippage: 0,
-                        feeInfo: {
-                            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
-                            platformFee: { percent: 0, tokenSymbol: '' },
-                            cryptoFee: null
-                        },
+                        feeInfo: {},
                         transitAmount: new BigNumber(NaN),
                         cryptoFeeToken: from
                     },

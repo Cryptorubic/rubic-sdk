@@ -47,11 +47,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
                         gasData: null,
                         priceImpact: 0,
                         slippage: 0,
-                        feeInfo: {
-                            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
-                            platformFee: { percent: 0, tokenSymbol: '' },
-                            cryptoFee: null
-                        }
+                        feeInfo: {}
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});

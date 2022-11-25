@@ -83,7 +83,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const toChainId = blockchainId[toBlockchain];
 
         const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-        const fromWithoutFee = getFromWithoutFee(from, feeInfo?.platformFee?.percent);
+        const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
 
         const fromAddress = this.getWalletAddress(fromBlockchain);
         const toAddress = options.receiverAddress || fromAddress;
@@ -176,25 +176,26 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
         return {
-            fixedFee: {
-                amount: await this.getFixedFee(
-                    fromBlockchain,
-                    providerAddress,
-                    rubicProxyContractAddress[fromBlockchain],
-                    evmCommonCrossChainAbi
-                ),
-                tokenSymbol: nativeTokensList[fromBlockchain].symbol
-            },
-            platformFee: {
-                percent: await this.getFeePercent(
-                    fromBlockchain,
-                    providerAddress,
-                    rubicProxyContractAddress[fromBlockchain],
-                    evmCommonCrossChainAbi
-                ),
-                tokenSymbol: percentFeeToken.symbol
-            },
-            cryptoFee: null
+            rubicProxy: {
+                fixedFee: {
+                    amount: await this.getFixedFee(
+                        fromBlockchain,
+                        providerAddress,
+                        rubicProxyContractAddress[fromBlockchain],
+                        evmCommonCrossChainAbi
+                    ),
+                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                },
+                platformFee: {
+                    percent: await this.getFeePercent(
+                        fromBlockchain,
+                        providerAddress,
+                        rubicProxyContractAddress[fromBlockchain],
+                        evmCommonCrossChainAbi
+                    ),
+                    tokenSymbol: percentFeeToken.symbol
+                }
+            }
         };
     }
 

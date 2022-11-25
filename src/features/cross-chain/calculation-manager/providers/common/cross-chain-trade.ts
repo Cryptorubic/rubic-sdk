@@ -88,8 +88,14 @@ export abstract class CrossChainTrade {
     }
 
     public get networkFee(): BigNumber {
-        return new BigNumber(this.feeInfo.fixedFee?.amount || 0).plus(
-            this.feeInfo.cryptoFee?.amount || 0
+        return new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || 0).plus(
+            this.feeInfo.provider?.cryptoFee?.amount || 0
+        );
+    }
+
+    public get platformFee(): BigNumber {
+        return new BigNumber(this.feeInfo.rubicProxy?.platformFee?.percent || 0).plus(
+            this.feeInfo.provider?.platformFee?.percent || 0
         );
     }
 
@@ -221,7 +227,7 @@ export abstract class CrossChainTrade {
     protected getSwapValue(providerValue?: BigNumber | string | number | null): string {
         const nativeToken = nativeTokensList[this.from.blockchain];
         const fixedFeeValue = Web3Pure.toWei(
-            this.feeInfo?.fixedFee?.amount || 0,
+            this.feeInfo.rubicProxy?.fixedFee?.amount || 0,
             nativeToken.decimals
         );
 
@@ -229,7 +235,7 @@ export abstract class CrossChainTrade {
         if (this.from.isNative) {
             if (providerValue) {
                 fromValue = new BigNumber(providerValue).dividedBy(
-                    1 - (this.feeInfo.platformFee?.percent || 0) / 100
+                    1 - (this.feeInfo.rubicProxy?.platformFee?.percent || 0) / 100
                 );
             } else {
                 fromValue = this.from.weiAmount;

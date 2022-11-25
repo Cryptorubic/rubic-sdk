@@ -82,7 +82,10 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 from,
                 contractAbi
             );
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo?.platformFee?.percent);
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
 
             const fromTokenAddress = createTokenNativeAddressProxy(
                 from,
@@ -142,13 +145,15 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
 
             feeInfo = {
                 ...feeInfo,
-                platformFee: {
-                    ...feeInfo.platformFee!,
-                    percent: feeInfo.platformFee!.percent + transactionData.fee * 100
-                },
-                cryptoFee: {
-                    amount: new BigNumber(transactionData.chainFee),
-                    tokenSymbol: toToken.symbol
+                provider: {
+                    platformFee: {
+                        percent: transactionData.fee * 100,
+                        tokenSymbol: from.symbol
+                    },
+                    cryptoFee: {
+                        amount: new BigNumber(transactionData.chainFee),
+                        tokenSymbol: toToken.symbol
+                    }
                 }
             };
 
@@ -203,25 +208,26 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
         contractAbi: AbiItem[]
     ): Promise<FeeInfo> {
         return {
-            fixedFee: {
-                amount: await this.getFixedFee(
-                    fromBlockchain,
-                    providerAddress,
-                    rubicProxyContractAddress[fromBlockchain],
-                    contractAbi
-                ),
-                tokenSymbol: nativeTokensList[fromBlockchain].symbol
-            },
-            platformFee: {
-                percent: await this.getFeePercent(
-                    fromBlockchain,
-                    providerAddress,
-                    rubicProxyContractAddress[fromBlockchain],
-                    contractAbi
-                ),
-                tokenSymbol: percentFeeToken.symbol
-            },
-            cryptoFee: null
+            rubicProxy: {
+                fixedFee: {
+                    amount: await this.getFixedFee(
+                        fromBlockchain,
+                        providerAddress,
+                        rubicProxyContractAddress[fromBlockchain],
+                        contractAbi
+                    ),
+                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                },
+                platformFee: {
+                    percent: await this.getFeePercent(
+                        fromBlockchain,
+                        providerAddress,
+                        rubicProxyContractAddress[fromBlockchain],
+                        contractAbi
+                    ),
+                    tokenSymbol: percentFeeToken.symbol
+                }
+            }
         };
     }
 }

@@ -61,11 +61,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
                         transitFeeToken: {} as PriceTokenAmount,
                         gasData: null,
                         feeInPercents: 0,
-                        feeInfo: {
-                            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
-                            platformFee: { percent: 0, tokenSymbol: '' },
-                            cryptoFee: null
-                        },
+                        feeInfo: {},
                         slippage: 0
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS,
@@ -281,7 +277,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
         const feePerByte = await contract.celerFeePerByte(message, messageBusAddress);
         const feeBase = await contract.celerFeeBase(messageBusAddress);
 
-        const fixedFee = Web3Pure.toWei(this.feeInfo.fixedFee?.amount || 0);
+        const fixedFee = Web3Pure.toWei(this.feeInfo.rubicProxy?.fixedFee?.amount || 0);
 
         if (isNative) {
             return amountIn

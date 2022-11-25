@@ -51,11 +51,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                         route,
                         gasData: null,
                         toTokenAmountMin: new BigNumber(0),
-                        feeInfo: {
-                            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
-                            platformFee: { percent: 0, tokenSymbol: '' },
-                            cryptoFee: null
-                        },
+                        feeInfo: {},
                         priceImpact: 0,
                         onChainSubtype: {
                             from: undefined,

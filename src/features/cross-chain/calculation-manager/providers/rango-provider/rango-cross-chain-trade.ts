@@ -51,11 +51,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
                         toTokenAmountMin: new BigNumber(0),
                         slippageTolerance: 4,
                         cryptoFeeToken: {} as PriceTokenAmount,
-                        feeInfo: {
-                            cryptoFee: null,
-                            fixedFee: null,
-                            platformFee: null
-                        },
+                        feeInfo: {},
                         onChainSubtype: {
                             from: undefined,
                             to: undefined
@@ -218,7 +214,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
     private async refetchTxData(): Promise<EvmTransaction> {
         const amountWithoutFee = getFromWithoutFee(
             this.from,
-            this.feeInfo?.platformFee?.percent
+            this.feeInfo.rubicProxy?.platformFee?.percent
         ).stringWeiAmount;
         const response = await this.rangoClientRef.swap({
             from: {

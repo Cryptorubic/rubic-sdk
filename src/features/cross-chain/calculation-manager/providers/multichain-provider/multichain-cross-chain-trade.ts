@@ -44,11 +44,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
                         gasData: null,
                         priceImpact: 0,
                         toTokenAmountMin: new BigNumber(0),
-                        feeInfo: {
-                            fixedFee: null,
-                            platformFee: null,
-                            cryptoFee: null
-                        },
+                        feeInfo: {},
                         routerAddress,
                         spenderAddress,
                         routerMethodName: multichainMethodName,
@@ -174,7 +170,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
 
         const fromAmountWithoutFee = getFromWithoutFee(
             this.from,
-            this.feeInfo?.platformFee?.percent
+            this.feeInfo.rubicProxy?.platformFee?.percent
         ).stringWeiAmount;
         let multichainMethodArguments: unknown[];
         if (this.routerMethodName === 'anySwapOutNative') {
