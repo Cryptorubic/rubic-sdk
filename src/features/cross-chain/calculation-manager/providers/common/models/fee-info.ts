@@ -8,7 +8,7 @@ export interface FeeInfo {
      * Fees, taken by cross-chain proxy or celer contract .
      * Attached as additional amounts.
      */
-    proxy?: {
+    rubicProxy?: {
         /**
          * Fixed crypto fee attached as additional value.
          */

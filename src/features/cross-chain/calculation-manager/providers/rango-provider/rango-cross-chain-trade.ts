@@ -214,7 +214,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
     private async refetchTxData(): Promise<EvmTransaction> {
         const amountWithoutFee = getFromWithoutFee(
             this.from,
-            this.feeInfo.proxy?.platformFee?.percent
+            this.feeInfo.rubicProxy?.platformFee?.percent
         ).stringWeiAmount;
         const response = await this.rangoClientRef.swap({
             from: {

@@ -78,7 +78,10 @@ export class RangoCrossChainProvider extends CrossChainProvider {
 
         try {
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo.proxy?.platformFee?.percent);
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
             const request = await this.getRequestParams(fromWithoutFee, toToken, options);
 
             const { route, resultType, tx } = await this.rango.swap(request);
@@ -253,7 +256,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         providerAddress: string
     ): Promise<FeeInfo> {
         return {
-            proxy: {
+            rubicProxy: {
                 fixedFee: {
                     amount: await this.getFixedFee(
                         fromBlockchain,

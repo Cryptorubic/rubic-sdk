@@ -277,7 +277,7 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
         const feePerByte = await contract.celerFeePerByte(message, messageBusAddress);
         const feeBase = await contract.celerFeeBase(messageBusAddress);
 
-        const fixedFee = Web3Pure.toWei(this.feeInfo.proxy?.fixedFee?.amount || 0);
+        const fixedFee = Web3Pure.toWei(this.feeInfo.rubicProxy?.fixedFee?.amount || 0);
 
         if (isNative) {
             return amountIn

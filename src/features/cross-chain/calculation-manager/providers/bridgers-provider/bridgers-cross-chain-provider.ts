@@ -82,7 +82,10 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 from,
                 contractAbi
             );
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo.proxy?.platformFee?.percent);
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
 
             const fromTokenAddress = createTokenNativeAddressProxy(
                 from,
@@ -205,7 +208,7 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
         contractAbi: AbiItem[]
     ): Promise<FeeInfo> {
         return {
-            proxy: {
+            rubicProxy: {
                 fixedFee: {
                     amount: await this.getFixedFee(
                         fromBlockchain,

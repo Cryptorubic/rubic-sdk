@@ -447,7 +447,7 @@ export class CelerCrossChainProvider extends CrossChainProvider {
             tokenSymbol: cryptoFeeToken.symbol
         };
         return {
-            proxy: {
+            rubicProxy: {
                 fixedFee
             },
             provider: {

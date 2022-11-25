@@ -120,7 +120,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             });
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo.proxy?.platformFee?.percent);
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
             const tokenAmountIn = new SymbiosisTokenAmount(tokenIn, fromWithoutFee.stringWeiAmount);
 
             const tokenOut = isBitcoinSwap
@@ -313,7 +316,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         );
 
         return {
-            proxy: {
+            rubicProxy: {
                 fixedFee: {
                     amount: fixedFeeAmount,
                     tokenSymbol: nativeTokensList[fromBlockchain].symbol

@@ -170,7 +170,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
 
         const fromAmountWithoutFee = getFromWithoutFee(
             this.from,
-            this.feeInfo.proxy?.platformFee?.percent
+            this.feeInfo.rubicProxy?.platformFee?.percent
         ).stringWeiAmount;
         let multichainMethodArguments: unknown[];
         if (this.routerMethodName === 'anySwapOutNative') {

@@ -143,7 +143,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     ): Promise<ContractParams> {
         const fromWithoutFee = getFromWithoutFee(
             this.from,
-            this.feeInfo.proxy?.platformFee?.percent
+            this.feeInfo.rubicProxy?.platformFee?.percent
         );
         const { methodArguments, transactionData } =
             await getMethodArgumentsAndTransactionData<EvmBridgersTransactionData>(

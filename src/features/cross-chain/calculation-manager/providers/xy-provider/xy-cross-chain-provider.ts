@@ -60,7 +60,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
             const fromWithoutFee = getFromWithoutFee(
                 fromToken,
-                feeInfo.proxy?.platformFee?.percent
+                feeInfo.rubicProxy?.platformFee?.percent
             );
 
             const slippageTolerance = options.slippageTolerance * 100;
@@ -138,7 +138,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
         providerAddress: string
     ): Promise<FeeInfo> {
         return {
-            proxy: {
+            rubicProxy: {
                 fixedFee: {
                     amount: await this.getFixedFee(
                         fromBlockchain,

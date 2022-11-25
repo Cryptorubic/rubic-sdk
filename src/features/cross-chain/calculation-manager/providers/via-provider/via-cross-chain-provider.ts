@@ -69,7 +69,10 @@ export class ViaCrossChainProvider extends CrossChainProvider {
             const toChainId = blockchainId[toBlockchain];
 
             let feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo.proxy?.platformFee?.percent);
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
 
             const via = new Via({
                 ...VIA_DEFAULT_CONFIG,
@@ -311,7 +314,7 @@ export class ViaCrossChainProvider extends CrossChainProvider {
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
         return {
-            proxy: {
+            rubicProxy: {
                 fixedFee: {
                     amount: await this.getFixedFee(
                         fromBlockchain,

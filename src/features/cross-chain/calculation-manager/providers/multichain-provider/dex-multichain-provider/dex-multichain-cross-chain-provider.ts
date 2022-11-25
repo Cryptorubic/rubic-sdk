@@ -94,7 +94,10 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             // }
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo.proxy?.platformFee?.percent);
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
             const cryptoFee = this.getProtocolFee(targetToken, from.tokenAmount);
 
             let onChainTrade: EvmOnChainTrade | null = null;
@@ -268,7 +271,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
         return {
-            proxy: {
+            rubicProxy: {
                 fixedFee: {
                     amount: await this.getFixedFee(
                         fromBlockchain,

@@ -89,7 +89,10 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
             const feeInfo: FeeInfo = {};
             const cryptoFee = this.getProtocolFee(targetToken, from.weiAmount);
 
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo.proxy?.platformFee?.percent);
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
 
             const toFeeAmount = getToFeeAmount(fromWithoutFee.tokenAmount, targetToken);
             const toAmount = fromWithoutFee.tokenAmount.minus(toFeeAmount);
@@ -171,14 +174,14 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
         // @TODO Add conversion from transit token to source.
         if (minAmount.tokenAmount.lt(targetToken.MinimumSwap)) {
             const minimumAmount = new BigNumber(targetToken.MinimumSwap)
-                .dividedBy(1 - (feeInfo.proxy?.platformFee?.percent || 0) / 100)
+                .dividedBy(1 - (feeInfo.rubicProxy?.platformFee?.percent || 0) / 100)
                 .toFixed(5, 0);
             throw new MinAmountError(new BigNumber(minimumAmount), minAmount.symbol);
         }
 
         if (amount.tokenAmount.gt(targetToken.MaximumSwap)) {
             const maximumAmount = new BigNumber(targetToken.MaximumSwap)
-                .dividedBy(1 - (feeInfo.proxy?.platformFee?.percent || 0) / 100)
+                .dividedBy(1 - (feeInfo.rubicProxy?.platformFee?.percent || 0) / 100)
                 .toFixed(5, 1);
             throw new MaxAmountError(new BigNumber(maximumAmount), amount.symbol);
         }
@@ -216,7 +219,7 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
         return {
-            proxy: {
+            rubicProxy: {
                 fixedFee: {
                     amount: await this.getFixedFee(
                         fromBlockchain,

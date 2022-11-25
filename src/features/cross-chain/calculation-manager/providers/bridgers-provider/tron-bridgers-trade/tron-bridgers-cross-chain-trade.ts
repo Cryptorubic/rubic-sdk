@@ -66,7 +66,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
     ): Promise<TronContractParams> {
         const fromWithoutFee = getFromWithoutFee(
             this.from,
-            this.feeInfo.proxy?.platformFee?.percent
+            this.feeInfo.rubicProxy?.platformFee?.percent
         );
         const { methodArguments, transactionData } =
             await getMethodArgumentsAndTransactionData<TronBridgersTransactionData>(

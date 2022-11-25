@@ -83,7 +83,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const toChainId = blockchainId[toBlockchain];
 
         const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-        const fromWithoutFee = getFromWithoutFee(from, feeInfo.proxy?.platformFee?.percent);
+        const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
 
         const fromAddress = this.getWalletAddress(fromBlockchain);
         const toAddress = options.receiverAddress || fromAddress;
@@ -176,7 +176,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
         return {
-            proxy: {
+            rubicProxy: {
                 fixedFee: {
                     amount: await this.getFixedFee(
                         fromBlockchain,
