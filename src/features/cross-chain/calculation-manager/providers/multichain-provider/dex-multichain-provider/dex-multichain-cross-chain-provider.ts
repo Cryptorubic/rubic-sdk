@@ -94,7 +94,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             // }
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo?.platformFee?.percent);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo.proxy?.platformFee?.percent);
             const cryptoFee = this.getProtocolFee(targetToken, from.tokenAmount);
 
             let onChainTrade: EvmOnChainTrade | null = null;
@@ -160,7 +160,9 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                     toTokenAmountMin,
                     feeInfo: {
                         ...feeInfo,
-                        cryptoFee
+                        provider: {
+                            cryptoFee
+                        }
                     },
                     routerAddress,
                     spenderAddress,
@@ -266,25 +268,26 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
         return {
-            fixedFee: {
-                amount: await this.getFixedFee(
-                    fromBlockchain,
-                    providerAddress,
-                    multichainProxyContractAddress[fromBlockchain],
-                    multichainProxyContractAbi
-                ),
-                tokenSymbol: nativeTokensList[fromBlockchain].symbol
-            },
-            platformFee: {
-                percent: await this.getFeePercent(
-                    fromBlockchain,
-                    providerAddress,
-                    multichainProxyContractAddress[fromBlockchain],
-                    multichainProxyContractAbi
-                ),
-                tokenSymbol: percentFeeToken.symbol
-            },
-            cryptoFee: null
+            proxy: {
+                fixedFee: {
+                    amount: await this.getFixedFee(
+                        fromBlockchain,
+                        providerAddress,
+                        multichainProxyContractAddress[fromBlockchain],
+                        multichainProxyContractAbi
+                    ),
+                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                },
+                platformFee: {
+                    percent: await this.getFeePercent(
+                        fromBlockchain,
+                        providerAddress,
+                        multichainProxyContractAddress[fromBlockchain],
+                        multichainProxyContractAbi
+                    ),
+                    tokenSymbol: percentFeeToken.symbol
+                }
+            }
         };
     }
 }

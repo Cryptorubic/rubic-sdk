@@ -53,11 +53,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
                         gasData: null,
                         priceImpact: 0,
                         toTokenAmountMin: new BigNumber(0),
-                        feeInfo: {
-                            fixedFee: null,
-                            platformFee: null,
-                            cryptoFee: null
-                        },
+                        feeInfo: {},
                         cryptoFeeToken: {} as PriceTokenAmount,
                         onChainSubtype: { from: undefined, to: undefined },
                         bridgeType: BRIDGE_TYPE.VIA,

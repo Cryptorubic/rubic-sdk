@@ -447,11 +447,15 @@ export class CelerCrossChainProvider extends CrossChainProvider {
             tokenSymbol: cryptoFeeToken.symbol
         };
         return {
-            fixedFee,
-            platformFee: { percent: feeInPercents, tokenSymbol: transitFeeToken.symbol },
-            cryptoFee: {
-                amount: cryptoFeeToken.tokenAmount,
-                tokenSymbol: cryptoFeeToken.symbol
+            proxy: {
+                fixedFee
+            },
+            provider: {
+                platformFee: { percent: feeInPercents, tokenSymbol: transitFeeToken.symbol },
+                cryptoFee: {
+                    amount: cryptoFeeToken.tokenAmount,
+                    tokenSymbol: cryptoFeeToken.symbol
+                }
             }
         };
     }

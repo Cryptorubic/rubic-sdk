@@ -44,11 +44,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                         from,
                         to,
                         toTokenAmountMin: new BigNumber(0),
-                        feeInfo: {
-                            fixedFee: null,
-                            platformFee: null,
-                            cryptoFee: null
-                        },
+                        feeInfo: {},
                         gasData: null,
                         slippage: 0
                     },
@@ -145,13 +141,18 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     protected async getContractParams(
         options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
     ): Promise<ContractParams> {
-        const fromWithoutFee = getFromWithoutFee(this.from, this.feeInfo?.platformFee?.percent);
+        const fromWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo.proxy?.platformFee?.percent
+        );
         const { methodArguments, transactionData } =
             await getMethodArgumentsAndTransactionData<EvmBridgersTransactionData>(
+                this.from,
                 fromWithoutFee,
                 this.to,
                 this.toTokenAmountMin,
                 this.walletAddress,
+                this.providerAddress,
                 options
             );
 

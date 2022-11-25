@@ -58,7 +58,10 @@ export class XyCrossChainProvider extends CrossChainProvider {
             );
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-            const fromWithoutFee = getFromWithoutFee(fromToken, feeInfo?.platformFee?.percent);
+            const fromWithoutFee = getFromWithoutFee(
+                fromToken,
+                feeInfo.proxy?.platformFee?.percent
+            );
 
             const slippageTolerance = options.slippageTolerance * 100;
 
@@ -109,9 +112,11 @@ export class XyCrossChainProvider extends CrossChainProvider {
                         slippage: options.slippageTolerance,
                         feeInfo: {
                             ...feeInfo,
-                            cryptoFee: {
-                                amount: new BigNumber(xyFee!.amount),
-                                tokenSymbol: xyFee!.symbol
+                            provider: {
+                                cryptoFee: {
+                                    amount: new BigNumber(xyFee!.amount),
+                                    tokenSymbol: xyFee!.symbol
+                                }
                             }
                         }
                     },
@@ -133,25 +138,26 @@ export class XyCrossChainProvider extends CrossChainProvider {
         providerAddress: string
     ): Promise<FeeInfo> {
         return {
-            fixedFee: {
-                amount: await this.getFixedFee(
-                    fromBlockchain,
-                    providerAddress,
-                    xyContractAddress[fromBlockchain].rubicRouter,
-                    evmCommonCrossChainAbi
-                ),
-                tokenSymbol: nativeTokensList[fromBlockchain].symbol
-            },
-            platformFee: {
-                percent: await this.getFeePercent(
-                    fromBlockchain,
-                    providerAddress,
-                    xyContractAddress[fromBlockchain].rubicRouter,
-                    evmCommonCrossChainAbi
-                ),
-                tokenSymbol: 'USDC'
-            },
-            cryptoFee: null
+            proxy: {
+                fixedFee: {
+                    amount: await this.getFixedFee(
+                        fromBlockchain,
+                        providerAddress,
+                        xyContractAddress[fromBlockchain].rubicRouter,
+                        evmCommonCrossChainAbi
+                    ),
+                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                },
+                platformFee: {
+                    percent: await this.getFeePercent(
+                        fromBlockchain,
+                        providerAddress,
+                        xyContractAddress[fromBlockchain].rubicRouter,
+                        evmCommonCrossChainAbi
+                    ),
+                    tokenSymbol: 'USDC'
+                }
+            }
         };
     }
 

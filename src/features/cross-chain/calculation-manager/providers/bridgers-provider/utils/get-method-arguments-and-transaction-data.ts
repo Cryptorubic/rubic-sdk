@@ -2,7 +2,6 @@ import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -22,10 +21,12 @@ import { MarkRequired } from 'ts-essentials';
 export async function getMethodArgumentsAndTransactionData<
     T extends EvmBridgersTransactionData | TronBridgersTransactionData
 >(
+    from: PriceTokenAmount<BridgersCrossChainSupportedBlockchain>,
     fromWithoutFee: PriceTokenAmount<BridgersCrossChainSupportedBlockchain>,
     to: PriceTokenAmount<BridgersCrossChainSupportedBlockchain>,
     toTokenAmountMin: BigNumber,
     walletAddress: string,
+    providerAddress: string,
     options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
 ): Promise<{
     methodArguments: unknown[];
@@ -66,17 +67,17 @@ export async function getMethodArgumentsAndTransactionData<
     const methodArguments: unknown[] = [
         'native:bridgers',
         [
-            fromWithoutFee.address,
-            fromWithoutFee.stringWeiAmount,
+            from.address,
+            from.stringWeiAmount,
             blockchainId[to.blockchain],
             dstTokenAddress,
             amountOutMin,
             receiverAddress,
-            EvmWeb3Pure.nativeTokenAddress,
+            providerAddress,
             transactionData.to
         ]
     ];
-    if (!fromWithoutFee.isNative) {
+    if (!from.isNative) {
         methodArguments.push(transactionData.to);
     }
 

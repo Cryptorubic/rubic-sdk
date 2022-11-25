@@ -78,7 +78,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
 
         try {
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo?.platformFee?.percent);
+            const fromWithoutFee = getFromWithoutFee(from, feeInfo.proxy?.platformFee?.percent);
             const request = await this.getRequestParams(fromWithoutFee, toToken, options);
 
             const { route, resultType, tx } = await this.rango.swap(request);
@@ -141,14 +141,16 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                         slippageTolerance: options.slippageTolerance as number,
                         feeInfo: {
                             ...feeInfo,
-                            cryptoFee: {
-                                amount: Web3Pure.fromWei(
-                                    networkFee?.amount || 0,
-                                    networkFee?.token.decimals
-                                ),
-                                tokenSymbol:
-                                    networkFee?.token.symbol ||
-                                    nativeTokensList[fromBlockchain].symbol
+                            provider: {
+                                cryptoFee: {
+                                    amount: Web3Pure.fromWei(
+                                        networkFee?.amount || 0,
+                                        networkFee?.token.decimals
+                                    ),
+                                    tokenSymbol:
+                                        networkFee?.token.symbol ||
+                                        nativeTokensList[fromBlockchain].symbol
+                                }
                             }
                         },
                         cryptoFeeToken,
@@ -251,27 +253,30 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         providerAddress: string
     ): Promise<FeeInfo> {
         return {
-            fixedFee: {
-                amount: await this.getFixedFee(
-                    fromBlockchain,
-                    providerAddress,
-                    RANGO_CONTRACT_ADDRESSES[fromBlockchain as RangoCrossChainSupportedBlockchain]
-                        .rubicRouter,
-                    evmCommonCrossChainAbi
-                ),
-                tokenSymbol: nativeTokensList[fromBlockchain].symbol
-            },
-            platformFee: {
-                percent: await this.getFeePercent(
-                    fromBlockchain,
-                    providerAddress,
-                    RANGO_CONTRACT_ADDRESSES[fromBlockchain as RangoCrossChainSupportedBlockchain]
-                        .rubicRouter,
-                    evmCommonCrossChainAbi
-                ),
-                tokenSymbol: 'USDC'
-            },
-            cryptoFee: null
+            proxy: {
+                fixedFee: {
+                    amount: await this.getFixedFee(
+                        fromBlockchain,
+                        providerAddress,
+                        RANGO_CONTRACT_ADDRESSES[
+                            fromBlockchain as RangoCrossChainSupportedBlockchain
+                        ].rubicRouter,
+                        evmCommonCrossChainAbi
+                    ),
+                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                },
+                platformFee: {
+                    percent: await this.getFeePercent(
+                        fromBlockchain,
+                        providerAddress,
+                        RANGO_CONTRACT_ADDRESSES[
+                            fromBlockchain as RangoCrossChainSupportedBlockchain
+                        ].rubicRouter,
+                        evmCommonCrossChainAbi
+                    ),
+                    tokenSymbol: 'USDC'
+                }
+            }
         };
     }
 }

@@ -62,11 +62,7 @@ export abstract class CrossChainProvider {
         _percentFeeToken: PriceToken,
         _contractAbi?: AbiItem[]
     ): Promise<FeeInfo> {
-        return {
-            fixedFee: null,
-            platformFee: null,
-            cryptoFee: null
-        };
+        return {};
     }
 
     /**
