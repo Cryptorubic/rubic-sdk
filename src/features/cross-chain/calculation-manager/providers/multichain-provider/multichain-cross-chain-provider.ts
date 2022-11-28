@@ -12,6 +12,8 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { Injector } from 'src/core/injector/injector';
+import { wlContractAbi } from 'src/features/common/constants/wl-contract-abi';
+import { wlContractAddress } from 'src/features/common/constants/wl-contract-address';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -70,22 +72,19 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 };
             }
 
-            // @TODO Remove comments after contracts whitelist.
-            // try {
-            //     await this.checkProviderIsWhitelisted(
-            //         fromBlockchain,
-            //         targetToken.router,
-            //         targetToken.spender
-            //     );
-            // } catch (error) {
-            //     return {
-            //         trade: null,
-            //         error
-            //     };
-            // }
-            //
-            //
-            // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+            try {
+                await this.checkProviderIsWhitelisted(
+                    fromBlockchain,
+                    targetToken.router,
+                    targetToken.spender
+                );
+            } catch (error) {
+                return {
+                    trade: null,
+                    error
+                };
+            }
+
             const feeInfo: FeeInfo = {};
             const cryptoFee = this.getProtocolFee(targetToken, from.weiAmount);
 
@@ -195,9 +194,9 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
         const whitelistedContracts = await Injector.web3PublicService
             .getWeb3Public(fromBlockchain)
             .callContractMethod<string[]>(
-                rubicProxyContractAddress[fromBlockchain],
-                evmCommonCrossChainAbi,
-                'getAvailableRouters'
+                wlContractAddress[fromBlockchain as EvmBlockchainName],
+                wlContractAbi,
+                'getAvailableAnyRouters'
             );
 
         if (
