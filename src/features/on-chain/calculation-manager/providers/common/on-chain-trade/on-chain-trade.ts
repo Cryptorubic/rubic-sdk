@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import {
+    NotWhitelistedProviderError,
     RubicSdkError,
     WalletNotConnectedError,
     WrongFromAddressError,
@@ -7,11 +8,14 @@ import {
 } from 'src/common/errors';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { Injector } from 'src/core/injector/injector';
+import { wlContractAbi } from 'src/features/common/constants/wl-contract-abi';
+import { wlContractAddress } from 'src/features/common/constants/wl-contract-address';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { isAddressCorrect } from 'src/features/common/utils/check-address';
@@ -185,6 +189,19 @@ export abstract class OnChainTrade {
         }
         if (!isAddressCorrect(receiverAddress, this.to.blockchain)) {
             throw new WrongReceiverAddressError();
+        }
+    }
+
+    protected async checkProviderIsWhitelisted(txTo: string): Promise<void> {
+        const isWhitelistedProvider = await this.web3Public.callContractMethod(
+            wlContractAddress[this.from.blockchain as EvmBlockchainName],
+            wlContractAbi,
+            'isWhitelistedDEX',
+            [txTo]
+        );
+
+        if (!isWhitelistedProvider) {
+            throw new NotWhitelistedProviderError(txTo);
         }
     }
 }
