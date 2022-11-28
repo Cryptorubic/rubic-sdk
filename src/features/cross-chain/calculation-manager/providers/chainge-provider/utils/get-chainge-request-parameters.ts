@@ -1,42 +1,38 @@
 import CryptoJS from 'crypto-js';
-import { chaingeApiKey } from '../constants/chainge-api-key';
-import { chaingeApiSecret } from '../constants/chainge-api-secret';
 import { ChaingeRequestHeaders } from '../models/chainge-request-parameters';
 
-export function getChaingeRequestHeaders<T>(requestObject: T): ChaingeRequestHeaders | undefined {
-    const headers: ChaingeRequestHeaders = {
-        timestamp: new Date().getTime().toString(),
-        expireTime: '5000',
-        appKey: chaingeApiKey
-    } as ChaingeRequestHeaders;
+export function getChaingeRequestHeaders(
+    requestObject: Record<string, string | number>
+): ChaingeRequestHeaders | undefined {
+    const appSecret = '28Ae9xQdXy6oAieePkVH5i7mKKk8Fk1EjoxyPPaLkeffcExUrai9oiCypLAc1vBE';
+    const appKey = '22bhpGsqHj4P8W7HjVpToQAyTMGBPXpCDcJZGYFu34r88PX1x8Yzrq6eSWre4Y23';
+
+    const timestamp = new Date().getTime();
+    const expireTime = 15000;
 
     let strBody = '';
-    // eslint-disable-next-line guard-for-in
-    for (const key in requestObject) {
-        strBody += `${key}=${requestObject[key]}`;
+    const keysBody = Object.keys(requestObject).sort();
+    for (const key of keysBody) {
+        const val = requestObject[key];
+        strBody += `${key}=${val}`;
     }
 
-    const keys: string[] = [];
-    for (const k in headers) {
-        if (k === 'signature') {
-            // eslint-disable-next-line no-continue
-            continue;
-        }
-        keys.push(k);
-    }
+    const param: Record<string, string> = {
+        appKey,
+        expireTime: expireTime.toString(),
+        timestamp: timestamp.toString()
+    };
 
     let strHeader = '';
-    for (let i = 0; i < keys.length; i++) {
-        if (!keys[i]) {
-            return undefined;
+    let headerKeys = Object.keys(param);
+    headerKeys = headerKeys.sort();
+    for (const key of headerKeys) {
+        if (key !== 'signature') {
+            const val = param[key];
+            strHeader += `${key}=${val}`;
         }
-        strHeader += keys[i];
-        strHeader += '=';
-        strHeader += headers[keys[i] || 0] as string;
     }
-    const str = strBody + strHeader;
-    const hash = CryptoJS.HmacSHA256(str, chaingeApiSecret);
-    console.log({ ...headers, signature: hash.toString() });
-    headers['signature'] = hash.toString();
-    return headers;
+    const input = strBody + strHeader;
+    const sign = CryptoJS.HmacSHA256(input, appSecret).toString();
+    return { ...param, signature: sign };
 }

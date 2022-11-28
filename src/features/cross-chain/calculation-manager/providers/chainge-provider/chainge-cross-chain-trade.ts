@@ -11,6 +11,14 @@ import { GetContractParamsOptions } from '../common/models/get-contract-params-o
 import { OnChainSubtype } from '../common/models/on-chain-subtype';
 
 export class ChaingeCrossChainTrade extends EvmCrossChainTrade {
+    public getUsdPrice(): BigNumber {
+        throw new Error('Method not implemented.');
+    }
+
+    public getTradeInfo() {
+        throw new Error('Method not implemented.');
+    }
+
     public from: PriceTokenAmount<EvmBlockchainName>;
 
     public gasData: GasData;

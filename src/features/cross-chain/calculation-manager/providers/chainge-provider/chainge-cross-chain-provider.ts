@@ -1,6 +1,7 @@
 import { CrossChainIsUnavailableError } from 'src/common/errors';
 import { PriceTokenAmount, PriceToken } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Injector } from 'src/core/injector/injector';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
@@ -11,6 +12,7 @@ import {
     ChaingeCrossChainSupportedBlockchain,
     chaingeCrossChainSupportedBlockchains
 } from './constants/chainge-cross-chain-supported-blockchain';
+import { chaingeUtils } from './constants/ethers';
 import { ChaingeQuoteRequest } from './models/chainge-quote-request';
 import { getChaingeRequestHeaders } from './utils/get-chainge-request-parameters';
 
@@ -38,14 +40,35 @@ export class ChaingeCrossChainProvider extends CrossChainProvider {
             toToken: toToken.symbol,
             feeLevel: 0
         };
-        const headers = getChaingeRequestHeaders<ChaingeQuoteRequest>(quoteRequest);
-        const response = await Injector.httpClient.post(
+        const rawTxRequest = {
+            amount: from.tokenAmount.toNumber(),
+            chain: from.blockchain,
+            evmAddress: Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address,
+            fromAddress: Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address,
+            token: from.symbol
+        };
+
+        const aggregateQuoteHeaders = getChaingeRequestHeaders(
+            quoteRequest as unknown as Record<string, string | number>
+        );
+        const aggregateQuoteResponse = await Injector.httpClient.post(
             `${chaingeApiBaseUrl}open/v1/order/getAggregateQuote`,
             quoteRequest,
-            headers
+            aggregateQuoteHeaders
+        );
+        console.log(chaingeUtils);
+        const rawTxHeaders = getChaingeRequestHeaders(rawTxRequest);
+        const rawTxResponse: { data: { raw: string } } = await Injector.httpClient.post(
+            `${chaingeApiBaseUrl}open/v1/order/getTransferToMinterRaw`,
+            rawTxRequest,
+            rawTxHeaders
         );
 
-        console.log(response);
+        console.log({
+            aggregateQuoteResponse,
+            rawTxResponse,
+            decode: chaingeUtils.decodeRaw(`0x${rawTxResponse.data.raw.split('_')[0]}`)
+        });
 
         throw new CrossChainIsUnavailableError();
     }
