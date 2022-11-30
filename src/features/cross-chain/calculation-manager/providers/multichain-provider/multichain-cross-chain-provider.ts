@@ -72,18 +72,23 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 };
             }
 
-            try {
-                await this.checkProviderIsWhitelisted(
-                    fromBlockchain,
-                    targetToken.router,
-                    targetToken.spender
-                );
-            } catch (error) {
-                return {
-                    trade: null,
-                    error
-                };
-            }
+            await this.checkProviderIsWhitelisted(
+                fromBlockchain,
+                targetToken.router,
+                targetToken.spender
+            );
+            // try {
+            //     await this.checkProviderIsWhitelisted(
+            //         fromBlockchain,
+            //         targetToken.router,
+            //         targetToken.spender
+            //     );
+            // } catch (error) {
+            //     return {
+            //         trade: null,
+            //         error
+            //     };
+            // }
 
             const feeInfo: FeeInfo = {};
             const cryptoFee = this.getProtocolFee(targetToken, from.weiAmount);
@@ -208,7 +213,11 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                     compareAddresses(whitelistedContract, providerGateway)
                 ))
         ) {
-            throw new NotWhitelistedProviderError(providerRouter, providerGateway);
+            throw new NotWhitelistedProviderError(
+                providerRouter,
+                providerGateway,
+                'multichain:anyrouter'
+            );
         }
     }
 

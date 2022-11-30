@@ -197,7 +197,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
                     compareAddresses(whitelistedContract, providerGateway)
                 ))
         ) {
-            throw new NotWhitelistedProviderError(providerRouter, providerGateway);
+            throw new NotWhitelistedProviderError(providerRouter, providerGateway, 'crosschain');
         }
     }
 }

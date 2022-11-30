@@ -201,7 +201,7 @@ export abstract class OnChainTrade {
         );
 
         if (!isWhitelistedProvider) {
-            throw new NotWhitelistedProviderError(txTo);
+            throw new NotWhitelistedProviderError(txTo, undefined, 'dex');
         }
     }
 }

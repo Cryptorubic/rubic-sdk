@@ -222,7 +222,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                     compareAddresses(whitelistedContract, providerGateway)
                 ))
         ) {
-            throw new NotWhitelistedProviderError(providerRouter, providerGateway);
+            throw new NotWhitelistedProviderError(providerRouter, providerGateway, 'crosschain');
         }
     }
 

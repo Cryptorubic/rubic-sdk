@@ -1,11 +1,14 @@
 import BigNumber from 'bignumber.js';
-import { NotSupportedTokensError } from 'src/common/errors';
+import { NotSupportedTokensError, NotWhitelistedProviderError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { wlContractAbi } from 'src/features/common/constants/wl-contract-abi';
+import { wlContractAddress } from 'src/features/common/constants/wl-contract-address';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -80,18 +83,19 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             }
             const { targetToken } = tokens;
 
+            await this.checkProviderIsWhitelisted(fromBlockchain, targetToken.router);
             const whitelistedDexes = await this.getWhitelistedDexes(fromBlockchain);
-            // @TODO Return after new contracts deploy.
-            // if (
-            //     !whitelistedAddresses.some(whitelistedAddress =>
-            //         compareAddresses(whitelistedAddress, targetToken.router)
-            //     )
-            // ) {
-            //     return {
-            //         trade: null,
-            //         error: new NotWhitelistedProviderError(targetToken.router)
-            //     };
-            // }
+            // // @TODO Return after new contracts deploy.
+            // // if (
+            // //     !whitelistedAddresses.some(whitelistedAddress =>
+            // //         compareAddresses(whitelistedAddress, targetToken.router)
+            // //     )
+            // // ) {
+            // //     return {
+            // //         trade: null,
+            // //         error: new NotWhitelistedProviderError(targetToken.router)
+            // //     };
+            // // }
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
             const fromWithoutFee = getFromWithoutFee(
@@ -199,6 +203,27 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
         }
     }
 
+    protected async checkProviderIsWhitelisted(
+        fromBlockchain: Web3PublicSupportedBlockchain,
+        providerRouter: string
+    ): Promise<void> {
+        const whitelistedContracts = await Injector.web3PublicService
+            .getWeb3Public(fromBlockchain)
+            .callContractMethod<string[]>(
+                wlContractAddress[fromBlockchain as EvmBlockchainName],
+                wlContractAbi,
+                'getAvailableDEXs'
+            );
+
+        if (
+            !whitelistedContracts.find(whitelistedContract =>
+                compareAddresses(whitelistedContract, providerRouter)
+            )
+        ) {
+            throw new NotWhitelistedProviderError(providerRouter, undefined, 'multichain:dex');
+        }
+    }
+
     private async getSourceTransitToken(
         fromBlockchain: BlockchainName,
         toToken: Token
@@ -215,9 +240,9 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
     ): Promise<string[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
         return web3Public.callContractMethod<string[]>(
-            multichainProxyContractAddress[fromBlockchain],
-            multichainProxyContractAbi,
-            'getAvailableRouters'
+            wlContractAddress[fromBlockchain as EvmBlockchainName],
+            wlContractAbi,
+            'getAvailableDEXs'
         );
     }
 
