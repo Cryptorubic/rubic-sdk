@@ -15,11 +15,12 @@ import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-publ
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { wlContractAbi } from 'src/features/common/constants/wl-contract-abi';
+import { wlContractAddress } from 'src/features/common/constants/wl-contract-address';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-trade';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { TransactionConfig } from 'web3-core';
@@ -183,9 +184,9 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         const whitelistedContracts = await Injector.web3PublicService
             .getWeb3Public(this.from.blockchain)
             .callContractMethod<string[]>(
-                this.fromContractAddress,
-                evmCommonCrossChainAbi,
-                'getAvailableRouters'
+                wlContractAddress[this.from.blockchain as EvmBlockchainName],
+                wlContractAbi,
+                'getAvailableCrossChains'
             );
 
         if (
