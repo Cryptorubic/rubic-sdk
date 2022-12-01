@@ -8,6 +8,8 @@ import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/bl
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { wlContractAbi } from 'src/features/common/constants/wl-contract-abi';
+import { wlContractAddress } from 'src/features/common/constants/wl-contract-address';
 import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
@@ -208,9 +210,9 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const whitelistedContracts = await Injector.web3PublicService
             .getWeb3Public(fromBlockchain)
             .callContractMethod<string[]>(
-                rubicProxyContractAddress[fromBlockchain],
-                evmCommonCrossChainAbi,
-                'getAvailableRouters'
+                wlContractAddress[fromBlockchain],
+                wlContractAbi,
+                'getAvailableCrossChains'
             );
 
         if (
