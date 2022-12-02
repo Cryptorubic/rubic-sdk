@@ -85,17 +85,6 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
 
             await this.checkProviderIsWhitelisted(fromBlockchain, targetToken.router);
             const whitelistedDexes = await this.getWhitelistedDexes(fromBlockchain);
-            // // @TODO Return after new contracts deploy.
-            // // if (
-            // //     !whitelistedAddresses.some(whitelistedAddress =>
-            // //         compareAddresses(whitelistedAddress, targetToken.router)
-            // //     )
-            // // ) {
-            // //     return {
-            // //         trade: null,
-            // //         error: new NotWhitelistedProviderError(targetToken.router)
-            // //     };
-            // // }
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
             const fromWithoutFee = getFromWithoutFee(

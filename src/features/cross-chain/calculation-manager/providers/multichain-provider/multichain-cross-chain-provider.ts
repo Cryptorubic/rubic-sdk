@@ -77,18 +77,6 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 targetToken.router,
                 targetToken.spender
             );
-            // try {
-            //     await this.checkProviderIsWhitelisted(
-            //         fromBlockchain,
-            //         targetToken.router,
-            //         targetToken.spender
-            //     );
-            // } catch (error) {
-            //     return {
-            //         trade: null,
-            //         error
-            //     };
-            // }
 
             const feeInfo: FeeInfo = {};
             const cryptoFee = this.getProtocolFee(targetToken, from.weiAmount);
