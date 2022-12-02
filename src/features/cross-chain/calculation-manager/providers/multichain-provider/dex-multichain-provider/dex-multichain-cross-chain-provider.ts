@@ -212,7 +212,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             .callContractMethod<string[]>(
                 wlContractAddress[fromBlockchain as EvmBlockchainName],
                 wlContractAbi,
-                'getAvailableDEXs'
+                'getAvailableAnyRouters'
             );
 
         if (
@@ -220,7 +220,11 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                 compareAddresses(whitelistedContract, providerRouter)
             )
         ) {
-            throw new NotWhitelistedProviderError(providerRouter, undefined, 'multichain:dex');
+            throw new NotWhitelistedProviderError(
+                providerRouter,
+                undefined,
+                'multichain:anyrouter'
+            );
         }
     }
 
