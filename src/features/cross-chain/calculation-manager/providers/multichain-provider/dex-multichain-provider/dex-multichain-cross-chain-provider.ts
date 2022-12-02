@@ -244,9 +244,9 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
     ): Promise<string[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
         return web3Public.callContractMethod<string[]>(
-            wlContractAddress[fromBlockchain as EvmBlockchainName],
-            wlContractAbi,
-            'getAvailableDEXs'
+            multichainProxyContractAddress[fromBlockchain],
+            multichainProxyContractAbi,
+            'getAvailableRouters'
         );
     }
 
