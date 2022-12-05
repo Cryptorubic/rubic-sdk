@@ -233,6 +233,9 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             fromAddress: this.contractAddress,
             supportFee: false
         });
+
+        await this.checkProviderIsWhitelisted(directTransactionConfig.to);
+
         const receiverAddress = options.receiverAddress || options.fromAddress;
         const methodArguments = [
             [
