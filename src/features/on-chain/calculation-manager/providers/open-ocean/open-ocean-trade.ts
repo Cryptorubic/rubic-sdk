@@ -1,12 +1,12 @@
 import { Api } from '@openocean.finance/api/lib/api';
 import BigNumber from 'bignumber.js';
 import {
-    LifiPairIsUnavailableError,
     LowSlippageDeflationaryTokenError,
     RubicSdkError,
     SwapRequestError
 } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
+import { parseError } from 'src/common/utils/errors';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -17,6 +17,7 @@ import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/p
 import { onChainProxyContractAddress } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { openOceanBlockchainName } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/open-ocean-blockchain';
+import { OpenoceanOnChainSupportedBlockchain } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/open-ocean-on-chain-supported-blockchain';
 import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/open-ocean/models/open-ocean-trade-struct';
 
 interface OpenOceanTransactionRequest {
@@ -115,7 +116,7 @@ export class OpenOceanTrade extends EvmOnChainTrade {
             if (this.isDeflationError()) {
                 throw new LowSlippageDeflationaryTokenError();
             }
-            throw new LifiPairIsUnavailableError();
+            throw parseError(err);
         }
     }
 
@@ -127,7 +128,9 @@ export class OpenOceanTrade extends EvmOnChainTrade {
             Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM) as EvmWeb3Private
         ).address;
         const swapQuoteResponse = await this.openOceanApi.swapQuote({
-            chain: openOceanBlockchainName[this.from.blockchain] as string,
+            chain: openOceanBlockchainName[
+                this.from.blockchain as OpenoceanOnChainSupportedBlockchain
+            ],
             inTokenAddress: this.from.address,
             outTokenAddress: this.to.address,
             amount: this.from.tokenAmount.toNumber(),
@@ -135,9 +138,6 @@ export class OpenOceanTrade extends EvmOnChainTrade {
             slippage: this.slippageTolerance * 100,
             account: walletAddress
         });
-
-        console.log({ swapQuoteResponse });
-
         const { data, to } =
             typeof swapQuoteResponse.data === 'object' ? swapQuoteResponse.data : swapQuoteResponse;
 

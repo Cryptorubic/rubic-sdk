@@ -15,8 +15,6 @@ import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
-import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
-import { RequiredLifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
 import { openOceanBlockchainName } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/open-ocean-blockchain';
 import {
     OpenoceanOnChainSupportedBlockchain,
@@ -31,11 +29,6 @@ export class OpenOceanProvider {
     private readonly onChainProxyService = new OnChainProxyService();
 
     private readonly openOceanApi = new Api();
-
-    private readonly defaultOptions: Omit<RequiredLifiCalculationOptions, 'disabledProviders'> = {
-        ...evmProviderDefaultOptions,
-        gasCalculation: 'calculate'
-    };
 
     constructor() {}
 
@@ -53,7 +46,7 @@ export class OpenOceanProvider {
                 .getWeb3Public(blockchain)
                 .getGasPrice();
             const quoteResponse: OpenOceanQuoteResponse = await this.openOceanApi.quote({
-                chain: openOceanBlockchainName[blockchain]!,
+                chain: openOceanBlockchainName[blockchain],
                 inTokenAddress: fromWithoutFee.address,
                 outTokenAddress: toToken.address,
                 amount: fromWithoutFee.tokenAmount.toNumber(),
@@ -150,7 +143,7 @@ export class OpenOceanProvider {
 
     private async checkIsSupportedTokens(from: PriceTokenAmount, to: PriceToken): Promise<void> {
         const tokenListResponse: OpenOceanTokenListResponse = await this.openOceanApi.getTokenList({
-            chain: openOceanBlockchainName[from.blockchain] as string
+            chain: openOceanBlockchainName[from.blockchain as OpenoceanOnChainSupportedBlockchain]
         });
         const tokens = (tokenListResponse?.data || tokenListResponse).map(token =>
             token.address.toLocaleLowerCase()

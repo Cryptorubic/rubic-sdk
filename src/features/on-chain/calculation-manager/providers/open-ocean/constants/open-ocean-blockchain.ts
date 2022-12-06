@@ -1,6 +1,8 @@
-import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
-export const openOceanBlockchainName: Partial<Record<BlockchainName, string>> = {
+import { OpenoceanOnChainSupportedBlockchain } from './open-ocean-on-chain-supported-blockchain';
+
+export const openOceanBlockchainName: Record<OpenoceanOnChainSupportedBlockchain, string> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: 'eth',
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: 'bsc',
     [BLOCKCHAIN_NAME.POLYGON]: 'polygon',
