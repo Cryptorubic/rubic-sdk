@@ -13,12 +13,14 @@ import { OnChainManagerCalculationOptions } from 'src/features/on-chain/calculat
 import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
 import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
 import { RequiredOnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/required-on-chain-manager-calculation-options';
+import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
 import { LifiProvider } from 'src/features/on-chain/calculation-manager/providers/lifi/lifi-provider';
 import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
+import { OpenOceanProvider } from 'src/features/on-chain/calculation-manager/providers/open-ocean/open-ocean-provider';
 
 /**
  * Contains methods to calculate on-chain trades.
@@ -32,6 +34,8 @@ export class OnChainManager {
     public readonly tradeProviders: OnChainTypedTradeProviders = typedTradeProviders;
 
     public readonly lifiProvider = new LifiProvider();
+
+    public readonly openOceanProvider = new OpenOceanProvider();
 
     public readonly deflationTokenManager = new DeflationTokenManager();
 
@@ -146,7 +150,15 @@ export class OnChainManager {
             options
         );
 
-        const trades = (await Promise.all([dexesTradesPromise, lifiTradesPromise])).flat();
+        const openOceanTradePromise = this.openOceanProvider.calculate(
+            from as PriceTokenAmount<EvmBlockchainName>,
+            to as PriceTokenAmount<EvmBlockchainName>,
+            options as RequiredOnChainCalculationOptions
+        );
+
+        const trades = (
+            await Promise.all([dexesTradesPromise, lifiTradesPromise, openOceanTradePromise])
+        ).flat();
         return trades.sort((tradeA, tradeB) => {
             if (tradeA instanceof OnChainTrade || tradeB instanceof OnChainTrade) {
                 if (tradeA instanceof OnChainTrade && tradeB instanceof OnChainTrade) {

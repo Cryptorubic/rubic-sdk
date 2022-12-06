@@ -213,6 +213,10 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             await this.getProxyContractParams(options);
         const gasParams = this.getGasParams(options);
 
+        console.log({
+            [`${this.type}`]: { contractAddress, contractAbi, methodName, methodArguments, value }
+        });
+
         return EvmWeb3Pure.encodeMethodCall(
             contractAddress,
             contractAbi,
