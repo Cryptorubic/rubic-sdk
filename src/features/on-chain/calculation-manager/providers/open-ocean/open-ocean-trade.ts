@@ -5,12 +5,14 @@ import {
     RubicSdkError,
     SwapRequestError
 } from 'src/common/errors';
+import { nativeTokensList } from 'src/common/tokens';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { parseError } from 'src/common/utils/errors';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
@@ -133,8 +135,10 @@ export class OpenOceanTrade extends EvmOnChainTrade {
             ],
             inTokenAddress: this.from.address,
             outTokenAddress: this.to.address,
-            amount: this.from.tokenAmount.toNumber(),
-            gasPrice,
+            amount: this.from.tokenAmount.toString() as unknown as number,
+            gasPrice: Web3Pure.fromWei(gasPrice, nativeTokensList[this.from.blockchain].decimals)
+                .multipliedBy(10 ** 9)
+                .toFixed(0),
             slippage: this.slippageTolerance * 100,
             account: walletAddress
         });

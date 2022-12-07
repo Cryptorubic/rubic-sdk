@@ -2,8 +2,9 @@ import { Api } from '@openocean.finance/api/lib/api';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { OnChainIsUnavailableError } from 'src/common/errors/on-chain';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
@@ -49,10 +50,20 @@ export class OpenOceanProvider {
                 chain: openOceanBlockchainName[blockchain],
                 inTokenAddress: fromWithoutFee.address,
                 outTokenAddress: toToken.address,
-                amount: fromWithoutFee.tokenAmount.toNumber(),
+                amount: fromWithoutFee.tokenAmount.toString() as unknown as number,
                 slippage: options.slippageTolerance! * 100,
-                gasPrice
+                gasPrice: Web3Pure.fromWei(gasPrice, nativeTokensList[from.blockchain].decimals)
+                    .multipliedBy(10 ** 9)
+                    .toFixed(0)
             });
+
+            if ([500, 400].includes(quoteResponse.code)) {
+                return {
+                    type: ON_CHAIN_TRADE_TYPE.OPEN_OCEAN,
+                    error: new RubicSdkError(quoteResponse.error)
+                };
+            }
+
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 weiAmount: new BigNumber((quoteResponse.data || quoteResponse).outAmount)
