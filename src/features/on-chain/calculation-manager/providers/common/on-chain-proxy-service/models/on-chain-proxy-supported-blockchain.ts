@@ -20,7 +20,10 @@ export const onChainProxySupportedBlockchains = [
     BLOCKCHAIN_NAME.BOBA,
     BLOCKCHAIN_NAME.KAVA,
     BLOCKCHAIN_NAME.BITGERT,
-    BLOCKCHAIN_NAME.METIS
+    BLOCKCHAIN_NAME.METIS,
+    BLOCKCHAIN_NAME.KLAYTN,
+    BLOCKCHAIN_NAME.SYSCOIN,
+    BLOCKCHAIN_NAME.VELAS
 ] as const;
 
 export type OnChainProxySupportedBlockchain = typeof onChainProxySupportedBlockchains[number];
