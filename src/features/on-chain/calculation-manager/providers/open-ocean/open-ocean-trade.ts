@@ -15,6 +15,7 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { onChainProxyContractAddress } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
@@ -95,7 +96,7 @@ export class OpenOceanTrade extends EvmOnChainTrade {
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         this.checkFromAddress(options.fromAddress, true);
-        this.checkReceiverAddress(options.receiverAddress);
+        checkUnsupportedReceiverAddress(options?.receiverAddress, this.walletAddress);
 
         try {
             const transactionData = await this.getTransactionData();
