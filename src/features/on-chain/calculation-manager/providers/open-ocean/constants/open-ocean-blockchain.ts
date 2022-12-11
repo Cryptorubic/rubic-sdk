@@ -12,6 +12,5 @@ export const openOceanBlockchainName: Record<OpenoceanOnChainSupportedBlockchain
     [BLOCKCHAIN_NAME.GNOSIS]: 'xdai',
     [BLOCKCHAIN_NAME.BOBA]: 'boba',
     [BLOCKCHAIN_NAME.OKE_X_CHAIN]: 'okex',
-    [BLOCKCHAIN_NAME.HARMONY]: 'harmony',
-    [BLOCKCHAIN_NAME.CRONOS]: 'cronos'
+    [BLOCKCHAIN_NAME.HARMONY]: 'harmony'
 };
