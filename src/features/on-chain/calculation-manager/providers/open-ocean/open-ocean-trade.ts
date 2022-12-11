@@ -8,6 +8,7 @@ import {
 import { nativeTokensList } from 'src/common/tokens';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { parseError } from 'src/common/utils/errors';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -72,9 +73,14 @@ export class OpenOceanTrade extends EvmOnChainTrade {
     private readonly _toTokenAmountMin: PriceTokenAmount;
 
     protected get spenderAddress(): string {
+        const openOceanContractAddress =
+            this.from.blockchain === BLOCKCHAIN_NAME.OKE_X_CHAIN
+                ? '0xc0006Be82337585481044a7d11941c0828FFD2D4'
+                : '0x6352a56caadC4F1E25CD6c75970Fa768A3304e64';
+
         return this.useProxy
             ? onChainProxyContractAddress[this.from.blockchain]
-            : '0x6352a56caadC4F1E25CD6c75970Fa768A3304e64';
+            : openOceanContractAddress;
     }
 
     public get dexContractAddress(): string {
