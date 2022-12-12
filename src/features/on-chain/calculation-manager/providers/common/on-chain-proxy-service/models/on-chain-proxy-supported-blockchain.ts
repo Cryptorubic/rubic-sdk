@@ -23,7 +23,8 @@ export const onChainProxySupportedBlockchains = [
     BLOCKCHAIN_NAME.METIS,
     BLOCKCHAIN_NAME.KLAYTN,
     BLOCKCHAIN_NAME.SYSCOIN,
-    BLOCKCHAIN_NAME.VELAS
+    BLOCKCHAIN_NAME.VELAS,
+    BLOCKCHAIN_NAME.OASIS
 ] as const;
 
 export type OnChainProxySupportedBlockchain = typeof onChainProxySupportedBlockchains[number];
