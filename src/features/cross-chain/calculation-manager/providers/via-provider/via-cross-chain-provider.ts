@@ -96,7 +96,9 @@ export class ViaCrossChainProvider extends CrossChainProvider {
             const wrappedRoutes = await via.getRoutes({
                 ...params
             });
-            const routes = wrappedRoutes.routes.filter(route => this.parseBridge(route));
+            const routes = wrappedRoutes.routes.filter(
+                route => this.parseBridge(route) && this.isAvailableProvider(route)
+            );
             if (!routes.length) {
                 return { trade: null, error: new RubicSdkError('No available routes') };
             }
@@ -335,5 +337,12 @@ export class ViaCrossChainProvider extends CrossChainProvider {
                 }
             }
         };
+    }
+
+    private isAvailableProvider(route: IRoute): boolean {
+        const blacklistProviders = ['thorchain'];
+        return !route.actions.some(action =>
+            action.steps.some(step => blacklistProviders.includes(step.tool.name.toLowerCase()))
+        );
     }
 }

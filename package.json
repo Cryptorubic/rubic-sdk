@@ -65,6 +65,7 @@
   },
   "dependencies": {
     "@lifi/sdk": "^1.6.3",
+    "@openocean.finance/api": "^0.0.3",
     "@viaprotocol/router-sdk": "^1.0.7",
     "assert": "^2.0.0",
     "axios": "^0.26.1",
