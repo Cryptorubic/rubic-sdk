@@ -78,7 +78,7 @@ export class CrossChainSymbiosisManager {
         }
 
         const fullOptions = combineOptions(options, this.defaultRevertOptions);
-        const slippage = fullOptions.slippageTolerance * 100;
+        const slippage = fullOptions.slippageTolerance * 10000;
         const deadline = deadlineMinutesTimestamp(fullOptions.deadline);
         const { transactionRequest } = await this.symbiosis
             .newRevertPending(request)

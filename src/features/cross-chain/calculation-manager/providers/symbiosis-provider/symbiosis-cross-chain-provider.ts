@@ -30,6 +30,7 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { symbiosisTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-transit-tokens';
 import { getSymbiosisV1Config } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-v1-config';
+import { SwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/swapping-params';
 import { ZappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/zapping-params';
 import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-trade';
 import { OneinchAvalancheProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
@@ -40,7 +41,7 @@ import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/prov
 import { OneinchEthereumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
 import { OneinchPolygonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
 import { ZappyProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/zappy/trisolaris-aurora-provider';
-import { Symbiosis as SymbiosisV2, ZappingRenBTC, ZappingRenBTCExactIn } from 'symbiosis-js-sdk';
+import { Symbiosis as SymbiosisV2, ZappingRenBTCExactIn } from 'symbiosis-js-sdk';
 import {
     Error as SymbiosisError,
     ErrorCode,
@@ -48,8 +49,9 @@ import {
     Symbiosis as SymbiosisV1,
     Token as SymbiosisToken,
     TokenAmount as SymbiosisTokenAmount,
-    ZappingRenBTC as ZappingRenBTCV1
+    TokenAmount
 } from 'symbiosis-js-sdk-v1';
+import { SwapExactIn } from 'symbiosis-js-sdk-v1/dist/crosschain/baseSwapping';
 
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
@@ -352,7 +354,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         let swapResult;
 
         if (toBlockchain !== BLOCKCHAIN_NAME.BITCOIN && swapParams.tokenOut) {
-            const swappingArguments = [
+            const swappingParams: SwappingParams = [
                 swapParams.tokenAmountIn,
                 swapParams.tokenOut,
                 swapParams.fromAddress,
@@ -361,20 +363,9 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 swapParams.slippage,
                 swapParams.deadline,
                 true
-            ] as const;
+            ];
 
-            const swappingV1 = this.symbiosisV1.newSwapping();
-            const swappingV2 = this.symbiosisV2.newSwapping();
-
-            const [swapResultV1, swapResultV2] = await Promise.all([
-                swappingV1.exactIn(...swappingArguments),
-                swappingV2.exactIn(...swappingArguments)
-            ]);
-
-            swapResult =
-                swapResultV1.tokenAmountOut > swapResultV2.tokenAmountOut
-                    ? swapResultV1
-                    : swapResultV2;
+            swapResult = await this.getBestSwappingSwapResult(swappingParams);
         } else {
             const poolId =
                 fromBlockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN
@@ -413,24 +404,45 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         };
     }
 
+    private async getBestSwappingSwapResult(swappingParams: SwappingParams): Promise<SwapExactIn> {
+        const swappingV1 = this.symbiosisV1.newSwapping();
+        const swappingV2 = this.symbiosisV2.newSwapping();
+
+        const [swapResultV1, swapResultV2] = await Promise.allSettled([
+            swappingV1.exactIn(...swappingParams),
+            swappingV2.exactIn(...swappingParams)
+        ]);
+        return this.chooseBestFulfilledResult(swapResultV1, swapResultV2);
+    }
+
     private async getBestZappingSwapResult(
         zappingParams: ZappingParams
     ): Promise<ZappingRenBTCExactIn> {
         const zappingV1 = this.symbiosisV1.newZappingRenBTC();
         const zappingV2 = this.symbiosisV2.newZappingRenBTC();
 
-        const swapResultV1 = await this.getZappingSwapResult(zappingV1, zappingParams);
-        const swapResultV2 = await this.getZappingSwapResult(zappingV2, zappingParams);
-
-        return swapResultV1.tokenAmountOut > swapResultV2.tokenAmountOut
-            ? swapResultV1
-            : swapResultV2;
+        const [swapResultV1, swapResultV2] = await Promise.allSettled([
+            zappingV1.exactIn(...zappingParams),
+            zappingV2.exactIn(...zappingParams)
+        ]);
+        return this.chooseBestFulfilledResult(swapResultV1, swapResultV2);
     }
 
-    private getZappingSwapResult(
-        zapping: ZappingRenBTC | ZappingRenBTCV1,
-        params: ZappingParams
-    ): ZappingRenBTCExactIn {
-        return zapping.exactIn(...params);
+    private chooseBestFulfilledResult<T extends { tokenAmountOut: TokenAmount }>(
+        result1: PromiseSettledResult<T>,
+        result2: PromiseSettledResult<T>
+    ): T | never {
+        if (result1.status !== 'fulfilled') {
+            if (result2.status !== 'fulfilled') {
+                throw result1.reason;
+            }
+            return result2.value;
+        }
+        if (result2.status !== 'fulfilled') {
+            return result1.value;
+        }
+        return result1.value.tokenAmountOut > result2.value.tokenAmountOut
+            ? result1.value
+            : result2.value;
     }
 }
