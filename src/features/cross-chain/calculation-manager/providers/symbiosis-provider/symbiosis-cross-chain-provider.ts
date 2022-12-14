@@ -24,12 +24,13 @@ import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-man
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { SYMBIOSIS_CONTRACT_ADDRESS } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/contract-address';
-import { getSymbiosisConfig } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-config';
 import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { symbiosisTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-transit-tokens';
+import { getSymbiosisV1Config } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-v1-config';
+import { ZappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/zapping-params';
 import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-trade';
 import { OneinchAvalancheProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
 import { OolongSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/boba/oolong-swap/oolong-swap-provider';
@@ -39,21 +40,23 @@ import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/prov
 import { OneinchEthereumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
 import { OneinchPolygonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
 import { ZappyProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/zappy/trisolaris-aurora-provider';
+import { Symbiosis as SymbiosisV2, ZappingRenBTC, ZappingRenBTCExactIn } from 'symbiosis-js-sdk';
 import {
     Error as SymbiosisError,
     ErrorCode,
     Percent,
-    Symbiosis,
+    Symbiosis as SymbiosisV1,
     Token as SymbiosisToken,
-    Token,
     TokenAmount as SymbiosisTokenAmount,
-    TokenAmount
-} from 'symbiosis-js-sdk';
+    ZappingRenBTC as ZappingRenBTCV1
+} from 'symbiosis-js-sdk-v1';
 
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
 
-    private readonly symbiosis = new Symbiosis(getSymbiosisConfig(), 'rubic');
+    private readonly symbiosisV1 = new SymbiosisV1(getSymbiosisV1Config(), 'rubic');
+
+    private readonly symbiosisV2 = new SymbiosisV2('mainnet', 'rubic');
 
     private readonly onChainProviders: Record<
         SymbiosisCrossChainSupportedBlockchain,
@@ -65,7 +68,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         [BLOCKCHAIN_NAME.AVALANCHE]: new OneinchAvalancheProvider(),
         [BLOCKCHAIN_NAME.BOBA]: new OolongSwapProvider(),
         [BLOCKCHAIN_NAME.TELOS]: new ZappyProvider(),
-        // [BLOCKCHAIN_NAME.AURORA]: new OneinchAuroraProvider()
         [BLOCKCHAIN_NAME.BITCOIN]: new OneinchEthereumProvider()
     };
 
@@ -333,8 +335,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         fromBlockchain: BlockchainName,
         toBlockchain: BlockchainName,
         swapParams: {
-            tokenAmountIn: TokenAmount;
-            tokenOut: Token | null;
+            tokenAmountIn: SymbiosisTokenAmount;
+            tokenOut: SymbiosisToken | null;
             fromAddress: string;
             receiverAddress: string;
             refundAddress: string;
@@ -350,8 +352,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         let swapResult;
 
         if (toBlockchain !== BLOCKCHAIN_NAME.BITCOIN && swapParams.tokenOut) {
-            const swapping = this.symbiosis.newSwapping();
-            swapResult = await swapping.exactIn(
+            const swappingArguments = [
                 swapParams.tokenAmountIn,
                 swapParams.tokenOut,
                 swapParams.fromAddress,
@@ -360,24 +361,38 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 swapParams.slippage,
                 swapParams.deadline,
                 true
-            );
+            ] as const;
+
+            const swappingV1 = this.symbiosisV1.newSwapping();
+            const swappingV2 = this.symbiosisV2.newSwapping();
+
+            const [swapResultV1, swapResultV2] = await Promise.all([
+                swappingV1.exactIn(...swappingArguments),
+                swappingV2.exactIn(...swappingArguments)
+            ]);
+
+            swapResult =
+                swapResultV1.tokenAmountOut > swapResultV2.tokenAmountOut
+                    ? swapResultV1
+                    : swapResultV2;
         } else {
-            const zapping = this.symbiosis.newZappingRenBTC();
             const poolId =
                 fromBlockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN
                     ? blockchainId[BLOCKCHAIN_NAME.POLYGON]
                     : blockchainId[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN];
+            const zappingParams: ZappingParams = [
+                swapParams.tokenAmountIn,
+                poolId,
+                swapParams.fromAddress,
+                swapParams.receiverAddress,
+                swapParams.fromAddress,
+                swapParams.slippage,
+                swapParams.deadline,
+                true
+            ];
+
             try {
-                swapResult = await zapping.exactIn(
-                    swapParams.tokenAmountIn,
-                    poolId,
-                    swapParams.fromAddress,
-                    swapParams.receiverAddress,
-                    swapParams.fromAddress,
-                    swapParams.slippage,
-                    swapParams.deadline,
-                    true
-                );
+                swapResult = await this.getBestZappingSwapResult(zappingParams);
             } catch (err) {
                 if (
                     err.code === ErrorCode.AMOUNT_TOO_LOW ||
@@ -385,16 +400,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 ) {
                     throw err;
                 }
-                swapResult = await zapping.exactIn(
-                    swapParams.tokenAmountIn,
-                    poolId,
-                    swapParams.fromAddress,
-                    swapParams.receiverAddress,
-                    swapParams.fromAddress,
-                    swapParams.slippage,
-                    swapParams.deadline,
-                    true
-                );
+
+                swapResult = await this.getBestZappingSwapResult(zappingParams);
             }
         }
 
@@ -404,5 +411,26 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             transitTokenFee: swapResult.fee,
             transactionRequest: swapResult.transactionRequest
         };
+    }
+
+    private async getBestZappingSwapResult(
+        zappingParams: ZappingParams
+    ): Promise<ZappingRenBTCExactIn> {
+        const zappingV1 = this.symbiosisV1.newZappingRenBTC();
+        const zappingV2 = this.symbiosisV2.newZappingRenBTC();
+
+        const swapResultV1 = await this.getZappingSwapResult(zappingV1, zappingParams);
+        const swapResultV2 = await this.getZappingSwapResult(zappingV2, zappingParams);
+
+        return swapResultV1.tokenAmountOut > swapResultV2.tokenAmountOut
+            ? swapResultV1
+            : swapResultV2;
+    }
+
+    private getZappingSwapResult(
+        zapping: ZappingRenBTC | ZappingRenBTCV1,
+        params: ZappingParams
+    ): ZappingRenBTCExactIn {
+        return zapping.exactIn(...params);
     }
 }

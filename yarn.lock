@@ -8692,10 +8692,28 @@ swarm-js@^0.1.40:
     tar "^4.0.2"
     xhr-request "^1.0.1"
 
-symbiosis-js-sdk@2.8.22:
+"symbiosis-js-sdk-v1@npm:symbiosis-js-sdk@2.8.22":
   version "2.8.22"
   resolved "https://registry.yarnpkg.com/symbiosis-js-sdk/-/symbiosis-js-sdk-2.8.22.tgz#4ec0d90cc3f73fde0770ab05f3a0d13e832a8908"
   integrity sha512-0YIIw3GoRblP/RZxX2ySqtBWnlloTZAQPds0o+Asnxu+EYY0xsOROoTJ4MGCaeMwkbYZ1DHO/61djA/fezX+iw==
+  dependencies:
+    "@renproject/chains-bitcoin" "^3.4.2"
+    "@renproject/chains-ethereum" "^3.4.3"
+    "@renproject/ren" "~3.3.0"
+    big.js "^5.2.2"
+    bignumber.js "^9.0.1"
+    decimal.js-light "^2.5.0"
+    isomorphic-unfetch "^3.1.0"
+    jsbi "^3.1.1"
+    lodash.flatmap "^4.5.0"
+    tiny-invariant "^1.1.0"
+    tiny-warning "^1.0.3"
+    toformat "^2.0.0"
+
+symbiosis-js-sdk@^2.9.4:
+  version "2.9.4"
+  resolved "https://registry.yarnpkg.com/symbiosis-js-sdk/-/symbiosis-js-sdk-2.9.4.tgz#744f4c778dc425ca5a32b8c514eb7a210222fad5"
+  integrity sha512-CNc1GH1H+VbKxjuCilIdMswg8Wdez2QO6KATaT1QdIvqr7XBswV+ivDb87va0+lI3Sn3lWj/3fFOXXy11iic8Q==
   dependencies:
     "@renproject/chains-bitcoin" "^3.4.2"
     "@renproject/chains-ethereum" "^3.4.3"
