@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash.clonedeep';
 import { HealthcheckError, RubicSdkError, TimeoutError } from 'src/common/errors';
 import pTimeout from 'src/common/utils/p-timeout';
 import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
@@ -125,7 +126,7 @@ export class Web3PublicService {
                             );
                         }
 
-                        const methodParams = structuredClone(params);
+                        const methodParams = cloneDeep(params);
                         const callMethod = () => (target[prop] as Function).call(target, ...params);
                         try {
                             const result = await pTimeout(
