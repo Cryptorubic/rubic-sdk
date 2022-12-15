@@ -1,4 +1,3 @@
-import { Api } from '@openocean.finance/api/lib/api';
 import BigNumber from 'bignumber.js';
 import {
     LowSlippageDeflationaryTokenError,
@@ -23,6 +22,9 @@ import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/provi
 import { openOceanBlockchainName } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/open-ocean-blockchain';
 import { OpenoceanOnChainSupportedBlockchain } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/open-ocean-on-chain-supported-blockchain';
 import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/open-ocean/models/open-ocean-trade-struct';
+
+import { openOceanApiUrl } from './constants/get-open-ocean-api-url';
+import { OpenoceanSwapQuoteResponse } from './models/open-cean-swap-quote-response';
 
 interface OpenOceanTransactionRequest {
     to: string;
@@ -67,8 +69,6 @@ export class OpenOceanTrade extends EvmOnChainTrade {
     }
 
     public readonly type = ON_CHAIN_TRADE_TYPE.OPEN_OCEAN;
-
-    private readonly openOceanApi = new Api();
 
     private readonly _toTokenAmountMin: PriceTokenAmount;
 
@@ -136,21 +136,31 @@ export class OpenOceanTrade extends EvmOnChainTrade {
         const walletAddress = (
             Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM) as EvmWeb3Private
         ).address;
-        const swapQuoteResponse = await this.openOceanApi.swapQuote({
-            chain: openOceanBlockchainName[
-                this.from.blockchain as OpenoceanOnChainSupportedBlockchain
-            ],
-            inTokenAddress: this.from.address,
-            outTokenAddress: this.to.address,
-            amount: this.from.tokenAmount.toString() as unknown as number,
-            gasPrice: Web3Pure.fromWei(gasPrice, nativeTokensList[this.from.blockchain].decimals)
-                .multipliedBy(10 ** 9)
-                .toFixed(0),
-            slippage: this.slippageTolerance * 100,
-            account: walletAddress
-        });
-        const { data, to } =
-            typeof swapQuoteResponse.data === 'object' ? swapQuoteResponse.data : swapQuoteResponse;
+        const apiUrl = openOceanApiUrl.swapQuote(
+            openOceanBlockchainName[this.from.blockchain as OpenoceanOnChainSupportedBlockchain]
+        );
+        const swapQuoteResponse = await Injector.httpClient.get<OpenoceanSwapQuoteResponse>(
+            apiUrl,
+            {
+                params: {
+                    chain: openOceanBlockchainName[
+                        this.from.blockchain as OpenoceanOnChainSupportedBlockchain
+                    ],
+                    inTokenAddress: this.from.address,
+                    outTokenAddress: this.to.address,
+                    amount: this.from.tokenAmount.toString() as unknown as number,
+                    gasPrice: Web3Pure.fromWei(
+                        gasPrice,
+                        nativeTokensList[this.from.blockchain].decimals
+                    )
+                        .multipliedBy(10 ** 9)
+                        .toFixed(0),
+                    slippage: this.slippageTolerance * 100,
+                    account: walletAddress
+                }
+            }
+        );
+        const { data, to } = swapQuoteResponse.data;
 
         return {
             data,

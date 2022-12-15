@@ -14,3 +14,6 @@ export const openOceanBlockchainName: Record<OpenoceanOnChainSupportedBlockchain
     [BLOCKCHAIN_NAME.OKE_X_CHAIN]: 'okex',
     [BLOCKCHAIN_NAME.HARMONY]: 'harmony'
 };
+
+export type OpenOceanBlockchainName =
+    typeof openOceanBlockchainName[OpenoceanOnChainSupportedBlockchain];
