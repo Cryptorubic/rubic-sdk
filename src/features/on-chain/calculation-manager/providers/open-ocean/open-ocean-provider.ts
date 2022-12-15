@@ -15,6 +15,7 @@ import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
+import { openOceanApiUrl } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/get-open-ocean-api-url';
 import { openOceanBlockchainName } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/open-ocean-blockchain';
 import {
     OpenoceanOnChainSupportedBlockchain,
@@ -24,8 +25,6 @@ import { OpenOceanQuoteResponse } from 'src/features/on-chain/calculation-manage
 import { OpenOceanTokenListResponse } from 'src/features/on-chain/calculation-manager/providers/open-ocean/models/open-ocean-token-list-response';
 import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/open-ocean/models/open-ocean-trade-struct';
 import { OpenOceanTrade } from 'src/features/on-chain/calculation-manager/providers/open-ocean/open-ocean-trade';
-
-import { openOceanApiUrl } from './constants/get-open-ocean-api-url';
 
 export class OpenOceanProvider {
     private readonly onChainProxyService = new OnChainProxyService();

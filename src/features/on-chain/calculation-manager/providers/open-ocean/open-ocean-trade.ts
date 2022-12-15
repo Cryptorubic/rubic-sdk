@@ -19,12 +19,11 @@ import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { onChainProxyContractAddress } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { openOceanApiUrl } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/get-open-ocean-api-url';
 import { openOceanBlockchainName } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/open-ocean-blockchain';
 import { OpenoceanOnChainSupportedBlockchain } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/open-ocean-on-chain-supported-blockchain';
+import { OpenoceanSwapQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/open-ocean/models/open-cean-swap-quote-response';
 import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/open-ocean/models/open-ocean-trade-struct';
-
-import { openOceanApiUrl } from './constants/get-open-ocean-api-url';
-import { OpenoceanSwapQuoteResponse } from './models/open-cean-swap-quote-response';
 
 interface OpenOceanTransactionRequest {
     to: string;
