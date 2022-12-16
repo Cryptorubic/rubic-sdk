@@ -1,4 +1,3 @@
-import { Api } from '@openocean.finance/api/lib/api';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { OnChainIsUnavailableError } from 'src/common/errors/on-chain';
@@ -16,6 +15,7 @@ import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
+import { openOceanApiUrl } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/get-open-ocean-api-url';
 import { openOceanBlockchainName } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/open-ocean-blockchain';
 import {
     OpenoceanOnChainSupportedBlockchain,
@@ -28,8 +28,6 @@ import { OpenOceanTrade } from 'src/features/on-chain/calculation-manager/provid
 
 export class OpenOceanProvider {
     private readonly onChainProxyService = new OnChainProxyService();
-
-    private readonly openOceanApi = new Api();
 
     constructor() {}
 
@@ -46,15 +44,18 @@ export class OpenOceanProvider {
             const gasPrice = await Injector.web3PublicService
                 .getWeb3Public(blockchain)
                 .getGasPrice();
-            const quoteResponse: OpenOceanQuoteResponse = await this.openOceanApi.quote({
-                chain: openOceanBlockchainName[blockchain],
-                inTokenAddress: fromWithoutFee.address,
-                outTokenAddress: toToken.address,
-                amount: fromWithoutFee.tokenAmount.toString() as unknown as number,
-                slippage: options.slippageTolerance! * 100,
-                gasPrice: Web3Pure.fromWei(gasPrice, nativeTokensList[from.blockchain].decimals)
-                    .multipliedBy(10 ** 9)
-                    .toFixed(0)
+            const apiUrl = openOceanApiUrl.quote(openOceanBlockchainName[blockchain]);
+            const quoteResponse = await Injector.httpClient.get<OpenOceanQuoteResponse>(apiUrl, {
+                params: {
+                    chain: openOceanBlockchainName[blockchain],
+                    inTokenAddress: fromWithoutFee.address,
+                    outTokenAddress: toToken.address,
+                    amount: fromWithoutFee.tokenAmount.toString() as unknown as number,
+                    slippage: options.slippageTolerance! * 100,
+                    gasPrice: Web3Pure.fromWei(gasPrice, nativeTokensList[from.blockchain].decimals)
+                        .multipliedBy(10 ** 9)
+                        .toFixed(0)
+                }
             });
 
             if ([500, 400].includes(quoteResponse.code)) {
@@ -66,11 +67,11 @@ export class OpenOceanProvider {
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
-                weiAmount: new BigNumber((quoteResponse.data || quoteResponse).outAmount)
+                weiAmount: new BigNumber(quoteResponse.data.outAmount)
             });
-            const toTokenWeiAmountMin = new BigNumber(
-                (quoteResponse.data || quoteResponse).outAmount
-            ).multipliedBy(1 - options.slippageTolerance);
+            const toTokenWeiAmountMin = new BigNumber(quoteResponse.data.outAmount).multipliedBy(
+                1 - options.slippageTolerance
+            );
             const openOceanTradeStruct = {
                 from,
                 to,
@@ -153,12 +154,11 @@ export class OpenOceanProvider {
     }
 
     private async checkIsSupportedTokens(from: PriceTokenAmount, to: PriceToken): Promise<void> {
-        const tokenListResponse: OpenOceanTokenListResponse = await this.openOceanApi.getTokenList({
-            chain: openOceanBlockchainName[from.blockchain as OpenoceanOnChainSupportedBlockchain]
-        });
-        const tokens = (tokenListResponse?.data || tokenListResponse).map(token =>
-            token.address.toLocaleLowerCase()
+        const apiUrl = openOceanApiUrl.tokenList(
+            openOceanBlockchainName[from.blockchain as OpenoceanOnChainSupportedBlockchain]
         );
+        const tokenListResponse = await Injector.httpClient.get<OpenOceanTokenListResponse>(apiUrl);
+        const tokens = tokenListResponse?.data?.map(token => token.address.toLocaleLowerCase());
         const isSupportedTokens =
             Boolean(tokens.length) &&
             (from.isNative || tokens.includes(from.address.toLocaleLowerCase())) &&
