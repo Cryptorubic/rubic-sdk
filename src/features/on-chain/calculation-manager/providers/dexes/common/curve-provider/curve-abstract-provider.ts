@@ -13,6 +13,7 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { addressProviderAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/common/curve-provider/constants/address-provider-abi';
+import { registryAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/common/curve-provider/constants/registry-abi';
 import { registryExchangeAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/common/curve-provider/constants/registry-exchange-abi';
 import { CurveAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/curve-provider/curve-abstract-trade';
 import { CurveOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/curve-provider/models/curve-on-chain-trade-struct';
@@ -43,25 +44,37 @@ export abstract class CurveAbstractProvider<
         toToken: PriceToken<EvmBlockchainName>,
         options?: OnChainCalculationOptions
     ): Promise<EvmOnChainTrade> {
-        const exchangeAddress = await this.web3Public.callContractMethod(
+        const registryExchangeAddress = await this.web3Public.callContractMethod(
             this.addressProvider,
             addressProviderAbi,
             'get_address',
-            ['2'] // 2 is exchange contract address.
+            ['2']
         );
 
-        const { 0: pool, 1: amountOut } = await this.web3Public.callContractMethod<{
-            0: string;
-            1: string;
-        }>(exchangeAddress, registryExchangeAbi, 'get_best_rate', [
-            fromToken.address,
-            toToken.address,
-            fromToken.stringWeiAmount
-        ]);
+        const registryAddress = await this.web3Public.callContractMethod(
+            this.addressProvider,
+            addressProviderAbi,
+            'get_address',
+            ['0']
+        );
 
-        if (!pool || !amountOut) {
+        const poolAddress = await this.web3Public.callContractMethod(
+            registryAddress,
+            registryAbi,
+            'find_pool_for_coins',
+            [fromToken.address, toToken.address]
+        );
+
+        if (!poolAddress) {
             throw new RubicSdkError('Token is not supported.');
         }
+
+        const amountOut = await this.web3Public.callContractMethod(
+            registryExchangeAddress,
+            registryExchangeAbi,
+            'get_exchange_amount',
+            [poolAddress, fromToken.address, toToken.address, fromToken.stringWeiAmount]
+        );
 
         const fullOptions = combineOptions(options, this.defaultOptions);
         const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(
@@ -79,13 +92,13 @@ export abstract class CurveAbstractProvider<
             to,
             slippageTolerance: fullOptions.slippageTolerance,
             gasFeeInfo: null,
-            useProxy: false,
+            useProxy: true,
             proxyFeeInfo,
             fromWithoutFee,
             withDeflation: fullOptions.withDeflation,
             path: [fromToken, toToken],
-            registryExchangeAddress: exchangeAddress,
-            poolAddress: pool
+            registryExchangeAddress,
+            poolAddress
         };
 
         return new this.Trade(tradeStruct, fullOptions.providerAddress);
