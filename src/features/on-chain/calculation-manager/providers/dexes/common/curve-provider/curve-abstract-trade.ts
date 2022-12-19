@@ -9,6 +9,7 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { registryExchangeAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/common/curve-provider/constants/registry-exchange-abi';
+import { CurveAbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/curve-provider/curve-abstract-provider';
 import { CurveOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/curve-provider/models/curve-on-chain-trade-struct';
 
 export abstract class CurveAbstractTrade extends EvmOnChainTrade {
@@ -57,7 +58,7 @@ export abstract class CurveAbstractTrade extends EvmOnChainTrade {
             const gasParams = this.getGasParams(options);
             const exchangeParams = [
                 this.poolAddress,
-                this.from.address,
+                this.from.isNative ? CurveAbstractProvider.nativeAddress : this.from.address,
                 this.to.address,
                 this.from.stringWeiAmount,
                 this.toTokenAmountMin.stringWeiAmount
