@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "3.13.0-alpha-ap-1",
+  "version": "3.13.0",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -65,13 +65,13 @@
   },
   "dependencies": {
     "@lifi/sdk": "^1.6.3",
-    "@openocean.finance/api": "^0.0.3",
     "@viaprotocol/router-sdk": "^1.0.7",
     "assert": "^2.0.0",
     "axios": "^0.26.1",
     "bignumber.js": "9.1.0",
     "bitcoin-address-validation": "2.2.1",
     "ethers": "^5.6.8",
+    "lodash.clonedeep": "^4.5.0",
     "rango-sdk-basic": "^0.0.7",
     "rxjs": "^7.5.7",
     "symbiosis-js-sdk": "^2.9.4",
@@ -82,6 +82,7 @@
   "devDependencies": {
     "@babel/core": "^7.0.0-0",
     "@types/jest": "^28.1.2",
+    "@types/lodash.clonedeep": "^4.5.7",
     "@typescript-eslint/eslint-plugin": "^5.36.2",
     "@typescript-eslint/parser": "^5.36.2",
     "bip39": "^3.0.4",
