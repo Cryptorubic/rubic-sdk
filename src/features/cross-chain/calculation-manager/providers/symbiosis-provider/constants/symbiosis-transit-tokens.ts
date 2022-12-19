@@ -38,6 +38,20 @@ export const symbiosisTransitTokens: Record<SymbiosisCrossChainSupportedBlockcha
         symbol: 'USDC',
         decimals: 6
     },
+    [BLOCKCHAIN_NAME.BOBA_BSC]: {
+        blockchain: BLOCKCHAIN_NAME.BOBA_BSC,
+        address: '0x9f98f9f312d23d078061962837042b8918e6aff2',
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.BOBA_AVALANCHE]: {
+        blockchain: BLOCKCHAIN_NAME.BOBA_AVALANCHE,
+        address: '0x126969743a6d300bab08f303f104f0f7dbafbe20',
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 6
+    },
     [BLOCKCHAIN_NAME.TELOS]: {
         blockchain: BLOCKCHAIN_NAME.TELOS,
         address: '0x818ec0a7fe18ff94269904fced6ae3dae6d6dc0b',

@@ -141,8 +141,22 @@ export const nativeTokensList = {
     [BLOCKCHAIN_NAME.BOBA]: new Token({
         blockchain: BLOCKCHAIN_NAME.BOBA,
         address: EvmWeb3Pure.nativeTokenAddress,
-        name: 'ETH',
-        symbol: 'ETH',
+        name: 'BOBA',
+        symbol: 'BOBA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BOBA_BSC]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BOBA_BSC,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'BOBA',
+        symbol: 'BOBA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BOBA_AVALANCHE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BOBA_AVALANCHE,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'BOBA',
+        symbol: 'BOBA',
         decimals: 18
     }),
     [BLOCKCHAIN_NAME.ASTAR]: new Token({
