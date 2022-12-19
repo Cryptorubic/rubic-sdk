@@ -1,8 +1,10 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { combineOptions } from 'src/common/utils/options';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import {
     OnChainCalculationOptions,
     RequiredOnChainCalculationOptions
@@ -29,6 +31,8 @@ export abstract class CurveAbstractProvider<
 
     protected readonly addressProvider = '0x0000000022D53366457F9d5E68Ec105046FC4383';
 
+    public static readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+
     private readonly defaultOptions: RequiredOnChainCalculationOptions = {
         ...evmProviderDefaultOptions,
         deadlineMinutes: 20,
@@ -44,6 +48,11 @@ export abstract class CurveAbstractProvider<
         toToken: PriceToken<EvmBlockchainName>,
         options?: OnChainCalculationOptions
     ): Promise<EvmOnChainTrade> {
+        const fromAddress = fromToken.isNative
+            ? CurveAbstractProvider.nativeAddress
+            : fromToken.address;
+        const toAddress = toToken.isNative ? CurveAbstractProvider.nativeAddress : toToken.address;
+
         const registryExchangeAddress = await this.web3Public.callContractMethod(
             this.addressProvider,
             addressProviderAbi,
@@ -58,14 +67,23 @@ export abstract class CurveAbstractProvider<
             ['0']
         );
 
-        const poolAddress = await this.web3Public.callContractMethod(
+        let poolAddress = await this.web3Public.callContractMethod(
             registryAddress,
             registryAbi,
             'find_pool_for_coins',
-            [fromToken.address, toToken.address]
+            [fromAddress, toAddress]
         );
+        if (compareAddresses(poolAddress, EvmWeb3Pure.EMPTY_ADDRESS)) {
+            const bestRate = await this.web3Public.callContractMethod(
+                registryExchangeAddress,
+                registryExchangeAbi,
+                'get_best_rate',
+                [fromAddress, toAddress, fromToken.stringWeiAmount]
+            );
+            poolAddress = bestRate[0]!;
+        }
 
-        if (!poolAddress) {
+        if (compareAddresses(poolAddress, EvmWeb3Pure.EMPTY_ADDRESS)) {
             throw new RubicSdkError('Token is not supported.');
         }
 
@@ -73,7 +91,7 @@ export abstract class CurveAbstractProvider<
             registryExchangeAddress,
             registryExchangeAbi,
             'get_exchange_amount',
-            [poolAddress, fromToken.address, toToken.address, fromToken.stringWeiAmount]
+            [poolAddress, fromAddress, toAddress, fromToken.stringWeiAmount]
         );
 
         const fullOptions = combineOptions(options, this.defaultOptions);
