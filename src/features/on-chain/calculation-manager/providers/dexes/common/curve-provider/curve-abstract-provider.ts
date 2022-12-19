@@ -52,33 +52,18 @@ export abstract class CurveAbstractProvider<
             ? CurveAbstractProvider.nativeAddress
             : fromToken.address;
         const toAddress = toToken.isNative ? CurveAbstractProvider.nativeAddress : toToken.address;
+        const fromAmount = fromToken.stringWeiAmount;
 
-        const registryExchangeAddress = await this.web3Public.callContractMethod(
-            this.addressProvider,
-            addressProviderAbi,
-            'get_address',
-            ['2']
-        );
+        const registryExchangeAddress = await this.fetchRegistryExchangeAddress();
+        const registryAddress = await this.fetchRegistryAddress();
+        let poolAddress = await this.fetchPoolAddress(fromAddress, toAddress, registryAddress);
 
-        const registryAddress = await this.web3Public.callContractMethod(
-            this.addressProvider,
-            addressProviderAbi,
-            'get_address',
-            ['0']
-        );
-
-        let poolAddress = await this.web3Public.callContractMethod(
-            registryAddress,
-            registryAbi,
-            'find_pool_for_coins',
-            [fromAddress, toAddress]
-        );
         if (compareAddresses(poolAddress, EvmWeb3Pure.EMPTY_ADDRESS)) {
-            const bestRate = await this.web3Public.callContractMethod(
-                registryExchangeAddress,
-                registryExchangeAbi,
-                'get_best_rate',
-                [fromAddress, toAddress, fromToken.stringWeiAmount]
+            const bestRate = await this.fetchBestRate(
+                fromAddress,
+                toAddress,
+                fromAmount,
+                registryExchangeAddress
             );
             poolAddress = bestRate[0]!;
         }
@@ -87,11 +72,12 @@ export abstract class CurveAbstractProvider<
             throw new RubicSdkError('Token is not supported.');
         }
 
-        const amountOut = await this.web3Public.callContractMethod(
-            registryExchangeAddress,
-            registryExchangeAbi,
-            'get_exchange_amount',
-            [poolAddress, fromAddress, toAddress, fromToken.stringWeiAmount]
+        const amountOut = await this.fetchExchangeAmount(
+            fromAddress,
+            toAddress,
+            fromAmount,
+            poolAddress,
+            registryExchangeAddress
         );
 
         const fullOptions = combineOptions(options, this.defaultOptions);
@@ -120,5 +106,65 @@ export abstract class CurveAbstractProvider<
         };
 
         return new this.Trade(tradeStruct, fullOptions.providerAddress);
+    }
+
+    private async fetchRegistryExchangeAddress(): Promise<string> {
+        return this.web3Public.callContractMethod(
+            this.addressProvider,
+            addressProviderAbi,
+            'get_address',
+            ['2']
+        );
+    }
+
+    private async fetchRegistryAddress(): Promise<string> {
+        return this.web3Public.callContractMethod(
+            this.addressProvider,
+            addressProviderAbi,
+            'get_address',
+            ['0']
+        );
+    }
+
+    private async fetchPoolAddress(
+        fromAddress: string,
+        toAddress: string,
+        registryAddress: string
+    ): Promise<string> {
+        return this.web3Public.callContractMethod(
+            registryAddress,
+            registryAbi,
+            'find_pool_for_coins',
+            [fromAddress, toAddress]
+        );
+    }
+
+    private async fetchBestRate(
+        fromAddress: string,
+        toAddress: string,
+        fromAmount: string,
+        registryExchangeAddress: string
+    ): Promise<[string, string]> {
+        return this.web3Public.callContractMethod(
+            registryExchangeAddress,
+            registryExchangeAbi,
+            'get_best_rate',
+            [fromAddress, toAddress, fromAmount]
+        );
+    }
+
+    private async fetchExchangeAmount(
+        fromAddress: string,
+        toAddress: string,
+        fromAmount: string,
+        poolAddress: string,
+        registryExchangeAddress: string
+    ): Promise<string> {
+        return this.web3Public.callContractMethod(
+            registryExchangeAddress,
+            registryExchangeAbi,
+            'get_exchange_amount',
+            [poolAddress, fromAddress, toAddress, fromAmount]
+        );
     }
 }
