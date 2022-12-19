@@ -12,7 +12,7 @@ const defaultAvalancheRoutingProvidersAddresses = [
     '0xd1c3f94DE7e5B45fa4eDBBA472491a9f4B166FC4' // XAVA
 ];
 
-const defaultAvalancheWethAddress = 'wrappedNativeTokensList[BLOCKCHAIN_NAME.AVALANCHE].address';
+const defaultAvalancheWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.AVALANCHE].address;
 
 export const defaultAvalancheProviderConfiguration: UniswapV2ProviderConfiguration = {
     maxTransitTokens: 3,

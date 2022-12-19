@@ -63,7 +63,7 @@ export class LifiProvider {
             order: 'RECOMMENDED',
             slippage: fullOptions.slippageTolerance,
             exchanges: {
-                deny: lifiDisabledProviders
+                deny: lifiDisabledProviders.concat('openocean')
             }
         };
 

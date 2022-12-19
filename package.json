@@ -71,15 +71,17 @@
     "bignumber.js": "9.1.0",
     "bitcoin-address-validation": "2.2.1",
     "ethers": "^5.6.8",
+    "lodash.clonedeep": "^4.5.0",
     "rango-sdk-basic": "^0.0.7",
     "rxjs": "^7.5.7",
     "symbiosis-js-sdk": "2.8.22",
     "tronweb": "^4.3.0",
-    "web3": "^1.8.0"
+    "web3": "^1.8.1"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-0",
     "@types/jest": "^28.1.2",
+    "@types/lodash.clonedeep": "^4.5.7",
     "@typescript-eslint/eslint-plugin": "^5.36.2",
     "@typescript-eslint/parser": "^5.36.2",
     "bip39": "^3.0.4",

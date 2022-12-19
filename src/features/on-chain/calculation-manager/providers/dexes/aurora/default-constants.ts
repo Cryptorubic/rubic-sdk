@@ -13,7 +13,7 @@ const defaultAuroraRoutingProvidersAddresses = [
     '0xe3520349F477A5F6EB06107066048508498A291b' // DAI
 ];
 
-const defaultAuroraWethAddress = 'wrappedNativeTokensList[BLOCKCHAIN_NAME.AURORA].address';
+const defaultAuroraWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.AURORA].address;
 
 export const defaultAuroraProviderConfiguration: UniswapV2ProviderConfiguration = {
     maxTransitTokens: 1,
