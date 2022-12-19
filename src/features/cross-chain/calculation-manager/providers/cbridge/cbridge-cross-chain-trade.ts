@@ -18,9 +18,6 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
-/**
- * Calculated XY cross-chain trade.
- */
 export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
@@ -44,7 +41,8 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
                         priceImpact: 0,
                         slippage: 0,
                         feeInfo: {},
-                        maxSlippage: 0
+                        maxSlippage: 0,
+                        contractAddress: EvmWeb3Pure.EMPTY_ADDRESS
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -78,7 +76,7 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
 
     public static readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.XY;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
 
     public readonly isAggregator = false;
 
@@ -87,7 +85,7 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         to: undefined
     };
 
-    public readonly bridgeType = BRIDGE_TYPE.XY;
+    public readonly bridgeType = BRIDGE_TYPE.CELER;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
@@ -113,6 +111,8 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly maxSlippage: number;
 
+    private celerContractAddress: string;
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
@@ -122,6 +122,7 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             slippage: number;
             feeInfo: FeeInfo;
             maxSlippage: number;
+            contractAddress: string;
         },
         providerAddress: string
     ) {
@@ -136,13 +137,18 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         this.feeInfo = crossChainTrade.feeInfo;
         this.priceImpact = crossChainTrade.priceImpact;
         this.maxSlippage = crossChainTrade.maxSlippage;
+        this.celerContractAddress = crossChainTrade.contractAddress;
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const receiverAddress = options?.receiverAddress || this.walletAddress;
-        const data = this.getTransactionRequest(receiverAddress, this.maxSlippage);
         const toChainId = blockchainId[this.to.blockchain];
         const fromContracts = cbridgeContractAddress[this.fromBlockchain];
+        const data = this.getTransactionRequest(
+            receiverAddress,
+            this.maxSlippage,
+            fromContracts.providerRouter
+        );
 
         const swapArguments = [
             this.from.address,
@@ -176,22 +182,6 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         return fromUsd.dividedBy(this.to.tokenAmount);
     }
 
-    // private async getTransactionRequest(receiverAddress?: string): Promise<{
-    //     data: string;
-    //     value: string;
-    // }> {
-    //     const params: XyTransactionRequest = {
-    //         ...this.transactionRequest,
-    //         ...(receiverAddress && { receiveAddress: receiverAddress })
-    //     };
-    //
-    //     const { tx } = await Injector.httpClient.get<XyTransactionResponse>(
-    //         `${XyCrossChainProvider.apiEndpoint}/swap`,
-    //         { params: { ...params } }
-    //     );
-    //     return tx!;
-    // }
-
     public getUsdPrice(): BigNumber {
         return this.from.price.multipliedBy(this.from.tokenAmount);
     }
@@ -205,20 +195,32 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    private getTransactionRequest(receiverAddress: string, maxSlippage: number): string {
-        return EvmWeb3Pure.encodeMethodCall(
-            this.fromContractAddress,
-            cbridgeContractAbi,
-            this.from.isNative ? 'sendNative' : 'native',
-            [
+    private getTransactionRequest(
+        receiverAddress: string,
+        maxSlippage: number,
+        contractAddress: string
+    ): string {
+        try {
+            const params = [
                 receiverAddress,
                 this.from.address,
                 this.from.stringWeiAmount,
                 blockchainId[this.to.blockchain],
                 Date.now(),
                 maxSlippage
-            ],
-            this.getSwapValue()
-        ).data;
+            ];
+            const value = this.from.isNative ? this.from.stringWeiAmount : '0';
+            const evmConfig = EvmWeb3Pure.encodeMethodCall(
+                contractAddress,
+                cbridgeContractAbi,
+                this.from.isNative ? 'sendNative' : 'send',
+                params,
+                value
+            );
+            return evmConfig.data;
+        } catch (err) {
+            console.debug(err);
+            throw new Error();
+        }
     }
 }

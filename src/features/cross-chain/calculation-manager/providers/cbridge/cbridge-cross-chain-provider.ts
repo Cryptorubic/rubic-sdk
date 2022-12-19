@@ -1,5 +1,4 @@
-import BigNumber from 'bignumber.js';
-import { InsufficientLiquidityError, MinAmountError, RubicSdkError } from 'src/common/errors';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
@@ -21,7 +20,6 @@ import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { XyStatusCode } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-status-code';
 
 export class CbridgeCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
@@ -54,7 +52,10 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                 evmCommonCrossChainAbi
             );
 
-            await this.fetchContractAddressAndCheckTokens(fromToken, toToken);
+            const contractAddress = await this.fetchContractAddressAndCheckTokens(
+                fromToken,
+                toToken
+            );
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
             const fromWithoutFee = getFromWithoutFee(
@@ -87,7 +88,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                         priceImpact: fromToken.calculatePriceImpactPercent(to) || 0,
                         slippage: options.slippageTolerance,
                         feeInfo,
-                        maxSlippage
+                        maxSlippage,
+                        contractAddress
                     },
                     options.providerAddress
                 )
@@ -130,30 +132,11 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         };
     }
 
-    private analyzeStatusCode(code: XyStatusCode, message: string): void {
-        switch (code) {
-            case '0':
-                break;
-            case '3':
-            case '4':
-                throw new InsufficientLiquidityError();
-            case '6': {
-                const [minAmount, tokenSymbol] = message.split('to ')[1]!.slice(0, -1).split(' ');
-                throw new MinAmountError(new BigNumber(minAmount!), tokenSymbol!);
-            }
-            case '5':
-            case '10':
-            case '99':
-            default:
-                throw new RubicSdkError('Unknown Error.');
-        }
-    }
-
     private async fetchContractAddressAndCheckTokens(
         fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>
     ): Promise<string> {
-        const config = await this.apiService.getTransferConfigs();
+        const config = await CbridgeCrossChainApiService.getTransferConfigs();
 
         const fromChainId = blockchainId[fromToken.blockchain];
         const toChainId = blockchainId[toToken.blockchain];
@@ -194,9 +177,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             slippage_tolerance: Number((options.slippageTolerance * 1_000_000).toFixed(0)),
             amt: fromToken.stringWeiAmount
         };
-        const { eq_value_token_amt, max_slippage } = await this.apiService.fetchEstimateAmount(
-            requestParams
-        );
+        const { eq_value_token_amt, max_slippage } =
+            await CbridgeCrossChainApiService.fetchEstimateAmount(requestParams);
         return { amount: eq_value_token_amt, maxSlippage: max_slippage };
     }
 }

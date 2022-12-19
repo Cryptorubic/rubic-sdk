@@ -44,4 +44,9 @@ export interface CrossChainTradeData {
      * Expected minimum output amount.
      */
     amountOutMin?: string;
+
+    /**
+     * Celer bridge transaction ID.
+     */
+    celerTransactionId?: string;
 }
