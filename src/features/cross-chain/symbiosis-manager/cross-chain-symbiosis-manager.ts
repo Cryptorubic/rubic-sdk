@@ -1,25 +1,26 @@
 import { Log as EthersLog, TransactionReceipt as EthersReceipt } from '@ethersproject/providers';
 import { RubicSdkError } from 'src/common/errors';
-import { Token } from 'src/common/tokens';
+import { combineOptions, deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { Injector } from 'src/core/injector/injector';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { getSymbiosisConfig } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-config';
 import {
-    ChainId,
-    CHAINS_PRIORITY,
-    PendingRequest,
-    Symbiosis,
-    Token as SymbiosisToken,
-    WaitForComplete
-} from 'symbiosis-js-sdk';
+    RequiredRevertSwapTransactionOptions,
+    RevertSwapTransactionOptions
+} from 'src/features/cross-chain/symbiosis-manager/models/revert-swap-transaction-options';
+import { CHAINS_PRIORITY, PendingRequest, Symbiosis, WaitForComplete } from 'symbiosis-js-sdk';
+import { ChainId } from 'symbiosis-js-sdk/dist/constants';
 import { TransactionReceipt } from 'web3-eth';
 
 export class CrossChainSymbiosisManager {
-    private readonly symbiosis = new Symbiosis(getSymbiosisConfig(), 'rubic');
+    private readonly symbiosis = new Symbiosis('mainnet', 'rubic');
+
+    private readonly defaultRevertOptions: RequiredRevertSwapTransactionOptions = {
+        slippageTolerance: 0.02,
+        deadline: 20
+    };
 
     private get web3Private(): EvmWeb3Private {
         return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM);
@@ -42,37 +43,29 @@ export class CrossChainSymbiosisManager {
      * Waiting for symbiosis trade to complete.
      * @param fromBlockchain Trade from blockchain.
      * @param toBlockchain Trade to blockchain.
-     * @param toToken Trade to toke.
      * @param receipt Transaction receipt.
      * @returns Promise<EthersLog>
      */
     public async waitForComplete(
         fromBlockchain: BlockchainName,
         toBlockchain: BlockchainName,
-        toToken: Token,
         receipt: TransactionReceipt
     ): Promise<EthersLog> {
         const fromChainId = blockchainId[fromBlockchain] as ChainId;
         const toChainId = blockchainId[toBlockchain] as ChainId;
-        const tokenOut = new SymbiosisToken({
-            chainId: toChainId,
-            address: toToken.isNative ? '' : toToken.address,
-            decimals: toToken.decimals,
-            isNative: toToken.isNative
-        });
 
         return await new WaitForComplete({
             direction: this.getDirection(fromChainId, toChainId),
             symbiosis: this.symbiosis,
             revertableAddress: this.walletAddress,
-            tokenOut,
+            chainIdOut: toChainId,
             chainIdIn: fromChainId
         }).waitForComplete(receipt as unknown as EthersReceipt);
     }
 
     public async revertTrade(
         revertTransactionHash: string,
-        options: SwapTransactionOptions = {}
+        options: RevertSwapTransactionOptions = {}
     ): Promise<TransactionReceipt> {
         const pendingRequest = await this.getUserTrades();
         const request = pendingRequest.find(
@@ -84,7 +77,12 @@ export class CrossChainSymbiosisManager {
             throw new RubicSdkError('No request with provided transaction hash');
         }
 
-        const { transactionRequest } = await this.symbiosis.newRevertPending(request).revert();
+        const fullOptions = combineOptions(options, this.defaultRevertOptions);
+        const slippage = fullOptions.slippageTolerance * 10000;
+        const deadline = deadlineMinutesTimestamp(fullOptions.deadline);
+        const { transactionRequest } = await this.symbiosis
+            .newRevertPending(request)
+            .revert(slippage, deadline);
 
         const { onConfirm, gasLimit, gasPrice } = options;
         const onTransactionHash = (hash: string) => {
