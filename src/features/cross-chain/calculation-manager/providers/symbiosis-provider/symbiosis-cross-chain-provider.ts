@@ -479,7 +479,9 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         if (result2.status !== 'fulfilled') {
             return { ...result1.value, version: 'v1' };
         }
-        return result1.value.tokenAmountOut.greaterThan(result2.value.tokenAmountOut)
+        return new BigNumber(result1.value.tokenAmountOut.toFixed()).gt(
+            result2.value.tokenAmountOut.toFixed()
+        )
             ? { ...result1.value, version: 'v1' }
             : { ...result2.value, version: 'v2' };
     }
