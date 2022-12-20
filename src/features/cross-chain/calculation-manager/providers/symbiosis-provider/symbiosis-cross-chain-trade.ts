@@ -49,7 +49,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                         priceImpact: 0,
                         slippage: 0,
                         feeInfo: {},
-                        transitAmount: new BigNumber(NaN)
+                        transitAmount: new BigNumber(NaN),
+                        version: 'v1'
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -109,8 +110,11 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly slippage: number;
 
+    public readonly version: 'v1' | 'v2';
+
     private readonly getTransactionRequest: (
         fromAddress: string,
+        version: 'v1' | 'v2',
         receiver?: string
     ) => Promise<SymbiosisTradeData>;
 
@@ -126,12 +130,17 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
             to: PriceTokenAmount;
-            swapFunction: (fromAddress: string, receiver?: string) => Promise<SymbiosisTradeData>;
+            swapFunction: (
+                fromAddress: string,
+                version: 'v1' | 'v2',
+                receiver?: string
+            ) => Promise<SymbiosisTradeData>;
             gasData: GasData | null;
             priceImpact: number;
             slippage: number;
             feeInfo: FeeInfo;
             transitAmount: BigNumber;
+            version: 'v1' | 'v2';
         },
         providerAddress: string
     ) {
@@ -147,6 +156,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         this.priceImpact = crossChainTrade.priceImpact;
         this.slippage = crossChainTrade.slippage;
         this.transitAmount = crossChainTrade.transitAmount;
+        this.version = crossChainTrade.version;
 
         this.onChainSubtype = {
             from: ON_CHAIN_TRADE_TYPE.ONE_INCH,
@@ -160,6 +170,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const exactIn = await this.getTransactionRequest(
             this.walletAddress,
+            this.version,
             options?.receiverAddress
         );
         const { data, value: providerValue } = exactIn.transactionRequest;
@@ -173,9 +184,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                 ? EvmWeb3Pure.EMPTY_ADDRESS
                 : options?.receiverAddress || this.walletAddress;
         const symbiosisContractAddress =
-            exactIn.version === 'v1'
-                ? SYMBIOSIS_CONTRACT_ADDRESS_V1
-                : SYMBIOSIS_CONTRACT_ADDRESS_V2;
+            this.version === 'v1' ? SYMBIOSIS_CONTRACT_ADDRESS_V1 : SYMBIOSIS_CONTRACT_ADDRESS_V2;
 
         const swapArguments = [
             this.from.address,

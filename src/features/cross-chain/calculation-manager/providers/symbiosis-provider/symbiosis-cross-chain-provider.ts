@@ -149,7 +149,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const {
                 tokenAmountOut,
                 priceImpact,
-                fee: transitTokenFee
+                fee: transitTokenFee,
+                version
             } = await this.getTrade(fromBlockchain, toBlockchain, {
                 tokenAmountIn,
                 tokenOut,
@@ -160,22 +161,31 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 deadline
             });
 
-            const swapFunction = (fromUserAddress: string, receiver?: string) => {
+            const swapFunction = (
+                fromUserAddress: string,
+                version: 'v1' | 'v2',
+                receiver?: string
+            ) => {
                 if (isBitcoinSwap && !receiver) {
                     throw new RubicSdkError('No receiver address provider for bitcoin swap.');
                 }
                 const refundAddress = isBitcoinSwap ? fromUserAddress : receiver || fromAddress;
                 const receiverAddress = isBitcoinSwap ? receiver! : receiver || fromUserAddress;
 
-                return this.getTrade(fromBlockchain, toBlockchain, {
-                    tokenAmountIn,
-                    tokenOut,
-                    fromAddress: fromUserAddress,
-                    receiverAddress,
-                    refundAddress,
-                    slippage: slippageTolerance,
-                    deadline
-                });
+                return this.getTrade(
+                    fromBlockchain,
+                    toBlockchain,
+                    {
+                        tokenAmountIn,
+                        tokenOut,
+                        fromAddress: fromUserAddress,
+                        receiverAddress,
+                        refundAddress,
+                        slippage: slippageTolerance,
+                        deadline
+                    },
+                    version
+                );
             };
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -227,7 +237,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                                 }
                             }
                         },
-                        transitAmount
+                        transitAmount,
+                        version
                     },
                     options.providerAddress
                 )
@@ -369,7 +380,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             refundAddress: string;
             slippage: number;
             deadline: number;
-        }
+        },
+        version?: 'v1' | 'v2'
     ): Promise<SymbiosisTradeData> {
         if (toBlockchain !== BLOCKCHAIN_NAME.BITCOIN && swapParams.tokenOut) {
             const swappingParams: SwappingParams = [
@@ -383,7 +395,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 true
             ];
 
-            return this.getBestSwappingSwapResult(swappingParams);
+            return this.getBestSwappingSwapResult(swappingParams, version);
         }
 
         const poolId =
@@ -402,7 +414,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         ];
 
         try {
-            return await this.getBestZappingSwapResult(zappingParams);
+            return await this.getBestZappingSwapResult(zappingParams, version);
         } catch (err) {
             if (
                 err.code === ErrorCode.AMOUNT_TOO_LOW ||
@@ -416,10 +428,19 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     }
 
     private async getBestSwappingSwapResult(
-        swappingParams: SwappingParams
+        swappingParams: SwappingParams,
+        version?: 'v1' | 'v2'
     ): Promise<SymbiosisTradeData> {
         const swappingV1 = this.symbiosisV1.newSwapping();
         const swappingV2 = this.symbiosisV2.newSwapping();
+
+        if (version) {
+            const swapping = version === 'v1' ? swappingV1 : swappingV2;
+            return {
+                ...(await swapping.exactIn(...swappingParams)),
+                version
+            };
+        }
 
         const [swapResultV1, swapResultV2] = await Promise.allSettled([
             swappingV1.exactIn(...swappingParams),
@@ -429,10 +450,19 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     }
 
     private async getBestZappingSwapResult(
-        zappingParams: ZappingParams
+        zappingParams: ZappingParams,
+        version?: 'v1' | 'v2'
     ): Promise<SymbiosisTradeData> {
         const zappingV1 = this.symbiosisV1.newZappingRenBTC();
         const zappingV2 = this.symbiosisV2.newZappingRenBTC();
+
+        if (version) {
+            const zapping = version === 'v1' ? zappingV1 : zappingV2;
+            return {
+                ...(await zapping.exactIn(...zappingParams)),
+                version
+            };
+        }
 
         const [swapResultV1, swapResultV2] = await Promise.allSettled([
             zappingV1.exactIn(...zappingParams),

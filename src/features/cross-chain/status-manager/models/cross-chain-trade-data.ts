@@ -44,4 +44,9 @@ export interface CrossChainTradeData {
      * Expected minimum output amount.
      */
     amountOutMin?: string;
+
+    /**
+     * Version of symbiosis sdk, used to make swap.
+     */
+    symbiosisVersion?: 'v1' | 'v2';
 }
