@@ -147,6 +147,26 @@ export class EvmWeb3Public extends Web3Public {
             );
         }
 
+        return this.multicallContractsMethodsByOne(contractAbi, contractsData);
+    }
+
+    /**
+     * Executes multiple calls in the single contract call.
+     * @param calls Multicall calls data list.
+     * @returns Result of calls execution.
+     */
+    private async multicall(calls: EvmCall[]): Promise<EvmMulticallResponse[]> {
+        const contract = new this.web3.eth.Contract(EVM_MULTICALL_ABI, this.multicallAddress);
+        return contract.methods.tryAggregate(false, calls).call();
+    }
+
+    private multicallContractsMethodsByOne<Output extends Web3PrimitiveType>(
+        contractAbi: AbiItem[],
+        contractsData: {
+            contractAddress: string;
+            methodsData: MethodData[];
+        }[]
+    ): Promise<ContractMulticallResponse<Output>[][]> {
         return Promise.all(
             contractsData.map(contractData => {
                 const contract = new this.web3.eth.Contract(
@@ -173,16 +193,6 @@ export class EvmWeb3Public extends Web3Public {
                 );
             })
         );
-    }
-
-    /**
-     * Executes multiple calls in the single contract call.
-     * @param calls Multicall calls data list.
-     * @returns Result of calls execution.
-     */
-    private async multicall(calls: EvmCall[]): Promise<EvmMulticallResponse[]> {
-        const contract = new this.web3.eth.Contract(EVM_MULTICALL_ABI, this.multicallAddress);
-        return contract.methods.tryAggregate(false, calls).call();
     }
 
     public async callContractMethod<T extends Web3PrimitiveType = string>(
