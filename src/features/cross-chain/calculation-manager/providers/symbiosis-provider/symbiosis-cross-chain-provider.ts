@@ -100,16 +100,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            if (
-                fromBlockchain !== BLOCKCHAIN_NAME.BOBA_BSC &&
-                fromBlockchain !== BLOCKCHAIN_NAME.BOBA_AVALANCHE
-            ) {
-                await this.checkContractState(
-                    fromBlockchain as EvmBlockchainName,
-                    rubicProxyContractAddress[fromBlockchain],
-                    evmCommonCrossChainAbi
-                );
-            }
+            await this.checkContractState(
+                fromBlockchain as EvmBlockchainName,
+                rubicProxyContractAddress[fromBlockchain],
+                evmCommonCrossChainAbi
+            );
 
             const isBitcoinSwap = toBlockchain === BLOCKCHAIN_NAME.BITCOIN;
 
@@ -334,13 +329,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         providerAddress: string,
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
-        if (
-            fromBlockchain === BLOCKCHAIN_NAME.BOBA_BSC ||
-            fromBlockchain === BLOCKCHAIN_NAME.BOBA_AVALANCHE
-        ) {
-            return {};
-        }
-
         const fixedFeeAmount = await this.getFixedFee(
             fromBlockchain as EvmBlockchainName,
             providerAddress,
