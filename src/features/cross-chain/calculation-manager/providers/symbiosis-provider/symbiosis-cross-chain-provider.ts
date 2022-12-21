@@ -29,6 +29,7 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { symbiosisTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-transit-tokens';
 import { getSymbiosisV1Config } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-v1-config';
+import { getSymbiosisV2Config } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-v2-config';
 import { SwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/swapping-params';
 import { SymbiosisTradeData } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import { ZappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/zapping-params';
@@ -56,7 +57,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
     private readonly symbiosisV1 = new SymbiosisV1(getSymbiosisV1Config(), 'rubic');
 
-    private readonly symbiosisV2 = new SymbiosisV2('mainnet', 'rubic');
+    private readonly symbiosisV2 = new SymbiosisV2(getSymbiosisV2Config(), 'rubic');
 
     private readonly onChainProviders: Partial<
         Record<SymbiosisCrossChainSupportedBlockchain, OnChainProvider>

@@ -12,6 +12,7 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { Injector } from 'src/core/injector/injector';
 import { getSymbiosisV1Config } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-v1-config';
+import { getSymbiosisV2Config } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-v2-config';
 import {
     RequiredRevertSwapTransactionOptions,
     RevertSwapTransactionOptions
@@ -34,7 +35,7 @@ import { TransactionReceipt } from 'web3-eth';
 export class CrossChainSymbiosisManager {
     private readonly symbiosisV1 = new SymbiosisV1(getSymbiosisV1Config(), 'rubic');
 
-    private readonly symbiosisV2 = new SymbiosisV2('mainnet', 'rubic');
+    private readonly symbiosisV2 = new SymbiosisV2(getSymbiosisV2Config(), 'rubic');
 
     private readonly defaultRevertOptions: RequiredRevertSwapTransactionOptions = {
         slippageTolerance: 0.02,
