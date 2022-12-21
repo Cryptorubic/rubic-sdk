@@ -7,8 +7,6 @@ import { CbridgeTransferConfigsResponse } from 'src/features/cross-chain/calcula
 export class CbridgeCrossChainApiService {
     public static readonly apiEndpoint = 'https://cbridge-prod2.celer.app/v2/';
 
-    constructor() {}
-
     public static async getTransferConfigs(): Promise<CbridgeTransferConfigsResponse> {
         return Injector.httpClient.get(
             `${CbridgeCrossChainApiService.apiEndpoint}getTransferConfigs`
