@@ -53,6 +53,7 @@ module.exports = {
                     }
                 ],
                 'no-empty': ['error', { 'allowEmptyCatch': true }],
+                'no-bitwise': 'off',
                 // Styling.
                 'array-bracket-spacing': ['error', 'never'],
                 'object-curly-spacing': ['error', 'always'],

@@ -15,6 +15,7 @@ export const chainTypeByBlockchain = {
     ),
     [BLOCKCHAIN_NAME.BITCOIN]: CHAIN_TYPE.BITCOIN,
     [BLOCKCHAIN_NAME.TRON]: CHAIN_TYPE.TRON,
+    [BLOCKCHAIN_NAME.ICP]: CHAIN_TYPE.ICP,
     [BLOCKCHAIN_NAME.SOLANA]: undefined,
     [BLOCKCHAIN_NAME.NEAR]: undefined
 };

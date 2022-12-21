@@ -36,5 +36,6 @@ export const blockchainId: Record<BlockchainName, number> = {
     // Non EVN blockchains
     [BLOCKCHAIN_NAME.BITCOIN]: 5555,
     [BLOCKCHAIN_NAME.SOLANA]: NaN,
-    [BLOCKCHAIN_NAME.NEAR]: NaN
+    [BLOCKCHAIN_NAME.NEAR]: NaN,
+    [BLOCKCHAIN_NAME.ICP]: NaN
 };

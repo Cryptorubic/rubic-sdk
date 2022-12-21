@@ -36,7 +36,8 @@ export const BLOCKCHAIN_NAME = {
     SOLANA: 'SOLANA',
     NEAR: 'NEAR',
     BITCOIN: 'BITCOIN',
-    TRON: 'TRON'
+    TRON: 'TRON',
+    ICP: 'ICP'
 } as const;
 
 export type BlockchainName = typeof BLOCKCHAIN_NAME[keyof typeof BLOCKCHAIN_NAME];

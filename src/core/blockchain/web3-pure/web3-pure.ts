@@ -4,6 +4,7 @@ import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Web3PureContainer } from 'src/core/blockchain/web3-pure/models/web3-pure-container';
 import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/bitcoin-web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { IcpWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/icp-web3-pure';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 
 /**
@@ -16,6 +17,8 @@ export class Web3Pure {
     public static [CHAIN_TYPE.BITCOIN] = BitcoinWeb3Pure;
 
     public static [CHAIN_TYPE.TRON] = TronWeb3Pure;
+
+    public static [CHAIN_TYPE.ICP] = IcpWeb3Pure;
 
     /**
      * Increases the gas limit value by the specified percentage and rounds to the nearest integer.
