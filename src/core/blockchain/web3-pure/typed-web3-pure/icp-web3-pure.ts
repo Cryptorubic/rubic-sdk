@@ -21,7 +21,7 @@ export class IcpWeb3Pure {
     }
 
     public static isAddressCorrect(address: string): boolean {
-        if (address.length !== 64) {
+        if (address?.length !== 64) {
             return false;
         }
         const buffer = this.base16Decode(address);

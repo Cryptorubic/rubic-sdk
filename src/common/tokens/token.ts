@@ -30,6 +30,9 @@ export class Token<T extends BlockchainName = BlockchainName> {
         if (tokenBaseStruct.blockchain === BLOCKCHAIN_NAME.BITCOIN) {
             return nativeTokensList[BLOCKCHAIN_NAME.BITCOIN] as Token<T>;
         }
+        if (tokenBaseStruct.blockchain === BLOCKCHAIN_NAME.ICP) {
+            return nativeTokensList[BLOCKCHAIN_NAME.ICP] as Token<T>;
+        }
 
         if (!Web3PublicService.isSupportedBlockchain(tokenBaseStruct.blockchain)) {
             throw new RubicSdkError(

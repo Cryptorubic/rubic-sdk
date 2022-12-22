@@ -7,7 +7,7 @@ export interface HttpClient {
         body: Object,
         options?: {
             headers?: {
-                [header: string]: string | string[];
+                [header: string]: string;
             };
         }
     ): Promise<ResponseBody>;

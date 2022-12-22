@@ -93,10 +93,21 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
          */
 
-        const [toAmount, { minAmount, maxAmount }] = await Promise.all([
-            this.getToAmount(fromCurrency, toCurrency, from.tokenAmount),
-            this.getMinMaxRange(fromCurrency, toCurrency)
-        ]);
+        const { minAmount, maxAmount } = await this.getMinMaxRange(fromCurrency, toCurrency);
+        if (minAmount.gt(from.tokenAmount)) {
+            return {
+                trade: null,
+                error: new MinAmountError(minAmount, from.symbol)
+            };
+        }
+        if (maxAmount?.lt(from.tokenAmount)) {
+            return {
+                trade: null,
+                error: new MaxAmountError(maxAmount, from.symbol)
+            };
+        }
+
+        const toAmount = await this.getToAmount(fromCurrency, toCurrency, from.tokenAmount);
 
         const to = new PriceTokenAmount({
             ...toToken.asStruct,
@@ -123,18 +134,6 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             { ...changenowTrade, gasData },
             options.providerAddress
         );
-        if (minAmount.gt(from.tokenAmount)) {
-            return {
-                trade: changenowCrossChainTrade,
-                error: new MinAmountError(minAmount, from.symbol)
-            };
-        }
-        if (maxAmount?.lt(from.tokenAmount)) {
-            return {
-                trade: changenowCrossChainTrade,
-                error: new MaxAmountError(maxAmount, from.symbol)
-            };
-        }
         if (!options.receiverAddress) {
             return {
                 trade: changenowCrossChainTrade,
@@ -222,7 +221,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         toCurrency: ChangenowCurrency
     ): Promise<{ minAmount: BigNumber; maxAmount: BigNumber | null }> {
         const response = await Injector.httpClient.get<ChangenowRangeResponse>(
-            `https://api.changenow.io/v2/exchange/estimated-amount?flow=standard`,
+            `https://api.changenow.io/v2/exchange/range?flow=standard`,
             {
                 params: {
                     fromCurrency: fromCurrency.ticker,
