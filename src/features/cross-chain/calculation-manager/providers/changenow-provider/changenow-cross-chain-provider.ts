@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { MaxAmountError, MinAmountError, RubicSdkError } from 'src/common/errors';
+import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { nativeTokensList, PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -22,7 +22,6 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-currencies-api';
 import {
     ChangenowEstimatedAmountResponse,
-    ChangenowExchangeResponse,
     ChangenowRangeResponse
 } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-exchange-api';
 import { ChangenowTrade } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-trade';
@@ -117,11 +116,8 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             from: from as PriceTokenAmount<ChangenowCrossChainFromSupportedBlockchain>,
             to,
             toTokenAmountMin: to.tokenAmount,
-
-            id: undefined,
-            payingAddress: undefined,
-            receiverAddress: undefined,
-
+            fromCurrency,
+            toCurrency,
             feeInfo: {},
             gasData: null
         };
@@ -130,32 +126,9 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 ? await ChangenowCrossChainTrade.getGasData(changenowTrade, options.receiverAddress)
                 : null;
 
-        const changenowCrossChainTrade = new ChangenowCrossChainTrade(
-            { ...changenowTrade, gasData },
-            options.providerAddress
-        );
-        if (!options.receiverAddress) {
-            return {
-                trade: changenowCrossChainTrade,
-                error: new RubicSdkError('`receiverAddress` option is required')
-            };
-        }
-
-        const { id, payinAddress: payingAddress } = await this.getPaymentInfo(
-            fromCurrency,
-            toCurrency,
-            from.tokenAmount,
-            options.receiverAddress
-        );
         return {
             trade: new ChangenowCrossChainTrade(
-                {
-                    ...changenowTrade,
-                    gasData,
-                    id,
-                    payingAddress,
-                    receiverAddress: options.receiverAddress
-                },
+                { ...changenowTrade, gasData },
                 options.providerAddress
             )
         };
@@ -238,31 +211,6 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             minAmount: new BigNumber(response.minAmount),
             maxAmount: response.maxAmount ? new BigNumber(response.maxAmount) : null
         };
-    }
-
-    private async getPaymentInfo(
-        fromCurrency: ChangenowCurrency,
-        toCurrency: ChangenowCurrency,
-        fromAmount: BigNumber,
-        receiverAddress: string
-    ): Promise<ChangenowExchangeResponse> {
-        return Injector.httpClient.post<ChangenowExchangeResponse>(
-            'https://api.changenow.io/v2/exchange',
-            {
-                fromCurrency: fromCurrency.ticker,
-                toCurrency: toCurrency.ticker,
-                fromNetwork: fromCurrency.network,
-                toNetwork: toCurrency.network,
-                fromAmount: fromAmount.toFixed(),
-                address: receiverAddress,
-                flow: 'standard'
-            },
-            {
-                headers: {
-                    'x-changenow-api-key': changenowApiKey
-                }
-            }
-        );
     }
 
     protected override async getFeeInfo(

@@ -4,6 +4,7 @@ import {
     ChangenowCrossChainFromSupportedBlockchain,
     ChangenowCrossChainToSupportedBlockchain
 } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-cross-chain-supported-blockchain';
+import { ChangenowCurrency } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-currencies-api';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 
@@ -12,9 +13,8 @@ export interface ChangenowTrade {
     to: PriceTokenAmount<ChangenowCrossChainToSupportedBlockchain>;
     toTokenAmountMin: BigNumber;
 
-    id: string | undefined;
-    payingAddress: string | undefined;
-    receiverAddress: string | undefined;
+    fromCurrency: ChangenowCurrency;
+    toCurrency: ChangenowCurrency;
 
     feeInfo: FeeInfo;
     gasData: GasData;
