@@ -4,6 +4,7 @@ import { nativeTokensList, PriceToken, PriceTokenAmount, Token } from 'src/commo
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
+import { changenowApiKey } from 'src/features/common/providers/changenow/constants/changenow-api-key';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { ChangenowCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/changenow-cross-chain-trade';
@@ -166,7 +167,12 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         to: Token<ChangenowCrossChainSupportedBlockchain>
     ): Promise<{ fromCurrency?: ChangenowCurrency; toCurrency?: ChangenowCurrency }> {
         const currencies = await Injector.httpClient.get<ChangenowCurrenciesResponse>(
-            'https://api.changenow.io/v2/exchange/currencies?active=true&flow=standard'
+            'https://api.changenow.io/v2/exchange/currencies?active=true&flow=standard',
+            {
+                headers: {
+                    'x-changenow-api-key': changenowApiKey
+                }
+            }
         );
 
         const getCurrency = (
@@ -202,6 +208,9 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                     fromAmount: fromAmount.toFixed(),
                     fromNetwork: fromCurrency.network,
                     toNetwork: toCurrency.network
+                },
+                headers: {
+                    'x-changenow-api-key': changenowApiKey
                 }
             }
         );
@@ -220,6 +229,9 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                     toCurrency: toCurrency.ticker,
                     fromNetwork: fromCurrency.network,
                     toNetwork: toCurrency.network
+                },
+                headers: {
+                    'x-changenow-api-key': changenowApiKey
                 }
             }
         );
@@ -245,6 +257,11 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 fromAmount: fromAmount.toFixed(),
                 address: receiverAddress,
                 flow: 'standard'
+            },
+            {
+                headers: {
+                    'x-changenow-api-key': changenowApiKey
+                }
             }
         );
     }

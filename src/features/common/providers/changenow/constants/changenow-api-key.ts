@@ -1,0 +1,1 @@
+export const changenowApiKey = '46d11f3cdfbb6a238aabed90f1d0120bb64daa67200c7398f649758c3ecb6543';
