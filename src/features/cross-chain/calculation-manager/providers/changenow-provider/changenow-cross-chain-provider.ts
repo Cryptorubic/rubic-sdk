@@ -1,10 +1,9 @@
 import BigNumber from 'bignumber.js';
-import { MaxAmountError, MinAmountError } from 'src/common/errors';
+import { MaxAmountError, MinAmountError, RubicSdkError } from 'src/common/errors';
 import { nativeTokensList, PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
-import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { ChangenowCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/changenow-cross-chain-trade';
@@ -22,6 +21,7 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-currencies-api';
 import {
     ChangenowEstimatedAmountResponse,
+    ChangenowExchangeResponse,
     ChangenowRangeResponse
 } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-exchange-api';
 import { ChangenowTrade } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-trade';
@@ -80,6 +80,8 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             return null;
         }
 
+        // todo return
+        /*
         await this.checkContractState(
             fromBlockchain,
             rubicProxyContractAddress[fromBlockchain],
@@ -88,9 +90,10 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
 
         const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
         const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
+         */
 
         const [toAmount, { minAmount, maxAmount }] = await Promise.all([
-            this.getToAmount(fromCurrency, toCurrency, fromWithoutFee.tokenAmount),
+            this.getToAmount(fromCurrency, toCurrency, from.tokenAmount),
             this.getMinMaxRange(fromCurrency, toCurrency)
         ]);
 
@@ -102,7 +105,12 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             from: from as PriceTokenAmount<ChangenowCrossChainFromSupportedBlockchain>,
             to,
             toTokenAmountMin: to.tokenAmount,
-            feeInfo,
+
+            id: undefined,
+            payingAddress: undefined,
+            receiverAddress: undefined,
+
+            feeInfo: {},
             gasData: null
         };
         const gasData =
@@ -114,7 +122,6 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             { ...changenowTrade, gasData },
             options.providerAddress
         );
-
         if (minAmount.gt(from.tokenAmount)) {
             return {
                 trade: changenowCrossChainTrade,
@@ -127,9 +134,30 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 error: new MaxAmountError(maxAmount, from.symbol)
             };
         }
+        if (!options.receiverAddress) {
+            return {
+                trade: changenowCrossChainTrade,
+                error: new RubicSdkError('`receiverAddress` option is required')
+            };
+        }
 
+        const { id, payinAddress: payingAddress } = await this.getPaymentInfo(
+            fromCurrency,
+            toCurrency,
+            from.tokenAmount,
+            options.receiverAddress
+        );
         return {
-            trade: changenowCrossChainTrade
+            trade: new ChangenowCrossChainTrade(
+                {
+                    ...changenowTrade,
+                    gasData,
+                    id,
+                    payingAddress,
+                    receiverAddress: options.receiverAddress
+                },
+                options.providerAddress
+            )
         };
     }
 
@@ -199,6 +227,26 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             minAmount: new BigNumber(response.minAmount),
             maxAmount: response.maxAmount ? new BigNumber(response.maxAmount) : null
         };
+    }
+
+    private async getPaymentInfo(
+        fromCurrency: ChangenowCurrency,
+        toCurrency: ChangenowCurrency,
+        fromAmount: BigNumber,
+        receiverAddress: string
+    ): Promise<ChangenowExchangeResponse> {
+        return Injector.httpClient.post<ChangenowExchangeResponse>(
+            'https://api.changenow.io/v2/exchange',
+            {
+                fromCurrency: fromCurrency.ticker,
+                toCurrency: toCurrency.ticker,
+                fromNetwork: fromCurrency.network,
+                toNetwork: toCurrency.network,
+                fromAmount: fromAmount.toFixed(),
+                address: receiverAddress,
+                flow: 'standard'
+            }
+        );
     }
 
     protected override async getFeeInfo(

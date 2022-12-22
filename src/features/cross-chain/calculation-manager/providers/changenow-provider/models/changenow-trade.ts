@@ -11,6 +11,11 @@ export interface ChangenowTrade {
     from: PriceTokenAmount<ChangenowCrossChainFromSupportedBlockchain>;
     to: PriceTokenAmount<ChangenowCrossChainToSupportedBlockchain>;
     toTokenAmountMin: BigNumber;
+
+    id: string | undefined;
+    payingAddress: string | undefined;
+    receiverAddress: string | undefined;
+
     feeInfo: FeeInfo;
     gasData: GasData;
 }

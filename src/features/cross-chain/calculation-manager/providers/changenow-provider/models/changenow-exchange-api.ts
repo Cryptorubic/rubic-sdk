@@ -5,3 +5,8 @@ export interface ChangenowRangeResponse {
     minAmount: string;
     maxAmount: string | null;
 }
+
+export interface ChangenowExchangeResponse {
+    id: string;
+    payinAddress: string;
+}
