@@ -5,4 +5,5 @@ export interface CbridgeEstimateAmountResponse {
     readonly base_fee: string;
     readonly slippage_tolerance: number;
     readonly max_slippage: number;
+    readonly estimated_receive_amt: string;
 }

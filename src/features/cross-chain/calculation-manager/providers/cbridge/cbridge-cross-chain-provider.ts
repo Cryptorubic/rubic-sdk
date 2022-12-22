@@ -1,5 +1,10 @@
 import BigNumber from 'bignumber.js';
-import { NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
+import {
+    MaxAmountError,
+    MinAmountError,
+    NotSupportedTokensError,
+    RubicSdkError
+} from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { TokenStruct } from 'src/common/tokens/token';
@@ -13,6 +18,7 @@ import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CbridgeCrossChainApiService } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-api-service';
 import { CbridgeCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-trade';
+import { cbridgeContractAbi } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-abi';
 import { cbridgeContractAddress } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-address';
 import {
     CbridgeCrossChainSupportedBlockchain,
@@ -102,7 +108,10 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             }
             const toTransitToken =
                 celerTransitTokens[toToken.blockchain as CelerCrossChainSupportedBlockchain];
-            if (onChainTrade && !compareAddresses(toTransitToken.address, toToken.address)) {
+            if (
+                (onChainTrade && !compareAddresses(toTransitToken.address, toToken.address)) ||
+                (!onChainTrade && fromToken.symbol !== toToken.symbol)
+            ) {
                 throw new RubicSdkError('Not supported tokens');
             }
 
@@ -121,6 +130,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                     ? await CbridgeCrossChainTrade.getGasData(fromToken, to, onChainTrade)
                     : null;
 
+            const amountsErrors = await this.getMinMaxAmountsErrors(transitToken);
+
             return {
                 trade: new CbridgeCrossChainTrade(
                     {
@@ -136,7 +147,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                         onChainTrade
                     },
                     options.providerAddress
-                )
+                ),
+                error: amountsErrors
             };
         } catch (err) {
             const rubicSdkError = CrossChainProvider.parseError(err);
@@ -218,9 +230,9 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             slippage_tolerance: Number((options.slippageTolerance * 1_000_000).toFixed(0)),
             amt: fromToken.stringWeiAmount
         };
-        const { eq_value_token_amt, max_slippage } =
+        const { estimated_receive_amt, max_slippage } =
             await CbridgeCrossChainApiService.fetchEstimateAmount(requestParams);
-        return { amount: eq_value_token_amt, maxSlippage: max_slippage };
+        return { amount: estimated_receive_amt, maxSlippage: max_slippage };
     }
 
     private async getOnChainTrade(
@@ -271,5 +283,43 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             multichainProxyContractAbi,
             'getAvailableRouters'
         );
+    }
+
+    private async getMinMaxAmountsErrors(
+        fromToken: PriceTokenAmount<EvmBlockchainName>
+    ): Promise<MinAmountError | MaxAmountError | undefined> {
+        try {
+            const fromBlockchain = fromToken.blockchain as CbridgeCrossChainSupportedBlockchain;
+            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+
+            const minAmount = await web3Public.callContractMethod(
+                cbridgeContractAddress[fromBlockchain].providerRouter,
+                cbridgeContractAbi,
+                'minSend',
+                [fromToken.address]
+            );
+            if (new BigNumber(minAmount).gt(fromToken.stringWeiAmount)) {
+                return new MinAmountError(
+                    Web3Pure.fromWei(minAmount, fromToken.decimals),
+                    fromToken.symbol
+                );
+            }
+
+            const maxAmount = await web3Public.callContractMethod(
+                cbridgeContractAddress[fromBlockchain].providerRouter,
+                cbridgeContractAbi,
+                'maxSend',
+                [fromToken.address]
+            );
+            if (new BigNumber(maxAmount).lt(fromToken.stringWeiAmount)) {
+                return new MaxAmountError(
+                    Web3Pure.fromWei(maxAmount, fromToken.decimals),
+                    fromToken.symbol
+                );
+            }
+        } catch {
+            return undefined;
+        }
+        return undefined;
     }
 }

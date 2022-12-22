@@ -67,9 +67,7 @@ export class CrossChainCbridgeManager {
             const statusResponse = await CbridgeCrossChainApiService.fetchTradeStatus(transferId);
             if (statusResponse.status === TransferHistoryStatus.TRANSFER_TO_BE_REFUNDED) {
                 await CrossChainCbridgeManager.withdrawLiquidity(transferId, estimateAmount);
-                await new Promise(resolve => {
-                    setTimeout(() => resolve(''), 10_000);
-                });
+                await new Promise(resolve => setTimeout(resolve, 10_000));
                 return CrossChainCbridgeManager.transferRefund(
                     fromBlockchain,
                     statusResponse,

@@ -524,7 +524,6 @@ export class CrossChainStatusManager {
                 case TransferHistoryStatus.TRANSFER_UNKNOWN:
                 case TransferHistoryStatus.TRANSFER_SUBMITTING:
                 case TransferHistoryStatus.TRANSFER_WAITING_FOR_SGN_CONFIRMATION:
-                case TransferHistoryStatus.TRANSFER_WAITING_FOR_FUND_RELEASE:
                 case TransferHistoryStatus.TRANSFER_REQUESTING_REFUND:
                 case TransferHistoryStatus.TRANSFER_CONFIRMING_YOUR_REFUND:
                 default:
@@ -540,6 +539,7 @@ export class CrossChainStatusManager {
                         status: TxStatus.FAIL,
                         hash: null
                     };
+                case TransferHistoryStatus.TRANSFER_WAITING_FOR_FUND_RELEASE:
                 case TransferHistoryStatus.TRANSFER_TO_BE_REFUNDED:
                     return {
                         status: TxStatus.REVERT,

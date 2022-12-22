@@ -15,5 +15,10 @@ export const cbridgeContractAddress: Record<
         providerGateway: '0x88DCDC47D2f83a99CF0000FDF667A468bB958a78',
         providerRouter: '0x88DCDC47D2f83a99CF0000FDF667A468bB958a78',
         rubicRouter: '0x3420865a31C84C468a88BcAEf6CeC69e2885e7bA'
+    },
+    [BLOCKCHAIN_NAME.AVALANCHE]: {
+        providerGateway: '0xef3c714c9425a8F3697A9C969Dc1af30ba82e5d4',
+        providerRouter: '0xef3c714c9425a8F3697A9C969Dc1af30ba82e5d4',
+        rubicRouter: '0x3420865a31C84C468a88BcAEf6CeC69e2885e7bA'
     }
 };
