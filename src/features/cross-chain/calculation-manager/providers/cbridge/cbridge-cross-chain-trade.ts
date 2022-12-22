@@ -80,11 +80,11 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE;
 
     public readonly isAggregator = false;
 
-    public readonly bridgeType = BRIDGE_TYPE.CELER;
+    public readonly bridgeType = BRIDGE_TYPE.CELER_BRIDGE;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
@@ -139,7 +139,7 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         this.priceImpact = crossChainTrade.priceImpact;
         this.slippage = crossChainTrade.slippage;
         this.toTokenAmountMin = crossChainTrade.transitMinAmount.multipliedBy(
-            1 - crossChainTrade.slippage
+            1 - crossChainTrade.maxSlippage / 10_000_000
         );
         this.feeInfo = crossChainTrade.feeInfo;
         this.priceImpact = crossChainTrade.priceImpact;
@@ -182,8 +182,10 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             ).data;
             methodArguments.push(encodedData);
             swapArguments.push(this.onChainTrade.dexContractAddress);
+        } else {
+            swapArguments.push(EvmWeb3Pure.EMPTY_ADDRESS);
         }
-        methodArguments.push(this.maxSlippage, swapArguments);
+        methodArguments.push(502, swapArguments);
 
         const value = this.getSwapValue();
 
@@ -209,7 +211,7 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ? { total: this.priceImpact } : null,
-            slippage: { total: this.slippage }
+            slippage: { total: this.maxSlippage / 100_000 }
         };
     }
 

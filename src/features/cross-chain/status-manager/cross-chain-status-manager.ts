@@ -14,6 +14,7 @@ import {
 } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { CbridgeCrossChainApiService } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-api-service';
+import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
 import { TransferHistoryStatus } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
 import { LifiSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
 import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
@@ -21,6 +22,7 @@ import { SymbiosisSwapStatus } from 'src/features/cross-chain/calculation-manage
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-default-api-key';
 import { ViaSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/via-provider/models/via-swap-status';
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
+import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
 import { MultichainStatusMapping } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
 import { CelerTransferStatus } from 'src/features/cross-chain/status-manager/models/celer-transfer-status.enum';
 import { CrossChainStatus } from 'src/features/cross-chain/status-manager/models/cross-chain-status';
@@ -512,9 +514,11 @@ export class CrossChainStatusManager {
 
     private async getCelerBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
-            const swapData = await CbridgeCrossChainApiService.fetchTradeStatus(
-                data.celerTransactionId!
+            const transferId = await CrossChainCbridgeManager.getTransferId(
+                data.srcTxHash,
+                data.fromBlockchain as CbridgeCrossChainSupportedBlockchain
             );
+            const swapData = await CbridgeCrossChainApiService.fetchTradeStatus(transferId);
 
             switch (swapData.status) {
                 case TransferHistoryStatus.TRANSFER_UNKNOWN:
