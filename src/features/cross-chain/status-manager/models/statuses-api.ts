@@ -21,7 +21,7 @@ export interface SymbiosisApiResponse {
     tx: {
         hash: string;
         chainId: number;
-    };
+    } | null;
 }
 
 export interface BtcStatusResponse {

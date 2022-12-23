@@ -194,15 +194,16 @@ export class CrossChainStatusManager {
         if (symbiosisTxIndexingTimeSpent) {
             try {
                 const srcChainId = blockchainId[data.fromBlockchain];
+                const baseApi = data.symbiosisVersion === 'v2' ? 'api-v2' : 'api';
                 const {
                     status: { text: dstTxStatus },
-                    tx: { hash: dstHash }
+                    tx
                 } = await Injector.httpClient.get<SymbiosisApiResponse>(
-                    `https://api.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
+                    `https://${baseApi}.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
                 );
                 let dstTxData: TxStatusData = {
                     status: TxStatus.PENDING,
-                    hash: dstHash || null
+                    hash: tx?.hash || null
                 };
 
                 if (
@@ -224,7 +225,7 @@ export class CrossChainStatusManager {
                     if (data.toBlockchain !== BLOCKCHAIN_NAME.BITCOIN) {
                         dstTxData.status = TxStatus.SUCCESS;
                     } else {
-                        dstTxData = await this.getBitcoinStatus(dstHash);
+                        dstTxData = await this.getBitcoinStatus(tx!.hash);
                     }
                 }
 
