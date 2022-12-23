@@ -7,6 +7,7 @@ import {
 } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, wrappedNativeTokensList } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { PriceTokenAmountStruct } from 'src/common/tokens/price-token-amount';
 import { TokenStruct } from 'src/common/tokens/token';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -106,13 +107,30 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
 
                 transitTokenAmount = onChainTrade.to.tokenAmount;
                 transitMinAmount = onChainTrade.toTokenAmountMin.tokenAmount;
-                transitToken = new PriceTokenAmount<EvmBlockchainName>({
+
+                const defaultTransit = new PriceTokenAmount<EvmBlockchainName>({
                     ...(celerTransitTokens[
                         fromToken.blockchain as CelerCrossChainSupportedBlockchain
                     ] as TokenStruct<EvmBlockchainName>),
                     tokenAmount: transitTokenAmount,
                     price: new BigNumber(0)
                 });
+                const transitConfig = await this.fetchContractAddressAndCheckTokens(
+                    defaultTransit,
+                    toToken
+                );
+                const celerTransitTokenStruct: PriceTokenAmountStruct<EvmBlockchainName> = {
+                    blockchain: fromToken.blockchain,
+                    address: transitConfig.supportedFromToken!.token.address,
+                    name: transitConfig.supportedFromToken!.name,
+                    symbol: transitConfig.supportedFromToken!.token.symbol,
+                    decimals: transitConfig.supportedFromToken!.token.decimal,
+                    price: new BigNumber(0),
+                    tokenAmount: transitTokenAmount
+                };
+                transitToken = transitConfig?.supportedFromToken
+                    ? new PriceTokenAmount<EvmBlockchainName>(celerTransitTokenStruct)
+                    : defaultTransit;
             }
             const toTransitToken =
                 celerTransitTokens[toToken.blockchain as CelerCrossChainSupportedBlockchain];
@@ -243,7 +261,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             supportedToNative,
             address: config.chains.find(chain => chain.id === fromChainId)!.contract_addr,
             isTokenBridge: supportedFromToken?.token.symbol === supportedToToken?.token.symbol,
-            isNativeBridge: Boolean(supportedFromNative)
+            isNativeBridge: Boolean(supportedFromNative) && Boolean(supportedToNative)
         };
     }
 
@@ -253,12 +271,17 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         options: RequiredCrossChainOptions,
         config: CelerConfig
     ): Promise<{ amount: string; maxSlippage: number }> {
+        let tokenSymbol = fromToken.symbol;
+        if (config.isTokenBridge) {
+            tokenSymbol = config.supportedFromToken?.token.symbol || tokenSymbol;
+        }
+        if (config.isNativeBridge) {
+            tokenSymbol = config.supportedFromNative?.token.symbol || tokenSymbol;
+        }
         const requestParams: CbridgeEstimateAmountRequest = {
             src_chain_id: blockchainId[fromToken.blockchain],
             dst_chain_id: blockchainId[toToken.blockchain],
-            token_symbol: config.isNativeBridge
-                ? config.supportedFromNative?.token.symbol || fromToken.symbol
-                : config.supportedFromToken?.token.symbol || fromToken.symbol,
+            token_symbol: tokenSymbol,
             usr_addr: options?.receiverAddress || this.getWalletAddress(fromToken.blockchain),
             slippage_tolerance: Number((options.slippageTolerance * 1_000_000).toFixed(0)),
             amt: fromToken.stringWeiAmount
