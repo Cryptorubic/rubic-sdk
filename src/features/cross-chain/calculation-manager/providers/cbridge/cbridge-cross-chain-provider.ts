@@ -5,7 +5,7 @@ import {
     NotSupportedTokensError,
     RubicSdkError
 } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount, wrappedNativeTokensList } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { TokenStruct } from 'src/common/tokens/token';
 import { compareAddresses } from 'src/common/utils/blockchain';
@@ -20,10 +20,12 @@ import { CbridgeCrossChainApiService } from 'src/features/cross-chain/calculatio
 import { CbridgeCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-trade';
 import { cbridgeContractAbi } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-abi';
 import { cbridgeContractAddress } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-address';
+import { cbridgeProxyAbi } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-proxy-abi';
 import {
     CbridgeCrossChainSupportedBlockchain,
     cbridgeSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
+import { TokenInfo } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-chain-token-info';
 import { CbridgeEstimateAmountRequest } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-estimate-amount-request';
 import { celerTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-transit-tokens';
 import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
@@ -33,6 +35,16 @@ import { CalculationResult } from 'src/features/cross-chain/calculation-manager/
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+
+interface CelerConfig {
+    address: string;
+    supportedFromToken: TokenInfo | undefined;
+    supportedFromNative: TokenInfo | undefined;
+    supportedToToken: TokenInfo | undefined;
+    supportedToNative: TokenInfo | undefined;
+    isTokenBridge: boolean;
+    isNativeBridge: boolean;
+}
 
 export class CbridgeCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE;
@@ -64,7 +76,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             );
 
             const config = await this.fetchContractAddressAndCheckTokens(fromToken, toToken);
-            if (!config.supportedToToken) {
+            if (!config.supportedToToken && !config.supportedToNative) {
                 throw new RubicSdkError('To token is not supported');
             }
 
@@ -77,9 +89,9 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             let onChainTrade: EvmOnChainTrade | null = null;
             let transitTokenAmount = fromWithoutFee.tokenAmount;
             let transitMinAmount = transitTokenAmount;
-            let transitToken = fromToken;
+            let transitToken = fromWithoutFee;
 
-            if (!config.supportedFromToken) {
+            if (!config.isNativeBridge && !config.isTokenBridge) {
                 onChainTrade = await this.getOnChainTrade(
                     fromWithoutFee,
                     [],
@@ -104,14 +116,16 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             }
             const toTransitToken =
                 celerTransitTokens[toToken.blockchain as CelerCrossChainSupportedBlockchain];
-            if (
-                (onChainTrade && !compareAddresses(toTransitToken.address, toToken.address)) ||
-                (!onChainTrade && fromToken.symbol !== toToken.symbol)
-            ) {
+            if (onChainTrade && !compareAddresses(toTransitToken.address, toToken.address)) {
                 throw new RubicSdkError('Not supported tokens');
             }
 
-            const { amount, maxSlippage } = await this.getEstimates(transitToken, toToken, options);
+            const { amount, maxSlippage } = await this.getEstimates(
+                transitToken,
+                toToken,
+                options,
+                config
+            );
             if (!amount) {
                 throw new RubicSdkError('Can not estimate trade');
             }
@@ -167,7 +181,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                         fromBlockchain,
                         providerAddress,
                         cbridgeContractAddress[fromBlockchain].rubicRouter,
-                        evmCommonCrossChainAbi
+                        cbridgeProxyAbi
                     ),
                     tokenSymbol: nativeTokensList[fromBlockchain].symbol
                 },
@@ -176,7 +190,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                         fromBlockchain,
                         providerAddress,
                         cbridgeContractAddress[fromBlockchain].rubicRouter,
-                        evmCommonCrossChainAbi
+                        cbridgeProxyAbi
                     ),
                     tokenSymbol: 'USDC'
                 }
@@ -187,9 +201,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
     private async fetchContractAddressAndCheckTokens(
         fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>
-    ): Promise<{ address: string; supportedFromToken: boolean; supportedToToken: boolean }> {
+    ): Promise<CelerConfig> {
         const config = await CbridgeCrossChainApiService.getTransferConfigs();
-
         const fromChainId = blockchainId[fromToken.blockchain];
         const toChainId = blockchainId[toToken.blockchain];
         if (
@@ -199,29 +212,53 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             throw new RubicSdkError('Not supported chain');
         }
 
-        const supportedFromToken = !!config.chain_token?.[fromChainId]?.token.some(el =>
+        const supportedFromToken = config.chain_token?.[fromChainId]?.token.find(el =>
             compareAddresses(el.token.address, fromToken.address)
         );
-        const supportedToToken = !!config.chain_token?.[toChainId]?.token.some(el =>
+        const supportedFromNative = config.chain_token?.[fromChainId]?.token.find(
+            el =>
+                wrappedNativeTokensList[fromToken.blockchain].symbol.toLowerCase() ===
+                    el.token.symbol.toLowerCase() ||
+                nativeTokensList[fromToken.blockchain].symbol.toLowerCase() ===
+                    el.token.symbol.toLowerCase()
+        );
+
+        const supportedToToken = config.chain_token?.[toChainId]?.token.find(el =>
             compareAddresses(el.token.address, toToken.address)
+        );
+
+        const supportedToNative = config.chain_token?.[toChainId]?.token.find(
+            el =>
+                compareAddresses(
+                    el.token.address,
+                    wrappedNativeTokensList[toToken.blockchain].address
+                ) ||
+                compareAddresses(el.token.address, nativeTokensList[toToken.blockchain].address)
         );
 
         return {
             supportedFromToken,
+            supportedFromNative,
             supportedToToken,
-            address: config.chains.find(chain => chain.id === fromChainId)!.contract_addr
+            supportedToNative,
+            address: config.chains.find(chain => chain.id === fromChainId)!.contract_addr,
+            isTokenBridge: supportedFromToken?.token.symbol === supportedToToken?.token.symbol,
+            isNativeBridge: Boolean(supportedFromNative)
         };
     }
 
     private async getEstimates(
         fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
-        options: RequiredCrossChainOptions
+        options: RequiredCrossChainOptions,
+        config: CelerConfig
     ): Promise<{ amount: string; maxSlippage: number }> {
         const requestParams: CbridgeEstimateAmountRequest = {
             src_chain_id: blockchainId[fromToken.blockchain],
             dst_chain_id: blockchainId[toToken.blockchain],
-            token_symbol: fromToken.symbol,
+            token_symbol: config.isNativeBridge
+                ? config.supportedFromNative?.token.symbol || fromToken.symbol
+                : config.supportedFromToken?.token.symbol || fromToken.symbol,
             usr_addr: options?.receiverAddress || this.getWalletAddress(fromToken.blockchain),
             slippage_tolerance: Number((options.slippageTolerance * 1_000_000).toFixed(0)),
             amt: fromToken.stringWeiAmount
@@ -272,11 +309,15 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             const fromBlockchain = fromToken.blockchain as CbridgeCrossChainSupportedBlockchain;
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 
+            const fromTokenAddress = fromToken.isNative
+                ? wrappedNativeTokensList[fromBlockchain].address
+                : fromToken.address;
+
             const minAmountString = await web3Public.callContractMethod(
                 cbridgeContractAddress[fromBlockchain].providerRouter,
                 cbridgeContractAbi,
                 'minSend',
-                [fromToken.address]
+                [fromTokenAddress]
             );
             const minAmount = new BigNumber(minAmountString).multipliedBy(1.05);
             if (minAmount.gt(fromToken.stringWeiAmount)) {
@@ -290,7 +331,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                 cbridgeContractAddress[fromBlockchain].providerRouter,
                 cbridgeContractAbi,
                 'maxSend',
-                [fromToken.address]
+                [fromTokenAddress]
             );
             const maxAmount = new BigNumber(maxAmountString).dividedBy(0.95);
             if (maxAmount.lt(fromToken.stringWeiAmount)) {

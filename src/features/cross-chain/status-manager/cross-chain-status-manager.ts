@@ -15,7 +15,10 @@ import {
 import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { CbridgeCrossChainApiService } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-api-service';
 import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
-import { TransferHistoryStatus } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
+import {
+    TransferHistoryStatus,
+    XferStatus
+} from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
 import { LifiSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
 import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
 import { SymbiosisSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
@@ -541,10 +544,15 @@ export class CrossChainStatusManager {
                     };
                 case TransferHistoryStatus.TRANSFER_WAITING_FOR_FUND_RELEASE:
                 case TransferHistoryStatus.TRANSFER_TO_BE_REFUNDED:
-                    return {
-                        status: TxStatus.REVERT,
-                        hash: null
-                    };
+                    return swapData.refund_reason === XferStatus.OK_TO_RELAY
+                        ? {
+                              status: TxStatus.PENDING,
+                              hash: null
+                          }
+                        : {
+                              status: TxStatus.REVERT,
+                              hash: null
+                          };
             }
         } catch {
             return { status: TxStatus.PENDING, hash: null };

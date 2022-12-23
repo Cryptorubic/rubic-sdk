@@ -12,7 +12,6 @@ import {
     CbridgeStatusResponse,
     TransferHistoryStatus
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
-import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
 import Web3 from 'web3';
 import { TransactionReceipt } from 'web3-eth';
 
@@ -30,7 +29,7 @@ export class CrossChainCbridgeManager {
 
     public static async getTransferId(
         sourceTransaction: string,
-        fromBlockchain: CelerCrossChainSupportedBlockchain
+        fromBlockchain: CbridgeCrossChainSupportedBlockchain
     ): Promise<string> {
         const transactionRecipient = await Injector.web3PublicService
             .getWeb3Public(fromBlockchain)

@@ -5,7 +5,7 @@ interface Token {
     readonly xfer_disabled: boolean;
 }
 
-interface TokenInfo {
+export interface TokenInfo {
     readonly token: Token;
     readonly name: string;
     readonly icon: string;
