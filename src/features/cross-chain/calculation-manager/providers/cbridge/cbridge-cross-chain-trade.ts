@@ -185,7 +185,7 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         } else {
             swapArguments.push(EvmWeb3Pure.EMPTY_ADDRESS);
         }
-        methodArguments.push(502, swapArguments);
+        methodArguments.push(this.maxSlippage, swapArguments);
 
         const value = this.getSwapValue();
 

@@ -272,26 +272,28 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             const fromBlockchain = fromToken.blockchain as CbridgeCrossChainSupportedBlockchain;
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 
-            const minAmount = await web3Public.callContractMethod(
+            const minAmountString = await web3Public.callContractMethod(
                 cbridgeContractAddress[fromBlockchain].providerRouter,
                 cbridgeContractAbi,
                 'minSend',
                 [fromToken.address]
             );
-            if (new BigNumber(minAmount).gt(fromToken.stringWeiAmount)) {
+            const minAmount = new BigNumber(minAmountString).multipliedBy(1.05);
+            if (minAmount.gt(fromToken.stringWeiAmount)) {
                 return new MinAmountError(
                     Web3Pure.fromWei(minAmount, fromToken.decimals),
                     fromToken.symbol
                 );
             }
 
-            const maxAmount = await web3Public.callContractMethod(
+            const maxAmountString = await web3Public.callContractMethod(
                 cbridgeContractAddress[fromBlockchain].providerRouter,
                 cbridgeContractAbi,
                 'maxSend',
                 [fromToken.address]
             );
-            if (new BigNumber(maxAmount).lt(fromToken.stringWeiAmount)) {
+            const maxAmount = new BigNumber(maxAmountString).dividedBy(0.95);
+            if (maxAmount.lt(fromToken.stringWeiAmount)) {
                 return new MaxAmountError(
                     Web3Pure.fromWei(maxAmount, fromToken.decimals),
                     fromToken.symbol
