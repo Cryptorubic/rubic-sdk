@@ -31,9 +31,6 @@ import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { multichainProxyContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-abi';
-import { multichainProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-address';
-import { MultichainProxyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/models/supported-blockchain';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
@@ -83,10 +80,9 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             let transitToken = fromToken;
 
             if (!config.supportedFromToken) {
-                const whiteListedDexes = await this.getWhitelistedDexes(fromBlockchain);
                 onChainTrade = await this.getOnChainTrade(
                     fromWithoutFee,
-                    whiteListedDexes,
+                    [],
                     options.slippageTolerance
                 );
                 if (!onChainTrade) {
@@ -237,7 +233,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
 
     private async getOnChainTrade(
         from: PriceTokenAmount,
-        availableDexes: string[],
+        _availableDexes: string[],
         slippageTolerance: number
     ): Promise<EvmOnChainTrade | null> {
         const fromBlockchain = from.blockchain as CelerCrossChainSupportedBlockchain;
@@ -261,28 +257,12 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         )
             .filter(value => value.status === 'fulfilled')
             .map(value => (value as PromiseFulfilledResult<EvmOnChainTrade>).value)
-            .filter(onChainTrade =>
-                availableDexes.some(availableDex =>
-                    compareAddresses(availableDex, onChainTrade.dexContractAddress)
-                )
-            )
             .sort((a, b) => b.to.tokenAmount.comparedTo(a.to.tokenAmount));
 
         if (!onChainTrades.length) {
             return null;
         }
         return onChainTrades[0]!;
-    }
-
-    private getWhitelistedDexes(
-        fromBlockchain: MultichainProxyCrossChainSupportedBlockchain
-    ): Promise<string[]> {
-        const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-        return web3Public.callContractMethod<string[]>(
-            multichainProxyContractAddress[fromBlockchain],
-            multichainProxyContractAbi,
-            'getAvailableRouters'
-        );
     }
 
     private async getMinMaxAmountsErrors(
