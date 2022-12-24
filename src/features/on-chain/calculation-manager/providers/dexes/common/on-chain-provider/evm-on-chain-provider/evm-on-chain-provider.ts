@@ -36,9 +36,13 @@ export abstract class EvmOnChainProvider extends OnChainProvider {
     ): Promise<EvmOnChainTrade>;
 
     protected async checkContractState(fromBlockchain: EvmBlockchainName): Promise<void | never> {
-        const isPaused = await this.onChainProxyService.isContractPaused(fromBlockchain);
-        if (isPaused) {
-            throw new OnChainIsUnavailableError();
+        try {
+            const isPaused = await this.onChainProxyService.isContractPaused(fromBlockchain);
+            if (isPaused) {
+                throw new OnChainIsUnavailableError();
+            }
+        } catch (e) {
+            console.log(e);
         }
     }
 
@@ -52,7 +56,11 @@ export abstract class EvmOnChainProvider extends OnChainProvider {
         let fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
         let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
         if (fullOptions.useProxy) {
-            await this.checkContractState(from.blockchain);
+            try {
+                await this.checkContractState(from.blockchain);
+            } catch (e) {
+                console.log(e);
+            }
 
             proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
                 from,

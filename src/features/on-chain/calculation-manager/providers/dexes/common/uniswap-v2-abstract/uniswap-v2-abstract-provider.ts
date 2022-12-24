@@ -48,7 +48,13 @@ export abstract class UniswapV2AbstractProvider<
         to: PriceToken<EvmBlockchainName>,
         options?: OnChainCalculationOptions
     ): Promise<UniswapV2AbstractTrade> {
-        return this.calculateDifficultTrade(from, to, from.weiAmount, 'input', options);
+        try {
+            return this.calculateDifficultTrade(from, to, from.weiAmount, 'input', options);
+        } catch (e) {
+            console.log(e);
+
+            return this.calculateDifficultTrade(from, to, from.weiAmount, 'input', options);
+        }
     }
 
     /**
@@ -99,15 +105,19 @@ export abstract class UniswapV2AbstractProvider<
         let weiAmountWithoutFee = weiAmount;
         let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
         if (fullOptions.useProxy) {
-            const proxyContractInfo = await this.handleProxyContract(
-                new PriceTokenAmount({
-                    ...fromToken.asStruct,
-                    weiAmount
-                }),
-                fullOptions
-            );
-            weiAmountWithoutFee = proxyContractInfo.fromWithoutFee.weiAmount;
-            proxyFeeInfo = proxyContractInfo.proxyFeeInfo;
+            try {
+                const proxyContractInfo = await this.handleProxyContract(
+                    new PriceTokenAmount({
+                        ...fromToken.asStruct,
+                        weiAmount
+                    }),
+                    fullOptions
+                );
+                weiAmountWithoutFee = proxyContractInfo.fromWithoutFee.weiAmount;
+                proxyFeeInfo = proxyContractInfo.proxyFeeInfo;
+            } catch (e) {
+                console.log(e);
+            }
         }
 
         const fromProxy = createTokenNativeAddressProxy(
