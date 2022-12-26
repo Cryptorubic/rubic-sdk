@@ -8,6 +8,8 @@ import { SymbiosisCrossChainProvider } from 'src/features/cross-chain/calculatio
 import { ViaCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/via-provider/via-cross-chain-provider';
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 
+import { StargateCrossChainProvider } from '../providers/stargate-provider/stargate-cross-chain-provider';
+
 export const CrossChainProviders = [
     CelerCrossChainProvider,
     SymbiosisCrossChainProvider,
@@ -17,5 +19,6 @@ export const CrossChainProviders = [
     ViaCrossChainProvider,
     BridgersCrossChainProvider,
     DexMultichainCrossChainProvider,
-    XyCrossChainProvider
+    XyCrossChainProvider,
+    StargateCrossChainProvider
 ] as const;
