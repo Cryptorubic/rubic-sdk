@@ -6,7 +6,6 @@ import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/bl
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
-import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
@@ -51,17 +50,18 @@ export class XyCrossChainProvider extends CrossChainProvider {
             const receiverAddress =
                 options.receiverAddress || this.getWalletAddress(fromBlockchain);
 
-            await this.checkContractState(
-                fromBlockchain,
-                xyContractAddress[fromBlockchain].rubicRouter,
-                evmCommonCrossChainAbi
-            );
+            // await this.checkContractState(
+            //     fromBlockchain,
+            //     xyContractAddress[fromBlockchain].rubicRouter,
+            //     evmCommonCrossChainAbi
+            // );
 
-            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-            const fromWithoutFee = getFromWithoutFee(
-                fromToken,
-                feeInfo.rubicProxy?.platformFee?.percent
-            );
+            // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
+            // const fromWithoutFee = getFromWithoutFee(
+            //     fromToken,
+            //     feeInfo.rubicProxy?.platformFee?.percent
+            // );
+            const fromWithoutFee = fromToken;
 
             const slippageTolerance = options.slippageTolerance * 100;
 
@@ -111,7 +111,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                         priceImpact: fromToken.calculatePriceImpactPercent(to) || 0,
                         slippage: options.slippageTolerance,
                         feeInfo: {
-                            ...feeInfo,
+                            // ...feeInfo,
                             provider: {
                                 cryptoFee: {
                                     amount: new BigNumber(xyFee!.amount),
