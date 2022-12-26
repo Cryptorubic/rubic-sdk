@@ -21,8 +21,6 @@ import { LifiProvider } from 'src/features/on-chain/calculation-manager/provider
 import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
 import { OpenOceanProvider } from 'src/features/on-chain/calculation-manager/providers/open-ocean/open-ocean-provider';
 
-import { RequiredOnChainCalculationOptions } from './providers/common/models/on-chain-calculation-options';
-
 /**
  * Contains methods to calculate on-chain trades.
  */
@@ -144,22 +142,20 @@ export class OnChainManager {
         ) as [OnChainTradeType, OnChainProvider][];
         const dexesTradesPromise = this.calculateDexes(from, to, dexesProviders, options);
 
-        const lifiTradesPromise = this.calculateLifiTrades(
-            from,
-            to,
-            dexesProviders.map(dexProvider => dexProvider[0]),
-            options
-        );
+        // const lifiTradesPromise = this.calculateLifiTrades(
+        //     from,
+        //     to,
+        //     dexesProviders.map(dexProvider => dexProvider[0]),
+        //     options
+        // );
 
-        const openOceanTradePromise = this.openOceanProvider.calculate(
-            from as PriceTokenAmount<EvmBlockchainName>,
-            to as PriceTokenAmount<EvmBlockchainName>,
-            options as RequiredOnChainCalculationOptions
-        );
+        // const openOceanTradePromise = this.openOceanProvider.calculate(
+        //     from as PriceTokenAmount<EvmBlockchainName>,
+        //     to as PriceTokenAmount<EvmBlockchainName>,
+        //     options as RequiredOnChainCalculationOptions
+        // );
 
-        const trades = (
-            await Promise.all([dexesTradesPromise, lifiTradesPromise, openOceanTradePromise])
-        ).flat();
+        const trades = (await Promise.all([dexesTradesPromise])).flat();
         return trades.sort((tradeA, tradeB) => {
             if (tradeA instanceof OnChainTrade || tradeB instanceof OnChainTrade) {
                 if (tradeA instanceof OnChainTrade && tradeB instanceof OnChainTrade) {

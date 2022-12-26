@@ -100,13 +100,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            /*
-            await this.checkContractState(
-                fromBlockchain as EvmBlockchainName,
-                rubicProxyContractAddress[fromBlockchain],
-                evmCommonCrossChainAbi
-            );
-            */
+            // await this.checkContractState(
+            //     fromBlockchain as EvmBlockchainName,
+            //     rubicProxyContractAddress[fromBlockchain],
+            //     evmCommonCrossChainAbi
+            // );
 
             const isBitcoinSwap = toBlockchain === BLOCKCHAIN_NAME.BITCOIN;
 
@@ -122,13 +120,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 isNative: from.isNative
             });
 
-            /*
-            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-            const fromWithoutFee = getFromWithoutFee(
-                from,
-                feeInfo.rubicProxy?.platformFee?.percent
-            );
-             */
+            // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+            // const fromWithoutFee = getFromWithoutFee(
+            //     from,
+            //     feeInfo.rubicProxy?.platformFee?.percent
+            // );
             const fromWithoutFee = from;
             const tokenAmountIn = new SymbiosisTokenAmount(tokenIn, fromWithoutFee.stringWeiAmount);
 

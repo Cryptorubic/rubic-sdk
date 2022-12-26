@@ -94,7 +94,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                     ? await DebridgeCrossChainTrade.getGasData(from, to, requestParams)
                     : null;
 
-            const transitToken = estimation.srcChainTokenOut;
+            const transitToken = estimation.srcChainTokenOut || estimation.srcChainTokenIn;
 
             const cryptoFeeAmount = new BigNumber(tx.value).minus(
                 from.isNative ? from.stringWeiAmount : 0
@@ -116,8 +116,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                             dstChainTokenOutRecipient: fromAddress
                         },
                         gasData,
-                        // @TODO price impact
-                        priceImpact: 0,
+                        priceImpact: from.calculatePriceImpactPercent(to) || 0,
                         slippage: options.slippageTolerance,
                         feeInfo: {
                             provider: {
