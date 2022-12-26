@@ -7,7 +7,6 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
-import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
@@ -55,24 +54,19 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         try {
             const fromAddress = options.fromAddress || this.getWalletAddress(fromBlockchain);
 
-            await this.checkContractState(
-                fromBlockchain,
-                DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-                evmCommonCrossChainAbi
-            );
-
-            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-            const fromWithoutFee = getFromWithoutFee(
-                from,
-                feeInfo.rubicProxy?.platformFee?.percent
-            );
+            // TODO return after cross-chain proxy fix
+            // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
+            // const fromWithoutFee = getFromWithoutFee(
+            //     from,
+            //     feeInfo.rubicProxy?.platformFee?.percent
+            // );
 
             const slippageTolerance = options.slippageTolerance * 100;
 
             const requestParams: TransactionRequest = {
                 srcChainId: blockchainId[fromBlockchain],
                 srcChainTokenIn: from.address,
-                srcChainTokenInAmount: fromWithoutFee.stringWeiAmount,
+                srcChainTokenInAmount: from.stringWeiAmount,
                 slippage: slippageTolerance,
                 dstChainId: blockchainId[toBlockchain],
                 dstChainTokenOut: toToken.address,
@@ -126,7 +120,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         priceImpact: 0,
                         slippage: options.slippageTolerance,
                         feeInfo: {
-                            ...feeInfo,
                             provider: {
                                 cryptoFee: {
                                     amount: Web3Pure.fromWei(cryptoFeeAmount),
@@ -182,7 +175,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
     private parseDebridgeApiError(httpErrorResponse: {
         error: TransactionErrorResponse;
     }): RubicSdkError | null {
-        if (httpErrorResponse.error.errorId === 'INCLUDED_GAS_FEE_NOT_COVERED_BY_INPUT_AMOUNT') {
+        if (httpErrorResponse?.error?.errorId === 'INCLUDED_GAS_FEE_NOT_COVERED_BY_INPUT_AMOUNT') {
             return new TooLowAmountError();
         }
 
