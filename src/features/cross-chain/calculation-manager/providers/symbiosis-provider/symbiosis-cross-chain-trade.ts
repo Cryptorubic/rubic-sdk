@@ -197,8 +197,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             );
 
             await this.web3Private.trySendTransaction(transactionRequest.to!, {
-                data: transactionRequest.data!.toString()!,
-                value: transactionRequest.value!.toString() || '0',
+                data: transactionRequest.data!.toString(),
+                value: transactionRequest.value?.toString() || '0',
                 onTransactionHash,
                 gas: gasLimit,
                 gasPrice
