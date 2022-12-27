@@ -96,7 +96,7 @@ export abstract class CurveAbstractProvider<
             to,
             slippageTolerance: fullOptions.slippageTolerance,
             gasFeeInfo: null,
-            useProxy: true,
+            useProxy: fullOptions.useProxy,
             proxyFeeInfo,
             fromWithoutFee,
             withDeflation: fullOptions.withDeflation,
