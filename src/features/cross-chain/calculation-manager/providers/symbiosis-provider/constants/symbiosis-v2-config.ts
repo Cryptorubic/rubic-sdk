@@ -2,7 +2,7 @@ import { Config } from 'symbiosis-js-sdk';
 
 export function getSymbiosisV2Config(): Config {
     return {
-        minSwapAmountInUsd: 20,
+        minSwapAmountInUsd: 10,
         maxSwapAmountInUsd: 5000000,
         advisor: {
             url: 'https://api-v2.symbiosis.finance/calculations'

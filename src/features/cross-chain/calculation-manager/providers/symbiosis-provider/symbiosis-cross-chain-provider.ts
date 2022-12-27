@@ -15,7 +15,6 @@ import {
 } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
-import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
@@ -86,6 +85,13 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         if (fromBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
             return false;
         }
+        if (fromBlockchain === BLOCKCHAIN_NAME.AVALANCHE) {
+            return toBlockchain === BLOCKCHAIN_NAME.BOBA_AVALANCHE ||
+                toBlockchain === BLOCKCHAIN_NAME.BOBA_BSC ||
+                toBlockchain === BLOCKCHAIN_NAME.BOBA
+                ? false
+                : super.areSupportedBlockchains(fromBlockchain, toBlockchain);
+        }
         return super.areSupportedBlockchains(fromBlockchain, toBlockchain);
     }
 
@@ -101,11 +107,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            await this.checkContractState(
-                fromBlockchain as EvmBlockchainName,
-                rubicProxyContractAddress[fromBlockchain],
-                evmCommonCrossChainAbi
-            );
+            // await this.checkContractState(
+            //     fromBlockchain as EvmBlockchainName,
+            //     rubicProxyContractAddress[fromBlockchain],
+            //     evmCommonCrossChainAbi
+            // );
 
             const isBitcoinSwap = toBlockchain === BLOCKCHAIN_NAME.BITCOIN;
 
@@ -121,11 +127,12 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 isNative: from.isNative
             });
 
-            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-            const fromWithoutFee = getFromWithoutFee(
-                from,
-                feeInfo.rubicProxy?.platformFee?.percent
-            );
+            // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+            // const fromWithoutFee = getFromWithoutFee(
+            //     from,
+            //     feeInfo.rubicProxy?.platformFee?.percent
+            // );
+            const fromWithoutFee = from;
             const tokenAmountIn = new SymbiosisTokenAmount(tokenIn, fromWithoutFee.stringWeiAmount);
 
             const tokenOut = isBitcoinSwap
@@ -225,7 +232,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                         priceImpact: parseFloat(priceImpact.toFixed()),
                         slippage: options.slippageTolerance,
                         feeInfo: {
-                            ...feeInfo,
                             provider: {
                                 cryptoFee: {
                                     amount: new BigNumber(transitTokenFee.toFixed()),

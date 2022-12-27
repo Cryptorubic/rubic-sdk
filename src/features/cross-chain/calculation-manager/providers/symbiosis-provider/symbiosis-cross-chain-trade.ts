@@ -1,14 +1,14 @@
 import BigNumber from 'bignumber.js';
+import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
@@ -122,8 +122,12 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         return this.from.blockchain as SymbiosisCrossChainSupportedBlockchain;
     }
 
+    // used for approve
     protected get fromContractAddress(): string {
-        return rubicProxyContractAddress[this.fromBlockchain];
+        const symbiosisContractAddress =
+            this.version === 'v1' ? SYMBIOSIS_CONTRACT_ADDRESS_V1 : SYMBIOSIS_CONTRACT_ADDRESS_V2;
+        return symbiosisContractAddress[this.fromBlockchain].providerGateway;
+        // return rubicProxyContractAddress[this.fromBlockchain];
     }
 
     constructor(
@@ -167,7 +171,52 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        await this.checkTradeErrors();
+        this.checkReceiverAddress(
+            options.receiverAddress,
+            !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
+        );
+
+        await this.checkAllowanceAndApprove(options);
+
+        const { onConfirm, gasLimit, gasPrice } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+
+        try {
+            const { transactionRequest } = await this.getTransactionRequest(
+                this.walletAddress,
+                this.version,
+                options?.receiverAddress
+            );
+
+            await this.web3Private.trySendTransaction(transactionRequest.to!, {
+                data: transactionRequest.data!.toString(),
+                value: transactionRequest.value?.toString() || '0',
+                onTransactionHash,
+                gas: gasLimit,
+                gasPrice
+            });
+
+            return transactionHash!;
+        } catch (err) {
+            if (err instanceof FailedToCheckForTransactionReceiptError) {
+                return transactionHash!;
+            }
+            throw err;
+        }
+    }
+
+    public async getContractParams(_options: GetContractParamsOptions): Promise<ContractParams> {
+        throw new RubicSdkError('Temporary disabled');
+
+        /*
         const exactIn = await this.getTransactionRequest(
             this.walletAddress,
             this.version,
@@ -212,6 +261,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             methodArguments,
             value
         };
+         */
     }
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
