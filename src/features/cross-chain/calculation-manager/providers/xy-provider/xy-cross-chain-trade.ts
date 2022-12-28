@@ -245,7 +245,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ? { total: this.priceImpact } : null,
-            slippage: { total: this.slippage }
+            slippage: { total: this.slippage * 100 }
         };
     }
 }

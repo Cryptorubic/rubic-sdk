@@ -14,7 +14,6 @@ import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/bl
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
-import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CbridgeCrossChainApiService } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-api-service';
@@ -31,7 +30,6 @@ import { CbridgeEstimateAmountRequest } from 'src/features/cross-chain/calculati
 import { celerTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-transit-tokens';
 import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
@@ -70,22 +68,23 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            await this.checkContractState(
-                fromBlockchain,
-                cbridgeContractAddress[fromBlockchain].rubicRouter,
-                evmCommonCrossChainAbi
-            );
+            // await this.checkContractState(
+            //     fromBlockchain,
+            //     cbridgeContractAddress[fromBlockchain].rubicRouter,
+            //     evmCommonCrossChainAbi
+            // );
 
             const config = await this.fetchContractAddressAndCheckTokens(fromToken, toToken);
             if (!config.supportedToToken && !config.supportedToNative) {
                 throw new RubicSdkError('To token is not supported');
             }
 
-            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-            const fromWithoutFee = getFromWithoutFee(
-                fromToken,
-                feeInfo.rubicProxy?.platformFee?.percent
-            );
+            // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
+            // const fromWithoutFee = getFromWithoutFee(
+            //     fromToken,
+            //     feeInfo.rubicProxy?.platformFee?.percent
+            // );
+            const fromWithoutFee = fromToken;
 
             let onChainTrade: EvmOnChainTrade | null = null;
             let transitTokenAmount = fromWithoutFee.tokenAmount;
@@ -168,7 +167,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                         gasData,
                         priceImpact: fromToken.calculatePriceImpactPercent(to) || 0,
                         slippage: options.slippageTolerance,
-                        feeInfo,
+                        feeInfo: {},
                         maxSlippage,
                         contractAddress: config.address,
                         transitMinAmount,
