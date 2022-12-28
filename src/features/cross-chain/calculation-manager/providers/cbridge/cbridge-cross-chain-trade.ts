@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -6,7 +7,9 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { cbridgeContractAbi } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-abi';
 import { cbridgeContractAddress } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-address';
 import { cbridgeProxyAbi } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-proxy-abi';
 import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
@@ -101,7 +104,8 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return cbridgeContractAddress[this.fromBlockchain].rubicRouter;
+        // return cbridgeContractAddress[this.fromBlockchain].rubicRouter;
+        return cbridgeContractAddress[this.fromBlockchain].providerRouter;
     }
 
     public readonly feeInfo: FeeInfo;
@@ -150,6 +154,44 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             ? { from: crossChainTrade.onChainTrade.type, to: undefined }
             : { from: undefined, to: undefined };
         this.onChainTrade = crossChainTrade.onChainTrade;
+    }
+
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        await this.checkTradeErrors();
+        if (options.receiverAddress) {
+            throw new RubicSdkError('Receiver address not supported');
+        }
+
+        await this.checkAllowanceAndApprove(options);
+
+        const { onConfirm, gasLimit, gasPrice } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+
+        // eslint-disable-next-line no-useless-catch
+        try {
+            const { data, to, value } = this.getTransactionRequest(
+                options.receiverAddress || this.walletAddress,
+                this.maxSlippage
+            );
+
+            await this.web3Private.trySendTransaction(to, {
+                data,
+                value,
+                onTransactionHash,
+                gas: gasLimit,
+                gasPrice
+            });
+
+            return transactionHash!;
+        } catch (err) {
+            throw err;
+        }
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -220,5 +262,33 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             return this.onChainTrade ? 'swapNativeAndBridge' : 'bridgeNative';
         }
         return this.onChainTrade ? 'swapAndBridge' : 'bridge';
+    }
+
+    private getTransactionRequest(
+        receiverAddress: string,
+        maxSlippage: number
+    ): {
+        data: string;
+        value: string;
+        to: string;
+    } {
+        const params: (string | number)[] = [receiverAddress];
+        if (!this.from.isNative) {
+            params.push(this.from.address);
+        }
+        params.push(
+            this.from.stringWeiAmount,
+            blockchainId[this.to.blockchain],
+            Date.now(),
+            maxSlippage
+        );
+        const encode = EvmWeb3Pure.encodeMethodCall(
+            this.fromContractAddress,
+            cbridgeContractAbi,
+            this.from.isNative ? 'sendNative' : 'send',
+            params,
+            this.from.isNative ? this.from.stringWeiAmount : '0'
+        );
+        return { data: encode.data, to: encode.to, value: encode.value };
     }
 }
