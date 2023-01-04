@@ -72,11 +72,11 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 };
             }
 
-            await this.checkProviderIsWhitelisted(
-                fromBlockchain,
-                targetToken.router,
-                targetToken.spender
-            );
+            // await this.checkProviderIsWhitelisted(
+            //     fromBlockchain,
+            //     targetToken.router,
+            //     targetToken.spender
+            // );
 
             const feeInfo: FeeInfo = {};
             const cryptoFee = this.getProtocolFee(targetToken, from.weiAmount);
