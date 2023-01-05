@@ -4,6 +4,7 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
@@ -76,7 +77,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 toTokenAddress: toToken.isNative
                     ? XyCrossChainTrade.nativeAddress
                     : toToken.address,
-                receiveAddress: receiverAddress
+                receiveAddress: receiverAddress || EvmWeb3Pure.EMPTY_ADDRESS
             };
 
             const { toTokenAmount, statusCode, msg, xyFee } =
