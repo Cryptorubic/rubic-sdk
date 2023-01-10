@@ -1,6 +1,6 @@
 import { Route } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
-import { SwapRequestError } from 'src/common/errors';
+import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -157,7 +157,39 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         try {
-            return await super.swap(options);
+            // return await super.swap(options);
+            await this.checkTradeErrors();
+            if (options.receiverAddress) {
+                throw new RubicSdkError('Receiver address not supported');
+            }
+
+            await this.checkAllowanceAndApprove(options);
+
+            const { onConfirm, gasLimit, gasPrice } = options;
+            let transactionHash: string;
+            const onTransactionHash = (hash: string) => {
+                if (onConfirm) {
+                    onConfirm(hash);
+                }
+                transactionHash = hash;
+            };
+
+            // eslint-disable-next-line no-useless-catch
+            try {
+                const { data, value, to } = await this.getSwapData(options?.receiverAddress);
+
+                await this.web3Private.trySendTransaction(to, {
+                    data,
+                    value,
+                    onTransactionHash,
+                    gas: gasLimit,
+                    gasPrice
+                });
+
+                return transactionHash!;
+            } catch (err) {
+                throw err;
+            }
         } catch (err) {
             if ([400, 500, 503].includes(err.code)) {
                 throw new SwapRequestError();
