@@ -70,7 +70,7 @@
     "axios": "^0.26.1",
     "bignumber.js": "9.1.0",
     "bitcoin-address-validation": "2.2.1",
-    "cbridge-revert-manager": "^1.0.0",
+    "cbridge-revert-manager": "1.1.0",
     "ethers": "^5.6.8",
     "grpc-web": "^1.4.2",
     "lodash.clonedeep": "^4.5.0",
