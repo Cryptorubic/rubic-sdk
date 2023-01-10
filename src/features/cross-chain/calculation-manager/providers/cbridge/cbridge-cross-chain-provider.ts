@@ -131,7 +131,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             //     throw new RubicSdkError('Not supported tokens');
             // }
 
-            const { amount, maxSlippage } = await this.getEstimates(
+            const { amount, maxSlippage, fee } = await this.getEstimates(
                 transitToken,
                 toToken,
                 options,
@@ -161,7 +161,14 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                         gasData,
                         priceImpact: /* fromToken.calculatePriceImpactPercent(to)  || */ 0,
                         slippage: options.slippageTolerance,
-                        feeInfo: {},
+                        feeInfo: {
+                            provider: {
+                                cryptoFee: {
+                                    amount: Web3Pure.fromWei(fee, toToken.decimals),
+                                    tokenSymbol: toToken.symbol
+                                }
+                            }
+                        },
                         maxSlippage,
                         contractAddress: config.address,
                         transitMinAmount,
@@ -263,12 +270,11 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions,
         config: CelerConfig
-    ): Promise<{ amount: string; maxSlippage: number }> {
+    ): Promise<{ amount: string; maxSlippage: number; fee: string }> {
         let tokenSymbol = fromToken.symbol;
         if (config.isTokenBridge) {
             tokenSymbol = config.supportedFromToken?.token.symbol || tokenSymbol;
-        }
-        if (config.isNativeBridge) {
+        } else if (config.isNativeBridge) {
             tokenSymbol = config.supportedFromNative?.token.symbol || tokenSymbol;
         }
         const requestParams: CbridgeEstimateAmountRequest = {
@@ -279,9 +285,9 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             slippage_tolerance: Number((options.slippageTolerance * 1_000_000).toFixed(0)),
             amt: fromToken.stringWeiAmount
         };
-        const { estimated_receive_amt, max_slippage } =
+        const { estimated_receive_amt, max_slippage, base_fee } =
             await CbridgeCrossChainApiService.fetchEstimateAmount(requestParams);
-        return { amount: estimated_receive_amt, maxSlippage: max_slippage };
+        return { amount: estimated_receive_amt, maxSlippage: max_slippage, fee: base_fee };
     }
 
     private async getOnChainTrade(
