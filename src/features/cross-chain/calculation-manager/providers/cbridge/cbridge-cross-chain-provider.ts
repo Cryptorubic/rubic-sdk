@@ -1,14 +1,7 @@
 import BigNumber from 'bignumber.js';
-import {
-    MaxAmountError,
-    MinAmountError,
-    NotSupportedTokensError,
-    RubicSdkError
-} from 'src/common/errors';
+import { MaxAmountError, MinAmountError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, wrappedNativeTokensList } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { PriceTokenAmountStruct } from 'src/common/tokens/price-token-amount';
-import { TokenStruct } from 'src/common/tokens/token';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -86,58 +79,59 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             // );
             const fromWithoutFee = fromToken;
 
-            let onChainTrade: EvmOnChainTrade | null = null;
-            let transitTokenAmount = fromWithoutFee.tokenAmount;
-            let transitMinAmount = transitTokenAmount;
-            let transitToken = fromWithoutFee;
+            const onChainTrade: EvmOnChainTrade | null = null;
+            const transitTokenAmount = fromWithoutFee.tokenAmount;
+            const transitMinAmount = transitTokenAmount;
+            const transitToken = fromWithoutFee;
 
             if (!config.isNativeBridge && !config.isTokenBridge) {
-                onChainTrade = await this.getOnChainTrade(
-                    fromWithoutFee,
-                    [],
-                    options.slippageTolerance
-                );
-                if (!onChainTrade) {
-                    return {
-                        trade: null,
-                        error: new NotSupportedTokensError()
-                    };
-                }
-
-                transitTokenAmount = onChainTrade.to.tokenAmount;
-                transitMinAmount = onChainTrade.toTokenAmountMin.tokenAmount;
-
-                const defaultTransit = new PriceTokenAmount<EvmBlockchainName>({
-                    ...(celerTransitTokens[
-                        fromToken.blockchain as CelerCrossChainSupportedBlockchain
-                    ] as TokenStruct<EvmBlockchainName>),
-                    tokenAmount: transitTokenAmount,
-                    price: new BigNumber(0)
-                });
-                const transitConfig = await this.fetchContractAddressAndCheckTokens(
-                    defaultTransit,
-                    toToken
-                );
-                const celerTransitTokenStruct: PriceTokenAmountStruct<EvmBlockchainName> = {
-                    blockchain: fromToken.blockchain,
-                    address: transitConfig.supportedFromToken!.token.address,
-                    name: transitConfig.supportedFromToken!.name,
-                    symbol: transitConfig.supportedFromToken!.token.symbol,
-                    decimals: transitConfig.supportedFromToken!.token.decimal,
-                    price: new BigNumber(0),
-                    tokenAmount: transitTokenAmount
-                };
-                transitToken = transitConfig?.supportedFromToken
-                    ? new PriceTokenAmount<EvmBlockchainName>(celerTransitTokenStruct)
-                    : defaultTransit;
+                throw new RubicSdkError('Tokens are not supported');
+                // onChainTrade = await this.getOnChainTrade(
+                //     fromWithoutFee,
+                //     [],
+                //     options.slippageTolerance
+                // );
+                // if (!onChainTrade) {
+                //     return {
+                //         trade: null,
+                //         error: new NotSupportedTokensError()
+                //     };
+                // }
+                //
+                // transitTokenAmount = onChainTrade.to.tokenAmount;
+                // transitMinAmount = onChainTrade.toTokenAmountMin.tokenAmount;
+                //
+                // const defaultTransit = new PriceTokenAmount<EvmBlockchainName>({
+                //     ...(celerTransitTokens[
+                //         fromToken.blockchain as CelerCrossChainSupportedBlockchain
+                //     ] as TokenStruct<EvmBlockchainName>),
+                //     tokenAmount: transitTokenAmount,
+                //     price: new BigNumber(0)
+                // });
+                // const transitConfig = await this.fetchContractAddressAndCheckTokens(
+                //     defaultTransit,
+                //     toToken
+                // );
+                // const celerTransitTokenStruct: PriceTokenAmountStruct<EvmBlockchainName> = {
+                //     blockchain: fromToken.blockchain,
+                //     address: transitConfig.supportedFromToken!.token.address,
+                //     name: transitConfig.supportedFromToken!.name,
+                //     symbol: transitConfig.supportedFromToken!.token.symbol,
+                //     decimals: transitConfig.supportedFromToken!.token.decimal,
+                //     price: new BigNumber(0),
+                //     tokenAmount: transitTokenAmount
+                // };
+                // transitToken = transitConfig?.supportedFromToken
+                //     ? new PriceTokenAmount<EvmBlockchainName>(celerTransitTokenStruct)
+                //     : defaultTransit;
             }
-            const toTransitToken =
-                celerTransitTokens[toToken.blockchain as CelerCrossChainSupportedBlockchain];
-            if (onChainTrade && !compareAddresses(toTransitToken.address, toToken.address)) {
-                throw new RubicSdkError('Not supported tokens');
-            }
+            // const toTransitToken =
+            //     celerTransitTokens[toToken.blockchain as CelerCrossChainSupportedBlockchain];
+            // if (onChainTrade && !compareAddresses(toTransitToken.address, toToken.address)) {
+            //     throw new RubicSdkError('Not supported tokens');
+            // }
 
-            const { amount, maxSlippage } = await this.getEstimates(
+            const { amount, maxSlippage, fee } = await this.getEstimates(
                 transitToken,
                 toToken,
                 options,
@@ -165,9 +159,16 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                         from: fromToken,
                         to,
                         gasData,
-                        priceImpact: fromToken.calculatePriceImpactPercent(to) || 0,
+                        priceImpact: /* fromToken.calculatePriceImpactPercent(to)  || */ 0,
                         slippage: options.slippageTolerance,
-                        feeInfo: {},
+                        feeInfo: {
+                            provider: {
+                                cryptoFee: {
+                                    amount: Web3Pure.fromWei(fee, toToken.decimals),
+                                    tokenSymbol: toToken.symbol
+                                }
+                            }
+                        },
                         maxSlippage,
                         contractAddress: config.address,
                         transitMinAmount,
@@ -269,12 +270,11 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions,
         config: CelerConfig
-    ): Promise<{ amount: string; maxSlippage: number }> {
+    ): Promise<{ amount: string; maxSlippage: number; fee: string }> {
         let tokenSymbol = fromToken.symbol;
         if (config.isTokenBridge) {
             tokenSymbol = config.supportedFromToken?.token.symbol || tokenSymbol;
-        }
-        if (config.isNativeBridge) {
+        } else if (config.isNativeBridge) {
             tokenSymbol = config.supportedFromNative?.token.symbol || tokenSymbol;
         }
         const requestParams: CbridgeEstimateAmountRequest = {
@@ -285,9 +285,9 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             slippage_tolerance: Number((options.slippageTolerance * 1_000_000).toFixed(0)),
             amt: fromToken.stringWeiAmount
         };
-        const { estimated_receive_amt, max_slippage } =
+        const { estimated_receive_amt, max_slippage, base_fee } =
             await CbridgeCrossChainApiService.fetchEstimateAmount(requestParams);
-        return { amount: estimated_receive_amt, maxSlippage: max_slippage };
+        return { amount: estimated_receive_amt, maxSlippage: max_slippage, fee: base_fee };
     }
 
     private async getOnChainTrade(
