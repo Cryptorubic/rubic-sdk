@@ -64,7 +64,7 @@ export class EvmWeb3Private extends Web3Private {
     /**
      * Instance of web3, initialized with ethereum wallet, e.g. Metamask, WalletConnect.
      */
-    private readonly web3: Web3;
+    public readonly web3: Web3;
 
     constructor(walletProviderCore: WalletProviderCore<Web3>) {
         super(walletProviderCore.address);
