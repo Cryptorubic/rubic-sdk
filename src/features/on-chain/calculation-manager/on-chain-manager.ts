@@ -142,7 +142,6 @@ export class OnChainManager {
         ) as [OnChainTradeType, OnChainProvider][];
         const dexesTradesPromise = this.calculateDexes(from, to, dexesProviders, options);
 
-        /*
         const lifiTradesPromise = this.calculateLifiTrades(
             from,
             to,
@@ -150,18 +149,14 @@ export class OnChainManager {
             options
         );
 
-        const openOceanTradePromise = this.openOceanProvider.calculate(
-            from as PriceTokenAmount<EvmBlockchainName>,
-            to as PriceTokenAmount<EvmBlockchainName>,
-            options as RequiredOnChainCalculationOptions
-        );
+        // const openOceanTradePromise = this.openOceanProvider.calculate(
+        //     from as PriceTokenAmount<EvmBlockchainName>,
+        //     to as PriceTokenAmount<EvmBlockchainName>,
+        //     options as RequiredOnChainCalculationOptions
+        // );
 
-        const trades = (
-            await Promise.all([dexesTradesPromise, lifiTradesPromise, openOceanTradePromise])
-        ).flat();
-         */
+        const trades = (await Promise.all([dexesTradesPromise, lifiTradesPromise])).flat();
 
-        const trades = await dexesTradesPromise;
         return trades.sort((tradeA, tradeB) => {
             if (tradeA instanceof OnChainTrade || tradeB instanceof OnChainTrade) {
                 if (tradeA instanceof OnChainTrade && tradeB instanceof OnChainTrade) {
