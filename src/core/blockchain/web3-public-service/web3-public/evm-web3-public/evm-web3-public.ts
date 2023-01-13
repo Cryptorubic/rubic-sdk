@@ -1,30 +1,30 @@
-import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
+import BigNumber from 'bignumber.js';
 import { RubicSdkError, TimeoutError } from 'src/common/errors';
-import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
-import { RpcResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/rpc-response';
-import { EvmMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-multicall-response';
-import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
+import pTimeout from 'src/common/utils/p-timeout';
 import {
     HEALTHCHECK,
     isBlockchainHealthcheckAvailable
 } from 'src/core/blockchain/constants/healthcheck';
-import { EVM_MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/evm-multicall-abi';
-import Web3 from 'web3';
-import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
-import { AbiItem } from 'web3-utils';
-import { EvmCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-call';
-import { TransactionReceipt, BlockTransactionString } from 'web3-eth';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { provider as Provider, HttpProvider, BlockNumber } from 'web3-core';
-import { HttpClient } from 'src/core/http-client/models/http-client';
-import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
-import pTimeout from 'src/common/utils/p-timeout';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
-import BigNumber from 'bignumber.js';
-import { EventData } from 'web3-eth-contract';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
+import { EVM_MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/evm-multicall-abi';
+import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
+import { EvmCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-call';
+import { EvmMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/evm-multicall-response';
+import { RpcResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/rpc-response';
+import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
+import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
+import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
+import { HttpClient } from 'src/core/http-client/models/http-client';
+import Web3 from 'web3';
+import { BlockNumber, HttpProvider, provider as Provider } from 'web3-core';
+import { BlockTransactionString, TransactionReceipt } from 'web3-eth';
+import { EventData } from 'web3-eth-contract';
+import { AbiItem } from 'web3-utils';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
@@ -109,41 +109,45 @@ export class EvmWeb3Public extends Web3Public {
             methodsData: MethodData[];
         }[]
     ): Promise<ContractMulticallResponse<Output>[][]> {
-        const calls: EvmCall[][] = contractsData.map(({ contractAddress, methodsData }) => {
-            const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
-            return methodsData.map(({ methodName, methodArguments }) => ({
-                callData: contract.methods[methodName](...methodArguments).encodeABI(),
-                target: contractAddress
-            }));
-        });
+        if (this.multicallAddress) {
+            const calls: EvmCall[][] = contractsData.map(({ contractAddress, methodsData }) => {
+                const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
+                return methodsData.map(({ methodName, methodArguments }) => ({
+                    callData: contract.methods[methodName](...methodArguments).encodeABI(),
+                    target: contractAddress
+                }));
+            });
 
-        const outputs = await this.multicall(calls.flat());
+            const outputs = await this.multicall(calls.flat());
 
-        let outputIndex = 0;
-        return contractsData.map(contractData =>
-            contractData.methodsData.map(methodData => {
-                const methodOutputAbi = contractAbi.find(
-                    funcSignature => funcSignature.name === methodData.methodName
-                )!.outputs!;
-                const output = outputs[outputIndex];
-                if (!output) {
-                    throw new RubicSdkError('Output has to be defined');
-                }
+            let outputIndex = 0;
+            return contractsData.map(contractData =>
+                contractData.methodsData.map(methodData => {
+                    const methodOutputAbi = contractAbi.find(
+                        funcSignature => funcSignature.name === methodData.methodName
+                    )!.outputs!;
+                    const output = outputs[outputIndex];
+                    if (!output) {
+                        throw new RubicSdkError('Output has to be defined');
+                    }
 
-                outputIndex++;
+                    outputIndex++;
 
-                return {
-                    success: output.success,
-                    output:
-                        output.success && output.returnData.length > 2
-                            ? (this.web3.eth.abi.decodeParameters(
-                                  methodOutputAbi,
-                                  output.returnData
-                              )[0] as Output)
-                            : null
-                };
-            })
-        );
+                    return {
+                        success: output.success,
+                        output:
+                            output.success && output.returnData.length > 2
+                                ? (this.web3.eth.abi.decodeParameters(
+                                      methodOutputAbi,
+                                      output.returnData
+                                  )[0] as Output)
+                                : null
+                    };
+                })
+            );
+        }
+
+        return this.multicallContractsMethodsByOne(contractAbi, contractsData);
     }
 
     /**
@@ -154,6 +158,41 @@ export class EvmWeb3Public extends Web3Public {
     private async multicall(calls: EvmCall[]): Promise<EvmMulticallResponse[]> {
         const contract = new this.web3.eth.Contract(EVM_MULTICALL_ABI, this.multicallAddress);
         return contract.methods.tryAggregate(false, calls).call();
+    }
+
+    private multicallContractsMethodsByOne<Output extends Web3PrimitiveType>(
+        contractAbi: AbiItem[],
+        contractsData: {
+            contractAddress: string;
+            methodsData: MethodData[];
+        }[]
+    ): Promise<ContractMulticallResponse<Output>[][]> {
+        return Promise.all(
+            contractsData.map(contractData => {
+                const contract = new this.web3.eth.Contract(
+                    contractAbi,
+                    contractData.contractAddress
+                );
+                return Promise.all(
+                    contractData.methodsData.map(async methodData => {
+                        try {
+                            const output = (await contract.methods[methodData.methodName](
+                                ...methodData.methodArguments
+                            ).call()) as Output;
+                            return {
+                                success: true,
+                                output
+                            };
+                        } catch {
+                            return {
+                                success: false,
+                                output: null
+                            };
+                        }
+                    })
+                );
+            })
+        );
     }
 
     public async callContractMethod<T extends Web3PrimitiveType = string>(
@@ -209,8 +248,6 @@ export class EvmWeb3Public extends Web3Public {
 
     /**
      * Get estimated gas of several contract method executions via rpc batch request.
-     * @param abi Contract ABI.
-     * @param contractAddress Contract address.
      * @param fromAddress Sender address.
      * @param callsData Transactions parameters.
      * @returns List of contract execution estimated gases.
@@ -219,26 +256,18 @@ export class EvmWeb3Public extends Web3Public {
      * Else (if you have not enough balance, allowance ...) then the list item would be equal to null.
      */
     public async batchEstimatedGas(
-        abi: AbiItem[],
-        contractAddress: string,
         fromAddress: string,
         callsData: BatchCall[]
     ): Promise<(BigNumber | null)[]> {
         try {
-            const contract = new this.web3.eth.Contract(abi, contractAddress);
-
-            const dataList = callsData.map(callData =>
-                contract.methods[callData.contractMethod](...callData.params).encodeABI()
-            );
-
-            const rpcCallsData = dataList.map((data, index) => ({
+            const rpcCallsData = callsData.map(callData => ({
                 rpcMethod: 'eth_estimateGas',
                 params: {
                     from: fromAddress,
-                    to: contractAddress,
-                    data,
-                    ...(callsData?.[index]?.value && {
-                        value: `0x${parseInt(callsData?.[index]?.value!).toString(16)}`
+                    to: callData.to,
+                    data: callData.data,
+                    ...(callData.value && {
+                        value: `0x${parseInt(callData.value).toString(16)}`
                     })
                 }
             }));

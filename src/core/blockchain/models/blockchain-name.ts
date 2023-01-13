@@ -17,12 +17,18 @@ export const EVM_BLOCKCHAIN_NAME = {
     MOONBEAM: 'MOONBEAM',
     CELO: 'CELO',
     BOBA: 'BOBA',
+    BOBA_BSC: 'BOBA_BSC',
+    BOBA_AVALANCHE: 'BOBA_AVALANCHE',
     ASTAR: 'ASTAR',
     ETHEREUM_POW: 'ETHW',
     KAVA: 'KAVA',
     BITGERT: 'BITGERT',
     OASIS: 'OASIS',
-    METIS: 'METIS'
+    METIS: 'METIS',
+    DFK: 'DEFIKINGDOMS',
+    KLAYTN: 'KLAYTN',
+    VELAS: 'VELAS',
+    SYSCOIN: 'SYSCOIN'
 } as const;
 
 export const BLOCKCHAIN_NAME = {

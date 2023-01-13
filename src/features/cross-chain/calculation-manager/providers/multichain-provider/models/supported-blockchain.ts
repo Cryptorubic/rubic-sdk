@@ -22,7 +22,11 @@ export const multichainCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.KAVA,
     BLOCKCHAIN_NAME.BITGERT,
     BLOCKCHAIN_NAME.OASIS,
-    BLOCKCHAIN_NAME.METIS
+    BLOCKCHAIN_NAME.METIS,
+    BLOCKCHAIN_NAME.DFK,
+    BLOCKCHAIN_NAME.KLAYTN,
+    BLOCKCHAIN_NAME.VELAS,
+    BLOCKCHAIN_NAME.SYSCOIN
 ] as const;
 
 export type MultichainCrossChainSupportedBlockchain =

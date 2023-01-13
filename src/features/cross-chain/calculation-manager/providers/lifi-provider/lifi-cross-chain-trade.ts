@@ -1,29 +1,29 @@
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { Route } from '@lifi/sdk';
+import BigNumber from 'bignumber.js';
+import { SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Injector } from 'src/core/injector/injector';
+import { ContractParams } from 'src/features/common/models/contract-params';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import {
     BRIDGE_TYPE,
     BridgeType
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
-import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
-import { SwapRequestError } from 'src/common/errors';
-import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
-import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
-import { Injector } from 'src/core/injector/injector';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import BigNumber from 'bignumber.js';
-import { Route } from '@lifi/sdk';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
-import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
+import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
 
 /**
  * Calculated Celer cross-chain trade.
@@ -51,11 +51,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                         route,
                         gasData: null,
                         toTokenAmountMin: new BigNumber(0),
-                        feeInfo: {
-                            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
-                            platformFee: { percent: 0, tokenSymbol: '' },
-                            cryptoFee: null
-                        },
+                        feeInfo: {},
                         priceImpact: 0,
                         onChainSubtype: {
                             from: undefined,

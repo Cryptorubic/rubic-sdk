@@ -1,27 +1,27 @@
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
-import { Injector } from 'src/core/injector/injector';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import BigNumber from 'bignumber.js';
+import { InsufficientLiquidityError, MinAmountError, RubicSdkError } from 'src/common/errors';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Injector } from 'src/core/injector/injector';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { xyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-contract-address';
+import { XyStatusCode } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-status-code';
 import {
     XyCrossChainSupportedBlockchain,
     xySupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
-import { xyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-contract-address';
-import { XyCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-trade';
 import { XyTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-request';
 import { XyTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-response';
-import { XyStatusCode } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-status-code';
-import { InsufficientLiquidityError, MinAmountError, RubicSdkError } from 'src/common/errors';
+import { XyCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-trade';
 
 export class XyCrossChainProvider extends CrossChainProvider {
     public static readonly apiEndpoint = 'https://open-api.xy.finance/v1';
@@ -51,14 +51,18 @@ export class XyCrossChainProvider extends CrossChainProvider {
             const receiverAddress =
                 options.receiverAddress || this.getWalletAddress(fromBlockchain);
 
-            await this.checkContractState(
-                fromBlockchain,
-                xyContractAddress[fromBlockchain].rubicRouter,
-                evmCommonCrossChainAbi
-            );
+            // await this.checkContractState(
+            //     fromBlockchain,
+            //     xyContractAddress[fromBlockchain].rubicRouter,
+            //     evmCommonCrossChainAbi
+            // );
 
-            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-            const fromWithoutFee = getFromWithoutFee(fromToken, feeInfo);
+            // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
+            // const fromWithoutFee = getFromWithoutFee(
+            //     fromToken,
+            //     feeInfo.rubicProxy?.platformFee?.percent
+            // );
+            const fromWithoutFee = fromToken;
 
             const slippageTolerance = options.slippageTolerance * 100;
 
@@ -73,7 +77,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 toTokenAddress: toToken.isNative
                     ? XyCrossChainTrade.nativeAddress
                     : toToken.address,
-                receiveAddress: receiverAddress
+                receiveAddress: receiverAddress || EvmWeb3Pure.EMPTY_ADDRESS
             };
 
             const { toTokenAmount, statusCode, msg, xyFee } =
@@ -108,10 +112,12 @@ export class XyCrossChainProvider extends CrossChainProvider {
                         priceImpact: fromToken.calculatePriceImpactPercent(to) || 0,
                         slippage: options.slippageTolerance,
                         feeInfo: {
-                            ...feeInfo,
-                            cryptoFee: {
-                                amount: new BigNumber(xyFee!.amount),
-                                tokenSymbol: xyFee!.symbol
+                            // ...feeInfo,
+                            provider: {
+                                cryptoFee: {
+                                    amount: new BigNumber(xyFee!.amount),
+                                    tokenSymbol: xyFee!.symbol
+                                }
                             }
                         }
                     },
@@ -133,25 +139,26 @@ export class XyCrossChainProvider extends CrossChainProvider {
         providerAddress: string
     ): Promise<FeeInfo> {
         return {
-            fixedFee: {
-                amount: await this.getFixedFee(
-                    fromBlockchain,
-                    providerAddress,
-                    xyContractAddress[fromBlockchain].rubicRouter,
-                    evmCommonCrossChainAbi
-                ),
-                tokenSymbol: nativeTokensList[fromBlockchain].symbol
-            },
-            platformFee: {
-                percent: await this.getFeePercent(
-                    fromBlockchain,
-                    providerAddress,
-                    xyContractAddress[fromBlockchain].rubicRouter,
-                    evmCommonCrossChainAbi
-                ),
-                tokenSymbol: 'USDC'
-            },
-            cryptoFee: null
+            rubicProxy: {
+                fixedFee: {
+                    amount: await this.getFixedFee(
+                        fromBlockchain,
+                        providerAddress,
+                        xyContractAddress[fromBlockchain].rubicRouter,
+                        evmCommonCrossChainAbi
+                    ),
+                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                },
+                platformFee: {
+                    percent: await this.getFeePercent(
+                        fromBlockchain,
+                        providerAddress,
+                        xyContractAddress[fromBlockchain].rubicRouter,
+                        evmCommonCrossChainAbi
+                    ),
+                    tokenSymbol: 'USDC'
+                }
+            }
         };
     }
 

@@ -1,9 +1,7 @@
-import { XyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
-
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { UniversalContract } from 'src/features/cross-chain/calculation-manager/providers/common/models/universal-contract';
-
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { XyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
 
 export const xyContractAddress: Record<XyCrossChainSupportedBlockchain, UniversalContract> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {

@@ -1,24 +1,24 @@
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { Injector } from 'src/core/injector/injector';
+import BigNumber from 'bignumber.js';
 import {
     RubicSdkError,
     WalletNotConnectedError,
     WrongFromAddressError,
     WrongReceiverAddressError
 } from 'src/common/errors';
-import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { PriceTokenAmount } from 'src/common/tokens';
-import BigNumber from 'bignumber.js';
+import { nativeTokensList, PriceTokenAmount } from 'src/common/tokens';
+import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
-import { HttpClient } from 'src/core/http-client/models/http-client';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
-import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
-import { isAddressCorrect } from 'src/features/common/utils/check-address';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { HttpClient } from 'src/core/http-client/models/http-client';
+import { Injector } from 'src/core/injector/injector';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { isAddressCorrect } from 'src/features/common/utils/check-address';
+import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { BridgeType } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 /**
@@ -88,8 +88,14 @@ export abstract class CrossChainTrade {
     }
 
     public get networkFee(): BigNumber {
-        return new BigNumber(this.feeInfo.fixedFee?.amount || 0).plus(
-            this.feeInfo.cryptoFee?.amount || 0
+        return new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || 0).plus(
+            this.feeInfo.provider?.cryptoFee?.amount || 0
+        );
+    }
+
+    public get platformFee(): BigNumber {
+        return new BigNumber(this.feeInfo.rubicProxy?.platformFee?.percent || 0).plus(
+            this.feeInfo.provider?.platformFee?.percent || 0
         );
     }
 
@@ -219,13 +225,17 @@ export abstract class CrossChainTrade {
      * @param providerValue Value, returned from cross-chain provider.
      */
     protected getSwapValue(providerValue?: BigNumber | string | number | null): string {
-        const fixedFeeValue = Web3Pure.toWei(this.feeInfo?.fixedFee?.amount || 0);
+        const nativeToken = nativeTokensList[this.from.blockchain];
+        const fixedFeeValue = Web3Pure.toWei(
+            this.feeInfo.rubicProxy?.fixedFee?.amount || 0,
+            nativeToken.decimals
+        );
 
         let fromValue: BigNumber;
         if (this.from.isNative) {
             if (providerValue) {
                 fromValue = new BigNumber(providerValue).dividedBy(
-                    1 - (this.feeInfo.platformFee?.percent || 0) / 100
+                    1 - (this.feeInfo.rubicProxy?.platformFee?.percent || 0) / 100
                 );
             } else {
                 fromValue = this.from.weiAmount;

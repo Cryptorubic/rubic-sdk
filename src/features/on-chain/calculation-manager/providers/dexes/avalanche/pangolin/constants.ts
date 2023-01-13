@@ -1,7 +1,7 @@
-import { defaultAvalancheProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/default-constants';
-import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { wrappedNativeTokensList } from 'src/common/tokens';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { defaultAvalancheProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/default-constants';
+import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 export const PANGOLIN_CONTRACT_ADDRESS = '0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106';
 

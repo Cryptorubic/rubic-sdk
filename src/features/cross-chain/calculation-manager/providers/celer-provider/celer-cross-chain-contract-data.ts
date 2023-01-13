@@ -1,35 +1,31 @@
-import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { celerCrossChainContractAbi } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-cross-chain-contract-abi';
-import { PriceTokenAmount, Token } from 'src/common/tokens';
-import { ProviderData } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/provider-data';
-import { CelerMessageBusController } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-message-bus-controller/celer-message-bus-controller';
-import { celerTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-transit-tokens';
-import { Cache } from 'src/common/utils/decorators';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import BigNumber from 'bignumber.js';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { CelerSupportedOnChainTradeProvider } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-supported-on-chain-trade';
 import { RubicSdkError } from 'src/common/errors';
+import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { Cache } from 'src/common/utils/decorators';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Injector } from 'src/core/injector/injector';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
+import { CelerMessageBusController } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-message-bus-controller/celer-message-bus-controller';
+import { celerCrossChainContractAbi } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-cross-chain-contract-abi';
+import { celerTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-transit-tokens';
+import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
+import { CelerSupportedOnChainTradeProvider } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-supported-on-chain-trade';
+import { ProviderData } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/provider-data';
 
 /**
  * Class to work with readable methods of cross-chain contract.
  */
 export class CelerCrossChainContractData {
-    private readonly web3Public: EvmWeb3Public;
+    private readonly web3Public = Injector.web3PublicService.getWeb3Public(this.blockchain);
 
-    private readonly messageBusController: CelerMessageBusController;
+    private readonly messageBusController = new CelerMessageBusController(this.web3Public);
 
     constructor(
         public readonly blockchain: CelerCrossChainSupportedBlockchain,
         public readonly address: string,
         public readonly providersData: ProviderData[]
-    ) {
-        this.web3Public = Injector.web3PublicService.getWeb3Public(this.blockchain);
-        this.messageBusController = new CelerMessageBusController(this.web3Public);
-    }
+    ) {}
 
     public getProvider(providerIndex: number): CelerSupportedOnChainTradeProvider {
         const provider = this.providersData?.[providerIndex]?.provider;

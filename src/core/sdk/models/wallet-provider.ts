@@ -1,8 +1,8 @@
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { provider } from 'web3-core';
-import Web3 from 'web3';
-import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
 import { Any } from 'src/common/utils/types';
+import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import Web3 from 'web3';
+import { provider } from 'web3-core';
 
 export interface WalletProviderCore<T = Any> {
     /**

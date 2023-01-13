@@ -1,5 +1,5 @@
-import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
 import BigNumber from 'bignumber.js';
+import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
 import { Token } from 'src/common/tokens';
 
 /**

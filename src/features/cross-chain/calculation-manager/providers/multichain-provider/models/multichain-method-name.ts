@@ -1,7 +1,8 @@
 export const multichainMethodNames = [
     'anySwapOut',
     'anySwapOutNative',
-    'anySwapOutUnderlying'
+    'anySwapOutUnderlying',
+    'Swapout'
 ] as const;
 
 export type MultichainMethodName = typeof multichainMethodNames[number];

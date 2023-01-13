@@ -1,24 +1,26 @@
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import BigNumber from 'bignumber.js';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
-import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { ContractParams } from 'src/features/common/models/contract-params';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import BigNumber from 'bignumber.js';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
-import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { xyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-contract-address';
 import { XyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
-import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 import { XyTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-request';
 import { XyTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-response';
-import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 
 /**
  * Calculated XY cross-chain trade.
@@ -47,11 +49,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
                         gasData: null,
                         priceImpact: 0,
                         slippage: 0,
-                        feeInfo: {
-                            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
-                            platformFee: { percent: 0, tokenSymbol: '' },
-                            cryptoFee: null
-                        }
+                        feeInfo: {}
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -113,7 +111,8 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return xyContractAddress[this.fromBlockchain].rubicRouter;
+        // return xyContractAddress[this.fromBlockchain].rubicRouter;
+        return xyContractAddress[this.fromBlockchain].providerRouter;
     }
 
     public readonly feeInfo: FeeInfo;
@@ -145,7 +144,44 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         this.priceImpact = crossChainTrade.priceImpact;
     }
 
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        await this.checkTradeErrors();
+        if (options.receiverAddress) {
+            throw new RubicSdkError('Receiver address not supported');
+        }
+
+        await this.checkAllowanceAndApprove(options);
+
+        const { onConfirm, gasLimit, gasPrice } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+
+        // eslint-disable-next-line no-useless-catch
+        try {
+            const { data, value, to } = await this.getTransactionRequest();
+
+            await this.web3Private.trySendTransaction(to, {
+                data,
+                value,
+                onTransactionHash,
+                gas: gasLimit,
+                gasPrice
+            });
+
+            return transactionHash!;
+        } catch (err) {
+            throw err;
+        }
+    }
+
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
+        throw new RubicSdkError('Temporary disabled');
+
         const receiverAddress = options?.receiverAddress || this.walletAddress;
         const { data, value: providerValue } = await this.getTransactionRequest(receiverAddress);
         const toChainId = blockchainId[this.to.blockchain];
@@ -186,6 +222,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
     private async getTransactionRequest(receiverAddress?: string): Promise<{
         data: string;
         value: string;
+        to: string;
     }> {
         const params: XyTransactionRequest = {
             ...this.transactionRequest,
@@ -208,7 +245,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ? { total: this.priceImpact } : null,
-            slippage: { total: this.slippage }
+            slippage: { total: this.slippage * 100 }
         };
     }
 }

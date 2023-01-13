@@ -1,12 +1,12 @@
 import { RubicSdkError } from 'src/common/errors';
-import { ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/constants/swap-router-contract-data';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { CelerOnChainTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-on-chain-contract-trade/celer-on-chain-trade/celer-on-chain-trade';
-import { AlgebraTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/algebra-trade';
 import { DestinationCelerSwapInfo } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/models/destination-celer-swap-info';
 import { SwapVersion } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/models/provider-type.enum';
 import { v3LikeCelerSwapInfo } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/models/v3-like-celer-swap-info';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { AbstractAlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/algebra/abstract-algebra-quoter-controller';
+import { AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/algebra/algebra-quoter-controller';
+import { AlgebraTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/algebra-trade';
+import { ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/constants/swap-router-contract-data';
 
 export class CelerAlgebraTrade implements CelerOnChainTrade {
     readonly defaultDeadline = 999999999999999;
@@ -14,7 +14,7 @@ export class CelerAlgebraTrade implements CelerOnChainTrade {
     constructor(private readonly algebraTrade: AlgebraTrade) {}
 
     public getFirstPath(): string {
-        return AbstractAlgebraQuoterController.getEncodedPath(Array.from(this.algebraTrade.path));
+        return AlgebraQuoterController.getEncodedPath(Array.from(this.algebraTrade.path));
     }
 
     public getSecondPath(): string[] {

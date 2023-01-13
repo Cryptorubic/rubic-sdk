@@ -1,6 +1,6 @@
 import {
-    BridgeType,
-    BRIDGE_TYPE
+    BRIDGE_TYPE,
+    BridgeType
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 
 export const RANGO_TRADE_BRIDGE_TYPE: Partial<Record<string, BridgeType>> = {

@@ -1,20 +1,20 @@
-import { AbiItem } from 'web3-utils';
+import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
-import { CelerCrossChainContractData } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-cross-chain-contract-data';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { Cache } from 'src/common/utils/decorators';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { CelerCrossChainContractData } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-cross-chain-contract-data';
+import { celerCrossChainContractAbi } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-cross-chain-contract-abi';
+import { CelerSwapMethod } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-swap-methods';
+import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
+import { CelerSupportedOnChainTradeProvider } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-supported-on-chain-trade';
 import {
     isAlgebraProvider,
     isOneInchLikeProvider,
     isUniswapV2LikeProvider,
     isUniswapV3LikeProvider
 } from 'src/features/on-chain/calculation-manager/utils/type-guards';
-import { celerCrossChainContractAbi } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-cross-chain-contract-abi';
-import { CelerSwapMethod } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-swap-methods';
-import { Cache } from 'src/common/utils/decorators';
-import { CelerSupportedOnChainTradeProvider } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-supported-on-chain-trade';
-import { PriceTokenAmount } from 'src/common/tokens';
-import BigNumber from 'bignumber.js';
-import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
+import { AbiItem } from 'web3-utils';
 
 export abstract class CelerContractTrade {
     public abstract readonly fromToken: PriceTokenAmount<EvmBlockchainName>;

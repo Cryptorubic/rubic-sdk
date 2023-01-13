@@ -1,16 +1,16 @@
-import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
-import { staticImplements } from 'src/common/utils/decorators';
-import { compareAddresses } from 'src/common/utils/blockchain';
-import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
-import { AbiInput, AbiItem, AbiOutput } from 'web3-utils';
-import { InfiniteArray } from 'src/common/utils/types';
-import { TronParameters } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-parameters';
-import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
 import { BigNumber as EthersBigNumber } from 'ethers';
+import { compareAddresses } from 'src/common/utils/blockchain';
+import { staticImplements } from 'src/common/utils/decorators';
+import { InfiniteArray } from 'src/common/utils/types';
+import { TronWeb } from 'src/core/blockchain/constants/tron/tron-web';
 import {
     TronWeb3PrimitiveType,
     Web3PrimitiveType
 } from 'src/core/blockchain/models/web3-primitive-type';
+import { TronParameters } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-parameters';
+import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
+import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
+import { AbiInput, AbiItem, AbiOutput } from 'web3-utils';
 
 @staticImplements<TypedWeb3Pure>()
 export class TronWeb3Pure {

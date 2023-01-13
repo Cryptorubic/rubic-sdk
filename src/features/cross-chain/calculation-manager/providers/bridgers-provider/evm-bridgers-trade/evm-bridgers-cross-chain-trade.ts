@@ -1,27 +1,27 @@
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { PriceTokenAmount } from 'src/common/tokens';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import BigNumber from 'bignumber.js';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Injector } from 'src/core/injector/injector';
+import { ContractParams } from 'src/features/common/models/contract-params';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { BridgersEvmCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
+import { EvmBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/evm-bridgers-trade/models/evm-bridgers-transaction-data';
+import { getMethodArgumentsAndTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/utils/get-method-arguments-and-transaction-data';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
-import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
-import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
-import { MarkRequired } from 'ts-essentials';
-import { getMethodArgumentsAndTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/utils/get-method-arguments-and-transaction-data';
-import { EvmBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/evm-bridgers-trade/models/evm-bridgers-transaction-data';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { Injector } from 'src/core/injector/injector';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { TransactionConfig } from 'web3-core';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { MarkRequired } from 'ts-essentials';
+import { TransactionConfig } from 'web3-core';
 
 export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -44,11 +44,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                         from,
                         to,
                         toTokenAmountMin: new BigNumber(0),
-                        feeInfo: {
-                            fixedFee: null,
-                            platformFee: null,
-                            cryptoFee: null
-                        },
+                        feeInfo: {},
                         gasData: null,
                         slippage: 0
                     },
@@ -145,13 +141,18 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     protected async getContractParams(
         options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
     ): Promise<ContractParams> {
-        const fromWithoutFee = getFromWithoutFee(this.from, this.feeInfo);
+        const fromWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo.rubicProxy?.platformFee?.percent
+        );
         const { methodArguments, transactionData } =
             await getMethodArgumentsAndTransactionData<EvmBridgersTransactionData>(
+                this.from,
                 fromWithoutFee,
                 this.to,
                 this.toTokenAmountMin,
                 this.walletAddress,
+                this.providerAddress,
                 options
             );
 

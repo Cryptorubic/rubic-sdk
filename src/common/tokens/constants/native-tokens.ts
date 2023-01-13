@@ -1,7 +1,7 @@
 import { Token } from 'src/common/tokens/token';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/bitcoin-web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 
 export const nativeTokensList = {
@@ -141,8 +141,22 @@ export const nativeTokensList = {
     [BLOCKCHAIN_NAME.BOBA]: new Token({
         blockchain: BLOCKCHAIN_NAME.BOBA,
         address: EvmWeb3Pure.nativeTokenAddress,
-        name: 'ETH',
-        symbol: 'ETH',
+        name: 'BOBA',
+        symbol: 'BOBA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BOBA_BSC]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BOBA_BSC,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'BOBA',
+        symbol: 'BOBA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BOBA_AVALANCHE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BOBA_AVALANCHE,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'BOBA',
+        symbol: 'BOBA',
         decimals: 18
     }),
     [BLOCKCHAIN_NAME.ASTAR]: new Token({
@@ -199,6 +213,34 @@ export const nativeTokensList = {
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'Metis token',
         symbol: 'METIS',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.DFK]: new Token({
+        blockchain: BLOCKCHAIN_NAME.DFK,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'JEWEL',
+        symbol: 'JEWEL',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.KLAYTN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.KLAYTN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Klaytn',
+        symbol: 'KLAY',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.VELAS]: new Token({
+        blockchain: BLOCKCHAIN_NAME.VELAS,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Velas',
+        symbol: 'VLX',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SYSCOIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SYSCOIN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Syscoin',
+        symbol: 'SYS',
         decimals: 18
     })
 };

@@ -1,5 +1,5 @@
-import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 
 /**
  * Data required to obtain status of cross-chain trade.
@@ -44,4 +44,14 @@ export interface CrossChainTradeData {
      * Expected minimum output amount.
      */
     amountOutMin?: string;
+
+    /**
+     * Celer bridge transaction ID.
+     */
+    celerTransactionId?: string;
+
+    /**
+     * Version of symbiosis sdk, used to make swap.
+     */
+    symbiosisVersion?: 'v1' | 'v2';
 }

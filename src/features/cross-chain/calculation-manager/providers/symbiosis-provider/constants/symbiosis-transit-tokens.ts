@@ -1,6 +1,6 @@
-import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { TokenStruct } from 'src/common/tokens/token';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
 
 export const symbiosisTransitTokens: Record<SymbiosisCrossChainSupportedBlockchain, TokenStruct> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
@@ -34,6 +34,20 @@ export const symbiosisTransitTokens: Record<SymbiosisCrossChainSupportedBlockcha
     [BLOCKCHAIN_NAME.BOBA]: {
         blockchain: BLOCKCHAIN_NAME.BOBA,
         address: '0x66a2a913e447d6b4bf33efbec43aaef87890fbbc',
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 6
+    },
+    [BLOCKCHAIN_NAME.BOBA_BSC]: {
+        blockchain: BLOCKCHAIN_NAME.BOBA_BSC,
+        address: '0x9f98f9f312d23d078061962837042b8918e6aff2',
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.BOBA_AVALANCHE]: {
+        blockchain: BLOCKCHAIN_NAME.BOBA_AVALANCHE,
+        address: '0x126969743a6d300bab08f303f104f0f7dbafbe20',
         name: 'USDC',
         symbol: 'USDC',
         decimals: 6

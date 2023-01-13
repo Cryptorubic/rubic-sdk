@@ -1,5 +1,5 @@
 import { Token } from 'src/common/tokens/token';
-import { BlockchainName, BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: new Token({
@@ -142,6 +142,20 @@ export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
         symbol: 'WETH',
         decimals: 18
     }),
+    [BLOCKCHAIN_NAME.BOBA_BSC]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BOBA_BSC,
+        address: '0xC58aaD327D6D58D979882601ba8DDa0685B505eA',
+        name: 'Wrapped Boba',
+        symbol: 'WBOBA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BOBA_AVALANCHE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BOBA_AVALANCHE,
+        address: '0x26c319B7B2cF823365414d082698C8ac90cbBA63',
+        name: 'Wrapped Boba',
+        symbol: 'WBOBA',
+        decimals: 18
+    }),
     [BLOCKCHAIN_NAME.ASTAR]: new Token({
         blockchain: BLOCKCHAIN_NAME.ASTAR,
         address: '0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720',
@@ -196,6 +210,34 @@ export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
         address: '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000',
         name: 'Wrapped METIS',
         symbol: 'WMETIS',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.DFK]: new Token({
+        blockchain: BLOCKCHAIN_NAME.DFK,
+        address: '0xCCb93dABD71c8Dad03Fc4CE5559dC3D89F67a260',
+        name: 'Wrapped JEWEL',
+        symbol: 'WJEWEL',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.KLAYTN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.KLAYTN,
+        address: '0xe4f05a66ec68b54a58b17c22107b02e0232cc817',
+        name: 'Wrapped KLAY',
+        symbol: 'WKLAY',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.VELAS]: new Token({
+        blockchain: BLOCKCHAIN_NAME.VELAS,
+        address: '0xc579D1f3CF86749E05CD06f7ADe17856c2CE3126',
+        name: 'Wrapped VLX',
+        symbol: 'WVLX',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SYSCOIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SYSCOIN,
+        address: '0xd3e822f3ef011Ca5f17D82C956D952D8d7C3A1BB',
+        name: 'Wrapped SYS',
+        symbol: 'WSYS',
         decimals: 18
     })
 };

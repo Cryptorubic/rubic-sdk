@@ -1,8 +1,8 @@
-import { UniSwapV3EthereumPowTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum-pow/uni-swap-v3-ethereum-pow/uni-swap-v3-ethereum-pow-trade';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { UniswapV3AbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-provider';
 import { UNI_SWAP_V3_ETHEREUM_POW_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum-pow/uni-swap-v3-ethereum-pow/constants/provider-configuration';
 import { UNI_SWAP_V3_ETHEREUM_POW_ROUTER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum-pow/uni-swap-v3-ethereum-pow/constants/router-configuration';
-import { UniswapV3AbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v3-abstract/uniswap-v3-abstract-provider';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { UniSwapV3EthereumPowTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum-pow/uni-swap-v3-ethereum-pow/uni-swap-v3-ethereum-pow-trade';
 
 export class UniSwapV3EthereumPowProvider extends UniswapV3AbstractProvider<UniSwapV3EthereumPowTrade> {
     public readonly blockchain = BLOCKCHAIN_NAME.ETHEREUM_POW;

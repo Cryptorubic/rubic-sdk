@@ -1,5 +1,5 @@
-import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculation-manager/models/wrapped-cross-chain-trade-or-null';
 import { MaxAmountError, MinAmountError } from 'src/common/errors';
+import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculation-manager/models/wrapped-cross-chain-trade-or-null';
 
 /**
  * Compares two cross chain trades for sorting algorithm.
