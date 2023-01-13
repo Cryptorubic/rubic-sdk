@@ -4,7 +4,7 @@ import { TOKENS as ALL_TOKENS } from '__tests__/utils/tokens';
 import { Utils } from '__tests__/unit-tests/features/swap/utils/utils';
 import { Injector } from 'src/core/injector/injector';
 import BigNumber from 'bignumber.js';
-import { Web3Public } from 'src/core';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { PriceToken } from 'src/common/tokens/price-token';
 import { UniSwapV3PolygonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-provider';
@@ -17,7 +17,7 @@ export const uniswapV3PolygonTradeSpec = () =>
     describe('UniSwap V3 Polygon trade tests.', () => {
         let chain: Chain;
         let uniswapV3Provider: UniSwapV3PolygonProvider;
-        let web3Public: Web3Public;
+        let web3Public: EvmWeb3Public;
         let userAddress: string;
         let utils: Utils;
 
@@ -30,7 +30,9 @@ export const uniswapV3PolygonTradeSpec = () =>
             const configuration = await chain.getConfiguration();
             await mockInjector(configuration);
             web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.POLYGON);
-            userAddress = Injector.web3PrivateService.address;
+            userAddress = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
+                BLOCKCHAIN_NAME.POLYGON
+            ).address;
             utils = new Utils(chain, web3Public);
         });
 
@@ -48,7 +50,8 @@ export const uniswapV3PolygonTradeSpec = () =>
             const trade = await uniswapV3Provider.calculate(from, to, {
                 gasCalculation: 'disabled'
             });
-            const transactionReceipt = await trade.swap();
+            const transactionHash = await trade.swap();
+            const transactionReceipt = await web3Public.getTransactionReceipt(transactionHash);
             const maticBalanceAfter = await web3Public.getBalance(userAddress);
             const usdtBalanceAfter = await web3Public.getBalance(userAddress, TOKENS.USDT.address);
             const transactionFee = await utils.getTransactionFeeByReceipt(transactionReceipt);
@@ -92,7 +95,8 @@ export const uniswapV3PolygonTradeSpec = () =>
             const trade = await uniswapV3Provider.calculate(from, to, {
                 gasCalculation: 'disabled'
             });
-            const transactionReceipt = await trade.swap({ onApprove });
+            const transactionHash = await trade.swap({ onApprove });
+            const transactionReceipt = await web3Public.getTransactionReceipt(transactionHash);
             const usdtBalanceAfter = await web3Public.getBalance(userAddress, from.address);
             const maticBalanceAfter = await web3Public.getBalance(userAddress);
             const approveTransactionFee = await utils.getTransactionFeeByHash(approveTxHash);
@@ -131,7 +135,8 @@ export const uniswapV3PolygonTradeSpec = () =>
             const trade = await uniswapV3Provider.calculate(from, to, {
                 gasCalculation: 'disabled'
             });
-            const transactionReceipt = await trade.swap();
+            const transactionHash = await trade.swap();
+            const transactionReceipt = await web3Public.getTransactionReceipt(transactionHash);
             const usdtBalanceAfter = await web3Public.getBalance(userAddress, from.address);
             const daiBalanceAfter = await web3Public.getBalance(userAddress, to.address);
 
