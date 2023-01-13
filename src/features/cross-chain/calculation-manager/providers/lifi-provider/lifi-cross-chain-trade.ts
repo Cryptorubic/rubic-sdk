@@ -51,7 +51,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                         gasData: null,
                         toTokenAmountMin: new BigNumber(0),
                         feeInfo: {},
-                        priceImpact: 0,
+                        priceImpact: from.calculatePriceImpactPercent(to) || 0,
                         onChainSubtype: {
                             from: undefined,
                             to: undefined

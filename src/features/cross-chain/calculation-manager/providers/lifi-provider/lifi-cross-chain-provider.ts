@@ -196,7 +196,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                     //     rubicProxyContractAddress[fromBlockchain],
                     //     evmCommonCrossChainAbi
                     // ),
-                    percent: 0,
+                    percent: 0.15,
                     tokenSymbol: percentFeeToken.symbol
                 }
             }
