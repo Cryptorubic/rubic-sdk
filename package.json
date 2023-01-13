@@ -80,6 +80,7 @@
     "symbiosis-js-sdk": "^2.9.6",
     "symbiosis-js-sdk-v1": "npm:symbiosis-js-sdk@2.8.22",
     "tronweb": "^4.3.0",
+    "ttypescript": "^1.5.15",
     "web3": "^1.8.1"
   },
   "devDependencies": {
