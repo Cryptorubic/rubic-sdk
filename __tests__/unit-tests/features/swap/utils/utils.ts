@@ -1,6 +1,6 @@
 import { TransactionReceipt } from 'web3-eth';
 import BigNumber from 'bignumber.js';
-import { Web3Public } from 'src/core';
+import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { Chain } from '__tests__/utils/chain';
 
 export class Utils {
