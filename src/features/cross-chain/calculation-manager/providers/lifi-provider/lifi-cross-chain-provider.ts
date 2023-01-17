@@ -37,6 +37,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
     private readonly MIN_AMOUNT_USD = new BigNumber(30);
 
+    private readonly lifiFee = 0.0015;
+
     public isSupportedBlockchain(
         blockchain: BlockchainName
     ): blockchain is LifiCrossChainSupportedBlockchain {
@@ -76,7 +78,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             bridges: {
                 deny: options.lifiDisabledBridgeTypes
             },
-            fee: 0.0015,
+            fee: this.lifiFee,
             integrator: 'Rubic'
         };
 
@@ -167,7 +169,14 @@ export class LifiCrossChainProvider extends CrossChainProvider {
     }
 
     private checkMinError(from: PriceTokenAmount): void | never {
-        if (from.price.multipliedBy(from.tokenAmount).lt(this.MIN_AMOUNT_USD)) {
+        const fromUsdAmount = from.price.multipliedBy(from.tokenAmount);
+        if (fromUsdAmount.lt(this.MIN_AMOUNT_USD)) {
+            if (from.price.isFinite()) {
+                const minTokenAmount = this.MIN_AMOUNT_USD.multipliedBy(from.tokenAmount).dividedBy(
+                    fromUsdAmount
+                );
+                throw new MinAmountError(minTokenAmount, from.symbol);
+            }
             throw new MinAmountError(this.MIN_AMOUNT_USD, 'USDC');
         }
     }
@@ -202,7 +211,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             },
             provider: {
                 platformFee: {
-                    percent: 0.0015,
+                    percent: this.lifiFee * 100,
                     tokenSymbol: percentFeeToken.symbol
                 }
             }
