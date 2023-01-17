@@ -64,7 +64,9 @@ export class LifiProvider {
             slippage: fullOptions.slippageTolerance,
             exchanges: {
                 deny: lifiDisabledProviders.concat('openocean')
-            }
+            },
+            fee: 0.0015,
+            integrator: 'Rubic'
         };
 
         const routesRequest: RoutesRequest = {

@@ -13,7 +13,7 @@
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ESNext",
+    "target": "es2020",
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
