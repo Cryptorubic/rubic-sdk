@@ -11,12 +11,9 @@ import { Injector } from 'src/core/injector/injector';
 import { wlContractAbi } from 'src/features/common/constants/wl-contract-abi';
 import { wlContractAddress } from 'src/features/common/constants/wl-contract-address';
 import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
-import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import {
     BRIDGE_TYPE,
     bridges,
@@ -40,6 +37,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
     private readonly MIN_AMOUNT_USD = new BigNumber(30);
 
+    private readonly lifiFee = 0.0015;
+
     public isSupportedBlockchain(
         blockchain: BlockchainName
     ): blockchain is LifiCrossChainSupportedBlockchain {
@@ -59,11 +58,11 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             return null;
         }
 
-        await this.checkContractState(
-            fromBlockchain,
-            rubicProxyContractAddress[fromBlockchain],
-            evmCommonCrossChainAbi
-        );
+        // await this.checkContractState(
+        //     fromBlockchain,
+        //     rubicProxyContractAddress[fromBlockchain],
+        //     evmCommonCrossChainAbi
+        // );
 
         if (
             options.lifiDisabledBridgeTypes?.length &&
@@ -78,14 +77,17 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             allowSwitchChain: false,
             bridges: {
                 deny: options.lifiDisabledBridgeTypes
-            }
+            },
+            fee: this.lifiFee,
+            integrator: 'Rubic'
         };
 
         const fromChainId = blockchainId[fromBlockchain];
         const toChainId = blockchainId[toBlockchain];
 
         const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-        const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
+        // const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
+        const fromWithoutFee = from;
 
         const fromAddress = this.getWalletAddress(fromBlockchain);
         const toAddress = options.receiverAddress || fromAddress;
@@ -111,8 +113,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             throw new RubicSdkError('No available routes');
         }
 
-        const providerGateway = bestRoute.steps[0]!.estimate.approvalAddress;
-        await this.checkProviderIsWhitelisted(from.blockchain, providerGateway);
+        // const providerGateway = bestRoute.steps[0]!.estimate.approvalAddress;
+        // await this.checkProviderIsWhitelisted(from.blockchain, providerGateway);
 
         const { fromAmountUSD, toAmountUSD } = bestRoute;
         const priceImpact = new BigNumber(fromAmountUSD)
@@ -167,34 +169,49 @@ export class LifiCrossChainProvider extends CrossChainProvider {
     }
 
     private checkMinError(from: PriceTokenAmount): void | never {
-        if (from.price.multipliedBy(from.tokenAmount).lt(this.MIN_AMOUNT_USD)) {
+        const fromUsdAmount = from.price.multipliedBy(from.tokenAmount);
+        if (fromUsdAmount.lt(this.MIN_AMOUNT_USD)) {
+            if (from.price.isFinite()) {
+                const minTokenAmount = this.MIN_AMOUNT_USD.multipliedBy(from.tokenAmount).dividedBy(
+                    fromUsdAmount
+                );
+                throw new MinAmountError(minTokenAmount, from.symbol);
+            }
             throw new MinAmountError(this.MIN_AMOUNT_USD, 'USDC');
         }
     }
 
     protected override async getFeeInfo(
         fromBlockchain: LifiCrossChainSupportedBlockchain,
-        providerAddress: string,
+        _providerAddress: string,
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
         return {
             rubicProxy: {
                 fixedFee: {
-                    amount: await this.getFixedFee(
-                        fromBlockchain,
-                        providerAddress,
-                        rubicProxyContractAddress[fromBlockchain],
-                        evmCommonCrossChainAbi
-                    ),
+                    // amount: await this.getFixedFee(
+                    //     fromBlockchain,
+                    //     providerAddress,
+                    //     rubicProxyContractAddress[fromBlockchain],
+                    //     evmCommonCrossChainAbi
+                    // ),
+                    amount: new BigNumber(0),
                     tokenSymbol: nativeTokensList[fromBlockchain].symbol
                 },
                 platformFee: {
-                    percent: await this.getFeePercent(
-                        fromBlockchain,
-                        providerAddress,
-                        rubicProxyContractAddress[fromBlockchain],
-                        evmCommonCrossChainAbi
-                    ),
+                    // percent: await this.getFeePercent(
+                    //     fromBlockchain,
+                    //     providerAddress,
+                    //     rubicProxyContractAddress[fromBlockchain],
+                    //     evmCommonCrossChainAbi
+                    // ),
+                    percent: 0,
+                    tokenSymbol: percentFeeToken.symbol
+                }
+            },
+            provider: {
+                platformFee: {
+                    percent: this.lifiFee * 100,
                     tokenSymbol: percentFeeToken.symbol
                 }
             }
