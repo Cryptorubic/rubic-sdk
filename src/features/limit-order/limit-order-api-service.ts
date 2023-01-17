@@ -7,22 +7,41 @@ import { Injector } from 'src/core/injector/injector';
 import { limitOrderContractAbi } from 'src/features/limit-order/constants/limit-order-contract-abi';
 import { seriesNonceManagerAbi } from 'src/features/limit-order/constants/series-nonce-manager-abi';
 import { LimitOrder } from 'src/features/limit-order/models/limit-order';
-import { LimitOrderApiResponse } from 'src/features/limit-order/models/limit-order-api';
+import {
+    LimitOrderApi,
+    LimitOrderApiResponse
+} from 'src/features/limit-order/models/limit-order-api';
 import { LIMIT_ORDER_STATUS } from 'src/features/limit-order/models/limit-order-status';
 import { limitOrderSupportedBlockchains } from 'src/features/limit-order/models/supported-blockchains';
 
+const baseApi = (chainId: number) => `https://limit-orders.1inch.io/v3.0/${chainId}/limit-order`;
+
 export class LimitOrdersApiService {
+    private getApiOrders(chainId: number, userAddress: string): Promise<LimitOrderApiResponse> {
+        return Injector.httpClient.get<LimitOrderApiResponse>(
+            `${baseApi(chainId)}/address/${userAddress}`,
+            {
+                params: {
+                    statuses: '[1, 2]',
+                    sortBy: 'createDateTime'
+                }
+            }
+        );
+    }
+
     public async getUserOrders(userAddress: string): Promise<LimitOrder[]> {
         const orders = (
             await Promise.all(
                 limitOrderSupportedBlockchains.map(async blockchain => {
-                    const id = blockchainId[blockchain];
-                    const ordersById = await Injector.httpClient.get<LimitOrderApiResponse[]>(
-                        `https://limit-orders.1inch.io/v3.0/${id}/limit-order/address/${userAddress}?page=1&limit=100&statuses=%5B1,2%5D&sortBy=createDateTime`
-                    );
-                    return Promise.all(
-                        ordersById.map(orderById => this.parseLimitOrder(blockchain, orderById))
-                    );
+                    const chainId = blockchainId[blockchain];
+                    const ordersById = await this.getApiOrders(chainId, userAddress);
+                    try {
+                        return await Promise.all(
+                            ordersById.map(orderById => this.parseLimitOrder(blockchain, orderById))
+                        );
+                    } catch {
+                        return [];
+                    }
                 })
             )
         ).flat();
@@ -41,10 +60,11 @@ export class LimitOrdersApiService {
     private async parseLimitOrder(
         blockchain: BlockchainName,
         {
+            orderHash,
             createDateTime,
             data: { makerAsset, takerAsset, makingAmount, takingAmount, interactions },
             orderInvalidReason
-        }: LimitOrderApiResponse
+        }: LimitOrderApi
     ): Promise<LimitOrder> {
         const [fromToken, toToken] = await Promise.all([
             Token.createToken({ address: makerAsset, blockchain }),
@@ -70,6 +90,7 @@ export class LimitOrdersApiService {
         } catch {}
 
         return {
+            hash: orderHash,
             creation: new Date(createDateTime),
             fromToken,
             toToken,
@@ -79,5 +100,22 @@ export class LimitOrdersApiService {
             status:
                 orderInvalidReason === null ? LIMIT_ORDER_STATUS.VALID : LIMIT_ORDER_STATUS.INVALID
         };
+    }
+
+    public async getOrderByHash(
+        userAddress: string,
+        blockchain: BlockchainName,
+        hash: string
+    ): Promise<LimitOrderApi | null> {
+        const chainId = blockchainId[blockchain];
+        try {
+            const orders = await this.getApiOrders(chainId, userAddress);
+            return (
+                orders.find(({ orderHash }) => orderHash.toLowerCase() === hash.toLowerCase()) ||
+                null
+            );
+        } catch {
+            return null;
+        }
     }
 }

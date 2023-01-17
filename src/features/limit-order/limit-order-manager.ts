@@ -1,6 +1,8 @@
 import {
+    ChainId,
     limirOrderProtocolAdresses,
     LimitOrderBuilder,
+    LimitOrderPredicateBuilder,
     LimitOrderPredicateCallData,
     LimitOrderProtocolFacade,
     NonceSeriesV2,
@@ -9,10 +11,13 @@ import {
     SeriesNonceManagerPredicateBuilder,
     Web3ProviderConnector
 } from '@1inch/limit-order-protocol-utils';
-import { LimitOrderPredicateBuilder } from '@1inch/limit-order-protocol-utils/limit-order-predicate.builder';
-import { ChainId } from '@1inch/limit-order-protocol-utils/model/limit-order-protocol.model';
 import BigNumber from 'bignumber.js';
-import { RubicSdkError, UnnecessaryApproveError, WalletNotConnectedError } from 'src/common/errors';
+import {
+    FailedToCheckForTransactionReceiptError,
+    RubicSdkError,
+    UnnecessaryApproveError,
+    WalletNotConnectedError
+} from 'src/common/errors';
 import { Token, TokenAmount } from 'src/common/tokens';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import {
@@ -48,17 +53,20 @@ export class LimitOrderManager {
 
     private readonly apiService = new LimitOrdersApiService();
 
+    private get web3Private(): EvmWeb3Private {
+        return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM);
+    }
+
+    private get walletAddress(): string {
+        return this.web3Private.address;
+    }
+
     private getWeb3Public(blockchain: EvmBlockchainName): EvmWeb3Public {
         return Injector.web3PublicService.getWeb3Public(blockchain);
     }
 
-    private getWeb3Private(blockchain: EvmBlockchainName): EvmWeb3Private {
-        const chainType = BlockchainsInfo.getChainType(blockchain);
-        return Injector.web3PrivateService.getWeb3Private(chainType);
-    }
-
-    private checkWalletConnected(blockchain: EvmBlockchainName): never | void {
-        if (!this.getWeb3Private(blockchain).address) {
+    private checkWalletConnected(): never | void {
+        if (!this.walletAddress) {
             throw new WalletNotConnectedError();
         }
     }
@@ -67,19 +75,18 @@ export class LimitOrderManager {
         fromToken: Token<EvmBlockchainName> | TokenBaseStruct<EvmBlockchainName>,
         fromAmount: BigNumber | string | number
     ): Promise<boolean> {
-        const { blockchain } = fromToken;
-        this.checkWalletConnected(blockchain);
+        this.checkWalletConnected();
 
         const fromTokenAmount = await TokenAmount.createToken({
             ...fromToken,
             tokenAmount: new BigNumber(fromAmount)
         });
-        const walletAddress = this.getWeb3Private(blockchain).address;
+        const { blockchain } = fromToken;
         const chainId = blockchainId[blockchain] as ChainId;
         const contractAddress = limirOrderProtocolAdresses[chainId];
         const allowance = await this.getWeb3Public(blockchain).getAllowance(
             fromToken.address,
-            walletAddress,
+            this.walletAddress,
             contractAddress
         );
         return fromTokenAmount.weiAmount.gt(allowance);
@@ -98,9 +105,9 @@ export class LimitOrderManager {
             }
         }
 
+        this.checkWalletConnected();
         const { blockchain } = fromToken;
-        this.checkWalletConnected(blockchain);
-        await this.getWeb3Private(blockchain).checkBlockchainCorrect(blockchain);
+        await this.web3Private.checkBlockchainCorrect(blockchain);
 
         const fromTokenAmount = await TokenAmount.createToken({
             ...fromToken,
@@ -115,7 +122,7 @@ export class LimitOrderManager {
 
         const chainId = blockchainId[blockchain] as ChainId;
         const contractAddress = limirOrderProtocolAdresses[chainId];
-        return this.getWeb3Private(blockchain).approveTokens(
+        return this.web3Private.approveTokens(
             fromTokenAmount.address,
             contractAddress,
             approveAmount,
@@ -166,7 +173,6 @@ export class LimitOrderManager {
 
         const chainId = blockchainId[blockchain] as ChainId;
         const chainType = BlockchainsInfo.getChainType(blockchain) as CHAIN_TYPE.EVM;
-        const walletAddress = Injector.web3PrivateService.getWeb3Private(chainType).address;
 
         const connector = new Web3ProviderConnector(
             Injector.web3PrivateService.getWeb3Private(chainType).web3
@@ -192,7 +198,7 @@ export class LimitOrderManager {
         const expiration = Math.floor(Date.now() / 1000) + 20 * 10 ** 9;
         const nonce = await seriesNonceManagerFacade.getNonce(
             NonceSeriesV2.LimitOrderV3,
-            walletAddress
+            this.walletAddress
         );
         const simpleLimitOrderPredicate: LimitOrderPredicateCallData =
             limitOrderPredicateBuilder.arbitraryStaticCall(
@@ -201,7 +207,7 @@ export class LimitOrderManager {
                     NonceSeriesV2.LimitOrderV3,
                     expiration,
                     BigInt(nonce),
-                    walletAddress
+                    this.walletAddress
                 )
             );
 
@@ -209,7 +215,7 @@ export class LimitOrderManager {
         const limitOrder = limitOrderBuilder.buildLimitOrder({
             makerAssetAddress: fromTokenAmount.address,
             takerAssetAddress: toTokenAmount.address,
-            makerAddress: walletAddress,
+            makerAddress: this.walletAddress,
             makingAmount: fromTokenAmount.stringWeiAmount,
             takingAmount: toTokenAmount.stringWeiAmount,
             predicate: simpleLimitOrderPredicate
@@ -217,7 +223,7 @@ export class LimitOrderManager {
 
         const limitOrderTypedData = limitOrderBuilder.buildLimitOrderTypedData(limitOrder);
         const limitOrderSignature = await limitOrderBuilder.buildOrderSignature(
-            walletAddress,
+            this.walletAddress,
             limitOrderTypedData
         );
         const limitOrderHash = limitOrderBuilder.buildLimitOrderHash(limitOrderTypedData);
@@ -234,5 +240,49 @@ export class LimitOrderManager {
 
     public getUserTrades(userAddress: string): Promise<LimitOrder[]> {
         return this.apiService.getUserOrders(userAddress);
+    }
+
+    public async cancelOrder(blockchain: EvmBlockchainName, orderHash: string): Promise<string> {
+        this.checkWalletConnected();
+        this.web3Private.checkBlockchainCorrect(blockchain);
+
+        const order = await this.apiService.getOrderByHash(
+            this.walletAddress,
+            blockchain,
+            orderHash
+        );
+        if (!order) {
+            throw new RubicSdkError(`No order with hash ${orderHash}`);
+        }
+
+        const chainId = blockchainId[blockchain] as ChainId;
+
+        const connector = new Web3ProviderConnector(this.web3Private.web3);
+        const contractAddress = limirOrderProtocolAdresses[chainId];
+
+        const limitOrderProtocolFacade = new LimitOrderProtocolFacade(
+            contractAddress,
+            chainId,
+            connector
+        );
+
+        const callData = limitOrderProtocolFacade.cancelLimitOrder(order.data);
+
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            transactionHash = hash;
+        };
+        try {
+            await this.web3Private.sendTransaction(contractAddress, {
+                data: callData,
+                onTransactionHash
+            });
+            return transactionHash!;
+        } catch (err) {
+            if (err instanceof FailedToCheckForTransactionReceiptError) {
+                return transactionHash!;
+            }
+            throw err;
+        }
     }
 }

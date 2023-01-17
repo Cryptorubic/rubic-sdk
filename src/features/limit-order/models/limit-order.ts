@@ -3,6 +3,7 @@ import { Token } from 'src/common/tokens';
 import { LIMIT_ORDER_STATUS } from 'src/features/limit-order/models/limit-order-status';
 
 export interface LimitOrder {
+    hash: string;
     creation: Date;
     fromToken: Token | null;
     toToken: Token | null;
