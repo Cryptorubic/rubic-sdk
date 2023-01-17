@@ -29,6 +29,8 @@ import { TronTransactionOptions } from 'src/core/blockchain/web3-private-service
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { Injector } from 'src/core/injector/injector';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { LimitOrdersApiService } from 'src/features/limit-order/limit-order-api-service';
+import { LimitOrder } from 'src/features/limit-order/models/limit-order';
 import {
     LimitOrderSupportedBlockchain,
     limitOrderSupportedBlockchains
@@ -43,6 +45,8 @@ export class LimitOrderManager {
             supportedBlockchain => supportedBlockchain === blockchain
         );
     }
+
+    private readonly apiService = new LimitOrdersApiService();
 
     private getWeb3Public(blockchain: EvmBlockchainName): EvmWeb3Public {
         return Injector.web3PublicService.getWeb3Public(blockchain);
@@ -226,5 +230,9 @@ export class LimitOrderManager {
                 data: limitOrder
             }
         );
+    }
+
+    public getUserTrades(userAddress: string): Promise<LimitOrder[]> {
+        return this.apiService.getUserOrders(userAddress);
     }
 }
