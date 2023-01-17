@@ -12,20 +12,38 @@ import {
 import { LimitOrderPredicateBuilder } from '@1inch/limit-order-protocol-utils/limit-order-predicate.builder';
 import { ChainId } from '@1inch/limit-order-protocol-utils/model/limit-order-protocol.model';
 import BigNumber from 'bignumber.js';
-import { UnnecessaryApproveError, WalletNotConnectedError } from 'src/common/errors';
+import { RubicSdkError, UnnecessaryApproveError, WalletNotConnectedError } from 'src/common/errors';
 import { Token, TokenAmount } from 'src/common/tokens';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
+import { TronTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-options';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { Injector } from 'src/core/injector/injector';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import {
+    LimitOrderSupportedBlockchain,
+    limitOrderSupportedBlockchains
+} from 'src/features/limit-order/models/supported-blockchains';
 import { TransactionReceipt } from 'web3-eth';
 
 export class LimitOrderManager {
+    public static isSupportedBlockchain(
+        blockchain: BlockchainName
+    ): blockchain is LimitOrderSupportedBlockchain {
+        return limitOrderSupportedBlockchains.some(
+            supportedBlockchain => supportedBlockchain === blockchain
+        );
+    }
+
     private getWeb3Public(blockchain: EvmBlockchainName): EvmWeb3Public {
         return Injector.web3PublicService.getWeb3Public(blockchain);
     }
@@ -101,6 +119,22 @@ export class LimitOrderManager {
         );
     }
 
+    private async checkAllowanceAndApprove(
+        fromTokenAmount: TokenAmount<EvmBlockchainName>,
+        options?: Omit<SwapTransactionOptions, 'onConfirm' | 'feeLimit'>
+    ): Promise<void> {
+        const needApprove = await this.needApprove(fromTokenAmount, fromTokenAmount.tokenAmount);
+        if (!needApprove) {
+            return;
+        }
+
+        const approveOptions: TronTransactionOptions = {
+            onTransactionHash: options?.onApprove,
+            feeLimit: options?.approveFeeLimit
+        };
+        await this.approve(fromTokenAmount, fromTokenAmount.tokenAmount, approveOptions, false);
+    }
+
     public async createOrder(
         fromToken: Token<EvmBlockchainName> | TokenBaseStruct<EvmBlockchainName>,
         toToken: string | Token<EvmBlockchainName> | TokenBaseStruct<EvmBlockchainName>,
@@ -119,7 +153,12 @@ export class LimitOrderManager {
             ...toTokenParsed,
             tokenAmount: new BigNumber(toAmount)
         });
-        const blockchain = fromToken.blockchain;
+        if (fromTokenAmount.blockchain !== toTokenAmount.blockchain) {
+            throw new RubicSdkError('Blockchains must be equal');
+        }
+        const blockchain = fromTokenAmount.blockchain;
+
+        await this.checkAllowanceAndApprove(fromTokenAmount);
 
         const chainId = blockchainId[blockchain] as ChainId;
         const chainType = BlockchainsInfo.getChainType(blockchain) as CHAIN_TYPE.EVM;
