@@ -1,3 +1,4 @@
+import { LimitOrder as OneinchLimitOrder } from '@1inch/limit-order-protocol-utils';
 import { ethers } from 'ethers';
 import { Token } from 'src/common/tokens';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -45,15 +46,7 @@ export class LimitOrdersApiService {
                 })
             )
         ).flat();
-        orders.sort((orderA, orderB) => {
-            if (orderA.status === orderB.status) {
-                return orderB.creation.getTime() - orderA.creation.getTime();
-            }
-            if (orderA.status === LIMIT_ORDER_STATUS.INVALID) {
-                return 1;
-            }
-            return -1;
-        });
+        this.sortOrders(orders);
         return orders;
     }
 
@@ -102,6 +95,18 @@ export class LimitOrdersApiService {
         };
     }
 
+    private sortOrders(orders: LimitOrder[]): void {
+        orders.sort((orderA, orderB) => {
+            if (orderA.status === orderB.status) {
+                return orderB.creation.getTime() - orderA.creation.getTime();
+            }
+            if (orderA.status === LIMIT_ORDER_STATUS.INVALID) {
+                return 1;
+            }
+            return -1;
+        });
+    }
+
     public async getOrderByHash(
         userAddress: string,
         blockchain: BlockchainName,
@@ -117,5 +122,19 @@ export class LimitOrdersApiService {
         } catch {
             return null;
         }
+    }
+
+    public async createLimitOrder(
+        chainId: number,
+        body: {
+            orderHash: string;
+            signature: string;
+            data: OneinchLimitOrder;
+        }
+    ): Promise<void> {
+        await Injector.httpClient.post(
+            `https://limit-orders.1inch.io/v3.0/${chainId}/limit-order`,
+            body
+        );
     }
 }

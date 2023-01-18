@@ -36,10 +36,12 @@ import { Injector } from 'src/core/injector/injector';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { LimitOrdersApiService } from 'src/features/limit-order/limit-order-api-service';
 import { LimitOrder } from 'src/features/limit-order/models/limit-order';
+import { LimitOrderManagerOptions } from 'src/features/limit-order/models/manager-options';
 import {
     LimitOrderSupportedBlockchain,
     limitOrderSupportedBlockchains
 } from 'src/features/limit-order/models/supported-blockchains';
+import { getParsedTokenAmounts } from 'src/features/limit-order/utils/get-parsed-token-amounts';
 import { TransactionReceipt } from 'web3-eth';
 
 export class LimitOrderManager {
@@ -150,33 +152,64 @@ export class LimitOrderManager {
         fromToken: Token<EvmBlockchainName> | TokenBaseStruct<EvmBlockchainName>,
         toToken: string | Token<EvmBlockchainName> | TokenBaseStruct<EvmBlockchainName>,
         fromAmount: BigNumber | string | number,
-        toAmount: BigNumber | string | number
+        toAmount: BigNumber | string | number,
+        options: LimitOrderManagerOptions
     ): Promise<void> {
-        const fromTokenAmount = await TokenAmount.createToken({
-            ...fromToken,
-            tokenAmount: new BigNumber(fromAmount)
-        });
-        const toTokenParsed =
-            typeof toToken === 'string'
-                ? { address: toToken, blockchain: fromToken.blockchain }
-                : toToken;
-        const toTokenAmount = await TokenAmount.createToken({
-            ...toTokenParsed,
-            tokenAmount: new BigNumber(toAmount)
-        });
+        const { fromTokenAmount, toTokenAmount } = await getParsedTokenAmounts(
+            fromToken,
+            toToken,
+            fromAmount,
+            toAmount
+        );
         if (fromTokenAmount.blockchain !== toTokenAmount.blockchain) {
             throw new RubicSdkError('Blockchains must be equal');
         }
-        const blockchain = fromTokenAmount.blockchain;
 
         await this.checkAllowanceAndApprove(fromTokenAmount);
 
+        const blockchain = fromTokenAmount.blockchain;
         const chainId = blockchainId[blockchain] as ChainId;
         const chainType = BlockchainsInfo.getChainType(blockchain) as CHAIN_TYPE.EVM;
 
         const connector = new Web3ProviderConnector(
             Injector.web3PrivateService.getWeb3Private(chainType).web3
         );
+        const contractAddress = limirOrderProtocolAdresses[chainId];
+
+        const simpleLimitOrderPredicate = await this.getLimitOrderPredicate(
+            chainId,
+            connector,
+            options.deadline
+        );
+        const limitOrderBuilder = new LimitOrderBuilder(contractAddress, chainId, connector);
+        const limitOrder = limitOrderBuilder.buildLimitOrder({
+            makerAssetAddress: fromTokenAmount.address,
+            takerAssetAddress: toTokenAmount.address,
+            makerAddress: this.walletAddress,
+            makingAmount: fromTokenAmount.stringWeiAmount,
+            takingAmount: toTokenAmount.stringWeiAmount,
+            predicate: simpleLimitOrderPredicate
+        });
+
+        const limitOrderTypedData = limitOrderBuilder.buildLimitOrderTypedData(limitOrder);
+        const limitOrderSignature = await limitOrderBuilder.buildOrderSignature(
+            this.walletAddress,
+            limitOrderTypedData
+        );
+        const limitOrderHash = limitOrderBuilder.buildLimitOrderHash(limitOrderTypedData);
+
+        await this.apiService.createLimitOrder(chainId, {
+            orderHash: limitOrderHash,
+            signature: limitOrderSignature,
+            data: limitOrder
+        });
+    }
+
+    private async getLimitOrderPredicate(
+        chainId: ChainId,
+        connector: Web3ProviderConnector,
+        deadline: number
+    ): Promise<LimitOrderPredicateCallData> {
         const contractAddress = limirOrderProtocolAdresses[chainId];
         const seriesContractAddress = seriesNonceManagerContractAddresses[chainId];
 
@@ -195,46 +228,19 @@ export class LimitOrderManager {
             seriesNonceManagerFacade
         );
 
-        const expiration = Math.floor(Date.now() / 1000) + 20 * 10 ** 9;
+        const expiration = Math.floor(Date.now() / 1000) + deadline * 60;
         const nonce = await seriesNonceManagerFacade.getNonce(
             NonceSeriesV2.LimitOrderV3,
             this.walletAddress
         );
-        const simpleLimitOrderPredicate: LimitOrderPredicateCallData =
-            limitOrderPredicateBuilder.arbitraryStaticCall(
-                seriesNonceManagerPredicateBuilder.facade,
-                seriesNonceManagerPredicateBuilder.timestampBelowAndNonceEquals(
-                    NonceSeriesV2.LimitOrderV3,
-                    expiration,
-                    BigInt(nonce),
-                    this.walletAddress
-                )
-            );
-
-        const limitOrderBuilder = new LimitOrderBuilder(contractAddress, chainId, connector);
-        const limitOrder = limitOrderBuilder.buildLimitOrder({
-            makerAssetAddress: fromTokenAmount.address,
-            takerAssetAddress: toTokenAmount.address,
-            makerAddress: this.walletAddress,
-            makingAmount: fromTokenAmount.stringWeiAmount,
-            takingAmount: toTokenAmount.stringWeiAmount,
-            predicate: simpleLimitOrderPredicate
-        });
-
-        const limitOrderTypedData = limitOrderBuilder.buildLimitOrderTypedData(limitOrder);
-        const limitOrderSignature = await limitOrderBuilder.buildOrderSignature(
-            this.walletAddress,
-            limitOrderTypedData
-        );
-        const limitOrderHash = limitOrderBuilder.buildLimitOrderHash(limitOrderTypedData);
-
-        await Injector.httpClient.post(
-            `https://limit-orders.1inch.io/v3.0/${chainId}/limit-order`,
-            {
-                orderHash: limitOrderHash,
-                signature: limitOrderSignature,
-                data: limitOrder
-            }
+        return limitOrderPredicateBuilder.arbitraryStaticCall(
+            seriesNonceManagerPredicateBuilder.facade,
+            seriesNonceManagerPredicateBuilder.timestampBelowAndNonceEquals(
+                NonceSeriesV2.LimitOrderV3,
+                expiration,
+                BigInt(nonce),
+                this.walletAddress
+            )
         );
     }
 
@@ -244,34 +250,17 @@ export class LimitOrderManager {
 
     public async cancelOrder(blockchain: EvmBlockchainName, orderHash: string): Promise<string> {
         this.checkWalletConnected();
-        this.web3Private.checkBlockchainCorrect(blockchain);
-
-        const order = await this.apiService.getOrderByHash(
-            this.walletAddress,
-            blockchain,
-            orderHash
-        );
-        if (!order) {
-            throw new RubicSdkError(`No order with hash ${orderHash}`);
-        }
+        await this.web3Private.checkBlockchainCorrect(blockchain);
 
         const chainId = blockchainId[blockchain] as ChainId;
-
-        const connector = new Web3ProviderConnector(this.web3Private.web3);
         const contractAddress = limirOrderProtocolAdresses[chainId];
-
-        const limitOrderProtocolFacade = new LimitOrderProtocolFacade(
-            contractAddress,
-            chainId,
-            connector
-        );
-
-        const callData = limitOrderProtocolFacade.cancelLimitOrder(order.data);
+        const callData = await this.getCancelCallData(blockchain, orderHash);
 
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             transactionHash = hash;
         };
+
         try {
             await this.web3Private.sendTransaction(contractAddress, {
                 data: callData,
@@ -284,5 +273,28 @@ export class LimitOrderManager {
             }
             throw err;
         }
+    }
+
+    private async getCancelCallData(
+        blockchain: BlockchainName,
+        orderHash: string
+    ): Promise<string> {
+        const order = await this.apiService.getOrderByHash(
+            this.walletAddress,
+            blockchain,
+            orderHash
+        );
+        if (!order) {
+            throw new RubicSdkError(`No order with hash ${orderHash}`);
+        }
+
+        const chainId = blockchainId[blockchain] as ChainId;
+        const connector = new Web3ProviderConnector(this.web3Private.web3);
+        const limitOrderProtocolFacade = new LimitOrderProtocolFacade(
+            limirOrderProtocolAdresses[chainId],
+            chainId,
+            connector
+        );
+        return limitOrderProtocolFacade.cancelLimitOrder(order.data);
     }
 }
