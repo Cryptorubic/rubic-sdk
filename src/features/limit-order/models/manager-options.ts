@@ -1,3 +1,6 @@
 export interface LimitOrderManagerOptions {
-    deadline: number; // in minutes
+    /**
+     * Deadline in minutes.
+     */
+    deadline: number;
 }
