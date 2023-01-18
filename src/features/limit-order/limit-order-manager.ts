@@ -34,7 +34,7 @@ import { TronTransactionOptions } from 'src/core/blockchain/web3-private-service
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { Injector } from 'src/core/injector/injector';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { LimitOrdersApiService } from 'src/features/limit-order/limit-order-api-service';
+import { LimitOrderApiService } from 'src/features/limit-order/limit-order-api-service';
 import { LimitOrder } from 'src/features/limit-order/models/limit-order';
 import { LimitOrderManagerOptions } from 'src/features/limit-order/models/manager-options';
 import {
@@ -53,7 +53,7 @@ export class LimitOrderManager {
         );
     }
 
-    private readonly apiService = new LimitOrdersApiService();
+    private readonly apiService = new LimitOrderApiService();
 
     private get web3Private(): EvmWeb3Private {
         return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM);

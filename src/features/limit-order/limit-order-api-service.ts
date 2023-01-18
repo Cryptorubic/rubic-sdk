@@ -17,7 +17,7 @@ import { limitOrderSupportedBlockchains } from 'src/features/limit-order/models/
 
 const baseApi = (chainId: number) => `https://limit-orders.1inch.io/v3.0/${chainId}/limit-order`;
 
-export class LimitOrdersApiService {
+export class LimitOrderApiService {
     private getApiOrders(chainId: number, userAddress: string): Promise<LimitOrderApiResponse> {
         return Injector.httpClient.get<LimitOrderApiResponse>(
             `${baseApi(chainId)}/address/${userAddress}`,
