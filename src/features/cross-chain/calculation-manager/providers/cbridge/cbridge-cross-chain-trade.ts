@@ -9,30 +9,29 @@ import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { cbridgeContractAbi } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-abi';
+import { cbridgeContractAddress } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-address';
+import { cbridgeProxyAbi } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-proxy-abi';
+import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
+import { celerTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-transit-tokens';
+import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
-import { xyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-contract-address';
-import { XyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
-import { XyTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-request';
-import { XyTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-response';
-import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
-/**
- * Calculated XY cross-chain trade.
- */
-export class XyCrossChainTrade extends EvmCrossChainTrade {
+export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
-        transactionRequest: XyTransactionRequest
+        onChainTrade?: EvmOnChainTrade | null
     ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as XyCrossChainSupportedBlockchain;
+        const fromBlockchain = from.blockchain as CbridgeCrossChainSupportedBlockchain;
         const walletAddress =
             Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
         if (!walletAddress) {
@@ -41,15 +40,18 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
         try {
             const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                await new XyCrossChainTrade(
+                await new CbridgeCrossChainTrade(
                     {
                         from,
                         to,
-                        transactionRequest,
                         gasData: null,
                         priceImpact: 0,
                         slippage: 0,
-                        feeInfo: {}
+                        feeInfo: {},
+                        maxSlippage: 0,
+                        contractAddress: EvmWeb3Pure.EMPTY_ADDRESS,
+                        transitMinAmount: new BigNumber(0),
+                        onChainTrade: onChainTrade!
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -81,18 +83,11 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    public static readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.XY;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE;
 
     public readonly isAggregator = false;
 
-    public readonly onChainSubtype = {
-        from: undefined,
-        to: undefined
-    };
-
-    public readonly bridgeType = BRIDGE_TYPE.XY;
+    public readonly bridgeType = BRIDGE_TYPE.CELER_BRIDGE;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
@@ -104,30 +99,39 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly gasData: GasData | null;
 
-    private readonly transactionRequest: XyTransactionRequest;
-
-    private get fromBlockchain(): XyCrossChainSupportedBlockchain {
-        return this.from.blockchain as XyCrossChainSupportedBlockchain;
+    private get fromBlockchain(): CbridgeCrossChainSupportedBlockchain {
+        return this.from.blockchain as CbridgeCrossChainSupportedBlockchain;
     }
 
     protected get fromContractAddress(): string {
-        // return xyContractAddress[this.fromBlockchain].rubicRouter;
-        return xyContractAddress[this.fromBlockchain].providerRouter;
+        // return cbridgeContractAddress[this.fromBlockchain].rubicRouter;
+        return cbridgeContractAddress[this.fromBlockchain].providerRouter;
     }
 
     public readonly feeInfo: FeeInfo;
 
     private readonly slippage: number;
 
+    private readonly maxSlippage: number;
+
+    private readonly celerContractAddress: string;
+
+    public readonly onChainSubtype: OnChainSubtype;
+
+    public readonly onChainTrade: EvmOnChainTrade | null;
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
             to: PriceTokenAmount<EvmBlockchainName>;
-            transactionRequest: XyTransactionRequest;
             gasData: GasData | null;
             priceImpact: number;
             slippage: number;
             feeInfo: FeeInfo;
+            maxSlippage: number;
+            contractAddress: string;
+            transitMinAmount: BigNumber;
+            onChainTrade: EvmOnChainTrade | null;
         },
         providerAddress: string
     ) {
@@ -135,13 +139,21 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
-        this.transactionRequest = crossChainTrade.transactionRequest;
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
         this.slippage = crossChainTrade.slippage;
-        this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
+        this.toTokenAmountMin = crossChainTrade.transitMinAmount.multipliedBy(
+            1 - crossChainTrade.maxSlippage / 10_000_000
+        );
         this.feeInfo = crossChainTrade.feeInfo;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.maxSlippage = crossChainTrade.maxSlippage;
+        this.celerContractAddress = crossChainTrade.contractAddress;
+
+        this.onChainSubtype = crossChainTrade.onChainTrade
+            ? { from: crossChainTrade.onChainTrade.type, to: undefined }
+            : { from: undefined, to: undefined };
+        this.onChainTrade = crossChainTrade.onChainTrade;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -163,7 +175,10 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
         // eslint-disable-next-line no-useless-catch
         try {
-            const { data, value, to } = await this.getTransactionRequest();
+            const { data, to, value } = this.getTransactionRequest(
+                options.receiverAddress || this.walletAddress,
+                this.maxSlippage
+            );
 
             await this.web3Private.trySendTransaction(to, {
                 data,
@@ -180,12 +195,9 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        throw new RubicSdkError('Temporary disabled');
-
         const receiverAddress = options?.receiverAddress || this.walletAddress;
-        const { data, value: providerValue } = await this.getTransactionRequest(receiverAddress);
         const toChainId = blockchainId[this.to.blockchain];
-        const fromContracts = xyContractAddress[this.fromBlockchain];
+        const fromContracts = cbridgeContractAddress[this.fromBlockchain];
 
         const swapArguments = [
             this.from.address,
@@ -194,22 +206,35 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             this.to.address,
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
             receiverAddress,
-            this.providerAddress,
-            fromContracts.providerRouter
+            this.providerAddress
         ];
 
-        const methodArguments: unknown[] = [`native:${this.type.toLowerCase()}`, swapArguments];
-        if (!this.from.isNative) {
-            methodArguments.push(fromContracts.providerGateway);
+        const methodArguments: unknown[] = [];
+        if (this.onChainTrade) {
+            methodArguments.push(
+                celerTransitTokens[this.from.blockchain as CelerCrossChainSupportedBlockchain]
+                    .address
+            );
+            const encodedData = (
+                await this.onChainTrade.encodeDirect({
+                    fromAddress: options.fromAddress || this.walletAddress,
+                    receiverAddress: this.fromContractAddress,
+                    supportFee: false
+                })
+            ).data;
+            methodArguments.push(encodedData);
+            swapArguments.push(this.onChainTrade.dexContractAddress);
+        } else {
+            swapArguments.push(EvmWeb3Pure.EMPTY_ADDRESS);
         }
-        methodArguments.push(data);
+        methodArguments.push(this.maxSlippage, swapArguments);
 
-        const value = this.getSwapValue(providerValue);
+        const value = this.getSwapValue();
 
         return {
             contractAddress: fromContracts.rubicRouter,
-            contractAbi: evmCommonCrossChainAbi,
-            methodName: this.methodName,
+            contractAbi: cbridgeProxyAbi,
+            methodName: this.getMethodName(),
             methodArguments,
             value
         };
@@ -217,23 +242,6 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         return fromUsd.dividedBy(this.to.tokenAmount);
-    }
-
-    private async getTransactionRequest(receiverAddress?: string): Promise<{
-        data: string;
-        value: string;
-        to: string;
-    }> {
-        const params: XyTransactionRequest = {
-            ...this.transactionRequest,
-            ...(receiverAddress && { receiveAddress: receiverAddress })
-        };
-
-        const { tx } = await Injector.httpClient.get<XyTransactionResponse>(
-            `${XyCrossChainProvider.apiEndpoint}/swap`,
-            { params: { ...params } }
-        );
-        return tx!;
     }
 
     public getUsdPrice(): BigNumber {
@@ -244,8 +252,43 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact ? { total: this.priceImpact } : null,
-            slippage: { total: this.slippage * 100 }
+            priceImpact: this.priceImpact ? { total: this.priceImpact } : { total: 0 },
+            slippage: { total: this.maxSlippage / 10_000 }
         };
+    }
+
+    private getMethodName(): string {
+        if (this.from.isNative) {
+            return this.onChainTrade ? 'swapNativeAndBridge' : 'bridgeNative';
+        }
+        return this.onChainTrade ? 'swapAndBridge' : 'bridge';
+    }
+
+    private getTransactionRequest(
+        receiverAddress: string,
+        maxSlippage: number
+    ): {
+        data: string;
+        value: string;
+        to: string;
+    } {
+        const params: (string | number)[] = [receiverAddress];
+        if (!this.from.isNative) {
+            params.push(this.from.address);
+        }
+        params.push(
+            this.from.stringWeiAmount,
+            blockchainId[this.to.blockchain],
+            Date.now(),
+            maxSlippage
+        );
+        const encode = EvmWeb3Pure.encodeMethodCall(
+            this.fromContractAddress,
+            cbridgeContractAbi,
+            this.from.isNative ? 'sendNative' : 'send',
+            params,
+            this.from.isNative ? this.from.stringWeiAmount : '0'
+        );
+        return { data: encode.data, to: encode.to, value: encode.value };
     }
 }

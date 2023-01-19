@@ -14,12 +14,19 @@ import {
     CrossChainTradeType
 } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
+import { CbridgeCrossChainApiService } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-api-service';
+import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
+import {
+    TransferHistoryStatus,
+    XferStatus
+} from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
 import { LifiSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
 import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
 import { SymbiosisSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-default-api-key';
 import { ViaSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/via-provider/models/via-swap-status';
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
+import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
 import { MultichainStatusMapping } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
 import { CelerTransferStatus } from 'src/features/cross-chain/status-manager/models/celer-transfer-status.enum';
 import {
@@ -54,6 +61,7 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.BRIDGERS]: this.getBridgersDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: this.getMultichainDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE]: this.getCelerBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CHANGENOW]: this.getChangenowDstSwapStatus
     };
 
@@ -509,6 +517,50 @@ export class CrossChainStatusManager {
                 return { status: TxStatus.FAIL, hash: null };
             }
             return { status: TxStatus.PENDING, hash: null };
+        } catch {
+            return { status: TxStatus.PENDING, hash: null };
+        }
+    }
+
+    private async getCelerBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        try {
+            const transferId = await CrossChainCbridgeManager.getTransferId(
+                data.srcTxHash,
+                data.fromBlockchain as CbridgeCrossChainSupportedBlockchain
+            );
+            const swapData = await CbridgeCrossChainApiService.fetchTradeStatus(transferId);
+
+            switch (swapData.status) {
+                case TransferHistoryStatus.TRANSFER_UNKNOWN:
+                case TransferHistoryStatus.TRANSFER_SUBMITTING:
+                case TransferHistoryStatus.TRANSFER_WAITING_FOR_SGN_CONFIRMATION:
+                case TransferHistoryStatus.TRANSFER_REQUESTING_REFUND:
+                case TransferHistoryStatus.TRANSFER_CONFIRMING_YOUR_REFUND:
+                default:
+                    return { status: TxStatus.PENDING, hash: null };
+                case TransferHistoryStatus.TRANSFER_REFUNDED:
+                case TransferHistoryStatus.TRANSFER_COMPLETED:
+                    return {
+                        status: TxStatus.SUCCESS,
+                        hash: swapData.dst_block_tx_link.split('/').at(-1)!
+                    };
+                case TransferHistoryStatus.TRANSFER_FAILED:
+                    return {
+                        status: TxStatus.FAIL,
+                        hash: null
+                    };
+                case TransferHistoryStatus.TRANSFER_WAITING_FOR_FUND_RELEASE:
+                case TransferHistoryStatus.TRANSFER_TO_BE_REFUNDED:
+                    return swapData.refund_reason === XferStatus.OK_TO_RELAY
+                        ? {
+                              status: TxStatus.PENDING,
+                              hash: null
+                          }
+                        : {
+                              status: TxStatus.REVERT,
+                              hash: null
+                          };
+            }
         } catch {
             return { status: TxStatus.PENDING, hash: null };
         }

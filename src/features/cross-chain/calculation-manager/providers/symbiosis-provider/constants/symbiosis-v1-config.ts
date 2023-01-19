@@ -2,7 +2,7 @@ import { Config } from 'symbiosis-js-sdk-v1/dist/crosschain/types';
 
 export function getSymbiosisV1Config(): Config {
     return {
-        minSwapAmountInUsd: 20,
+        minSwapAmountInUsd: 10,
         maxSwapAmountInUsd: 5000000,
         advisor: {
             url: 'https://api.symbiosis.finance/calculations'
