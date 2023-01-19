@@ -142,6 +142,20 @@ export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
         symbol: 'WETH',
         decimals: 18
     }),
+    [BLOCKCHAIN_NAME.BOBA_BSC]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BOBA_BSC,
+        address: '0xC58aaD327D6D58D979882601ba8DDa0685B505eA',
+        name: 'Wrapped Boba',
+        symbol: 'WBOBA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BOBA_AVALANCHE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BOBA_AVALANCHE,
+        address: '0x26c319B7B2cF823365414d082698C8ac90cbBA63',
+        name: 'Wrapped Boba',
+        symbol: 'WBOBA',
+        decimals: 18
+    }),
     [BLOCKCHAIN_NAME.ASTAR]: new Token({
         blockchain: BLOCKCHAIN_NAME.ASTAR,
         address: '0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720',

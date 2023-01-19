@@ -44,4 +44,14 @@ export interface CrossChainTradeData {
      * Expected minimum output amount.
      */
     amountOutMin?: string;
+
+    /**
+     * Celer bridge transaction ID.
+     */
+    celerTransactionId?: string;
+
+    /**
+     * Version of symbiosis sdk, used to make swap.
+     */
+    symbiosisVersion?: 'v1' | 'v2';
 }
