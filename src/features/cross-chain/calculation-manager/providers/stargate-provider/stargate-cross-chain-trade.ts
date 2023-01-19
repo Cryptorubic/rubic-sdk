@@ -163,11 +163,20 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
 
         // eslint-disable-next-line no-useless-catch
         try {
-            const { data, value, to } = await StargateCrossChainTrade.getLayerZeroSwapData(
+            const { data, to } = await StargateCrossChainTrade.getLayerZeroSwapData(
                 this.from,
                 this.to,
                 this.toTokenAmountMin
             );
+
+            const lzFeeWei = Web3Pure.toWei(
+                this.feeInfo.provider!.cryptoFee!.amount,
+                nativeTokensList[this.from.blockchain].decimals
+            );
+
+            const value = this.from.isNative
+                ? this.from.weiAmount.plus(lzFeeWei).toFixed()
+                : this.getSwapValue(lzFeeWei);
 
             await this.web3Private.trySendTransaction(to, {
                 data,
@@ -213,15 +222,12 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
               ];
         const methodName = isEthTrade ? 'swapETH' : 'swap';
         const abi = isEthTrade ? stargateRouterEthAbi : stargateRouterAbi;
-        const layerZeroTx = EvmWeb3Pure.encodeMethodCall(
+        return EvmWeb3Pure.encodeMethodCall(
             stargateRouterAddress,
             abi,
             methodName,
             methodArguments
         );
-        console.log({ ENCODED_LZ_SWAP_TX: layerZeroTx });
-
-        return layerZeroTx;
     }
 
     public async getContractParams(): Promise<ContractParams> {
@@ -277,15 +283,6 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         //         ? this.from.weiAmount.plus(lzFeeWei).plus(fixedFeeWei).toString()
         //         : new BigNumber(fixedFeeWei).plus(lzFeeWei).toString()
         // );
-        console.log({
-            ROUTER_CALL_PARAMS: {
-                contractAddress: this.fromContractAddress,
-                contractAbi: evmCommonCrossChainAbi,
-                methodName: this.methodName,
-                methodArguments,
-                value
-            }
-        });
 
         return {
             contractAddress: this.fromContractAddress,
