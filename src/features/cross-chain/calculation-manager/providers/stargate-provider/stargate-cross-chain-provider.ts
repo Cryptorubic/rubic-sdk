@@ -11,11 +11,8 @@ import { Injector } from 'src/core/injector/injector';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { RANGO_CONTRACT_ADDRESSES } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/contract-address';
-import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
 
 import { stargateBlockchainSupportedPools } from './constants/stargate-blockchain-supported-pool';
 import { stargateChainId } from './constants/stargate-chain-id';
@@ -30,8 +27,6 @@ import { StargateCrossChainTrade } from './stargate-cross-chain-trade';
 
 export class StargateCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.STARGATE;
-
-    private feeInfo: FeeInfo = {};
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
@@ -82,13 +77,14 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 ...toToken.asStruct,
                 tokenAmount: amountOutMin
             });
-            this.feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
+            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
+
             const layerZeroFeeWei = await this.getLayerZeroFee(from, to, amountOutMin);
             const layerZeroFeeAmount = Web3Pure.fromWei(
                 layerZeroFeeWei,
                 nativeTokensList[fromBlockchain].decimals
             );
-            this.feeInfo.provider = {
+            feeInfo.provider = {
                 cryptoFee: {
                     amount: layerZeroFeeAmount,
                     tokenSymbol: nativeTokensList[fromBlockchain].symbol
@@ -104,7 +100,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                         slippageTolerance: options.slippageTolerance,
                         priceImpact: null,
                         gasData: null,
-                        feeInfo: this.feeInfo
+                        feeInfo
                     },
                     options.providerAddress
                 )
@@ -142,36 +138,37 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 ['0', '0', walletAddress || EvmWeb3Pure.EMPTY_ADDRESS]
             ]
         );
-        console.log({ TRADE_FEE: layerZeroFee['0'] });
         return new BigNumber(`${layerZeroFee['0']!}`);
     }
 
     protected async getFeeInfo(
         fromBlockchain: Partial<EvmBlockchainName>,
-        providerAddress: string
+        _providerAddress: string
     ): Promise<FeeInfo> {
         return {
             rubicProxy: {
                 fixedFee: {
-                    amount: await this.getFixedFee(
-                        fromBlockchain,
-                        providerAddress,
-                        RANGO_CONTRACT_ADDRESSES[
-                            fromBlockchain as RangoCrossChainSupportedBlockchain
-                        ].rubicRouter,
-                        evmCommonCrossChainAbi
-                    ),
+                    // amount: await this.getFixedFee(
+                    //     fromBlockchain,
+                    //     providerAddress,
+                    //     RANGO_CONTRACT_ADDRESSES[
+                    //         fromBlockchain as RangoCrossChainSupportedBlockchain
+                    //     ].rubicRouter,
+                    //     evmCommonCrossChainAbi
+                    // ),
+                    amount: new BigNumber(0),
                     tokenSymbol: nativeTokensList[fromBlockchain].symbol
                 },
                 platformFee: {
-                    percent: await this.getFeePercent(
-                        fromBlockchain,
-                        providerAddress,
-                        RANGO_CONTRACT_ADDRESSES[
-                            fromBlockchain as RangoCrossChainSupportedBlockchain
-                        ].rubicRouter,
-                        evmCommonCrossChainAbi
-                    ),
+                    // percent: await this.getFeePercent(
+                    //     fromBlockchain,
+                    //     providerAddress,
+                    //     RANGO_CONTRACT_ADDRESSES[
+                    //         fromBlockchain as RangoCrossChainSupportedBlockchain
+                    //     ].rubicRouter,
+                    //     evmCommonCrossChainAbi
+                    // ),
+                    percent: 0,
                     tokenSymbol: 'USDC'
                 }
             }

@@ -19,7 +19,6 @@ import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/pro
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
 
-import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { stargateChainId } from './constants/stargate-chain-id';
 import {
@@ -28,7 +27,6 @@ import {
 } from './constants/stargate-contract-address';
 import { StargateCrossChainSupportedBlockchain } from './constants/stargate-cross-chain-supported-blockchain';
 import { StargateBridgeToken, stargatePoolId } from './constants/stargate-pool-id';
-// import { StartgatePoolId } from './constants/stargate-pool-id';
 import { stargateRouterAbi } from './constants/stargate-router-abi';
 import { stargateRouterEthAbi } from './constants/stargate-router-eth-abi';
 
@@ -122,7 +120,8 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return rubicProxyContractAddress[this.fromBlockchain];
+        // return rubicProxyContractAddress[this.fromBlockchain];
+        return stargateContractAddress[this.fromBlockchain];
     }
 
     constructor(
@@ -150,8 +149,39 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         this.checkWalletConnected();
         checkUnsupportedReceiverAddress(options?.receiverAddress, this.walletAddress);
+        await this.checkTradeErrors();
+        await this.checkAllowanceAndApprove(options);
 
-        return super.swap(options);
+        const { onConfirm, gasLimit, gasPrice } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+
+        // eslint-disable-next-line no-useless-catch
+        try {
+            const { data, value, to } = await StargateCrossChainTrade.getLayerZeroSwapData(
+                this.from,
+                this.to,
+                this.toTokenAmountMin
+            );
+
+            await this.web3Private.trySendTransaction(to, {
+                data,
+                value,
+                onTransactionHash,
+                gas: gasLimit,
+                gasPrice
+            });
+
+            return transactionHash!;
+        } catch (err) {
+            throw err;
+        }
+        // return super.swap(options);
     }
 
     public static async getLayerZeroSwapData(
