@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { BridgersEvmCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
@@ -12,9 +13,11 @@ import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/provid
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { tronCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';
+import { tronNativeSwapAbi } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/constants/tron-native-swap-abi';
 import { TronContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/models/tron-contract-params';
 import { TronGetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/models/tron-get-contract-params-options';
 import { TronCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/tron-cross-chain-trade';
+import { MarkRequired } from 'ts-essentials';
 
 export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;
@@ -37,6 +40,8 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
 
     private readonly slippage: number;
 
+    private readonly contractAddress: string;
+
     protected get fromContractAddress(): string {
         return rubicProxyContractAddress[this.from.blockchain];
     }
@@ -48,6 +53,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
             slippage: number;
+            contractAddress: string;
         },
         providerAddress: string
     ) {
@@ -59,6 +65,59 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
         this.feeInfo = crossChainTrade.feeInfo;
         this.priceImpact = this.from.calculatePriceImpactPercent(this.to);
         this.slippage = crossChainTrade.slippage;
+        this.contractAddress = crossChainTrade.contractAddress;
+    }
+
+    public async swap(
+        options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
+    ): Promise<string | never> {
+        await this.checkTradeErrors();
+        this.checkReceiverAddress(options.receiverAddress, true);
+        await this.checkAllowanceAndApprove(options);
+
+        const { onConfirm } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+
+        // eslint-disable-next-line no-useless-catch
+        try {
+            const fromWithoutFee = getFromWithoutFee(
+                this.from,
+                this.feeInfo.rubicProxy?.platformFee?.percent
+            );
+
+            const { transactionData } =
+                await getMethodArgumentsAndTransactionData<TronBridgersTransactionData>(
+                    this.from,
+                    fromWithoutFee,
+                    this.to,
+                    this.toTokenAmountMin,
+                    this.walletAddress,
+                    this.providerAddress,
+                    options
+                );
+
+            await this.web3Private.executeContractMethod(
+                transactionData.to,
+                tronNativeSwapAbi,
+                this.methodName,
+                transactionData.parameter.map(el => el.value),
+                {
+                    onTransactionHash,
+                    callValue: transactionData.options.callValue,
+                    feeLimit: transactionData.options.feeLimit
+                }
+            );
+
+            return transactionHash!;
+        } catch (err) {
+            throw err;
+        }
     }
 
     protected async getContractParams(
