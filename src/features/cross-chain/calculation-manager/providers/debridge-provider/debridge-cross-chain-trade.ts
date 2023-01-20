@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
+import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -159,9 +159,6 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
 
     // TODO use inherited swap implementation after cross-chain proxy fix
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        if (options.receiverAddress) {
-            throw new RubicSdkError('Receiver address not supported');
-        }
         this.checkWalletConnected();
         await this.checkAllowanceAndApprove(options);
         const { data, value, to } = await this.getTransactionRequest();
