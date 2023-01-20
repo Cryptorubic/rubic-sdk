@@ -1,5 +1,5 @@
 import { CrossChainIsUnavailableError } from 'src/common/errors';
-import { PriceTokenAmount, PriceToken } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Injector } from 'src/core/injector/injector';

@@ -19,6 +19,7 @@ import {
     TransferHistoryStatus,
     XferStatus
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
+import { getChaingeRequestHeaders } from 'src/features/cross-chain/calculation-manager/providers/chainge-provider/utils/get-chainge-request-parameters';
 import { LifiSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
 import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
 import { SymbiosisSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
@@ -39,8 +40,9 @@ import {
     SymbiosisApiResponse
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
-import { ChaingeStatusApiResponse } from './models/chainge-status-api-response';
+
 import { chaingeApiBaseUrl } from '../calculation-manager/providers/chainge-provider/constants/chainge-api-base-url';
+import { ChaingeStatusApiResponse } from './models/chainge-status-api-response';
 
 /**
  * Contains methods for getting cross-chain trade statuses.

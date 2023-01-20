@@ -1,48 +1,45 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { EvmBlockchainName, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { ContractParams } from 'src/features/common/models/contract-params';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { CROSS_CHAIN_TRADE_TYPE } from '../../models/cross-chain-trade-type';
 import { EvmCrossChainTrade } from '../common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from '../common/emv-cross-chain-trade/models/gas-data';
 import { BridgeType } from '../common/models/bridge-type';
-import { ContractParams } from '../common/models/contract-params';
 import { FeeInfo } from '../common/models/fee-info';
 import { GetContractParamsOptions } from '../common/models/get-contract-params-options';
 import { OnChainSubtype } from '../common/models/on-chain-subtype';
 
 export class ChaingeCrossChainTrade extends EvmCrossChainTrade {
-    public getUsdPrice(): BigNumber {
-        throw new Error('Method not implemented.');
-    }
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
-    public getTradeInfo() {
-        throw new Error('Method not implemented.');
-    }
-
-    public from: PriceTokenAmount<EvmBlockchainName>;
-
-    public gasData: GasData;
+    public readonly gasData: GasData;
 
     protected getContractParams(_options: GetContractParamsOptions): Promise<ContractParams> {
         throw new Error('Method not implemented.');
     }
 
-    public type = CROSS_CHAIN_TRADE_TYPE.CHAINGE;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.CHAINGE;
 
-    public to: PriceTokenAmount<BlockchainName>;
+    public readonly to: PriceTokenAmount<BlockchainName>;
 
-    public toTokenAmountMin: BigNumber;
+    public readonly toTokenAmountMin: BigNumber;
 
-    public feeInfo: FeeInfo;
+    public readonly feeInfo: FeeInfo;
 
-    public onChainSubtype: OnChainSubtype = {
+    public readonly onChainSubtype: OnChainSubtype = {
         from: undefined,
         to: undefined
     };
 
-    public bridgeType: BridgeType = 'across';
+    public readonly bridgeType: BridgeType = 'across';
 
-    public isAggregator = true;
+    public readonly isAggregator = true;
+
+    private readonly priceImpact: number;
+
+    private readonly slippage: number;
 
     protected get fromContractAddress(): string {
         throw new Error('Method not implemented.');
@@ -56,6 +53,7 @@ export class ChaingeCrossChainTrade extends EvmCrossChainTrade {
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
             priceImpact: number;
+            slippage: number;
         },
         providerAddress: string
     ) {
@@ -66,9 +64,24 @@ export class ChaingeCrossChainTrade extends EvmCrossChainTrade {
         this.gasData = crossChainTrade.gasData;
         this.feeInfo = crossChainTrade.feeInfo;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
+        this.priceImpact = crossChainTrade.priceImpact;
+        this.slippage = crossChainTrade.slippage;
     }
 
-    public getTradeAmountRatio(_fromUsd: BigNumber): BigNumber {
-        return new BigNumber(1);
+    public getUsdPrice(): BigNumber {
+        return this.from.price.multipliedBy(this.from.tokenAmount);
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: this.priceImpact ? { total: this.priceImpact } : null,
+            slippage: { total: this.slippage * 100 }
+        };
+    }
+
+    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
+        return fromUsd.dividedBy(this.to.tokenAmount);
     }
 }
