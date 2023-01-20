@@ -198,7 +198,7 @@ export class CrossChainStatusManager {
                     status: { text: dstTxStatus },
                     tx
                 } = await Injector.httpClient.get<SymbiosisApiResponse>(
-                    `https://api-v2'.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
+                    `https://api-v2.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
                 );
                 let dstTxData: TxStatusData = {
                     status: TxStatus.PENDING,
