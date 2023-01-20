@@ -194,12 +194,11 @@ export class CrossChainStatusManager {
         if (symbiosisTxIndexingTimeSpent) {
             try {
                 const srcChainId = blockchainId[data.fromBlockchain];
-                const baseApi = data.symbiosisVersion === 'v2' ? 'api-v2' : 'api';
                 const {
                     status: { text: dstTxStatus },
                     tx
                 } = await Injector.httpClient.get<SymbiosisApiResponse>(
-                    `https://${baseApi}.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
+                    `https://api-v2'.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
                 );
                 let dstTxData: TxStatusData = {
                     status: TxStatus.PENDING,
