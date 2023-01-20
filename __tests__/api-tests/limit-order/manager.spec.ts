@@ -4,7 +4,6 @@ import { sdkConfiguration } from '__tests__/api-tests/limit-order/constants/sdk-
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { orderParsed, userAddress } from '__tests__/api-tests/limit-order/constants/user-data';
 import { Any } from 'src/common/utils/types';
-import { RubicSdkError } from 'src/common/errors';
 
 describe('Limit Order Manager integration tests', () => {
     let manager: LimitOrderManager;
@@ -30,15 +29,8 @@ describe('Limit Order Manager integration tests', () => {
     });
 
     test('Get error, trying to get cancel call data, due to invalid hash', async () => {
-        let err: RubicSdkError | undefined;
-        try {
-            await manager['getCancelCallData'](
-                BLOCKCHAIN_NAME.POLYGON,
-                `${orderParsed.hash}_invalid`
-            );
-        } catch (methodErr) {
-            err = methodErr;
-        }
-        expect(err).toBeDefined();
+        await expect(
+            manager['getCancelCallData'](BLOCKCHAIN_NAME.POLYGON, `${orderParsed.hash}_invalid`)
+        ).rejects.toThrow();
     });
 });

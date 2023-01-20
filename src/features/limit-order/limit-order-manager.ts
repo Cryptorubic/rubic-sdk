@@ -26,7 +26,6 @@ import {
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
@@ -164,15 +163,16 @@ export class LimitOrderManager {
         if (fromTokenAmount.blockchain !== toTokenAmount.blockchain) {
             throw new RubicSdkError('Blockchains must be equal');
         }
+        this.checkWalletConnected();
+        const { blockchain } = fromToken;
+        await this.web3Private.checkBlockchainCorrect(blockchain);
 
         await this.checkAllowanceAndApprove(fromTokenAmount);
 
-        const blockchain = fromTokenAmount.blockchain;
         const chainId = blockchainId[blockchain] as ChainId;
-        const chainType = BlockchainsInfo.getChainType(blockchain) as CHAIN_TYPE.EVM;
 
         const connector = new Web3ProviderConnector(
-            Injector.web3PrivateService.getWeb3Private(chainType).web3
+            Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).web3
         );
         const contractAddress = limirOrderProtocolAdresses[chainId];
 

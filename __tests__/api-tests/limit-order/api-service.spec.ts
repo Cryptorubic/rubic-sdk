@@ -37,13 +37,7 @@ describe('Limit Order Api Service integration tests', () => {
     });
 
     test('Catch error on getting orders with invalid parameters', async () => {
-        let err: Error | undefined;
-        try {
-            await apiService['getApiOrders'](-1, userAddress);
-        } catch (apiErr) {
-            err = apiErr;
-        }
-        expect(err).toBeDefined();
+        await expect(apiService['getApiOrders'](-1, userAddress)).rejects.toThrow();
     });
 
     test('Parse api limit order', async () => {
