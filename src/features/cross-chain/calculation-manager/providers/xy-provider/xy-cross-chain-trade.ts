@@ -159,7 +159,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
         // eslint-disable-next-line no-useless-catch
         try {
-            const { data, value, to } = await this.getTransactionRequest();
+            const { data, value, to } = await this.getTransactionRequest(options?.receiverAddress);
 
             await this.web3Private.trySendTransaction(to, {
                 data,

@@ -161,7 +161,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         this.checkWalletConnected();
         await this.checkAllowanceAndApprove(options);
-        const { data, value, to } = await this.getTransactionRequest();
+        const { data, value, to } = await this.getTransactionRequest(options?.receiverAddress);
         const { onConfirm } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
