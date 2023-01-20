@@ -1,11 +1,11 @@
+import BigNumber from 'bignumber.js';
 import { RubicSdkError, TimeoutError } from 'src/common/errors';
-import { HttpClient } from 'src/core/http-client/models/http-client';
+import { Cache } from 'src/common/utils/decorators';
 import pTimeout from 'src/common/utils/p-timeout';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import BigNumber from 'bignumber.js';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { Cache } from 'src/common/utils/decorators';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { HttpClient } from 'src/core/http-client/models/http-client';
 
 const supportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,
@@ -21,7 +21,13 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.BOBA,
     BLOCKCHAIN_NAME.BITCOIN,
     BLOCKCHAIN_NAME.ETHEREUM_POW,
-    BLOCKCHAIN_NAME.KAVA
+    BLOCKCHAIN_NAME.KAVA,
+    BLOCKCHAIN_NAME.OASIS,
+    BLOCKCHAIN_NAME.METIS,
+    BLOCKCHAIN_NAME.DFK,
+    BLOCKCHAIN_NAME.KLAYTN,
+    BLOCKCHAIN_NAME.VELAS,
+    BLOCKCHAIN_NAME.SYSCOIN
 ] as const;
 
 type SupportedBlockchain = typeof supportedBlockchains[number];
@@ -57,7 +63,13 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.BOBA]: 'ethereum',
             [BLOCKCHAIN_NAME.BITCOIN]: 'bitcoin',
             [BLOCKCHAIN_NAME.ETHEREUM_POW]: 'ethereum-pow-iou',
-            [BLOCKCHAIN_NAME.KAVA]: 'kava'
+            [BLOCKCHAIN_NAME.KAVA]: 'kava',
+            [BLOCKCHAIN_NAME.OASIS]: 'rose',
+            [BLOCKCHAIN_NAME.METIS]: 'metis',
+            [BLOCKCHAIN_NAME.DFK]: 'defi-kingdoms',
+            [BLOCKCHAIN_NAME.KLAYTN]: 'klaytn',
+            [BLOCKCHAIN_NAME.VELAS]: 'velas',
+            [BLOCKCHAIN_NAME.SYSCOIN]: 'syscoin'
         };
 
         this.tokenBlockchainId = {
@@ -74,7 +86,13 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.BOBA]: 'boba-network',
             [BLOCKCHAIN_NAME.BITCOIN]: 'bitcoin',
             [BLOCKCHAIN_NAME.ETHEREUM_POW]: 'ethereum-pow-iou',
-            [BLOCKCHAIN_NAME.KAVA]: 'kava'
+            [BLOCKCHAIN_NAME.KAVA]: 'kava',
+            [BLOCKCHAIN_NAME.OASIS]: 'oasis',
+            [BLOCKCHAIN_NAME.METIS]: 'metis',
+            [BLOCKCHAIN_NAME.DFK]: 'defi-kingdoms',
+            [BLOCKCHAIN_NAME.KLAYTN]: 'klaytn',
+            [BLOCKCHAIN_NAME.VELAS]: 'velas',
+            [BLOCKCHAIN_NAME.SYSCOIN]: 'syscoin'
         };
     }
 

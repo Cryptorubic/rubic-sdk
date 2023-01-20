@@ -12,7 +12,8 @@ module.exports = {
             },
             plugins: [
                 '@typescript-eslint',
-                'unused-imports'
+                'unused-imports',
+                'simple-import-sort'
             ],
             extends: [
                 'airbnb-typescript/base',
@@ -28,6 +29,8 @@ module.exports = {
                 'no-inferrable-types': 'off',
                 '@typescript-eslint/no-explicit-any': 2,
                 '@typescript-eslint/no-unused-vars': 'off',
+                'simple-import-sort/imports': 'error',
+                'simple-import-sort/exports': 'error',
                 'unused-imports/no-unused-imports': 'error',
                 'unused-imports/no-unused-vars': [
                     'error',
@@ -80,7 +83,8 @@ module.exports = {
                 ],
                 'import/export': 0,
                 '@typescript-eslint/no-shadow': 'off',
-                '@typescript-eslint/return-await': 'off'
+                '@typescript-eslint/return-await': 'off',
+                'prefer-destructuring': 'off'
             }
         },
         {

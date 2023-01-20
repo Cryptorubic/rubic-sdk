@@ -1,38 +1,38 @@
-import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import BigNumber from 'bignumber.js';
+import { BridgersPairIsUnavailableError, MaxAmountError, MinAmountError } from 'src/common/errors';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
+import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
+import {
+    BridgersQuoteRequest,
+    BridgersQuoteResponse
+} from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import {
     BridgersCrossChainSupportedBlockchain,
     bridgersCrossChainSupportedBlockchains,
     BridgersEvmCrossChainSupportedBlockchain
 } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
-import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
-import { BridgersPairIsUnavailableError, MaxAmountError, MinAmountError } from 'src/common/errors';
-import BigNumber from 'bignumber.js';
-import { TronBridgersCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/tron-bridgers-cross-chain-trade';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
-import { createTokenNativeAddressProxy } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/utils/token-native-address-proxy';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmBridgersCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/evm-bridgers-trade/evm-bridgers-cross-chain-trade';
-import { tronCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';
+import { TronBridgersCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/tron-bridgers-cross-chain-trade';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { tronCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';
 import { AbiItem } from 'web3-utils';
-import {
-    BridgersQuoteRequest,
-    BridgersQuoteResponse
-} from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
 
 export class BridgersCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.BRIDGERS;
@@ -82,7 +82,10 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 from,
                 contractAbi
             );
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
 
             const fromTokenAddress = createTokenNativeAddressProxy(
                 from,
@@ -142,13 +145,15 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
 
             feeInfo = {
                 ...feeInfo,
-                platformFee: {
-                    ...feeInfo.platformFee!,
-                    percent: feeInfo.platformFee!.percent + transactionData.fee * 100
-                },
-                cryptoFee: {
-                    amount: new BigNumber(transactionData.chainFee),
-                    tokenSymbol: toToken.symbol
+                provider: {
+                    platformFee: {
+                        percent: transactionData.fee * 100,
+                        tokenSymbol: from.symbol
+                    },
+                    cryptoFee: {
+                        amount: new BigNumber(transactionData.chainFee),
+                        tokenSymbol: toToken.symbol
+                    }
                 }
             };
 
@@ -169,7 +174,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                             to: to as PriceTokenAmount<TronBlockchainName>,
                             toTokenAmountMin,
                             feeInfo,
-                            gasData
+                            gasData,
+                            slippage: options.slippageTolerance
                         },
                         options.providerAddress
                     )
@@ -181,7 +187,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                         from: from as PriceTokenAmount<TronBlockchainName>,
                         to: to as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
                         toTokenAmountMin,
-                        feeInfo
+                        feeInfo,
+                        slippage: options.slippageTolerance
                     },
                     options.providerAddress
                 )
@@ -201,25 +208,26 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
         contractAbi: AbiItem[]
     ): Promise<FeeInfo> {
         return {
-            fixedFee: {
-                amount: await this.getFixedFee(
-                    fromBlockchain,
-                    providerAddress,
-                    rubicProxyContractAddress[fromBlockchain],
-                    contractAbi
-                ),
-                tokenSymbol: nativeTokensList[fromBlockchain].symbol
-            },
-            platformFee: {
-                percent: await this.getFeePercent(
-                    fromBlockchain,
-                    providerAddress,
-                    rubicProxyContractAddress[fromBlockchain],
-                    contractAbi
-                ),
-                tokenSymbol: percentFeeToken.symbol
-            },
-            cryptoFee: null
+            rubicProxy: {
+                fixedFee: {
+                    amount: await this.getFixedFee(
+                        fromBlockchain,
+                        providerAddress,
+                        rubicProxyContractAddress[fromBlockchain],
+                        contractAbi
+                    ),
+                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                },
+                platformFee: {
+                    percent: await this.getFeePercent(
+                        fromBlockchain,
+                        providerAddress,
+                        rubicProxyContractAddress[fromBlockchain],
+                        contractAbi
+                    ),
+                    tokenSymbol: percentFeeToken.symbol
+                }
+            }
         };
     }
 }

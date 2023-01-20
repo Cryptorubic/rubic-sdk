@@ -5,26 +5,46 @@ import BigNumber from 'bignumber.js';
  */
 export interface FeeInfo {
     /**
-     * Fixed crypto fee attached as additional value.
+     * Fees, taken by cross-chain proxy or celer contract .
+     * Attached as additional amounts.
      */
-    readonly fixedFee: {
-        readonly amount: BigNumber;
-        readonly tokenSymbol: string;
-    } | null;
+    rubicProxy?: {
+        /**
+         * Fixed crypto fee attached as additional value.
+         */
+        fixedFee?: {
+            amount: BigNumber;
+            tokenSymbol: string;
+        };
+
+        /**
+         * Platform fee which is percent from token in amount.
+         */
+        platformFee?: {
+            percent: number;
+            tokenSymbol: string;
+        };
+    };
 
     /**
-     * Platform fee which is percent from token in amount.
+     * Fees, taken by provider.
+     * Already included in amounts.
      */
-    readonly platformFee: {
-        readonly percent: number;
-        readonly tokenSymbol: string;
-    } | null;
+    provider?: {
+        /**
+         * Crypto fee to pay swap in target network.
+         */
+        cryptoFee?: {
+            amount: BigNumber;
+            tokenSymbol: string;
+        };
 
-    /**
-     * Crypto fee to pay swap in target network.
-     */
-    readonly cryptoFee: {
-        readonly amount: BigNumber;
-        readonly tokenSymbol: string;
-    } | null;
+        /**
+         * Platform fee which is percent from token in amount.
+         */
+        platformFee?: {
+            percent: number;
+            tokenSymbol: string;
+        };
+    };
 }

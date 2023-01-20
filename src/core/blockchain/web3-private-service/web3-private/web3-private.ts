@@ -1,7 +1,7 @@
+import BigNumber from 'bignumber.js';
+import { InvalidAddressError, RubicSdkError, WrongNetworkError } from 'src/common/errors';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
-import { InvalidAddressError, RubicSdkError, WrongNetworkError } from 'src/common/errors';
-import BigNumber from 'bignumber.js';
 
 /**
  * Class containing methods for executing the functions of contracts

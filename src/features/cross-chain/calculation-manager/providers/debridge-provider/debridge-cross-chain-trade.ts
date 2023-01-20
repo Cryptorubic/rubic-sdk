@@ -1,24 +1,28 @@
-import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-cross-chain-supported-blockchain';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/contract-address';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import BigNumber from 'bignumber.js';
+import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
-import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
-import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
-import { TransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
-import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
+import { parseError } from 'src/common/utils/errors';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { ContractParams } from 'src/features/common/models/contract-params';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import BigNumber from 'bignumber.js';
-import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
-import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/contract-address';
+import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-cross-chain-supported-blockchain';
+import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
+import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
+import { TransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
+import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 /**
  * Calculated DeBridge cross-chain trade.
@@ -30,6 +34,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     private readonly cryptoFeeToken: PriceTokenAmount;
 
     private readonly transactionRequest: TransactionRequest;
+
+    private readonly slippage: number;
 
     /** @internal */
     public static async getGasData(
@@ -54,11 +60,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                         gasData: null,
                         priceImpact: 0,
                         slippage: 0,
-                        feeInfo: {
-                            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
-                            platformFee: { percent: 0, tokenSymbol: '' },
-                            cryptoFee: null
-                        },
+                        feeInfo: {},
                         transitAmount: new BigNumber(NaN),
                         cryptoFeeToken: from
                     },
@@ -118,7 +120,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return DE_BRIDGE_CONTRACT_ADDRESS[this.fromBlockchain].rubicRouter;
+        // TODO return after cross-chain proxy fix
+        return DE_BRIDGE_CONTRACT_ADDRESS[this.fromBlockchain].providerRouter;
     }
 
     public readonly feeInfo: FeeInfo;
@@ -144,6 +147,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         this.transactionRequest = crossChainTrade.transactionRequest;
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.slippage = crossChainTrade.slippage;
 
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
         this.feeInfo = crossChainTrade.feeInfo;
@@ -151,6 +155,40 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
 
         this.transitAmount = crossChainTrade.transitAmount;
+    }
+
+    // TODO use inherited swap implementation after cross-chain proxy fix
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        if (options.receiverAddress) {
+            throw new RubicSdkError('Receiver address not supported');
+        }
+        this.checkWalletConnected();
+        await this.checkAllowanceAndApprove(options);
+        const { data, value, to } = await this.getTransactionRequest();
+        const { onConfirm } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+        try {
+            await this.web3Private.trySendTransaction(to, {
+                onTransactionHash,
+                data,
+                value,
+                gas: options.gasLimit,
+                gasPrice: options.gasPrice
+            });
+
+            return transactionHash!;
+        } catch (err) {
+            if (err instanceof FailedToCheckForTransactionReceiptError) {
+                return transactionHash!;
+            }
+            throw parseError(err);
+        }
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -201,6 +239,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     private async getTransactionRequest(receiverAddress?: string): Promise<{
         data: string;
         value: string;
+        to: string;
     }> {
         const params = {
             ...this.transactionRequest,
@@ -212,5 +251,18 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             { params }
         );
         return tx;
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.transitAmount;
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: { total: this.priceImpact },
+            slippage: { total: this.slippage * 100 }
+        };
     }
 }

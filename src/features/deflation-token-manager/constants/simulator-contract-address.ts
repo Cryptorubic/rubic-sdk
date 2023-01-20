@@ -1,10 +1,21 @@
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    EVM_BLOCKCHAIN_NAME,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 
-export const simulatorContractAddress: Partial<Record<EvmBlockchainName, string>> = {
-    [BLOCKCHAIN_NAME.POLYGON]: '0x92F524e07fA4aC497e1Bc71aE85EEfe75B2CfB2a',
-    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: '0xd556457D696733525E4156E8a1Ff71Cd596478D7',
-    [BLOCKCHAIN_NAME.ETHEREUM]: '0x792dbcf1712c53e1942e31183ddf1b7825b617df',
-    [BLOCKCHAIN_NAME.AVALANCHE]: '0xD737B69a4966B00f31906bC411164c79Cb316687',
-    [BLOCKCHAIN_NAME.ARBITRUM]: '0xF51833eD84c95ebC9D42288b7e0A8DD49F432aA8',
-    [BLOCKCHAIN_NAME.FANTOM]: '0x2b3A2B07812e52BcF511F3A6A733AeBD5c0e0BcA'
-};
+export const simulatorContractAddress: Record<EvmBlockchainName, string> = Object.values(
+    EVM_BLOCKCHAIN_NAME
+).reduce((acc, blockchain) => {
+    let contractAddress = '0x32d43423E6f2293729303fB56C52f853f5683333';
+    if (blockchain === BLOCKCHAIN_NAME.POLYGON) {
+        contractAddress = '0xf746908a3eb1a6a16cab7cb40bbe47b897b2ebcb';
+    }
+    if (blockchain === BLOCKCHAIN_NAME.CELO) {
+        contractAddress = '0xf5454E6Da76E2af9824b8D88F2Af103159A396aA';
+    }
+    return {
+        ...acc,
+        [blockchain]: contractAddress
+    };
+}, {} as Record<EvmBlockchainName, string>);

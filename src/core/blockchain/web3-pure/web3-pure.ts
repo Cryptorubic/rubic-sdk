@@ -1,9 +1,9 @@
 import BigNumber from 'bignumber.js';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/bitcoin-web3-pure';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { staticImplements } from 'src/common/utils/decorators';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Web3PureContainer } from 'src/core/blockchain/web3-pure/models/web3-pure-container';
+import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/bitcoin-web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 
 /**

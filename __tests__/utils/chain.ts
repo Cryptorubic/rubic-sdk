@@ -8,12 +8,13 @@ import { DEFAULT_MNEMONIC } from '__tests__/utils/constants/mnemonic';
 import { TOKENS_HOLDERS } from '__tests__/utils/tokens';
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
-import { BlockchainName, Configuration } from 'src/core';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Configuration } from 'src/core/sdk/models/configuration';
 import * as util from 'util';
 import Web3 from 'web3';
 import { HttpProvider } from 'web3-core';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { Token } from 'src/common';
+import { Token } from 'src/common/tokens';
 
 export class Chain {
     private static walletsNumber = 10;

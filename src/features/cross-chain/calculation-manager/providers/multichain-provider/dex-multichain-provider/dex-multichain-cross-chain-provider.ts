@@ -1,31 +1,34 @@
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import BigNumber from 'bignumber.js';
+import { NotSupportedTokensError, NotWhitelistedProviderError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { Injector } from 'src/core/injector/injector';
+import { wlContractAbi } from 'src/features/common/constants/wl-contract-abi';
+import { wlContractAddress } from 'src/features/common/constants/wl-contract-address';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import BigNumber from 'bignumber.js';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
-import { NotSupportedTokensError } from 'src/common/errors';
-import { isMultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/is-multichain-method-name';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { multichainProxyContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-abi';
+import { multichainProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-address';
+import { DexMultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/dex-multichain-cross-chain-trade';
 import {
     MultichainProxyCrossChainSupportedBlockchain,
     multichainProxyCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/models/supported-blockchain';
-import { multichainProxyContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-abi';
-import { multichainProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-address';
-import { compareAddresses } from 'src/common/utils/blockchain';
-import { Injector } from 'src/core/injector/injector';
-import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
-import { DexMultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/dex-multichain-cross-chain-trade';
-import { getMultichainTokens } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/get-multichain-tokens';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { MultichainCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-provider';
 import { MultichainTargetToken } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/tokens-api';
+import { MultichainCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-provider';
+import { getMultichainTokens } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/get-multichain-tokens';
 import { getToFeeAmount } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/get-to-fee-amount';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { isMultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/is-multichain-method-name';
+import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 export class DexMultichainCrossChainProvider extends MultichainCrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.MULTICHAIN;
@@ -80,21 +83,14 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             }
             const { targetToken } = tokens;
 
+            await this.checkProviderIsWhitelisted(fromBlockchain, targetToken.router);
             const whitelistedDexes = await this.getWhitelistedDexes(fromBlockchain);
-            // @TODO Return after new contracts deploy.
-            // if (
-            //     !whitelistedAddresses.some(whitelistedAddress =>
-            //         compareAddresses(whitelistedAddress, targetToken.router)
-            //     )
-            // ) {
-            //     return {
-            //         trade: null,
-            //         error: new NotWhitelistedProviderError(targetToken.router)
-            //     };
-            // }
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-            const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
             const cryptoFee = this.getProtocolFee(targetToken, from.tokenAmount);
 
             let onChainTrade: EvmOnChainTrade | null = null;
@@ -160,13 +156,16 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                     toTokenAmountMin,
                     feeInfo: {
                         ...feeInfo,
-                        cryptoFee
+                        provider: {
+                            cryptoFee
+                        }
                     },
                     routerAddress,
                     spenderAddress,
                     routerMethodName,
                     anyTokenAddress,
-                    onChainTrade
+                    onChainTrade,
+                    slippage: options.slippageTolerance
                 },
                 options.providerAddress
             );
@@ -190,6 +189,31 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                 trade: null,
                 error: CrossChainProvider.parseError(err)
             };
+        }
+    }
+
+    protected async checkProviderIsWhitelisted(
+        fromBlockchain: Web3PublicSupportedBlockchain,
+        providerRouter: string
+    ): Promise<void> {
+        const whitelistedContracts = await Injector.web3PublicService
+            .getWeb3Public(fromBlockchain)
+            .callContractMethod<string[]>(
+                wlContractAddress[fromBlockchain as EvmBlockchainName],
+                wlContractAbi,
+                'getAvailableAnyRouters'
+            );
+
+        if (
+            !whitelistedContracts.find(whitelistedContract =>
+                compareAddresses(whitelistedContract, providerRouter)
+            )
+        ) {
+            throw new NotWhitelistedProviderError(
+                providerRouter,
+                undefined,
+                'multichain:anyrouter'
+            );
         }
     }
 
@@ -224,7 +248,9 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
         const fromBlockchain = from.blockchain as MultichainProxyCrossChainSupportedBlockchain;
 
         // @TODO Add filter before promise resolving.
-        const dexes = Object.values(typedTradeProviders[fromBlockchain]);
+        const dexes = Object.values(typedTradeProviders[fromBlockchain]).filter(
+            dex => dex.supportReceiverAddress
+        );
         const to = await PriceToken.createToken({
             address:
                 transitToken.tokenType === 'NATIVE'
@@ -246,7 +272,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             .map(value => (value as PromiseFulfilledResult<EvmOnChainTrade>).value)
             .filter(onChainTrade =>
                 availableDexes.some(availableDex =>
-                    compareAddresses(availableDex, onChainTrade.contractAddress)
+                    compareAddresses(availableDex, onChainTrade.dexContractAddress)
                 )
             )
             .sort((a, b) => b.to.tokenAmount.comparedTo(a.to.tokenAmount));
@@ -263,25 +289,26 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
         return {
-            fixedFee: {
-                amount: await this.getFixedFee(
-                    fromBlockchain,
-                    providerAddress,
-                    multichainProxyContractAddress[fromBlockchain],
-                    multichainProxyContractAbi
-                ),
-                tokenSymbol: nativeTokensList[fromBlockchain].symbol
-            },
-            platformFee: {
-                percent: await this.getFeePercent(
-                    fromBlockchain,
-                    providerAddress,
-                    multichainProxyContractAddress[fromBlockchain],
-                    multichainProxyContractAbi
-                ),
-                tokenSymbol: percentFeeToken.symbol
-            },
-            cryptoFee: null
+            rubicProxy: {
+                fixedFee: {
+                    amount: await this.getFixedFee(
+                        fromBlockchain,
+                        providerAddress,
+                        multichainProxyContractAddress[fromBlockchain],
+                        multichainProxyContractAbi
+                    ),
+                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                },
+                platformFee: {
+                    percent: await this.getFeePercent(
+                        fromBlockchain,
+                        providerAddress,
+                        multichainProxyContractAddress[fromBlockchain],
+                        multichainProxyContractAbi
+                    ),
+                    tokenSymbol: percentFeeToken.symbol
+                }
+            }
         };
     }
 }

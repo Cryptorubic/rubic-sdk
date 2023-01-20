@@ -1,10 +1,10 @@
 import { RubicSdkError } from 'src/common/errors';
-import { UniswapV2AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v2-abstract/uniswap-v2-abstract-trade';
-import { v2LikeCelerSwap } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/models/v2-like-celer-swap-info';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { CelerOnChainTrade } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/celer-on-chain-contract-trade/celer-on-chain-trade/celer-on-chain-trade';
 import { DestinationCelerSwapInfo } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/models/destination-celer-swap-info';
 import { SwapVersion } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/models/provider-type.enum';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { v2LikeCelerSwap } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/celer-contract-trade/models/v2-like-celer-swap-info';
+import { UniswapV2AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 
 export class CelerUniswapV2Trade implements CelerOnChainTrade {
     readonly defaultDeadline = 999999999999999;

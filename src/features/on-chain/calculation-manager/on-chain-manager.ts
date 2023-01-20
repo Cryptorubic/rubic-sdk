@@ -1,28 +1,25 @@
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/on-chain-trade';
 import { RubicSdkError } from 'src/common/errors';
-import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
-import { OnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/on-chain-manager-calculation-options';
-import { LifiProvider } from 'src/features/on-chain/calculation-manager/providers/lifi/lifi-provider';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
-import {
-    ON_CHAIN_TRADE_TYPE,
-    OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
-import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/on-chain-provider/on-chain-provider';
-import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/oneinch-abstract/constants';
-import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
-import pTimeout from 'src/common/utils/p-timeout';
-import { MarkRequired } from 'ts-essentials';
 import { combineOptions } from 'src/common/utils/options';
-import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
+import pTimeout from 'src/common/utils/p-timeout';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { ProviderAddress } from 'src/core/sdk/models/provider-address';
 import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
-
-export type RequiredOnChainManagerCalculationOptions = MarkRequired<
-    OnChainManagerCalculationOptions,
-    'timeout' | 'disabledProviders'
->;
+import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
+import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
+import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
+import { OnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/on-chain-manager-calculation-options';
+import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
+import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
+import { RequiredOnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/required-on-chain-manager-calculation-options';
+import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
+import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
+import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
+import { LifiProvider } from 'src/features/on-chain/calculation-manager/providers/lifi/lifi-provider';
+import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
+import { OpenOceanProvider } from 'src/features/on-chain/calculation-manager/providers/open-ocean/open-ocean-provider';
 
 /**
  * Contains methods to calculate on-chain trades.
@@ -30,21 +27,18 @@ export type RequiredOnChainManagerCalculationOptions = MarkRequired<
 export class OnChainManager {
     public static readonly defaultCalculationTimeout = 10_000;
 
-    private static getFullOptions(
-        options?: OnChainManagerCalculationOptions
-    ): RequiredOnChainManagerCalculationOptions {
-        return combineOptions<RequiredOnChainManagerCalculationOptions>(options, {
-            timeout: OnChainManager.defaultCalculationTimeout,
-            disabledProviders: []
-        });
-    }
-
     /**
      * List of all on-chain trade providers, combined by blockchains.
      */
     public readonly tradeProviders: OnChainTypedTradeProviders = typedTradeProviders;
 
     public readonly lifiProvider = new LifiProvider();
+
+    public readonly openOceanProvider = new OpenOceanProvider();
+
+    public readonly deflationTokenManager = new DeflationTokenManager();
+
+    public constructor(private readonly providerAddress: ProviderAddress) {}
 
     /**
      * Calculates on-chain trades, sorted by output amount.
@@ -99,7 +93,43 @@ export class OnChainManager {
             toToken
         );
 
-        return this.calculateTradeFromTokens(from, to, OnChainManager.getFullOptions(options));
+        const fullOptions = await this.getFullOptions(from, to, options);
+        return this.calculateTradeFromTokens(from, to, fullOptions);
+    }
+
+    private async getFullOptions(
+        from: PriceTokenAmount,
+        to: PriceToken,
+        options?: OnChainManagerCalculationOptions
+    ): Promise<RequiredOnChainManagerCalculationOptions> {
+        const chainType = BlockchainsInfo.getChainType(from.blockchain) as keyof ProviderAddress;
+
+        const [isDeflationFrom, isDeflationTo] = await Promise.all([
+            this.isDeflationToken(from),
+            this.isDeflationToken(to)
+        ]);
+        let useProxy: boolean;
+        if (options?.useProxy === false) {
+            useProxy = options.useProxy;
+        } else {
+            useProxy =
+                OnChainProxyService.isSupportedBlockchain(from.blockchain) &&
+                (!isDeflationFrom.isDeflation || isDeflationFrom.isWhitelisted);
+        }
+
+        return combineOptions<RequiredOnChainManagerCalculationOptions>(
+            { ...options, useProxy },
+            {
+                timeout: OnChainManager.defaultCalculationTimeout,
+                disabledProviders: [],
+                providerAddress: this.providerAddress[chainType],
+                useProxy,
+                withDeflation: {
+                    from: isDeflationFrom,
+                    to: isDeflationTo
+                }
+            }
+        );
     }
 
     private async calculateTradeFromTokens(
@@ -107,25 +137,51 @@ export class OnChainManager {
         to: PriceToken,
         options: RequiredOnChainManagerCalculationOptions
     ): Promise<Array<OnChainTrade | OnChainTradeError>> {
-        const { timeout, disabledProviders, ...providersOptions } = options;
-        const providers = Object.entries(this.tradeProviders[from.blockchain]).filter(
-            ([type]) => !disabledProviders.includes(type as OnChainTradeType)
+        const dexesProviders = Object.entries(this.tradeProviders[from.blockchain]).filter(
+            ([type]) => !options.disabledProviders.includes(type as OnChainTradeType)
         ) as [OnChainTradeType, OnChainProvider][];
+        const dexesTradesPromise = this.calculateDexes(from, to, dexesProviders, options);
 
-        const onChainTradesPromise = Promise.all(
-            providers.map(async ([type, provider]) => {
+        const lifiTradesPromise = this.calculateLifiTrades(
+            from,
+            to,
+            dexesProviders.map(dexProvider => dexProvider[0]),
+            options
+        );
+
+        // const openOceanTradePromise = this.openOceanProvider.calculate(
+        //     from as PriceTokenAmount<EvmBlockchainName>,
+        //     to as PriceTokenAmount<EvmBlockchainName>,
+        //     options as RequiredOnChainCalculationOptions
+        // );
+
+        const trades = (await Promise.all([dexesTradesPromise, lifiTradesPromise])).flat();
+
+        return trades.sort((tradeA, tradeB) => {
+            if (tradeA instanceof OnChainTrade || tradeB instanceof OnChainTrade) {
+                if (tradeA instanceof OnChainTrade && tradeB instanceof OnChainTrade) {
+                    return tradeA.to.tokenAmount.comparedTo(tradeB.to.tokenAmount);
+                }
+                return tradeA instanceof OnChainTrade ? 1 : -1;
+            }
+            return 0;
+        });
+    }
+
+    private isDeflationToken(token: Token): Promise<IsDeflationToken> {
+        return this.deflationTokenManager.isDeflationToken(token);
+    }
+
+    private async calculateDexes(
+        from: PriceTokenAmount,
+        to: PriceToken,
+        dexesProviders: [OnChainTradeType, OnChainProvider][],
+        options: RequiredOnChainManagerCalculationOptions
+    ): Promise<Array<OnChainTrade | OnChainTradeError>> {
+        return Promise.all(
+            dexesProviders.map(async ([type, provider]) => {
                 try {
-                    const providerSpecificOptions = {
-                        ...providersOptions,
-                        wrappedAddress:
-                            type === ON_CHAIN_TRADE_TYPE.ONE_INCH
-                                ? oneinchApiParams.nativeAddress
-                                : providersOptions.wrappedAddress
-                    };
-                    return await pTimeout(
-                        provider.calculate(from, to, providerSpecificOptions),
-                        timeout
-                    );
+                    return await pTimeout(provider.calculate(from, to, options), options.timeout);
                 } catch (e) {
                     console.debug(
                         `[RUBIC_SDK] Trade calculation error occurred for ${type} trade provider.`,
@@ -135,60 +191,37 @@ export class OnChainManager {
                 }
             })
         );
-        const lifiTradesPromise = (async () => {
-            try {
-                return await this.calculateLifiTrades(
-                    from,
-                    to,
-                    providers.map(provider => provider[0]),
-                    options
-                );
-            } catch (e) {
-                console.debug(`[RUBIC_SDK] Trade calculation error occurred for lifi.`, e);
-                return null;
-            }
-        })();
-
-        const [instantTrades, lifiTrades] = await Promise.all([
-            onChainTradesPromise,
-            lifiTradesPromise
-        ]);
-        const trades = lifiTrades ? instantTrades.concat(lifiTrades) : instantTrades;
-
-        return trades.sort((tradeA, tradeB) => {
-            if (tradeA instanceof OnChainTrade || tradeB instanceof OnChainTrade) {
-                if (tradeA instanceof OnChainTrade && tradeB instanceof OnChainTrade) {
-                    return tradeA.to.tokenAmount.comparedTo(tradeB.to.tokenAmount);
-                }
-                if (tradeA instanceof OnChainTrade) {
-                    return 1;
-                }
-                return -1;
-            }
-            return 0;
-        });
     }
 
     private async calculateLifiTrades(
         from: PriceTokenAmount,
         to: PriceToken,
-        providers: OnChainTradeType[],
+        dexesProvidersTypes: OnChainTradeType[],
         options: RequiredOnChainManagerCalculationOptions
     ): Promise<OnChainTrade[]> {
         if (!BlockchainsInfo.isEvmBlockchainName(from.blockchain)) {
             return [];
         }
+        if (options.withDeflation.from.isDeflation) {
+            console.debug('[RUBIC_SDK] Lifi does not work if source token is deflation.');
+            return [];
+        }
 
-        const disabledProviders = providers.concat(options.disabledProviders);
-
-        return this.lifiProvider.calculate(
-            from as PriceTokenAmount<EvmBlockchainName>,
-            to as PriceTokenAmount<EvmBlockchainName>,
-            disabledProviders,
-            {
-                slippageTolerance: options.slippageTolerance,
-                gasCalculation: options.gasCalculation === 'disabled' ? 'disabled' : 'calculate'
-            }
-        );
+        try {
+            const disabledProviders = dexesProvidersTypes.concat(options.disabledProviders);
+            const calculationOptions: LifiCalculationOptions = {
+                ...options,
+                gasCalculation: options.gasCalculation === 'disabled' ? 'disabled' : 'calculate',
+                disabledProviders
+            };
+            return await this.lifiProvider.calculate(
+                from as PriceTokenAmount<EvmBlockchainName>,
+                to as PriceTokenAmount<EvmBlockchainName>,
+                calculationOptions
+            );
+        } catch (err) {
+            console.debug('[RUBIC_SDK] Trade calculation error occurred for lifi.', err);
+            return [];
+        }
     }
 }

@@ -9,6 +9,7 @@ export const multichainProxyContractAddress: Record<
 > = multichainProxyCrossChainSupportedBlockchains.reduce((acc, blockchain) => {
     return {
         ...acc,
-        [blockchain]: '0x333BE852042F435431967664e09315CC63593333'
+        // [blockchain]: '0x333BE852042F435431967664e09315CC63593333'
+        [blockchain]: ''
     };
 }, {} as Record<MultichainProxyCrossChainSupportedBlockchain, string>);

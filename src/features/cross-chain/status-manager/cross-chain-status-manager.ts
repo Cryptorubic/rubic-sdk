@@ -1,4 +1,36 @@
+import { Via } from '@viaprotocol/router-sdk';
+import { StatusResponse, TransactionStatus } from 'rango-sdk-basic';
+import { RubicSdkError } from 'src/common/errors';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
+import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
+import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils/get-bridgers-trade-status';
+import { getSrcTxStatus } from 'src/features/common/status-manager/utils/get-src-tx-status';
+import {
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTradeType
+} from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
+import { CbridgeCrossChainApiService } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-api-service';
+import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
+import {
+    TransferHistoryStatus,
+    XferStatus
+} from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
+import { LifiSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
+import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
+import { SymbiosisSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
+import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-default-api-key';
+import { ViaSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/via-provider/models/via-swap-status';
+import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
+import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
+import { MultichainStatusMapping } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
+import { CelerTransferStatus } from 'src/features/cross-chain/status-manager/models/celer-transfer-status.enum';
+import { CrossChainStatus } from 'src/features/cross-chain/status-manager/models/cross-chain-status';
+import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
+import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
 import {
     BtcStatusResponse,
     CelerXtransferStatusResponse,
@@ -6,31 +38,7 @@ import {
     GetDstTxDataFn,
     SymbiosisApiResponse
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
-import { CrossChainStatus } from 'src/features/cross-chain/status-manager/models/cross-chain-status';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
-import { StatusResponse, TransactionStatus } from 'rango-sdk-basic';
-import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-default-api-key';
-import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
-import { ViaSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/via-provider/models/via-swap-status';
-import { SymbiosisSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
-import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
-import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
-import {
-    CROSS_CHAIN_TRADE_TYPE,
-    CrossChainTradeType
-} from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { LifiSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
-import { Via } from '@viaprotocol/router-sdk';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
-import { CelerTransferStatus } from 'src/features/cross-chain/status-manager/models/celer-transfer-status.enum';
-import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils/get-bridgers-trade-status';
-import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
-import { getSrcTxStatus } from 'src/features/common/status-manager/utils/get-src-tx-status';
-import { RubicSdkError } from 'src/common/errors';
-import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
-import { MultichainStatusMapping } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
-import { getChaingeRequestHeaders } from '../calculation-manager/providers/chainge-provider/utils/get-chainge-request-parameters';
+import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 import { ChaingeStatusApiResponse } from './models/chainge-status-api-response';
 import { chaingeApiBaseUrl } from '../calculation-manager/providers/chainge-provider/constants/chainge-api-base-url';
 
@@ -49,6 +57,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.BRIDGERS]: this.getBridgersDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: this.getMultichainDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE]: this.getCelerBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CHAINGE]: this.getChaingeDstSwapStatus
     };
 
@@ -187,15 +197,16 @@ export class CrossChainStatusManager {
         if (symbiosisTxIndexingTimeSpent) {
             try {
                 const srcChainId = blockchainId[data.fromBlockchain];
+                const baseApi = data.symbiosisVersion === 'v2' ? 'api-v2' : 'api';
                 const {
                     status: { text: dstTxStatus },
-                    tx: { hash: dstHash }
+                    tx
                 } = await Injector.httpClient.get<SymbiosisApiResponse>(
-                    `https://api.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
+                    `https://${baseApi}.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
                 );
                 let dstTxData: TxStatusData = {
                     status: TxStatus.PENDING,
-                    hash: dstHash || null
+                    hash: tx?.hash || null
                 };
 
                 if (
@@ -217,7 +228,7 @@ export class CrossChainStatusManager {
                     if (data.toBlockchain !== BLOCKCHAIN_NAME.BITCOIN) {
                         dstTxData.status = TxStatus.SUCCESS;
                     } else {
-                        dstTxData = await this.getBitcoinStatus(dstHash);
+                        dstTxData = await this.getBitcoinStatus(tx!.hash);
                     }
                 }
 
@@ -484,6 +495,71 @@ export class CrossChainStatusManager {
                 status: TxStatus.PENDING,
                 hash: null
             };
+        }
+    }
+
+    private async getXyDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        try {
+            const { isSuccess, status, txHash } = await this.httpClient.get<XyApiResponse>(
+                `${XyCrossChainProvider.apiEndpoint}/crossChainStatus?srcChainId=${
+                    blockchainId[data.fromBlockchain]
+                }&transactionHash=${data.srcTxHash}`
+            );
+
+            if (isSuccess && status === 'Done') {
+                return { status: TxStatus.SUCCESS, hash: txHash };
+            }
+
+            if (!isSuccess) {
+                return { status: TxStatus.FAIL, hash: null };
+            }
+            return { status: TxStatus.PENDING, hash: null };
+        } catch {
+            return { status: TxStatus.PENDING, hash: null };
+        }
+    }
+
+    private async getCelerBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        try {
+            const transferId = await CrossChainCbridgeManager.getTransferId(
+                data.srcTxHash,
+                data.fromBlockchain as CbridgeCrossChainSupportedBlockchain
+            );
+            const swapData = await CbridgeCrossChainApiService.fetchTradeStatus(transferId);
+
+            switch (swapData.status) {
+                case TransferHistoryStatus.TRANSFER_UNKNOWN:
+                case TransferHistoryStatus.TRANSFER_SUBMITTING:
+                case TransferHistoryStatus.TRANSFER_WAITING_FOR_SGN_CONFIRMATION:
+                case TransferHistoryStatus.TRANSFER_REQUESTING_REFUND:
+                case TransferHistoryStatus.TRANSFER_CONFIRMING_YOUR_REFUND:
+                default:
+                    return { status: TxStatus.PENDING, hash: null };
+                case TransferHistoryStatus.TRANSFER_REFUNDED:
+                case TransferHistoryStatus.TRANSFER_COMPLETED:
+                    return {
+                        status: TxStatus.SUCCESS,
+                        hash: swapData.dst_block_tx_link.split('/').at(-1)!
+                    };
+                case TransferHistoryStatus.TRANSFER_FAILED:
+                    return {
+                        status: TxStatus.FAIL,
+                        hash: null
+                    };
+                case TransferHistoryStatus.TRANSFER_WAITING_FOR_FUND_RELEASE:
+                case TransferHistoryStatus.TRANSFER_TO_BE_REFUNDED:
+                    return swapData.refund_reason === XferStatus.OK_TO_RELAY
+                        ? {
+                              status: TxStatus.PENDING,
+                              hash: null
+                          }
+                        : {
+                              status: TxStatus.REVERT,
+                              hash: null
+                          };
+            }
+        } catch {
+            return { status: TxStatus.PENDING, hash: null };
         }
     }
 

@@ -1,7 +1,7 @@
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
-import BigNumber from 'bignumber.js';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export async function getPriceTokensFromInputTokens<T extends BlockchainName = BlockchainName>(
     from:

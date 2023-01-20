@@ -1,7 +1,9 @@
-import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
+import { wrappedNativeTokensList } from 'src/common/tokens';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultHarmonyRoutingProvidersAddresses = [
-    '0xcf664087a5bb0237a0bad6742852ec6c8d69a27a', // WONE
+    wrappedNativeTokensList[BLOCKCHAIN_NAME.HARMONY].address, // WONE
     '0xef977d2f931c1978db5f6747666fa1eacb0d0339', // DAI
     '0x985458e523db3d53125813ed68c274899e9dfab4', // USDC
     '0x3c2b8be99c50593081eaa2a724f0b8285f5aba8f', // USDT
@@ -10,7 +12,7 @@ const defaultHarmonyRoutingProvidersAddresses = [
     '0xea589e93ff18b1a1f1e9bac7ef3e86ab62addc79' // VIPER
 ];
 
-const defaultHarmonyWethAddress = '0xcf664087a5bb0237a0bad6742852ec6c8d69a27a';
+const defaultHarmonyWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.HARMONY].address;
 
 export const defaultHarmonyProviderConfiguration: UniswapV2ProviderConfiguration = {
     maxTransitTokens: 2,

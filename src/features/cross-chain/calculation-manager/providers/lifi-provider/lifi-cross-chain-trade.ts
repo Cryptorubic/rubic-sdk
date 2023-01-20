@@ -1,28 +1,28 @@
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { Route } from '@lifi/sdk';
+import BigNumber from 'bignumber.js';
+import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Injector } from 'src/core/injector/injector';
+import { ContractParams } from 'src/features/common/models/contract-params';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import {
     BRIDGE_TYPE,
     BridgeType
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
-import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
-import { SwapRequestError } from 'src/common/errors';
-import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
-import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
-import { Injector } from 'src/core/injector/injector';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import BigNumber from 'bignumber.js';
-import { Route } from '@lifi/sdk';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
-import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
+import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
 
 /**
  * Calculated Celer cross-chain trade.
@@ -50,17 +50,14 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                         route,
                         gasData: null,
                         toTokenAmountMin: new BigNumber(0),
-                        feeInfo: {
-                            fixedFee: { amount: new BigNumber(0), tokenSymbol: '' },
-                            platformFee: { percent: 0, tokenSymbol: '' },
-                            cryptoFee: null
-                        },
-                        priceImpact: 0,
+                        feeInfo: {},
+                        priceImpact: from.calculatePriceImpactPercent(to) || 0,
                         onChainSubtype: {
                             from: undefined,
                             to: undefined
                         },
-                        bridgeType: BRIDGE_TYPE.LIFI
+                        bridgeType: BRIDGE_TYPE.LIFI,
+                        slippage: 0
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -116,12 +113,15 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly feeInfo: FeeInfo;
 
+    private readonly slippage: number;
+
     private get fromBlockchain(): LifiCrossChainSupportedBlockchain {
         return this.from.blockchain as LifiCrossChainSupportedBlockchain;
     }
 
     public get fromContractAddress(): string {
-        return rubicProxyContractAddress[this.fromBlockchain];
+        // return rubicProxyContractAddress[this.fromBlockchain];
+        return this.providerGateway;
     }
 
     constructor(
@@ -135,6 +135,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             priceImpact: number;
             onChainSubtype: OnChainSubtype;
             bridgeType: BridgeType;
+            slippage: number;
         },
         providerAddress: string
     ) {
@@ -148,7 +149,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         this.gasData = crossChainTrade.gasData;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.feeInfo = crossChainTrade.feeInfo;
-
+        this.slippage = crossChainTrade.slippage;
         this.priceImpact = crossChainTrade.priceImpact;
         this.onChainSubtype = crossChainTrade.onChainSubtype;
         this.bridgeType = crossChainTrade.bridgeType;
@@ -156,7 +157,39 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         try {
-            return await super.swap(options);
+            // return await super.swap(options);
+            await this.checkTradeErrors();
+            if (options.receiverAddress) {
+                throw new RubicSdkError('Receiver address not supported');
+            }
+
+            await this.checkAllowanceAndApprove(options);
+
+            const { onConfirm, gasLimit, gasPrice } = options;
+            let transactionHash: string;
+            const onTransactionHash = (hash: string) => {
+                if (onConfirm) {
+                    onConfirm(hash);
+                }
+                transactionHash = hash;
+            };
+
+            // eslint-disable-next-line no-useless-catch
+            try {
+                const { data, value, to } = await this.getSwapData(options?.receiverAddress);
+
+                await this.web3Private.trySendTransaction(to, {
+                    data,
+                    value,
+                    onTransactionHash,
+                    gas: gasLimit,
+                    gasPrice
+                });
+
+                return transactionHash!;
+            } catch (err) {
+                throw err;
+            }
         } catch (err) {
             if ([400, 500, 503].includes(err.code)) {
                 throw new SwapRequestError();
@@ -238,5 +271,18 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         return fromUsd.dividedBy(this.to.tokenAmount);
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.from.price.multipliedBy(this.from.tokenAmount);
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: { total: this.priceImpact },
+            slippage: { total: this.slippage * 100 }
+        };
     }
 }

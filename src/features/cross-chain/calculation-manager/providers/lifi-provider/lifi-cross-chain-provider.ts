@@ -1,35 +1,34 @@
-import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
-import { LifiCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/lifi-cross-chain-trade';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import {
-    LifiCrossChainSupportedBlockchain,
-    lifiCrossChainSupportedBlockchains
-} from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
 import LIFI, { LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import BigNumber from 'bignumber.js';
+import { MinAmountError, NotWhitelistedProviderError, RubicSdkError } from 'src/common/errors';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Injector } from 'src/core/injector/injector';
+import { wlContractAbi } from 'src/features/common/constants/wl-contract-abi';
+import { wlContractAddress } from 'src/features/common/constants/wl-contract-address';
+import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
+import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import {
     BRIDGE_TYPE,
     bridges,
     BridgeType
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { MinAmountError, NotWhitelistedProviderError, RubicSdkError } from 'src/common/errors';
-import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-providers';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import BigNumber from 'bignumber.js';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import {
+    LifiCrossChainSupportedBlockchain,
+    lifiCrossChainSupportedBlockchains
+} from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
+import { LifiCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/lifi-cross-chain-trade';
 import { LifiBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { Injector } from 'src/core/injector/injector';
-import { compareAddresses } from 'src/common/utils/blockchain';
+import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-providers';
 
 export class LifiCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
@@ -37,6 +36,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
     private readonly lifi = new LIFI(getLifiConfig());
 
     private readonly MIN_AMOUNT_USD = new BigNumber(30);
+
+    private readonly lifiFee = 0.0015;
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
@@ -57,11 +58,11 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             return null;
         }
 
-        await this.checkContractState(
-            fromBlockchain,
-            rubicProxyContractAddress[fromBlockchain],
-            evmCommonCrossChainAbi
-        );
+        // await this.checkContractState(
+        //     fromBlockchain,
+        //     rubicProxyContractAddress[fromBlockchain],
+        //     evmCommonCrossChainAbi
+        // );
 
         if (
             options.lifiDisabledBridgeTypes?.length &&
@@ -76,14 +77,17 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             allowSwitchChain: false,
             bridges: {
                 deny: options.lifiDisabledBridgeTypes
-            }
+            },
+            fee: this.lifiFee,
+            integrator: 'Rubic'
         };
 
         const fromChainId = blockchainId[fromBlockchain];
         const toChainId = blockchainId[toBlockchain];
 
         const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
-        const fromWithoutFee = getFromWithoutFee(from, feeInfo);
+        // const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
+        const fromWithoutFee = from;
 
         const fromAddress = this.getWalletAddress(fromBlockchain);
         const toAddress = options.receiverAddress || fromAddress;
@@ -109,8 +113,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             throw new RubicSdkError('No available routes');
         }
 
-        const providerGateway = bestRoute.steps[0]!.estimate.approvalAddress;
-        await this.checkProviderIsWhitelisted(from.blockchain, providerGateway);
+        // const providerGateway = bestRoute.steps[0]!.estimate.approvalAddress;
+        // await this.checkProviderIsWhitelisted(from.blockchain, providerGateway);
 
         const { fromAmountUSD, toAmountUSD } = bestRoute;
         const priceImpact = new BigNumber(fromAmountUSD)
@@ -144,7 +148,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                 feeInfo,
                 priceImpact,
                 onChainSubtype: onChainType,
-                bridgeType: bridgeType || BRIDGE_TYPE.LIFI
+                bridgeType: bridgeType || BRIDGE_TYPE.LIFI,
+                slippage: options.slippageTolerance
             },
             options.providerAddress
         );
@@ -164,36 +169,52 @@ export class LifiCrossChainProvider extends CrossChainProvider {
     }
 
     private checkMinError(from: PriceTokenAmount): void | never {
-        if (from.price.multipliedBy(from.tokenAmount).lt(this.MIN_AMOUNT_USD)) {
+        const fromUsdAmount = from.price.multipliedBy(from.tokenAmount);
+        if (fromUsdAmount.lt(this.MIN_AMOUNT_USD)) {
+            if (from.price.isFinite()) {
+                const minTokenAmount = this.MIN_AMOUNT_USD.multipliedBy(from.tokenAmount).dividedBy(
+                    fromUsdAmount
+                );
+                throw new MinAmountError(minTokenAmount, from.symbol);
+            }
             throw new MinAmountError(this.MIN_AMOUNT_USD, 'USDC');
         }
     }
 
     protected override async getFeeInfo(
         fromBlockchain: LifiCrossChainSupportedBlockchain,
-        providerAddress: string,
+        _providerAddress: string,
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
         return {
-            fixedFee: {
-                amount: await this.getFixedFee(
-                    fromBlockchain,
-                    providerAddress,
-                    rubicProxyContractAddress[fromBlockchain],
-                    evmCommonCrossChainAbi
-                ),
-                tokenSymbol: nativeTokensList[fromBlockchain].symbol
+            rubicProxy: {
+                fixedFee: {
+                    // amount: await this.getFixedFee(
+                    //     fromBlockchain,
+                    //     providerAddress,
+                    //     rubicProxyContractAddress[fromBlockchain],
+                    //     evmCommonCrossChainAbi
+                    // ),
+                    amount: new BigNumber(0),
+                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                },
+                platformFee: {
+                    // percent: await this.getFeePercent(
+                    //     fromBlockchain,
+                    //     providerAddress,
+                    //     rubicProxyContractAddress[fromBlockchain],
+                    //     evmCommonCrossChainAbi
+                    // ),
+                    percent: 0,
+                    tokenSymbol: percentFeeToken.symbol
+                }
             },
-            platformFee: {
-                percent: await this.getFeePercent(
-                    fromBlockchain,
-                    providerAddress,
-                    rubicProxyContractAddress[fromBlockchain],
-                    evmCommonCrossChainAbi
-                ),
-                tokenSymbol: percentFeeToken.symbol
-            },
-            cryptoFee: null
+            provider: {
+                platformFee: {
+                    percent: this.lifiFee * 100,
+                    tokenSymbol: percentFeeToken.symbol
+                }
+            }
         };
     }
 
@@ -206,9 +227,9 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const whitelistedContracts = await Injector.web3PublicService
             .getWeb3Public(fromBlockchain)
             .callContractMethod<string[]>(
-                rubicProxyContractAddress[fromBlockchain],
-                evmCommonCrossChainAbi,
-                'getAvailableRouters'
+                wlContractAddress[fromBlockchain],
+                wlContractAbi,
+                'getAvailableCrossChains'
             );
 
         if (
@@ -220,7 +241,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                     compareAddresses(whitelistedContract, providerGateway)
                 ))
         ) {
-            throw new NotWhitelistedProviderError(providerRouter, providerGateway);
+            throw new NotWhitelistedProviderError(providerRouter, providerGateway, 'crosschain');
         }
     }
 

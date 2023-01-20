@@ -1,5 +1,5 @@
-import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
 import BigNumber from 'bignumber.js';
+import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
 
 export class MaxAmountError extends RubicSdkError {
     constructor(public readonly maxAmount: BigNumber, public readonly tokenSymbol: string) {

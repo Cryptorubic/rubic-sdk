@@ -7,6 +7,8 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     RANGO: 'rango',
     BRIDGERS: 'bridgers',
     MULTICHAIN: 'multichain',
+    XY: 'xy',
+    CELER_BRIDGE: 'celer_bridge',
     CHAINGE: 'chainge'
 } as const;
 

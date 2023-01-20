@@ -1,7 +1,9 @@
+import { wrappedNativeTokensList } from 'src/common/tokens';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import {
     UniswapV3RouterConfiguration,
     UniswapV3RouterLiquidityPool
-} from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
+} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
 
 /**
  * Most popular tokens in uni v3 to use in a route.
@@ -11,7 +13,7 @@ const tokensSymbols = ['WMATIC', 'WETH', 'DAI', 'USDT', 'USDC'] as const;
 type TokenSymbol = typeof tokensSymbols[number];
 
 const routerTokens: Record<TokenSymbol, string> = {
-    WMATIC: '0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270',
+    WMATIC: wrappedNativeTokensList[BLOCKCHAIN_NAME.POLYGON].address,
     WETH: '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619',
     DAI: '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',
     USDT: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',

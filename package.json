@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "3.4.68",
+  "version": "3.16.8-alpha-sd.0",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -50,15 +50,17 @@
   ],
   "license": "GPL-3.0",
   "scripts": {
-    "build": "yarn create-index && webpack && npx rimraf ./src/index.ts",
+    "build": "yarn create-index && webpack && yarn delete-index",
     "start": "webpack --watch",
-    "compile": "yarn create-index && npx rimraf lib && tsc --project tsconfig.json && tscpaths -p ./tsconfig.json -s ./src -o ./lib && npx rimraf ./src/index.ts",
+    "compile": "yarn create-index && npx rimraf lib && tsc --project tsconfig.json && tscpaths -p ./tsconfig.json -s ./src -o ./lib && yarn delete-index",
     "lint": "eslint src __tests__",
     "create-index": "cti entrypoint ./src --withoutbackup && renamer -f \"/^entrypoint/\" -r \"index\" \"./src/*\" --force",
+    "delete-index": "npx rimraf ./src/index.ts",
     "test": "cd ./scripts && bash test-runner.sh",
+    "test:unit": "yarn jest ./__tests__/unit-tests",
     "build:publish": "yarn compile && yarn build && npm publish --access public",
     "analyze": "webpack --profile --json > stats.json &&  webpack-bundle-analyzer stats.json",
-    "docs": "typedoc",
+    "docs": "yarn create-index && typedoc && yarn delete-index",
     "publish": "yarn publish --access public",
     "publish:alpha": "yarn publish --access public --tag alpha"
   },
@@ -71,17 +73,22 @@
     "axios": "^0.26.1",
     "bignumber.js": "9.1.0",
     "bitcoin-address-validation": "2.2.1",
+    "cbridge-revert-manager": "1.1.0",
     "crypto-js": "^4.1.1",
     "ethers": "^5.6.8",
+    "grpc-web": "^1.4.2",
+    "lodash.clonedeep": "^4.5.0",
     "rango-sdk-basic": "^0.0.7",
-    "rxjs": "^7.5.7",
-    "symbiosis-js-sdk": "2.8.13",
+    "rxjs": "^7.8.0",
+    "symbiosis-js-sdk": "^2.9.6",
+    "symbiosis-js-sdk-v1": "npm:symbiosis-js-sdk@2.8.22",
     "tronweb": "^4.3.0",
-    "web3": "^1.8.0"
+    "web3": "^1.8.1"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-0",
-    "@types/jest": "^28.1.2",
+    "@types/jest": "^29.2.3",
+    "@types/lodash.clonedeep": "^4.5.7",
     "@typescript-eslint/eslint-plugin": "^5.36.2",
     "@typescript-eslint/parser": "^5.36.2",
     "bip39": "^3.0.4",
@@ -96,11 +103,12 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-simple-import-sort": "^8.0.0",
     "eslint-plugin-unused-imports": "^1.1.4",
     "ethereumjs-wallet": "^1.0.2",
     "http-browserify": "^1.7.0",
     "https-browserify": "^1.0.0",
-    "jest": "^28.1.1",
+    "jest": "^29.3.1",
     "jest-mock-promise": "^2.0.2",
     "prettier": "^2.2.1",
     "renamer": "^4.0.0",
@@ -108,13 +116,13 @@
     "stream-browserify": "^3.0.0",
     "terser-webpack-plugin": "^5.3.0",
     "ts-essentials": "^9.0.0",
-    "ts-jest": "^28.0.5",
+    "ts-jest": "^29.0.3",
     "ts-loader": "^9.3.0",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "tscpaths": "^0.0.9",
-    "ttypescript": "^1.5.13",
-    "typedoc": "^0.22.17",
-    "typescript": "^4.8.3",
+    "ttypescript": "^1.5.15",
+    "typedoc": "^0.23.21",
+    "typescript": "^4.9.4",
     "typescript-transform-paths": "^3.3.1",
     "url": "^0.11.0",
     "webpack": "^5.65.0",
@@ -123,10 +131,10 @@
   },
   "overrides": {
     "ethers": {
-      "bignumber.js": "^9.1.0"
+      "bignumber.js": "9.1.0"
     },
     "symbiosis-js-sdk": {
-      "bignumber.js": "^9.1.0"
+      "bignumber.js": "9.1.0"
     }
   }
 }

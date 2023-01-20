@@ -1,19 +1,19 @@
 import BigNumber from 'bignumber.js';
-import { MULTICALL_ADDRESSES } from 'src/core/blockchain/web3-public-service/web3-public/constants/multicall-addresses';
-import { SupportedTokenField } from 'src/core/blockchain/web3-public-service/web3-public/models/supported-token-field';
-import { AbiItem } from 'web3-utils';
-import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
-import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { InsufficientFundsError, RubicSdkError } from 'src/common/errors';
-import { Cache } from 'src/common/utils/decorators';
+import { Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Cache } from 'src/common/utils/decorators';
+import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
-import { Token } from 'src/common/tokens';
-import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
-import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
+import { MULTICALL_ADDRESSES } from 'src/core/blockchain/web3-public-service/web3-public/constants/multicall-addresses';
+import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
+import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
+import { SupportedTokenField } from 'src/core/blockchain/web3-public-service/web3-public/models/supported-token-field';
 import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
+import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { AbiItem } from 'web3-utils';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.

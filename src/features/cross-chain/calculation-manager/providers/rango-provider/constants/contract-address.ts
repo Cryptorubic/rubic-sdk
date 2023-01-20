@@ -1,7 +1,7 @@
-import { UniversalContract } from 'src/features/cross-chain/calculation-manager/providers/common/models/universal-contract';
-import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { UniversalContract } from 'src/features/cross-chain/calculation-manager/providers/common/models/universal-contract';
+import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
 
 export const RANGO_CONTRACT_ADDRESSES: Record<
     RangoCrossChainSupportedBlockchain,

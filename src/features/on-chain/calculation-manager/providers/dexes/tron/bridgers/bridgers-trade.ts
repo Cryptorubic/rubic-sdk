@@ -1,25 +1,25 @@
-import { PriceTokenAmount, Token } from 'src/common/tokens';
-import { TronOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/abstract/on-chain-trade/tron-on-chain-trade/tron-on-chain-trade';
+import { SwapRequestError } from 'src/common/errors';
+import { PriceTokenAmount, Token, TokenAmount } from 'src/common/tokens';
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import {
-    ON_CHAIN_TRADE_TYPE,
-    OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/models/on-chain-trade-type';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
+import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
+import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { createTokenNativeAddressProxy } from 'src/features/on-chain/calculation-manager/providers/dexes/abstract/utils/token-native-address-proxy';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
-import { Injector } from 'src/core/injector/injector';
-import { TronBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/models/tron-bridgers-transaction-data';
-import { SwapRequestError } from 'src/common/errors';
-import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import {
     BridgersSwapRequest,
     BridgersSwapResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-swap-api';
-import { TokenAmountSymbol } from 'src/common/tokens/models/token-amount-symbol';
+import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
+import { TronBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/models/tron-bridgers-transaction-data';
+import { OnChainPlatformFee } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
+import {
+    ON_CHAIN_TRADE_TYPE,
+    OnChainTradeType
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { TronOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/tron-on-chain-trade/tron-on-chain-trade';
 
 export class BridgersTrade extends TronOnChainTrade {
     public readonly from: PriceTokenAmount<TronBlockchainName>;
@@ -30,36 +30,43 @@ export class BridgersTrade extends TronOnChainTrade {
 
     public readonly slippageTolerance: number;
 
-    public readonly contractAddress: string;
+    private readonly contractAddress: string;
 
-    public readonly cryptoFeeToken: TokenAmountSymbol;
+    public readonly cryptoFeeToken: TokenAmount;
 
-    public readonly platformFeePercent: number;
+    public readonly platformFee: OnChainPlatformFee;
 
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.BRIDGERS;
+    }
+
+    protected get spenderAddress(): string {
+        return this.contractAddress;
     }
 
     public get toTokenAmountMin(): PriceTokenAmount {
         return this.to;
     }
 
-    constructor(tradeStruct: {
-        from: PriceTokenAmount<TronBlockchainName>;
-        to: PriceTokenAmount<TronBlockchainName>;
-        slippageTolerance: number;
-        contractAddress: string;
-        cryptoFeeToken: TokenAmountSymbol;
-        platformFeePercent: number;
-    }) {
-        super();
+    constructor(
+        tradeStruct: {
+            from: PriceTokenAmount<TronBlockchainName>;
+            to: PriceTokenAmount<TronBlockchainName>;
+            slippageTolerance: number;
+            contractAddress: string;
+            cryptoFeeToken: TokenAmount;
+            platformFee: OnChainPlatformFee;
+        },
+        providerAddress: string
+    ) {
+        super(providerAddress);
 
         this.from = tradeStruct.from;
         this.to = tradeStruct.to;
         this.slippageTolerance = tradeStruct.slippageTolerance;
         this.contractAddress = tradeStruct.contractAddress;
         this.cryptoFeeToken = tradeStruct.cryptoFeeToken;
-        this.platformFeePercent = tradeStruct.platformFeePercent;
+        this.platformFee = tradeStruct.platformFee;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {

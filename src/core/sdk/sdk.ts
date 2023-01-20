@@ -1,22 +1,22 @@
-import { Configuration } from 'src/core/sdk/models/configuration';
-import { Injector } from 'src/core/injector/injector';
-import { HttpClient } from 'src/core/http-client/models/http-client';
-import { CrossChainSymbiosisManager } from 'src/features/cross-chain/symbiosis-manager/cross-chain-symbiosis-manager';
-import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Web3PrivateService } from 'src/core/blockchain/web3-private-service/web3-private-service';
+import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
+import { CoingeckoApi } from 'src/core/coingecko-api/coingecko-api';
+import { GasPriceApi } from 'src/core/gas-price-api/gas-price-api';
 import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
+import { HttpClient } from 'src/core/http-client/models/http-client';
+import { Injector } from 'src/core/injector/injector';
+import { Configuration } from 'src/core/sdk/models/configuration';
+import { ProviderAddress } from 'src/core/sdk/models/provider-address';
+import { WalletProvider, WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 import { CrossChainManager } from 'src/features/cross-chain/calculation-manager/cross-chain-manager';
 import { CrossChainStatusManager } from 'src/features/cross-chain/status-manager/cross-chain-status-manager';
-import { OnChainManager } from 'src/features/on-chain/calculation-manager/on-chain-manager';
-import { GasPriceApi } from 'src/core/gas-price-api/gas-price-api';
-import { CoingeckoApi } from 'src/core/coingecko-api/coingecko-api';
-import { WalletProvider, WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
-import { OnChainStatusManager } from 'src/features/on-chain/status-manager/on-chain-status-manager';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
-import { ProviderAddress } from 'src/core/sdk/models/provider-address';
+import { CrossChainSymbiosisManager } from 'src/features/cross-chain/symbiosis-manager/cross-chain-symbiosis-manager';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
+import { OnChainManager } from 'src/features/on-chain/calculation-manager/on-chain-manager';
+import { OnChainStatusManager } from 'src/features/on-chain/status-manager/on-chain-status-manager';
 
 /**
  * Base class to work with sdk.
@@ -115,7 +115,7 @@ export class SDK {
     }
 
     private constructor(providerAddress: ProviderAddress) {
-        this.onChainManager = new OnChainManager();
+        this.onChainManager = new OnChainManager(providerAddress);
         this.crossChainManager = new CrossChainManager(providerAddress);
         this.deflationTokenManager = new DeflationTokenManager();
         this.onChainStatusManager = new OnChainStatusManager();

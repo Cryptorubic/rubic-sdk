@@ -1,21 +1,22 @@
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
-import { Injector } from 'src/core/injector/injector';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { PriceTokenAmount } from 'src/common/tokens';
-import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
 import BigNumber from 'bignumber.js';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Injector } from 'src/core/injector/injector';
+import { ContractParams } from 'src/features/common/models/contract-params';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
-import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
-import { MultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/multichain-method-name';
-import { getFromWithoutFee } from 'src/features/cross-chain/calculation-manager/utils/get-from-without-fee';
-import { multichainContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/constants/contract-abi';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { multichainContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/constants/contract-abi';
+import { MultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/multichain-method-name';
 
 export class MultichainCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -43,15 +44,12 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
                         gasData: null,
                         priceImpact: 0,
                         toTokenAmountMin: new BigNumber(0),
-                        feeInfo: {
-                            fixedFee: null,
-                            platformFee: null,
-                            cryptoFee: null
-                        },
+                        feeInfo: {},
                         routerAddress,
                         spenderAddress,
                         routerMethodName: multichainMethodName,
-                        anyTokenAddress
+                        anyTokenAddress,
+                        slippage: 0
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -111,6 +109,8 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
 
     protected readonly anyTokenAddress: string;
 
+    private readonly slippage: number;
+
     protected get fromContractAddress(): string {
         return this.routerAddress;
     }
@@ -127,6 +127,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
             spenderAddress: string;
             routerMethodName: MultichainMethodName;
             anyTokenAddress: string;
+            slippage: number;
         },
         providerAddress: string
     ) {
@@ -143,6 +144,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
         this.routerMethodName = crossChainTrade.routerMethodName;
         this.anyTokenAddress = crossChainTrade.anyTokenAddress;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.slippage = crossChainTrade.slippage;
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -166,7 +168,10 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
         //     methodArguments.push(this.spenderAddress);
         // }
 
-        const fromAmountWithoutFee = getFromWithoutFee(this.from, this.feeInfo).stringWeiAmount;
+        const fromAmountWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo.rubicProxy?.platformFee?.percent
+        ).stringWeiAmount;
         let multichainMethodArguments: unknown[];
         if (this.routerMethodName === 'anySwapOutNative') {
             multichainMethodArguments = [this.anyTokenAddress, receiverAddress, toChainId];
@@ -198,5 +203,18 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         return fromUsd.dividedBy(this.to.tokenAmount);
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.from.price.multipliedBy(this.from.tokenAmount);
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: { total: this.priceImpact },
+            slippage: { total: this.slippage * 100 }
+        };
     }
 }

@@ -1,32 +1,33 @@
-import { MethodDecoder } from 'src/features/cross-chain/calculation-manager/utils/decode-method';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Via } from '@viaprotocol/router-sdk';
 import { IRoute } from '@viaprotocol/router-sdk/dist/types';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-default-api-key';
-import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
-import { Injector } from 'src/core/injector/injector';
-import { viaContractAddress } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/contract-data';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import BigNumber from 'bignumber.js';
+import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Injector } from 'src/core/injector/injector';
+import { ContractParams } from 'src/features/common/models/contract-params';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import {
     BRIDGE_TYPE,
     BridgeType
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
-import { Via } from '@viaprotocol/router-sdk';
-import { RubicSdkError, SwapRequestError } from 'src/common/errors';
-import { ContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/contract-params';
-import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-cross-chain-supported-blockchain';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
-import { compareAddresses } from 'src/common/utils/blockchain';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure';
-import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
-import BigNumber from 'bignumber.js';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
-import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { viaContractAddress } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/contract-data';
+import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-cross-chain-supported-blockchain';
+import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-default-api-key';
+import { MethodDecoder } from 'src/features/cross-chain/calculation-manager/utils/decode-method';
 
 export class ViaCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -52,14 +53,11 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
                         gasData: null,
                         priceImpact: 0,
                         toTokenAmountMin: new BigNumber(0),
-                        feeInfo: {
-                            fixedFee: null,
-                            platformFee: null,
-                            cryptoFee: null
-                        },
+                        feeInfo: {},
                         cryptoFeeToken: {} as PriceTokenAmount,
                         onChainSubtype: { from: undefined, to: undefined },
-                        bridgeType: BRIDGE_TYPE.VIA
+                        bridgeType: BRIDGE_TYPE.VIA,
+                        slippage: 0
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS,
                     EvmWeb3Pure.EMPTY_ADDRESS
@@ -120,6 +118,8 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly calculationWalletAddress: string;
 
+    private readonly slippage: number;
+
     protected get fromContractAddress(): string {
         return viaContractAddress[this.from.blockchain as ViaCrossChainSupportedBlockchain];
     }
@@ -140,6 +140,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
             cryptoFeeToken: PriceTokenAmount;
             onChainSubtype: OnChainSubtype;
             bridgeType: BridgeType;
+            slippage: number;
         },
         providerAddress: string,
         calculationWalletAddress: string
@@ -158,6 +159,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
 
         this.onChainSubtype = crossChainTrade.onChainSubtype;
         this.bridgeType = crossChainTrade.bridgeType;
+        this.slippage = crossChainTrade.slippage;
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -255,5 +257,18 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
         throw new RubicSdkError(
             'Calculation and swap wallet addresses are different. You should recalculate trade.'
         );
+    }
+
+    public getUsdPrice(): BigNumber {
+        return this.from.price.multipliedBy(this.from.tokenAmount);
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: this.estimatedGas,
+            feeInfo: this.feeInfo,
+            priceImpact: { total: this.priceImpact },
+            slippage: { total: this.slippage }
+        };
     }
 }

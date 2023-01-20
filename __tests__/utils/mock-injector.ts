@@ -2,7 +2,7 @@ import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
 import { Web3PrivateService } from 'src/core/blockchain/web3-private-service/web3-private-service';
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
 import { Injector } from 'src/core/injector/injector';
-import { Configuration } from 'src/core';
+import { Configuration } from 'src/core/sdk/models/configuration';
 
 export async function mockInjector(configuration: Configuration): Promise<void> {
     const web3PublicService = new Web3PublicService(configuration.rpcProviders);
