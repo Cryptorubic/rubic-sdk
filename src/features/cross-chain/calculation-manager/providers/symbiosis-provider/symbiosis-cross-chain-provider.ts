@@ -27,7 +27,6 @@ import {
     symbiosisCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { symbiosisTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-transit-tokens';
-import { getSymbiosisV1Config } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-v1-config';
 import { getSymbiosisV2Config } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-v2-config';
 import { SwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/swapping-params';
 import { SymbiosisTradeData } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
@@ -41,22 +40,12 @@ import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/prov
 import { OneinchEthereumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
 import { OneinchPolygonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
 import { ZappyProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/zappy/trisolaris-aurora-provider';
-import { Symbiosis as SymbiosisV2 } from 'symbiosis-js-sdk';
-import {
-    Error as SymbiosisError,
-    ErrorCode,
-    Symbiosis as SymbiosisV1,
-    Token as SymbiosisToken,
-    TokenAmount as SymbiosisTokenAmount,
-    TokenAmount
-} from 'symbiosis-js-sdk-v1';
+import { Error, ErrorCode, Symbiosis, Token, TokenAmount } from 'symbiosis-js-sdk';
 
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
 
-    private readonly symbiosisV1 = new SymbiosisV1(getSymbiosisV1Config(), 'rubic');
-
-    private readonly symbiosisV2 = new SymbiosisV2(getSymbiosisV2Config(), 'rubic');
+    private readonly symbiosis = new Symbiosis(getSymbiosisV2Config(), 'rubic');
 
     private readonly onChainProviders: Partial<
         Record<SymbiosisCrossChainSupportedBlockchain, OnChainProvider>
@@ -120,7 +109,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 this.getWalletAddress(fromBlockchain as Web3PrivateSupportedBlockchain) ||
                 oneinchApiParams.nativeAddress;
 
-            const tokenIn = new SymbiosisToken({
+            const tokenIn = new Token({
                 chainId: blockchainId[fromBlockchain],
                 address: from.isNative ? '' : from.address,
                 decimals: from.decimals,
@@ -133,11 +122,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             //     feeInfo.rubicProxy?.platformFee?.percent
             // );
             const fromWithoutFee = from;
-            const tokenAmountIn = new SymbiosisTokenAmount(tokenIn, fromWithoutFee.stringWeiAmount);
+            const tokenAmountIn = new TokenAmount(tokenIn, fromWithoutFee.stringWeiAmount);
 
             const tokenOut = isBitcoinSwap
                 ? null
-                : new SymbiosisToken({
+                : new Token({
                       chainId: blockchainId[toBlockchain],
                       address: toToken.isNative ? '' : toToken.address,
                       decimals: toToken.decimals,
@@ -152,8 +141,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const {
                 tokenAmountOut,
                 priceImpact,
-                fee: transitTokenFee,
-                version
+                fee: transitTokenFee
             } = await this.getTrade(fromBlockchain, toBlockchain, {
                 tokenAmountIn,
                 tokenOut,
@@ -164,31 +152,22 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 deadline
             });
 
-            const swapFunction = (
-                fromUserAddress: string,
-                version: 'v1' | 'v2',
-                receiver?: string
-            ) => {
+            const swapFunction = (fromUserAddress: string, receiver?: string) => {
                 if (isBitcoinSwap && !receiver) {
                     throw new RubicSdkError('No receiver address provider for bitcoin swap.');
                 }
                 const refundAddress = isBitcoinSwap ? fromUserAddress : receiver || fromAddress;
                 const receiverAddress = isBitcoinSwap ? receiver! : receiver || fromUserAddress;
 
-                return this.getTrade(
-                    fromBlockchain,
-                    toBlockchain,
-                    {
-                        tokenAmountIn,
-                        tokenOut,
-                        fromAddress: fromUserAddress,
-                        receiverAddress,
-                        refundAddress,
-                        slippage: slippageTolerance,
-                        deadline
-                    },
-                    version
-                );
+                return this.getTrade(fromBlockchain, toBlockchain, {
+                    tokenAmountIn,
+                    tokenOut,
+                    fromAddress: fromUserAddress,
+                    receiverAddress,
+                    refundAddress,
+                    slippage: slippageTolerance,
+                    deadline
+                });
             };
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -239,8 +218,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                                 }
                             }
                         },
-                        transitAmount,
-                        version
+                        transitAmount
                     },
                     options.providerAddress
                 )
@@ -249,7 +227,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             let rubicSdkError = CrossChainProvider.parseError(err);
 
             if ((err as { message: string })?.message?.includes('$')) {
-                const symbiosisError = err as SymbiosisError;
+                const symbiosisError = err as Error;
                 rubicSdkError =
                     symbiosisError.code === ErrorCode.AMOUNT_LESS_THAN_FEE
                         ? new TooLowAmountError()
@@ -268,7 +246,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     }
 
     private async checkMinMaxErrors(
-        err: SymbiosisError,
+        err: Error,
         from: PriceTokenAmount<SymbiosisCrossChainSupportedBlockchain>,
         slippage: number
     ): Promise<RubicSdkError> {
@@ -368,15 +346,14 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         fromBlockchain: BlockchainName,
         toBlockchain: BlockchainName,
         swapParams: {
-            tokenAmountIn: SymbiosisTokenAmount;
-            tokenOut: SymbiosisToken | null;
+            tokenAmountIn: TokenAmount;
+            tokenOut: Token | null;
             fromAddress: string;
             receiverAddress: string;
             refundAddress: string;
             slippage: number;
             deadline: number;
-        },
-        version?: 'v1' | 'v2'
+        }
     ): Promise<SymbiosisTradeData> {
         if (toBlockchain !== BLOCKCHAIN_NAME.BITCOIN && swapParams.tokenOut) {
             const swappingParams: SwappingParams = [
@@ -390,7 +367,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 true
             ];
 
-            return this.getBestSwappingSwapResult(swappingParams, version);
+            return this.getBestSwappingSwapResult(swappingParams);
         }
 
         const poolId =
@@ -409,7 +386,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         ];
 
         try {
-            return await this.getBestZappingSwapResult(zappingParams, version);
+            return await this.getBestZappingSwapResult(zappingParams);
         } catch (err) {
             if (
                 err.code === ErrorCode.AMOUNT_TOO_LOW ||
@@ -423,73 +400,16 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     }
 
     private async getBestSwappingSwapResult(
-        swappingParams: SwappingParams,
-        version?: 'v1' | 'v2'
+        swappingParams: SwappingParams
     ): Promise<SymbiosisTradeData> {
-        const swappingV1 = this.symbiosisV1.newSwapping();
-        const swappingV2 = this.symbiosisV2.newSwapping();
-
-        if (version) {
-            const swapping = version === 'v1' ? swappingV1 : swappingV2;
-            return {
-                ...(await swapping.exactIn(...swappingParams)),
-                version
-            };
-        }
-
-        const [swapResultV1, swapResultV2] = await Promise.allSettled([
-            swappingV1.exactIn(...swappingParams),
-            swappingV2.exactIn(...swappingParams)
-        ]);
-        return this.chooseBestFulfilledResult(swapResultV1, swapResultV2);
+        const swapping = this.symbiosis.newSwapping();
+        return swapping.exactIn(...swappingParams);
     }
 
     private async getBestZappingSwapResult(
-        zappingParams: ZappingParams,
-        version?: 'v1' | 'v2'
+        zappingParams: ZappingParams
     ): Promise<SymbiosisTradeData> {
-        const zappingV1 = this.symbiosisV1.newZappingRenBTC();
-        const zappingV2 = this.symbiosisV2.newZappingRenBTC();
-
-        if (version) {
-            const zapping = version === 'v1' ? zappingV1 : zappingV2;
-            return {
-                ...(await zapping.exactIn(...zappingParams)),
-                version
-            };
-        }
-
-        const [swapResultV1, swapResultV2] = await Promise.allSettled([
-            zappingV1.exactIn(...zappingParams),
-            zappingV2.exactIn(...zappingParams)
-        ]);
-        return this.chooseBestFulfilledResult(swapResultV1, swapResultV2);
-    }
-
-    private chooseBestFulfilledResult<T extends { tokenAmountOut: TokenAmount }>(
-        result1: PromiseSettledResult<T>,
-        result2: PromiseSettledResult<T>
-    ): (T & { version: 'v1' | 'v2' }) | never {
-        if (result1.status !== 'fulfilled') {
-            if (result2.status !== 'fulfilled') {
-                if (
-                    result1.reason.code === ErrorCode.AMOUNT_TOO_LOW ||
-                    result1.reason.code === ErrorCode.AMOUNT_TOO_HIGH ||
-                    result1.reason.code === ErrorCode.AMOUNT_LESS_THAN_FEE
-                ) {
-                    throw result1.reason;
-                }
-                throw result2.reason;
-            }
-            return { ...result2.value, version: 'v2' };
-        }
-        if (result2.status !== 'fulfilled') {
-            return { ...result1.value, version: 'v1' };
-        }
-        return new BigNumber(result1.value.tokenAmountOut.toFixed()).gt(
-            result2.value.tokenAmountOut.toFixed()
-        )
-            ? { ...result1.value, version: 'v1' }
-            : { ...result2.value, version: 'v2' };
+        const zapping = this.symbiosis.newZappingRenBTC();
+        return zapping.exactIn(...zappingParams);
     }
 }

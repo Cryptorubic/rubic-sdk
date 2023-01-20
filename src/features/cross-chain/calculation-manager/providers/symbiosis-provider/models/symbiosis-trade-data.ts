@@ -7,5 +7,4 @@ export interface SymbiosisTradeData {
     priceImpact: Percent;
     fee: SymbiosisTokenAmount;
     transactionRequest: TransactionRequest;
-    version: 'v1' | 'v2';
 }
