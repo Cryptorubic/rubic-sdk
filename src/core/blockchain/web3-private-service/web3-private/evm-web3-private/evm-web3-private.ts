@@ -48,6 +48,9 @@ export class EvmWeb3Private extends Web3Private {
             return new UserRejectError();
         }
         try {
+            if (err.message.includes('0x6c544f')) {
+                return new InsufficientFundsGasPriceValueError();
+            }
             const errorMessage = JSON.parse(err.message.slice(24)).message;
             if (errorMessage) {
                 return new Error(errorMessage);

@@ -1,6 +1,6 @@
 import { Route } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
-import { SwapRequestError } from 'src/common/errors';
+import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -10,7 +10,6 @@ import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
@@ -52,7 +51,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                         gasData: null,
                         toTokenAmountMin: new BigNumber(0),
                         feeInfo: {},
-                        priceImpact: 0,
+                        priceImpact: from.calculatePriceImpactPercent(to) || 0,
                         onChainSubtype: {
                             from: undefined,
                             to: undefined
@@ -121,7 +120,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public get fromContractAddress(): string {
-        return rubicProxyContractAddress[this.fromBlockchain];
+        // return rubicProxyContractAddress[this.fromBlockchain];
+        return this.providerGateway;
     }
 
     constructor(
@@ -157,7 +157,39 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         try {
-            return await super.swap(options);
+            // return await super.swap(options);
+            await this.checkTradeErrors();
+            if (options.receiverAddress) {
+                throw new RubicSdkError('Receiver address not supported');
+            }
+
+            await this.checkAllowanceAndApprove(options);
+
+            const { onConfirm, gasLimit, gasPrice } = options;
+            let transactionHash: string;
+            const onTransactionHash = (hash: string) => {
+                if (onConfirm) {
+                    onConfirm(hash);
+                }
+                transactionHash = hash;
+            };
+
+            // eslint-disable-next-line no-useless-catch
+            try {
+                const { data, value, to } = await this.getSwapData(options?.receiverAddress);
+
+                await this.web3Private.trySendTransaction(to, {
+                    data,
+                    value,
+                    onTransactionHash,
+                    gas: gasLimit,
+                    gasPrice
+                });
+
+                return transactionHash!;
+            } catch (err) {
+                throw err;
+            }
         } catch (err) {
             if ([400, 500, 503].includes(err.code)) {
                 throw new SwapRequestError();
