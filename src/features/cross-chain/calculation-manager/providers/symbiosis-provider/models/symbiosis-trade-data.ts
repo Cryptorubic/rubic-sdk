@@ -1,10 +1,9 @@
 import { TransactionRequest } from '@ethersproject/abstract-provider';
-import { Percent } from 'symbiosis-js-sdk-v1';
-import { TokenAmount as SymbiosisTokenAmount } from 'symbiosis-js-sdk-v1/dist/entities/fractions/tokenAmount';
+import { Percent, TokenAmount } from 'symbiosis-js-sdk/dist/entities';
 
 export interface SymbiosisTradeData {
-    tokenAmountOut: SymbiosisTokenAmount;
+    tokenAmountOut: TokenAmount;
     priceImpact: Percent;
-    fee: SymbiosisTokenAmount;
+    fee: TokenAmount;
     transactionRequest: TransactionRequest;
 }
