@@ -12,7 +12,6 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { BridgersEvmCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { EvmBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/evm-bridgers-trade/models/evm-bridgers-transaction-data';
 import { getMethodArgumentsAndTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/utils/get-method-arguments-and-transaction-data';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
@@ -46,7 +45,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                         toTokenAmountMin: new BigNumber(0),
                         feeInfo: {},
                         gasData: null,
-                        slippage: 0
+                        slippage: 0,
+                        contractAddress: ''
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({ receiverAddress });
@@ -100,8 +100,11 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly slippage: number;
 
+    private readonly contractAddress: string;
+
     protected get fromContractAddress(): string {
-        return rubicProxyContractAddress[this.from.blockchain];
+        // return rubicProxyContractAddress[this.from.blockchain];
+        return this.contractAddress;
     }
 
     constructor(
@@ -112,6 +115,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             feeInfo: FeeInfo;
             gasData: GasData;
             slippage: number;
+            contractAddress: string;
         },
         providerAddress: string
     ) {
@@ -124,12 +128,56 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = this.from.calculatePriceImpactPercent(this.to);
         this.slippage = crossChainTrade.slippage;
+        this.contractAddress = crossChainTrade.contractAddress;
     }
 
     public async swap(
         options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
     ): Promise<string | never> {
-        return super.swap(options);
+        await this.checkTradeErrors();
+        this.checkReceiverAddress(options.receiverAddress, true);
+
+        await this.checkAllowanceAndApprove(options);
+
+        const { onConfirm, gasLimit, gasPrice } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+
+        // eslint-disable-next-line no-useless-catch
+        try {
+            const fromWithoutFee = getFromWithoutFee(
+                this.from,
+                this.feeInfo.rubicProxy?.platformFee?.percent
+            );
+
+            const { transactionData } =
+                await getMethodArgumentsAndTransactionData<EvmBridgersTransactionData>(
+                    this.from,
+                    fromWithoutFee,
+                    this.to,
+                    this.toTokenAmountMin,
+                    this.walletAddress,
+                    this.providerAddress,
+                    options
+                );
+
+            await this.web3Private.trySendTransaction(transactionData.to, {
+                data: transactionData.data,
+                value: transactionData.value,
+                onTransactionHash,
+                gas: gasLimit,
+                gasPrice
+            });
+
+            return transactionHash!;
+        } catch (err) {
+            throw err;
+        }
     }
 
     public async encode(

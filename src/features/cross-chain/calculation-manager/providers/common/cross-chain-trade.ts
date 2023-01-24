@@ -84,7 +84,8 @@ export abstract class CrossChainTrade {
     }
 
     protected get methodName(): string {
-        return this.from.isNative ? 'routerCallNative' : 'routerCall';
+        // return this.from.isNative ? 'routerCallNative' : 'routerCall';
+        return this.from.isNative ? 'swapEth' : 'swap';
     }
 
     public get networkFee(): BigNumber {
