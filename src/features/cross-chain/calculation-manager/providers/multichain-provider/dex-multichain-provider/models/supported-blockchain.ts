@@ -28,4 +28,4 @@ export const multichainProxyCrossChainSupportedBlockchains = [
 ] as const;
 
 export type MultichainProxyCrossChainSupportedBlockchain =
-    typeof multichainProxyCrossChainSupportedBlockchains[number];
+    (typeof multichainProxyCrossChainSupportedBlockchains)[number];

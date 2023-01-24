@@ -10,7 +10,7 @@ import {
  */
 const tokensSymbols = ['WETH', 'USDT', 'USDC', 'WBTC', 'DAI'] as const;
 
-type TokenSymbol = typeof tokensSymbols[number];
+type TokenSymbol = (typeof tokensSymbols)[number];
 
 const routerTokens: Record<TokenSymbol, string> = {
     WETH: wrappedNativeTokensList[BLOCKCHAIN_NAME.ETHEREUM_POW].address,
