@@ -5,6 +5,7 @@ import { LimitOrder as OneinchOrderData } from '@1inch/limit-order-protocol-util
  */
 export interface LimitOrderApi {
     orderHash: string;
+    signature: string;
     createDateTime: string;
     data: OneinchOrderData;
     orderInvalidReason: null | string;

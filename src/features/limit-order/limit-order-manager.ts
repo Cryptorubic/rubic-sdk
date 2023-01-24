@@ -262,7 +262,7 @@ export class LimitOrderManager {
         };
 
         try {
-            await this.web3Private.sendTransaction(contractAddress, {
+            await this.web3Private.trySendTransaction(contractAddress, {
                 data: callData,
                 onTransactionHash
             });
