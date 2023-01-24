@@ -10,4 +10,5 @@ export const rangoCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.OPTIMISM
 ] as const;
 
-export type RangoCrossChainSupportedBlockchain = typeof rangoCrossChainSupportedBlockchains[number];
+export type RangoCrossChainSupportedBlockchain =
+    (typeof rangoCrossChainSupportedBlockchains)[number];

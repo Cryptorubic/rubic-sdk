@@ -9,7 +9,7 @@ export const bridgersCrossChainSupportedBlockchains = [
 ] as const;
 
 export type BridgersCrossChainSupportedBlockchain =
-    typeof bridgersCrossChainSupportedBlockchains[number];
+    (typeof bridgersCrossChainSupportedBlockchains)[number];
 
 export type BridgersEvmCrossChainSupportedBlockchain = BridgersCrossChainSupportedBlockchain &
     EvmBlockchainName;

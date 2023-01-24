@@ -24,4 +24,4 @@ export const deflationManagerSupportedBlockchains = [
 ] as const;
 
 export type DeflationManagerSupportedBlockchain =
-    typeof deflationManagerSupportedBlockchains[number];
+    (typeof deflationManagerSupportedBlockchains)[number];

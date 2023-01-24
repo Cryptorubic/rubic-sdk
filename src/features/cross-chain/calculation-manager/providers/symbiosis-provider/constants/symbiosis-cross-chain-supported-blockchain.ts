@@ -13,4 +13,4 @@ export const symbiosisCrossChainSupportedBlockchains = [
 ] as const;
 
 export type SymbiosisCrossChainSupportedBlockchain =
-    typeof symbiosisCrossChainSupportedBlockchains[number];
+    (typeof symbiosisCrossChainSupportedBlockchains)[number];

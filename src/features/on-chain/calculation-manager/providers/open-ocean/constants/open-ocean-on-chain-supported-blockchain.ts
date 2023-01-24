@@ -14,4 +14,4 @@ export const openoceanOnChainSupportedBlockchains = [
 ] as const;
 
 export type OpenoceanOnChainSupportedBlockchain =
-    typeof openoceanOnChainSupportedBlockchains[number];
+    (typeof openoceanOnChainSupportedBlockchains)[number];

@@ -10,7 +10,7 @@ import {
  */
 const tokensSymbols = ['WMATIC', 'WETH', 'DAI', 'USDT', 'USDC'] as const;
 
-type TokenSymbol = typeof tokensSymbols[number];
+type TokenSymbol = (typeof tokensSymbols)[number];
 
 const routerTokens: Record<TokenSymbol, string> = {
     WMATIC: wrappedNativeTokensList[BLOCKCHAIN_NAME.POLYGON].address,

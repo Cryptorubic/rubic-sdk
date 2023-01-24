@@ -5,4 +5,4 @@ export const web3PrivateSupportedBlockchain = [
     BLOCKCHAIN_NAME.TRON
 ] as const;
 
-export type Web3PrivateSupportedBlockchain = typeof web3PrivateSupportedBlockchain[number];
+export type Web3PrivateSupportedBlockchain = (typeof web3PrivateSupportedBlockchain)[number];
