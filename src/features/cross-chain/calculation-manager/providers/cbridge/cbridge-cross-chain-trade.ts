@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -158,10 +157,6 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
-        if (options.receiverAddress) {
-            throw new RubicSdkError('Receiver address not supported');
-        }
-
         await this.checkAllowanceAndApprove(options);
 
         const { onConfirm, gasLimit, gasPrice } = options;

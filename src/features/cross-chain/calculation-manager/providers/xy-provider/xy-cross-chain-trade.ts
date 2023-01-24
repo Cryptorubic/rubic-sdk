@@ -146,10 +146,6 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
-        if (options.receiverAddress) {
-            throw new RubicSdkError('Receiver address not supported');
-        }
-
         await this.checkAllowanceAndApprove(options);
 
         const { onConfirm, gasLimit, gasPrice } = options;
@@ -163,7 +159,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
         // eslint-disable-next-line no-useless-catch
         try {
-            const { data, value, to } = await this.getTransactionRequest();
+            const { data, value, to } = await this.getTransactionRequest(options?.receiverAddress);
 
             await this.web3Private.trySendTransaction(to, {
                 data,
