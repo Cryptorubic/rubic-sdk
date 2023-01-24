@@ -11,4 +11,4 @@ export const cbridgeSupportedBlockchains = [
     BLOCKCHAIN_NAME.OPTIMISM
 ] as const;
 
-export type CbridgeCrossChainSupportedBlockchain = typeof cbridgeSupportedBlockchains[number];
+export type CbridgeCrossChainSupportedBlockchain = (typeof cbridgeSupportedBlockchains)[number];

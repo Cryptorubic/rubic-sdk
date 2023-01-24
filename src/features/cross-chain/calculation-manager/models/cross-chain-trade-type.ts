@@ -12,4 +12,4 @@ export const CROSS_CHAIN_TRADE_TYPE = {
 } as const;
 
 export type CrossChainTradeType =
-    typeof CROSS_CHAIN_TRADE_TYPE[keyof typeof CROSS_CHAIN_TRADE_TYPE];
+    (typeof CROSS_CHAIN_TRADE_TYPE)[keyof typeof CROSS_CHAIN_TRADE_TYPE];

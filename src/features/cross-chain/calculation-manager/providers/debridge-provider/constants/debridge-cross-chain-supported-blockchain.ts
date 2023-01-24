@@ -9,4 +9,4 @@ export const deBridgeCrossChainSupportedBlockchains = [
 ] as const;
 
 export type DeBridgeCrossChainSupportedBlockchain =
-    typeof deBridgeCrossChainSupportedBlockchains[number];
+    (typeof deBridgeCrossChainSupportedBlockchains)[number];

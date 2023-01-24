@@ -27,4 +27,4 @@ export const onChainProxySupportedBlockchains = [
     BLOCKCHAIN_NAME.OASIS
 ] as const;
 
-export type OnChainProxySupportedBlockchain = typeof onChainProxySupportedBlockchains[number];
+export type OnChainProxySupportedBlockchain = (typeof onChainProxySupportedBlockchains)[number];
