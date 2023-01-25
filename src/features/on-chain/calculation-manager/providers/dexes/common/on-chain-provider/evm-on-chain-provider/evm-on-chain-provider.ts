@@ -36,13 +36,9 @@ export abstract class EvmOnChainProvider extends OnChainProvider {
     ): Promise<EvmOnChainTrade>;
 
     protected async checkContractState(fromBlockchain: EvmBlockchainName): Promise<void | never> {
-        try {
-            const isPaused = await this.onChainProxyService.isContractPaused(fromBlockchain);
-            if (isPaused) {
-                throw new OnChainIsUnavailableError();
-            }
-        } catch (e) {
-            console.log(e);
+        const isPaused = await this.onChainProxyService.isContractPaused(fromBlockchain);
+        if (isPaused) {
+            throw new OnChainIsUnavailableError();
         }
     }
 

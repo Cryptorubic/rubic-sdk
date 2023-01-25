@@ -48,13 +48,7 @@ export abstract class UniswapV2AbstractProvider<
         to: PriceToken<EvmBlockchainName>,
         options?: OnChainCalculationOptions
     ): Promise<UniswapV2AbstractTrade> {
-        try {
-            return this.calculateDifficultTrade(from, to, from.weiAmount, 'input', options);
-        } catch (e) {
-            console.log(e);
-
-            return this.calculateDifficultTrade(from, to, from.weiAmount, 'input', options);
-        }
+        return this.calculateDifficultTrade(from, to, from.weiAmount, 'input', options);
     }
 
     /**
