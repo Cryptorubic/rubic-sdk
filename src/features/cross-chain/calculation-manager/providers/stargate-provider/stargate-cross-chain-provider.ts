@@ -13,6 +13,8 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { feeLibraryAbi } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/fee-library-abi';
+import { stargateFeeLibraryContractAddress } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-fee-library-contract-address';
 
 import { stargateBlockchainSupportedPools } from './constants/stargate-blockchain-supported-pool';
 import { stargateChainId } from './constants/stargate-chain-id';
@@ -70,6 +72,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
                 return null;
             }
+            await this.checkEqFee(from, toToken);
             this.checkIsSupportedTokens(from, toToken);
 
             const amountOutMin = from.tokenAmount.multipliedBy(1 - options.slippageTolerance);
@@ -173,5 +176,32 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 }
             }
         };
+    }
+
+    private async checkEqFee(
+        fromToken: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>
+    ): Promise<void> {
+        const fromBlockchain = fromToken.blockchain as StargateCrossChainSupportedBlockchain;
+        const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
+        const srcPoolId = stargatePoolId[fromToken.symbol as StargateBridgeToken];
+        const dstPoolId = stargatePoolId[toToken.symbol as StargateBridgeToken];
+        const dstChainId = stargateChainId[toBlockchain as StargateCrossChainSupportedBlockchain];
+        const amountSD = fromToken.stringWeiAmount;
+        const whitelisted = false;
+        const hasEqReward = false;
+
+        const [, protocolSubsidy] = await Injector.web3PublicService
+            .getWeb3Public(fromBlockchain)
+            .callContractMethod<[string, string]>(
+                stargateFeeLibraryContractAddress[fromBlockchain],
+                feeLibraryAbi,
+                'getEquilibriumFee',
+                [srcPoolId, dstPoolId, dstChainId, amountSD, whitelisted, hasEqReward]
+            );
+
+        if (protocolSubsidy === '0') {
+            throw new RubicSdkError('Rebalancing need detected.');
+        }
     }
 }

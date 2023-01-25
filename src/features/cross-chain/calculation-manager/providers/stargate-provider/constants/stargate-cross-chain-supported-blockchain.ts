@@ -7,8 +7,9 @@ export const stargateCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.AVALANCHE,
     BLOCKCHAIN_NAME.FANTOM,
     BLOCKCHAIN_NAME.ARBITRUM,
-    BLOCKCHAIN_NAME.OPTIMISM
+    BLOCKCHAIN_NAME.OPTIMISM,
+    BLOCKCHAIN_NAME.METIS
 ] as const;
 
 export type StargateCrossChainSupportedBlockchain =
-    typeof stargateCrossChainSupportedBlockchains[number];
+    (typeof stargateCrossChainSupportedBlockchains)[number];

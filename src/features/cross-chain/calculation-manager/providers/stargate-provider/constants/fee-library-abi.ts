@@ -1,4 +1,6 @@
-export const feelibraryabi = [
+import { AbiItem } from 'web3-utils';
+
+export const feeLibraryAbi: AbiItem[] = [
     {
         inputs: [
             { internalType: 'address', name: '_factory', type: 'address' },

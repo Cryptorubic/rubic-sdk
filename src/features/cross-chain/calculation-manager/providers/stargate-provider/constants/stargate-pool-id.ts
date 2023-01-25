@@ -10,7 +10,8 @@ export enum StargateBridgeToken {
     ETH = 'ETH',
     sUSD = 'sUSD',
     LUSD = 'LUSD',
-    BUSD = 'BUSD'
+    BUSD = 'BUSD',
+    mUSD = 'm.USDT'
 }
 
 export const stargatePoolId: Record<StargateBridgeToken, number> = {
@@ -23,5 +24,6 @@ export const stargatePoolId: Record<StargateBridgeToken, number> = {
     [StargateBridgeToken.ETH]: 13,
     [StargateBridgeToken.sUSD]: 14,
     [StargateBridgeToken.LUSD]: 15,
-    [StargateBridgeToken.BUSD]: 5
+    [StargateBridgeToken.BUSD]: 5,
+    [StargateBridgeToken.mUSD]: 19
 };

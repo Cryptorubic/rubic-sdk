@@ -52,5 +52,6 @@ export const stargateBlockchainSupportedPools: Record<
         stargatePoolId[StargateBridgeToken.ETH],
         stargatePoolId[StargateBridgeToken.sUSD],
         stargatePoolId[StargateBridgeToken.LUSD]
-    ]
+    ],
+    [BLOCKCHAIN_NAME.METIS]: [stargatePoolId[StargateBridgeToken.mUSD]]
 };
