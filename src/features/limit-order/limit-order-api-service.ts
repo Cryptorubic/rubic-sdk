@@ -1,4 +1,5 @@
 import { LimitOrder as OneinchLimitOrder } from '@1inch/limit-order-protocol-utils';
+import BigNumber from 'bignumber.js';
 import { ethers } from 'ethers';
 import { Token } from 'src/common/tokens';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -56,7 +57,8 @@ export class LimitOrderApiService {
             orderHash,
             createDateTime,
             data: { makerAsset, takerAsset, makingAmount, takingAmount, interactions },
-            orderInvalidReason
+            orderInvalidReason,
+            remainingMakerAmount
         }: LimitOrderApi
     ): Promise<LimitOrder> {
         const [fromToken, toToken] = await Promise.all([
@@ -91,7 +93,13 @@ export class LimitOrderApiService {
             toAmount: Web3Pure.fromWei(takingAmount, toToken?.decimals),
             expiration,
             status:
-                orderInvalidReason === null ? LIMIT_ORDER_STATUS.VALID : LIMIT_ORDER_STATUS.INVALID
+                orderInvalidReason === null ? LIMIT_ORDER_STATUS.VALID : LIMIT_ORDER_STATUS.INVALID,
+            filledPercent: new BigNumber(makingAmount)
+                .minus(remainingMakerAmount)
+                .div(makingAmount)
+                .multipliedBy(100)
+                .dp(2)
+                .toNumber()
         };
     }
 

@@ -7,6 +7,7 @@ export interface LimitOrderApi {
     orderHash: string;
     signature: string;
     createDateTime: string;
+    remainingMakerAmount: string;
     data: OneinchOrderData;
     orderInvalidReason: null | string;
 }
