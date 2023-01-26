@@ -49,14 +49,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         const srcSupportedPools = stargateBlockchainSupportedPools[fromBlockchain];
         const dstSupportedPools = stargateBlockchainSupportedPools[toBlockchain];
 
-        if (
-            !(
-                srcPoolId === dstPoolId &&
-                srcSupportedPools.includes(srcPoolId) &&
-                dstSupportedPools.includes(dstPoolId)
-            )
-        ) {
-            throw new RubicSdkError('Unsupported token pair');
+        if (!srcSupportedPools.includes(srcPoolId) || !dstSupportedPools.includes(dstPoolId)) {
+            throw new RubicSdkError('Unsupported token pair.');
         }
     }
 
@@ -191,17 +185,26 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         const whitelisted = false;
         const hasEqReward = false;
 
-        const [, protocolSubsidy] = await Injector.web3PublicService
-            .getWeb3Public(fromBlockchain)
-            .callContractMethod<[string, string]>(
-                stargateFeeLibraryContractAddress[fromBlockchain],
-                feeLibraryAbi,
-                'getEquilibriumFee',
-                [srcPoolId, dstPoolId, dstChainId, amountSD, whitelisted, hasEqReward]
-            );
+        try {
+            const { 0: fee, 1: protocolSubsidy } = await Injector.web3PublicService
+                .getWeb3Public(fromBlockchain)
+                .callContractMethod<{ 0: string; 1: string }>(
+                    stargateFeeLibraryContractAddress[fromBlockchain],
+                    feeLibraryAbi,
+                    'getEquilibriumFee',
+                    [srcPoolId, dstPoolId, dstChainId, amountSD, whitelisted, hasEqReward]
+                );
 
-        if (protocolSubsidy === '0') {
-            throw new RubicSdkError('Rebalancing need detected.');
+            if (new BigNumber(protocolSubsidy).lt(fee)) {
+                throw new RubicSdkError('Rebalancing need detected.');
+            }
+        } catch (err) {
+            if (err instanceof Error) {
+                if (err.message.includes('Rebalancing need detected.')) {
+                    throw err;
+                }
+                throw new RubicSdkError('Tokens are not supported.');
+            }
         }
     }
 }
