@@ -2,6 +2,7 @@ import { LimitOrder as OneinchLimitOrder } from '@1inch/limit-order-protocol-uti
 import BigNumber from 'bignumber.js';
 import { ethers } from 'ethers';
 import { Token } from 'src/common/tokens';
+import { notNull } from 'src/common/utils/object';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -19,12 +20,16 @@ import { limitOrderSupportedBlockchains } from 'src/features/limit-order/models/
 const baseApi = (chainId: number) => `https://limit-orders.1inch.io/v3.0/${chainId}/limit-order`;
 
 export class LimitOrderApiService {
-    private getApiOrders(chainId: number, userAddress: string): Promise<LimitOrderApiResponse> {
+    private getApiOrders(
+        chainId: number,
+        userAddress: string,
+        statuses = [1, 2]
+    ): Promise<LimitOrderApiResponse> {
         return Injector.httpClient.get<LimitOrderApiResponse>(
             `${baseApi(chainId)}/address/${userAddress}`,
             {
                 params: {
-                    statuses: '[1, 2]',
+                    statuses: JSON.stringify(statuses),
                     sortBy: 'createDateTime'
                 }
             }
@@ -36,11 +41,20 @@ export class LimitOrderApiService {
             await Promise.all(
                 limitOrderSupportedBlockchains.map(async blockchain => {
                     const chainId = blockchainId[blockchain];
-                    const ordersById = await this.getApiOrders(chainId, userAddress);
+                    const ordersById = (
+                        await Promise.all([
+                            this.getApiOrders(chainId, userAddress, [1, 2]),
+                            this.getApiOrders(chainId, userAddress, [3])
+                        ])
+                    ).flat();
                     try {
-                        return await Promise.all(
-                            ordersById.map(orderById => this.parseLimitOrder(blockchain, orderById))
-                        );
+                        return (
+                            await Promise.all(
+                                ordersById.map(orderById =>
+                                    this.parseLimitOrder(blockchain, orderById)
+                                )
+                            )
+                        ).filter(notNull);
                     } catch {
                         return [];
                     }
@@ -60,7 +74,11 @@ export class LimitOrderApiService {
             orderInvalidReason,
             remainingMakerAmount
         }: LimitOrderApi
-    ): Promise<LimitOrder> {
+    ): Promise<LimitOrder | null> {
+        if (orderInvalidReason !== null && remainingMakerAmount === makingAmount) {
+            return null;
+        }
+
         const [fromToken, toToken] = await Promise.all([
             Token.createToken({ address: makerAsset, blockchain }),
             Token.createToken({ address: takerAsset, blockchain })
@@ -84,6 +102,15 @@ export class LimitOrderApiService {
             expiration = new Date(Number(BigInt(timeNonceSeriesAccount) >> 216n) * 1000);
         } catch {}
 
+        let status: LIMIT_ORDER_STATUS;
+        if (orderInvalidReason === null) {
+            status = LIMIT_ORDER_STATUS.VALID;
+        } else if (orderInvalidReason === 'order filled') {
+            status = LIMIT_ORDER_STATUS.FILLED;
+        } else {
+            status = LIMIT_ORDER_STATUS.EXPIRED;
+        }
+
         return {
             hash: orderHash,
             creation: new Date(createDateTime),
@@ -92,8 +119,7 @@ export class LimitOrderApiService {
             fromAmount: Web3Pure.fromWei(makingAmount, fromToken?.decimals),
             toAmount: Web3Pure.fromWei(takingAmount, toToken?.decimals),
             expiration,
-            status:
-                orderInvalidReason === null ? LIMIT_ORDER_STATUS.VALID : LIMIT_ORDER_STATUS.INVALID,
+            status,
             filledPercent: new BigNumber(makingAmount)
                 .minus(remainingMakerAmount)
                 .div(makingAmount)
@@ -105,13 +131,18 @@ export class LimitOrderApiService {
 
     private sortOrders(orders: LimitOrder[]): void {
         orders.sort((orderA, orderB) => {
-            if (orderA.status === orderB.status) {
+            if (
+                (orderA.status === LIMIT_ORDER_STATUS.VALID &&
+                    orderB.status === LIMIT_ORDER_STATUS.VALID) ||
+                (orderA.status !== LIMIT_ORDER_STATUS.VALID &&
+                    orderB.status !== LIMIT_ORDER_STATUS.VALID)
+            ) {
                 return orderB.creation.getTime() - orderA.creation.getTime();
             }
-            if (orderA.status === LIMIT_ORDER_STATUS.INVALID) {
-                return 1;
+            if (orderA.status === LIMIT_ORDER_STATUS.VALID) {
+                return -1;
             }
-            return -1;
+            return 1;
         });
     }
 

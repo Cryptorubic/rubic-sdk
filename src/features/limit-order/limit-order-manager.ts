@@ -248,7 +248,11 @@ export class LimitOrderManager {
         return this.apiService.getUserOrders(userAddress);
     }
 
-    public async cancelOrder(blockchain: EvmBlockchainName, orderHash: string): Promise<string> {
+    public async cancelOrder(
+        blockchain: EvmBlockchainName,
+        orderHash: string,
+        options: SwapTransactionOptions = {}
+    ): Promise<string> {
         this.checkWalletConnected();
         await this.web3Private.checkBlockchainCorrect(blockchain);
 
@@ -259,12 +263,16 @@ export class LimitOrderManager {
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             transactionHash = hash;
+
+            options.onConfirm?.(hash);
         };
 
         try {
             await this.web3Private.trySendTransaction(contractAddress, {
                 data: callData,
-                onTransactionHash
+                onTransactionHash,
+                gas: options.gasLimit,
+                gasPrice: options.gasPrice
             });
             return transactionHash!;
         } catch (err) {
