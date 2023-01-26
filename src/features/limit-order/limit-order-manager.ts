@@ -29,6 +29,7 @@ import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
+import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private/models/web3.error';
 import { TronTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/models/tron-transaction-options';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { Injector } from 'src/core/injector/injector';
@@ -192,11 +193,17 @@ export class LimitOrderManager {
         });
 
         const limitOrderTypedData = limitOrderBuilder.buildLimitOrderTypedData(limitOrder);
-        const limitOrderSignature = await limitOrderBuilder.buildOrderSignature(
-            this.walletAddress,
-            limitOrderTypedData
-        );
         const limitOrderHash = limitOrderBuilder.buildLimitOrderHash(limitOrderTypedData);
+
+        let limitOrderSignature: string;
+        try {
+            limitOrderSignature = await limitOrderBuilder.buildOrderSignature(
+                this.walletAddress,
+                limitOrderTypedData
+            );
+        } catch (err) {
+            throw EvmWeb3Private.parseError(err as Web3Error);
+        }
 
         await this.apiService.createLimitOrder(chainId, {
             orderHash: limitOrderHash,

@@ -72,7 +72,8 @@ export class LimitOrderApiService {
             createDateTime,
             data: { makerAsset, takerAsset, makingAmount, takingAmount, interactions },
             orderInvalidReason,
-            remainingMakerAmount
+            remainingMakerAmount,
+            makerBalance
         }: LimitOrderApi
     ): Promise<LimitOrder | null> {
         if (orderInvalidReason !== null && remainingMakerAmount === makingAmount) {
@@ -118,6 +119,7 @@ export class LimitOrderApiService {
             toToken,
             fromAmount: Web3Pure.fromWei(makingAmount, fromToken?.decimals),
             toAmount: Web3Pure.fromWei(takingAmount, toToken?.decimals),
+            fromBalance: Web3Pure.fromWei(makerBalance, fromToken?.decimals),
             expiration,
             status,
             filledPercent: new BigNumber(makingAmount)

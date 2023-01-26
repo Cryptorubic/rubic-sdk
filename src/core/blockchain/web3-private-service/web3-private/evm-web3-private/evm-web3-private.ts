@@ -28,7 +28,7 @@ export class EvmWeb3Private extends Web3Private {
      * Parses web3 error by its code or message.
      * @param err Web3 error to parse.
      */
-    private static parseError(err: Web3Error): RubicSdkError {
+    public static parseError(err: Web3Error): RubicSdkError {
         if (err.message.includes('Transaction has been reverted by the EVM')) {
             return new TransactionRevertedError();
         }

@@ -8,6 +8,7 @@ export interface LimitOrderApi {
     signature: string;
     createDateTime: string;
     remainingMakerAmount: string;
+    makerBalance: string;
     data: OneinchOrderData;
     orderInvalidReason: null | string;
 }
