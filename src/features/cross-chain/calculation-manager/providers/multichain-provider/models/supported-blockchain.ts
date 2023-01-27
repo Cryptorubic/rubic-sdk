@@ -30,4 +30,4 @@ export const multichainCrossChainSupportedBlockchains = [
 ] as const;
 
 export type MultichainCrossChainSupportedBlockchain =
-    typeof multichainCrossChainSupportedBlockchains[number];
+    (typeof multichainCrossChainSupportedBlockchains)[number];

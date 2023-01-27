@@ -16,4 +16,4 @@ export const xySupportedBlockchains = [
     // BLOCKCHAIN_NAME.KLAYTN
 ] as const;
 
-export type XyCrossChainSupportedBlockchain = typeof xySupportedBlockchains[number];
+export type XyCrossChainSupportedBlockchain = (typeof xySupportedBlockchains)[number];
