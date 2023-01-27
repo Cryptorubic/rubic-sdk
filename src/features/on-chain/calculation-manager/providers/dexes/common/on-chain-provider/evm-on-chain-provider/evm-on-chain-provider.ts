@@ -52,11 +52,7 @@ export abstract class EvmOnChainProvider extends OnChainProvider {
         let fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
         let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
         if (fullOptions.useProxy) {
-            try {
-                await this.checkContractState(from.blockchain);
-            } catch (e) {
-                console.log(e);
-            }
+            await this.checkContractState(from.blockchain);
 
             proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
                 from,

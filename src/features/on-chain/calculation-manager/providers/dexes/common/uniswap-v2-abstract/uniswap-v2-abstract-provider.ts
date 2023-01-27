@@ -99,19 +99,15 @@ export abstract class UniswapV2AbstractProvider<
         let weiAmountWithoutFee = weiAmount;
         let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
         if (fullOptions.useProxy) {
-            try {
-                const proxyContractInfo = await this.handleProxyContract(
-                    new PriceTokenAmount({
-                        ...fromToken.asStruct,
-                        weiAmount
-                    }),
-                    fullOptions
-                );
-                weiAmountWithoutFee = proxyContractInfo.fromWithoutFee.weiAmount;
-                proxyFeeInfo = proxyContractInfo.proxyFeeInfo;
-            } catch (e) {
-                console.log(e);
-            }
+            const proxyContractInfo = await this.handleProxyContract(
+                new PriceTokenAmount({
+                    ...fromToken.asStruct,
+                    weiAmount
+                }),
+                fullOptions
+            );
+            weiAmountWithoutFee = proxyContractInfo.fromWithoutFee.weiAmount;
+            proxyFeeInfo = proxyContractInfo.proxyFeeInfo;
         }
 
         const fromProxy = createTokenNativeAddressProxy(
