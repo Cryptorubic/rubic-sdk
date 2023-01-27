@@ -9,6 +9,7 @@ import { PancakeSwapProvider } from 'src/features/on-chain/calculation-manager/p
 import { SushiSwapBscProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
 import { SushiSwapEthereumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider';
 import { UniSwapV2EthereumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-provider';
+import { VerseProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/verse/verse-provider';
 import { SushiSwapEthereumPowProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum-pow/sushi-swap-ethereum-pow/sushi-swap-ethereum-pow-provider';
 import { UniSwapV2EthereumPowProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum-pow/uni-swap-v2-ethereum-pow/uni-swap-v2-ethereum-pow-provider';
 import { SoulSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/soul-swap/soul-swap-provider';
@@ -41,6 +42,7 @@ export const UniswapV2TradeProviders = [
     // ethereum
     UniSwapV2EthereumProvider,
     SushiSwapEthereumProvider,
+    VerseProvider,
     // bsc
     PancakeSwapProvider,
     SushiSwapBscProvider,
