@@ -312,4 +312,74 @@ export class LimitOrderManager {
         );
         return limitOrderProtocolFacade.cancelLimitOrder(order.data);
     }
+
+    public async fillOrder(
+        takingToken: TokenAmount<EvmBlockchainName>,
+        orderHash: string,
+        options: SwapTransactionOptions = {}
+    ): Promise<string> {
+        this.checkWalletConnected();
+        const blockchain = takingToken.blockchain;
+        await this.web3Private.checkBlockchainCorrect(blockchain);
+
+        const chainId = blockchainId[blockchain] as ChainId;
+        const contractAddress = limirOrderProtocolAdresses[chainId];
+        const callData = await this.getFillCallData(
+            blockchain,
+            orderHash,
+            takingToken.stringWeiAmount
+        );
+
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            transactionHash = hash;
+
+            options.onConfirm?.(hash);
+        };
+
+        try {
+            await this.web3Private.trySendTransaction(contractAddress, {
+                data: callData,
+                onTransactionHash,
+                gas: options.gasLimit,
+                gasPrice: options.gasPrice
+            });
+            return transactionHash!;
+        } catch (err) {
+            if (err instanceof FailedToCheckForTransactionReceiptError) {
+                return transactionHash!;
+            }
+            throw err;
+        }
+    }
+
+    private async getFillCallData(
+        blockchain: BlockchainName,
+        orderHash: string,
+        takingAmountWei: string
+    ): Promise<string> {
+        const order = await this.apiService.getOrderByHash(
+            this.walletAddress,
+            blockchain,
+            orderHash
+        );
+        if (!order) {
+            throw new RubicSdkError(`No order with hash ${orderHash}`);
+        }
+
+        const chainId = blockchainId[blockchain] as ChainId;
+        const connector = new Web3ProviderConnector(this.web3Private.web3);
+        const limitOrderProtocolFacade = new LimitOrderProtocolFacade(
+            limirOrderProtocolAdresses[chainId],
+            chainId,
+            connector
+        );
+        return limitOrderProtocolFacade.fillLimitOrder({
+            order: order.data,
+            signature: order.signature,
+            makingAmount: '0',
+            takingAmount: takingAmountWei,
+            thresholdAmount: '0'
+        });
+    }
 }
