@@ -171,7 +171,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
     private checkMinError(from: PriceTokenAmount): void | never {
         const fromUsdAmount = from.price.multipliedBy(from.tokenAmount);
         if (fromUsdAmount.lt(this.MIN_AMOUNT_USD)) {
-            if (from.price.isFinite()) {
+            if (from.price.isFinite() && fromUsdAmount.isFinite()) {
                 const minTokenAmount = this.MIN_AMOUNT_USD.multipliedBy(from.tokenAmount).dividedBy(
                     fromUsdAmount
                 );
