@@ -12,7 +12,9 @@ import { wlContractAddress } from 'src/features/common/constants/wl-contract-add
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { multichainProxyContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-abi';
@@ -53,11 +55,6 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
         }
 
         try {
-            await this.checkContractState(
-                fromBlockchain,
-                multichainProxyContractAddress[fromBlockchain],
-                multichainProxyContractAbi
-            );
             const sourceTransitToken = await this.getSourceTransitToken(fromBlockchain, toToken);
             if (!sourceTransitToken) {
                 return {
@@ -83,8 +80,8 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             }
             const { targetToken } = tokens;
 
-            await this.checkProviderIsWhitelisted(fromBlockchain, targetToken.router);
-            const whitelistedDexes = await this.getWhitelistedDexes(fromBlockchain);
+            // await this.checkProviderIsWhitelisted(fromBlockchain, targetToken.router);
+            // const whitelistedDexes = await this.getWhitelistedDexes(fromBlockchain);
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
             const fromWithoutFee = getFromWithoutFee(
@@ -107,7 +104,7 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                 onChainTrade = await this.getOnChainTrade(
                     fromWithoutFee,
                     sourceTransitToken,
-                    whitelistedDexes,
+                    [],
                     options.slippageTolerance
                 );
                 if (!onChainTrade) {
@@ -242,15 +239,15 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
     private async getOnChainTrade(
         from: PriceTokenAmount,
         transitToken: MultichainTargetToken,
-        availableDexes: string[],
+        _availableDexes: string[],
         slippageTolerance: number
     ): Promise<EvmOnChainTrade | null> {
         const fromBlockchain = from.blockchain as MultichainProxyCrossChainSupportedBlockchain;
 
         // @TODO Add filter before promise resolving.
-        const dexes = Object.values(typedTradeProviders[fromBlockchain]).filter(
-            dex => dex.supportReceiverAddress
-        );
+        const dexes = Object.values(typedTradeProviders[fromBlockchain])
+            .filter(dex => dex.supportReceiverAddress)
+            .filter(dex => dex.type === 'QUICK_SWAP');
         const to = await PriceToken.createToken({
             address:
                 transitToken.tokenType === 'NATIVE'
@@ -270,11 +267,12 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
         )
             .filter(value => value.status === 'fulfilled')
             .map(value => (value as PromiseFulfilledResult<EvmOnChainTrade>).value)
-            .filter(onChainTrade =>
-                availableDexes.some(availableDex =>
-                    compareAddresses(availableDex, onChainTrade.dexContractAddress)
-                )
-            )
+            // @TODO
+            // .filter(onChainTrade =>
+            //     availableDexes.some(availableDex =>
+            //         compareAddresses(availableDex, onChainTrade.dexContractAddress)
+            //     )
+            // )
             .sort((a, b) => b.to.tokenAmount.comparedTo(a.to.tokenAmount));
 
         if (!onChainTrades.length) {
@@ -288,24 +286,28 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
         providerAddress: string,
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
+        const fixedFeeAmount = await this.getFixedFee(
+            fromBlockchain as EvmBlockchainName,
+            providerAddress,
+            rubicProxyContractAddress[fromBlockchain],
+            evmCommonCrossChainAbi
+        );
+
+        const feePercent = await this.getFeePercent(
+            fromBlockchain as EvmBlockchainName,
+            providerAddress,
+            rubicProxyContractAddress[fromBlockchain],
+            evmCommonCrossChainAbi
+        );
+
         return {
             rubicProxy: {
                 fixedFee: {
-                    amount: await this.getFixedFee(
-                        fromBlockchain,
-                        providerAddress,
-                        multichainProxyContractAddress[fromBlockchain],
-                        multichainProxyContractAbi
-                    ),
+                    amount: fixedFeeAmount,
                     tokenSymbol: nativeTokensList[fromBlockchain].symbol
                 },
                 platformFee: {
-                    percent: await this.getFeePercent(
-                        fromBlockchain,
-                        providerAddress,
-                        multichainProxyContractAddress[fromBlockchain],
-                        multichainProxyContractAbi
-                    ),
+                    percent: feePercent,
                     tokenSymbol: percentFeeToken.symbol
                 }
             }

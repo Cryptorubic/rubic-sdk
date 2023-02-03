@@ -119,6 +119,10 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly onChainTrade: EvmOnChainTrade | null;
 
+    protected get methodName(): string {
+        return '';
+    }
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;

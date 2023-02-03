@@ -115,6 +115,10 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
         return this.routerAddress;
     }
 
+    protected get methodName(): string {
+        return '';
+    }
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;

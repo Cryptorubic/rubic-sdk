@@ -133,6 +133,10 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         return RANGO_CONTRACT_ADDRESSES[this.fromBlockchain].rubicRouter;
     }
 
+    protected get methodName(): string {
+        return '';
+    }
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;

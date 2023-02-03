@@ -151,6 +151,10 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
         return this.fromTrade.contract.address;
     }
 
+    protected get methodName(): string {
+        return '';
+    }
+
     constructor(
         crossChainTrade: {
             fromTrade: CelerContractTrade;

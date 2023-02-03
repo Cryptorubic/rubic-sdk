@@ -107,6 +107,10 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         return this.contractAddress;
     }
 
+    protected get methodName(): string {
+        return '';
+    }
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>;
@@ -132,6 +136,12 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public async swap(
+        options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
+    ): Promise<string | never> {
+        return this.swapDirect(options);
+    }
+
+    private async swapDirect(
         options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
     ): Promise<string | never> {
         await this.checkTradeErrors();

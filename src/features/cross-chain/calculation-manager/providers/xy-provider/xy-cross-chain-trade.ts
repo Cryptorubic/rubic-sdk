@@ -119,6 +119,10 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly slippage: number;
 
+    protected get methodName(): string {
+        return '';
+    }
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
@@ -145,6 +149,10 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        return this.swapDirect(options);
+    }
+
+    public async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 

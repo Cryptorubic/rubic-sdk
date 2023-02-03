@@ -98,7 +98,7 @@ export abstract class CrossChainProvider {
             await web3Public.callContractMethod<string>(
                 contractAddress,
                 contractAbi,
-                'fixedCryptoFee'
+                'fixedNativeFee'
             ),
             nativeToken.decimals
         );

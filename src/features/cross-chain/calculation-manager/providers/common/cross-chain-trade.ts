@@ -83,10 +83,7 @@ export abstract class CrossChainTrade {
         return this.web3Private.address;
     }
 
-    protected get methodName(): string {
-        // return this.from.isNative ? 'routerCallNative' : 'routerCall';
-        return this.from.isNative ? 'swapEth' : 'swap';
-    }
+    protected abstract get methodName(): string;
 
     public get networkFee(): BigNumber {
         return new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || 0).plus(

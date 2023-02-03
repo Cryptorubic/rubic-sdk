@@ -46,6 +46,10 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
         return this.contractAddress;
     }
 
+    protected get methodName(): string {
+        return '';
+    }
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<TronBlockchainName>;
@@ -69,6 +73,12 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
     }
 
     public async swap(
+        options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
+    ): Promise<string | never> {
+        return this.swapDirect(options);
+    }
+
+    private async swapDirect(
         options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
     ): Promise<string | never> {
         await this.checkTradeErrors();

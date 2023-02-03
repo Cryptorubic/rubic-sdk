@@ -124,6 +124,10 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         return this.providerGateway;
     }
 
+    protected get methodName(): string {
+        return '';
+    }
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
@@ -155,7 +159,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         this.bridgeType = crossChainTrade.bridgeType;
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+    protected async directSwap(options: SwapTransactionOptions = {}): Promise<string | never> {
         try {
             // return await super.swap(options);
             await this.checkTradeErrors();
@@ -176,7 +180,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
             // eslint-disable-next-line no-useless-catch
             try {
-                const { data, value, to } = await this.getSwapData(options?.receiverAddress);
+                const { data, value, to } = await this.fetchSwapData(options?.receiverAddress);
 
                 await this.web3Private.trySendTransaction(to, {
                     data,
@@ -198,12 +202,16 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        return this.directSwap(options);
+    }
+
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.getSwapData(options?.receiverAddress);
+        } = await this.fetchSwapData(options?.receiverAddress);
         await this.checkProviderIsWhitelisted(providerRouter, this.providerGateway);
 
         const toChainId = blockchainId[this.to.blockchain];
@@ -239,7 +247,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    private async getSwapData(receiverAddress?: string): Promise<LifiTransactionRequest> {
+    private async fetchSwapData(receiverAddress?: string): Promise<LifiTransactionRequest> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,

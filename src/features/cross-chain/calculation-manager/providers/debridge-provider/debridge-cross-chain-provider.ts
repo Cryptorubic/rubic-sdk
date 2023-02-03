@@ -7,6 +7,7 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+// import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
@@ -54,7 +55,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         try {
             const fromAddress = options.fromAddress || this.getWalletAddress(fromBlockchain);
 
-            // TODO return after cross-chain proxy fix
             // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
             // const fromWithoutFee = getFromWithoutFee(
             //     from,
@@ -99,6 +99,13 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             const cryptoFeeAmount = new BigNumber(tx.value).minus(
                 from.isNative ? from.stringWeiAmount : 0
             );
+            // feeInfo.provider = {
+            //     ...feeInfo?.provider,
+            //     cryptoFee: {
+            //         amount: Web3Pure.fromWei(cryptoFeeAmount),
+            //         tokenSymbol: nativeTokensList[fromBlockchain].symbol
+            //     }
+            // };
 
             const nativeToken = nativeTokensList[fromBlockchain];
             const cryptoFeeToken = await PriceTokenAmount.createFromToken({
@@ -118,6 +125,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         gasData,
                         priceImpact: from.calculatePriceImpactPercent(to) || 0,
                         slippage: options.slippageTolerance,
+                        // feeInfo,
                         feeInfo: {
                             provider: {
                                 cryptoFee: {
@@ -127,7 +135,9 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                             }
                         },
                         transitAmount: Web3Pure.fromWei(transitToken.amount, transitToken.decimals),
-                        cryptoFeeToken
+                        cryptoFeeToken,
+                        // @TODO CCR
+                        onChainTrade: null
                     },
                     options.providerAddress
                 )
