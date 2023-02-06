@@ -12,4 +12,4 @@ export const limitOrderSupportedBlockchains = [
     BLOCKCHAIN_NAME.AURORA
 ] as const;
 
-export type LimitOrderSupportedBlockchain = typeof limitOrderSupportedBlockchains[number];
+export type LimitOrderSupportedBlockchain = (typeof limitOrderSupportedBlockchains)[number];
