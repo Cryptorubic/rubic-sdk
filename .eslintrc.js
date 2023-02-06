@@ -84,7 +84,8 @@ module.exports = {
                 'import/export': 0,
                 '@typescript-eslint/no-shadow': 'off',
                 '@typescript-eslint/return-await': 'off',
-                'prefer-destructuring': 'off'
+                'prefer-destructuring': 'off',
+                'no-bitwise': 'off'
             }
         },
         {
