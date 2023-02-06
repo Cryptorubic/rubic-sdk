@@ -15,7 +15,11 @@ export const userAddress = '0x11738D36B166C4F18028fE2fa28050fdbd91c430';
  */
 export const orderApi: LimitOrderApi = {
     orderHash: '0x87aa138bb4e6d78d6efc01ee8a03d66fd127c50d48163ad2b4fe8c46bd9bde58',
+    signature:
+        '0x2632a07086e9dde0a79882a89644c68ff50f364d4f7d485fefdd55310ff7b38d0001ef98a56cba829939456f2b96b890d9b8a49395232ca5a82b53b0c919e5641c',
     createDateTime: '2023-01-17T15:58:27.930Z',
+    remainingMakerAmount: '1000000',
+    makerBalance: '0',
     data: {
         makerAsset: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
         takerAsset: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
@@ -38,10 +42,12 @@ export const orderApi: LimitOrderApi = {
 export const orderParsed: LimitOrder = {
     hash: '0x87aa138bb4e6d78d6efc01ee8a03d66fd127c50d48163ad2b4fe8c46bd9bde58',
     creation: new Date('2023-01-17T15:58:27.930Z'),
+    expiration: new Date('2656-10-27T03:31:44.000Z'),
     fromToken: TOKENS[BLOCKCHAIN_NAME.POLYGON].USDC,
     toToken: TOKENS[BLOCKCHAIN_NAME.POLYGON].USDT,
     fromAmount: new BigNumber(1),
     toAmount: new BigNumber(10),
-    expiration: new Date('2656-10-27T03:31:44.000Z'),
-    status: LIMIT_ORDER_STATUS.VALID
+    fromBalance: new BigNumber(0),
+    status: LIMIT_ORDER_STATUS.VALID,
+    filledPercent: 0
 };

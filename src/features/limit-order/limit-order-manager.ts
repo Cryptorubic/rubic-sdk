@@ -172,9 +172,7 @@ export class LimitOrderManager {
 
         const chainId = blockchainId[blockchain] as ChainId;
 
-        const connector = new Web3ProviderConnector(
-            Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).web3
-        );
+        const connector = new Web3ProviderConnector(this.web3Private.web3);
         const contractAddress = limirOrderProtocolAdresses[chainId];
 
         const simpleLimitOrderPredicate = await this.getLimitOrderPredicate(

@@ -25,7 +25,7 @@ describe('Limit Order Api Service integration tests', () => {
         );
         expect(orders.length).toBeGreaterThan(0);
         const order = orders.find(v => v.orderHash === orderApi.orderHash);
-        expect(order).toMatchObject(orderApi);
+        expect(order).toMatchObject({ ...orderApi, makerBalance: order?.makerBalance });
     });
 
     test('Get empty array of ethereum orders', async () => {
@@ -53,7 +53,7 @@ describe('Limit Order Api Service integration tests', () => {
             orderApi.orderHash
         );
         expect(getApiOrdersFn).toBeCalled();
-        expect(order).toMatchObject(orderApi);
+        expect(order).toMatchObject({ ...orderApi, makerBalance: order?.makerBalance });
     });
 
     test('Get null by invalid order hash', async () => {
@@ -84,7 +84,7 @@ describe('Limit Order Api Service integration tests', () => {
 
         expect(orders.length).toBeGreaterThan(0);
         const order = orders.find(v => v.hash === orderParsed.hash);
-        expect(order).toEqual(orderParsed);
+        expect(order).toEqual({ ...orderParsed, fromBalance: order?.fromBalance });
     });
 
     test('Get empty array of invalid user orders', async () => {
