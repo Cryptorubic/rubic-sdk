@@ -65,6 +65,7 @@
     "publish:alpha": "yarn publish --access public --tag alpha"
   },
   "dependencies": {
+    "@layerzerolabs/scan-client": "^0.0.0-beta.6",
     "@lifi/sdk": "^1.6.3",
     "@viaprotocol/router-sdk": "^1.0.7",
     "assert": "^2.0.0",

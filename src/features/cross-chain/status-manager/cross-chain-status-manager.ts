@@ -1,3 +1,4 @@
+import { createClient } from '@layerzerolabs/scan-client';
 import { Via } from '@viaprotocol/router-sdk';
 import { StatusResponse, TransactionStatus } from 'rango-sdk-basic';
 import { RubicSdkError } from 'src/common/errors';
@@ -46,6 +47,8 @@ import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy
 export class CrossChainStatusManager {
     private readonly httpClient = Injector.httpClient;
 
+    private readonly LayzerZeroScanClient = createClient('mainnet');
+
     private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, GetDstTxDataFn | null> = {
         [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
@@ -56,7 +59,9 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.BRIDGERS]: this.getBridgersDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: this.getMultichainDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE]: this.getCelerBridgeDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE]: this.getCelerBridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getStargateDstSwapStatus
     };
 
     /**
@@ -126,6 +131,40 @@ export class CrossChainStatusManager {
         }
 
         return getDstTxStatusFn.call(this, tradeData);
+    }
+
+    /**
+     * Get Stargate trade dst transaction status and hash.
+     * @param data Trade data.
+     * @returns Cross-chain transaction status and hash.
+     */
+    private async getStargateDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const scanResponse = await this.LayzerZeroScanClient.getMessagesBySrcTxHash(data.srcTxHash);
+        const targetTrade = scanResponse.messages.find(
+            item => item.srcTxHash.toLocaleLowerCase() === data.srcTxHash.toLocaleLowerCase()
+        );
+        const txStatusData: TxStatusData = {
+            status: TxStatus.PENDING,
+            hash: null
+        };
+
+        if (targetTrade?.dstTxHash) {
+            txStatusData.hash = targetTrade.dstTxHash;
+        }
+
+        if (targetTrade?.status === 'DELIVERED') {
+            txStatusData.status = TxStatus.SUCCESS;
+        }
+
+        if (targetTrade?.status === 'INFLIGHT') {
+            txStatusData.status = TxStatus.PENDING;
+        }
+
+        if (targetTrade?.status === 'FAILED') {
+            txStatusData.status = TxStatus.FAIL;
+        }
+
+        return txStatusData;
     }
 
     /**

@@ -8,7 +8,8 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     BRIDGERS: 'bridgers',
     MULTICHAIN: 'multichain',
     XY: 'xy',
-    CELER_BRIDGE: 'celer_bridge'
+    CELER_BRIDGE: 'celer_bridge',
+    STARGATE: 'stargate'
 } as const;
 
 export type CrossChainTradeType =
