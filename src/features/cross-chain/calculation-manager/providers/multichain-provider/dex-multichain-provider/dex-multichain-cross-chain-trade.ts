@@ -7,6 +7,7 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
@@ -179,6 +180,10 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
             fromAddress,
             receiverAddress: this.fromContractAddress
         });
+        const amount = getFromWithoutFee(
+            this.from,
+            this.feeInfo?.rubicProxy?.platformFee?.percent
+        ).stringWeiAmount;
 
         return [
             [
@@ -186,7 +191,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
                 swapData.to,
                 this.from.address,
                 this.onChainTrade!.to.address,
-                this.from.stringWeiAmount,
+                amount,
                 swapData.data,
                 true
             ]

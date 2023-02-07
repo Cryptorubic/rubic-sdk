@@ -133,7 +133,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
             const receiverAddress = options.receiverAddress || fromAddress;
 
-            const tokenAmountIn = new TokenAmount(tokenIn, fromWithoutFee.stringWeiAmount);
+            const tokenAmountIn = new TokenAmount(tokenIn, from.stringWeiAmount);
 
             const tokenOut = isBitcoinSwap
                 ? null

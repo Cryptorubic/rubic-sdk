@@ -1,6 +1,5 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
-import { OnChainIsUnavailableError } from 'src/common/errors/on-chain';
 import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -104,13 +103,6 @@ export class OpenOceanProvider {
         }
     }
 
-    private async checkContractState(fromBlockchain: EvmBlockchainName): Promise<void | never> {
-        const isPaused = await this.onChainProxyService.isContractPaused(fromBlockchain);
-        if (isPaused) {
-            throw new OnChainIsUnavailableError();
-        }
-    }
-
     protected async handleProxyContract(
         from: PriceTokenAmount<EvmBlockchainName>,
         fullOptions: RequiredOnChainCalculationOptions
@@ -121,8 +113,6 @@ export class OpenOceanProvider {
         let fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
         let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
         if (fullOptions.useProxy) {
-            await this.checkContractState(from.blockchain);
-
             proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
                 from,
                 fullOptions.providerAddress

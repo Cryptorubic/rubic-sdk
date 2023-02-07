@@ -1,6 +1,5 @@
 import LIFI, { RouteOptions, RoutesRequest, Step } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
-import { OnChainIsUnavailableError } from 'src/common/errors/on-chain';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { notNull } from 'src/common/utils/object';
 import { combineOptions } from 'src/common/utils/options';
@@ -129,13 +128,6 @@ export class LifiProvider {
         ).filter(notNull);
     }
 
-    private async checkContractState(fromBlockchain: EvmBlockchainName): Promise<void | never> {
-        const isPaused = await this.onChainProxyService.isContractPaused(fromBlockchain);
-        if (isPaused) {
-            throw new OnChainIsUnavailableError();
-        }
-    }
-
     protected async handleProxyContract(
         from: PriceTokenAmount<EvmBlockchainName>,
         fullOptions: RequiredOnChainCalculationOptions
@@ -146,8 +138,6 @@ export class LifiProvider {
         let fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
         let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
         if (fullOptions.useProxy) {
-            await this.checkContractState(from.blockchain);
-
             proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
                 from,
                 fullOptions.providerAddress

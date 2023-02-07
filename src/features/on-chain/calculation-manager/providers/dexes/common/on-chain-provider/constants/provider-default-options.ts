@@ -5,7 +5,7 @@ export const providerDefaultOptions: Omit<
     'gasCalculation' | 'providerAddress'
 > = {
     slippageTolerance: 0.02,
-    useProxy: false,
+    useProxy: true,
     withDeflation: {
         from: { isDeflation: false },
         to: { isDeflation: false }

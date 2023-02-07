@@ -16,12 +16,11 @@ import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
-import {
-    onChainProxyContractAbi,
-    onChainProxyContractAddress
-} from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import {
@@ -68,7 +67,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
     private get contractAddress(): string {
         return this.useProxy
-            ? onChainProxyContractAddress[this.from.blockchain]
+            ? rubicProxyContractAddress[this.from.blockchain]
             : this.dexContractAddress;
     }
 
@@ -177,7 +176,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 fromAddress,
                 receiverAddress
             });
-            await this.web3Private.trySendTransaction(transactionConfig.to, {
+            await this.web3Private.sendTransaction(transactionConfig.to, {
                 onTransactionHash,
                 data: transactionConfig.data,
                 value: transactionConfig.value,
@@ -226,28 +225,18 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     private async getProxyContractParams(
         options: EncodeTransactionOptions
     ): Promise<ContractParams> {
-        const methodName = this.from.isNative ? 'instantTradeNative' : 'instantTrade';
-
-        const directTransactionConfig = await this.encodeDirect({
-            ...options,
-            fromAddress: this.contractAddress,
-            supportFee: false
-        });
-
-        await this.checkProviderIsWhitelisted(directTransactionConfig.to);
+        // @TODO CCR
+        // await this.checkProviderIsWhitelisted(directTransactionConfig.to);
+        const swapData = await this.getSwapData(options);
 
         const receiverAddress = options.receiverAddress || options.fromAddress;
         const methodArguments = [
-            [
-                this.from.address,
-                this.from.stringWeiAmount,
-                this.to.address,
-                this.toTokenAmountMin.stringWeiAmount,
-                receiverAddress,
-                this.providerAddress,
-                directTransactionConfig.to
-            ],
-            directTransactionConfig.data
+            EvmWeb3Pure.randomHex(32),
+            this.providerAddress,
+            EvmWeb3Pure.randomHex(20),
+            receiverAddress,
+            this.toTokenAmountMin.stringWeiAmount,
+            swapData
         ];
 
         const value = new BigNumber(this.proxyFeeInfo?.fixedFeeToken.stringWeiAmount || 0)
@@ -256,8 +245,8 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
         return {
             contractAddress: this.contractAddress,
-            contractAbi: onChainProxyContractAbi,
-            methodName,
+            contractAbi: evmCommonCrossChainAbi,
+            methodName: 'swapTokensGeneric',
             methodArguments,
             value
         };
@@ -286,5 +275,25 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             gas: options.gasLimit || calculatedGasFee.gasLimit,
             gasPrice: options.gasPrice || calculatedGasFee.gasPrice
         };
+    }
+
+    protected async getSwapData(options: GetContractParamsOptions): Promise<unknown[]> {
+        const directTransactionConfig = await this.encodeDirect({
+            ...options,
+            fromAddress: this.contractAddress,
+            supportFee: false
+        });
+
+        return [
+            [
+                directTransactionConfig.to,
+                directTransactionConfig.to,
+                this.from.address,
+                this.to.address,
+                this.from.stringWeiAmount,
+                directTransactionConfig.data,
+                true
+            ]
+        ];
     }
 }

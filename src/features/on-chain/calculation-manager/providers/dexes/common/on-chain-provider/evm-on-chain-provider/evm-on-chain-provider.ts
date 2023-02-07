@@ -1,4 +1,3 @@
-import { OnChainIsUnavailableError } from 'src/common/errors/on-chain';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
@@ -35,13 +34,6 @@ export abstract class EvmOnChainProvider extends OnChainProvider {
         options?: OnChainCalculationOptions
     ): Promise<EvmOnChainTrade>;
 
-    protected async checkContractState(fromBlockchain: EvmBlockchainName): Promise<void | never> {
-        const isPaused = await this.onChainProxyService.isContractPaused(fromBlockchain);
-        if (isPaused) {
-            throw new OnChainIsUnavailableError();
-        }
-    }
-
     protected async handleProxyContract(
         from: PriceTokenAmount<EvmBlockchainName>,
         fullOptions: RequiredOnChainCalculationOptions
@@ -52,8 +44,6 @@ export abstract class EvmOnChainProvider extends OnChainProvider {
         let fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
         let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
         if (fullOptions.useProxy) {
-            await this.checkContractState(from.blockchain);
-
             proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
                 from,
                 fullOptions.providerAddress
