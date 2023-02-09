@@ -154,7 +154,7 @@ export class LimitOrderManager {
         fromAmount: BigNumber | string | number,
         toAmount: BigNumber | string | number,
         options: LimitOrderManagerOptions
-    ): Promise<void> {
+    ): Promise<string> {
         const { fromTokenAmount, toTokenAmount } = await getParsedTokenAmounts(
             fromToken,
             toToken,
@@ -208,6 +208,7 @@ export class LimitOrderManager {
             signature: limitOrderSignature,
             data: limitOrder
         });
+        return limitOrderHash;
     }
 
     private async getLimitOrderPredicate(
