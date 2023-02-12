@@ -188,10 +188,16 @@ export class CoingeckoApi {
      * Gets price of common token or native coin in usd from coingecko.
      * @param token Token to get price for.
      */
-    public getTokenPrice(token: {
+    public async getTokenPrice(token: {
         address: string;
         blockchain: BlockchainName;
     }): Promise<BigNumber> {
+        if (!CoingeckoApi.isSupportedBlockchain(token.blockchain)) {
+            throw new RubicSdkError(
+                `Blockchain ${token.blockchain} is not supported by coingecko-api`
+            );
+        }
+
         const chainType = BlockchainsInfo.getChainType(token.blockchain);
         if (Web3Pure[chainType].isNativeAddress(token.address)) {
             return this.getNativeCoinPrice(token.blockchain);

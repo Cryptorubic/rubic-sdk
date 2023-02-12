@@ -3,8 +3,10 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
+import { EMPTY_ADDRESS } from 'src/core/blockchain/web3-pure/constants/empty-address';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 
@@ -113,9 +115,16 @@ export class Token<T extends BlockchainName = BlockchainName> {
     public readonly decimals: number;
 
     public get isNative(): boolean {
-        return Web3Pure[BlockchainsInfo.getChainType(this.blockchain)].isNativeAddress(
-            this.address
-        );
+        let chainType: CHAIN_TYPE | undefined;
+        try {
+            chainType = BlockchainsInfo.getChainType(this.blockchain);
+        } catch {}
+        if (chainType && Web3Pure[chainType].isNativeAddress(this.address)) {
+            return Web3Pure[BlockchainsInfo.getChainType(this.blockchain)].isNativeAddress(
+                this.address
+            );
+        }
+        return this.address === EMPTY_ADDRESS;
     }
 
     constructor(tokenStruct: TokenStruct<T>) {
