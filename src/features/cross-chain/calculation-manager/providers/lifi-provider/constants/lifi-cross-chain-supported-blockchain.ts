@@ -17,4 +17,4 @@ export const lifiCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.CELO
 ] as const;
 
-export type LifiCrossChainSupportedBlockchain = typeof lifiCrossChainSupportedBlockchains[number];
+export type LifiCrossChainSupportedBlockchain = (typeof lifiCrossChainSupportedBlockchains)[number];

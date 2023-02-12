@@ -13,7 +13,7 @@ export const web3PublicSupportedBlockchains = [
     BLOCKCHAIN_NAME.TRON
 ] as const;
 
-export type Web3PublicSupportedBlockchain = typeof web3PublicSupportedBlockchains[number];
+export type Web3PublicSupportedBlockchain = (typeof web3PublicSupportedBlockchains)[number];
 
 export type Web3PublicStorage = Record<Web3PublicSupportedBlockchain, Web3Public> &
     Record<EvmBlockchainName, EvmWeb3Public> &

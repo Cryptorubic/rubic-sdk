@@ -10,4 +10,5 @@ export const celerCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.AURORA
 ] as const;
 
-export type CelerCrossChainSupportedBlockchain = typeof celerCrossChainSupportedBlockchains[number];
+export type CelerCrossChainSupportedBlockchain =
+    (typeof celerCrossChainSupportedBlockchains)[number];

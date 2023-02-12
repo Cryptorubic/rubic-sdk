@@ -51,11 +51,6 @@ export interface CrossChainTradeData {
     celerTransactionId?: string;
 
     /**
-     * Version of symbiosis sdk, used to make swap.
-     */
-    symbiosisVersion?: 'v1' | 'v2';
-
-    /**
      * Changenow trade id.
      */
     changenowId?: string;

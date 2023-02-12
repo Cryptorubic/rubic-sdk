@@ -5,4 +5,4 @@ export const multichainMethodNames = [
     'Swapout'
 ] as const;
 
-export type MultichainMethodName = typeof multichainMethodNames[number];
+export type MultichainMethodName = (typeof multichainMethodNames)[number];

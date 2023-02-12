@@ -19,4 +19,4 @@ export const viaCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.BOBA
 ] as const;
 
-export type ViaCrossChainSupportedBlockchain = typeof viaCrossChainSupportedBlockchains[number];
+export type ViaCrossChainSupportedBlockchain = (typeof viaCrossChainSupportedBlockchains)[number];
