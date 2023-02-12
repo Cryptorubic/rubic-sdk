@@ -4,6 +4,6 @@ import { UniswapV3AlgebraProviderConfiguration } from 'src/features/on-chain/cal
 
 export const UNI_SWAP_V3_ETHEREUM_POW_PROVIDER_CONFIGURATION: UniswapV3AlgebraProviderConfiguration =
     {
-        wethAddress: wrappedNativeTokensList[BLOCKCHAIN_NAME.ETHEREUM_POW].address,
+        wethAddress: wrappedNativeTokensList[BLOCKCHAIN_NAME.ETHEREUM_POW]!.address,
         maxTransitTokens: 1
     };

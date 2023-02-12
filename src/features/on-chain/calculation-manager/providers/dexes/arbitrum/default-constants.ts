@@ -3,7 +3,7 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultArbitrumRoutingProvidersAddresses = [
-    wrappedNativeTokensList[BLOCKCHAIN_NAME.ARBITRUM].address, // WETH
+    wrappedNativeTokensList[BLOCKCHAIN_NAME.ARBITRUM]!.address, // WETH
     '0xfea7a6a0b346362bf88a9e4a88416b77a57d6c2a', // MIM
     '0x6c2c06790b3e3e3c38e12ee22f8183b37a13ee55', // DPX
     '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8', // USDC
@@ -11,7 +11,7 @@ const defaultArbitrumRoutingProvidersAddresses = [
     '0x539bde0d7dbd336b79148aa742883198bbf60342' // MAGIC
 ];
 
-const defaultArbitrumWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.ARBITRUM].address;
+const defaultArbitrumWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.ARBITRUM]!.address;
 
 export const defaultArbitrumProviderConfiguration: UniswapV2ProviderConfiguration = {
     maxTransitTokens: 1,

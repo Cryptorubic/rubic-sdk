@@ -3,10 +3,10 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultDFKRoutingProvidersAddresses = [
-    wrappedNativeTokensList[BLOCKCHAIN_NAME.DFK].address // WJEWEL
+    wrappedNativeTokensList[BLOCKCHAIN_NAME.DFK]!.address // WJEWEL
 ];
 
-const defaultDFKWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.DFK].address;
+const defaultDFKWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.DFK]!.address;
 
 export const defaultDFKProviderConfiguration: UniswapV2ProviderConfiguration = {
     maxTransitTokens: 2,

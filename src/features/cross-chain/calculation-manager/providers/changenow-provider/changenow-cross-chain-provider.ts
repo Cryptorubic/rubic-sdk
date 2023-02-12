@@ -2,9 +2,14 @@ import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { nativeTokensList, PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { changenowApiKey } from 'src/features/common/providers/changenow/constants/changenow-api-key';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
@@ -137,7 +142,11 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         const getCurrency = (
             token: Token<ChangenowCrossChainSupportedBlockchain>
         ): ChangenowCurrency | undefined => {
-            const apiBlockchain = changenowApiBlockchain[token.blockchain];
+            const apiBlockchain =
+                token.blockchain === BLOCKCHAIN_NAME.AVALANCHE &&
+                EvmWeb3Pure.isNativeAddress(token.address)
+                    ? 'cchain'
+                    : changenowApiBlockchain[token.blockchain];
             return currencies.find(
                 currency =>
                     currency.network === apiBlockchain &&

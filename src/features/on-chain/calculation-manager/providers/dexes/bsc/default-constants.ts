@@ -3,7 +3,7 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultBscRoutingProvidersAddresses = [
-    wrappedNativeTokensList[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN].address, // WBNB
+    wrappedNativeTokensList[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]!.address, // WBNB
     '0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82', // CAKE
     '0xe9e7cea3dedca5984780bafc599bd69add087d56', // BUSD
     '0x55d398326f99059fF775485246999027B3197955', // USDT
@@ -13,7 +13,7 @@ const defaultBscRoutingProvidersAddresses = [
     '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d' // USDC
 ];
 
-const defaultBscWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN].address;
+const defaultBscWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]!.address;
 
 export const defaultBscProviderConfiguration: UniswapV2ProviderConfiguration = {
     maxTransitTokens: 3,

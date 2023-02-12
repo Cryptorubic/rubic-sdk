@@ -1,11 +1,12 @@
 import {
     BLOCKCHAIN_NAME,
+    BlockchainName,
     EVM_BLOCKCHAIN_NAME,
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 
-export const chainTypeByBlockchain = {
+export const chainTypeByBlockchain: Partial<Record<BlockchainName, CHAIN_TYPE>> = {
     ...Object.values(EVM_BLOCKCHAIN_NAME).reduce(
         (acc, evmBlockchainName) => ({
             ...acc,
@@ -15,7 +16,5 @@ export const chainTypeByBlockchain = {
     ),
     [BLOCKCHAIN_NAME.BITCOIN]: CHAIN_TYPE.BITCOIN,
     [BLOCKCHAIN_NAME.TRON]: CHAIN_TYPE.TRON,
-    [BLOCKCHAIN_NAME.ICP]: CHAIN_TYPE.ICP,
-    [BLOCKCHAIN_NAME.SOLANA]: undefined,
-    [BLOCKCHAIN_NAME.NEAR]: undefined
+    [BLOCKCHAIN_NAME.ICP]: CHAIN_TYPE.ICP
 };

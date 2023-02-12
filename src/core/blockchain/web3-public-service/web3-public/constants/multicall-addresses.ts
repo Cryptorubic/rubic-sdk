@@ -1,7 +1,14 @@
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
-import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
+import {
+    Web3PublicSupportedBlockchain,
+    web3PublicSupportedBlockchains
+} from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 
 export const MULTICALL_ADDRESSES: Record<Web3PublicSupportedBlockchain, string> = {
+    ...Object.values(web3PublicSupportedBlockchains).reduce(
+        (acc, blockchain) => ({ ...acc, [blockchain]: '' }),
+        {} as Record<Web3PublicSupportedBlockchain, string>
+    ),
     [BLOCKCHAIN_NAME.ETHEREUM]: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: '0x15dc8b5ed578AA7a019dd0139B330cfD625cA795',
     [BLOCKCHAIN_NAME.POLYGON]: '0x176730799C812d70C6608F51aEa6C7e5cdA7eA50',
@@ -20,8 +27,6 @@ export const MULTICALL_ADDRESSES: Record<Web3PublicSupportedBlockchain, string> 
     [BLOCKCHAIN_NAME.MOONBEAM]: '0x6477204E12A7236b9619385ea453F370aD897bb2',
     [BLOCKCHAIN_NAME.CELO]: '0x9aac9048fC8139667D6a2597B902865bfdc225d3',
     [BLOCKCHAIN_NAME.BOBA]: '0x96a5Eac3fa7BB87c61881Dc093884C06719Bcd1E',
-    [BLOCKCHAIN_NAME.BOBA_BSC]: '', // unknown
-    [BLOCKCHAIN_NAME.BOBA_AVALANCHE]: '', // unknown
     [BLOCKCHAIN_NAME.ASTAR]: '0xcA11bde05977b3631167028862bE2a173976CA11',
     [BLOCKCHAIN_NAME.ETHEREUM_POW]: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
     [BLOCKCHAIN_NAME.KAVA]: '0x45be772faE4a9F31401dfF4738E5DC7DD439aC0b',

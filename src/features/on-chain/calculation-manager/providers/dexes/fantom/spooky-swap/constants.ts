@@ -6,7 +6,7 @@ import { defaultFantomProviderConfiguration } from 'src/features/on-chain/calcul
 export const SPOOKY_SWAP_CONTRACT_ADDRESS = '0xF491e7B69E4244ad4002BC14e878a34207E38c29';
 
 const routingProvidersAddresses = [
-    wrappedNativeTokensList[BLOCKCHAIN_NAME.FANTOM].address, // wFTM
+    wrappedNativeTokensList[BLOCKCHAIN_NAME.FANTOM]!.address, // wFTM
     '0x8d11ec38a3eb5e956b052f67da8bdc9bef8abf3e', // DAI
     '0x04068da6c83afcfa0e13ba15a6696662335d5b75', // USDC
     '0x049d68029688eAbF473097a2fC38ef61633A3C7A', // fUSDT
