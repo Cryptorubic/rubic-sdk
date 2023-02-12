@@ -2,20 +2,18 @@ import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { nativeTokensList, PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { Injector } from 'src/core/injector/injector';
 import { changenowApiKey } from 'src/features/common/providers/changenow/constants/changenow-api-key';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { ChangenowCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/changenow-cross-chain-trade';
-import { changenowApiBlockchain } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
 import {
-    ChangenowCrossChainFromSupportedBlockchain,
-    changenowCrossChainFromSupportedBlockchains,
-    ChangenowCrossChainSupportedBlockchain,
-    ChangenowCrossChainToSupportedBlockchain,
-    changenowCrossChainToSupportedBlockchains
-} from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-cross-chain-supported-blockchain';
+    changenowApiBlockchain,
+    ChangenowCrossChainSupportedBlockchain
+} from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
 import {
     ChangenowCurrenciesResponse,
     ChangenowCurrency
@@ -37,27 +35,16 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
     public isSupportedBlockchain(
         blockchain: BlockchainName
     ): blockchain is ChangenowCrossChainSupportedBlockchain {
-        return (
-            changenowCrossChainFromSupportedBlockchains.some(
-                supportedBlockchain => supportedBlockchain === blockchain
-            ) ||
-            changenowCrossChainToSupportedBlockchains.some(
-                supportedBlockchain => supportedBlockchain === blockchain
-            )
-        );
+        return Object.keys(changenowApiBlockchain).includes(blockchain);
     }
 
-    public override areSupportedBlockchains(
+    public areSupportedBlockchains(
         fromBlockchain: BlockchainName,
         toBlockchain: BlockchainName
     ): boolean {
         return (
-            changenowCrossChainFromSupportedBlockchains.some(
-                supportedBlockchain => supportedBlockchain === fromBlockchain
-            ) &&
-            changenowCrossChainToSupportedBlockchains.some(
-                supportedBlockchain => supportedBlockchain === toBlockchain
-            )
+            BlockchainsInfo.isEvmBlockchainName(fromBlockchain) &&
+            this.isSupportedBlockchain(toBlockchain)
         );
     }
 
@@ -66,8 +53,8 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         toToken: PriceToken,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
-        const fromBlockchain = from.blockchain as ChangenowCrossChainFromSupportedBlockchain;
-        const toBlockchain = toToken.blockchain as ChangenowCrossChainToSupportedBlockchain;
+        const fromBlockchain = from.blockchain;
+        const toBlockchain = toToken.blockchain;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return null;
         }
@@ -80,7 +67,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             return null;
         }
 
-        // todo return
+        // todo return after proxy fix
         /*
         await this.checkContractState(
             fromBlockchain,
@@ -111,9 +98,9 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         const to = new PriceTokenAmount({
             ...toToken.asStruct,
             tokenAmount: toAmount
-        }) as PriceTokenAmount<ChangenowCrossChainToSupportedBlockchain>;
+        }) as PriceTokenAmount<ChangenowCrossChainSupportedBlockchain>;
         const changenowTrade: ChangenowTrade = {
-            from: from as PriceTokenAmount<ChangenowCrossChainFromSupportedBlockchain>,
+            from: from as PriceTokenAmount<EvmBlockchainName>,
             to,
             toTokenAmountMin: to.tokenAmount,
             fromCurrency,
@@ -214,7 +201,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
     }
 
     protected override async getFeeInfo(
-        fromBlockchain: ChangenowCrossChainFromSupportedBlockchain,
+        fromBlockchain: Web3PublicSupportedBlockchain,
         providerAddress: string,
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {

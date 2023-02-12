@@ -1,16 +1,14 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
-import {
-    ChangenowCrossChainFromSupportedBlockchain,
-    ChangenowCrossChainToSupportedBlockchain
-} from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-cross-chain-supported-blockchain';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { ChangenowCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
 import { ChangenowCurrency } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-currencies-api';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 
 export interface ChangenowTrade {
-    from: PriceTokenAmount<ChangenowCrossChainFromSupportedBlockchain>;
-    to: PriceTokenAmount<ChangenowCrossChainToSupportedBlockchain>;
+    from: PriceTokenAmount<EvmBlockchainName>;
+    to: PriceTokenAmount<ChangenowCrossChainSupportedBlockchain>;
     toTokenAmountMin: BigNumber;
 
     fromCurrency: ChangenowCurrency;

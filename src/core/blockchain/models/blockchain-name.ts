@@ -34,10 +34,10 @@ export const EVM_BLOCKCHAIN_NAME = {
     FILECOIN: 'FILECOIN',
     FLARE: 'FLARE',
     IOTEX: 'IOTEX',
-    KLAY: 'KLAY',
     ONTOLOGY: 'ONTOLOGY',
     THETA: 'THETA',
-    XDC: 'XDC'
+    XDC: 'XDC',
+    BITCOIN_CASH: 'BITCOIN_CASH'
 } as const;
 
 export const BLOCKCHAIN_NAME = {
@@ -56,8 +56,8 @@ export const BLOCKCHAIN_NAME = {
     COSMOS: 'COSMOS',
     BAND_PROTOCOL: 'BAND_PROTOCOL',
     BITCOIN_DIAMOND: 'BITCOIN_DIAMOND',
-    BITCOIN_CASH: 'BITCOIN_CASH',
     BSV: 'BSV',
+    BITCOIN_GOLD: 'BITCOIN_GOLD',
     CASPER: 'CASPER',
     DASH: 'DASH',
     DECRED: 'DECRED',
@@ -121,3 +121,4 @@ export type SolanaBlockchainName = typeof BLOCKCHAIN_NAME.SOLANA;
 export type NearBlockchainName = typeof BLOCKCHAIN_NAME.NEAR;
 export type BitcoinBlockchainName = typeof BLOCKCHAIN_NAME.BITCOIN;
 export type TronBlockchainName = typeof BLOCKCHAIN_NAME.TRON;
+export type IcpBlockchainName = typeof BLOCKCHAIN_NAME.ICP;
