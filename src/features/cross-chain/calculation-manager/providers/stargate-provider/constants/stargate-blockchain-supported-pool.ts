@@ -1,57 +1,58 @@
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { stargateBridgeToken } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-bridge-token';
+import { stargatePoolId } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-id';
 
 import { StargateCrossChainSupportedBlockchain } from './stargate-cross-chain-supported-blockchain';
-import { StargateBridgeToken, stargatePoolId } from './stargate-pool-id';
 
 export const stargateBlockchainSupportedPools: Record<
     StargateCrossChainSupportedBlockchain,
     number[]
 > = {
     [BLOCKCHAIN_NAME.ETHEREUM]: [
-        stargatePoolId[StargateBridgeToken.USDC],
-        stargatePoolId[StargateBridgeToken.USDT],
-        stargatePoolId[StargateBridgeToken.DAI],
-        stargatePoolId[StargateBridgeToken.FRAX],
-        stargatePoolId[StargateBridgeToken.USDD],
-        stargatePoolId[StargateBridgeToken.ETH],
-        stargatePoolId[StargateBridgeToken.sUSD],
-        stargatePoolId[StargateBridgeToken.LUSD],
-        stargatePoolId[StargateBridgeToken.MAI]
+        stargatePoolId[stargateBridgeToken.USDC],
+        stargatePoolId[stargateBridgeToken.USDT],
+        stargatePoolId[stargateBridgeToken.DAI],
+        stargatePoolId[stargateBridgeToken.FRAX],
+        stargatePoolId[stargateBridgeToken.USDD],
+        stargatePoolId[stargateBridgeToken.ETH],
+        stargatePoolId[stargateBridgeToken.sUSD],
+        stargatePoolId[stargateBridgeToken.LUSD],
+        stargatePoolId[stargateBridgeToken.MAI]
     ],
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: [
-        stargatePoolId[StargateBridgeToken.USDT],
-        stargatePoolId[StargateBridgeToken.BUSD],
-        stargatePoolId[StargateBridgeToken.USDD],
-        stargatePoolId[StargateBridgeToken.MAI]
+        stargatePoolId[stargateBridgeToken.USDT],
+        stargatePoolId[stargateBridgeToken.BUSD],
+        stargatePoolId[stargateBridgeToken.USDD],
+        stargatePoolId[stargateBridgeToken.MAI]
     ],
     [BLOCKCHAIN_NAME.POLYGON]: [
-        stargatePoolId[StargateBridgeToken.USDC],
-        stargatePoolId[StargateBridgeToken.USDT],
-        stargatePoolId[StargateBridgeToken.DAI],
-        stargatePoolId[StargateBridgeToken.MAI]
+        stargatePoolId[stargateBridgeToken.USDC],
+        stargatePoolId[stargateBridgeToken.USDT],
+        stargatePoolId[stargateBridgeToken.DAI],
+        stargatePoolId[stargateBridgeToken.MAI]
     ],
     [BLOCKCHAIN_NAME.AVALANCHE]: [
-        stargatePoolId[StargateBridgeToken.USDC],
-        stargatePoolId[StargateBridgeToken.USDT],
-        stargatePoolId[StargateBridgeToken.MAI],
-        stargatePoolId[StargateBridgeToken.FRAX]
+        stargatePoolId[stargateBridgeToken.USDC],
+        stargatePoolId[stargateBridgeToken.USDT],
+        stargatePoolId[stargateBridgeToken.MAI],
+        stargatePoolId[stargateBridgeToken.FRAX]
     ],
-    [BLOCKCHAIN_NAME.FANTOM]: [stargatePoolId[StargateBridgeToken.USDC]],
+    [BLOCKCHAIN_NAME.FANTOM]: [stargatePoolId[stargateBridgeToken.USDC]],
     [BLOCKCHAIN_NAME.ARBITRUM]: [
-        stargatePoolId[StargateBridgeToken.USDC],
-        stargatePoolId[StargateBridgeToken.USDT],
-        stargatePoolId[StargateBridgeToken.MAI],
-        stargatePoolId[StargateBridgeToken.FRAX],
-        stargatePoolId[StargateBridgeToken.ETH]
+        stargatePoolId[stargateBridgeToken.USDC],
+        stargatePoolId[stargateBridgeToken.USDT],
+        stargatePoolId[stargateBridgeToken.MAI],
+        stargatePoolId[stargateBridgeToken.FRAX],
+        stargatePoolId[stargateBridgeToken.ETH]
     ],
     [BLOCKCHAIN_NAME.OPTIMISM]: [
-        stargatePoolId[StargateBridgeToken.USDC],
-        stargatePoolId[StargateBridgeToken.DAI],
-        stargatePoolId[StargateBridgeToken.MAI],
-        stargatePoolId[StargateBridgeToken.FRAX],
-        stargatePoolId[StargateBridgeToken.ETH],
-        stargatePoolId[StargateBridgeToken.sUSD],
-        stargatePoolId[StargateBridgeToken.LUSD]
+        stargatePoolId[stargateBridgeToken.USDC],
+        stargatePoolId[stargateBridgeToken.DAI],
+        stargatePoolId[stargateBridgeToken.MAI],
+        stargatePoolId[stargateBridgeToken.FRAX],
+        stargatePoolId[stargateBridgeToken.ETH],
+        stargatePoolId[stargateBridgeToken.sUSD],
+        stargatePoolId[stargateBridgeToken.LUSD]
     ],
-    [BLOCKCHAIN_NAME.METIS]: [stargatePoolId[StargateBridgeToken.mUSD]]
+    [BLOCKCHAIN_NAME.METIS]: [stargatePoolId[stargateBridgeToken.mUSD]]
 };

@@ -127,7 +127,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly slippage: number;
 
-    private onChainTrade: EvmOnChainTrade | null;
+    private readonly onChainTrade: EvmOnChainTrade | null;
 
     private readonly getTransactionRequest: (
         fromAddress: string,
@@ -296,7 +296,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                 ? EvmWeb3Pure.EMPTY_ADDRESS
                 : options?.receiverAddress || this.walletAddress;
         const toChainId = blockchainId[this.to.blockchain];
-        const fromToken = this.onChainTrade ? this.onChainTrade.to : this.from;
+        const fromToken = this.onChainTrade ? this.onChainTrade.toTokenAmountMin : this.from;
         const hasSwapBeforeBridge = this.onChainTrade !== null;
 
         return [

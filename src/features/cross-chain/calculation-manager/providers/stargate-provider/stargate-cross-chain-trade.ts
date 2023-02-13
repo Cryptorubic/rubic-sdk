@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { BytesLike } from 'ethers';
 import { nativeTokensList, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
@@ -11,13 +12,20 @@ import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
+import { StargateBridgeToken } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-bridge-token';
+import { stargatePoolId } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-id';
+import { stargatePoolsDecimals } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pools-decimals';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 
 import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { stargateChainId } from './constants/stargate-chain-id';
@@ -26,11 +34,16 @@ import {
     stargateEthContractAddress
 } from './constants/stargate-contract-address';
 import { StargateCrossChainSupportedBlockchain } from './constants/stargate-cross-chain-supported-blockchain';
-import { StargateBridgeToken, stargatePoolId } from './constants/stargate-pool-id';
 import { stargateRouterAbi } from './constants/stargate-router-abi';
 import { stargateRouterEthAbi } from './constants/stargate-router-eth-abi';
 
 export class StargateCrossChainTrade extends EvmCrossChainTrade {
+    protected get methodName(): string {
+        return this.onChainTrade
+            ? 'swapAndStartBridgeTokensViaStargate'
+            : 'startBridgeTokensViaStargate';
+    }
+
     /**  @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -58,10 +71,11 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                             gasLimit: new BigNumber(0),
                             gasPrice: new BigNumber(0)
                         },
-                        feeInfo: {}
+                        feeInfo: {},
+                        onChainTrade: null
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
-                ).getContractParams();
+                ).getContractParams({});
 
             const [gasLimit, gasPrice] = await Promise.all([
                 web3Public.getEstimatedGas(
@@ -120,9 +134,10 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        // return rubicProxyContractAddress[this.fromBlockchain];
-        return stargateContractAddress[this.fromBlockchain];
+        return rubicProxyContractAddress[this.fromBlockchain];
     }
+
+    private readonly onChainTrade: EvmOnChainTrade | null;
 
     constructor(
         crossChainTrade: {
@@ -133,6 +148,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             priceImpact: number | null;
             gasData: GasData | null;
             feeInfo: FeeInfo;
+            onChainTrade: EvmOnChainTrade | null;
         },
         providerAddress: string
     ) {
@@ -144,9 +160,10 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         this.priceImpact = crossChainTrade.priceImpact;
         this.gasData = crossChainTrade.gasData;
         this.feeInfo = crossChainTrade.feeInfo;
+        this.onChainTrade = crossChainTrade.onChainTrade;
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+    private async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         this.checkWalletConnected();
         checkUnsupportedReceiverAddress(options?.receiverAddress, this.walletAddress);
         await this.checkTradeErrors();
@@ -215,7 +232,10 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                   stargatePoolId[to.symbol as StargateBridgeToken],
                   walletAddress,
                   from.stringWeiAmount,
-                  Web3Pure.toWei(amountOutMin, from.decimals),
+                  Web3Pure.toWei(
+                      amountOutMin,
+                      stargatePoolsDecimals[to.symbol as StargateBridgeToken]
+                  ),
                   ['0', '0', walletAddress],
                   walletAddress,
                   '0x'
@@ -230,59 +250,26 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         );
     }
 
-    public async getContractParams(): Promise<ContractParams> {
+    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const lzTxConfig = await StargateCrossChainTrade.getLayerZeroSwapData(
             this.from,
             this.to,
             this.toTokenAmountMin
         );
 
-        const routerCallParams = [
-            this.from.address,
-            this.from.stringWeiAmount,
-            blockchainId[this.to.blockchain],
-            this.to.address,
-            Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
-            this.walletAddress,
-            this.providerAddress,
-            lzTxConfig.to
-        ];
+        const bridgeData = this.getBridgeData(options);
+        const swapData = this.onChainTrade && (await this.getSwapData(options));
+        const providerData = this.getProviderData(lzTxConfig.data);
 
-        const methodArguments: unknown[] = [
-            `${this.type.toLowerCase()}:${this.bridgeType}`,
-            routerCallParams
-        ];
+        const methodArguments = swapData
+            ? [bridgeData, swapData, providerData]
+            : [bridgeData, providerData];
 
-        if (!this.from.isNative && !this.to.isNative) {
-            methodArguments.push(lzTxConfig.to);
-        }
-        methodArguments.push(lzTxConfig.data);
-
-        const lzFeeWei = Web3Pure.toWei(
-            this.feeInfo.provider?.cryptoFee?.amount!,
+        const lzWeiFee = Web3Pure.toWei(
+            this.feeInfo.provider!.cryptoFee!.amount,
             nativeTokensList[this.from.blockchain].decimals
         );
-        const fixedFeeWei = Web3Pure.toWei(
-            this.feeInfo.rubicProxy?.fixedFee?.amount!,
-            nativeTokensList[this.from.blockchain].decimals
-        );
-        const value = this.from.isNative
-            ? this.from.weiAmount.plus(lzFeeWei).plus(fixedFeeWei).toString()
-            : this.getSwapValue(lzFeeWei);
-
-        console.log({
-            lzFeeWei,
-            RubicfixedFee: Web3Pure.toWei(
-                this.feeInfo.rubicProxy?.fixedFee?.amount!,
-                nativeTokensList[this.from.blockchain].decimals
-            ),
-            value
-        });
-        // const value = this.getSwapValue(
-        //     this.from.isNative
-        //         ? this.from.weiAmount.plus(lzFeeWei).plus(fixedFeeWei).toString()
-        //         : new BigNumber(fixedFeeWei).plus(lzFeeWei).toString()
-        // );
+        const value = this.getSwapValue(lzWeiFee);
 
         return {
             contractAddress: this.fromContractAddress,
@@ -291,6 +278,61 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             methodArguments,
             value
         };
+
+        // const routerCallParams = [
+        //     this.from.address,
+        //     this.from.stringWeiAmount,
+        //     blockchainId[this.to.blockchain],
+        //     this.to.address,
+        //     Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
+        //     this.walletAddress,
+        //     this.providerAddress,
+        //     lzTxConfig.to
+        // ];
+        //
+        // const methodArguments: unknown[] = [
+        //     `${this.type.toLowerCase()}:${this.bridgeType}`,
+        //     routerCallParams
+        // ];
+        //
+        // if (!this.from.isNative && !this.to.isNative) {
+        //     methodArguments.push(lzTxConfig.to);
+        // }
+        // methodArguments.push(lzTxConfig.data);
+        //
+        // const lzFeeWei = Web3Pure.toWei(
+        //     this.feeInfo.provider?.cryptoFee?.amount!,
+        //     nativeTokensList[this.from.blockchain].decimals
+        // );
+        // const fixedFeeWei = Web3Pure.toWei(
+        //     this.feeInfo.rubicProxy?.fixedFee?.amount!,
+        //     nativeTokensList[this.from.blockchain].decimals
+        // );
+        // const value = this.from.isNative
+        //     ? this.from.weiAmount.plus(lzFeeWei).plus(fixedFeeWei).toString()
+        //     : this.getSwapValue(lzFeeWei);
+        //
+        // console.log({
+        //     lzFeeWei,
+        //     RubicfixedFee: Web3Pure.toWei(
+        //         this.feeInfo.rubicProxy?.fixedFee?.amount!,
+        //         nativeTokensList[this.from.blockchain].decimals
+        //     ),
+        //     value
+        // });
+        // const value = this.getSwapValue(
+        //     this.from.isNative
+        //         ? this.from.weiAmount.plus(lzFeeWei).plus(fixedFeeWei).toString()
+        //         : new BigNumber(fixedFeeWei).plus(lzFeeWei).toString()
+        // );
+
+        // return {
+        //     contractAddress: this.fromContractAddress,
+        //     contractAbi: evmCommonCrossChainAbi,
+        //     methodName: this.methodName,
+        //     methodArguments,
+        //     value
+        // };
     }
 
     public getTradeAmountRatio(_fromUsd: BigNumber): BigNumber {
@@ -315,5 +357,59 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         _providerGateway?: string
     ): Promise<void> {
         return undefined;
+    }
+
+    protected getBridgeData(options: GetContractParamsOptions): unknown[] {
+        const receiverAddress = options?.receiverAddress || this.walletAddress;
+        const toChainId = blockchainId[this.to.blockchain];
+        const fromToken = this.onChainTrade ? this.onChainTrade.to : this.from;
+        const hasSwapBeforeBridge = this.onChainTrade !== null;
+
+        return [
+            EvmWeb3Pure.randomHex(32),
+            `native:${this.type.toLowerCase()}`,
+            this.providerAddress,
+            EvmWeb3Pure.randomHex(20),
+            fromToken.address,
+            receiverAddress,
+            fromToken.stringWeiAmount,
+            toChainId,
+            hasSwapBeforeBridge,
+            false
+        ];
+    }
+
+    protected async getSwapData(options: GetContractParamsOptions): Promise<unknown[]> {
+        const fromAddress =
+            options.fromAddress || this.walletAddress || oneinchApiParams.nativeAddress;
+        const swapData = await this.onChainTrade!.encode({
+            fromAddress,
+            receiverAddress: this.fromContractAddress
+        });
+        const transitToken = this.onChainTrade ? this.onChainTrade.to.address : this.from.address;
+
+        return [
+            [
+                swapData.to,
+                swapData.to,
+                this.from.address,
+                transitToken,
+                this.from.stringWeiAmount,
+                swapData.data,
+                true
+            ]
+        ];
+    }
+
+    protected getProviderData(_sourceData: BytesLike): unknown[] {
+        const pool = stargatePoolId[this.to.symbol as StargateBridgeToken];
+        const targetPoolDecimals = stargatePoolsDecimals[this.from.symbol as StargateBridgeToken];
+        const amount = Web3Pure.toWei(this.toTokenAmountMin, targetPoolDecimals);
+        const fee = Web3Pure.toWei(
+            this.feeInfo.provider!.cryptoFee!.amount,
+            nativeTokensList[this.from.blockchain].decimals
+        );
+
+        return [pool, amount, '0', fee, this.walletAddress, this.walletAddress, '0x'];
     }
 }

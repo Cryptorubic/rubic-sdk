@@ -309,7 +309,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                 dexes.map(dex =>
                     dex.calculate(from, to, {
                         slippageTolerance,
-                        gasCalculation: 'disabled'
+                        gasCalculation: 'disabled',
+                        useProxy: false
                     })
                 )
             )

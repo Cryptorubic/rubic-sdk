@@ -281,7 +281,8 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         const directTransactionConfig = await this.encodeDirect({
             ...options,
             fromAddress: this.contractAddress,
-            supportFee: false
+            supportFee: false,
+            receiverAddress: this.contractAddress
         });
 
         return [

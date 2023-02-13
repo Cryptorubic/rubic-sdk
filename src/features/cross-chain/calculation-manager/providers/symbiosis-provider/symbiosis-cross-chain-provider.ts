@@ -128,7 +128,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 fromWithoutFee,
                 transitToken,
                 [],
-                options.slippageTolerance
+                (options.slippageTolerance - 0.005) / 2
             ))!;
 
             const receiverAddress = options.receiverAddress || fromAddress;
@@ -265,6 +265,9 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         slippageTolerance: number
     ): Promise<EvmOnChainTrade | null> {
         const fromBlockchain = from.blockchain as MultichainProxyCrossChainSupportedBlockchain;
+        if (compareAddresses(from.address, transitToken.address)) {
+            return null;
+        }
 
         const dexes = Object.values(typedTradeProviders[fromBlockchain]).filter(
             el => el.type === ON_CHAIN_TRADE_TYPE.QUICK_SWAP
@@ -278,7 +281,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 dexes.map(dex =>
                     dex.calculate(from, to, {
                         slippageTolerance,
-                        gasCalculation: 'disabled'
+                        gasCalculation: 'disabled',
+                        useProxy: false
                     })
                 )
             )
@@ -362,7 +366,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         return amount.multipliedBy(1 - approximatePercentDifference);
     }
 
-    protected override async getFeeInfo(
+    protected async getFeeInfo(
         fromBlockchain: SymbiosisCrossChainSupportedBlockchain,
         providerAddress: string,
         percentFeeToken: PriceTokenAmount

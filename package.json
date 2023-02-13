@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "3.17.2qwertyuoppqwertyiopqwertyiopqwertyuiopqwe",
+  "version": "3.17.2qwertyuoppqwertyiopqwertyiopqwertyuiopqwertyuiopqwertyuiopq",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -46,6 +46,11 @@
       "name": "Sleta Dmitry",
       "email": "sleta@rubic.finance",
       "url": "https://github.com/axtezy"
+    },
+    {
+      "name": "Kolebaev Vladislav",
+      "email": "ko1ebayev.worx@gmail.com",
+      "url": "https://github.com/ko1ebayev"
     }
   ],
   "license": "GPL-3.0",
