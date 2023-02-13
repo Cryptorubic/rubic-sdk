@@ -31,7 +31,6 @@ export const EVM_BLOCKCHAIN_NAME = {
     SYSCOIN: 'SYSCOIN',
     EOS: 'EOS',
     ETHEREUM_CLASSIC: 'ETHEREUM_CLASSIC',
-    FILECOIN: 'FILECOIN',
     FLARE: 'FLARE',
     IOTEX: 'IOTEX',
     ONTOLOGY: 'ONTOLOGY',
@@ -111,7 +110,8 @@ export const BLOCKCHAIN_NAME = {
     SYMBOL: 'SYMBOL',
     ZCASH: 'ZCASH',
     HORIZEN: 'HORIZEN',
-    ZILLIQA: 'ZILLIQA'
+    ZILLIQA: 'ZILLIQA',
+    FILECOIN: 'FILECOIN'
 } as const;
 
 export type BlockchainName = (typeof BLOCKCHAIN_NAME)[keyof typeof BLOCKCHAIN_NAME];

@@ -39,7 +39,6 @@ export const blockchainId: Record<BlockchainName, number> = {
     [BLOCKCHAIN_NAME.SYSCOIN]: 57,
     [BLOCKCHAIN_NAME.EOS]: 59,
     [BLOCKCHAIN_NAME.ETHEREUM_CLASSIC]: 61,
-    [BLOCKCHAIN_NAME.FILECOIN]: 314,
     [BLOCKCHAIN_NAME.FLARE]: 14,
     [BLOCKCHAIN_NAME.IOTEX]: 4689,
     [BLOCKCHAIN_NAME.ONTOLOGY]: 58,
@@ -47,5 +46,6 @@ export const blockchainId: Record<BlockchainName, number> = {
     [BLOCKCHAIN_NAME.XDC]: 50,
     [BLOCKCHAIN_NAME.BITCOIN_CASH]: 10000,
     // Non EVN blockchains
-    [BLOCKCHAIN_NAME.BITCOIN]: 5555
+    [BLOCKCHAIN_NAME.BITCOIN]: 5555,
+    [BLOCKCHAIN_NAME.FILECOIN]: 314
 };

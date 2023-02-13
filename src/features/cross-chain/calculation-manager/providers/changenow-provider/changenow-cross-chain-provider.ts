@@ -19,6 +19,7 @@ import {
     changenowApiBlockchain,
     ChangenowCrossChainSupportedBlockchain
 } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
+import { optimismNativeAddress } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/optimism-native-address';
 import {
     ChangenowCurrenciesResponse,
     ChangenowCurrency
@@ -147,10 +148,16 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 EvmWeb3Pure.isNativeAddress(token.address)
                     ? 'cchain'
                     : changenowApiBlockchain[token.blockchain];
+            const isOptimismToken = (currency: ChangenowCurrency) =>
+                token.blockchain === BLOCKCHAIN_NAME.OPTIMISM &&
+                token.address === optimismNativeAddress &&
+                currency.ticker === 'op';
+
             return currencies.find(
                 currency =>
                     currency.network === apiBlockchain &&
-                    ((token.isNative && currency.tokenContract === null) ||
+                    ((currency.tokenContract === null &&
+                        (token.isNative || isOptimismToken(currency))) ||
                         (currency.tokenContract &&
                             compareAddresses(token.address, currency.tokenContract)))
             );

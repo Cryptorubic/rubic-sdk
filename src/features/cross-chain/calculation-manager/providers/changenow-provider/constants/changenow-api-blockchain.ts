@@ -27,6 +27,7 @@ export const changenowApiBlockchain = {
     [BLOCKCHAIN_NAME.THETA]: 'theta',
     [BLOCKCHAIN_NAME.XDC]: 'xdc',
     // Non evm
+    [BLOCKCHAIN_NAME.BITCOIN]: 'btc',
     [BLOCKCHAIN_NAME.ICP]: 'icp',
     [BLOCKCHAIN_NAME.CARDANO]: 'ada',
     [BLOCKCHAIN_NAME.AION]: 'aion',
