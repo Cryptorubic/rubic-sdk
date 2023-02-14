@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
+import { NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { TokenStruct } from 'src/common/tokens/token';
@@ -10,6 +10,7 @@ import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
@@ -21,11 +22,10 @@ import { MultichainProxyCrossChainSupportedBlockchain } from 'src/features/cross
 import { feeLibraryAbi } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/fee-library-abi';
 import { StargateBridgeToken } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-bridge-token';
 import { stargateFeeLibraryContractAddress } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-fee-library-contract-address';
+import { stargatePoolAbi } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-abi';
 import { stargatePoolId } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-id';
 import { stargatePoolMapping } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-mapping';
 import { stargatePoolsDecimals } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pools-decimals';
-import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { symbiosisTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-transit-tokens';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
@@ -58,6 +58,9 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = to.blockchain as StargateCrossChainSupportedBlockchain;
         const srcPoolId = stargatePoolId[from.symbol as StargateBridgeToken];
+        if (!srcPoolId) {
+            return false;
+        }
         const dstPoolId = stargatePoolId[to.symbol as StargateBridgeToken];
         const srcSupportedPools = stargateBlockchainSupportedPools[fromBlockchain];
         const dstSupportedPools = stargateBlockchainSupportedPools[toBlockchain];
@@ -84,32 +87,52 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
 
             if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-                return null;
+                return {
+                    trade: null,
+                    error: new NotSupportedTokensError()
+                };
             }
-            await this.checkEqFee(from, toToken);
+
             const hasDirectRoute = StargateCrossChainProvider.checkIsSupportedTokens(from, toToken);
+            if (hasDirectRoute) {
+                await this.checkEqFee(from, toToken);
+            }
+
+            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
+
+            const transitToken = hasDirectRoute
+                ? from
+                : await this.getPoolToken(1, from.blockchain);
 
             let onChainTrade: EvmOnChainTrade | null = null;
+
             if (!hasDirectRoute) {
                 // @TODO CCR
                 // const compexRoute = await this.calculateComplexRoute(from, toToken);
                 onChainTrade = await this.getOnChainTrade(
-                    from,
-                    symbiosisTransitTokens[
-                        fromBlockchain as SymbiosisCrossChainSupportedBlockchain
-                    ],
+                    fromWithoutFee,
+                    transitToken,
                     [],
-                    0.05
+                    options.slippageTolerance
                 );
+                if (!onChainTrade) {
+                    return {
+                        trade: null,
+                        error: new NotSupportedTokensError()
+                    };
+                }
             }
 
-            const poolFee = await this.fetchPoolFees(from, toToken);
-            const amountOutMin = from.tokenAmount.minus(poolFee);
+            const poolFee = await this.fetchPoolFees(fromWithoutFee, toToken);
+            const amountOutMin = fromWithoutFee.tokenAmount.minus(poolFee);
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: amountOutMin
             });
-            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
 
             const layerZeroFeeWei = await this.getLayerZeroFee(from, to, amountOutMin);
             const layerZeroFeeAmount = Web3Pure.fromWei(
@@ -329,6 +352,32 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             }
             throw new RubicSdkError('Unknown error.');
         }
+    }
+
+    private async getPoolToken(
+        poolId: number,
+        fromBlockchain: EvmBlockchainName
+    ): Promise<PriceToken> {
+        const web3Adapter = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+
+        const poolAddress = await web3Adapter.callContractMethod(
+            stargateContractAddress[fromBlockchain as StargateCrossChainSupportedBlockchain],
+            stargateRouterAbi,
+            'pool',
+            [poolId]
+        );
+
+        const tokenAddress = await web3Adapter.callContractMethod(
+            poolAddress,
+            stargatePoolAbi,
+            'token',
+            []
+        );
+
+        return PriceToken.createToken({
+            address: tokenAddress,
+            blockchain: fromBlockchain
+        });
     }
 
     private async calculateComplexRoute(

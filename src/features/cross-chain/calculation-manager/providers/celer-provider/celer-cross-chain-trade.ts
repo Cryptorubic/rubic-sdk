@@ -357,8 +357,8 @@ export class CelerCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: { from: fromPriceImpact, to: toPriceImpact },
-            slippage: { total: this.slippage * 100 }
+            priceImpact: (fromPriceImpact || 0) + (toPriceImpact || 0),
+            slippage: this.slippage * 100
         };
     }
 }

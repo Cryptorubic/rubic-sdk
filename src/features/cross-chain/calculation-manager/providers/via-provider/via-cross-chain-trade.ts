@@ -271,8 +271,8 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: { total: this.priceImpact },
-            slippage: { total: this.slippage }
+            priceImpact: this.priceImpact,
+            slippage: this.slippage
         };
     }
 }

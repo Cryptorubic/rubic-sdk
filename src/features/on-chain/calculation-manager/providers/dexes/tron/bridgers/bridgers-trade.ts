@@ -14,6 +14,7 @@ import {
 } from 'src/features/common/providers/bridgers/models/bridgers-swap-api';
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { TronBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/models/tron-bridgers-transaction-data';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { OnChainPlatformFee } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import {
     ON_CHAIN_TRADE_TYPE,
@@ -48,6 +49,8 @@ export class BridgersTrade extends TronOnChainTrade {
         return this.to;
     }
 
+    public readonly feeInfo: FeeInfo;
+
     constructor(
         tradeStruct: {
             from: PriceTokenAmount<TronBlockchainName>;
@@ -67,6 +70,14 @@ export class BridgersTrade extends TronOnChainTrade {
         this.contractAddress = tradeStruct.contractAddress;
         this.cryptoFeeToken = tradeStruct.cryptoFeeToken;
         this.platformFee = tradeStruct.platformFee;
+        this.feeInfo = {
+            rubicProxy: {
+                platformFee: {
+                    percent: tradeStruct.platformFee.percent,
+                    tokenSymbol: tradeStruct.platformFee.token.symbol
+                }
+            }
+        };
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {

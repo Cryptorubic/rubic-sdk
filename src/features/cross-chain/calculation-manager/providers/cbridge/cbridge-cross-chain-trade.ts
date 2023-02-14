@@ -251,8 +251,8 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact ? { total: this.priceImpact } : { total: 0 },
-            slippage: { total: this.maxSlippage / 10_000 }
+            priceImpact: this.priceImpact || 0,
+            slippage: this.maxSlippage / 10_000
         };
     }
 

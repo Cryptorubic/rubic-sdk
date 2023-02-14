@@ -19,6 +19,8 @@ import { wlContractAddress } from 'src/features/common/constants/wl-contract-add
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { isAddressCorrect } from 'src/features/common/utils/check-address';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 /**
@@ -40,6 +42,8 @@ export abstract class OnChainTrade {
     protected abstract readonly spenderAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
     public abstract readonly path: ReadonlyArray<Token>;
+
+    public abstract readonly feeInfo: FeeInfo;
 
     /**
      * Type of instant trade provider.
@@ -203,5 +207,14 @@ export abstract class OnChainTrade {
         if (!isWhitelistedProvider) {
             throw new NotWhitelistedProviderError(txTo, undefined, 'dex');
         }
+    }
+
+    public getTradeInfo(): TradeInfo {
+        return {
+            estimatedGas: null,
+            feeInfo: this.feeInfo,
+            priceImpact: this.priceImpact || 0,
+            slippage: this.slippageTolerance * 100
+        };
     }
 }

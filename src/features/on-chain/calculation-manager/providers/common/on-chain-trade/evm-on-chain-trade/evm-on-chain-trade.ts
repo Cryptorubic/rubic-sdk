@@ -18,9 +18,9 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
-import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import {
@@ -45,12 +45,12 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
      */
     public readonly gasFeeInfo: GasFeeInfo | null;
 
+    public readonly feeInfo: FeeInfo;
+
     /**
      * True, if trade must be swapped through on-chain proxy contract.
      */
     public readonly useProxy: boolean;
-
-    public readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
 
     /**
      * Contains from amount, from which proxy fees were subtracted.
@@ -95,9 +95,24 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         this.gasFeeInfo = evmOnChainTradeStruct.gasFeeInfo;
 
         this.useProxy = evmOnChainTradeStruct.useProxy;
-        this.proxyFeeInfo = evmOnChainTradeStruct.proxyFeeInfo;
         this.fromWithoutFee = evmOnChainTradeStruct.fromWithoutFee;
 
+        this.feeInfo = {
+            rubicProxy: {
+                fixedFee: {
+                    amount:
+                        evmOnChainTradeStruct.proxyFeeInfo?.fixedFeeToken.tokenAmount ||
+                        new BigNumber(0),
+                    tokenSymbol:
+                        evmOnChainTradeStruct.proxyFeeInfo?.fixedFeeToken.symbol || 'Unknown'
+                },
+                platformFee: {
+                    percent: evmOnChainTradeStruct.proxyFeeInfo?.platformFee.percent || 0,
+                    tokenSymbol:
+                        evmOnChainTradeStruct.proxyFeeInfo?.platformFee.token.symbol || 'Unknown'
+                }
+            }
+        };
         this.withDeflation = evmOnChainTradeStruct.withDeflation;
     }
 
@@ -239,7 +254,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             swapData
         ];
 
-        const value = new BigNumber(this.proxyFeeInfo?.fixedFeeToken.stringWeiAmount || 0)
+        const value = new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount.toFixed() || 0)
             .plus(this.from.isNative ? this.from.weiAmount : '0')
             .toFixed(0);
 

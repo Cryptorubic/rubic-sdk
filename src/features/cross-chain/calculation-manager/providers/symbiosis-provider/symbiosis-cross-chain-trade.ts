@@ -271,8 +271,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: { total: this.priceImpact },
-            slippage: { total: this.slippage * 100 }
+            priceImpact: this.priceImpact,
+            slippage: this.slippage
         };
     }
 
