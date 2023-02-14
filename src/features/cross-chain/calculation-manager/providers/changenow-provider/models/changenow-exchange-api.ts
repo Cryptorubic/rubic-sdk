@@ -9,4 +9,6 @@ export interface ChangenowRangeResponse {
 export interface ChangenowExchangeResponse {
     id: string;
     payinAddress: string;
+    payinExtraId: string;
+    payinExtraIdName: string;
 }

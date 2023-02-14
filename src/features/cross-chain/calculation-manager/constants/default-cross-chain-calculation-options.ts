@@ -10,5 +10,6 @@ export const defaultCrossChainCalculationOptions: Omit<
     disabledProviders: [],
     timeout: 25_000,
     slippageTolerance: 0.04,
-    deadline: 20
+    deadline: 20,
+    changenowFullyEnabled: false
 };

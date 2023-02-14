@@ -2,11 +2,7 @@ import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { nativeTokensList, PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import {
-    BLOCKCHAIN_NAME,
-    BlockchainName,
-    EvmBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -44,16 +40,6 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         return Object.keys(changenowApiBlockchain).includes(blockchain);
     }
 
-    public areSupportedBlockchains(
-        fromBlockchain: BlockchainName,
-        toBlockchain: BlockchainName
-    ): boolean {
-        return (
-            BlockchainsInfo.isEvmBlockchainName(fromBlockchain) &&
-            this.isSupportedBlockchain(toBlockchain)
-        );
-    }
-
     public async calculate(
         from: PriceTokenAmount,
         toToken: PriceToken,
@@ -61,7 +47,10 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = toToken.blockchain;
-        if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
+        if (
+            !this.areSupportedBlockchains(fromBlockchain, toBlockchain) ||
+            (!options.changenowFullyEnabled && !BlockchainsInfo.isEvmBlockchainName(fromBlockchain))
+        ) {
             return null;
         }
 
@@ -106,7 +95,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             tokenAmount: toAmount
         }) as PriceTokenAmount<ChangenowCrossChainSupportedBlockchain>;
         const changenowTrade: ChangenowTrade = {
-            from: from as PriceTokenAmount<EvmBlockchainName>,
+            from: from as PriceTokenAmount<ChangenowCrossChainSupportedBlockchain>,
             to,
             toTokenAmountMin: to.tokenAmount,
             fromCurrency,
