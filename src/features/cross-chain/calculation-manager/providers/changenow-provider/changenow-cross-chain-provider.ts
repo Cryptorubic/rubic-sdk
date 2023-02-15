@@ -77,20 +77,6 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
          */
 
-        const { minAmount, maxAmount } = await this.getMinMaxRange(fromCurrency, toCurrency);
-        if (minAmount.gt(from.tokenAmount)) {
-            return {
-                trade: null,
-                error: new MinAmountError(minAmount, from.symbol)
-            };
-        }
-        if (maxAmount?.lt(from.tokenAmount)) {
-            return {
-                trade: null,
-                error: new MaxAmountError(maxAmount, from.symbol)
-            };
-        }
-
         const toAmount = await this.getToAmount(fromCurrency, toCurrency, from.tokenAmount);
 
         const to = new PriceTokenAmount({
@@ -110,13 +96,26 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             options.gasCalculation === 'enabled' && options.receiverAddress
                 ? await ChangenowCrossChainTrade.getGasData(changenowTrade, options.receiverAddress)
                 : null;
+        const trade = new ChangenowCrossChainTrade(
+            { ...changenowTrade, gasData },
+            options.providerAddress
+        );
 
-        return {
-            trade: new ChangenowCrossChainTrade(
-                { ...changenowTrade, gasData },
-                options.providerAddress
-            )
-        };
+        const { minAmount, maxAmount } = await this.getMinMaxRange(fromCurrency, toCurrency);
+        if (minAmount.gt(from.tokenAmount)) {
+            return {
+                trade,
+                error: new MinAmountError(minAmount, from.symbol)
+            };
+        }
+        if (maxAmount?.lt(from.tokenAmount)) {
+            return {
+                trade,
+                error: new MaxAmountError(maxAmount, from.symbol)
+            };
+        }
+
+        return { trade };
     }
 
     private async getChangenowCurrencies(
