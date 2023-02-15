@@ -15,10 +15,7 @@ import {
     changenowApiBlockchain,
     ChangenowCrossChainSupportedBlockchain
 } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
-import {
-    celoNativeAddress,
-    optimismNativeAddress
-} from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/native-addresses';
+import { nativeTokensData } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/native-addresses';
 import {
     ChangenowCurrenciesResponse,
     ChangenowCurrency
@@ -183,13 +180,12 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         token: Token<ChangenowCrossChainSupportedBlockchain>,
         currency: ChangenowCurrency
     ): boolean {
-        return (
-            (token.blockchain === BLOCKCHAIN_NAME.OPTIMISM &&
-                token.address === optimismNativeAddress &&
-                currency.ticker === 'op') ||
-            (token.blockchain === BLOCKCHAIN_NAME.CELO &&
-                token.address === celoNativeAddress &&
-                currency.ticker === 'celo')
+        return nativeTokensData.some(
+            nativeTokenData =>
+                token.blockchain === nativeTokenData.blockchain &&
+                compareAddresses(nativeTokenData.address, token.address) &&
+                currency.network === changenowApiBlockchain[nativeTokenData.blockchain] &&
+                currency.ticker === nativeTokenData.ticker
         );
     }
 
