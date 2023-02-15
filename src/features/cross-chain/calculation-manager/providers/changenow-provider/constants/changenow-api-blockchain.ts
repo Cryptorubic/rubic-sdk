@@ -95,7 +95,8 @@ export const changenowApiBlockchain = {
     [BLOCKCHAIN_NAME.SYMBOL]: 'xym',
     [BLOCKCHAIN_NAME.ZCASH]: 'zec',
     [BLOCKCHAIN_NAME.HORIZEN]: 'zen',
-    [BLOCKCHAIN_NAME.ZILLIQA]: 'zil'
+    [BLOCKCHAIN_NAME.ZILLIQA]: 'zil',
+    [BLOCKCHAIN_NAME.TRON]: 'trx'
 };
 
 export type ChangenowCrossChainSupportedBlockchain = keyof typeof changenowApiBlockchain;

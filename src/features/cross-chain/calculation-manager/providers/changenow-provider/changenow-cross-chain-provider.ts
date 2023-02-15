@@ -15,7 +15,10 @@ import {
     changenowApiBlockchain,
     ChangenowCrossChainSupportedBlockchain
 } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
-import { optimismNativeAddress } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/optimism-native-address';
+import {
+    celoNativeAddress,
+    optimismNativeAddress
+} from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/native-addresses';
 import {
     ChangenowCurrenciesResponse,
     ChangenowCurrency
@@ -137,16 +140,12 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 EvmWeb3Pure.isNativeAddress(token.address)
                     ? 'cchain'
                     : changenowApiBlockchain[token.blockchain];
-            const isOptimismToken = (currency: ChangenowCurrency) =>
-                token.blockchain === BLOCKCHAIN_NAME.OPTIMISM &&
-                token.address === optimismNativeAddress &&
-                currency.ticker === 'op';
 
             return currencies.find(
                 currency =>
                     currency.network === apiBlockchain &&
                     ((currency.tokenContract === null &&
-                        (token.isNative || isOptimismToken(currency))) ||
+                        (token.isNative || this.isNativeAddress(token, currency))) ||
                         (currency.tokenContract &&
                             compareAddresses(token.address, currency.tokenContract)))
             );
@@ -156,6 +155,20 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             fromCurrency: getCurrency(from),
             toCurrency: getCurrency(to)
         };
+    }
+
+    private isNativeAddress(
+        token: Token<ChangenowCrossChainSupportedBlockchain>,
+        currency: ChangenowCurrency
+    ): boolean {
+        return (
+            (token.blockchain === BLOCKCHAIN_NAME.OPTIMISM &&
+                token.address === optimismNativeAddress &&
+                currency.ticker === 'op') ||
+            (token.blockchain === BLOCKCHAIN_NAME.CELO &&
+                token.address === celoNativeAddress &&
+                currency.ticker === 'celo')
+        );
     }
 
     private async getToAmount(
