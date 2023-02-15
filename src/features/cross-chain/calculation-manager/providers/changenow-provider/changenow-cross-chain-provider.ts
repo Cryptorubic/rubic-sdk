@@ -77,45 +77,53 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
          */
 
-        const toAmount = await this.getToAmount(fromCurrency, toCurrency, from.tokenAmount);
+        try {
+            const toAmount = await this.getToAmount(fromCurrency, toCurrency, from.tokenAmount);
 
-        const to = new PriceTokenAmount({
-            ...toToken.asStruct,
-            tokenAmount: toAmount
-        }) as PriceTokenAmount<ChangenowCrossChainSupportedBlockchain>;
-        const changenowTrade: ChangenowTrade = {
-            from: from as PriceTokenAmount<ChangenowCrossChainSupportedBlockchain>,
-            to,
-            toTokenAmountMin: to.tokenAmount,
-            fromCurrency,
-            toCurrency,
-            feeInfo: {},
-            gasData: null
-        };
-        const gasData =
-            options.gasCalculation === 'enabled' && options.receiverAddress
-                ? await ChangenowCrossChainTrade.getGasData(changenowTrade, options.receiverAddress)
-                : null;
-        const trade = new ChangenowCrossChainTrade(
-            { ...changenowTrade, gasData },
-            options.providerAddress
-        );
-
-        const { minAmount, maxAmount } = await this.getMinMaxRange(fromCurrency, toCurrency);
-        if (minAmount.gt(from.tokenAmount)) {
-            return {
-                trade,
-                error: new MinAmountError(minAmount, from.symbol)
+            const to = new PriceTokenAmount({
+                ...toToken.asStruct,
+                tokenAmount: toAmount
+            }) as PriceTokenAmount<ChangenowCrossChainSupportedBlockchain>;
+            const changenowTrade: ChangenowTrade = {
+                from: from as PriceTokenAmount<ChangenowCrossChainSupportedBlockchain>,
+                to,
+                toTokenAmountMin: to.tokenAmount,
+                fromCurrency,
+                toCurrency,
+                feeInfo: {},
+                gasData: null
             };
-        }
-        if (maxAmount?.lt(from.tokenAmount)) {
-            return {
-                trade,
-                error: new MaxAmountError(maxAmount, from.symbol)
-            };
-        }
+            const gasData =
+                options.gasCalculation === 'enabled' && options.receiverAddress
+                    ? await ChangenowCrossChainTrade.getGasData(
+                          changenowTrade,
+                          options.receiverAddress
+                      )
+                    : null;
+            const trade = new ChangenowCrossChainTrade(
+                { ...changenowTrade, gasData },
+                options.providerAddress
+            );
 
-        return { trade };
+            const error = await this.checkMinMaxAmounts(from, fromCurrency, toCurrency);
+            if (error) {
+                return {
+                    trade,
+                    error
+                };
+            }
+
+            return { trade };
+        } catch {
+            const error = await this.checkMinMaxAmounts(from, fromCurrency, toCurrency);
+            if (error) {
+                return {
+                    trade: null,
+                    error
+                };
+            }
+            return null;
+        }
     }
 
     private async getChangenowCurrencies(
@@ -154,6 +162,21 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             fromCurrency: getCurrency(from),
             toCurrency: getCurrency(to)
         };
+    }
+
+    private async checkMinMaxAmounts(
+        from: PriceTokenAmount,
+        fromCurrency: ChangenowCurrency,
+        toCurrency: ChangenowCurrency
+    ): Promise<MinAmountError | MaxAmountError | null> {
+        const { minAmount, maxAmount } = await this.getMinMaxRange(fromCurrency, toCurrency);
+        if (minAmount.gt(from.tokenAmount)) {
+            return new MinAmountError(minAmount, from.symbol);
+        }
+        if (maxAmount?.lt(from.tokenAmount)) {
+            return new MaxAmountError(maxAmount, from.symbol);
+        }
+        return null;
     }
 
     private isNativeAddress(
