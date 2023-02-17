@@ -172,7 +172,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
         try {
             const { id, payinAddress } = await this.getPaymentInfo(
                 this.from.tokenAmount,
-                options.receiverAddress!
+                options.receiverAddress ? options.receiverAddress : this.walletAddress
             );
             this.id = id;
 
