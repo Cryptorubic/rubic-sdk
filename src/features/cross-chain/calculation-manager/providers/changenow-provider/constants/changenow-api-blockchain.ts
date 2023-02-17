@@ -38,7 +38,7 @@ export const changenowApiBlockchain = {
     [BLOCKCHAIN_NAME.COSMOS]: 'atom',
     [BLOCKCHAIN_NAME.BAND_PROTOCOL]: 'band',
     [BLOCKCHAIN_NAME.BITCOIN_DIAMOND]: 'bcd',
-    [BLOCKCHAIN_NAME.BITCOIN_SV]: 'bsv',
+    [BLOCKCHAIN_NAME.BSV]: 'bsv',
     [BLOCKCHAIN_NAME.BITCOIN_GOLD]: 'btg',
     [BLOCKCHAIN_NAME.CASPER]: 'cspr',
     [BLOCKCHAIN_NAME.DASH]: 'dash',
