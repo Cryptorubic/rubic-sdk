@@ -61,12 +61,6 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            // await this.checkContractState(
-            //     fromBlockchain,
-            //     cbridgeContractAddress[fromBlockchain].rubicRouter,
-            //     evmCommonCrossChainAbi
-            // );
-
             const config = await this.fetchContractAddressAndCheckTokens(fromToken, toToken);
             if (!config.supportedToToken && !config.supportedToNative) {
                 throw new RubicSdkError('To token is not supported');

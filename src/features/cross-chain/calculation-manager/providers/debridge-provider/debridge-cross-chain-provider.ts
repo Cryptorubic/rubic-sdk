@@ -125,7 +125,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         gasData,
                         priceImpact: from.calculatePriceImpactPercent(to) || 0,
                         slippage: options.slippageTolerance,
-                        // feeInfo,
                         feeInfo: {
                             provider: {
                                 cryptoFee: {

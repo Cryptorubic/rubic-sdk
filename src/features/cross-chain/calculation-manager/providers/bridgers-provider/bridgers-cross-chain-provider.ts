@@ -68,11 +68,6 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
             const contractAbi = BlockchainsInfo.isTronBlockchainName(fromBlockchain)
                 ? tronCommonCrossChainAbi
                 : evmCommonCrossChainAbi;
-            // await this.checkContractState(
-            //     fromBlockchain,
-            //     rubicProxyContractAddress[fromBlockchain],
-            //     contractAbi
-            // );
 
             let feeInfo = await this.getFeeInfo(
                 fromBlockchain,

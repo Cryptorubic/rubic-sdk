@@ -159,9 +159,12 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         this.bridgeType = crossChainTrade.bridgeType;
     }
 
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        return this.directSwap(options);
+    }
+
     protected async directSwap(options: SwapTransactionOptions = {}): Promise<string | never> {
         try {
-            // return await super.swap(options);
             await this.checkTradeErrors();
             if (options.receiverAddress) {
                 throw new RubicSdkError('Receiver address not supported');
@@ -200,10 +203,6 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             }
             throw err;
         }
-    }
-
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        return this.directSwap(options);
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
