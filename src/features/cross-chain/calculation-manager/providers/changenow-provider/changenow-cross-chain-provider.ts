@@ -32,7 +32,7 @@ import { CalculationResult } from 'src/features/cross-chain/calculation-manager/
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 
 export class ChangenowCrossChainProvider extends CrossChainProvider {
-    readonly type = CROSS_CHAIN_TRADE_TYPE.CHANGENOW;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.CHANGENOW;
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
@@ -129,11 +129,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
     ): Promise<{ fromCurrency?: ChangenowCurrency; toCurrency?: ChangenowCurrency }> {
         const currencies = await Injector.httpClient.get<ChangenowCurrenciesResponse>(
             'https://api.changenow.io/v2/exchange/currencies?active=true&flow=standard',
-            {
-                headers: {
-                    'x-changenow-api-key': changenowApiKey
-                }
-            }
+            { headers: { 'x-changenow-api-key': changenowApiKey } }
         );
 
         const getCurrency = (

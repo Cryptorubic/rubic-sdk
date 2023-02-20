@@ -573,12 +573,8 @@ export class CrossChainStatusManager {
             const { status, payoutHash } = await this.httpClient.get<ChangenowApiResponse>(
                 'https://api.changenow.io/v2/exchange/by-id',
                 {
-                    params: {
-                        id: data.changenowId
-                    },
-                    headers: {
-                        'x-changenow-api-key': changenowApiKey
-                    }
+                    params: { id: data.changenowId },
+                    headers: { 'x-changenow-api-key': changenowApiKey }
                 }
             );
 

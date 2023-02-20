@@ -6,7 +6,6 @@ import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/bloc
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
-import { EMPTY_ADDRESS } from 'src/core/blockchain/web3-pure/constants/empty-address';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 
@@ -115,16 +114,15 @@ export class Token<T extends BlockchainName = BlockchainName> {
     public readonly decimals: number;
 
     public get isNative(): boolean {
-        let chainType: CHAIN_TYPE | undefined;
-        try {
-            chainType = BlockchainsInfo.getChainType(this.blockchain);
-        } catch {}
+        const chainType: CHAIN_TYPE = BlockchainsInfo.getChainType(this.blockchain);
+
         if (chainType && Web3Pure[chainType].isNativeAddress(this.address)) {
             return Web3Pure[BlockchainsInfo.getChainType(this.blockchain)].isNativeAddress(
                 this.address
             );
         }
-        return this.address === EMPTY_ADDRESS;
+
+        return this.address === Web3Pure[chainType].nativeTokenAddress;
     }
 
     constructor(tokenStruct: TokenStruct<T>) {

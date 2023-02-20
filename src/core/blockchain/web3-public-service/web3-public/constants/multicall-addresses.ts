@@ -4,11 +4,13 @@ import {
     web3PublicSupportedBlockchains
 } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 
+const otherWeb3PublicSupportedBlockchains = Object.values(web3PublicSupportedBlockchains).reduce(
+    (acc, blockchain) => ({ ...acc, [blockchain]: '' }),
+    {} as Record<Web3PublicSupportedBlockchain, string>
+);
+
 export const MULTICALL_ADDRESSES: Record<Web3PublicSupportedBlockchain, string> = {
-    ...Object.values(web3PublicSupportedBlockchains).reduce(
-        (acc, blockchain) => ({ ...acc, [blockchain]: '' }),
-        {} as Record<Web3PublicSupportedBlockchain, string>
-    ),
+    ...otherWeb3PublicSupportedBlockchains,
     [BLOCKCHAIN_NAME.ETHEREUM]: '0x5ba1e12693dc8f9c48aad8770482f4739beed696',
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: '0x15dc8b5ed578AA7a019dd0139B330cfD625cA795',
     [BLOCKCHAIN_NAME.POLYGON]: '0x176730799C812d70C6608F51aEa6C7e5cdA7eA50',

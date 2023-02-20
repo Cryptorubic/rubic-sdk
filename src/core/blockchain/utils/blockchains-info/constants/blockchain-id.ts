@@ -1,10 +1,12 @@
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
+const otherChains = Object.values(BLOCKCHAIN_NAME).reduce(
+    (acc, blockchain) => ({ ...acc, [blockchain]: NaN }),
+    {} as Record<BlockchainName, number>
+);
+
 export const blockchainId: Record<BlockchainName, number> = {
-    ...Object.values(BLOCKCHAIN_NAME).reduce(
-        (acc, blockchain) => ({ ...acc, [blockchain]: NaN }),
-        {} as Record<BlockchainName, number>
-    ),
+    ...otherChains,
     // EVN blockchains
     [BLOCKCHAIN_NAME.ETHEREUM]: 1,
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: 56,
