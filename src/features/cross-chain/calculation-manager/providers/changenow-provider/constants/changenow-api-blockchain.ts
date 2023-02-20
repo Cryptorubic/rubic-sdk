@@ -10,7 +10,6 @@ export const changenowApiBlockchain = {
     [BLOCKCHAIN_NAME.BITGERT]: 'brise',
     [BLOCKCHAIN_NAME.AVALANCHE]: 'avaxc',
     [BLOCKCHAIN_NAME.CELO]: 'celo',
-    [BLOCKCHAIN_NAME.CRONOS]: 'cro',
     [BLOCKCHAIN_NAME.EOS]: 'eos',
     [BLOCKCHAIN_NAME.ETHEREUM_CLASSIC]: 'etc',
     [BLOCKCHAIN_NAME.ETHEREUM_POW]: 'ethw',
