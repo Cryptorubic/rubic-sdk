@@ -3,7 +3,6 @@ import { BytesLike } from 'ethers';
 import { nativeTokensList, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -20,12 +19,12 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
 import { StargateBridgeToken } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-bridge-token';
 import { stargatePoolId } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-id';
 import { stargatePoolsDecimals } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pools-decimals';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 
 import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { stargateChainId } from './constants/stargate-chain-id';
@@ -257,8 +256,23 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             this.toTokenAmountMin
         );
 
-        const bridgeData = this.getBridgeData(options);
-        const swapData = this.onChainTrade && (await this.getSwapData(options));
+        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
+            walletAddress: this.walletAddress,
+            fromTokenAmount: this.from,
+            toTokenAmount: this.to,
+            onChainTrade: this.onChainTrade,
+            providerAddress: this.providerAddress,
+            type: this.type
+        });
+        const swapData =
+            this.onChainTrade &&
+            (await ProxyCrossChainEvmTrade.getSwapData(options, {
+                walletAddress: this.walletAddress,
+                contractAddress: this.fromContractAddress,
+                fromTokenAmount: this.from,
+                toTokenAmount: this.onChainTrade.to,
+                onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
+            }));
         const providerData = this.getProviderData(lzTxConfig.data);
 
         const methodArguments = swapData
@@ -357,48 +371,6 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         _providerGateway?: string
     ): Promise<void> {
         return undefined;
-    }
-
-    protected getBridgeData(options: GetContractParamsOptions): unknown[] {
-        const receiverAddress = options?.receiverAddress || this.walletAddress;
-        const toChainId = blockchainId[this.to.blockchain];
-        const fromToken = this.onChainTrade ? this.onChainTrade.to : this.from;
-        const hasSwapBeforeBridge = this.onChainTrade !== null;
-
-        return [
-            EvmWeb3Pure.randomHex(32),
-            `native:${this.type.toLowerCase()}`,
-            this.providerAddress,
-            EvmWeb3Pure.randomHex(20),
-            fromToken.address,
-            receiverAddress,
-            fromToken.stringWeiAmount,
-            toChainId,
-            hasSwapBeforeBridge,
-            false
-        ];
-    }
-
-    protected async getSwapData(options: GetContractParamsOptions): Promise<unknown[]> {
-        const fromAddress =
-            options.fromAddress || this.walletAddress || oneinchApiParams.nativeAddress;
-        const swapData = await this.onChainTrade!.encode({
-            fromAddress,
-            receiverAddress: this.fromContractAddress
-        });
-        const transitToken = this.onChainTrade ? this.onChainTrade.to.address : this.from.address;
-
-        return [
-            [
-                swapData.to,
-                swapData.to,
-                this.from.address,
-                transitToken,
-                this.from.stringWeiAmount,
-                swapData.data,
-                true
-            ]
-        ];
     }
 
     protected getProviderData(_sourceData: BytesLike): unknown[] {

@@ -1,24 +1,14 @@
 import BigNumber from 'bignumber.js';
-import { NotSupportedTokensError, NotWhitelistedProviderError } from 'src/common/errors';
+import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { Injector } from 'src/core/injector/injector';
-import { wlContractAbi } from 'src/features/common/constants/wl-contract-abi';
-import { wlContractAddress } from 'src/features/common/constants/wl-contract-address';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
-import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { multichainProxyContractAbi } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-abi';
-import { multichainProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/constants/contract-address';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { DexMultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/dex-multichain-cross-chain-trade';
 import {
     MultichainProxyCrossChainSupportedBlockchain,
@@ -29,7 +19,6 @@ import { MultichainCrossChainProvider } from 'src/features/cross-chain/calculati
 import { getMultichainTokens } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/get-multichain-tokens';
 import { getToFeeAmount } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/get-to-fee-amount';
 import { isMultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/utils/is-multichain-method-name';
-import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 export class DexMultichainCrossChainProvider extends MultichainCrossChainProvider {
@@ -80,9 +69,6 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             }
             const { targetToken } = tokens;
 
-            // await this.checkProviderIsWhitelisted(fromBlockchain, targetToken.router);
-            // const whitelistedDexes = await this.getWhitelistedDexes(fromBlockchain);
-
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
             const fromWithoutFee = getFromWithoutFee(
                 from,
@@ -101,10 +87,12 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
                 transitTokenAmount = fromWithoutFee.tokenAmount;
                 transitMinAmount = transitTokenAmount;
             } else {
-                onChainTrade = await this.getOnChainTrade(
+                onChainTrade = await ProxyCrossChainEvmTrade.getOnChainTrade(
                     fromWithoutFee,
-                    sourceTransitToken,
-                    [],
+                    {
+                        ...sourceTransitToken,
+                        blockchain: fromBlockchain
+                    },
                     options.slippageTolerance
                 );
                 if (!onChainTrade) {
@@ -189,31 +177,6 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
         }
     }
 
-    protected async checkProviderIsWhitelisted(
-        fromBlockchain: Web3PublicSupportedBlockchain,
-        providerRouter: string
-    ): Promise<void> {
-        const whitelistedContracts = await Injector.web3PublicService
-            .getWeb3Public(fromBlockchain)
-            .callContractMethod<string[]>(
-                wlContractAddress[fromBlockchain as EvmBlockchainName],
-                wlContractAbi,
-                'getAvailableAnyRouters'
-            );
-
-        if (
-            !whitelistedContracts.find(whitelistedContract =>
-                compareAddresses(whitelistedContract, providerRouter)
-            )
-        ) {
-            throw new NotWhitelistedProviderError(
-                providerRouter,
-                undefined,
-                'multichain:anyrouter'
-            );
-        }
-    }
-
     private async getSourceTransitToken(
         fromBlockchain: BlockchainName,
         toToken: Token
@@ -223,95 +186,5 @@ export class DexMultichainCrossChainProvider extends MultichainCrossChainProvide
             return null;
         }
         return tokens.targetToken;
-    }
-
-    private getWhitelistedDexes(
-        fromBlockchain: MultichainProxyCrossChainSupportedBlockchain
-    ): Promise<string[]> {
-        const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-        return web3Public.callContractMethod<string[]>(
-            multichainProxyContractAddress[fromBlockchain],
-            multichainProxyContractAbi,
-            'getAvailableRouters'
-        );
-    }
-
-    private async getOnChainTrade(
-        from: PriceTokenAmount,
-        transitToken: MultichainTargetToken,
-        _availableDexes: string[],
-        slippageTolerance: number
-    ): Promise<EvmOnChainTrade | null> {
-        const fromBlockchain = from.blockchain as MultichainProxyCrossChainSupportedBlockchain;
-
-        // @TODO Add filter before promise resolving.
-        const dexes = Object.values(typedTradeProviders[fromBlockchain])
-            .filter(dex => dex.supportReceiverAddress)
-            .filter(dex => dex.type === 'QUICK_SWAP');
-        const to = await PriceToken.createToken({
-            address:
-                transitToken.tokenType === 'NATIVE'
-                    ? EvmWeb3Pure.nativeTokenAddress
-                    : transitToken.address,
-            blockchain: fromBlockchain
-        });
-        const onChainTrades = (
-            await Promise.allSettled(
-                dexes.map(dex =>
-                    dex.calculate(from, to, {
-                        slippageTolerance,
-                        gasCalculation: 'disabled',
-                        useProxy: false
-                    })
-                )
-            )
-        )
-            .filter(value => value.status === 'fulfilled')
-            .map(value => (value as PromiseFulfilledResult<EvmOnChainTrade>).value)
-            // @TODO
-            // .filter(onChainTrade =>
-            //     availableDexes.some(availableDex =>
-            //         compareAddresses(availableDex, onChainTrade.dexContractAddress)
-            //     )
-            // )
-            .sort((a, b) => b.to.tokenAmount.comparedTo(a.to.tokenAmount));
-
-        if (!onChainTrades.length) {
-            return null;
-        }
-        return onChainTrades[0]!;
-    }
-
-    protected override async getFeeInfo(
-        fromBlockchain: MultichainProxyCrossChainSupportedBlockchain,
-        providerAddress: string,
-        percentFeeToken: PriceTokenAmount
-    ): Promise<FeeInfo> {
-        const fixedFeeAmount = await this.getFixedFee(
-            fromBlockchain as EvmBlockchainName,
-            providerAddress,
-            rubicProxyContractAddress[fromBlockchain],
-            evmCommonCrossChainAbi
-        );
-
-        const feePercent = await this.getFeePercent(
-            fromBlockchain as EvmBlockchainName,
-            providerAddress,
-            rubicProxyContractAddress[fromBlockchain],
-            evmCommonCrossChainAbi
-        );
-
-        return {
-            rubicProxy: {
-                fixedFee: {
-                    amount: fixedFeeAmount,
-                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
-                },
-                platformFee: {
-                    percent: feePercent,
-                    tokenSymbol: percentFeeToken.symbol
-                }
-            }
-        };
     }
 }

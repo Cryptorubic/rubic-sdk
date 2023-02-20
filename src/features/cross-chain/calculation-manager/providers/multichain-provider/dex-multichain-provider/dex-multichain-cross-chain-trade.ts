@@ -1,24 +1,21 @@
 import BigNumber from 'bignumber.js';
-import { BytesLike } from 'ethers';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
-import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { MultichainProxyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/models/supported-blockchain';
 import { MultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/multichain-method-name';
 import { MultichainCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/multichain-cross-chain-trade';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 
 export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
     /** @internal */
@@ -127,9 +124,32 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        const bridgeData = this.getBridgeData(options);
-        const swapData = this.onChainTrade && (await this.getSwapData(options));
-        const providerData = this.getProviderData('');
+        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
+            walletAddress: this.walletAddress,
+            fromTokenAmount: this.from,
+            toTokenAmount: this.to,
+            onChainTrade: this.onChainTrade,
+            providerAddress: this.providerAddress,
+            type: this.type
+        });
+
+        // const swapAmount = getFromWithoutFee(
+        //     this.from,
+        //     this.feeInfo?.rubicProxy?.platformFee?.percent
+        // ).stringWeiAmount;
+        const swapData =
+            this.onChainTrade &&
+            (await ProxyCrossChainEvmTrade.getSwapData(options, {
+                walletAddress: this.walletAddress,
+                contractAddress: this.fromContractAddress,
+                fromTokenAmount: this.from,
+                toTokenAmount: this.onChainTrade.to,
+                onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
+            }));
+        //
+        // const bridgeData = this.getBridgeData(options);
+        // const swapData = this.onChainTrade && (await this.getSwapData(options));
+        const providerData = [this.routerAddress];
 
         const methodArguments = swapData
             ? [bridgeData, swapData, providerData]
@@ -148,57 +168,5 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
         return fromUsd.dividedBy(this.to.tokenAmount);
-    }
-
-    protected getBridgeData(options: GetContractParamsOptions): unknown[] {
-        const receiverAddress =
-            this.to.blockchain === BLOCKCHAIN_NAME.BITCOIN
-                ? EvmWeb3Pure.EMPTY_ADDRESS
-                : options?.receiverAddress || this.walletAddress;
-        const toChainId = blockchainId[this.to.blockchain];
-        const fromToken = this.onChainTrade ? this.onChainTrade.to : this.from;
-        const hasSwapBeforeBridge = this.onChainTrade !== null;
-
-        return [
-            EvmWeb3Pure.randomHex(32),
-            `native:${this.type.toLowerCase()}`,
-            this.providerAddress,
-            EvmWeb3Pure.randomHex(20),
-            fromToken.address,
-            receiverAddress,
-            fromToken.stringWeiAmount,
-            toChainId,
-            hasSwapBeforeBridge,
-            false
-        ];
-    }
-
-    protected async getSwapData(options: GetContractParamsOptions): Promise<unknown[]> {
-        const fromAddress =
-            options.fromAddress || this.walletAddress || oneinchApiParams.nativeAddress;
-        const swapData = await this.onChainTrade!.encode({
-            fromAddress,
-            receiverAddress: this.fromContractAddress
-        });
-        const amount = getFromWithoutFee(
-            this.from,
-            this.feeInfo?.rubicProxy?.platformFee?.percent
-        ).stringWeiAmount;
-
-        return [
-            [
-                swapData.to,
-                swapData.to,
-                this.from.address,
-                this.onChainTrade!.to.address,
-                amount,
-                swapData.data,
-                true
-            ]
-        ];
-    }
-
-    protected getProviderData(_sourceData: BytesLike): unknown[] {
-        return [this.routerAddress];
     }
 }

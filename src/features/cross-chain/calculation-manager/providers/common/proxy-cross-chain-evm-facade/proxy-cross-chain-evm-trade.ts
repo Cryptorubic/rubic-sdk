@@ -1,35 +1,39 @@
 import BigNumber from 'bignumber.js';
 import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { TokenStruct } from 'src/common/tokens/token';
+import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { MultichainProxyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/models/supported-blockchain';
+import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { ProxyBridgeParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/proxy-bridge-params';
+import { ProxySwapParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/proxy-swap-params';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
-import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 import { AbiItem } from 'web3-utils';
 
 export class ProxyCrossChainEvmTrade {
-    public async getFeeInfo(
-        fromBlockchain: EvmBlockchainName,
+    public static async getFeeInfo(
+        fromBlockchain: Web3PublicSupportedBlockchain,
         providerAddress: string,
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
-        const fixedFeeAmount = await this.getFixedFee(
+        const fixedFeeAmount = await ProxyCrossChainEvmTrade.getFixedFee(
             fromBlockchain,
             providerAddress,
             rubicProxyContractAddress[fromBlockchain],
             evmCommonCrossChainAbi
         );
 
-        const feePercent = await this.getFeePercent(
+        const feePercent = await ProxyCrossChainEvmTrade.getFeePercent(
             fromBlockchain,
             providerAddress,
             rubicProxyContractAddress[fromBlockchain],
@@ -59,7 +63,7 @@ export class ProxyCrossChainEvmTrade {
      * @protected
      * @internal
      */
-    protected async getFixedFee(
+    private static async getFixedFee(
         fromBlockchain: Web3PublicSupportedBlockchain,
         providerAddress: string,
         contractAddress: string,
@@ -98,7 +102,7 @@ export class ProxyCrossChainEvmTrade {
      * @protected
      * @internal
      */
-    protected async getFeePercent(
+    private static async getFeePercent(
         fromBlockchain: Web3PublicSupportedBlockchain,
         providerAddress: string,
         contractAddress: string,
@@ -128,45 +132,100 @@ export class ProxyCrossChainEvmTrade {
         );
     }
 
-    public async getOnChainTrade(
+    public static async getOnChainTrade(
         from: PriceTokenAmount,
-        transitToken: TokenStruct<BlockchainName>,
-        _availableDexes: string[],
+        transitToken: TokenBaseStruct,
         slippageTolerance: number
     ): Promise<EvmOnChainTrade | null> {
-        const fromBlockchain = from.blockchain as MultichainProxyCrossChainSupportedBlockchain;
         if (compareAddresses(from.address, transitToken.address)) {
             return null;
         }
 
-        const dexes = Object.values(typedTradeProviders[fromBlockchain]).filter(
-            el => el.type === ON_CHAIN_TRADE_TYPE.QUICK_SWAP
-        );
-        //     .filter(
-        //     dex => dex.supportReceiverAddress
-        // );
+        const fromBlockchain = from.blockchain as EvmBlockchainName;
+        const availableDexes = await ProxyCrossChainEvmTrade.getWhitelistedDexes(fromBlockchain);
+
+        const dexes = Object.values(typedTradeProviders[fromBlockchain]);
         const to = await PriceToken.createToken(transitToken);
         const allOnChainTrades = await Promise.allSettled(
             dexes.map(dex =>
                 dex.calculate(from, to, {
                     slippageTolerance,
-                    gasCalculation: 'disabled'
+                    gasCalculation: 'disabled',
+                    useProxy: false
                 })
             )
         );
         const successSortedTrades = allOnChainTrades
             .filter(value => value.status === 'fulfilled')
             .map(value => (value as PromiseFulfilledResult<EvmOnChainTrade>).value)
-            // .filter(onChainTrade =>
-            //     availableDexes.some(availableDex =>
-            //         compareAddresses(availableDex, onChainTrade.dexContractAddress)
-            //     )
-            // )
+            .filter(onChainTrade =>
+                availableDexes.some(availableDex =>
+                    compareAddresses(availableDex, onChainTrade.dexContractAddress)
+                )
+            )
             .sort((a, b) => b.to.tokenAmount.comparedTo(a.to.tokenAmount));
 
         if (!successSortedTrades.length) {
             return null;
         }
         return successSortedTrades[0]!;
+    }
+
+    public static async getWhitelistedDexes(fromBlockchain: EvmBlockchainName): Promise<string[]> {
+        const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+        return web3Public.callContractMethod<string[]>(
+            rubicProxyContractAddress[fromBlockchain],
+            evmCommonCrossChainAbi,
+            'approvedDexs'
+        );
+    }
+
+    public static getBridgeData(
+        swapOptions: GetContractParamsOptions,
+        tradeParams: ProxyBridgeParams
+    ): unknown[] {
+        const receiverAddress = swapOptions?.receiverAddress || tradeParams.walletAddress;
+        const toChainId = blockchainId[tradeParams.toTokenAmount.blockchain];
+        const fromToken = tradeParams.onChainTrade
+            ? tradeParams.onChainTrade.toTokenAmountMin
+            : tradeParams.fromTokenAmount;
+        const hasSwapBeforeBridge = tradeParams.onChainTrade !== null;
+
+        return [
+            EvmWeb3Pure.randomHex(32),
+            `native:${tradeParams.type.toLowerCase()}`,
+            tradeParams.providerAddress,
+            EvmWeb3Pure.randomHex(20),
+            fromToken.address,
+            receiverAddress,
+            fromToken.stringWeiAmount,
+            toChainId,
+            hasSwapBeforeBridge,
+            false
+        ];
+    }
+
+    public static async getSwapData(
+        swapOptions: GetContractParamsOptions,
+        tradeParams: ProxySwapParams
+    ): Promise<unknown[]> {
+        const fromAddress =
+            swapOptions.fromAddress || tradeParams.walletAddress || oneinchApiParams.nativeAddress;
+        const swapData = await tradeParams.onChainEncodeFn({
+            fromAddress,
+            receiverAddress: tradeParams.contractAddress
+        });
+
+        return [
+            [
+                swapData.to,
+                swapData.to,
+                tradeParams.fromTokenAmount.address,
+                tradeParams.toTokenAmount.address,
+                tradeParams.fromTokenAmount.stringWeiAmount,
+                swapData.data,
+                true
+            ]
+        ];
     }
 }

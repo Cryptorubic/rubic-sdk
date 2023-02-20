@@ -545,5 +545,12 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
         outputs: [],
         stateMutability: 'payable',
         type: 'function'
+    },
+    {
+        inputs: [],
+        name: 'approvedDexs',
+        outputs: [{ internalType: 'address[]', name: 'addresses', type: 'address[]' }],
+        stateMutability: 'view',
+        type: 'function'
     }
 ];

@@ -2,8 +2,6 @@ import BigNumber from 'bignumber.js';
 import { NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { TokenStruct } from 'src/common/tokens/token';
-import { compareAddresses } from 'src/common/utils/blockchain';
 import { parseError } from 'src/common/utils/errors';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
@@ -13,12 +11,10 @@ import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { MultichainProxyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/dex-multichain-provider/models/supported-blockchain';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { feeLibraryAbi } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/fee-library-abi';
 import { StargateBridgeToken } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-bridge-token';
 import { stargateFeeLibraryContractAddress } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-fee-library-contract-address';
@@ -26,8 +22,6 @@ import { stargatePoolAbi } from 'src/features/cross-chain/calculation-manager/pr
 import { stargatePoolId } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-id';
 import { stargatePoolMapping } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-mapping';
 import { stargatePoolsDecimals } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pools-decimals';
-import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
-import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 import { stargateBlockchainSupportedPools } from './constants/stargate-blockchain-supported-pool';
@@ -104,37 +98,38 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            const transitToken = hasDirectRoute
-                ? from
-                : await this.getPoolToken(1, from.blockchain);
-
+            const transitToken = await this.getTransitToken(hasDirectRoute, from, toToken);
+            let transitTokenAmount = fromWithoutFee;
             let onChainTrade: EvmOnChainTrade | null = null;
 
             if (!hasDirectRoute) {
-                // @TODO CCR
-                // const compexRoute = await this.calculateComplexRoute(from, toToken);
-                onChainTrade = await this.getOnChainTrade(
+                const trade = await ProxyCrossChainEvmTrade.getOnChainTrade(
                     fromWithoutFee,
                     transitToken,
-                    [],
                     options.slippageTolerance
                 );
-                if (!onChainTrade) {
+                if (!trade) {
                     return {
                         trade: null,
                         error: new NotSupportedTokensError()
                     };
                 }
+                onChainTrade = trade;
+                transitTokenAmount = onChainTrade.to;
             }
 
-            const poolFee = await this.fetchPoolFees(fromWithoutFee, toToken);
-            const amountOutMin = fromWithoutFee.tokenAmount.minus(poolFee);
+            const poolFee = await this.fetchPoolFees(transitTokenAmount, toToken);
+            const amountOutMin = transitTokenAmount.tokenAmount.minus(poolFee);
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: amountOutMin
             });
 
-            const layerZeroFeeWei = await this.getLayerZeroFee(from, to, amountOutMin);
+            const layerZeroFeeWei = await this.getLayerZeroFee(
+                transitTokenAmount,
+                to,
+                amountOutMin
+            );
             const layerZeroFeeAmount = Web3Pure.fromWei(
                 layerZeroFeeWei,
                 nativeTokensList[fromBlockchain].decimals
@@ -202,32 +197,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         providerAddress: string,
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
-        const fixedFeeAmount = await this.getFixedFee(
-            fromBlockchain as EvmBlockchainName,
-            providerAddress,
-            rubicProxyContractAddress[fromBlockchain],
-            evmCommonCrossChainAbi
-        );
-
-        const feePercent = await this.getFeePercent(
-            fromBlockchain as EvmBlockchainName,
-            providerAddress,
-            rubicProxyContractAddress[fromBlockchain],
-            evmCommonCrossChainAbi
-        );
-
-        return {
-            rubicProxy: {
-                fixedFee: {
-                    amount: fixedFeeAmount,
-                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
-                },
-                platformFee: {
-                    percent: feePercent,
-                    tokenSymbol: percentFeeToken.symbol
-                }
-            }
-        };
+        return ProxyCrossChainEvmTrade.getFeeInfo(fromBlockchain, providerAddress, percentFeeToken);
     }
 
     private async checkEqFee(
@@ -380,61 +350,35 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         });
     }
 
-    private async calculateComplexRoute(
-        _from: PriceTokenAmount<EvmBlockchainName>,
-        _toToken: PriceToken<EvmBlockchainName>
-    ): Promise<undefined> {
-        // @TODO CCR
-        // const poolsFee = await this.fetchMultiplePoolFees(from, toToken);
-        // const bestSourcePool = poolsFee[0]!.pool;
-        // const [transitTokenSymbol] = Object.entries(stargatePoolId).find(
-        //     pool => pool[1] === bestSourcePool
-        // )!;
-        //
-        return undefined;
-    }
-
-    private async getOnChainTrade(
-        from: PriceTokenAmount,
-        transitToken: TokenStruct<BlockchainName>,
-        _availableDexes: string[],
-        slippageTolerance: number
-    ): Promise<EvmOnChainTrade | null> {
-        const fromBlockchain = from.blockchain as MultichainProxyCrossChainSupportedBlockchain;
-        if (compareAddresses(from.address, transitToken.address)) {
-            return null;
+    private async getTransitToken(
+        hasDirectRoute: boolean,
+        fromToken: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>
+    ) {
+        if (hasDirectRoute) {
+            return fromToken;
         }
 
-        const dexes = Object.values(typedTradeProviders[fromBlockchain]).filter(
-            el => el.type === ON_CHAIN_TRADE_TYPE.QUICK_SWAP
-        );
-        //     .filter(
-        //     dex => dex.supportReceiverAddress
-        // );
-        const to = await PriceToken.createToken(transitToken);
-        const onChainTrades = (
-            await Promise.allSettled(
-                dexes.map(dex =>
-                    dex.calculate(from, to, {
-                        slippageTolerance,
-                        gasCalculation: 'disabled',
-                        useProxy: false
-                    })
-                )
-            )
-        )
-            .filter(value => value.status === 'fulfilled')
-            .map(value => (value as PromiseFulfilledResult<EvmOnChainTrade>).value)
-            // .filter(onChainTrade =>
-            //     availableDexes.some(availableDex =>
-            //         compareAddresses(availableDex, onChainTrade.dexContractAddress)
-            //     )
-            // )
-            .sort((a, b) => b.to.tokenAmount.comparedTo(a.to.tokenAmount));
-
-        if (!onChainTrades.length) {
-            return null;
+        const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
+        const toBlockchainDirection = stargatePoolMapping[toBlockchain];
+        if (!toBlockchainDirection) {
+            throw new RubicSdkError('Tokens are not supported.');
         }
-        return onChainTrades[0]!;
+
+        const toSymbol = toToken.symbol as StargateBridgeToken;
+        const toSymbolDirection = toBlockchainDirection[toSymbol];
+        if (!toSymbolDirection) {
+            throw new RubicSdkError('Tokens are not supported.');
+        }
+
+        const fromBlockchain = fromToken.blockchain as StargateCrossChainSupportedBlockchain;
+        const fromBlockchainDirection = toSymbolDirection[fromBlockchain];
+        if (!fromBlockchainDirection) {
+            throw new RubicSdkError('Tokens are not supported.');
+        }
+
+        const fromPoolNumber = fromBlockchainDirection[0]!;
+
+        return this.getPoolToken(fromPoolNumber, fromBlockchain);
     }
 }

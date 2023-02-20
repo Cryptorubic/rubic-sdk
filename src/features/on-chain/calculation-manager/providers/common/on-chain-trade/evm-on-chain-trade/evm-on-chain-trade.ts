@@ -240,8 +240,6 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     private async getProxyContractParams(
         options: EncodeTransactionOptions
     ): Promise<ContractParams> {
-        // @TODO CCR
-        // await this.checkProviderIsWhitelisted(directTransactionConfig.to);
         const swapData = await this.getSwapData(options);
 
         const receiverAddress = options.receiverAddress || options.fromAddress;
@@ -299,6 +297,8 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             supportFee: false,
             receiverAddress: this.contractAddress
         });
+
+        await this.checkProviderIsWhitelisted(directTransactionConfig.to);
 
         return [
             [

@@ -170,6 +170,10 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         this.transitAmount = crossChainTrade.transitAmount;
     }
 
+    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        return this.swapDirect(options);
+    }
+
     private async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         this.checkWalletConnected();
         await this.checkAllowanceAndApprove(options);
@@ -325,7 +329,6 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     }
 
     private decodeCallData(data: ArrayLike<number> | string | undefined): string {
-        // @TODO CCR
         if (typeof data === 'string') {
             const decodeData = MethodDecoder.decodeMethod(
                 meteRouterAbi.find(method => method.name === 'metaRoute')!,

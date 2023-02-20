@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { BytesLike } from 'ethers';
 import {
     FailedToCheckForTransactionReceiptError,
     NotWhitelistedProviderError,
@@ -201,29 +200,5 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         ) {
             throw new NotWhitelistedProviderError(providerRouter, providerGateway, 'crosschain');
         }
-    }
-
-    /**
-     * Get provider specific params for swap.
-     * @param _sourceData Whole swap data from provider API.
-     */
-    protected getProviderData(_sourceData: BytesLike): unknown[] {
-        return [];
-    }
-
-    /**
-     * Get onChain trade data for swap in source network.
-     * @param _options Swap options.
-     */
-    protected getSwapData(_options: GetContractParamsOptions): Promise<unknown[]> {
-        return new Promise(resolve => resolve([]));
-    }
-
-    /**
-     * Get swap specific metadata for statistics.
-     * @param _options options.
-     */
-    protected getBridgeData(_options: GetContractParamsOptions): unknown[] {
-        return [];
     }
 }

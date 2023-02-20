@@ -136,7 +136,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         },
                         transitAmount: Web3Pure.fromWei(transitToken.amount, transitToken.decimals),
                         cryptoFeeToken,
-                        // @TODO CCR
                         onChainTrade: null
                     },
                     options.providerAddress
