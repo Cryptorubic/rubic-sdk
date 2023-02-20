@@ -20,7 +20,7 @@ export class IcpWeb3Pure {
         return address === IcpWeb3Pure.EMPTY_ADDRESS;
     }
 
-    public static isAddressCorrect(address: string): boolean {
+    public static async isAddressCorrect(address: string): Promise<boolean> {
         if (address?.length !== 64) {
             return false;
         }

@@ -155,9 +155,10 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
         }
 
         await this.checkTradeErrors();
-        this.checkReceiverAddress(
+        await this.checkReceiverAddress(
             options.receiverAddress,
-            !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
+            !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain),
+            CROSS_CHAIN_TRADE_TYPE.CHANGENOW
         );
 
         const { onConfirm, gasLimit, gasPrice } = options;
@@ -266,10 +267,11 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
             throw new RubicSdkError('Cannot encode trade for non-evm blockchain');
         }
 
-        this.checkFromAddress(options.fromAddress, true);
-        this.checkReceiverAddress(
+        await this.checkFromAddress(options.fromAddress, true, CROSS_CHAIN_TRADE_TYPE.CHANGENOW);
+        await this.checkReceiverAddress(
             options.receiverAddress,
-            !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
+            !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain),
+            CROSS_CHAIN_TRADE_TYPE.CHANGENOW
         );
 
         const { gasLimit, gasPrice } = options;

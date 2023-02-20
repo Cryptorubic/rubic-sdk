@@ -28,7 +28,7 @@ export class TronWeb3Pure {
         return address === TronWeb3Pure.EMPTY_ADDRESS;
     }
 
-    public static isAddressCorrect(address: string): boolean {
+    public static async isAddressCorrect(address: string): Promise<boolean> {
         return TronWeb.isAddress(address);
     }
 

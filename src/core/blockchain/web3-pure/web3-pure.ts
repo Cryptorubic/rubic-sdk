@@ -5,28 +5,12 @@ import { Web3PureContainer } from 'src/core/blockchain/web3-pure/models/web3-pur
 import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/bitcoin-web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { IcpWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/icp-web3-pure';
-import { AionWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/aion-web3-pure';
 import { AlgorandWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/algorand-web3-pure';
-import { AptosWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/aptos-web3-pure';
-import { ArdorWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/ardor-web3-pure';
-import { ArkWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/ark-web3-pure';
-import { BandProtocolWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/band-protocol-web3-pure';
 import { CardanoWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/cardano-web3-pure';
-import { CasperWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/casper-web3-pure';
-import { CosmosWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/cosmos-web3-pure';
 import { DashWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/dash-web3-pure';
-import { DecredWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/decred-web3-pure';
-import { DigiByteWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/digi-byte-web3-pure';
-import { DiviWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/divi-web3-pure';
 import { DogecoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/dogecoin-web3-pure';
-import { FioProtocolWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/fio-protocol-web3-pure';
-import { FiroWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/firo-web3-pure';
-import { HederaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/hedera-web3-pure';
-import { HeliumWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/helium-web3-pure';
-import { IconWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/icon-web3-pure';
 import { LitecoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/litecoin-web3-pure';
 import { MoneroWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/monero-web3-pure';
-import { MultiversXWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/multivers-x-web3-pure';
 import { NearWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/near-web3-pure';
 import { PolkadotWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/polkadot-web3-pure';
 import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/solana-web3-pure';
@@ -73,7 +57,7 @@ export class Web3Pure {
 
     // @TODO create web3pure file before release
 
-    public static [CHAIN_TYPE.AION] = AionWeb3Pure;
+    public static [CHAIN_TYPE.AION] = SolanaWeb3Pure;
 
     public static [CHAIN_TYPE.BITCOIN_DIAMOND] = BitcoinWeb3Pure;
 
@@ -81,37 +65,37 @@ export class Web3Pure {
 
     public static [CHAIN_TYPE.BSV] = BitcoinWeb3Pure;
 
-    public static [CHAIN_TYPE.APTOS] = AptosWeb3Pure;
+    public static [CHAIN_TYPE.APTOS] = SolanaWeb3Pure;
 
-    public static [CHAIN_TYPE.ARDOR] = ArdorWeb3Pure;
+    public static [CHAIN_TYPE.ARDOR] = SolanaWeb3Pure;
 
-    public static [CHAIN_TYPE.ARK] = ArkWeb3Pure;
+    public static [CHAIN_TYPE.ARK] = SolanaWeb3Pure;
 
-    public static [CHAIN_TYPE.COSMOS] = CosmosWeb3Pure;
+    public static [CHAIN_TYPE.COSMOS] = SolanaWeb3Pure;
 
-    public static [CHAIN_TYPE.BAND_PROTOCOL] = BandProtocolWeb3Pure;
+    public static [CHAIN_TYPE.BAND_PROTOCOL] = SolanaWeb3Pure;
 
-    public static [CHAIN_TYPE.CASPER] = CasperWeb3Pure;
+    public static [CHAIN_TYPE.CASPER] = SolanaWeb3Pure;
 
-    public static [CHAIN_TYPE.DECRED] = DecredWeb3Pure;
+    public static [CHAIN_TYPE.DECRED] = SolanaWeb3Pure;
 
-    public static [CHAIN_TYPE.DIGI_BYTE] = DigiByteWeb3Pure;
+    public static [CHAIN_TYPE.DIGI_BYTE] = SolanaWeb3Pure;
 
-    public static [CHAIN_TYPE.DIVI] = DiviWeb3Pure;
+    public static [CHAIN_TYPE.DIVI] = SolanaWeb3Pure;
 
-    public static [CHAIN_TYPE.MULTIVERS_X] = MultiversXWeb3Pure;
+    public static [CHAIN_TYPE.MULTIVERS_X] = SolanaWeb3Pure;
 
-    public static [CHAIN_TYPE.FIO_PROTOCOL] = FioProtocolWeb3Pure;
+    public static [CHAIN_TYPE.FIO_PROTOCOL] = SolanaWeb3Pure;
 
-    public static [CHAIN_TYPE.FIRO] = FiroWeb3Pure;
+    public static [CHAIN_TYPE.FIRO] = SolanaWeb3Pure;
 
     public static [CHAIN_TYPE.FLOW] = SolanaWeb3Pure;
 
-    public static [CHAIN_TYPE.HEDERA] = HederaWeb3Pure;
+    public static [CHAIN_TYPE.HEDERA] = SolanaWeb3Pure;
 
-    public static [CHAIN_TYPE.HELIUM] = HeliumWeb3Pure;
+    public static [CHAIN_TYPE.HELIUM] = SolanaWeb3Pure;
 
-    public static [CHAIN_TYPE.ICON] = IconWeb3Pure;
+    public static [CHAIN_TYPE.ICON] = SolanaWeb3Pure;
 
     public static [CHAIN_TYPE.IOST] = SolanaWeb3Pure;
 

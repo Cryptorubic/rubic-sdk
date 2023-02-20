@@ -70,7 +70,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
         options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
     ): Promise<string | never> {
         await this.checkTradeErrors();
-        this.checkReceiverAddress(options.receiverAddress, true);
+        await this.checkReceiverAddress(options.receiverAddress, true);
 
         await this.checkAllowanceAndApprove(options);
 
@@ -112,8 +112,8 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
     public async encode(
         options: MarkRequired<EncodeTransactionOptions, 'receiverAddress'>
     ): Promise<TronTransactionConfig> {
-        this.checkFromAddress(options.fromAddress, true);
-        this.checkReceiverAddress(options.receiverAddress, true);
+        await this.checkFromAddress(options.fromAddress, true);
+        await this.checkReceiverAddress(options.receiverAddress, true);
 
         const { contractAddress, contractAbi, methodName, methodArguments, value, feeLimit } =
             await this.getContractParams({

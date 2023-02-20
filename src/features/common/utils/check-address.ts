@@ -1,11 +1,27 @@
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Injector } from 'src/core/injector/injector';
+import { nonEvmChainAddressCorrectResponse } from 'src/features/common/models/non-evm-chain-address-correct-response';
+import {
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTradeType
+} from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
-export function isAddressCorrect(address: string, toBlockchain: BlockchainName): boolean {
+export async function isAddressCorrect(
+    address: string,
+    toBlockchain: BlockchainName,
+    crossChainType?: CrossChainTradeType | OnChainTradeType
+): Promise<boolean> {
     try {
-        const toChainType = BlockchainsInfo.getChainType(toBlockchain);
-        return Web3Pure[toChainType].isAddressCorrect(address);
+        if (crossChainType === CROSS_CHAIN_TRADE_TYPE.CHANGENOW) {
+            const response = await Injector.httpClient.get<nonEvmChainAddressCorrectResponse>(
+                `https://api.changenow.io/v2/validate/address?currency=${toBlockchain.toLowerCase()}&address=${address}`
+            );
+            return response.result;
+        }
+        return Web3Pure[BlockchainsInfo.getChainType(toBlockchain)].isAddressCorrect(address);
     } catch {
         return true;
     }

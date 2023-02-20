@@ -125,8 +125,8 @@ export class OneinchTrade extends EvmOnChainTrade {
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        this.checkFromAddress(options.fromAddress, true);
-        this.checkReceiverAddress(options.receiverAddress);
+        await this.checkFromAddress(options.fromAddress, true);
+        await this.checkReceiverAddress(options.receiverAddress);
 
         try {
             const apiTradeData = await this.getTradeData(
