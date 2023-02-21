@@ -6,10 +6,10 @@ const CRC32 = require('crc-32');
 
 @staticImplements<TypedWeb3Pure>()
 export class IcpWeb3Pure {
-    public static readonly EMPTY_ADDRESS = '';
+    public static readonly EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
     public static get nativeTokenAddress(): string {
-        return '';
+        return '0x0000000000000000000000000000000000000000';
     }
 
     public static isNativeAddress(address: string): boolean {
