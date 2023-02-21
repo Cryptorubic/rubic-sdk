@@ -13,6 +13,7 @@ import { LitecoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/
 import { MoneroWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/monero-web3-pure';
 import { NearWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/near-web3-pure';
 import { PolkadotWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/polkadot-web3-pure';
+import { RippleWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/ripple-web3-pure';
 import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/solana-web3-pure';
 import { TezosWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/tezos-web3-pure';
 import { ZilliqaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/zilliqa-web3-pure';
@@ -31,7 +32,7 @@ export class Web3Pure {
 
     public static [CHAIN_TYPE.ICP] = IcpWeb3Pure;
 
-    public static [CHAIN_TYPE.RIPPLE] = SolanaWeb3Pure;
+    public static [CHAIN_TYPE.RIPPLE] = RippleWeb3Pure;
 
     public static [CHAIN_TYPE.CARDANO] = CardanoWeb3Pure;
 
