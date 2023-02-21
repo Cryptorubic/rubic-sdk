@@ -22,10 +22,6 @@ export class ZilliqaWeb3Pure {
     }
 
     public static async isAddressCorrect(address: string): Promise<boolean> {
-        if (address === '') {
-            return false;
-        }
-
         const response = await Injector.httpClient.get<nonEvmChainAddressCorrectResponse>(
             `https://api.changenow.io/v2/validate/address?currency=${changenowApiBlockchain.ZILLIQA}&address=${address}`
         );
