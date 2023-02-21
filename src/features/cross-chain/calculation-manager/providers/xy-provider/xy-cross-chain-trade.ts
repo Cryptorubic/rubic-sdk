@@ -113,7 +113,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return rubicProxyContractAddress[this.fromBlockchain];
+        return rubicProxyContractAddress[this.fromBlockchain].gateway;
     }
 
     public readonly feeInfo: FeeInfo;
@@ -200,7 +200,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             this.onChainTrade &&
             (await ProxyCrossChainEvmTrade.getSwapData(options, {
                 walletAddress: this.walletAddress,
-                contractAddress: this.fromContractAddress,
+                contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
                 fromTokenAmount: this.from,
                 toTokenAmount: this.onChainTrade.to,
                 onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
@@ -214,7 +214,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         const value = this.getSwapValue(providerValue?.toString());
 
         return {
-            contractAddress: this.fromContractAddress,
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
             contractAbi: evmCommonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,

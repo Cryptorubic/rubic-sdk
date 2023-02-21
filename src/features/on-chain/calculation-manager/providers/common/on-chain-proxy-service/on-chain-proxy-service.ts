@@ -34,7 +34,7 @@ export class OnChainProxyService {
     ): Promise<OnChainProxyFeeInfo> {
         const fromBlockchain = from.blockchain;
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-        const contractAddress = rubicProxyContractAddress[fromBlockchain];
+        const contractAddress = rubicProxyContractAddress[fromBlockchain].router;
 
         let fixedCryptoFeeWei: string | undefined;
         let platformFeePercent: number;

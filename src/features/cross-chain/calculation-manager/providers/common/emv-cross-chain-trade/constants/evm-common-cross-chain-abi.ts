@@ -104,6 +104,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     },
                     {
                         internalType: 'address',
+                        name: 'receivingAssetId',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
                         name: 'receiver',
                         type: 'address'
                     },
@@ -194,6 +199,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'address', name: 'referrer', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'receivingAssetId',
+                        type: 'address'
+                    },
                     { internalType: 'address', name: 'receiver', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
@@ -209,6 +219,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'callTo', type: 'address' },
                     { internalType: 'address', name: 'approveTo', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'receivingAssetId',
+                        type: 'address'
+                    },
                     { internalType: 'address', name: 'receivingAssetId', type: 'address' },
                     { internalType: 'uint256', name: 'fromAmount', type: 'uint256' },
                     { internalType: 'bytes', name: 'callData', type: 'bytes' },
@@ -248,6 +263,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'address', name: 'referrer', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'receivingAssetId',
+                        type: 'address'
+                    },
                     { internalType: 'address', name: 'receiver', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
@@ -263,6 +283,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'callTo', type: 'address' },
                     { internalType: 'address', name: 'approveTo', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'receivingAssetId',
+                        type: 'address'
+                    },
                     { internalType: 'address', name: 'receivingAssetId', type: 'address' },
                     { internalType: 'uint256', name: 'fromAmount', type: 'uint256' },
                     { internalType: 'bytes', name: 'callData', type: 'bytes' },
@@ -313,6 +338,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'address', name: 'referrer', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'receivingAssetId',
+                        type: 'address'
+                    },
                     { internalType: 'address', name: 'receiver', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
@@ -410,6 +440,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'address', name: 'referrer', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'receivingAssetId',
+                        type: 'address'
+                    },
                     { internalType: 'address', name: 'receiver', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
@@ -425,6 +460,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'callTo', type: 'address' },
                     { internalType: 'address', name: 'approveTo', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'receivingAssetId',
+                        type: 'address'
+                    },
                     { internalType: 'address', name: 'receivingAssetId', type: 'address' },
                     { internalType: 'uint256', name: 'fromAmount', type: 'uint256' },
                     { internalType: 'bytes', name: 'callData', type: 'bytes' },
@@ -463,6 +503,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'address', name: 'referrer', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'receivingAssetId',
+                        type: 'address'
+                    },
                     { internalType: 'address', name: 'receiver', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
@@ -502,6 +547,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'address', name: 'referrer', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
+                    {
+                        internalType: 'address',
+                        name: 'receivingAssetId',
+                        type: 'address'
+                    },
                     { internalType: 'address', name: 'receiver', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },

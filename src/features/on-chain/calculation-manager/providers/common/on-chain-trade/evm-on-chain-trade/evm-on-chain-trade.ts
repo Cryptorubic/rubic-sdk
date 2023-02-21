@@ -67,7 +67,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
     private get contractAddress(): string {
         return this.useProxy
-            ? rubicProxyContractAddress[this.from.blockchain]
+            ? rubicProxyContractAddress[this.from.blockchain].gateway
             : this.dexContractAddress;
     }
 
@@ -257,7 +257,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             .toFixed(0);
 
         return {
-            contractAddress: this.contractAddress,
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
             contractAbi: evmCommonCrossChainAbi,
             methodName: 'swapTokensGeneric',
             methodArguments,

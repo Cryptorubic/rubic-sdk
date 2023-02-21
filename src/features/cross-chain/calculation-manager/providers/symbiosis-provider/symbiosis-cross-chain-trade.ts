@@ -137,10 +137,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         return this.from.blockchain as SymbiosisCrossChainSupportedBlockchain;
     }
 
-    // used for approve
     protected get fromContractAddress(): string {
-        // return SYMBIOSIS_CONTRACT_ADDRESS_V2[this.fromBlockchain].providerGateway;
-        return rubicProxyContractAddress[this.fromBlockchain];
+        return rubicProxyContractAddress[this.fromBlockchain].gateway;
     }
 
     protected get methodName(): string {
@@ -206,7 +204,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             this.onChainTrade &&
             (await ProxyCrossChainEvmTrade.getSwapData(options, {
                 walletAddress: this.walletAddress,
-                contractAddress: this.fromContractAddress,
+                contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
                 fromTokenAmount: this.from,
                 toTokenAmount: this.onChainTrade.to,
                 onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
@@ -220,7 +218,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         const value = this.getSwapValue(providerValue?.toString());
 
         return {
-            contractAddress: this.fromContractAddress,
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
             contractAbi: evmCommonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,

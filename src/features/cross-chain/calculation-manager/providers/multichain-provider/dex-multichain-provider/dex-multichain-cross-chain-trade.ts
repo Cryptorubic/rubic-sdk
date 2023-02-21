@@ -95,7 +95,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
     protected get fromContractAddress(): string {
         return rubicProxyContractAddress[
             this.from.blockchain as MultichainProxyCrossChainSupportedBlockchain
-        ];
+        ].gateway;
     }
 
     constructor(

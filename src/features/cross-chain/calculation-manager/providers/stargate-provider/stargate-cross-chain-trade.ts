@@ -133,7 +133,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return rubicProxyContractAddress[this.fromBlockchain];
+        return rubicProxyContractAddress[this.fromBlockchain].gateway;
     }
 
     private readonly onChainTrade: EvmOnChainTrade | null;
@@ -268,7 +268,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             this.onChainTrade &&
             (await ProxyCrossChainEvmTrade.getSwapData(options, {
                 walletAddress: this.walletAddress,
-                contractAddress: this.fromContractAddress,
+                contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
                 fromTokenAmount: this.from,
                 toTokenAmount: this.onChainTrade.to,
                 onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
@@ -286,7 +286,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         const value = this.getSwapValue(lzWeiFee);
 
         return {
-            contractAddress: this.fromContractAddress,
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
             contractAbi: evmCommonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,

@@ -29,14 +29,14 @@ export class ProxyCrossChainEvmTrade {
         const fixedFeeAmount = await ProxyCrossChainEvmTrade.getFixedFee(
             fromBlockchain,
             providerAddress,
-            rubicProxyContractAddress[fromBlockchain],
+            rubicProxyContractAddress[fromBlockchain].router,
             evmCommonCrossChainAbi
         );
 
         const feePercent = await ProxyCrossChainEvmTrade.getFeePercent(
             fromBlockchain,
             providerAddress,
-            rubicProxyContractAddress[fromBlockchain],
+            rubicProxyContractAddress[fromBlockchain].router,
             evmCommonCrossChainAbi
         );
 
@@ -174,7 +174,7 @@ export class ProxyCrossChainEvmTrade {
     public static async getWhitelistedDexes(fromBlockchain: EvmBlockchainName): Promise<string[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
         return web3Public.callContractMethod<string[]>(
-            rubicProxyContractAddress[fromBlockchain],
+            rubicProxyContractAddress[fromBlockchain].router,
             evmCommonCrossChainAbi,
             'approvedDexs'
         );
@@ -197,6 +197,7 @@ export class ProxyCrossChainEvmTrade {
             tradeParams.providerAddress,
             EvmWeb3Pure.randomHex(20),
             fromToken.address,
+            tradeParams.toTokenAmount.address,
             receiverAddress,
             fromToken.stringWeiAmount,
             toChainId,
