@@ -9,7 +9,7 @@ export class IcpWeb3Pure {
     public static readonly EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
     public static get nativeTokenAddress(): string {
-        return '0x0000000000000000000000000000000000000000';
+        return IcpWeb3Pure.EMPTY_ADDRESS;
     }
 
     public static isNativeAddress(address: string): boolean {
