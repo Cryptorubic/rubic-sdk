@@ -1,7 +1,7 @@
 import { Token } from 'src/common/tokens/token';
-import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
-export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
+export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: new Token({
         blockchain: BLOCKCHAIN_NAME.ETHEREUM,
         address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
@@ -71,20 +71,6 @@ export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
         name: 'Wrapped Telos',
         symbol: 'WTLOS',
         decimals: 18
-    }),
-    [BLOCKCHAIN_NAME.SOLANA]: new Token({
-        blockchain: BLOCKCHAIN_NAME.SOLANA,
-        address: '@TODO SOLANA',
-        name: 'Solana',
-        symbol: 'SOL',
-        decimals: 24
-    }),
-    [BLOCKCHAIN_NAME.NEAR]: new Token({
-        blockchain: BLOCKCHAIN_NAME.NEAR,
-        address: '@TODO NEAR',
-        name: 'NEAR',
-        symbol: 'NEAR',
-        decimals: 24
     }),
     [BLOCKCHAIN_NAME.OPTIMISM]: new Token({
         blockchain: BLOCKCHAIN_NAME.OPTIMISM,
@@ -176,20 +162,6 @@ export const wrappedNativeTokensList: Record<BlockchainName, Token> = {
         name: 'Wrapped Kava',
         symbol: 'WKAVA',
         decimals: 18
-    }),
-    [BLOCKCHAIN_NAME.BITCOIN]: new Token({
-        blockchain: BLOCKCHAIN_NAME.BITCOIN,
-        address: '',
-        name: 'Bitcoin',
-        symbol: 'BTC',
-        decimals: 8
-    }),
-    [BLOCKCHAIN_NAME.TRON]: new Token({
-        blockchain: BLOCKCHAIN_NAME.TRON,
-        address: 'TNUC9Qb1rRpS5CbWLmNMxXBjyFoydXjWFR',
-        name: 'Wrapped TRX',
-        symbol: 'WTRX',
-        decimals: 6
     }),
     [BLOCKCHAIN_NAME.BITGERT]: new Token({
         blockchain: BLOCKCHAIN_NAME.BITGERT,

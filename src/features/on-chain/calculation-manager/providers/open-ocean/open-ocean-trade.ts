@@ -100,7 +100,7 @@ export class OpenOceanTrade extends EvmOnChainTrade {
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        this.checkFromAddress(options.fromAddress, true);
+        await this.checkFromAddress(options.fromAddress, true);
         checkUnsupportedReceiverAddress(options?.receiverAddress, this.walletAddress);
 
         try {

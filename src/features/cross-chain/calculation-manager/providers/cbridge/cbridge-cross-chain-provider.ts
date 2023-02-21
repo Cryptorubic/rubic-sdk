@@ -235,7 +235,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         );
         const supportedFromNative = config.chain_token?.[fromChainId]?.token.find(
             el =>
-                wrappedNativeTokensList[fromToken.blockchain].symbol.toLowerCase() ===
+                wrappedNativeTokensList[fromToken.blockchain]!.symbol.toLowerCase() ===
                     el.token.symbol.toLowerCase() ||
                 nativeTokensList[fromToken.blockchain].symbol.toLowerCase() ===
                     el.token.symbol.toLowerCase()
@@ -249,7 +249,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             el =>
                 compareAddresses(
                     el.token.address,
-                    wrappedNativeTokensList[toToken.blockchain].address
+                    wrappedNativeTokensList[toToken.blockchain]!.address
                 ) ||
                 compareAddresses(el.token.address, nativeTokensList[toToken.blockchain].address)
         );
@@ -332,7 +332,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 
             const fromTokenAddress = fromToken.isNative
-                ? wrappedNativeTokensList[fromBlockchain].address
+                ? wrappedNativeTokensList[fromBlockchain]!.address
                 : fromToken.address;
 
             const minAmountString = await web3Public.callContractMethod(

@@ -55,6 +55,11 @@ export interface CrossChainOptions {
     rangoDisabledBridgeTypes?: RangoBridgeTypes[];
 
     lifiDisabledBridgeTypes?: LifiBridgeTypes[];
+
+    /**
+     * True, if changenow must be calculated for non-evm source blockchains.
+     */
+    changenowFullyEnabled?: boolean;
 }
 
 export type RequiredCrossChainOptions = MarkRequired<
@@ -66,4 +71,5 @@ export type RequiredCrossChainOptions = MarkRequired<
     | 'deadline'
     | 'providerAddress'
     | 'timeout'
+    | 'changenowFullyEnabled'
 >;

@@ -3,7 +3,7 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultPolygonRoutingProvidersAddresses = [
-    wrappedNativeTokensList[BLOCKCHAIN_NAME.POLYGON].address, // WMATIC
+    wrappedNativeTokensList[BLOCKCHAIN_NAME.POLYGON]!.address, // WMATIC
     '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619', // WETH
     '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063', // DAI
     '0xc2132D05D31c914a87C6611C10748AEb04B58e8F', // USDT
@@ -11,7 +11,7 @@ const defaultPolygonRoutingProvidersAddresses = [
     '0x831753DD7087CaC61aB5644b308642cc1c33Dc13' // QUICK
 ];
 
-const defaultPolygonWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.POLYGON].address;
+const defaultPolygonWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.POLYGON]!.address;
 
 export const defaultPolygonProviderConfiguration: UniswapV2ProviderConfiguration = {
     maxTransitTokens: 3,

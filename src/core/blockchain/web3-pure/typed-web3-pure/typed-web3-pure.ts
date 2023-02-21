@@ -18,5 +18,5 @@ export interface TypedWeb3Pure {
      * Checks if a given address is a valid Ethereum address.
      * @param address The address to check validity of.
      */
-    isAddressCorrect(address: string): boolean;
+    isAddressCorrect(address: string): Promise<boolean>;
 }

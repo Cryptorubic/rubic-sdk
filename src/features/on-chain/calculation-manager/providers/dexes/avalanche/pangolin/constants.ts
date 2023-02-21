@@ -6,7 +6,7 @@ import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculatio
 export const PANGOLIN_CONTRACT_ADDRESS = '0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106';
 
 const routingProvidersAddresses = [
-    wrappedNativeTokensList[BLOCKCHAIN_NAME.AVALANCHE].address, // WAVAX
+    wrappedNativeTokensList[BLOCKCHAIN_NAME.AVALANCHE]!.address, // WAVAX
     '0xc7198437980c041c805A1EDcbA50c1Ce5db95118', // USDT
     '0x60781C2586D68229fde47564546784ab3fACA982', // PNG
     '0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB', // WETH

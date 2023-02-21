@@ -135,7 +135,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
     ): Promise<string | never> {
         await this.checkTradeErrors();
-        this.checkReceiverAddress(options.receiverAddress, true);
+        await this.checkReceiverAddress(options.receiverAddress, true);
 
         await this.checkAllowanceAndApprove(options);
 
