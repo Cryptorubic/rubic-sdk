@@ -1,8 +1,7 @@
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { staticImplements } from 'src/common/utils/decorators';
+import { isChangenowReceiverAddressCorrect } from 'src/core/blockchain/utils/changenow-receiver-address-validator';
 import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
-import { Injector } from 'src/core/injector/injector';
-import { nonEvmChainAddressCorrectResponse } from 'src/features/common/models/non-evm-chain-address-correct-response';
 import { changenowApiBlockchain } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
 
 @staticImplements<TypedWeb3Pure>()
@@ -22,9 +21,10 @@ export class LitecoinWeb3Pure {
     }
 
     public static async isAddressCorrect(address: string): Promise<boolean> {
-        const response = await Injector.httpClient.get<nonEvmChainAddressCorrectResponse>(
-            `https://api.changenow.io/v2/validate/address?currency=${changenowApiBlockchain.LITECOIN}&address=${address}`
+        return isChangenowReceiverAddressCorrect(
+            address,
+            changenowApiBlockchain.LITECOIN,
+            /^(L|M|3)[A-Za-z0-9]{33}$|^(ltc1)[0-9A-Za-z]{39}$/
         );
-        return response.result;
     }
 }

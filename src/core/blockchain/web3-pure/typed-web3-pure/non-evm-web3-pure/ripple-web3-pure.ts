@@ -1,8 +1,7 @@
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { staticImplements } from 'src/common/utils/decorators';
+import { isChangenowReceiverAddressCorrect } from 'src/core/blockchain/utils/changenow-receiver-address-validator';
 import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
-import { Injector } from 'src/core/injector/injector';
-import { nonEvmChainAddressCorrectResponse } from 'src/features/common/models/non-evm-chain-address-correct-response';
 import { changenowApiBlockchain } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
 
 @staticImplements<TypedWeb3Pure>()
@@ -22,9 +21,10 @@ export class RippleWeb3Pure {
     }
 
     public static async isAddressCorrect(address: string): Promise<boolean> {
-        const response = await Injector.httpClient.get<nonEvmChainAddressCorrectResponse>(
-            `https://api.changenow.io/v2/validate/address?currency=${changenowApiBlockchain.RIPPLE}&address=${address}`
+        return isChangenowReceiverAddressCorrect(
+            address,
+            changenowApiBlockchain.RIPPLE,
+            /^r[1-9A-HJ-NP-Za-km-z]{25,34}$/
         );
-        return response.result;
     }
 }
