@@ -13,12 +13,6 @@ export const isChangenowReceiverAddressCorrect = async (
 
         return response.result;
     } catch (error) {
-        if (address === null) {
-            return false;
-        }
-
-        const isCorrect = address.match(regEx);
-
-        return !!(isCorrect !== null && isCorrect[0]);
+        return regEx.test(address);
     }
 };
