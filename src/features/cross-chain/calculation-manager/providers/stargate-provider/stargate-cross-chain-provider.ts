@@ -17,6 +17,7 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { feeLibraryAbi } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/fee-library-abi';
 import { StargateBridgeToken } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-bridge-token';
+import { stargateFactoryAbi } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-factory-abi';
 import { stargateFeeLibraryContractAddress } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-fee-library-contract-address';
 import { stargatePoolAbi } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-abi';
 import { stargatePoolId } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-id';
@@ -330,10 +331,17 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     ): Promise<PriceToken> {
         const web3Adapter = Injector.web3PublicService.getWeb3Public(fromBlockchain);
 
-        const poolAddress = await web3Adapter.callContractMethod(
+        const factoryAddress = await web3Adapter.callContractMethod(
             stargateContractAddress[fromBlockchain as StargateCrossChainSupportedBlockchain],
             stargateRouterAbi,
-            'pool',
+            'factory',
+            []
+        );
+
+        const poolAddress = await web3Adapter.callContractMethod(
+            factoryAddress,
+            stargateFactoryAbi,
+            'getPool',
             [poolId]
         );
 

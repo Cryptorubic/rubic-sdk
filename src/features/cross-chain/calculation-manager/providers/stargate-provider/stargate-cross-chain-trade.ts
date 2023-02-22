@@ -251,7 +251,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const lzTxConfig = await StargateCrossChainTrade.getLayerZeroSwapData(
-            this.from,
+            this.onChainTrade ? this.onChainTrade.to : this.from,
             this.to,
             this.toTokenAmountMin
         );
@@ -375,7 +375,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
 
     protected getProviderData(_sourceData: BytesLike): unknown[] {
         const pool = stargatePoolId[this.to.symbol as StargateBridgeToken];
-        const targetPoolDecimals = stargatePoolsDecimals[this.from.symbol as StargateBridgeToken];
+        const targetPoolDecimals = stargatePoolsDecimals[this.to.symbol as StargateBridgeToken];
         const amount = Web3Pure.toWei(this.toTokenAmountMin, targetPoolDecimals);
         const fee = Web3Pure.toWei(
             this.feeInfo.provider!.cryptoFee!.amount,

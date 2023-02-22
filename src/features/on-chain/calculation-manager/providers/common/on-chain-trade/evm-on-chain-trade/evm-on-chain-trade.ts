@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import {
     FailedToCheckForTransactionReceiptError,
+    NotWhitelistedProviderError,
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
@@ -20,6 +21,7 @@ import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
@@ -293,12 +295,16 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     protected async getSwapData(options: GetContractParamsOptions): Promise<unknown[]> {
         const directTransactionConfig = await this.encodeDirect({
             ...options,
-            fromAddress: this.contractAddress,
+            fromAddress: rubicProxyContractAddress[this.from.blockchain].router,
             supportFee: false,
-            receiverAddress: this.contractAddress
+            receiverAddress: rubicProxyContractAddress[this.from.blockchain].router
         });
-
-        await this.checkProviderIsWhitelisted(directTransactionConfig.to);
+        const availableDexs = (
+            await ProxyCrossChainEvmTrade.getWhitelistedDexes(this.from.blockchain)
+        ).map(address => address.toLowerCase());
+        if (!availableDexs.includes(directTransactionConfig.to.toLowerCase())) {
+            throw new NotWhitelistedProviderError(directTransactionConfig.to, undefined, 'dex');
+        }
 
         return [
             [

@@ -8,6 +8,15 @@ export const rubicProxyContractAddress: Record<
     }
 > = Object.values(BLOCKCHAIN_NAME).reduce(
     (acc, blockchain) => {
+        if (blockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN) {
+            return {
+                ...acc,
+                [blockchain]: {
+                    gateway: '0x03260E497f1106B8562068A8673B8bCEBB9da123',
+                    router: '0x11e370396AcE2B5d1056D5B0d46316fE08c073a6'
+                }
+            };
+        }
         // if (blockchain === BLOCKCHAIN_NAME.POLYGON) {
         //     contractAddress = '0x6c85a9ed880565f30852ebf5f0da97b5e80aa328';
         //     x

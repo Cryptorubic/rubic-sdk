@@ -199,11 +199,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'address', name: 'referrer', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
-                    {
-                        internalType: 'address',
-                        name: 'receivingAssetId',
-                        type: 'address'
-                    },
+                    { internalType: 'address', name: 'receivingAssetId', type: 'address' },
                     { internalType: 'address', name: 'receiver', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
@@ -219,11 +215,6 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'callTo', type: 'address' },
                     { internalType: 'address', name: 'approveTo', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
-                    {
-                        internalType: 'address',
-                        name: 'receivingAssetId',
-                        type: 'address'
-                    },
                     { internalType: 'address', name: 'receivingAssetId', type: 'address' },
                     { internalType: 'uint256', name: 'fromAmount', type: 'uint256' },
                     { internalType: 'bytes', name: 'callData', type: 'bytes' },
@@ -263,11 +254,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'address', name: 'referrer', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
-                    {
-                        internalType: 'address',
-                        name: 'receivingAssetId',
-                        type: 'address'
-                    },
+                    { internalType: 'address', name: 'receivingAssetId', type: 'address' },
                     { internalType: 'address', name: 'receiver', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
@@ -283,11 +270,6 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'callTo', type: 'address' },
                     { internalType: 'address', name: 'approveTo', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
-                    {
-                        internalType: 'address',
-                        name: 'receivingAssetId',
-                        type: 'address'
-                    },
                     { internalType: 'address', name: 'receivingAssetId', type: 'address' },
                     { internalType: 'uint256', name: 'fromAmount', type: 'uint256' },
                     { internalType: 'bytes', name: 'callData', type: 'bytes' },
@@ -338,11 +320,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'address', name: 'referrer', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
-                    {
-                        internalType: 'address',
-                        name: 'receivingAssetId',
-                        type: 'address'
-                    },
+                    { internalType: 'address', name: 'receivingAssetId', type: 'address' },
                     { internalType: 'address', name: 'receiver', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
@@ -396,16 +374,61 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
         inputs: [
             {
                 components: [
-                    { internalType: 'bytes32', name: 'transactionId', type: 'bytes32' },
-                    { internalType: 'string', name: 'bridge', type: 'string' },
-                    { internalType: 'address', name: 'integrator', type: 'address' },
-                    { internalType: 'address', name: 'referrer', type: 'address' },
-                    { internalType: 'address', name: 'sendingAssetId', type: 'address' },
-                    { internalType: 'address', name: 'receiver', type: 'address' },
-                    { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
-                    { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
-                    { internalType: 'bool', name: 'hasSourceSwaps', type: 'bool' },
-                    { internalType: 'bool', name: 'hasDestinationCall', type: 'bool' }
+                    {
+                        internalType: 'bytes32',
+                        name: 'transactionId',
+                        type: 'bytes32'
+                    },
+                    {
+                        internalType: 'string',
+                        name: 'bridge',
+                        type: 'string'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'integrator',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'referrer',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'sendingAssetId',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'receivingAssetId',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'receiver',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'minAmount',
+                        type: 'uint256'
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'destinationChainId',
+                        type: 'uint256'
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'hasSourceSwaps',
+                        type: 'bool'
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'hasDestinationCall',
+                        type: 'bool'
+                    }
                 ],
                 internalType: 'struct IRubic.BridgeData',
                 name: '_bridgeData',
@@ -413,13 +436,195 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
             },
             {
                 components: [
-                    { internalType: 'uint256', name: 'dstPoolId', type: 'uint256' },
-                    { internalType: 'uint256', name: 'minAmountLD', type: 'uint256' },
-                    { internalType: 'uint256', name: 'dstGasForCall', type: 'uint256' },
-                    { internalType: 'uint256', name: 'lzFee', type: 'uint256' },
-                    { internalType: 'address payable', name: 'refundAddress', type: 'address' },
-                    { internalType: 'bytes', name: 'callTo', type: 'bytes' },
-                    { internalType: 'bytes', name: 'callData', type: 'bytes' }
+                    {
+                        internalType: 'address',
+                        name: 'callTo',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'approveTo',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'sendingAssetId',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'receivingAssetId',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'fromAmount',
+                        type: 'uint256'
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'callData',
+                        type: 'bytes'
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'requiresDeposit',
+                        type: 'bool'
+                    }
+                ],
+                internalType: 'struct LibSwap.SwapData[]',
+                name: '_swapData',
+                type: 'tuple[]'
+            },
+            {
+                components: [
+                    {
+                        internalType: 'uint256',
+                        name: 'dstPoolId',
+                        type: 'uint256'
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'minAmountLD',
+                        type: 'uint256'
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'dstGasForCall',
+                        type: 'uint256'
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'lzFee',
+                        type: 'uint256'
+                    },
+                    {
+                        internalType: 'address payable',
+                        name: 'refundAddress',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'callTo',
+                        type: 'bytes'
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'callData',
+                        type: 'bytes'
+                    }
+                ],
+                internalType: 'struct StargateFacet.StargateData',
+                name: '_stargateData',
+                type: 'tuple'
+            }
+        ],
+        name: 'swapAndStartBridgeTokensViaStargate',
+        outputs: [],
+        stateMutability: 'payable',
+        type: 'function'
+    },
+    {
+        inputs: [
+            {
+                components: [
+                    {
+                        internalType: 'bytes32',
+                        name: 'transactionId',
+                        type: 'bytes32'
+                    },
+                    {
+                        internalType: 'string',
+                        name: 'bridge',
+                        type: 'string'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'integrator',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'referrer',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'sendingAssetId',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'receivingAssetId',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'receiver',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'minAmount',
+                        type: 'uint256'
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'destinationChainId',
+                        type: 'uint256'
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'hasSourceSwaps',
+                        type: 'bool'
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'hasDestinationCall',
+                        type: 'bool'
+                    }
+                ],
+                internalType: 'struct IRubic.BridgeData',
+                name: '_bridgeData',
+                type: 'tuple'
+            },
+            {
+                components: [
+                    {
+                        internalType: 'uint256',
+                        name: 'dstPoolId',
+                        type: 'uint256'
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'minAmountLD',
+                        type: 'uint256'
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'dstGasForCall',
+                        type: 'uint256'
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'lzFee',
+                        type: 'uint256'
+                    },
+                    {
+                        internalType: 'address payable',
+                        name: 'refundAddress',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'callTo',
+                        type: 'bytes'
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'callData',
+                        type: 'bytes'
+                    }
                 ],
                 internalType: 'struct StargateFacet.StargateData',
                 name: '_stargateData',
@@ -440,74 +645,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'address', name: 'referrer', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
-                    {
-                        internalType: 'address',
-                        name: 'receivingAssetId',
-                        type: 'address'
-                    },
-                    { internalType: 'address', name: 'receiver', type: 'address' },
-                    { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
-                    { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
-                    { internalType: 'bool', name: 'hasSourceSwaps', type: 'bool' },
-                    { internalType: 'bool', name: 'hasDestinationCall', type: 'bool' }
-                ],
-                internalType: 'struct IRubic.BridgeData',
-                name: '_bridgeData',
-                type: 'tuple'
-            },
-            {
-                components: [
-                    { internalType: 'address', name: 'callTo', type: 'address' },
-                    { internalType: 'address', name: 'approveTo', type: 'address' },
-                    { internalType: 'address', name: 'sendingAssetId', type: 'address' },
-                    {
-                        internalType: 'address',
-                        name: 'receivingAssetId',
-                        type: 'address'
-                    },
                     { internalType: 'address', name: 'receivingAssetId', type: 'address' },
-                    { internalType: 'uint256', name: 'fromAmount', type: 'uint256' },
-                    { internalType: 'bytes', name: 'callData', type: 'bytes' },
-                    { internalType: 'bool', name: 'requiresDeposit', type: 'bool' }
-                ],
-                internalType: 'struct LibSwap.SwapData[]',
-                name: '_swapData',
-                type: 'tuple[]'
-            },
-            {
-                components: [
-                    { internalType: 'uint256', name: 'dstPoolId', type: 'uint256' },
-                    { internalType: 'uint256', name: 'minAmountLD', type: 'uint256' },
-                    { internalType: 'uint256', name: 'dstGasForCall', type: 'uint256' },
-                    { internalType: 'uint256', name: 'lzFee', type: 'uint256' },
-                    { internalType: 'address payable', name: 'refundAddress', type: 'address' },
-                    { internalType: 'bytes', name: 'callTo', type: 'bytes' },
-                    { internalType: 'bytes', name: 'callData', type: 'bytes' }
-                ],
-                internalType: 'struct StargateFacet.StargateData',
-                name: '_stargateData',
-                type: 'tuple'
-            }
-        ],
-        name: 'swapAndStartBridgeTokensViaStargate',
-        outputs: [],
-        stateMutability: 'payable',
-        type: 'function'
-    },
-    {
-        inputs: [
-            {
-                components: [
-                    { internalType: 'bytes32', name: 'transactionId', type: 'bytes32' },
-                    { internalType: 'string', name: 'bridge', type: 'string' },
-                    { internalType: 'address', name: 'integrator', type: 'address' },
-                    { internalType: 'address', name: 'referrer', type: 'address' },
-                    { internalType: 'address', name: 'sendingAssetId', type: 'address' },
-                    {
-                        internalType: 'address',
-                        name: 'receivingAssetId',
-                        type: 'address'
-                    },
                     { internalType: 'address', name: 'receiver', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
@@ -547,11 +685,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'integrator', type: 'address' },
                     { internalType: 'address', name: 'referrer', type: 'address' },
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
-                    {
-                        internalType: 'address',
-                        name: 'receivingAssetId',
-                        type: 'address'
-                    },
+                    { internalType: 'address', name: 'receivingAssetId', type: 'address' },
                     { internalType: 'address', name: 'receiver', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },

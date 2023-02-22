@@ -51,5 +51,12 @@ export const stargateRouterAbi = [
         outputs: [],
         stateMutability: 'payable',
         type: 'function'
+    },
+    {
+        inputs: [],
+        name: 'factory',
+        outputs: [{ internalType: 'contract Factory', name: '', type: 'address' }],
+        stateMutability: 'view',
+        type: 'function'
     }
 ] as AbiItem[];
