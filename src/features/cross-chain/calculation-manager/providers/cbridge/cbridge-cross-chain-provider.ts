@@ -209,7 +209,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
 
     private async fetchContractAddressAndCheckTokens(
         fromTokenOrNative: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceToken<EvmBlockchainName>
+        toTokenOrNative: PriceToken<EvmBlockchainName>
     ): Promise<CelerConfig> {
         let fromToken = fromTokenOrNative;
         if (fromToken.isNative) {
@@ -220,6 +220,13 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             });
             fromToken = token as PriceTokenAmount<EvmBlockchainName>;
         }
+        let toToken = toTokenOrNative;
+        if (toToken.symbol === nativeTokensList[toToken.blockchain].symbol) {
+            const wrappedTo = wrappedNativeTokensList[toTokenOrNative.blockchain]!;
+            const token = await PriceToken.createToken(wrappedTo);
+            toToken = token as PriceToken<EvmBlockchainName>;
+        }
+
         const config = await CbridgeCrossChainApiService.getTransferConfigs();
         const fromChainId = blockchainId[fromToken.blockchain];
         const toChainId = blockchainId[toToken.blockchain];
