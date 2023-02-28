@@ -70,6 +70,7 @@
     "publish:alpha": "yarn publish --access public --tag alpha"
   },
   "dependencies": {
+    "@1inch/limit-order-protocol-utils": "^3.0.0",
     "@layerzerolabs/scan-client": "^0.0.0-beta.6",
     "@lifi/sdk": "^1.6.3",
     "@viaprotocol/router-sdk": "^1.0.7",
@@ -78,6 +79,7 @@
     "bignumber.js": "9.1.0",
     "bitcoin-address-validation": "2.2.1",
     "cbridge-revert-manager": "1.1.0",
+    "crc32": "^0.2.2",
     "ethers": "^5.6.8",
     "grpc-web": "^1.4.2",
     "lodash.clonedeep": "^4.5.0",

@@ -9,6 +9,7 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     MULTICHAIN: 'multichain',
     XY: 'xy',
     CELER_BRIDGE: 'celer_bridge',
+    CHANGENOW: 'changenow',
     STARGATE: 'stargate'
 } as const;
 

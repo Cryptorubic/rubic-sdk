@@ -165,29 +165,48 @@ export abstract class OnChainTrade {
         await this.web3Public.checkBalance(this.from, this.from.tokenAmount, this.walletAddress);
     }
 
-    protected checkFromAddress(fromAddress: string | undefined, isRequired = false): void | never {
+    protected async checkFromAddress(
+        fromAddress: string | undefined,
+        isRequired = false,
+        chainType?: OnChainTradeType
+    ): Promise<void | never> {
         if (!fromAddress) {
             if (isRequired) {
                 throw new RubicSdkError(`'fromAddress' is required option`);
             }
             return;
         }
-        if (!isAddressCorrect(fromAddress, this.from.blockchain)) {
+
+        const isAddressCorrectValue = await isAddressCorrect(
+            fromAddress,
+            this.from.blockchain,
+            chainType
+        );
+
+        if (!isAddressCorrectValue) {
             throw new WrongFromAddressError();
         }
     }
 
-    protected checkReceiverAddress(
+    protected async checkReceiverAddress(
         receiverAddress: string | undefined,
-        isRequired = false
-    ): void | never {
+        isRequired = false,
+        chainType?: OnChainTradeType
+    ): Promise<void | never> {
         if (!receiverAddress) {
             if (isRequired) {
                 throw new RubicSdkError(`'receiverAddress' is required option`);
             }
             return;
         }
-        if (!isAddressCorrect(receiverAddress, this.to.blockchain)) {
+
+        const isAddressCorrectValue = await isAddressCorrect(
+            receiverAddress,
+            this.from.blockchain,
+            chainType
+        );
+
+        if (!isAddressCorrectValue) {
             throw new WrongReceiverAddressError();
         }
     }

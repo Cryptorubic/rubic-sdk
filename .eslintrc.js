@@ -53,6 +53,7 @@ module.exports = {
                     }
                 ],
                 'no-empty': ['error', { 'allowEmptyCatch': true }],
+                'no-bitwise': 'off',
                 // Styling.
                 'array-bracket-spacing': ['error', 'never'],
                 'object-curly-spacing': ['error', 'always'],
@@ -84,7 +85,8 @@ module.exports = {
                 'import/export': 0,
                 '@typescript-eslint/no-shadow': 'off',
                 '@typescript-eslint/return-await': 'off',
-                'prefer-destructuring': 'off'
+                'prefer-destructuring': 'off',
+                'no-bitwise': 'off'
             }
         },
         {

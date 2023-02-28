@@ -212,8 +212,8 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        this.checkFromAddress(options.fromAddress, true);
-        this.checkReceiverAddress(options.receiverAddress);
+        await this.checkFromAddress(options.fromAddress, true);
+        await this.checkReceiverAddress(options.receiverAddress);
 
         if (this.useProxy) {
             return this.encodeProxy(options);

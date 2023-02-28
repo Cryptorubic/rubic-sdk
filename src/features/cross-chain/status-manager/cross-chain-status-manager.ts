@@ -6,6 +6,7 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
+import { changenowApiKey } from 'src/features/common/providers/changenow/constants/changenow-api-key';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils/get-bridgers-trade-status';
 import { getSrcTxStatus } from 'src/features/common/status-manager/utils/get-src-tx-status';
@@ -29,6 +30,10 @@ import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manag
 import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
 import { MultichainStatusMapping } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
 import { CelerTransferStatus } from 'src/features/cross-chain/status-manager/models/celer-transfer-status.enum';
+import {
+    ChangenowApiResponse,
+    ChangenowApiStatus
+} from 'src/features/cross-chain/status-manager/models/changenow-api-response';
 import { CrossChainStatus } from 'src/features/cross-chain/status-manager/models/cross-chain-status';
 import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
@@ -60,7 +65,7 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: this.getMultichainDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE]: this.getCelerBridgeDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.CHANGENOW]: this.getChangenowDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getStargateDstSwapStatus
     };
 
@@ -593,6 +598,31 @@ export class CrossChainStatusManager {
                               hash: null
                           };
             }
+        } catch {
+            return { status: TxStatus.PENDING, hash: null };
+        }
+    }
+
+    private async getChangenowDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        if (!data.changenowId) {
+            throw new RubicSdkError('Must provide changenow trade id');
+        }
+        try {
+            const { status, payoutHash } = await this.httpClient.get<ChangenowApiResponse>(
+                'https://api.changenow.io/v2/exchange/by-id',
+                {
+                    params: { id: data.changenowId },
+                    headers: { 'x-changenow-api-key': changenowApiKey }
+                }
+            );
+
+            if (status === ChangenowApiStatus.FINISHED || status === ChangenowApiStatus.REFUNDED) {
+                return { status: TxStatus.SUCCESS, hash: payoutHash };
+            }
+            if (status === ChangenowApiStatus.FAILED) {
+                return { status: TxStatus.FAIL, hash: null };
+            }
+            return { status: TxStatus.PENDING, hash: null };
         } catch {
             return { status: TxStatus.PENDING, hash: null };
         }

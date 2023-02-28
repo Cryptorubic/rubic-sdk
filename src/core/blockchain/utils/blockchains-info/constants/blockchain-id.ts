@@ -1,6 +1,12 @@
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
+const otherChains = Object.values(BLOCKCHAIN_NAME).reduce(
+    (acc, blockchain) => ({ ...acc, [blockchain]: NaN }),
+    {} as Record<BlockchainName, number>
+);
+
 export const blockchainId: Record<BlockchainName, number> = {
+    ...otherChains,
     // EVN blockchains
     [BLOCKCHAIN_NAME.ETHEREUM]: 1,
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: 56,
@@ -33,8 +39,15 @@ export const blockchainId: Record<BlockchainName, number> = {
     [BLOCKCHAIN_NAME.KLAYTN]: 8217,
     [BLOCKCHAIN_NAME.VELAS]: 106,
     [BLOCKCHAIN_NAME.SYSCOIN]: 57,
+    [BLOCKCHAIN_NAME.EOS]: 59,
+    [BLOCKCHAIN_NAME.ETHEREUM_CLASSIC]: 61,
+    [BLOCKCHAIN_NAME.FLARE]: 14,
+    [BLOCKCHAIN_NAME.IOTEX]: 4689,
+    [BLOCKCHAIN_NAME.ONTOLOGY]: 58,
+    [BLOCKCHAIN_NAME.THETA]: 361,
+    [BLOCKCHAIN_NAME.XDC]: 50,
+    [BLOCKCHAIN_NAME.BITCOIN_CASH]: 10000,
     // Non EVN blockchains
     [BLOCKCHAIN_NAME.BITCOIN]: 5555,
-    [BLOCKCHAIN_NAME.SOLANA]: NaN,
-    [BLOCKCHAIN_NAME.NEAR]: NaN
+    [BLOCKCHAIN_NAME.FILECOIN]: 314
 };

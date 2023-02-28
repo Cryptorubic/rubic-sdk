@@ -49,4 +49,9 @@ export interface CrossChainTradeData {
      * Celer bridge transaction ID.
      */
     celerTransactionId?: string;
+
+    /**
+     * Changenow trade id.
+     */
+    changenowId?: string;
 }

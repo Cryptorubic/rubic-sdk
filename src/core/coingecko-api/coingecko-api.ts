@@ -27,7 +27,8 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.DFK,
     BLOCKCHAIN_NAME.KLAYTN,
     BLOCKCHAIN_NAME.VELAS,
-    BLOCKCHAIN_NAME.SYSCOIN
+    BLOCKCHAIN_NAME.SYSCOIN,
+    BLOCKCHAIN_NAME.ICP
 ] as const;
 
 type SupportedBlockchain = (typeof supportedBlockchains)[number];
@@ -69,7 +70,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.DFK]: 'defi-kingdoms',
             [BLOCKCHAIN_NAME.KLAYTN]: 'klaytn',
             [BLOCKCHAIN_NAME.VELAS]: 'velas',
-            [BLOCKCHAIN_NAME.SYSCOIN]: 'syscoin'
+            [BLOCKCHAIN_NAME.SYSCOIN]: 'syscoin',
+            [BLOCKCHAIN_NAME.ICP]: 'internet-computer'
         };
 
         this.tokenBlockchainId = {
@@ -92,7 +94,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.DFK]: 'defi-kingdoms',
             [BLOCKCHAIN_NAME.KLAYTN]: 'klaytn',
             [BLOCKCHAIN_NAME.VELAS]: 'velas',
-            [BLOCKCHAIN_NAME.SYSCOIN]: 'syscoin'
+            [BLOCKCHAIN_NAME.SYSCOIN]: 'syscoin',
+            [BLOCKCHAIN_NAME.ICP]: 'internet-computer'
         };
     }
 
@@ -185,10 +188,16 @@ export class CoingeckoApi {
      * Gets price of common token or native coin in usd from coingecko.
      * @param token Token to get price for.
      */
-    public getTokenPrice(token: {
+    public async getTokenPrice(token: {
         address: string;
         blockchain: BlockchainName;
     }): Promise<BigNumber> {
+        if (!CoingeckoApi.isSupportedBlockchain(token.blockchain)) {
+            throw new RubicSdkError(
+                `Blockchain ${token.blockchain} is not supported by coingecko-api`
+            );
+        }
+
         const chainType = BlockchainsInfo.getChainType(token.blockchain);
         if (Web3Pure[chainType].isNativeAddress(token.address)) {
             return this.getNativeCoinPrice(token.blockchain);

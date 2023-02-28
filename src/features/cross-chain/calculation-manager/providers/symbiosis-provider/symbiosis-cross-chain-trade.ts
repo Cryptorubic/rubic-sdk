@@ -232,7 +232,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
      */
     private async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
-        this.checkReceiverAddress(
+        await this.checkReceiverAddress(
             options.receiverAddress,
             !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
         );

@@ -54,8 +54,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         [BLOCKCHAIN_NAME.POLYGON]: new OneinchPolygonProvider(),
         [BLOCKCHAIN_NAME.AVALANCHE]: new OneinchAvalancheProvider(),
         [BLOCKCHAIN_NAME.BOBA]: new OolongSwapProvider(),
-        [BLOCKCHAIN_NAME.TELOS]: new ZappyProvider(),
-        [BLOCKCHAIN_NAME.BITCOIN]: new OneinchEthereumProvider()
+        [BLOCKCHAIN_NAME.TELOS]: new ZappyProvider()
+        // [BLOCKCHAIN_NAME.BITCOIN]: new OneinchEthereumProvider()
     };
 
     public isSupportedBlockchain(
@@ -95,7 +95,14 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            const isBitcoinSwap = toBlockchain === BLOCKCHAIN_NAME.BITCOIN;
+            // await this.checkContractState(
+            //     fromBlockchain as EvmBlockchainName,
+            //     rubicProxyContractAddress[fromBlockchain],
+            //     evmCommonCrossChainAbi
+            // );
+
+            // const isBitcoinSwap = toBlockchain === BLOCKCHAIN_NAME.BITCOIN;
+            const isBitcoinSwap = false;
 
             const fromAddress =
                 options.fromAddress ||

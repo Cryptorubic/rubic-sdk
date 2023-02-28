@@ -29,7 +29,7 @@ export class EvmWeb3Pure {
         return address === EvmWeb3Pure.EMPTY_ADDRESS;
     }
 
-    public static isAddressCorrect(address: string): boolean {
+    public static async isAddressCorrect(address: string): Promise<boolean> {
         return isAddress(address);
     }
 

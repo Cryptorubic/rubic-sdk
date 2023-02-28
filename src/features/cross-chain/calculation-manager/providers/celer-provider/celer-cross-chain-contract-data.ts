@@ -118,7 +118,7 @@ export class CelerCrossChainContractData {
         toContract: CelerCrossChainContractData
     ): Promise<PriceTokenAmount<EvmBlockchainName>> {
         const feeAmount = await this.destinationCryptoFee(toContract.blockchain);
-        const nativeToken = nativeTokensList[this.blockchain];
+        const nativeToken = nativeTokensList[this.blockchain] as Token<EvmBlockchainName>;
         return PriceTokenAmount.createFromToken({
             ...nativeToken,
             weiAmount: feeAmount

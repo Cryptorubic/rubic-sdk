@@ -3,6 +3,7 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -29,6 +30,9 @@ export class Token<T extends BlockchainName = BlockchainName> {
     ): Promise<Token<T>> {
         if (tokenBaseStruct.blockchain === BLOCKCHAIN_NAME.BITCOIN) {
             return nativeTokensList[BLOCKCHAIN_NAME.BITCOIN] as Token<T>;
+        }
+        if (tokenBaseStruct.blockchain === BLOCKCHAIN_NAME.ICP) {
+            return nativeTokensList[BLOCKCHAIN_NAME.ICP] as Token<T>;
         }
 
         if (!Web3PublicService.isSupportedBlockchain(tokenBaseStruct.blockchain)) {
@@ -110,9 +114,15 @@ export class Token<T extends BlockchainName = BlockchainName> {
     public readonly decimals: number;
 
     public get isNative(): boolean {
-        return Web3Pure[BlockchainsInfo.getChainType(this.blockchain)].isNativeAddress(
-            this.address
-        );
+        const chainType: CHAIN_TYPE = BlockchainsInfo.getChainType(this.blockchain);
+
+        if (chainType && Web3Pure[chainType].isNativeAddress(this.address)) {
+            return Web3Pure[BlockchainsInfo.getChainType(this.blockchain)].isNativeAddress(
+                this.address
+            );
+        }
+
+        return this.address === Web3Pure[chainType].nativeTokenAddress;
     }
 
     constructor(tokenStruct: TokenStruct<T>) {

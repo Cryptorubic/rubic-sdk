@@ -100,7 +100,7 @@ export class DeflationTokenManager {
             return provider.blockchain === evmToken.blockchain ? provider : null;
         }).filter(notNull);
 
-        const nativeToken = nativeTokensList[evmToken.blockchain];
+        const nativeToken = nativeTokensList[evmToken.blockchain] as Token<EvmBlockchainName>;
         const from = new PriceTokenAmount({
             ...nativeToken,
             price: new BigNumber(NaN),

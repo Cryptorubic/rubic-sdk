@@ -3,7 +3,7 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-provider-configuration';
 
 const defaultKavaRoutingProvidersAddresses = [
-    wrappedNativeTokensList[BLOCKCHAIN_NAME.KAVA].address, // WKAVA
+    wrappedNativeTokensList[BLOCKCHAIN_NAME.KAVA]!.address, // WKAVA
     '0x765277eebeca2e31912c9946eae1021199b39c61', // DAI
     '0xE3F5a90F9cb311505cd691a46596599aA1A0AD7D', // ETH
     '0xab4e4bbb6d207b341cb5edbfa497d17ff5afa4d4', // JPT
@@ -12,7 +12,7 @@ const defaultKavaRoutingProvidersAddresses = [
     '0x818ec0a7fe18ff94269904fced6ae3dae6d6dc0b' // WBTC
 ];
 
-const defaultKavaWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.KAVA].address;
+const defaultKavaWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.KAVA]!.address;
 
 export const defaultKavaProviderConfiguration: UniswapV2ProviderConfiguration = {
     maxTransitTokens: 3,

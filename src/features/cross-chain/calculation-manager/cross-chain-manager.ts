@@ -225,10 +225,13 @@ export class CrossChainManager {
         fromBlockchain: BlockchainName,
         options?: CrossChainManagerCalculationOptions
     ): RequiredCrossChainManagerCalculationOptions {
-        const chainType = BlockchainsInfo.getChainType(fromBlockchain) as keyof ProviderAddress;
+        let chainType: keyof ProviderAddress | undefined;
+        try {
+            chainType = BlockchainsInfo.getChainType(fromBlockchain) as keyof ProviderAddress;
+        } catch {}
         return combineOptions(options, {
             ...defaultCrossChainCalculationOptions,
-            providerAddress: this.providerAddress[chainType]
+            providerAddress: chainType ? this.providerAddress[chainType] : ''
         });
     }
 

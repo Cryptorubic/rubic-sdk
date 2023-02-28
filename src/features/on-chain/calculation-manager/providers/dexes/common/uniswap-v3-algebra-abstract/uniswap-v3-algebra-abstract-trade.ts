@@ -208,8 +208,8 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
     protected abstract getSwapRouterExactInputMethodData(walletAddress: string): MethodData;
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        this.checkFromAddress(options.fromAddress, true);
-        this.checkReceiverAddress(options.receiverAddress);
+        await this.checkFromAddress(options.fromAddress, true);
+        await this.checkReceiverAddress(options.receiverAddress);
 
         const { methodName, methodArguments } = this.getSwapRouterMethodData(
             options.receiverAddress || options.fromAddress

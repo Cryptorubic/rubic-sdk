@@ -13,7 +13,7 @@ const tokensSymbols = ['WETH', 'GMX', 'USDC', 'WBTC', 'DAI'] as const;
 type TokenSymbol = (typeof tokensSymbols)[number];
 
 const routerTokens: Record<TokenSymbol, string> = {
-    WETH: wrappedNativeTokensList[BLOCKCHAIN_NAME.ARBITRUM].address,
+    WETH: wrappedNativeTokensList[BLOCKCHAIN_NAME.ARBITRUM]!.address,
     GMX: '0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a',
     USDC: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
     WBTC: '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',
