@@ -78,6 +78,10 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
         }
     }
 
+    protected get methodName(): string {
+        throw new RubicSdkError('No method name');
+    }
+
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CHANGENOW;
 
     public readonly isAggregator = false;
@@ -257,8 +261,8 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact ? { total: this.priceImpact } : null,
-            slippage: null
+            priceImpact: this.priceImpact || null,
+            slippage: 0
         };
     }
 

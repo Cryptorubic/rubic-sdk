@@ -243,7 +243,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                     amount: await this.getFixedFee(
                         fromBlockchain,
                         providerAddress,
-                        rubicProxyContractAddress[fromBlockchain],
+                        rubicProxyContractAddress[fromBlockchain].router,
                         evmCommonCrossChainAbi
                     ),
                     tokenSymbol: nativeTokensList[fromBlockchain].symbol
@@ -252,7 +252,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                     percent: await this.getFeePercent(
                         fromBlockchain,
                         providerAddress,
-                        rubicProxyContractAddress[fromBlockchain],
+                        rubicProxyContractAddress[fromBlockchain].router,
                         evmCommonCrossChainAbi
                     ),
                     tokenSymbol: percentFeeToken.symbol

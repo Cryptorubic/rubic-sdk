@@ -330,9 +330,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         providerAddress: string,
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
-        if (fromBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
-            return {};
-        }
         return ProxyCrossChainEvmTrade.getFeeInfo(fromBlockchain, providerAddress, percentFeeToken);
     }
 
