@@ -176,7 +176,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         this.transitAmount = crossChainTrade.transitAmount;
         this.onChainTrade = crossChainTrade?.onChainTrade || null;
         this.onChainSubtype = {
-            from: ON_CHAIN_TRADE_TYPE.ONE_INCH,
+            from: this.onChainTrade?.type,
             to:
                 crossChainTrade.to.blockchain === BLOCKCHAIN_NAME.BITCOIN
                     ? ON_CHAIN_TRADE_TYPE.REN_BTC
@@ -309,7 +309,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             '0x',
             '0x',
             EvmWeb3Pure.EMPTY_ADDRESS,
-            this.from.address,
+            this.onChainTrade ? this.onChainTrade.to.address : this.from.address,
             EvmWeb3Pure.EMPTY_ADDRESS,
             EvmWeb3Pure.EMPTY_ADDRESS,
             relay,

@@ -117,11 +117,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
             const transitToken = symbiosisTransitTokens[fromBlockchain];
 
-            const onChainTrade = (await ProxyCrossChainEvmTrade.getOnChainTrade(
+            let onChainTrade = await ProxyCrossChainEvmTrade.getOnChainTrade(
                 fromWithoutFee,
                 transitToken,
                 (options.slippageTolerance - 0.005) / 2
-            ))!;
+            );
 
             const receiverAddress = options.receiverAddress || fromAddress;
 
@@ -144,7 +144,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const {
                 tokenAmountOut,
                 priceImpact,
-                fee: transitTokenFee
+                fee: transitTokenFee,
+                route
             } = await this.getTrade(fromBlockchain, toBlockchain, {
                 tokenAmountIn,
                 tokenOut,
@@ -154,6 +155,9 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 slippage: slippageTolerance,
                 deadline
             });
+            if (this.shouldUseTransferToken(route, from)) {
+                onChainTrade = null;
+            }
 
             const swapFunction = (fromUserAddress: string, receiver?: string) => {
                 if (isBitcoinSwap && !receiver) {
@@ -394,5 +398,14 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     ): Promise<SymbiosisTradeData> {
         const zapping = this.symbiosis.newZappingRenBTC();
         return zapping.exactIn(...zappingParams);
+    }
+
+    private shouldUseTransferToken(
+        route: Token[],
+        from: PriceTokenAmount<EvmBlockchainName>
+    ): boolean {
+        const fromBlockchainId = blockchainId[from.blockchain];
+        const fromRouting = route.filter(token => token.chainId === fromBlockchainId);
+        return fromRouting.length === 1;
     }
 }

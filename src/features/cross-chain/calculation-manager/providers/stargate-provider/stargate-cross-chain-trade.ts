@@ -121,10 +121,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly toTokenAmountMin: BigNumber;
 
-    public readonly onChainSubtype: OnChainSubtype = {
-        from: undefined,
-        to: undefined
-    };
+    public readonly onChainSubtype: OnChainSubtype;
 
     public readonly bridgeType = BRIDGE_TYPE.STARGATE;
 
@@ -160,6 +157,10 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         this.gasData = crossChainTrade.gasData;
         this.feeInfo = crossChainTrade.feeInfo;
         this.onChainTrade = crossChainTrade.onChainTrade;
+        this.onChainSubtype = {
+            from: this.onChainTrade?.type,
+            to: undefined
+        };
     }
 
     private async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {

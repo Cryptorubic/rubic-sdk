@@ -118,7 +118,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
         super(crossChainTrade, providerAddress);
 
         this.onChainSubtype = crossChainTrade.onChainTrade
-            ? { from: crossChainTrade.onChainTrade.type, to: undefined }
+            ? { from: crossChainTrade.onChainTrade?.type, to: undefined }
             : { from: undefined, to: undefined };
         this.onChainTrade = crossChainTrade.onChainTrade;
     }
@@ -158,7 +158,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
         const value = this.getSwapValue();
 
         return {
-            contractAddress: this.fromContractAddress,
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
             contractAbi: evmCommonCrossChainAbi,
             methodName: this.methodName,
             methodArguments,
