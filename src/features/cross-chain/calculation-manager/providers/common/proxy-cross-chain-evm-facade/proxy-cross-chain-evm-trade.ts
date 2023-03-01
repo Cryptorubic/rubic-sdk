@@ -229,4 +229,11 @@ export class ProxyCrossChainEvmTrade {
             ]
         ];
     }
+
+    public static getGenericProviderData(
+        providerAddress: string,
+        providerData: string
+    ): [string, string] {
+        return [providerAddress, providerData];
+    }
 }
