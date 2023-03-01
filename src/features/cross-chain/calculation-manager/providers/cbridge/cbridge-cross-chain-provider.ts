@@ -7,13 +7,13 @@ import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/bl
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CbridgeCrossChainApiService } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-api-service';
 import { CbridgeCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-trade';
 import { cbridgeContractAbi } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-abi';
 import { cbridgeContractAddress } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-address';
-import { cbridgeProxyAbi } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-proxy-abi';
 import {
     CbridgeCrossChainSupportedBlockchain,
     cbridgeSupportedBlockchains
@@ -25,6 +25,7 @@ import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/cal
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
@@ -63,12 +64,15 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                 throw new RubicSdkError('To token is not supported');
             }
 
-            // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-            // const fromWithoutFee = getFromWithoutFee(
-            //     fromToken,
-            //     feeInfo.rubicProxy?.platformFee?.percent
-            // );
-            const fromWithoutFee = fromToken;
+            const feeInfo = await this.getFeeInfo(
+                fromBlockchain,
+                options.providerAddress,
+                fromToken
+            );
+            const fromWithoutFee = getFromWithoutFee(
+                fromToken,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
 
             const onChainTrade: EvmOnChainTrade | null = null;
             const transitTokenAmount = fromWithoutFee.tokenAmount;
@@ -150,9 +154,10 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                         from: fromToken,
                         to,
                         gasData,
-                        priceImpact: /* fromToken.calculatePriceImpactPercent(to)  || */ 0,
+                        priceImpact: fromToken.calculatePriceImpactPercent(to) || 0,
                         slippage: options.slippageTolerance,
                         feeInfo: {
+                            ...feeInfo,
                             provider: {
                                 cryptoFee: {
                                     amount: Web3Pure.fromWei(fee, toToken.decimals),
@@ -177,34 +182,6 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                 error: rubicSdkError
             };
         }
-    }
-
-    protected async getFeeInfo(
-        fromBlockchain: CbridgeCrossChainSupportedBlockchain,
-        providerAddress: string
-    ): Promise<FeeInfo> {
-        return {
-            rubicProxy: {
-                fixedFee: {
-                    amount: await this.getFixedFee(
-                        fromBlockchain,
-                        providerAddress,
-                        cbridgeContractAddress[fromBlockchain].rubicRouter,
-                        cbridgeProxyAbi
-                    ),
-                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
-                },
-                platformFee: {
-                    percent: await this.getFeePercent(
-                        fromBlockchain,
-                        providerAddress,
-                        cbridgeContractAddress[fromBlockchain].rubicRouter,
-                        cbridgeProxyAbi
-                    ),
-                    tokenSymbol: 'USDC'
-                }
-            }
-        };
     }
 
     private async fetchContractAddressAndCheckTokens(
@@ -353,5 +330,13 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             return undefined;
         }
         return undefined;
+    }
+
+    protected async getFeeInfo(
+        fromBlockchain: CbridgeCrossChainSupportedBlockchain,
+        providerAddress: string,
+        percentFeeToken: PriceTokenAmount
+    ): Promise<FeeInfo> {
+        return ProxyCrossChainEvmTrade.getFeeInfo(fromBlockchain, providerAddress, percentFeeToken);
     }
 }

@@ -18,6 +18,7 @@ import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-pu
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
+import { proxyHashErrors } from 'src/features/cross-chain/calculation-manager/providers/common/constants/proxy-hash-errors';
 import Web3 from 'web3';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
@@ -48,6 +49,10 @@ export class EvmWeb3Private extends Web3Private {
             return new UserRejectError();
         }
         try {
+            const error = EvmWeb3Private.tryParseProxyError(err);
+            if (error) {
+                return error;
+            }
             if (err.message.includes('0x6c544f')) {
                 return new InsufficientFundsGasPriceValueError();
             }
@@ -57,6 +62,17 @@ export class EvmWeb3Private extends Web3Private {
             }
         } catch {}
         return parseError(err);
+    }
+
+    private static tryParseProxyError(err: Error | { data: string }): RubicSdkError | undefined {
+        if ('data' in err) {
+            const error = proxyHashErrors.find(error => error.hash === err.data);
+            if (error) {
+                return new RubicSdkError(error.text);
+            }
+        }
+
+        return undefined;
     }
 
     protected readonly Web3Pure = EvmWeb3Pure;

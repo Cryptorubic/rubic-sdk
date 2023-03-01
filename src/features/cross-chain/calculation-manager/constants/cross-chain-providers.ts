@@ -13,14 +13,14 @@ const proxyProviders = [
     SymbiosisCrossChainProvider,
     DexMultichainCrossChainProvider,
     StargateCrossChainProvider,
-    XyCrossChainProvider
+    XyCrossChainProvider,
+    CbridgeCrossChainProvider
 ] as const;
 
 const nonProxyProviders = [
     LifiCrossChainProvider,
     DebridgeCrossChainProvider,
     BridgersCrossChainProvider,
-    CbridgeCrossChainProvider,
     ChangenowCrossChainProvider
 ] as const;
 
