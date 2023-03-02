@@ -222,7 +222,7 @@ export abstract class CrossChainTrade {
         }
         const isAddressCorrectValue = await isAddressCorrect(
             receiverAddress,
-            this.from.blockchain,
+            this.to.blockchain,
             crossChainType
         );
         if (!isAddressCorrectValue) {
