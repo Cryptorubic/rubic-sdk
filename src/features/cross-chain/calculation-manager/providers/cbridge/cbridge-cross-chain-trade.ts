@@ -177,7 +177,8 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         try {
             const { data, to, value } = this.getTransactionRequest(
                 options.receiverAddress || this.walletAddress,
-                this.maxSlippage
+                this.maxSlippage,
+                this.from
             );
 
             await this.web3Private.trySendTransaction(to, {
@@ -200,7 +201,11 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             data,
             to,
             value: providerValue
-        } = this.getTransactionRequest(receiverAddress, this.maxSlippage);
+        } = this.getTransactionRequest(
+            receiverAddress,
+            this.maxSlippage,
+            this.onChainTrade ? this.onChainTrade.to : this.from
+        );
 
         // const toChainId = blockchainId[this.to.blockchain];
         // const fromContracts = cbridgeContractAddress[this.fromBlockchain];
@@ -268,7 +273,11 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             ? [bridgeData, swapData, providerData]
             : [bridgeData, providerData];
 
-        const value = this.getSwapValue(providerValue?.toString());
+        const value = this.getSwapValue(
+            new BigNumber(this.from.isNative ? this.from.stringWeiAmount : 0).plus(
+                providerValue?.toString()
+            )
+        );
 
         return {
             contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
@@ -298,18 +307,19 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
 
     private getTransactionRequest(
         receiverAddress: string,
-        maxSlippage: number
+        maxSlippage: number,
+        transitToken: PriceTokenAmount
     ): {
         data: string;
         value: string;
         to: string;
     } {
         const params: (string | number)[] = [receiverAddress];
-        if (!this.from.isNative) {
-            params.push(this.from.address);
+        if (!transitToken.isNative) {
+            params.push(transitToken.address);
         }
         params.push(
-            this.from.stringWeiAmount,
+            transitToken.stringWeiAmount,
             blockchainId[this.to.blockchain],
             Date.now(),
             maxSlippage
@@ -317,9 +327,9 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         const encode = EvmWeb3Pure.encodeMethodCall(
             cbridgeContractAddress[this.fromBlockchain].providerRouter,
             cbridgeContractAbi,
-            this.from.isNative ? 'sendNative' : 'send',
+            transitToken.isNative ? 'sendNative' : 'send',
             params,
-            this.from.isNative ? this.from.stringWeiAmount : '0'
+            transitToken.isNative ? this.from.stringWeiAmount : '0'
         );
         return { data: encode.data, to: encode.to, value: encode.value };
     }

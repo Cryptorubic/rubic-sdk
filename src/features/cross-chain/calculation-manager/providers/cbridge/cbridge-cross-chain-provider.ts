@@ -1,7 +1,13 @@
 import BigNumber from 'bignumber.js';
-import { MaxAmountError, MinAmountError, RubicSdkError } from 'src/common/errors';
+import {
+    MaxAmountError,
+    MinAmountError,
+    NotSupportedTokensError,
+    RubicSdkError
+} from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, wrappedNativeTokensList } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { PriceTokenAmountStruct } from 'src/common/tokens/price-token-amount';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -34,6 +40,7 @@ interface CelerConfig {
     supportedFromToken: TokenInfo | undefined;
     supportedToToken: TokenInfo | undefined;
     isBridge: boolean;
+    possibleTransitToken: TokenInfo | undefined;
 }
 
 export class CbridgeCrossChainProvider extends CrossChainProvider {
@@ -74,51 +81,54 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            const onChainTrade: EvmOnChainTrade | null = null;
-            const transitTokenAmount = fromWithoutFee.tokenAmount;
-            const transitMinAmount = transitTokenAmount;
-            const transitToken = fromWithoutFee;
+            let onChainTrade: EvmOnChainTrade | null = null;
+            let transitTokenAmount = fromWithoutFee.tokenAmount;
+            let transitMinAmount = transitTokenAmount;
+            let transitToken = fromWithoutFee;
 
             if (!config.isBridge) {
-                throw new RubicSdkError('Tokens are not supported');
-                // onChainTrade = await this.getOnChainTrade(
-                //     fromWithoutFee,
-                //     [],
-                //     options.slippageTolerance
-                // );
-                // if (!onChainTrade) {
-                //     return {
-                //         trade: null,
-                //         error: new NotSupportedTokensError()
-                //     };
-                // }
-                //
-                // transitTokenAmount = onChainTrade.to.tokenAmount;
-                // transitMinAmount = onChainTrade.toTokenAmountMin.tokenAmount;
-                //
-                // const defaultTransit = new PriceTokenAmount<EvmBlockchainName>({
-                //     ...(celerTransitTokens[
-                //         fromToken.blockchain as CelerCrossChainSupportedBlockchain
-                //     ] as TokenStruct<EvmBlockchainName>),
-                //     tokenAmount: transitTokenAmount,
-                //     price: new BigNumber(0)
-                // });
-                // const transitConfig = await this.fetchContractAddressAndCheckTokens(
-                //     defaultTransit,
-                //     toToken
-                // );
-                // const celerTransitTokenStruct: PriceTokenAmountStruct<EvmBlockchainName> = {
-                //     blockchain: fromToken.blockchain,
-                //     address: transitConfig.supportedFromToken!.token.address,
-                //     name: transitConfig.supportedFromToken!.name,
-                //     symbol: transitConfig.supportedFromToken!.token.symbol,
-                //     decimals: transitConfig.supportedFromToken!.token.decimal,
-                //     price: new BigNumber(0),
-                //     tokenAmount: transitTokenAmount
-                // };
-                // transitToken = transitConfig?.supportedFromToken
-                //     ? new PriceTokenAmount<EvmBlockchainName>(celerTransitTokenStruct)
-                //     : defaultTransit;
+                onChainTrade = await this.getOnChainTrade(
+                    fromWithoutFee,
+                    [],
+                    options.slippageTolerance,
+                    config.possibleTransitToken!.token.address
+                );
+                if (!onChainTrade) {
+                    return {
+                        trade: null,
+                        error: new NotSupportedTokensError()
+                    };
+                }
+
+                transitTokenAmount = onChainTrade.to.tokenAmount;
+                transitMinAmount = onChainTrade.toTokenAmountMin.tokenAmount;
+                transitToken = onChainTrade.to;
+
+                const defaultTransit = new PriceTokenAmount<EvmBlockchainName>({
+                    ...onChainTrade.to.asStructWithAmount
+                });
+                const transitConfig = await this.fetchContractAddressAndCheckTokens(
+                    defaultTransit,
+                    toToken
+                );
+                const celerTransitTokenStruct: PriceTokenAmountStruct<EvmBlockchainName> = {
+                    blockchain: fromToken.blockchain,
+                    address: transitToken.address,
+                    name: onChainTrade
+                        ? transitConfig.possibleTransitToken!.name
+                        : transitConfig.supportedFromToken!.name,
+                    symbol: onChainTrade
+                        ? transitConfig.possibleTransitToken!.token.symbol
+                        : transitConfig.supportedFromToken!.token.symbol,
+                    decimals: onChainTrade
+                        ? transitConfig.possibleTransitToken!.token.decimal
+                        : transitConfig.supportedFromToken!.token.decimal,
+                    price: new BigNumber(0),
+                    tokenAmount: transitTokenAmount
+                };
+                transitToken = transitConfig?.supportedFromToken
+                    ? new PriceTokenAmount<EvmBlockchainName>(celerTransitTokenStruct)
+                    : defaultTransit;
             }
             // const toTransitToken =
             //     celerTransitTokens[toToken.blockchain as CelerCrossChainSupportedBlockchain];
@@ -222,11 +232,16 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             compareAddresses(el.token.address, toToken.address)
         );
 
+        const possibleTransitToken = config.chain_token?.[fromChainId]?.token.find(
+            el => el.token.symbol === supportedToToken!.token.symbol
+        );
+
         return {
             supportedFromToken,
             supportedToToken,
             address: config.chains.find(chain => chain.id === fromChainId)!.contract_addr,
-            isBridge: supportedFromToken?.token.symbol === supportedToToken?.token.symbol
+            isBridge: supportedFromToken?.token.symbol === supportedToToken?.token.symbol,
+            possibleTransitToken
         };
     }
 
@@ -256,7 +271,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
     private async getOnChainTrade(
         from: PriceTokenAmount,
         _availableDexes: string[],
-        slippageTolerance: number
+        slippageTolerance: number,
+        transitTokenAddress: string
     ): Promise<EvmOnChainTrade | null> {
         const fromBlockchain = from.blockchain as CelerCrossChainSupportedBlockchain;
 
@@ -264,7 +280,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             dex => dex.supportReceiverAddress
         );
         const to = await PriceToken.createToken({
-            address: celerTransitTokens[fromBlockchain].address,
+            address: transitTokenAddress,
             blockchain: fromBlockchain
         });
         const onChainTrades = (
@@ -281,6 +297,64 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             .filter(value => value.status === 'fulfilled')
             .map(value => (value as PromiseFulfilledResult<EvmOnChainTrade>).value)
             .sort((a, b) => b.to.tokenAmount.comparedTo(a.to.tokenAmount));
+
+        if (!onChainTrades.length) {
+            return null;
+        }
+        return onChainTrades[0]!;
+    }
+
+    private async getBestOnChainTrade(
+        from: PriceTokenAmount,
+        _availableDexes: string[],
+        slippageTolerance: number
+    ): Promise<EvmOnChainTrade | null> {
+        const fromBlockchain = from.blockchain as CelerCrossChainSupportedBlockchain;
+
+        const dexes = Object.values(typedTradeProviders[fromBlockchain]).filter(
+            dex => dex.supportReceiverAddress
+        );
+        const transitTokens = await Promise.all(
+            celerTransitTokens[fromBlockchain].map(token =>
+                PriceToken.createToken({
+                    address: token.address,
+                    blockchain: fromBlockchain
+                })
+            )
+        );
+
+        const onChainTrades = (
+            await Promise.all(
+                transitTokens.map(to =>
+                    Promise.allSettled(
+                        dexes.map(dex =>
+                            dex.calculate(from, to, {
+                                slippageTolerance,
+                                gasCalculation: 'disabled',
+                                useProxy: false
+                            })
+                        )
+                    ).then(settledTrades =>
+                        settledTrades
+                            .filter(value => value.status === 'fulfilled')
+                            .map(value => (value as PromiseFulfilledResult<EvmOnChainTrade>).value)
+                            .sort((a, b) => {
+                                const tradeAAmount = a.to.price.multipliedBy(
+                                    a.toTokenAmountMin.tokenAmount
+                                );
+                                const tradeBAmount = b.to.price.multipliedBy(
+                                    b.toTokenAmountMin.tokenAmount
+                                );
+                                return tradeBAmount.comparedTo(tradeAAmount);
+                            })
+                    )
+                )
+            )
+        )
+            .flat()
+            .sort((tradeA, tradeB) =>
+                tradeB.toTokenAmountMin.tokenAmount.comparedTo(tradeA.toTokenAmountMin.tokenAmount)
+            );
 
         if (!onChainTrades.length) {
             return null;

@@ -102,7 +102,7 @@ export class CelerCrossChainContractData {
     private getTransitTokenAddressBasedOnBlockchain(
         blockchain: CelerCrossChainSupportedBlockchain
     ): string {
-        return celerTransitTokens[blockchain].address;
+        return celerTransitTokens[blockchain][0]!.address;
     }
 
     public async getFeeInPercents(): Promise<number> {

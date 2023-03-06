@@ -46,30 +46,31 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    private static checkIsSupportedTokens(
+    private static hasDirectRoute(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceToken<EvmBlockchainName>
     ): boolean {
         const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = to.blockchain as StargateCrossChainSupportedBlockchain;
+
         const srcPoolId = stargatePoolId[from.symbol as StargateBridgeToken];
-        if (!srcPoolId) {
+        const srcSupportedPools = stargateBlockchainSupportedPools[fromBlockchain];
+        if (!srcPoolId || !srcSupportedPools.includes(srcPoolId)) {
             return false;
         }
+
         const dstPoolId = stargatePoolId[to.symbol as StargateBridgeToken];
-        const srcSupportedPools = stargateBlockchainSupportedPools[fromBlockchain];
         const dstSupportedPools = stargateBlockchainSupportedPools[toBlockchain];
+        if (!dstSupportedPools.includes(dstPoolId)) {
+            throw new RubicSdkError('Tokens are not supported.');
+        }
 
         const poolPathExists =
             stargatePoolMapping[fromBlockchain]?.[from.symbol as StargateBridgeToken]?.[
                 toBlockchain
             ]?.includes(dstPoolId);
 
-        if (!dstSupportedPools.includes(dstPoolId)) {
-            throw new RubicSdkError('Tokens are not supported.');
-        }
-
-        return !(srcSupportedPools.includes(srcPoolId) && !poolPathExists);
+        return Boolean(poolPathExists);
     }
 
     public async calculate(
@@ -88,7 +89,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 };
             }
 
-            const hasDirectRoute = StargateCrossChainProvider.checkIsSupportedTokens(from, toToken);
+            const hasDirectRoute = StargateCrossChainProvider.hasDirectRoute(from, toToken);
             if (hasDirectRoute) {
                 await this.checkEqFee(from, toToken);
             }

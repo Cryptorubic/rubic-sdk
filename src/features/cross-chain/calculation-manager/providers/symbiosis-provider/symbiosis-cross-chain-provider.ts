@@ -6,6 +6,7 @@ import {
     TooLowAmountError
 } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { TokenStruct } from 'src/common/tokens/token';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import {
     BLOCKCHAIN_NAME,
@@ -122,14 +123,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            const transitToken = symbiosisTransitTokens[fromBlockchain];
-
-            let onChainTrade = await ProxyCrossChainEvmTrade.getOnChainTrade(
-                fromWithoutFee,
-                transitToken,
-                (options.slippageTolerance - 0.005) / 2
-            );
-
             const receiverAddress = options.receiverAddress || fromAddress;
 
             const tokenAmountIn = new TokenAmount(tokenIn, from.stringWeiAmount);
@@ -162,9 +155,16 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 slippage: slippageTolerance,
                 deadline
             });
-            if (this.shouldUseTransferToken(route, from)) {
-                onChainTrade = null;
-            }
+
+            const transitToken = this.getTransferToken(route, from);
+
+            const onChainTrade = transitToken
+                ? await ProxyCrossChainEvmTrade.getOnChainTrade(
+                      fromWithoutFee,
+                      transitToken,
+                      (options.slippageTolerance - 0.005) / 2
+                  )
+                : null;
 
             const swapFunction = (fromUserAddress: string, receiver?: string) => {
                 if (isBitcoinSwap && !receiver) {
@@ -194,9 +194,9 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                     : null;
 
             let transitAmount: BigNumber;
-            if (compareAddresses(from.address, transitToken.address)) {
+            if (compareAddresses(from.address, transitToken?.address || '')) {
                 transitAmount = from.tokenAmount;
-            } else if (this.onChainProviders[fromBlockchain]) {
+            } else if (transitToken && this.onChainProviders[fromBlockchain]) {
                 transitAmount = (
                     await this.onChainProviders[fromBlockchain]!.calculate(
                         from,
@@ -234,7 +234,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                         },
                         transitAmount,
                         onChainTrade,
-                        transitToken
+                        transitToken: transitToken || from
                     },
                     options.providerAddress
                 )
@@ -404,12 +404,22 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         return zapping.exactIn(...zappingParams);
     }
 
-    private shouldUseTransferToken(
+    private getTransferToken(
         route: Token[],
         from: PriceTokenAmount<EvmBlockchainName>
-    ): boolean {
+    ): TokenStruct | undefined {
         const fromBlockchainId = blockchainId[from.blockchain];
         const fromRouting = route.filter(token => token.chainId === fromBlockchainId);
-        return fromRouting.length === 1;
+
+        const token = fromRouting.at(-1)!;
+        return fromRouting.length !== 1
+            ? {
+                  address: token.address,
+                  decimals: token.decimals,
+                  name: token.name!,
+                  blockchain: from.blockchain,
+                  symbol: token.symbol!
+              }
+            : undefined;
     }
 }
