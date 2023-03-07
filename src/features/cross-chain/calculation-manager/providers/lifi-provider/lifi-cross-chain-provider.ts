@@ -2,7 +2,6 @@ import LIFI, { LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { MinAmountError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -18,6 +17,7 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
     LifiCrossChainSupportedBlockchain,
     lifiCrossChainSupportedBlockchains
@@ -173,39 +173,10 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
     protected override async getFeeInfo(
         fromBlockchain: LifiCrossChainSupportedBlockchain,
-        _providerAddress: string,
+        providerAddress: string,
         percentFeeToken: PriceTokenAmount
     ): Promise<FeeInfo> {
-        return {
-            rubicProxy: {
-                fixedFee: {
-                    // amount: await this.getFixedFee(
-                    //     fromBlockchain,
-                    //     providerAddress,
-                    //     rubicProxyContractAddress[fromBlockchain],
-                    //     evmCommonCrossChainAbi
-                    // ),
-                    amount: new BigNumber(0),
-                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
-                },
-                platformFee: {
-                    // percent: await this.getFeePercent(
-                    //     fromBlockchain,
-                    //     providerAddress,
-                    //     rubicProxyContractAddress[fromBlockchain],
-                    //     evmCommonCrossChainAbi
-                    // ),
-                    percent: 0,
-                    tokenSymbol: percentFeeToken.symbol
-                }
-            },
-            provider: {
-                platformFee: {
-                    percent: this.lifiFee * 100,
-                    tokenSymbol: percentFeeToken.symbol
-                }
-            }
-        };
+        return ProxyCrossChainEvmTrade.getFeeInfo(fromBlockchain, providerAddress, percentFeeToken);
     }
 
     private parseTradeTypes(route: Route): {
