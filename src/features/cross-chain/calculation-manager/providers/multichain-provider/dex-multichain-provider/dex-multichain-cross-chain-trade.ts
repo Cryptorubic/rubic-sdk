@@ -141,7 +141,7 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
             this.onChainTrade &&
             (await ProxyCrossChainEvmTrade.getSwapData(options, {
                 walletAddress: this.walletAddress,
-                contractAddress: this.fromContractAddress,
+                contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
                 fromTokenAmount: this.from,
                 toTokenAmount: this.onChainTrade.to,
                 onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
