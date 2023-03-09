@@ -4,7 +4,7 @@ import {
     NotWhitelistedProviderError,
     UnnecessaryApproveError
 } from 'src/common/errors';
-import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { nativeTokensList, PriceTokenAmount, Token } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
@@ -13,6 +13,7 @@ import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
@@ -253,9 +254,12 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             swapData
         ];
 
-        const value = new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount.toFixed() || 0)
-            .plus(this.from.isNative ? this.from.weiAmount : '0')
-            .toFixed(0);
+        const nativeToken = nativeTokensList[this.from.blockchain];
+        const proxyFee = new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || '0');
+        const value = Web3Pure.toWei(
+            proxyFee.plus(this.from.isNative ? this.from.weiAmount : '0'),
+            nativeToken.decimals
+        );
 
         return {
             contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
