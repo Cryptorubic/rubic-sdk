@@ -102,7 +102,8 @@ export abstract class CurveAbstractProvider<
             withDeflation: fullOptions.withDeflation,
             path: [fromToken, toToken],
             registryExchangeAddress,
-            poolAddress
+            poolAddress,
+            usedForCrossChain: fullOptions.usedForCrossChain
         };
 
         return new this.Trade(tradeStruct, fullOptions.providerAddress);

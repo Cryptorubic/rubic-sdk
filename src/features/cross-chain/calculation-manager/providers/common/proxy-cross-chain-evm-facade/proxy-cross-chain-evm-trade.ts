@@ -151,7 +151,8 @@ export class ProxyCrossChainEvmTrade {
                 dex.calculate(from, to, {
                     slippageTolerance,
                     gasCalculation: 'disabled',
-                    useProxy: false
+                    useProxy: false,
+                    usedForCrossChain: true
                 })
             )
         );

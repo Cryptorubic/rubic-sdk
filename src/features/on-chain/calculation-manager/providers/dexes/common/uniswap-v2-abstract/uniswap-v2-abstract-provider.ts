@@ -157,7 +157,8 @@ export abstract class UniswapV2AbstractProvider<
             useProxy: fullOptions.useProxy,
             proxyFeeInfo,
             fromWithoutFee,
-            withDeflation: fullOptions.withDeflation
+            withDeflation: fullOptions.withDeflation,
+            usedForCrossChain: fullOptions.usedForCrossChain
         };
 
         if (fullOptions.gasCalculation === 'disabled') {

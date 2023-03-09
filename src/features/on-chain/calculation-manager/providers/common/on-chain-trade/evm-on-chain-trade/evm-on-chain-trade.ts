@@ -67,14 +67,12 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
     public abstract readonly dexContractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
-    private get contractAddress(): string {
-        return this.useProxy
-            ? rubicProxyContractAddress[this.from.blockchain].gateway
-            : this.dexContractAddress;
-    }
+    private readonly usedForCrossChain: boolean;
 
     protected get spenderAddress(): string {
-        return this.contractAddress;
+        return this.useProxy || this.usedForCrossChain
+            ? rubicProxyContractAddress[this.from.blockchain].gateway
+            : this.dexContractAddress;
     }
 
     protected get web3Public(): EvmWeb3Public {
@@ -98,6 +96,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
         this.useProxy = evmOnChainTradeStruct.useProxy;
         this.fromWithoutFee = evmOnChainTradeStruct.fromWithoutFee;
+        this.usedForCrossChain = evmOnChainTradeStruct.usedForCrossChain || false;
 
         this.feeInfo = {
             rubicProxy: {

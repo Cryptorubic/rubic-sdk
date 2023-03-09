@@ -284,7 +284,10 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             this.feeInfo.provider!.cryptoFee!.amount,
             nativeTokensList[this.from.blockchain].decimals
         );
-        const value = this.getSwapValue(lzWeiFee);
+        const totalValue = this.from.isNative
+            ? this.from.weiAmount.plus(lzWeiFee).toFixed()
+            : lzWeiFee;
+        const value = this.getSwapValue(totalValue);
 
         return {
             contractAddress: rubicProxyContractAddress[this.from.blockchain].router,

@@ -238,6 +238,7 @@ export class CrossChainStatusManager {
         if (symbiosisTxIndexingTimeSpent) {
             try {
                 const srcChainId = blockchainId[data.fromBlockchain];
+                const toBlockchainId = blockchainId[data.toBlockchain];
                 const {
                     status: { text: dstTxStatus },
                     tx
@@ -249,22 +250,27 @@ export class CrossChainStatusManager {
                     hash: tx?.hash || null
                 };
 
+                const targetTokenNetwork = tx?.chainId;
+
                 if (
                     dstTxStatus === SymbiosisSwapStatus.PENDING ||
                     dstTxStatus === SymbiosisSwapStatus.NOT_FOUND
                 ) {
-                    dstTxData.status = TxStatus.PENDING;
+                    return { ...dstTxData, status: TxStatus.PENDING };
                 }
 
                 if (dstTxStatus === SymbiosisSwapStatus.STUCKED) {
-                    dstTxData.status = TxStatus.REVERT;
+                    return { ...dstTxData, status: TxStatus.REVERT };
                 }
 
                 if (dstTxStatus === SymbiosisSwapStatus.REVERTED) {
-                    dstTxData.status = TxStatus.FALLBACK;
+                    return { ...dstTxData, status: TxStatus.FALLBACK };
                 }
 
-                if (dstTxStatus === SymbiosisSwapStatus.SUCCESS) {
+                if (
+                    dstTxStatus === SymbiosisSwapStatus.SUCCESS &&
+                    targetTokenNetwork === String(toBlockchainId)
+                ) {
                     if (data.toBlockchain !== BLOCKCHAIN_NAME.BITCOIN) {
                         dstTxData.status = TxStatus.SUCCESS;
                     } else {

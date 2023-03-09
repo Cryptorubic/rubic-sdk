@@ -215,7 +215,9 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             ? [bridgeData, swapData, providerData]
             : [bridgeData, providerData];
 
-        const value = this.getSwapValue(providerValue?.toString());
+        const value = this.getSwapValue(
+            this.from.isNative ? this.from.stringWeiAmount : providerValue?.toString()
+        );
 
         return {
             contractAddress: rubicProxyContractAddress[this.from.blockchain].router,

@@ -15,6 +15,7 @@ import {
 } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -158,11 +159,16 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
             const transitToken = this.getTransferToken(route, from);
 
+            const onChainSlippage =
+                transitToken?.address === from.address
+                    ? 0
+                    : (options.slippageTolerance - 0.005) / 2;
+
             const onChainTrade = transitToken
                 ? await ProxyCrossChainEvmTrade.getOnChainTrade(
                       fromWithoutFee,
                       transitToken,
-                      (options.slippageTolerance - 0.005) / 2
+                      onChainSlippage
                   )
                 : null;
 
@@ -172,6 +178,12 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 }
                 const refundAddress = isBitcoinSwap ? fromUserAddress : receiver || fromAddress;
                 const receiverAddress = isBitcoinSwap ? receiver! : receiver || fromUserAddress;
+
+                const amountIn = from.tokenAmount.multipliedBy(1 - onChainSlippage);
+                const tokenAmountIn = new TokenAmount(
+                    tokenIn,
+                    Web3Pure.toWei(amountIn, from.decimals)
+                );
 
                 return this.getTrade(fromBlockchain, toBlockchain, {
                     tokenAmountIn,
