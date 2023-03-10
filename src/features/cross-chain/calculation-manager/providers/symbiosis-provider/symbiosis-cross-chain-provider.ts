@@ -179,7 +179,9 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 const refundAddress = isBitcoinSwap ? fromUserAddress : receiver || fromAddress;
                 const receiverAddress = isBitcoinSwap ? receiver! : receiver || fromUserAddress;
 
-                const amountIn = fromWithoutFee.tokenAmount.multipliedBy(1 - onChainSlippage);
+                const amountIn = onChainTrade
+                    ? fromWithoutFee.tokenAmount.multipliedBy(1 - onChainSlippage)
+                    : fromWithoutFee.tokenAmount;
                 const tokenAmountIn = new TokenAmount(
                     tokenIn,
                     Web3Pure.toWei(amountIn, from.decimals)
