@@ -103,6 +103,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             const transitToken = await this.getTransitToken(hasDirectRoute, from, toToken);
             let transitTokenAmount = fromWithoutFee;
             let onChainTrade: EvmOnChainTrade | null = null;
+            let transitAmount: BigNumber = fromWithoutFee.tokenAmount;
 
             if (!hasDirectRoute) {
                 const trade = await ProxyCrossChainEvmTrade.getOnChainTrade(
@@ -118,10 +119,11 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 }
                 onChainTrade = trade;
                 transitTokenAmount = onChainTrade.to;
+                transitAmount = onChainTrade.toTokenAmountMin.tokenAmount;
             }
 
-            const poolFee = await this.fetchPoolFees(transitTokenAmount, toToken);
-            const amountOutMin = transitTokenAmount.tokenAmount.minus(poolFee);
+            const poolFee = await this.fetchPoolFees(transitTokenAmount, toToken, transitAmount);
+            const amountOutMin = transitAmount.minus(poolFee);
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: amountOutMin
@@ -243,7 +245,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
 
     private async fetchPoolFees(
         fromToken: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceToken<EvmBlockchainName>
+        toToken: PriceToken<EvmBlockchainName>,
+        transitAmount: BigNumber
     ): Promise<BigNumber> {
         const fromBlockchain = fromToken.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
@@ -252,7 +255,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         const dstChainId = stargateChainId[toBlockchain as StargateCrossChainSupportedBlockchain];
 
         const sdDecimals = stargatePoolsDecimals[fromToken.symbol as StargateBridgeToken];
-        const amountSD = Web3Pure.toWei(fromToken.tokenAmount, sdDecimals);
+        const amountSD = Web3Pure.toWei(transitAmount, sdDecimals);
 
         try {
             const { 1: eqFee, 4: protocolFee } = await Injector.web3PublicService
