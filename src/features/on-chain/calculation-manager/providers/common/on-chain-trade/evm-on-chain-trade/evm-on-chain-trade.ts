@@ -257,7 +257,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         const nativeToken = nativeTokensList[this.from.blockchain];
         const proxyFee = new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || '0');
         const value = Web3Pure.toWei(
-            proxyFee.plus(this.from.isNative ? this.from.weiAmount : '0'),
+            proxyFee.plus(this.from.isNative ? this.from.tokenAmount : '0'),
             nativeToken.decimals
         );
 
