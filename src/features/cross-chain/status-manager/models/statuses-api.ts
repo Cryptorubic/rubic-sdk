@@ -20,7 +20,7 @@ export interface SymbiosisApiResponse {
     };
     tx: {
         hash: string;
-        chainId: string;
+        chainId: number;
     } | null;
 }
 
