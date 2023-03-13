@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { InsufficientLiquidityError, MinAmountError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -13,8 +14,6 @@ import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { symbiosisTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-transit-tokens';
 import { XyStatusCode } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-status-code';
 import {
     XyCrossChainSupportedBlockchain,
@@ -65,14 +64,6 @@ export class XyCrossChainProvider extends CrossChainProvider {
 
             const slippageTolerance = options.slippageTolerance * 100;
 
-            const transitToken =
-                symbiosisTransitTokens[fromBlockchain as SymbiosisCrossChainSupportedBlockchain];
-            const onChainTrade = (await ProxyCrossChainEvmTrade.getOnChainTrade(
-                fromWithoutFee,
-                transitToken,
-                (options.slippageTolerance - 0.005) / 2
-            ))!;
-
             const requestParams: XyTransactionRequest = {
                 srcChainId: String(blockchainId[fromBlockchain]),
                 fromTokenAddress: fromToken.isNative
@@ -87,7 +78,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 receiveAddress: receiverAddress || EvmWeb3Pure.EMPTY_ADDRESS
             };
 
-            const { toTokenAmount, statusCode, msg, xyFee } =
+            const { toTokenAmount, statusCode, msg, xyFee, quote } =
                 await Injector.httpClient.get<XyTransactionResponse>(
                     `${XyCrossChainProvider.apiEndpoint}/swap`,
                     {
@@ -95,6 +86,21 @@ export class XyCrossChainProvider extends CrossChainProvider {
                     }
                 );
             this.analyzeStatusCode(statusCode, msg);
+
+            const sourceTransitToken = quote.sourceChainSwaps?.toToken;
+            const transitToken: TokenBaseStruct<EvmBlockchainName> | null = sourceTransitToken
+                ? {
+                      address: sourceTransitToken.tokenAddress,
+                      blockchain: fromBlockchain
+                  }
+                : null;
+            const onChainTrade = transitToken
+                ? (await ProxyCrossChainEvmTrade.getOnChainTrade(
+                      fromWithoutFee,
+                      transitToken,
+                      (options.slippageTolerance - 0.005) / 2
+                  ))!
+                : null;
 
             feeInfo.provider = {
                 cryptoFee: {
