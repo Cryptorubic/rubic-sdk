@@ -183,7 +183,8 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             const { data, to } = await StargateCrossChainTrade.getLayerZeroSwapData(
                 this.from,
                 this.to,
-                this.toTokenAmountMin
+                this.toTokenAmountMin,
+                options?.receiverAddress
             );
 
             const lzFeeWei = Web3Pure.toWei(
@@ -256,7 +257,8 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         const lzTxConfig = await StargateCrossChainTrade.getLayerZeroSwapData(
             this.onChainTrade ? this.onChainTrade.to : this.from,
             this.to,
-            this.toTokenAmountMin
+            this.toTokenAmountMin,
+            options?.receiverAddress
         );
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
@@ -276,7 +278,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                 toTokenAmount: this.onChainTrade.to,
                 onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
             }));
-        const providerData = this.getProviderData(lzTxConfig.data);
+        const providerData = this.getProviderData(lzTxConfig.data, options.receiverAddress);
 
         const methodArguments = swapData
             ? [bridgeData, swapData, providerData]
@@ -379,7 +381,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         return undefined;
     }
 
-    protected getProviderData(_sourceData: BytesLike): unknown[] {
+    protected getProviderData(_sourceData: BytesLike, receiverAddress?: string): unknown[] {
         const pool = stargatePoolId[this.to.symbol as StargateBridgeToken];
         const targetPoolDecimals = stargatePoolsDecimals[this.to.symbol as StargateBridgeToken];
         const amount = Web3Pure.toWei(this.toTokenAmountMin, targetPoolDecimals);
@@ -387,7 +389,8 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             this.feeInfo.provider!.cryptoFee!.amount,
             nativeTokensList[this.from.blockchain].decimals
         );
+        const destinationAddress = receiverAddress || this.walletAddress;
 
-        return [pool, amount, '0', fee, this.walletAddress, this.walletAddress, '0x'];
+        return [pool, amount, '0', fee, this.walletAddress, destinationAddress, '0x'];
     }
 }

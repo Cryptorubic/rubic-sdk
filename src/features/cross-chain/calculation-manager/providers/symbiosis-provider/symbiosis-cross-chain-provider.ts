@@ -85,6 +85,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         return super.areSupportedBlockchains(fromBlockchain, toBlockchain);
     }
 
+    // eslint-disable-next-line complexity
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
@@ -97,13 +98,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            // await this.checkContractState(
-            //     fromBlockchain as EvmBlockchainName,
-            //     rubicProxyContractAddress[fromBlockchain],
-            //     evmCommonCrossChainAbi
-            // );
-
-            // const isBitcoinSwap = toBlockchain === BLOCKCHAIN_NAME.BITCOIN;
             const isBitcoinSwap = false;
 
             const fromAddress =
@@ -139,8 +133,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
             const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
             const slippageTolerance = options.slippageTolerance * 10000;
-            // const bitcoinNullAddress = 'bc1qgkzct5j55x8vtf9vakdu6dzy3t8j8u93l043e9';
-            // const receiverAddress = isBitcoinSwap ? bitcoinNullAddress : fromAddress;
 
             const {
                 tokenAmountOut,
@@ -171,6 +163,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                       onChainSlippage
                   )
                 : null;
+
+            if (transitToken && !onChainTrade) {
+                throw new RubicSdkError('No on chain trade found.');
+            }
 
             const swapFunction = (fromUserAddress: string, receiver?: string) => {
                 if (isBitcoinSwap && !receiver) {
