@@ -16,6 +16,7 @@ import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-m
 import { ProxyBridgeParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/proxy-bridge-params';
 import { ProxySwapParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/proxy-swap-params';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
+import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 import { AbiItem } from 'web3-utils';
@@ -144,7 +145,9 @@ export class ProxyCrossChainEvmTrade {
         const fromBlockchain = from.blockchain as EvmBlockchainName;
         const availableDexes = await ProxyCrossChainEvmTrade.getWhitelistedDexes(fromBlockchain);
 
-        const dexes = Object.values(typedTradeProviders[fromBlockchain]);
+        const dexes = Object.values(typedTradeProviders[fromBlockchain]).filter(
+            el => el.type === ON_CHAIN_TRADE_TYPE.PANCAKE_SWAP
+        );
         const to = await PriceToken.createToken(transitToken);
         const allOnChainTrades = await Promise.allSettled(
             dexes.map(dex =>

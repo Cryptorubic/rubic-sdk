@@ -213,11 +213,13 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
     public static async getLayerZeroSwapData(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
-        amountOutMin: BigNumber
+        amountOutMin: BigNumber,
+        receiverAddress?: string
     ): Promise<EvmEncodeConfig> {
         const walletAddress =
             Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address ||
             EvmWeb3Pure.EMPTY_ADDRESS;
+        const destinationAddress = receiverAddress || walletAddress;
         const isEthTrade = from.isNative && to.isNative;
         const stargateRouterAddress = isEthTrade
             ? stargateEthContractAddress[from.blockchain as StargateCrossChainSupportedBlockchain]!
@@ -237,7 +239,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                       stargatePoolsDecimals[to.symbol as StargateBridgeToken]
                   ),
                   ['0', '0', walletAddress],
-                  walletAddress,
+                  destinationAddress,
                   '0x'
               ];
         const methodName = isEthTrade ? 'swapETH' : 'swap';
