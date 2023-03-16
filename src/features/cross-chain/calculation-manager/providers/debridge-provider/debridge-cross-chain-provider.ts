@@ -4,7 +4,6 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
@@ -62,6 +61,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             // );
 
             const slippageTolerance = options.slippageTolerance * 100;
+            const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
 
             const requestParams: TransactionRequest = {
                 srcChainId: blockchainId[fromBlockchain],
@@ -70,7 +70,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 slippage: slippageTolerance,
                 dstChainId: blockchainId[toBlockchain],
                 dstChainTokenOut: toToken.address,
-                dstChainTokenOutRecipient: EvmWeb3Pure.EMPTY_ADDRESS,
+                dstChainTokenOutRecipient: this.getWalletAddress(fromBlockchain) || fakeAddress,
                 referralCode: this.deBridgeReferralCode
             };
 
