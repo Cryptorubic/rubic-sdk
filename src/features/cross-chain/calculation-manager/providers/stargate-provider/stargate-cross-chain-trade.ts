@@ -22,7 +22,10 @@ import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/pro
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
-import { StargateBridgeToken } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-bridge-token';
+import {
+    StargateBridgeToken,
+    stargateBridgeToken
+} from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-bridge-token';
 import { stargatePoolId } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-id';
 import { stargatePoolsDecimals } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pools-decimals';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
@@ -228,12 +231,29 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             : stargateContractAddress[from.blockchain as StargateCrossChainSupportedBlockchain];
         const dstChainId = stargateChainId[to.blockchain as StargateCrossChainSupportedBlockchain];
 
+        let srcPoolId = stargatePoolId[from.symbol as StargateBridgeToken];
+        let dstPoolId = stargatePoolId[to.symbol as StargateBridgeToken];
+
+        // @TODO FIX STARGATE MULTIPLE POOLS
+        if (
+            dstPoolId === stargatePoolId[stargateBridgeToken.mUSD] &&
+            srcPoolId === stargatePoolId[stargateBridgeToken.USDT]
+        ) {
+            srcPoolId = stargatePoolId[stargateBridgeToken.mUSD];
+        }
+        if (
+            srcPoolId === stargatePoolId[stargateBridgeToken.mUSD] &&
+            dstPoolId === stargatePoolId[stargateBridgeToken.USDT]
+        ) {
+            dstPoolId = stargatePoolId[stargateBridgeToken.mUSD];
+        }
+
         const methodArguments = isEthTrade
             ? [dstChainId, walletAddress, walletAddress, from.stringWeiAmount, to.stringWeiAmount]
             : [
                   dstChainId,
-                  stargatePoolId[from.symbol as StargateBridgeToken],
-                  stargatePoolId[to.symbol as StargateBridgeToken],
+                  srcPoolId,
+                  dstPoolId,
                   walletAddress,
                   from.stringWeiAmount,
                   Web3Pure.toWei(

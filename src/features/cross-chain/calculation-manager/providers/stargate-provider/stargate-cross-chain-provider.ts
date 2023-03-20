@@ -16,7 +16,10 @@ import { CalculationResult } from 'src/features/cross-chain/calculation-manager/
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { feeLibraryAbi } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/fee-library-abi';
-import { StargateBridgeToken } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-bridge-token';
+import {
+    StargateBridgeToken,
+    stargateBridgeToken
+} from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-bridge-token';
 import { stargateFactoryAbi } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-factory-abi';
 import { stargateFeeLibraryContractAddress } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-fee-library-contract-address';
 import { stargatePoolAbi } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-abi';
@@ -90,9 +93,9 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             }
 
             const hasDirectRoute = StargateCrossChainProvider.hasDirectRoute(from, toToken);
-            if (hasDirectRoute) {
-                await this.checkEqFee(from, toToken);
-            }
+            // if (hasDirectRoute) {
+            //     await this.checkEqFee(from, toToken);
+            // }
 
             const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
             const fromWithoutFee = getFromWithoutFee(
@@ -250,17 +253,35 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     ): Promise<BigNumber> {
         const fromBlockchain = fromToken.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
-        const srcPoolId = stargatePoolId[fromToken.symbol as StargateBridgeToken];
-        const dstPoolId = stargatePoolId[toToken.symbol as StargateBridgeToken];
+        let srcPoolId = stargatePoolId[fromToken.symbol as StargateBridgeToken];
+        let dstPoolId = stargatePoolId[toToken.symbol as StargateBridgeToken];
         const dstChainId = stargateChainId[toBlockchain as StargateCrossChainSupportedBlockchain];
 
         const sdDecimals = stargatePoolsDecimals[fromToken.symbol as StargateBridgeToken];
         const amountSD = Web3Pure.toWei(transitAmount, sdDecimals);
 
+        // @TODO FIX STARGATE MULTIPLE POOLS
+        if (
+            dstPoolId === stargatePoolId[stargateBridgeToken.mUSD] &&
+            srcPoolId === stargatePoolId[stargateBridgeToken.USDT]
+        ) {
+            srcPoolId = stargatePoolId[stargateBridgeToken.mUSD];
+        }
+        if (
+            srcPoolId === stargatePoolId[stargateBridgeToken.mUSD] &&
+            dstPoolId === stargatePoolId[stargateBridgeToken.USDT]
+        ) {
+            dstPoolId = stargatePoolId[stargateBridgeToken.mUSD];
+        }
+
         try {
-            const { 1: eqFee, 4: protocolFee } = await Injector.web3PublicService
+            const {
+                1: eqFee,
+                2: eqReward,
+                4: protocolFee
+            } = await Injector.web3PublicService
                 .getWeb3Public(fromBlockchain)
-                .callContractMethod<{ 1: string; 4: string }>(
+                .callContractMethod<{ 1: string; 2: string; 4: string }>(
                     stargateFeeLibraryContractAddress[fromBlockchain],
                     feeLibraryAbi,
                     'getFees',
@@ -273,7 +294,10 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                     ]
                 );
 
-            return Web3Pure.fromWei(new BigNumber(eqFee).plus(protocolFee), sdDecimals);
+            return Web3Pure.fromWei(
+                new BigNumber(eqFee).plus(protocolFee).minus(eqReward),
+                sdDecimals
+            );
         } catch (err) {
             if (err instanceof Error) {
                 throw new RubicSdkError('Tokens are not supported.');
