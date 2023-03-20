@@ -20,6 +20,21 @@ import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/provi
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 import { AbiItem } from 'web3-utils';
 
+type BridgeParams = [
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    string,
+    number,
+    boolean,
+    boolean
+];
+
 export class ProxyCrossChainEvmTrade {
     public static async getFeeInfo(
         fromBlockchain: Web3PublicSupportedBlockchain,
@@ -184,7 +199,7 @@ export class ProxyCrossChainEvmTrade {
     public static getBridgeData(
         swapOptions: GetContractParamsOptions,
         tradeParams: ProxyBridgeParams
-    ): unknown[] {
+    ): BridgeParams {
         const receiverAddress = swapOptions?.receiverAddress || tradeParams.walletAddress;
         const toChainId = blockchainId[tradeParams.toTokenAmount.blockchain];
         const fromToken = tradeParams.onChainTrade
@@ -200,6 +215,7 @@ export class ProxyCrossChainEvmTrade {
             fromToken.address,
             tradeParams.toTokenAmount.address,
             receiverAddress,
+            tradeParams.fromAddress,
             fromToken.stringWeiAmount,
             toChainId,
             hasSwapBeforeBridge,
@@ -210,7 +226,7 @@ export class ProxyCrossChainEvmTrade {
     public static async getSwapData(
         swapOptions: GetContractParamsOptions,
         tradeParams: ProxySwapParams
-    ): Promise<unknown[]> {
+    ): Promise<[[string, string, string, string, string, string, boolean]]> {
         const fromAddress =
             swapOptions.fromAddress || tradeParams.walletAddress || oneinchApiParams.nativeAddress;
         const swapData = await tradeParams.onChainEncodeFn({

@@ -75,12 +75,10 @@ export class EvmWeb3Public extends Web3Public {
     }
 
     public async getBalance(userAddress: string, tokenAddress?: string): Promise<BigNumber> {
-        let balance;
-        if (tokenAddress && !EvmWeb3Pure.isNativeAddress(tokenAddress)) {
-            balance = await this.getTokenBalance(userAddress, tokenAddress);
-        } else {
-            balance = await this.web3.eth.getBalance(userAddress);
-        }
+        const isToken = tokenAddress && !EvmWeb3Pure.isNativeAddress(tokenAddress);
+        const balance = isToken
+            ? await this.getTokenBalance(userAddress, tokenAddress)
+            : await this.web3.eth.getBalance(userAddress);
         return new BigNumber(balance);
     }
 

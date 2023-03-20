@@ -13,6 +13,7 @@ import { cbridgeContractAddress } from 'src/features/cross-chain/calculation-man
 import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
@@ -207,56 +208,14 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             this.onChainTrade ? this.onChainTrade.to : this.from
         );
 
-        // const toChainId = blockchainId[this.to.blockchain];
-        // const fromContracts = cbridgeContractAddress[this.fromBlockchain];
-        //
-        // const swapArguments = [
-        //     this.from.address,
-        //     this.from.stringWeiAmount,
-        //     toChainId,
-        //     this.to.address,
-        //     Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
-        //     receiverAddress,
-        //     this.providerAddress
-        // ];
-        //
-        // const methodArguments: unknown[] = [];
-        // if (this.onChainTrade) {
-        //     methodArguments.push(
-        //         celerTransitTokens[this.from.blockchain as CelerCrossChainSupportedBlockchain]
-        //             .address
-        //     );
-        //     const encodedData = (
-        //         await this.onChainTrade.encodeDirect({
-        //             fromAddress: options.fromAddress || this.walletAddress,
-        //             receiverAddress: this.fromContractAddress,
-        //             supportFee: false
-        //         })
-        //     ).data;
-        //     methodArguments.push(encodedData);
-        //     swapArguments.push(this.onChainTrade.dexContractAddress);
-        // } else {
-        //     swapArguments.push(EvmWeb3Pure.EMPTY_ADDRESS);
-        // }
-        // methodArguments.push(this.maxSlippage, swapArguments);
-        //
-        // const value = this.getSwapValue();
-        //
-        // return {
-        //     contractAddress: fromContracts.rubicRouter,
-        //     contractAbi: cbridgeProxyAbi,
-        //     methodName: this.getMethodName(),
-        //     methodArguments,
-        //     value
-        // };
-
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: this.walletAddress,
             fromTokenAmount: this.from,
             toTokenAmount: this.to,
             onChainTrade: this.onChainTrade,
             providerAddress: this.providerAddress,
-            type: this.type
+            type: this.type,
+            fromAddress: this.walletAddress
         });
         const swapData =
             this.onChainTrade &&
@@ -279,11 +238,21 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             )
         );
 
-        return {
-            contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
-            contractAbi: evmCommonCrossChainAbi,
-            methodName: this.methodName,
+        const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
+            rubicProxyContractAddress[this.from.blockchain].router,
+            evmCommonCrossChainAbi,
+            this.methodName,
             methodArguments,
+            value
+        );
+        const sendingToken = this.from.isNative ? [] : [this.from.address];
+        const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
+
+        return {
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
+            contractAbi: gatewayRubicCrossChainAbi,
+            methodName: 'startViaRubic',
+            methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
             value
         };
     }

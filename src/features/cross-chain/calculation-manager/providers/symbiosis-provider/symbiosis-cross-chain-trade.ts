@@ -13,6 +13,7 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
@@ -198,7 +199,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             toTokenAmount: this.to,
             onChainTrade: this.onChainTrade,
             providerAddress: this.providerAddress,
-            type: this.type
+            type: this.type,
+            fromAddress: this.walletAddress
         });
         const swapData =
             this.onChainTrade &&
@@ -219,11 +221,21 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             this.from.isNative ? this.from.stringWeiAmount : providerValue?.toString()
         );
 
-        return {
-            contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
-            contractAbi: evmCommonCrossChainAbi,
-            methodName: this.methodName,
+        const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
+            rubicProxyContractAddress[this.from.blockchain].router,
+            evmCommonCrossChainAbi,
+            this.methodName,
             methodArguments,
+            value
+        );
+        const sendingToken = this.from.isNative ? [] : [this.from.address];
+        const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
+
+        return {
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
+            contractAbi: gatewayRubicCrossChainAbi,
+            methodName: 'startViaRubic',
+            methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
             value
         };
     }

@@ -113,6 +113,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                         type: 'address'
                     },
                     {
+                        internalType: 'address',
+                        name: 'refundee',
+                        type: 'address'
+                    },
+                    {
                         internalType: 'uint256',
                         name: 'minAmount',
                         type: 'uint256'
@@ -201,6 +206,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
                     { internalType: 'address', name: 'receivingAssetId', type: 'address' },
                     { internalType: 'address', name: 'receiver', type: 'address' },
+                    { internalType: 'address', name: 'refundee', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
                     { internalType: 'bool', name: 'hasSourceSwaps', type: 'bool' },
@@ -256,6 +262,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
                     { internalType: 'address', name: 'receivingAssetId', type: 'address' },
                     { internalType: 'address', name: 'receiver', type: 'address' },
+                    { internalType: 'address', name: 'refundee', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
                     { internalType: 'bool', name: 'hasSourceSwaps', type: 'bool' },
@@ -322,6 +329,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
                     { internalType: 'address', name: 'receivingAssetId', type: 'address' },
                     { internalType: 'address', name: 'receiver', type: 'address' },
+                    { internalType: 'address', name: 'refundee', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
                     { internalType: 'bool', name: 'hasSourceSwaps', type: 'bool' },
@@ -407,6 +415,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     {
                         internalType: 'address',
                         name: 'receiver',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'refundee',
                         type: 'address'
                     },
                     {
@@ -564,6 +577,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                         type: 'address'
                     },
                     {
+                        internalType: 'address',
+                        name: 'refundee',
+                        type: 'address'
+                    },
+                    {
                         internalType: 'uint256',
                         name: 'minAmount',
                         type: 'uint256'
@@ -647,6 +665,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
                     { internalType: 'address', name: 'receivingAssetId', type: 'address' },
                     { internalType: 'address', name: 'receiver', type: 'address' },
+                    { internalType: 'address', name: 'refundee', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
                     { internalType: 'bool', name: 'hasSourceSwaps', type: 'bool' },
@@ -687,6 +706,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     { internalType: 'address', name: 'sendingAssetId', type: 'address' },
                     { internalType: 'address', name: 'receivingAssetId', type: 'address' },
                     { internalType: 'address', name: 'receiver', type: 'address' },
+                    { internalType: 'address', name: 'refundee', type: 'address' },
                     { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
                     { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
                     { internalType: 'bool', name: 'hasSourceSwaps', type: 'bool' },
@@ -777,6 +797,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                         type: 'address'
                     },
                     {
+                        internalType: 'address',
+                        name: 'refundee',
+                        type: 'address'
+                    },
+                    {
                         internalType: 'uint256',
                         name: 'minAmount',
                         type: 'uint256'
@@ -861,6 +886,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     {
                         internalType: 'address',
                         name: 'receiver',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'refundee',
                         type: 'address'
                     },
                     {

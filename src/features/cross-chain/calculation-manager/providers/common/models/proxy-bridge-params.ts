@@ -8,4 +8,5 @@ export interface ProxyBridgeParams {
     onChainTrade: EvmOnChainTrade | null;
     providerAddress: string;
     type: string;
+    fromAddress: string;
 }

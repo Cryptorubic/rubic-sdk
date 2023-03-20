@@ -7,6 +7,7 @@ import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
@@ -130,13 +131,10 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
             toTokenAmount: this.to,
             onChainTrade: this.onChainTrade,
             providerAddress: this.providerAddress,
-            type: this.type
+            type: this.type,
+            fromAddress: this.walletAddress
         });
 
-        // const swapAmount = getFromWithoutFee(
-        //     this.from,
-        //     this.feeInfo?.rubicProxy?.platformFee?.percent
-        // ).stringWeiAmount;
         const swapData =
             this.onChainTrade &&
             (await ProxyCrossChainEvmTrade.getSwapData(options, {
@@ -147,8 +145,6 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
                 onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
             }));
         //
-        // const bridgeData = this.getBridgeData(options);
-        // const swapData = this.onChainTrade && (await this.getSwapData(options));
         const providerData = [this.routerAddress];
 
         const methodArguments = swapData
@@ -157,11 +153,21 @@ export class DexMultichainCrossChainTrade extends MultichainCrossChainTrade {
 
         const value = this.getSwapValue();
 
-        return {
-            contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
-            contractAbi: evmCommonCrossChainAbi,
-            methodName: this.methodName,
+        const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
+            rubicProxyContractAddress[this.from.blockchain].router,
+            evmCommonCrossChainAbi,
+            this.methodName,
             methodArguments,
+            value
+        );
+        const sendingToken = this.from.isNative ? [] : [this.from.address];
+        const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
+
+        return {
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
+            contractAbi: gatewayRubicCrossChainAbi,
+            methodName: 'startViaRubic',
+            methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
             value
         };
     }

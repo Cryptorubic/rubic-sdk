@@ -12,6 +12,7 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
@@ -267,7 +268,8 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             toTokenAmount: this.to,
             onChainTrade: this.onChainTrade,
             providerAddress: this.providerAddress,
-            type: this.type
+            type: this.type,
+            fromAddress: this.walletAddress
         });
         const swapData =
             this.onChainTrade &&
@@ -293,68 +295,23 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             : lzWeiFee;
         const value = this.getSwapValue(totalValue);
 
-        return {
-            contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
-            contractAbi: evmCommonCrossChainAbi,
-            methodName: this.methodName,
+        const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
+            rubicProxyContractAddress[this.from.blockchain].router,
+            evmCommonCrossChainAbi,
+            this.methodName,
             methodArguments,
             value
+        );
+        const sendingToken = this.from.isNative ? [] : [this.from.address];
+        const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
+
+        return {
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
+            contractAbi: gatewayRubicCrossChainAbi,
+            methodName: 'startViaRubic',
+            methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
+            value
         };
-
-        // const routerCallParams = [
-        //     this.from.address,
-        //     this.from.stringWeiAmount,
-        //     blockchainId[this.to.blockchain],
-        //     this.to.address,
-        //     Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
-        //     this.walletAddress,
-        //     this.providerAddress,
-        //     lzTxConfig.to
-        // ];
-        //
-        // const methodArguments: unknown[] = [
-        //     `${this.type.toLowerCase()}:${this.bridgeType}`,
-        //     routerCallParams
-        // ];
-        //
-        // if (!this.from.isNative && !this.to.isNative) {
-        //     methodArguments.push(lzTxConfig.to);
-        // }
-        // methodArguments.push(lzTxConfig.data);
-        //
-        // const lzFeeWei = Web3Pure.toWei(
-        //     this.feeInfo.provider?.cryptoFee?.amount!,
-        //     nativeTokensList[this.from.blockchain].decimals
-        // );
-        // const fixedFeeWei = Web3Pure.toWei(
-        //     this.feeInfo.rubicProxy?.fixedFee?.amount!,
-        //     nativeTokensList[this.from.blockchain].decimals
-        // );
-        // const value = this.from.isNative
-        //     ? this.from.weiAmount.plus(lzFeeWei).plus(fixedFeeWei).toString()
-        //     : this.getSwapValue(lzFeeWei);
-        //
-        // console.log({
-        //     lzFeeWei,
-        //     RubicfixedFee: Web3Pure.toWei(
-        //         this.feeInfo.rubicProxy?.fixedFee?.amount!,
-        //         nativeTokensList[this.from.blockchain].decimals
-        //     ),
-        //     value
-        // });
-        // const value = this.getSwapValue(
-        //     this.from.isNative
-        //         ? this.from.weiAmount.plus(lzFeeWei).plus(fixedFeeWei).toString()
-        //         : new BigNumber(fixedFeeWei).plus(lzFeeWei).toString()
-        // );
-
-        // return {
-        //     contractAddress: this.fromContractAddress,
-        //     contractAbi: evmCommonCrossChainAbi,
-        //     methodName: this.methodName,
-        //     methodArguments,
-        //     value
-        // };
     }
 
     public getTradeAmountRatio(_fromUsd: BigNumber): BigNumber {

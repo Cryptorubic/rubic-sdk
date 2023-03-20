@@ -12,16 +12,16 @@ export const rubicProxyContractAddress: Record<
             return {
                 ...acc,
                 [blockchain]: {
-                    gateway: '0x5EFa20dC7816cAE2d1142966eAA7eff71CdB2A54',
-                    router: '0x8a7f697958725Da3CF1dE1fDCcD7C25780e8dB89'
+                    gateway: '0x0906003a194543023Fc42ca60f9a83eB15c06f81',
+                    router: '0x7F16a4BcF533C1B5e2E8C89e61468eC0863Cc524'
                 }
             };
         }
         return {
             ...acc,
             [blockchain]: {
-                gateway: '0x03260E497f1106B8562068A8673B8bCEBB9da123',
-                router: '0x11e370396AcE2B5d1056D5B0d46316fE08c073a6'
+                gateway: '0x0906003a194543023Fc42ca60f9a83eB15c06f81',
+                router: '0x5F00664f90e8E6B09475C4B804efB11fC2fc07DE'
             }
         };
     },
