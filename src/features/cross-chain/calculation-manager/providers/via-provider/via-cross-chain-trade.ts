@@ -190,6 +190,10 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
+    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
+        return this.swap(options);
+    }
+
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const swapTransaction = await this.via.buildTx({
             routeId: this.route.routeId,

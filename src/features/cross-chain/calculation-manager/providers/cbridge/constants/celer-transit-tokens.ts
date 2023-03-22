@@ -1,8 +1,8 @@
 import { TokenStruct } from 'src/common/tokens/token';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
-import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
+import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
 
-export const celerTransitTokens: Record<CelerCrossChainSupportedBlockchain, TokenStruct[]> = {
+export const celerTransitTokens: Record<CbridgeCrossChainSupportedBlockchain, TokenStruct[]> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: [
         {
             blockchain: BLOCKCHAIN_NAME.ETHEREUM,
@@ -82,6 +82,15 @@ export const celerTransitTokens: Record<CelerCrossChainSupportedBlockchain, Toke
         {
             blockchain: BLOCKCHAIN_NAME.AURORA,
             address: '0xb12bfca5a55806aaf64e99521918a4bf0fc40802',
+            name: 'USDC',
+            symbol: 'USDC',
+            decimals: 6
+        }
+    ],
+    [BLOCKCHAIN_NAME.OPTIMISM]: [
+        {
+            blockchain: BLOCKCHAIN_NAME.OPTIMISM,
+            address: '0x7f5c764cbc14f9669b88837ca1490cca17c31607',
             name: 'USDC',
             symbol: 'USDC',
             decimals: 6

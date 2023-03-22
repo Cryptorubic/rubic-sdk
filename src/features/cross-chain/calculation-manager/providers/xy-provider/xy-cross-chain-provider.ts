@@ -54,7 +54,8 @@ export class XyCrossChainProvider extends CrossChainProvider {
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
-                fromToken
+                fromToken,
+                options?.useProxy?.[this.type] || true
             );
 
             const fromWithoutFee = getFromWithoutFee(
@@ -150,9 +151,15 @@ export class XyCrossChainProvider extends CrossChainProvider {
     protected async getFeeInfo(
         fromBlockchain: XyCrossChainSupportedBlockchain,
         providerAddress: string,
-        percentFeeToken: PriceTokenAmount
+        percentFeeToken: PriceTokenAmount,
+        useProxy: boolean
     ): Promise<FeeInfo> {
-        return ProxyCrossChainEvmTrade.getFeeInfo(fromBlockchain, providerAddress, percentFeeToken);
+        return ProxyCrossChainEvmTrade.getFeeInfo(
+            fromBlockchain,
+            providerAddress,
+            percentFeeToken,
+            useProxy
+        );
     }
 
     private analyzeStatusCode(code: XyStatusCode, message: string): void {

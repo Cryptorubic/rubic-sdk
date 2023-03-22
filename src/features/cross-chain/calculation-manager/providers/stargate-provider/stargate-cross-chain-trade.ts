@@ -167,7 +167,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    private async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
+    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         this.checkWalletConnected();
         checkUnsupportedReceiverAddress(options?.receiverAddress, this.walletAddress);
         await this.checkTradeErrors();

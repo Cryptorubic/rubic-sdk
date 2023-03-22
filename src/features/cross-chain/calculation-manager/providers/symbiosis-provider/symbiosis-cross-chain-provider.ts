@@ -112,7 +112,12 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 isNative: from.isNative
             });
 
-            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+            const feeInfo = await this.getFeeInfo(
+                fromBlockchain,
+                options.providerAddress,
+                from,
+                options?.useProxy?.[this.type] || true
+            );
             const fromWithoutFee = getFromWithoutFee(
                 from,
                 feeInfo.rubicProxy?.platformFee?.percent
@@ -338,9 +343,15 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     protected async getFeeInfo(
         fromBlockchain: SymbiosisCrossChainSupportedBlockchain,
         providerAddress: string,
-        percentFeeToken: PriceTokenAmount
+        percentFeeToken: PriceTokenAmount,
+        useProxy: boolean
     ): Promise<FeeInfo> {
-        return ProxyCrossChainEvmTrade.getFeeInfo(fromBlockchain, providerAddress, percentFeeToken);
+        return ProxyCrossChainEvmTrade.getFeeInfo(
+            fromBlockchain,
+            providerAddress,
+            percentFeeToken,
+            useProxy
+        );
     }
 
     private async getTrade(

@@ -154,7 +154,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         this.onChainTrade = crossChainTrade.onChainTrade;
     }
 
-    public async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
+    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 

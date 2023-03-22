@@ -76,7 +76,12 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const fromChainId = blockchainId[fromBlockchain];
         const toChainId = blockchainId[toBlockchain];
 
-        const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+        const feeInfo = await this.getFeeInfo(
+            fromBlockchain,
+            options.providerAddress,
+            from,
+            options?.useProxy?.[this.type] || true
+        );
         const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
         // const fromWithoutFee = from;
 
@@ -174,9 +179,15 @@ export class LifiCrossChainProvider extends CrossChainProvider {
     protected override async getFeeInfo(
         fromBlockchain: LifiCrossChainSupportedBlockchain,
         providerAddress: string,
-        percentFeeToken: PriceTokenAmount
+        percentFeeToken: PriceTokenAmount,
+        useProxy: boolean
     ): Promise<FeeInfo> {
-        return ProxyCrossChainEvmTrade.getFeeInfo(fromBlockchain, providerAddress, percentFeeToken);
+        return ProxyCrossChainEvmTrade.getFeeInfo(
+            fromBlockchain,
+            providerAddress,
+            percentFeeToken,
+            useProxy
+        );
     }
 
     private parseTradeTypes(route: Route): {

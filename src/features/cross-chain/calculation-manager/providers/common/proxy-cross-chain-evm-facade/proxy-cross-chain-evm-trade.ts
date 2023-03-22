@@ -39,21 +39,26 @@ export class ProxyCrossChainEvmTrade {
     public static async getFeeInfo(
         fromBlockchain: Web3PublicSupportedBlockchain,
         providerAddress: string,
-        percentFeeToken: PriceTokenAmount
+        percentFeeToken: PriceTokenAmount,
+        useProxy: boolean
     ): Promise<FeeInfo> {
-        const fixedFeeAmount = await ProxyCrossChainEvmTrade.getFixedFee(
-            fromBlockchain,
-            providerAddress,
-            rubicProxyContractAddress[fromBlockchain].router,
-            evmCommonCrossChainAbi
-        );
+        const fixedFeeAmount = useProxy
+            ? await ProxyCrossChainEvmTrade.getFixedFee(
+                  fromBlockchain,
+                  providerAddress,
+                  rubicProxyContractAddress[fromBlockchain].router,
+                  evmCommonCrossChainAbi
+              )
+            : new BigNumber(0);
 
-        const feePercent = await ProxyCrossChainEvmTrade.getFeePercent(
-            fromBlockchain,
-            providerAddress,
-            rubicProxyContractAddress[fromBlockchain].router,
-            evmCommonCrossChainAbi
-        );
+        const feePercent = useProxy
+            ? await ProxyCrossChainEvmTrade.getFeePercent(
+                  fromBlockchain,
+                  providerAddress,
+                  rubicProxyContractAddress[fromBlockchain].router,
+                  evmCommonCrossChainAbi
+              )
+            : 0;
 
         return {
             rubicProxy: {

@@ -24,10 +24,9 @@ import {
     CbridgeCrossChainSupportedBlockchain,
     cbridgeSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
+import { celerTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/celer-transit-tokens';
 import { TokenInfo } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-chain-token-info';
 import { CbridgeEstimateAmountRequest } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-estimate-amount-request';
-import { celerTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-transit-tokens';
-import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
@@ -74,7 +73,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
-                fromToken
+                fromToken,
+                options?.useProxy?.[this.type] || true
             );
             const fromWithoutFee = getFromWithoutFee(
                 fromToken,
@@ -274,7 +274,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         slippageTolerance: number,
         transitTokenAddress: string
     ): Promise<EvmOnChainTrade | null> {
-        const fromBlockchain = from.blockchain as CelerCrossChainSupportedBlockchain;
+        const fromBlockchain = from.blockchain as CbridgeCrossChainSupportedBlockchain;
 
         const dexes = Object.values(typedTradeProviders[fromBlockchain]).filter(
             dex => dex.supportReceiverAddress
@@ -309,7 +309,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         _availableDexes: string[],
         slippageTolerance: number
     ): Promise<EvmOnChainTrade | null> {
-        const fromBlockchain = from.blockchain as CelerCrossChainSupportedBlockchain;
+        const fromBlockchain = from.blockchain as CbridgeCrossChainSupportedBlockchain;
 
         const dexes = Object.values(typedTradeProviders[fromBlockchain]).filter(
             dex => dex.supportReceiverAddress
@@ -409,8 +409,14 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
     protected async getFeeInfo(
         fromBlockchain: CbridgeCrossChainSupportedBlockchain,
         providerAddress: string,
-        percentFeeToken: PriceTokenAmount
+        percentFeeToken: PriceTokenAmount,
+        useProxy: boolean
     ): Promise<FeeInfo> {
-        return ProxyCrossChainEvmTrade.getFeeInfo(fromBlockchain, providerAddress, percentFeeToken);
+        return ProxyCrossChainEvmTrade.getFeeInfo(
+            fromBlockchain,
+            providerAddress,
+            percentFeeToken,
+            useProxy
+        );
     }
 }

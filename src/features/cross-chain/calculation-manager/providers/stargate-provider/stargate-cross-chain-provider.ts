@@ -97,7 +97,12 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             //     await this.checkEqFee(from, toToken);
             // }
 
-            const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress, from);
+            const feeInfo = await this.getFeeInfo(
+                fromBlockchain,
+                options.providerAddress,
+                from,
+                options?.useProxy?.[this.type] || true
+            );
             const fromWithoutFee = getFromWithoutFee(
                 from,
                 feeInfo.rubicProxy?.platformFee?.percent
@@ -202,9 +207,15 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     protected async getFeeInfo(
         fromBlockchain: Partial<EvmBlockchainName>,
         providerAddress: string,
-        percentFeeToken: PriceTokenAmount
+        percentFeeToken: PriceTokenAmount,
+        useProxy: boolean
     ): Promise<FeeInfo> {
-        return ProxyCrossChainEvmTrade.getFeeInfo(fromBlockchain, providerAddress, percentFeeToken);
+        return ProxyCrossChainEvmTrade.getFeeInfo(
+            fromBlockchain,
+            providerAddress,
+            percentFeeToken,
+            useProxy
+        );
     }
 
     private async checkEqFee(

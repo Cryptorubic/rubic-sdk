@@ -97,7 +97,17 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         await this.approve(approveOptions, false);
     }
 
+    protected abstract swapDirect(options?: SwapTransactionOptions): Promise<string | never>;
+
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        const useProxy = options?.useProxy || this.useProxyByDefault;
+        if (!useProxy) {
+            return this.swapDirect(options);
+        }
+        return this.swapWithParams(options);
+    }
+
+    private async swapWithParams(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
         await this.checkReceiverAddress(
             options.receiverAddress,

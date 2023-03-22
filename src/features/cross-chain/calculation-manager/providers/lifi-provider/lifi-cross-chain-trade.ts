@@ -160,7 +160,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         this.bridgeType = crossChainTrade.bridgeType;
     }
 
-    protected async directSwap(options: SwapTransactionOptions = {}): Promise<string | never> {
+    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         try {
             await this.checkTradeErrors();
             if (options.receiverAddress) {

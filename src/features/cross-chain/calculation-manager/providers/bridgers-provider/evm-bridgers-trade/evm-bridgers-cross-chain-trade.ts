@@ -135,13 +135,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         this.contractAddress = crossChainTrade.contractAddress;
     }
 
-    public async swap(
-        options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
-    ): Promise<string | never> {
-        return this.swapDirect(options);
-    }
-
-    private async swapDirect(
+    protected async swapDirect(
         options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
     ): Promise<string | never> {
         await this.checkTradeErrors();

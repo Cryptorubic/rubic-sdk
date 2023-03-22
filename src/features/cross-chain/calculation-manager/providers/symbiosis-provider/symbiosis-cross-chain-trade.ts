@@ -244,7 +244,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
      * Used for direct provider swaps.
      * @param options Swap options
      */
-    private async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
+    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
         await this.checkReceiverAddress(
             options.receiverAddress,

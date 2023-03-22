@@ -26,6 +26,11 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
  */
 export abstract class CrossChainTrade {
     /**
+     * @internal
+     */
+    protected useProxyByDefault = true;
+
+    /**
      * Type of calculated cross-chain trade.
      */
     public abstract readonly type: CrossChainTradeType;

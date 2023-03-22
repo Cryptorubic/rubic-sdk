@@ -28,6 +28,8 @@ import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/cal
 import { RangoBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/models/rango-bridge-types';
 
 export class RangoCrossChainTrade extends EvmCrossChainTrade {
+    protected useProxyByDefault = false;
+
     /**  @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -175,6 +177,10 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         this.checkWalletConnected();
         checkUnsupportedReceiverAddress(options?.receiverAddress, this.walletAddress);
 
+        return super.swap(options);
+    }
+
+    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         return super.swap(options);
     }
 

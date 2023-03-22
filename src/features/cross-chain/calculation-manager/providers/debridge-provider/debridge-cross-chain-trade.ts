@@ -34,6 +34,8 @@ import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/prov
  * Calculated DeBridge cross-chain trade.
  */
 export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
+    protected useProxyByDefault = false;
+
     /** @internal */
     public readonly transitAmount: BigNumber;
 
@@ -170,11 +172,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         this.transitAmount = crossChainTrade.transitAmount;
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        return this.swapDirect(options);
-    }
-
-    private async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
+    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         this.checkWalletConnected();
         await this.checkAllowanceAndApprove(options);
         const { data, value, to } = await this.getTransactionRequest(options?.receiverAddress);

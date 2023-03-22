@@ -52,6 +52,7 @@ export abstract class CrossChainProvider {
      * @param _fromBlockchain Source network blockchain.
      * @param _providerAddress Integrator address.
      * @param _percentFeeToken Protocol fee token.
+     * @param _useProxy Use rubic proxy or not.
      * @param _contractAbi Rubic Proxy contract abi.
      * @protected
      * @internal
@@ -60,6 +61,7 @@ export abstract class CrossChainProvider {
         _fromBlockchain: Partial<BlockchainName>,
         _providerAddress: string,
         _percentFeeToken: PriceToken,
+        _useProxy: boolean,
         _contractAbi?: AbiItem[]
     ): Promise<FeeInfo> {
         return {};
