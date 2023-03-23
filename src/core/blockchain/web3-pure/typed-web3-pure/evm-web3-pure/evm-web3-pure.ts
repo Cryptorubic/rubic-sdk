@@ -33,6 +33,10 @@ export class EvmWeb3Pure {
         return isAddress(address);
     }
 
+    public static encodeParameters(types: string[], params: unknown[]): string {
+        return EvmWeb3Pure.web3Eth.abi.encodeParameters(types, params);
+    }
+
     /**
      * Converts address to bytes32 format.
      * @param address Address to convert.

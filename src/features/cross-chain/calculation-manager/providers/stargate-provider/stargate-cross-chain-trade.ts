@@ -300,6 +300,32 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                 toTokenAmount: this.onChainTrade.to,
                 onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
             }));
+
+        // const dstSwap = await ProxyCrossChainEvmTrade.getOnChainTrade(
+        //     new PriceTokenAmount({
+        //         ...this.to.asStructWithAmount,
+        //         tokenAmount: this.toTokenAmountMin
+        //     }),
+        //     {
+        //         address: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
+        //         blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN
+        //     },
+        //     0.1
+        // );
+        // const encoded = await dstSwap?.encodeDirect({
+        //     supportFee: false,
+        //     fromAddress: this.walletAddress,
+        //     receiverAddress: '0x738cfeEd9EBD5DAB3671DaBBcBc1195D38aF3769'
+        // });
+        //
+        // const txId = bridgeData[0];
+        // const reveivedToken = '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d';
+        //
+        // const test = EvmWeb3Pure.encodeParameters(
+        //     ['bytes32', 'bytes', 'address', 'address'],
+        //     [txId, encoded!.data, reveivedToken, options.receiverAddress || this.walletAddress]
+        // );
+
         const providerData = this.getProviderData(lzTxConfig.data, options.receiverAddress);
 
         const methodArguments = swapData
@@ -347,7 +373,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact || null,
-            slippage: this.slippageTolerance
+            slippage: this.slippageTolerance * 100
         };
     }
 
@@ -358,7 +384,11 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         return undefined;
     }
 
-    protected getProviderData(_sourceData: BytesLike, receiverAddress?: string): unknown[] {
+    protected getProviderData(
+        _sourceData: BytesLike,
+        receiverAddress?: string,
+        _test?: string
+    ): unknown[] {
         const pool = stargatePoolId[this.to.symbol as StargateBridgeToken];
         const targetPoolDecimals = stargatePoolsDecimals[this.to.symbol as StargateBridgeToken];
         const amount = Web3Pure.toWei(this.toTokenAmountMin, targetPoolDecimals);

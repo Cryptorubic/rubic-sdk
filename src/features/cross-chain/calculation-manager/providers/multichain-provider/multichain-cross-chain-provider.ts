@@ -216,6 +216,20 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
         };
     }
 
+    protected async getFeeInfo(
+        fromBlockchain: MultichainCrossChainSupportedBlockchain,
+        providerAddress: string,
+        percentFeeToken: PriceTokenAmount,
+        useProxy: boolean
+    ): Promise<FeeInfo> {
+        return ProxyCrossChainEvmTrade.getFeeInfo(
+            fromBlockchain,
+            providerAddress,
+            percentFeeToken,
+            useProxy
+        );
+    }
+
     private checkMinMaxErrors(
         amount: { tokenAmount: BigNumber; symbol: string },
         minAmount: { tokenAmount: BigNumber; symbol: string },

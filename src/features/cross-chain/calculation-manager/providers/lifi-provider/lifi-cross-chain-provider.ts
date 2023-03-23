@@ -176,7 +176,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         }
     }
 
-    protected override async getFeeInfo(
+    protected async getFeeInfo(
         fromBlockchain: LifiCrossChainSupportedBlockchain,
         providerAddress: string,
         percentFeeToken: PriceTokenAmount,

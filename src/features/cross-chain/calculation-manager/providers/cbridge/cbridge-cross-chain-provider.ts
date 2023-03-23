@@ -379,7 +379,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                 'minSend',
                 [fromTokenAddress]
             );
-            const minAmount = new BigNumber(minAmountString).multipliedBy(1.05);
+            const minAmount = new BigNumber(minAmountString);
             if (minAmount.gt(fromToken.stringWeiAmount)) {
                 return new MinAmountError(
                     Web3Pure.fromWei(minAmount, fromToken.decimals),
@@ -393,7 +393,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                 'maxSend',
                 [fromTokenAddress]
             );
-            const maxAmount = new BigNumber(maxAmountString).dividedBy(0.95);
+            const maxAmount = new BigNumber(maxAmountString);
             if (maxAmount.lt(fromToken.stringWeiAmount)) {
                 return new MaxAmountError(
                     Web3Pure.fromWei(maxAmount, fromToken.decimals),
