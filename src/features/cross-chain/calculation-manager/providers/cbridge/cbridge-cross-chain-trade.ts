@@ -212,7 +212,7 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             walletAddress: this.walletAddress,
             fromTokenAmount: this.from,
             toTokenAmount: this.to,
-            onChainTrade: this.onChainTrade,
+            srcChainTrade: this.onChainTrade,
             providerAddress: this.providerAddress,
             type: this.type,
             fromAddress: this.walletAddress

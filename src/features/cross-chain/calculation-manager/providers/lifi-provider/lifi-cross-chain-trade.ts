@@ -245,7 +245,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             walletAddress: this.walletAddress,
             fromTokenAmount: this.from,
             toTokenAmount: this.to,
-            onChainTrade: null,
+            srcChainTrade: null,
             providerAddress: this.providerAddress,
             type: this.type,
             fromAddress: this.walletAddress

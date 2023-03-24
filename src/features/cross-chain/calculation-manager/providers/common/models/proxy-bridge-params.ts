@@ -5,8 +5,9 @@ export interface ProxyBridgeParams {
     walletAddress: string;
     fromTokenAmount: PriceTokenAmount;
     toTokenAmount: PriceTokenAmount;
-    onChainTrade: EvmOnChainTrade | null;
+    srcChainTrade: EvmOnChainTrade | null;
     providerAddress: string;
     type: string;
     fromAddress: string;
+    dstChainTrade?: EvmOnChainTrade;
 }

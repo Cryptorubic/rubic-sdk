@@ -13,6 +13,7 @@ import { ProviderAddress } from 'src/core/sdk/models/provider-address';
 import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
 import { CrossChainProviders } from 'src/features/cross-chain/calculation-manager/constants/cross-chain-providers';
 import { defaultCrossChainCalculationOptions } from 'src/features/cross-chain/calculation-manager/constants/default-cross-chain-calculation-options';
+import { defaultProviderAddresses } from 'src/features/cross-chain/calculation-manager/constants/default-provider-addresses';
 import {
     CrossChainManagerCalculationOptions,
     RequiredCrossChainManagerCalculationOptions
@@ -231,7 +232,9 @@ export class CrossChainManager {
         } catch {}
         return combineOptions(options, {
             ...defaultCrossChainCalculationOptions,
-            providerAddress: chainType ? this.providerAddress[chainType] : ''
+            providerAddress: chainType
+                ? this.providerAddress[chainType]
+                : defaultProviderAddresses.crossChain
         });
     }
 

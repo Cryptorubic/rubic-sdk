@@ -8,12 +8,8 @@ export const rubicProxyContractAddress: Record<
     }
 > = Object.values(BLOCKCHAIN_NAME).reduce(
     (acc, blockchain) => {
-        const gateway = '0x0906003a194543023Fc42ca60f9a83eB15c06f81';
-        let router = '0x7F16a4BcF533C1B5e2E8C89e61468eC0863Cc524';
-
-        if (blockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN) {
-            router = '0x5F00664f90e8E6B09475C4B804efB11fC2fc07DE';
-        }
+        const gateway = '0x3335733c454805df6a77f825f266e136FB4a3333';
+        const router = '0x6AA981bFF95eDfea36Bdae98C26B274FfcafE8d3';
 
         return { ...acc, [blockchain]: { gateway, router } };
     },

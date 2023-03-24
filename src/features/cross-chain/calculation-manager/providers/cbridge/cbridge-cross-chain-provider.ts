@@ -130,11 +130,6 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                     ? new PriceTokenAmount<EvmBlockchainName>(celerTransitTokenStruct)
                     : defaultTransit;
             }
-            // const toTransitToken =
-            //     celerTransitTokens[toToken.blockchain as CelerCrossChainSupportedBlockchain];
-            // if (onChainTrade && !compareAddresses(toTransitToken.address, toToken.address)) {
-            //     throw new RubicSdkError('Not supported tokens');
-            // }
 
             const { amount, maxSlippage, fee } = await this.getEstimates(
                 transitToken,
@@ -156,7 +151,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                     ? await CbridgeCrossChainTrade.getGasData(fromToken, to, onChainTrade)
                     : null;
 
-            const amountsErrors = await this.getMinMaxAmountsErrors(transitToken);
+            const amountsErrors = await this.getMinMaxAmountsErrors(transitToken, feeInfo);
 
             return {
                 trade: new CbridgeCrossChainTrade(
@@ -363,7 +358,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
     }
 
     private async getMinMaxAmountsErrors(
-        fromToken: PriceTokenAmount<EvmBlockchainName>
+        fromToken: PriceTokenAmount<EvmBlockchainName>,
+        _feeInfo: FeeInfo
     ): Promise<MinAmountError | MaxAmountError | undefined> {
         try {
             const fromBlockchain = fromToken.blockchain as CbridgeCrossChainSupportedBlockchain;

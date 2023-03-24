@@ -3,7 +3,11 @@ import { NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { parseError } from 'src/common/utils/errors';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -16,6 +20,7 @@ import { CalculationResult } from 'src/features/cross-chain/calculation-manager/
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { feeLibraryAbi } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/fee-library-abi';
+import { relayersAddresses } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/relayers-addresses';
 import {
     StargateBridgeToken,
     stargateBridgeToken
@@ -110,7 +115,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
 
             const transitToken = await this.getTransitToken(hasDirectRoute, from, toToken);
             let transitTokenAmount = fromWithoutFee;
-            let onChainTrade: EvmOnChainTrade | null = null;
+            let srcChainTrade: EvmOnChainTrade | null = null;
             let transitAmount: BigNumber = fromWithoutFee.tokenAmount;
 
             if (!hasDirectRoute) {
@@ -125,9 +130,9 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                         error: new NotSupportedTokensError()
                     };
                 }
-                onChainTrade = trade;
-                transitTokenAmount = onChainTrade.to;
-                transitAmount = onChainTrade.toTokenAmountMin.tokenAmount;
+                srcChainTrade = trade;
+                transitTokenAmount = srcChainTrade.to;
+                transitAmount = srcChainTrade.toTokenAmountMin.tokenAmount;
             }
 
             const poolFee = await this.fetchPoolFees(transitTokenAmount, toToken, transitAmount);
@@ -137,10 +142,24 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 tokenAmount: amountOutMin
             });
 
+            const swapInDestination = false;
+            const dstChainTrade = swapInDestination
+                ? await this.getDstSwap(to, amountOutMin)
+                : null;
+            const dstSwapData = swapInDestination
+                ? (
+                      await dstChainTrade!.encodeDirect({
+                          supportFee: false,
+                          fromAddress: options?.fromAddress || EvmWeb3Pure.EMPTY_ADDRESS
+                      })
+                  ).data
+                : undefined;
+
             const layerZeroFeeWei = await this.getLayerZeroFee(
                 transitTokenAmount,
                 to,
-                amountOutMin
+                amountOutMin,
+                dstSwapData
             );
             const layerZeroFeeAmount = Web3Pure.fromWei(
                 layerZeroFeeWei,
@@ -163,7 +182,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                         priceImpact: null,
                         gasData: null,
                         feeInfo,
-                        onChainTrade
+                        srcChainTrade,
+                        dstChainTrade
                     },
                     options.providerAddress
                 )
@@ -180,25 +200,33 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     private async getLayerZeroFee(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
-        amountOutMin: BigNumber
+        amountOutMin: BigNumber,
+        dstSwapData?: string
     ): Promise<BigNumber> {
-        const layzerZeroTxData = await StargateCrossChainTrade.getLayerZeroSwapData(
+        const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
+        const toBlockchain = to.blockchain as StargateCrossChainSupportedBlockchain;
+        const layerZeroTxData = await StargateCrossChainTrade.getLayerZeroSwapData(
             from,
             to,
-            amountOutMin
+            amountOutMin,
+            undefined,
+            dstSwapData
         );
         const web3Public = Injector.web3PublicService.getWeb3Public(from.blockchain);
         const walletAddress = Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address;
+        const dstConfig = dstSwapData
+            ? ['750000', '0', relayersAddresses[toBlockchain]]
+            : ['0', '0', walletAddress];
         const layerZeroFee = await web3Public.callContractMethod(
-            stargateContractAddress[from.blockchain as StargateCrossChainSupportedBlockchain],
+            stargateContractAddress[fromBlockchain],
             stargateRouterAbi,
             'quoteLayerZeroFee',
             [
-                stargateChainId[to.blockchain as StargateCrossChainSupportedBlockchain],
+                stargateChainId[toBlockchain],
                 1,
                 walletAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                layzerZeroTxData.data,
-                ['0', '0', walletAddress || EvmWeb3Pure.EMPTY_ADDRESS]
+                layerZeroTxData.data,
+                dstConfig
             ]
         );
         return new BigNumber(`${layerZeroFee['0']!}`);
@@ -427,5 +455,22 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         const fromPoolNumber = fromBlockchainDirection[0]!;
 
         return this.getPoolToken(fromPoolNumber, fromBlockchain);
+    }
+
+    private async getDstSwap(
+        fromToken: PriceTokenAmount,
+        tokenAmount: BigNumber
+    ): Promise<EvmOnChainTrade | null> {
+        return ProxyCrossChainEvmTrade.getOnChainTrade(
+            new PriceTokenAmount({
+                ...fromToken.asStruct,
+                tokenAmount
+            }),
+            {
+                address: '0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d',
+                blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN
+            },
+            0.1
+        );
     }
 }

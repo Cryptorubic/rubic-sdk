@@ -6,6 +6,7 @@ import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/bl
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { ProviderAddress } from 'src/core/sdk/models/provider-address';
 import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
+import { defaultProviderAddresses } from 'src/features/cross-chain/calculation-manager/constants/default-provider-addresses';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
@@ -122,7 +123,8 @@ export class OnChainManager {
             {
                 timeout: OnChainManager.defaultCalculationTimeout,
                 disabledProviders: [],
-                providerAddress: this.providerAddress[chainType],
+                providerAddress:
+                    this.providerAddress?.[chainType] || defaultProviderAddresses.onChain,
                 useProxy,
                 withDeflation: {
                     from: isDeflationFrom,
