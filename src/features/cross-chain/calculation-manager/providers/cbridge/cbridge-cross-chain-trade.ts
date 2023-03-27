@@ -104,7 +104,9 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return rubicProxyContractAddress[this.fromBlockchain].gateway;
+        return this.isProxyTrade
+            ? rubicProxyContractAddress[this.fromBlockchain].gateway
+            : cbridgeContractAddress[this.fromBlockchain].providerGateway;
     }
 
     public readonly feeInfo: FeeInfo;

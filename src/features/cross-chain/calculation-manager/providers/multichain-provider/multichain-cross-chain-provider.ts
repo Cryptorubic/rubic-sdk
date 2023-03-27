@@ -39,6 +39,8 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as MultichainCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as MultichainCrossChainSupportedBlockchain;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
+
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return null;
         }
@@ -73,7 +75,7 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 fromBlockchain,
                 options.providerAddress,
                 from,
-                options?.useProxy?.[this.type] || true
+                useProxy
             );
             const fromWithoutFee = getFromWithoutFee(
                 from,
@@ -92,6 +94,12 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 transitTokenAmount = fromWithoutFee.tokenAmount;
                 transitMinAmount = transitTokenAmount;
             } else {
+                if (useProxy) {
+                    return {
+                        trade: null,
+                        error: new NotSupportedTokensError()
+                    };
+                }
                 onChainTrade = await ProxyCrossChainEvmTrade.getOnChainTrade(
                     fromWithoutFee,
                     {

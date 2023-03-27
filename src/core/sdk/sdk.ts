@@ -1,7 +1,6 @@
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Web3PrivateService } from 'src/core/blockchain/web3-private-service/web3-private-service';
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
-import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { CoingeckoApi } from 'src/core/coingecko-api/coingecko-api';
 import { GasPriceApi } from 'src/core/gas-price-api/gas-price-api';
@@ -100,7 +99,7 @@ export class SDK {
 
         const { providerAddress } = configuration;
         return new SDK({
-            [CHAIN_TYPE.EVM]: providerAddress?.[CHAIN_TYPE.EVM] || EvmWeb3Pure.EMPTY_ADDRESS,
+            [CHAIN_TYPE.EVM]: providerAddress?.[CHAIN_TYPE.EVM] || undefined,
             [CHAIN_TYPE.TRON]: providerAddress?.[CHAIN_TYPE.TRON] || TronWeb3Pure.EMPTY_ADDRESS
         });
     }

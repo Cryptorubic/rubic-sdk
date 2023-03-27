@@ -93,6 +93,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as SymbiosisCrossChainSupportedBlockchain;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return null;
         }
@@ -116,7 +117,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 fromBlockchain,
                 options.providerAddress,
                 from,
-                options?.useProxy?.[this.type] || true
+                useProxy
             );
             const fromWithoutFee = getFromWithoutFee(
                 from,
@@ -161,15 +162,16 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                     ? 0
                     : (options.slippageTolerance - 0.005) / 2;
 
-            const onChainTrade = transitToken
-                ? await ProxyCrossChainEvmTrade.getOnChainTrade(
-                      fromWithoutFee,
-                      transitToken,
-                      onChainSlippage
-                  )
-                : null;
+            const onChainTrade =
+                transitToken && useProxy
+                    ? await ProxyCrossChainEvmTrade.getOnChainTrade(
+                          fromWithoutFee,
+                          transitToken,
+                          onChainSlippage
+                      )
+                    : null;
 
-            if (transitToken && !onChainTrade) {
+            if (transitToken && !onChainTrade && useProxy) {
                 throw new RubicSdkError('No on chain trade found.');
             }
 

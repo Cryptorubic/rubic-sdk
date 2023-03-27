@@ -230,12 +230,17 @@ export class CrossChainManager {
         try {
             chainType = BlockchainsInfo.getChainType(fromBlockchain) as keyof ProviderAddress;
         } catch {}
-        return combineOptions(options, {
-            ...defaultCrossChainCalculationOptions,
-            providerAddress: chainType
-                ? this.providerAddress[chainType]
-                : defaultProviderAddresses.crossChain
-        });
+
+        let providerAddress = defaultProviderAddresses.crossChain;
+        if (
+            chainType &&
+            this.providerAddress?.[chainType] &&
+            this.providerAddress[chainType] !== undefined
+        ) {
+            providerAddress = this.providerAddress[chainType]!;
+        }
+
+        return combineOptions(options, { ...defaultCrossChainCalculationOptions, providerAddress });
     }
 
     private getNotDisabledProviders(

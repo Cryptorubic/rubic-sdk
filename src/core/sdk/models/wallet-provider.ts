@@ -22,7 +22,9 @@ export type TronWalletProviderCore = WalletProviderCore<typeof TronWeb>;
 /**
  * Stores wallet core and information about current user, used to make `send` transactions.
  */
-export interface WalletProvider {
+interface IWalletProvider {
     readonly [CHAIN_TYPE.EVM]?: EvmWalletProviderCore;
     readonly [CHAIN_TYPE.TRON]?: TronWalletProviderCore;
 }
+
+export type WalletProvider = Partial<IWalletProvider>;

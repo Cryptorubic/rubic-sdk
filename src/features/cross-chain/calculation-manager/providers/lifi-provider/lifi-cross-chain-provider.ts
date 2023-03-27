@@ -80,7 +80,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             fromBlockchain,
             options.providerAddress,
             from,
-            options?.useProxy?.[this.type] || true
+            options?.useProxy?.[this.type] ?? true
         );
         const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
         // const fromWithoutFee = from;

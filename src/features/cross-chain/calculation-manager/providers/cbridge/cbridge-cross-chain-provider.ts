@@ -74,7 +74,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                 fromBlockchain,
                 options.providerAddress,
                 fromToken,
-                options?.useProxy?.[this.type] || true
+                options?.useProxy?.[this.type] ?? true
             );
             const fromWithoutFee = getFromWithoutFee(
                 fromToken,

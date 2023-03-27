@@ -122,7 +122,9 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public get fromContractAddress(): string {
-        return rubicProxyContractAddress[this.fromBlockchain].gateway;
+        return this.isProxyTrade
+            ? rubicProxyContractAddress[this.fromBlockchain].gateway
+            : this.providerGateway;
     }
 
     protected get methodName(): string {

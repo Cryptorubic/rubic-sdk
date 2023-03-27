@@ -129,9 +129,11 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
     public readonly onChainTrade: EvmOnChainTrade | null;
 
     protected get fromContractAddress(): string {
-        return rubicProxyContractAddress[
-            this.from.blockchain as MultichainCrossChainSupportedBlockchain
-        ].gateway;
+        return this.isProxyTrade
+            ? rubicProxyContractAddress[
+                  this.from.blockchain as MultichainCrossChainSupportedBlockchain
+              ].gateway
+            : this.routerAddress;
     }
 
     constructor(

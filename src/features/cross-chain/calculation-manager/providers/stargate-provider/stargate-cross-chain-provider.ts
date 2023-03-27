@@ -106,7 +106,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 fromBlockchain,
                 options.providerAddress,
                 from,
-                options?.useProxy?.[this.type] || true
+                options?.useProxy?.[this.type] ?? true
             );
             const fromWithoutFee = getFromWithoutFee(
                 from,
@@ -216,7 +216,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         const walletAddress = Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address;
         const dstConfig = dstSwapData
             ? ['750000', '0', relayersAddresses[toBlockchain]]
-            : ['0', '0', walletAddress];
+            : ['0', '0', walletAddress || EvmWeb3Pure.EMPTY_ADDRESS];
         const layerZeroFee = await web3Public.callContractMethod(
             stargateContractAddress[fromBlockchain],
             stargateRouterAbi,

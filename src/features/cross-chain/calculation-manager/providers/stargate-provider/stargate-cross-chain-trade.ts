@@ -136,7 +136,9 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return rubicProxyContractAddress[this.fromBlockchain].gateway;
+        return this.isProxyTrade
+            ? rubicProxyContractAddress[this.fromBlockchain].gateway
+            : stargateContractAddress[this.fromBlockchain];
     }
 
     private readonly onChainTrade: EvmOnChainTrade | null;
@@ -422,7 +424,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             dstSwapData
                 ? relayersAddresses[this.to.blockchain as StargateCrossChainSupportedBlockchain]
                 : destinationAddress,
-            dstSwapData
+            dstSwapData || '0x'
         ];
     }
 }

@@ -102,6 +102,10 @@ export abstract class CrossChainTrade {
         );
     }
 
+    protected get isProxyTrade(): boolean {
+        return Boolean(this.feeInfo.rubicProxy?.fixedFee?.amount?.gt(0));
+    }
+
     protected constructor(protected readonly providerAddress: string) {}
 
     /**
