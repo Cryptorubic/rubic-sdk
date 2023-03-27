@@ -94,7 +94,7 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 transitTokenAmount = fromWithoutFee.tokenAmount;
                 transitMinAmount = transitTokenAmount;
             } else {
-                if (useProxy) {
+                if (!useProxy) {
                     return {
                         trade: null,
                         error: new NotSupportedTokensError()
