@@ -190,7 +190,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const receiverAddress = options?.receiverAddress || this.walletAddress;
-        const { data, value: providerValue } = await this.getTransactionRequest(receiverAddress);
+        const { data } = await this.getTransactionRequest(receiverAddress);
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
@@ -216,7 +216,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             ? [bridgeData, swapData, providerData]
             : [bridgeData, providerData];
 
-        const value = this.getSwapValue(providerValue?.toString());
+        const value = this.getSwapValue();
 
         const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,

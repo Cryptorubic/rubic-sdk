@@ -68,9 +68,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             allowSwitchChain: false,
             bridges: {
                 deny: options.lifiDisabledBridgeTypes
-            },
-            fee: this.lifiFee,
-            integrator: 'Rubic'
+            }
         };
 
         const fromChainId = blockchainId[fromBlockchain];

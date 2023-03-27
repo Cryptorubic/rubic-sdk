@@ -1,6 +1,7 @@
 import { Route } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import {
+    FailedToCheckForTransactionReceiptError,
     LifiPairIsUnavailableError,
     LowSlippageDeflationaryTokenError,
     RubicSdkError,
@@ -15,6 +16,8 @@ import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-trade-struct';
+import {SwapTransactionOptions} from "src/features/common/models/swap-transaction-options";
+import {parseError} from "src/common/utils/errors";
 
 interface LifiTransactionRequest {
     to: string;
