@@ -28,7 +28,26 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.KLAYTN,
     BLOCKCHAIN_NAME.VELAS,
     BLOCKCHAIN_NAME.SYSCOIN,
-    BLOCKCHAIN_NAME.ICP
+    BLOCKCHAIN_NAME.ICP,
+    BLOCKCHAIN_NAME.OPTIMISM,
+    BLOCKCHAIN_NAME.CRONOS,
+    BLOCKCHAIN_NAME.OKE_X_CHAIN,
+    BLOCKCHAIN_NAME.GNOSIS,
+    BLOCKCHAIN_NAME.FUSE,
+    BLOCKCHAIN_NAME.MOONBEAM,
+    BLOCKCHAIN_NAME.CELO,
+    BLOCKCHAIN_NAME.BOBA_BSC,
+    BLOCKCHAIN_NAME.BOBA_AVALANCHE,
+    BLOCKCHAIN_NAME.ASTAR,
+    BLOCKCHAIN_NAME.BITGERT,
+    BLOCKCHAIN_NAME.ETHEREUM_CLASSIC,
+    BLOCKCHAIN_NAME.EOS,
+    BLOCKCHAIN_NAME.FLARE,
+    BLOCKCHAIN_NAME.IOTEX,
+    BLOCKCHAIN_NAME.ONTOLOGY,
+    BLOCKCHAIN_NAME.THETA,
+    BLOCKCHAIN_NAME.XDC,
+    BLOCKCHAIN_NAME.BITCOIN_CASH
 ] as const;
 
 type SupportedBlockchain = (typeof supportedBlockchains)[number];
@@ -71,7 +90,26 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.KLAYTN]: 'klaytn',
             [BLOCKCHAIN_NAME.VELAS]: 'velas',
             [BLOCKCHAIN_NAME.SYSCOIN]: 'syscoin',
-            [BLOCKCHAIN_NAME.ICP]: 'internet-computer'
+            [BLOCKCHAIN_NAME.ICP]: 'internet-computer',
+            [BLOCKCHAIN_NAME.OPTIMISM]: 'optimism',
+            [BLOCKCHAIN_NAME.CRONOS]: 'cronos',
+            [BLOCKCHAIN_NAME.OKE_X_CHAIN]: 'okex-chain',
+            [BLOCKCHAIN_NAME.GNOSIS]: 'xdai',
+            [BLOCKCHAIN_NAME.FUSE]: 'fuse',
+            [BLOCKCHAIN_NAME.MOONBEAM]: 'moonbeam',
+            [BLOCKCHAIN_NAME.CELO]: 'celo',
+            [BLOCKCHAIN_NAME.BOBA_BSC]: 'boba',
+            [BLOCKCHAIN_NAME.BOBA_AVALANCHE]: 'boba',
+            [BLOCKCHAIN_NAME.ASTAR]: 'astar',
+            [BLOCKCHAIN_NAME.BITGERT]: 'bitgert',
+            [BLOCKCHAIN_NAME.ETHEREUM_CLASSIC]: 'ethereum-classic',
+            [BLOCKCHAIN_NAME.EOS]: 'eos',
+            [BLOCKCHAIN_NAME.FLARE]: 'flare-network',
+            [BLOCKCHAIN_NAME.IOTEX]: 'iotex',
+            [BLOCKCHAIN_NAME.ONTOLOGY]: 'ontology',
+            [BLOCKCHAIN_NAME.THETA]: 'theta',
+            [BLOCKCHAIN_NAME.XDC]: 'xdc-network',
+            [BLOCKCHAIN_NAME.BITCOIN_CASH]: 'bitcoin-cash'
         };
 
         this.tokenBlockchainId = {
@@ -95,7 +133,26 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.KLAYTN]: 'klaytn',
             [BLOCKCHAIN_NAME.VELAS]: 'velas',
             [BLOCKCHAIN_NAME.SYSCOIN]: 'syscoin',
-            [BLOCKCHAIN_NAME.ICP]: 'internet-computer'
+            [BLOCKCHAIN_NAME.ICP]: 'internet-computer',
+            [BLOCKCHAIN_NAME.OPTIMISM]: 'optimism',
+            [BLOCKCHAIN_NAME.CRONOS]: 'cronos',
+            [BLOCKCHAIN_NAME.OKE_X_CHAIN]: 'okex-chain',
+            [BLOCKCHAIN_NAME.GNOSIS]: 'xdai',
+            [BLOCKCHAIN_NAME.FUSE]: 'fuse',
+            [BLOCKCHAIN_NAME.MOONBEAM]: 'moonbeam',
+            [BLOCKCHAIN_NAME.CELO]: 'celo',
+            [BLOCKCHAIN_NAME.BOBA_BSC]: 'boba',
+            [BLOCKCHAIN_NAME.BOBA_AVALANCHE]: 'boba',
+            [BLOCKCHAIN_NAME.ASTAR]: 'astar',
+            [BLOCKCHAIN_NAME.BITGERT]: 'bitgert',
+            [BLOCKCHAIN_NAME.ETHEREUM_CLASSIC]: 'ethereum-classic',
+            [BLOCKCHAIN_NAME.EOS]: 'eos',
+            [BLOCKCHAIN_NAME.FLARE]: 'flare-network',
+            [BLOCKCHAIN_NAME.IOTEX]: 'iotex',
+            [BLOCKCHAIN_NAME.ONTOLOGY]: 'ontology',
+            [BLOCKCHAIN_NAME.THETA]: 'theta',
+            [BLOCKCHAIN_NAME.XDC]: 'xdc-network',
+            [BLOCKCHAIN_NAME.BITCOIN_CASH]: 'bitcoin-cash'
         };
     }
 
