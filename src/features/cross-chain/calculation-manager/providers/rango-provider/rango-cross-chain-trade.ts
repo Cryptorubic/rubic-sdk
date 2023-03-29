@@ -28,8 +28,6 @@ import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/cal
 import { RangoBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/models/rango-bridge-types';
 
 export class RangoCrossChainTrade extends EvmCrossChainTrade {
-    protected useProxyByDefault = false;
-
     /**  @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,

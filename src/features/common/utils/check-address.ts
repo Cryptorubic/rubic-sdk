@@ -21,7 +21,8 @@ export async function isAddressCorrect(
             );
             return response.result;
         }
-        return Web3Pure[BlockchainsInfo.getChainType(toBlockchain)].isAddressCorrect(address);
+        const blockchainProvider = Web3Pure[BlockchainsInfo.getChainType(toBlockchain)];
+        return blockchainProvider.isAddressCorrect(address);
     } catch {
         return true;
     }

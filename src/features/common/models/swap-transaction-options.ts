@@ -42,9 +42,4 @@ export interface SwapTransactionOptions {
      * Will be used for approve transaction, if it is called before swap.
      */
     approveFeeLimit?: number;
-
-    /**
-     * Use rubic proxy contracts
-     */
-    useProxy?: boolean;
 }

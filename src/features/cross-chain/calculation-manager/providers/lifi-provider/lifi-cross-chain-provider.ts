@@ -34,8 +34,6 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
     private readonly MIN_AMOUNT_USD = new BigNumber(30);
 
-    private readonly lifiFee = 0.0015;
-
     public isSupportedBlockchain(
         blockchain: BlockchainName
     ): blockchain is LifiCrossChainSupportedBlockchain {
@@ -107,15 +105,6 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             throw new RubicSdkError('No available routes');
         }
 
-        // const providerGateway = bestRoute.steps[0]!.estimate.approvalAddress;
-
-        const { fromAmountUSD, toAmountUSD } = bestRoute;
-        const priceImpact = new BigNumber(fromAmountUSD)
-            .minus(toAmountUSD)
-            .dividedBy(fromAmountUSD)
-            .dp(2)
-            .toNumber();
-
         from = new PriceTokenAmount({
             ...from.asStructWithAmount,
             price: new BigNumber(bestRoute.fromAmountUSD).dividedBy(from.tokenAmount)
@@ -124,6 +113,17 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             ...toToken.asStruct,
             weiAmount: new BigNumber(bestRoute.toAmount)
         });
+
+        const { fromAmountUSD, toAmountUSD } = bestRoute;
+        const priceImpact =
+            fromAmountUSD && toAmountUSD
+                ? new BigNumber(fromAmountUSD)
+                      .minus(toAmountUSD)
+                      .dividedBy(fromAmountUSD)
+                      .dp(4)
+                      .toNumber()
+                : from.calculatePriceImpactPercent(to)!;
+
         const gasData =
             options.gasCalculation === 'enabled'
                 ? await LifiCrossChainTrade.getGasData(from, to, bestRoute)

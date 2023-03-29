@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { InsufficientLiquidityError, MinAmountError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -91,7 +92,12 @@ export class XyCrossChainProvider extends CrossChainProvider {
             const sourceTransitToken = quote.sourceChainSwaps?.toToken;
             const transitToken: TokenBaseStruct<EvmBlockchainName> | null = sourceTransitToken
                 ? {
-                      address: sourceTransitToken.tokenAddress,
+                      address: compareAddresses(
+                          sourceTransitToken.tokenAddress,
+                          XyCrossChainTrade.nativeAddress
+                      )
+                          ? EvmWeb3Pure.EMPTY_ADDRESS
+                          : sourceTransitToken.tokenAddress,
                       blockchain: fromBlockchain
                   }
                 : null;
@@ -102,6 +108,13 @@ export class XyCrossChainProvider extends CrossChainProvider {
                       (options.slippageTolerance - 0.005) / 2
                   ))!
                 : null;
+
+            if (transitToken && !onChainTrade) {
+                return {
+                    trade: null,
+                    error: new RubicSdkError('Can not estimate source swap trade. ')
+                };
+            }
 
             feeInfo.provider = {
                 cryptoFee: {

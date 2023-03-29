@@ -98,9 +98,13 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             }
 
             const hasDirectRoute = StargateCrossChainProvider.hasDirectRoute(from, toToken);
-            // if (hasDirectRoute) {
-            //     await this.checkEqFee(from, toToken);
-            // }
+            // @TODO Remove after facet fix
+            if (hasDirectRoute && from.isNative && toToken.isNative) {
+                return {
+                    trade: null,
+                    error: new RubicSdkError('Native bridge is not supported.')
+                };
+            }
 
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
@@ -179,7 +183,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                         to,
                         toTokenAmountMin: amountOutMin,
                         slippageTolerance: options.slippageTolerance,
-                        priceImpact: null,
+                        priceImpact: transitTokenAmount.calculatePriceImpactPercent(to),
                         gasData: null,
                         feeInfo,
                         srcChainTrade,

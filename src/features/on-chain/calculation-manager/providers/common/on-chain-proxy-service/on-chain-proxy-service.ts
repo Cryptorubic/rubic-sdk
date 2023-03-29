@@ -5,22 +5,22 @@ import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/bl
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import {
+    ProxySupportedBlockchain,
+    proxySupportedBlockchains
+} from 'src/features/common/constants/proxy-supported-blockchain';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import {
     OnChainPlatformFee,
     OnChainProxyFeeInfo
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
-import {
-    OnChainProxySupportedBlockchain,
-    onChainProxySupportedBlockchains
-} from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/models/on-chain-proxy-supported-blockchain';
 
 export class OnChainProxyService {
     public static isSupportedBlockchain(
         blockchain: BlockchainName
-    ): blockchain is OnChainProxySupportedBlockchain {
-        return onChainProxySupportedBlockchains.some(
+    ): blockchain is ProxySupportedBlockchain {
+        return proxySupportedBlockchains.some(
             supportedBlockchain => supportedBlockchain === blockchain
         );
     }

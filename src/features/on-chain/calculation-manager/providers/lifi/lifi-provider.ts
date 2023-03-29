@@ -9,7 +9,10 @@ import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import {
+    ON_CHAIN_TRADE_TYPE,
+    OnChainTradeType
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
@@ -43,7 +46,7 @@ export class LifiProvider {
     ): Promise<OnChainTrade[]> {
         const fullOptions = combineOptions(options, {
             ...this.defaultOptions,
-            disabledProviders: options.disabledProviders
+            disabledProviders: [...options.disabledProviders, ON_CHAIN_TRADE_TYPE.DODO]
         });
 
         const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
@@ -63,9 +66,7 @@ export class LifiProvider {
             slippage: fullOptions.slippageTolerance,
             exchanges: {
                 deny: lifiDisabledProviders.concat('openocean')
-            },
-            fee: 0.0015,
-            integrator: 'Rubic'
+            }
         };
 
         const routesRequest: RoutesRequest = {
@@ -167,7 +168,7 @@ export class LifiProvider {
         from: Token<EvmBlockchainName>,
         to: Token
     ): Promise<ReadonlyArray<Token>> {
-        const estimatedPath = step.estimate.data.path;
+        const estimatedPath = step.estimate?.data?.path;
         return estimatedPath
             ? await Token.createTokens(estimatedPath, from.blockchain)
             : [from, to];

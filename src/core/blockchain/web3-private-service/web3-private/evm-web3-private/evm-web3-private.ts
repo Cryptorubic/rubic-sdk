@@ -3,6 +3,7 @@ import {
     FailedToCheckForTransactionReceiptError,
     InsufficientFundsGasPriceValueError,
     LowGasError,
+    LowSlippageDeflationaryTokenError,
     LowSlippageError,
     RubicSdkError,
     TransactionRevertedError,
@@ -55,6 +56,15 @@ export class EvmWeb3Private extends Web3Private {
             }
             if (err.message.includes('0x6c544f')) {
                 return new InsufficientFundsGasPriceValueError();
+            }
+            if (
+                err.message.includes('0xf32bec2f') ||
+                err.message.includes(
+                    'execution reverted: Received amount of tokens are less then expected'
+                ) ||
+                err.message.includes('0x275c273c')
+            ) {
+                return new LowSlippageDeflationaryTokenError();
             }
             const errorMessage = JSON.parse(err.message.slice(24)).message;
             if (errorMessage) {

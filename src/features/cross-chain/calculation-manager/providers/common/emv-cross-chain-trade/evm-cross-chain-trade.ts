@@ -100,8 +100,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
     protected abstract swapDirect(options?: SwapTransactionOptions): Promise<string | never>;
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        const useProxy = options?.useProxy ?? this.useProxyByDefault;
-        if (!useProxy) {
+        if (!this.isProxyTrade) {
             return this.swapDirect(options);
         }
         return this.swapWithParams(options);
@@ -129,6 +128,15 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
             await this.getContractParams(options);
 
         try {
+            console.info(
+                contractAddress,
+                contractAbi,
+                methodName,
+                methodName,
+                value,
+                gasLimit,
+                gasPrice
+            );
             await this.web3Private.executeContractMethod(
                 contractAddress,
                 contractAbi,

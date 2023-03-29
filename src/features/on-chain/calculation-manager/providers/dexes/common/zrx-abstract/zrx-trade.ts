@@ -58,7 +58,10 @@ export class ZrxTrade extends EvmOnChainTrade {
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        checkUnsupportedReceiverAddress(options?.receiverAddress, this.walletAddress);
+        checkUnsupportedReceiverAddress(
+            options?.receiverAddress,
+            options?.fromAddress || this.walletAddress
+        );
 
         const { gas, gasPrice } = this.getGasParams(options);
 

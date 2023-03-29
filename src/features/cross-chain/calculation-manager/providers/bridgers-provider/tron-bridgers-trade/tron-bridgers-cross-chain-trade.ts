@@ -115,7 +115,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
             await this.web3Private.executeContractMethod(
                 transactionData.to,
                 tronNativeSwapAbi,
-                this.methodName,
+                this.from.isNative ? 'swapEth' : 'swap',
                 transactionData.parameter.map(el => el.value),
                 {
                     onTransactionHash,

@@ -1,6 +1,6 @@
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
-export const onChainProxySupportedBlockchains = [
+export const proxySupportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,
     BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
     BLOCKCHAIN_NAME.POLYGON,
@@ -27,4 +27,4 @@ export const onChainProxySupportedBlockchains = [
     BLOCKCHAIN_NAME.OASIS
 ] as const;
 
-export type OnChainProxySupportedBlockchain = (typeof onChainProxySupportedBlockchains)[number];
+export type ProxySupportedBlockchain = (typeof proxySupportedBlockchains)[number];
