@@ -220,7 +220,6 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         } catch (err) {
             throw err;
         }
-        // return super.swap(options);
     }
 
     public static async getLayerZeroSwapData(

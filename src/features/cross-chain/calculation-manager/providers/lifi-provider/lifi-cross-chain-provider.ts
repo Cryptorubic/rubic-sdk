@@ -79,7 +79,6 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             options?.useProxy?.[this.type] ?? true
         );
         const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
-        // const fromWithoutFee = from;
 
         const fromAddress = this.getWalletAddress(fromBlockchain);
         const toAddress = options.receiverAddress || fromAddress;

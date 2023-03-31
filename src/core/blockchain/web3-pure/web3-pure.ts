@@ -56,8 +56,6 @@ export class Web3Pure {
 
     public static [CHAIN_TYPE.ZILLIQA] = ZilliqaWeb3Pure;
 
-    // @TODO create web3pure file before release
-
     public static [CHAIN_TYPE.AION] = SolanaWeb3Pure;
 
     public static [CHAIN_TYPE.BITCOIN_DIAMOND] = BitcoinWeb3Pure;
