@@ -75,13 +75,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         if (fromBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
             return false;
         }
-        if (fromBlockchain === BLOCKCHAIN_NAME.AVALANCHE) {
-            return toBlockchain === BLOCKCHAIN_NAME.BOBA_AVALANCHE ||
-                toBlockchain === BLOCKCHAIN_NAME.BOBA_BSC ||
-                toBlockchain === BLOCKCHAIN_NAME.BOBA
-                ? false
-                : super.areSupportedBlockchains(fromBlockchain, toBlockchain);
-        }
+
         return super.areSupportedBlockchains(fromBlockchain, toBlockchain);
     }
 
