@@ -94,14 +94,16 @@ export class CrossChainManager {
             | {
                   address: string;
                   blockchain: BlockchainName;
-              },
+              }
+            | PriceToken,
         fromAmount: string | number | BigNumber,
         toToken:
             | Token
             | {
                   address: string;
                   blockchain: BlockchainName;
-              },
+              }
+            | PriceToken,
         options?: CrossChainManagerCalculationOptions
     ): Promise<WrappedCrossChainTrade[]> {
         if (toToken instanceof Token && fromToken.blockchain === toToken.blockchain) {
@@ -177,14 +179,16 @@ export class CrossChainManager {
             | {
                   address: string;
                   blockchain: BlockchainName;
-              },
+              }
+            | PriceToken,
         fromAmount: string | number | BigNumber,
         toToken:
             | Token
             | {
                   address: string;
                   blockchain: BlockchainName;
-              },
+              }
+            | PriceToken,
         options?: CrossChainManagerCalculationOptions
     ): Observable<CrossChainReactivelyCalculatedTradeData> {
         if (toToken instanceof Token && fromToken.blockchain === toToken.blockchain) {

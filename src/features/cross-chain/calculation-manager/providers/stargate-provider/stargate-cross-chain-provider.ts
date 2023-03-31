@@ -328,13 +328,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                     stargateFeeLibraryContractAddress[fromBlockchain],
                     feeLibraryAbi,
                     'getFees',
-                    [
-                        srcPoolId,
-                        dstPoolId,
-                        dstChainId,
-                        this.getWalletAddress(fromBlockchain),
-                        amountSD
-                    ]
+                    [srcPoolId, dstPoolId, dstChainId, EvmWeb3Pure.EMPTY_ADDRESS, amountSD]
                 );
 
             return Web3Pure.fromWei(

@@ -215,7 +215,7 @@ export abstract class OnChainTrade {
         return {
             estimatedGas: null,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact || 0,
+            priceImpact: this.priceImpact,
             slippage: this.slippageTolerance * 100
         };
     }

@@ -10,6 +10,7 @@ import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { MultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/multichain-method-name';
 import {
     MultichainCrossChainSupportedBlockchain,
     multichainCrossChainSupportedBlockchains
@@ -62,8 +63,10 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 },
                 toBlockchain
             );
-            const routerMethodName = tokens?.targetToken.routerABI.split('(')[0]!;
-            if (!tokens || !isMultichainMethodName(routerMethodName)) {
+            const routerMethodName = tokens?.targetToken.routerABI.split(
+                '('
+            )[0]! as MultichainMethodName;
+            if (!tokens || (useProxy && !isMultichainMethodName(routerMethodName))) {
                 return {
                     trade: null,
                     error: new NotSupportedTokensError()

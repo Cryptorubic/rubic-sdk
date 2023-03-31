@@ -86,7 +86,7 @@ export abstract class CurveAbstractProvider<
             fullOptions
         );
 
-        const to = await PriceTokenAmount.createFromToken({
+        const to = new PriceTokenAmount({
             ...toToken.asStruct,
             weiAmount: new BigNumber(amountOut)
         });

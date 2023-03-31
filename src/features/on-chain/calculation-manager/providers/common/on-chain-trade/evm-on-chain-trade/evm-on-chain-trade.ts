@@ -194,8 +194,8 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 fromAddress,
                 receiverAddress
             });
-            console.info(transactionConfig, options.gasLimit, options.gasPrice);
-            await this.web3Private.sendTransaction(transactionConfig.to, {
+            // console.info(transactionConfig, options.gasLimit, options.gasPrice);
+            await this.web3Private.trySendTransaction(transactionConfig.to, {
                 onTransactionHash,
                 data: transactionConfig.data,
                 value: transactionConfig.value,

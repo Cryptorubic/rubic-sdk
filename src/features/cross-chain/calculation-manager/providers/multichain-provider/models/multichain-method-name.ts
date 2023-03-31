@@ -1,5 +1,4 @@
 export const multichainMethodNames = [
-    'anySwapOut',
     'anySwapOutNative',
     'anySwapOutUnderlying',
     'Swapout'

@@ -9,7 +9,8 @@ export async function getPriceTokensFromInputTokens<T extends BlockchainName = B
         | {
               address: string;
               blockchain: T;
-          },
+          }
+        | PriceToken<T>,
     fromAmount: string | number | BigNumber,
     to:
         | Token<T>
@@ -18,26 +19,34 @@ export async function getPriceTokensFromInputTokens<T extends BlockchainName = B
               address: string;
               blockchain: T;
           }
+        | PriceToken<T>
 ): Promise<{
     from: PriceTokenAmount<T>;
     to: PriceToken<T>;
 }> {
-    const fromPriceTokenPromise =
-        from instanceof Token ? PriceToken.createFromToken(from) : PriceToken.createToken(from);
+    let fromPriceTokenPromise: Promise<PriceToken<T>>;
 
-    let toPriceTokenPromise;
-    switch (true) {
-        case to instanceof Token:
-            toPriceTokenPromise = PriceToken.createFromToken(to as Token<T>);
-            break;
-        case typeof to === 'object':
-            toPriceTokenPromise = PriceToken.createToken(to as TokenBaseStruct<T>);
-            break;
-        default:
-            toPriceTokenPromise = PriceToken.createToken({
-                address: to as string,
-                blockchain: from.blockchain
-            });
+    if (from instanceof PriceToken) {
+        fromPriceTokenPromise = new Promise(resolve => resolve(from));
+    } else if (from instanceof Token) {
+        fromPriceTokenPromise = PriceToken.createFromToken(from);
+    } else {
+        fromPriceTokenPromise = PriceToken.createToken(from);
+    }
+
+    let toPriceTokenPromise: Promise<PriceToken<T>>;
+
+    if (to instanceof PriceToken) {
+        toPriceTokenPromise = new Promise(resolve => resolve(to));
+    } else if (to instanceof Token) {
+        toPriceTokenPromise = PriceToken.createFromToken(to as Token<T>);
+    } else if (typeof to === 'object') {
+        toPriceTokenPromise = PriceToken.createToken(to as TokenBaseStruct<T>);
+    } else {
+        toPriceTokenPromise = PriceToken.createToken({
+            address: to as string,
+            blockchain: from.blockchain
+        });
     }
 
     const [fromPriceToken, toPriceToken] = await Promise.all([

@@ -79,9 +79,10 @@ export class OnChainManager {
             | {
                   address: string;
                   blockchain: BlockchainName;
-              },
+              }
+            | PriceToken,
         fromAmount: string | number,
-        toToken: Token | string,
+        toToken: Token | string | PriceToken,
         options?: OnChainManagerCalculationOptions
     ): Promise<Array<OnChainTrade | OnChainTradeError>> {
         if (toToken instanceof Token && fromToken.blockchain !== toToken.blockchain) {
