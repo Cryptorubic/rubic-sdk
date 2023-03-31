@@ -376,7 +376,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                 [fromTokenAddress]
             );
             const minAmount = new BigNumber(minAmountString);
-            if (minAmount.gt(fromToken.stringWeiAmount)) {
+            if (minAmount.gte(fromToken.stringWeiAmount)) {
                 return new MinAmountError(
                     Web3Pure.fromWei(minAmount, fromToken.decimals),
                     fromToken.symbol
