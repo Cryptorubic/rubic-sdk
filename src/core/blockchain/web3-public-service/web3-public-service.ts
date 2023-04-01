@@ -143,7 +143,8 @@ export class Web3PublicService {
                             if (
                                 e instanceof TimeoutError ||
                                 e instanceof HealthcheckError ||
-                                e.message?.toLowerCase().includes(rpcString.toLowerCase())
+                                e.message?.toLowerCase().includes(rpcString.toLowerCase()) ||
+                                e?.message?.toLowerCase()?.includes('not authorized')
                             ) {
                                 if (curRpc === rpcProvider.rpcList[0]) {
                                     rpcProvider.rpcList.shift();
