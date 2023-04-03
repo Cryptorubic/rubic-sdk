@@ -31,7 +31,11 @@ export function compareCrossChainTrades(
         }
         return 1;
     }
-    if (!nextWrappedTrade || nextWrappedTrade.error) {
+    if (
+        !nextWrappedTrade ||
+        nextWrappedTrade.error ||
+        nextWrappedTrade?.trade?.to?.tokenAmount.lte(0)
+    ) {
         return 1;
     }
 
