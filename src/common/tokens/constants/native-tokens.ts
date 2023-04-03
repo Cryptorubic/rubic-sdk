@@ -240,5 +240,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Internet Computer',
         symbol: 'ICP',
         decimals: 8
+    }),
+    [BLOCKCHAIN_NAME.ZK_SYNC]: new Token({
+        blockchain: BLOCKCHAIN_NAME.OPTIMISM,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
     })
 };
