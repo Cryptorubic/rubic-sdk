@@ -21,4 +21,6 @@ export interface EvmOnChainTradeStruct {
         from: IsDeflationToken;
         to: IsDeflationToken;
     };
+
+    usedForCrossChain?: boolean;
 }

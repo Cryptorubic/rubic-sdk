@@ -97,7 +97,16 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         await this.approve(approveOptions, false);
     }
 
+    protected abstract swapDirect(options?: SwapTransactionOptions): Promise<string | never>;
+
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+        if (!this.isProxyTrade) {
+            return this.swapDirect(options);
+        }
+        return this.swapWithParams(options);
+    }
+
+    private async swapWithParams(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
         await this.checkReceiverAddress(
             options.receiverAddress,
@@ -119,7 +128,22 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
             await this.getContractParams(options);
 
         try {
-            await this.web3Private.tryExecuteContractMethod(
+            let method: 'tryExecuteContractMethod' | 'executeContractMethod' =
+                'tryExecuteContractMethod';
+            if (options?.testMode) {
+                console.info(
+                    contractAddress,
+                    contractAbi,
+                    methodName,
+                    methodName,
+                    value,
+                    gasLimit,
+                    gasPrice
+                );
+                method = 'executeContractMethod';
+            }
+
+            await this.web3Private[method](
                 contractAddress,
                 contractAbi,
                 methodName,

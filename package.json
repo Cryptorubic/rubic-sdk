@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "3.19.11",
+  "version": "4.0.0-beta.0",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -46,6 +46,11 @@
       "name": "Sleta Dmitry",
       "email": "sleta@rubic.finance",
       "url": "https://github.com/axtezy"
+    },
+    {
+      "name": "Kolebaev Vladislav",
+      "email": "ko1ebayev.worx@gmail.com",
+      "url": "https://github.com/ko1ebayev"
     }
   ],
   "license": "GPL-3.0",
@@ -66,6 +71,7 @@
   },
   "dependencies": {
     "@1inch/limit-order-protocol-utils": "^3.0.0",
+    "@layerzerolabs/scan-client": "^0.0.0-beta.6",
     "@lifi/sdk": "^1.6.3",
     "@viaprotocol/router-sdk": "^1.0.7",
     "assert": "^2.0.0",

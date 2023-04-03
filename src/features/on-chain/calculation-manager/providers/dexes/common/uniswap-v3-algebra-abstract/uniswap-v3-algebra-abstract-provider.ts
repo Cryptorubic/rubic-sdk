@@ -159,7 +159,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
             useProxy: fullOptions.useProxy,
             proxyFeeInfo,
             fromWithoutFee,
-            withDeflation: fullOptions.withDeflation
+            withDeflation: fullOptions.withDeflation,
+            usedForCrossChain: fullOptions.usedForCrossChain
         };
         if (fullOptions.gasCalculation === 'disabled') {
             return this.createTradeInstance(tradeStruct, route, fullOptions.providerAddress);

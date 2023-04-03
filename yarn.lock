@@ -978,6 +978,13 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
+"@layerzerolabs/scan-client@^0.0.0-beta.6":
+  version "0.0.0-beta.6"
+  resolved "https://registry.yarnpkg.com/@layerzerolabs/scan-client/-/scan-client-0.0.0-beta.6.tgz#079275514e2a386677fc8129ced52a3c3f0a1b9a"
+  integrity sha512-TjhEfMcmN5Q8Gtog45lj6in+y8OzGPoLzUzSF45cJO703Lrlwf5tAA85TQnnRWPGBiChw70KG2S6nzgmMRQWJg==
+  dependencies:
+    axios "^0.27.2"
+
 "@lifi/sdk@^1.6.3":
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/@lifi/sdk/-/sdk-1.7.2.tgz#a3cda45ca67c747cf13ab593b572e14a2d3a41cb"
@@ -2006,7 +2013,7 @@ aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.12.0.tgz#ce1c9d143389679e253b314241ea9aa5cec980d3"
   integrity sha512-NmWvPnx0F1SfrQbYwOi7OeaNGokp9XhzNioJ/CSBs8Qa4vxug81mhJEAVZwxXuBmYB5KDRfMq/F3RR0BIU7sWg==
 
-axios@0.27.2:
+axios@0.27.2, axios@^0.27.2:
   version "0.27.2"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.27.2.tgz#207658cc8621606e586c85db4b41a750e756d972"
   integrity sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==

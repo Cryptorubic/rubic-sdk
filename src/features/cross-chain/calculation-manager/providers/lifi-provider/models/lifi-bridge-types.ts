@@ -6,5 +6,6 @@ export enum LifiBridgeTypes {
     CONNEXT = 'connext',
     HOP = 'hop',
     HYPHEN = 'hyphen',
-    MULTICHAIN = 'multichain'
+    MULTICHAIN = 'multichain',
+    STARGATE = 'stargate'
 }

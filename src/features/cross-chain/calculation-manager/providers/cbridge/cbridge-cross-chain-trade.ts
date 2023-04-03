@@ -10,10 +10,10 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { cbridgeContractAbi } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-abi';
 import { cbridgeContractAddress } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-address';
-import { cbridgeProxyAbi } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-proxy-abi';
 import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
-import { celerTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/constants/celer-transit-tokens';
-import { CelerCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/celer-provider/models/celer-cross-chain-supported-blockchain';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
@@ -21,6 +21,7 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
@@ -103,8 +104,9 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        // return cbridgeContractAddress[this.fromBlockchain].rubicRouter;
-        return cbridgeContractAddress[this.fromBlockchain].providerRouter;
+        return this.isProxyTrade
+            ? rubicProxyContractAddress[this.fromBlockchain].gateway
+            : cbridgeContractAddress[this.fromBlockchain].providerGateway;
     }
 
     public readonly feeInfo: FeeInfo;
@@ -118,6 +120,12 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
     public readonly onChainSubtype: OnChainSubtype;
 
     public readonly onChainTrade: EvmOnChainTrade | null;
+
+    protected get methodName(): string {
+        return this.onChainTrade
+            ? 'swapAndStartBridgeTokensViaGenericCrossChain'
+            : 'startBridgeTokensViaGenericCrossChain';
+    }
 
     constructor(
         crossChainTrade: {
@@ -155,7 +163,7 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         this.onChainTrade = crossChainTrade.onChainTrade;
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
@@ -172,7 +180,8 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         try {
             const { data, to, value } = this.getTransactionRequest(
                 options.receiverAddress || this.walletAddress,
-                this.maxSlippage
+                this.maxSlippage,
+                this.from
             );
 
             await this.web3Private.trySendTransaction(to, {
@@ -191,46 +200,61 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const receiverAddress = options?.receiverAddress || this.walletAddress;
-        const toChainId = blockchainId[this.to.blockchain];
-        const fromContracts = cbridgeContractAddress[this.fromBlockchain];
-
-        const swapArguments = [
-            this.from.address,
-            this.from.stringWeiAmount,
-            toChainId,
-            this.to.address,
-            Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
+        const {
+            data,
+            to,
+            value: providerValue
+        } = this.getTransactionRequest(
             receiverAddress,
-            this.providerAddress
-        ];
+            this.maxSlippage,
+            this.onChainTrade ? this.onChainTrade.to : this.from
+        );
 
-        const methodArguments: unknown[] = [];
-        if (this.onChainTrade) {
-            methodArguments.push(
-                celerTransitTokens[this.from.blockchain as CelerCrossChainSupportedBlockchain]
-                    .address
-            );
-            const encodedData = (
-                await this.onChainTrade.encodeDirect({
-                    fromAddress: options.fromAddress || this.walletAddress,
-                    receiverAddress: this.fromContractAddress,
-                    supportFee: false
-                })
-            ).data;
-            methodArguments.push(encodedData);
-            swapArguments.push(this.onChainTrade.dexContractAddress);
-        } else {
-            swapArguments.push(EvmWeb3Pure.EMPTY_ADDRESS);
-        }
-        methodArguments.push(this.maxSlippage, swapArguments);
+        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
+            walletAddress: this.walletAddress,
+            fromTokenAmount: this.from,
+            toTokenAmount: this.to,
+            srcChainTrade: this.onChainTrade,
+            providerAddress: this.providerAddress,
+            type: this.type,
+            fromAddress: this.walletAddress
+        });
+        const swapData =
+            this.onChainTrade &&
+            (await ProxyCrossChainEvmTrade.getSwapData(options, {
+                walletAddress: this.walletAddress,
+                contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
+                fromTokenAmount: this.from,
+                toTokenAmount: this.onChainTrade.to,
+                onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
+            }));
+        const providerData = ProxyCrossChainEvmTrade.getGenericProviderData(to, data!);
 
-        const value = this.getSwapValue();
+        const methodArguments = swapData
+            ? [bridgeData, swapData, providerData]
+            : [bridgeData, providerData];
+
+        const value = this.getSwapValue(
+            new BigNumber(this.from.isNative ? this.from.stringWeiAmount : 0).plus(
+                providerValue?.toString()
+            )
+        );
+
+        const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
+            rubicProxyContractAddress[this.from.blockchain].router,
+            evmCommonCrossChainAbi,
+            this.methodName,
+            methodArguments,
+            value
+        );
+        const sendingToken = this.from.isNative ? [] : [this.from.address];
+        const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
 
         return {
-            contractAddress: fromContracts.rubicRouter,
-            contractAbi: cbridgeProxyAbi,
-            methodName: this.getMethodName(),
-            methodArguments,
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
+            contractAbi: gatewayRubicCrossChainAbi,
+            methodName: 'startViaRubic',
+            methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
             value
         };
     }
@@ -247,42 +271,36 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact ? { total: this.priceImpact } : { total: 0 },
-            slippage: { total: this.maxSlippage / 10_000 }
+            priceImpact: this.priceImpact || 0,
+            slippage: this.maxSlippage / 10_000
         };
-    }
-
-    private getMethodName(): string {
-        if (this.from.isNative) {
-            return this.onChainTrade ? 'swapNativeAndBridge' : 'bridgeNative';
-        }
-        return this.onChainTrade ? 'swapAndBridge' : 'bridge';
     }
 
     private getTransactionRequest(
         receiverAddress: string,
-        maxSlippage: number
+        maxSlippage: number,
+        transitToken: PriceTokenAmount
     ): {
         data: string;
         value: string;
         to: string;
     } {
         const params: (string | number)[] = [receiverAddress];
-        if (!this.from.isNative) {
-            params.push(this.from.address);
+        if (!transitToken.isNative) {
+            params.push(transitToken.address);
         }
         params.push(
-            this.from.stringWeiAmount,
+            transitToken.stringWeiAmount,
             blockchainId[this.to.blockchain],
             Date.now(),
             maxSlippage
         );
         const encode = EvmWeb3Pure.encodeMethodCall(
-            this.fromContractAddress,
+            cbridgeContractAddress[this.fromBlockchain].providerRouter,
             cbridgeContractAbi,
-            this.from.isNative ? 'sendNative' : 'send',
+            transitToken.isNative ? 'sendNative' : 'send',
             params,
-            this.from.isNative ? this.from.stringWeiAmount : '0'
+            transitToken.isNative ? this.from.stringWeiAmount : '0'
         );
         return { data: encode.data, to: encode.to, value: encode.value };
     }

@@ -7,7 +7,7 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
 import { TransactionGasParams } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-params';
 import Web3 from 'web3';
-import { AbiItem, fromAscii, isAddress, toChecksumAddress } from 'web3-utils';
+import { AbiItem, fromAscii, isAddress, randomHex, toChecksumAddress } from 'web3-utils';
 
 export type DecodeResult<T> = Result & T;
 
@@ -33,6 +33,10 @@ export class EvmWeb3Pure {
         return isAddress(address);
     }
 
+    public static encodeParameters(types: string[], params: unknown[]): string {
+        return EvmWeb3Pure.web3Eth.abi.encodeParameters(types, params);
+    }
+
     /**
      * Converts address to bytes32 format.
      * @param address Address to convert.
@@ -53,6 +57,14 @@ export class EvmWeb3Pure {
     public static asciiToBytes32(address: string): string {
         const bytes = fromAscii(address);
         return `0x${bytes.slice(2).padStart(64, '0')}`;
+    }
+
+    /**
+     * Generate random HEX strings from a given byte size.
+     * @param size byte size.
+     */
+    public static randomHex(size: number): string {
+        return randomHex(size);
     }
 
     /**

@@ -7,6 +7,9 @@ import { SushiSwapAvalancheProvider } from 'src/features/on-chain/calculation-ma
 import { OolongSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/boba/oolong-swap/oolong-swap-provider';
 import { PancakeSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/pancake-swap/pancake-swap-provider';
 import { SushiSwapBscProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
+import { CroSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/cronos/cro-swap/cro-swap-provider';
+import { CrodexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/cronos/crodex/crodex-provider';
+import { CronaSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/cronos/crona-swap/crona-swap-provider';
 import { SushiSwapEthereumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/sushi-swap-ethereum/sushi-swap-ethereum-provider';
 import { UniSwapV2EthereumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/uni-swap-v2-ethereum/uni-swap-v2-ethereum-provider';
 import { VerseProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/verse/verse-provider';
@@ -95,5 +98,9 @@ export const UniswapV2TradeProviders = [
     WagyuSwapProvider,
     AstroSwapProvider,
     // Syscoin
-    PegasysProvider
+    PegasysProvider,
+    // Cronos
+    CronaSwapProvider,
+    CroSwapProvider,
+    CrodexProvider
 ] as const;

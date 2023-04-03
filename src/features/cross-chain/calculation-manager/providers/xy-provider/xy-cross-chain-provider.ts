@@ -1,19 +1,20 @@
 import BigNumber from 'bignumber.js';
 import { InsufficientLiquidityError, MinAmountError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { xyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-contract-address';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { XyStatusCode } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-status-code';
 import {
     XyCrossChainSupportedBlockchain,
@@ -51,18 +52,17 @@ export class XyCrossChainProvider extends CrossChainProvider {
             const receiverAddress =
                 options.receiverAddress || this.getWalletAddress(fromBlockchain);
 
-            // await this.checkContractState(
-            //     fromBlockchain,
-            //     xyContractAddress[fromBlockchain].rubicRouter,
-            //     evmCommonCrossChainAbi
-            // );
+            const feeInfo = await this.getFeeInfo(
+                fromBlockchain,
+                options.providerAddress,
+                fromToken,
+                options?.useProxy?.[this.type] ?? true
+            );
 
-            // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-            // const fromWithoutFee = getFromWithoutFee(
-            //     fromToken,
-            //     feeInfo.rubicProxy?.platformFee?.percent
-            // );
-            const fromWithoutFee = fromToken;
+            const fromWithoutFee = getFromWithoutFee(
+                fromToken,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
 
             const slippageTolerance = options.slippageTolerance * 100;
 
@@ -71,7 +71,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 fromTokenAddress: fromToken.isNative
                     ? XyCrossChainTrade.nativeAddress
                     : fromToken.address,
-                amount: fromWithoutFee.stringWeiAmount,
+                amount: fromToken.stringWeiAmount,
                 slippage: String(slippageTolerance),
                 destChainId: blockchainId[toBlockchain],
                 toTokenAddress: toToken.isNative
@@ -80,7 +80,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 receiveAddress: receiverAddress || EvmWeb3Pure.EMPTY_ADDRESS
             };
 
-            const { toTokenAmount, statusCode, msg, xyFee } =
+            const { toTokenAmount, statusCode, msg, xyFee, quote } =
                 await Injector.httpClient.get<XyTransactionResponse>(
                     `${XyCrossChainProvider.apiEndpoint}/swap`,
                     {
@@ -88,6 +88,40 @@ export class XyCrossChainProvider extends CrossChainProvider {
                     }
                 );
             this.analyzeStatusCode(statusCode, msg);
+
+            const sourceTransitToken = quote.sourceChainSwaps?.toToken;
+            const transitToken: TokenBaseStruct<EvmBlockchainName> | null = sourceTransitToken
+                ? {
+                      address: compareAddresses(
+                          sourceTransitToken.tokenAddress,
+                          XyCrossChainTrade.nativeAddress
+                      )
+                          ? EvmWeb3Pure.EMPTY_ADDRESS
+                          : sourceTransitToken.tokenAddress,
+                      blockchain: fromBlockchain
+                  }
+                : null;
+            const onChainTrade = transitToken
+                ? (await ProxyCrossChainEvmTrade.getOnChainTrade(
+                      fromWithoutFee,
+                      transitToken,
+                      (options.slippageTolerance - 0.005) / 2
+                  ))!
+                : null;
+
+            if (transitToken && !onChainTrade) {
+                return {
+                    trade: null,
+                    error: new RubicSdkError('Can not estimate source swap trade. ')
+                };
+            }
+
+            feeInfo.provider = {
+                cryptoFee: {
+                    amount: new BigNumber(xyFee!.amount),
+                    tokenSymbol: xyFee!.symbol
+                }
+            };
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -111,15 +145,8 @@ export class XyCrossChainProvider extends CrossChainProvider {
                         gasData,
                         priceImpact: fromToken.calculatePriceImpactPercent(to) || 0,
                         slippage: options.slippageTolerance,
-                        feeInfo: {
-                            // ...feeInfo,
-                            provider: {
-                                cryptoFee: {
-                                    amount: new BigNumber(xyFee!.amount),
-                                    tokenSymbol: xyFee!.symbol
-                                }
-                            }
-                        }
+                        feeInfo,
+                        onChainTrade
                     },
                     options.providerAddress
                 )
@@ -136,30 +163,16 @@ export class XyCrossChainProvider extends CrossChainProvider {
 
     protected async getFeeInfo(
         fromBlockchain: XyCrossChainSupportedBlockchain,
-        providerAddress: string
+        providerAddress: string,
+        percentFeeToken: PriceTokenAmount,
+        useProxy: boolean
     ): Promise<FeeInfo> {
-        return {
-            rubicProxy: {
-                fixedFee: {
-                    amount: await this.getFixedFee(
-                        fromBlockchain,
-                        providerAddress,
-                        xyContractAddress[fromBlockchain].rubicRouter,
-                        evmCommonCrossChainAbi
-                    ),
-                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
-                },
-                platformFee: {
-                    percent: await this.getFeePercent(
-                        fromBlockchain,
-                        providerAddress,
-                        xyContractAddress[fromBlockchain].rubicRouter,
-                        evmCommonCrossChainAbi
-                    ),
-                    tokenSymbol: 'USDC'
-                }
-            }
-        };
+        return ProxyCrossChainEvmTrade.getFeeInfo(
+            fromBlockchain,
+            providerAddress,
+            percentFeeToken,
+            useProxy
+        );
     }
 
     private analyzeStatusCode(code: XyStatusCode, message: string): void {

@@ -8,7 +8,7 @@ import {
 export const KLAY_EXACT_INPUT_REGULAR_SWAP_METHOD: RegularSwapMethodsList = {
     TOKENS_TO_TOKENS: 'swapExactTokensForTokens',
     ETH_TO_TOKENS: 'swapExactKLAYForTokens',
-    TOKENS_TO_ETH: 'swapExactTokensForSyscoin'
+    TOKENS_TO_ETH: 'swapExactTokensForKLAY'
 };
 
 export const KLAY_EXACT_INPUT_SUPPORTING_FEE_SWAP_METHOD: SupportingFeeSwapMethodsList = {

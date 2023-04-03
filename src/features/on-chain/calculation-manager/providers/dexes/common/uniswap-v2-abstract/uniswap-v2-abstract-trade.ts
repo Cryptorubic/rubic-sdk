@@ -155,7 +155,8 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         if (options.supportFee === undefined) {
-            if (await this.needApprove(options.fromAddress)) {
+            const needApprove = await this.needApprove(options.fromAddress);
+            if (needApprove) {
                 throw new RubicSdkError(
                     'To use `encode` function, token must be approved for wallet'
                 );

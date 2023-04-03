@@ -1,9 +1,10 @@
 import BigNumber from 'bignumber.js';
 import {
     FailedToCheckForTransactionReceiptError,
+    NotWhitelistedProviderError,
     UnnecessaryApproveError
 } from 'src/common/errors';
-import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { nativeTokensList, PriceTokenAmount, Token } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
@@ -12,16 +13,18 @@ import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
+import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
-import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
-import {
-    onChainProxyContractAbi,
-    onChainProxyContractAddress
-} from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import {
@@ -46,12 +49,12 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
      */
     public readonly gasFeeInfo: GasFeeInfo | null;
 
+    public readonly feeInfo: FeeInfo;
+
     /**
      * True, if trade must be swapped through on-chain proxy contract.
      */
     public readonly useProxy: boolean;
-
-    public readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
 
     /**
      * Contains from amount, from which proxy fees were subtracted.
@@ -66,14 +69,12 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
     public abstract readonly dexContractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
-    private get contractAddress(): string {
-        return this.useProxy
-            ? onChainProxyContractAddress[this.from.blockchain]
-            : this.dexContractAddress;
-    }
+    private readonly usedForCrossChain: boolean;
 
     protected get spenderAddress(): string {
-        return this.contractAddress;
+        return this.useProxy || this.usedForCrossChain
+            ? rubicProxyContractAddress[this.from.blockchain].gateway
+            : this.dexContractAddress;
     }
 
     protected get web3Public(): EvmWeb3Public {
@@ -96,9 +97,25 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         this.gasFeeInfo = evmOnChainTradeStruct.gasFeeInfo;
 
         this.useProxy = evmOnChainTradeStruct.useProxy;
-        this.proxyFeeInfo = evmOnChainTradeStruct.proxyFeeInfo;
         this.fromWithoutFee = evmOnChainTradeStruct.fromWithoutFee;
+        this.usedForCrossChain = evmOnChainTradeStruct.usedForCrossChain || false;
 
+        this.feeInfo = {
+            rubicProxy: {
+                fixedFee: {
+                    amount:
+                        evmOnChainTradeStruct.proxyFeeInfo?.fixedFeeToken.tokenAmount ||
+                        new BigNumber(0),
+                    tokenSymbol:
+                        evmOnChainTradeStruct.proxyFeeInfo?.fixedFeeToken.symbol || 'Unknown'
+                },
+                platformFee: {
+                    percent: evmOnChainTradeStruct.proxyFeeInfo?.platformFee.percent || 0,
+                    tokenSymbol:
+                        evmOnChainTradeStruct.proxyFeeInfo?.platformFee.token.symbol || 'Unknown'
+                }
+            }
+        };
         this.withDeflation = evmOnChainTradeStruct.withDeflation;
     }
 
@@ -177,7 +194,13 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 fromAddress,
                 receiverAddress
             });
-            await this.web3Private.trySendTransaction(transactionConfig.to, {
+
+            let method: 'trySendTransaction' | 'sendTransaction' = 'trySendTransaction';
+            if (options?.testMode) {
+                console.info(transactionConfig, options.gasLimit, options.gasPrice);
+                method = 'sendTransaction';
+            }
+            await this.web3Private[method](transactionConfig.to, {
                 onTransactionHash,
                 data: transactionConfig.data,
                 value: transactionConfig.value,
@@ -226,39 +249,41 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     private async getProxyContractParams(
         options: EncodeTransactionOptions
     ): Promise<ContractParams> {
-        const methodName = this.from.isNative ? 'instantTradeNative' : 'instantTrade';
-
-        const directTransactionConfig = await this.encodeDirect({
-            ...options,
-            fromAddress: this.contractAddress,
-            supportFee: false
-        });
-
-        await this.checkProviderIsWhitelisted(directTransactionConfig.to);
+        const swapData = await this.getSwapData(options);
 
         const receiverAddress = options.receiverAddress || options.fromAddress;
         const methodArguments = [
-            [
-                this.from.address,
-                this.from.stringWeiAmount,
-                this.to.address,
-                this.toTokenAmountMin.stringWeiAmount,
-                receiverAddress,
-                this.providerAddress,
-                directTransactionConfig.to
-            ],
-            directTransactionConfig.data
+            EvmWeb3Pure.randomHex(32),
+            this.providerAddress,
+            EvmWeb3Pure.randomHex(20),
+            receiverAddress,
+            this.toTokenAmountMin.stringWeiAmount,
+            swapData
         ];
 
-        const value = new BigNumber(this.proxyFeeInfo?.fixedFeeToken.stringWeiAmount || 0)
-            .plus(this.from.isNative ? this.from.weiAmount : '0')
-            .toFixed(0);
+        const nativeToken = nativeTokensList[this.from.blockchain];
+        const proxyFee = new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || '0');
+        const value = Web3Pure.toWei(
+            proxyFee.plus(this.from.isNative ? this.from.tokenAmount : '0'),
+            nativeToken.decimals
+        );
+
+        const txConfig = EvmWeb3Pure.encodeMethodCall(
+            rubicProxyContractAddress[this.from.blockchain].router,
+            evmCommonCrossChainAbi,
+            'swapTokensGeneric',
+            methodArguments,
+            value
+        );
+
+        const sendingToken = this.from.isNative ? [] : [this.from.address];
+        const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
 
         return {
-            contractAddress: this.contractAddress,
-            contractAbi: onChainProxyContractAbi,
-            methodName,
-            methodArguments,
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
+            contractAbi: gatewayRubicCrossChainAbi,
+            methodName: 'startViaRubic',
+            methodArguments: [sendingToken, sendingAmount, txConfig.data],
             value
         };
     }
@@ -286,5 +311,32 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             gas: options.gasLimit || calculatedGasFee.gasLimit,
             gasPrice: options.gasPrice || calculatedGasFee.gasPrice
         };
+    }
+
+    protected async getSwapData(options: GetContractParamsOptions): Promise<unknown[]> {
+        const directTransactionConfig = await this.encodeDirect({
+            ...options,
+            fromAddress: rubicProxyContractAddress[this.from.blockchain].router,
+            supportFee: false,
+            receiverAddress: rubicProxyContractAddress[this.from.blockchain].router
+        });
+        const availableDexs = (
+            await ProxyCrossChainEvmTrade.getWhitelistedDexes(this.from.blockchain)
+        ).map(address => address.toLowerCase());
+        if (!availableDexs.includes(directTransactionConfig.to.toLowerCase())) {
+            throw new NotWhitelistedProviderError(directTransactionConfig.to, undefined, 'dex');
+        }
+
+        return [
+            [
+                directTransactionConfig.to,
+                directTransactionConfig.to,
+                this.from.address,
+                this.to.address,
+                this.from.stringWeiAmount,
+                directTransactionConfig.data,
+                true
+            ]
+        ];
     }
 }

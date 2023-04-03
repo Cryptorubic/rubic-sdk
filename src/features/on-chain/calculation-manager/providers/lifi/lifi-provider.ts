@@ -1,6 +1,5 @@
 import LIFI, { RouteOptions, RoutesRequest, Step } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
-import { OnChainIsUnavailableError } from 'src/common/errors/on-chain';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { notNull } from 'src/common/utils/object';
 import { combineOptions } from 'src/common/utils/options';
@@ -10,7 +9,10 @@ import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import {
+    ON_CHAIN_TRADE_TYPE,
+    OnChainTradeType
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
@@ -44,7 +46,7 @@ export class LifiProvider {
     ): Promise<OnChainTrade[]> {
         const fullOptions = combineOptions(options, {
             ...this.defaultOptions,
-            disabledProviders: options.disabledProviders
+            disabledProviders: [...options.disabledProviders, ON_CHAIN_TRADE_TYPE.DODO]
         });
 
         const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
@@ -64,9 +66,7 @@ export class LifiProvider {
             slippage: fullOptions.slippageTolerance,
             exchanges: {
                 deny: lifiDisabledProviders.concat('openocean')
-            },
-            fee: 0.0015,
-            integrator: 'Rubic'
+            }
         };
 
         const routesRequest: RoutesRequest = {
@@ -129,13 +129,6 @@ export class LifiProvider {
         ).filter(notNull);
     }
 
-    private async checkContractState(fromBlockchain: EvmBlockchainName): Promise<void | never> {
-        const isPaused = await this.onChainProxyService.isContractPaused(fromBlockchain);
-        if (isPaused) {
-            throw new OnChainIsUnavailableError();
-        }
-    }
-
     protected async handleProxyContract(
         from: PriceTokenAmount<EvmBlockchainName>,
         fullOptions: RequiredOnChainCalculationOptions
@@ -146,8 +139,6 @@ export class LifiProvider {
         let fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
         let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
         if (fullOptions.useProxy) {
-            await this.checkContractState(from.blockchain);
-
             proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
                 from,
                 fullOptions.providerAddress
@@ -177,7 +168,7 @@ export class LifiProvider {
         from: Token<EvmBlockchainName>,
         to: Token
     ): Promise<ReadonlyArray<Token>> {
-        const estimatedPath = step.estimate.data.path;
+        const estimatedPath = step.estimate?.data?.path;
         return estimatedPath
             ? await Token.createTokens(estimatedPath, from.blockchain)
             : [from, to];

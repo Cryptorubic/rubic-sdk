@@ -133,6 +133,10 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         return RANGO_CONTRACT_ADDRESSES[this.fromBlockchain].rubicRouter;
     }
 
+    protected get methodName(): string {
+        return '';
+    }
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
@@ -171,6 +175,10 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         this.checkWalletConnected();
         checkUnsupportedReceiverAddress(options?.receiverAddress, this.walletAddress);
 
+        return super.swap(options);
+    }
+
+    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         return super.swap(options);
     }
 
@@ -260,8 +268,8 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact ? { total: this.priceImpact } : null,
-            slippage: { total: this.slippageTolerance }
+            priceImpact: this.priceImpact || null,
+            slippage: this.slippageTolerance
         };
     }
 }

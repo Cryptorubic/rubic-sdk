@@ -53,7 +53,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         try {
             const fromAddress = options.fromAddress || this.getWalletAddress(fromBlockchain);
 
-            // TODO return after cross-chain proxy fix
             // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
             // const fromWithoutFee = getFromWithoutFee(
             //     from,
@@ -99,6 +98,13 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             const cryptoFeeAmount = new BigNumber(tx.value).minus(
                 from.isNative ? from.stringWeiAmount : 0
             );
+            // feeInfo.provider = {
+            //     ...feeInfo?.provider,
+            //     cryptoFee: {
+            //         amount: Web3Pure.fromWei(cryptoFeeAmount),
+            //         tokenSymbol: nativeTokensList[fromBlockchain].symbol
+            //     }
+            // };
 
             const nativeToken = nativeTokensList[fromBlockchain];
             const cryptoFeeToken = await PriceTokenAmount.createFromToken({
@@ -127,7 +133,8 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                             }
                         },
                         transitAmount: Web3Pure.fromWei(transitToken.amount, transitToken.decimals),
-                        cryptoFeeToken
+                        cryptoFeeToken,
+                        onChainTrade: null
                     },
                     options.providerAddress
                 )

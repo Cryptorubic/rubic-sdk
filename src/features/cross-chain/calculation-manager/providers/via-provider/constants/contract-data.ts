@@ -8,6 +8,6 @@ export const viaContractAddress: Record<ViaCrossChainSupportedBlockchain, string
     viaCrossChainSupportedBlockchains.reduce((acc, blockchain) => {
         return {
             ...acc,
-            [blockchain]: rubicProxyContractAddress[blockchain]
+            [blockchain]: rubicProxyContractAddress[blockchain].router
         };
     }, {} as Record<ViaCrossChainSupportedBlockchain, string>);

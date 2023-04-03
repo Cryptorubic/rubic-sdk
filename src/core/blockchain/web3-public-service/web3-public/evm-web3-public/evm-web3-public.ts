@@ -75,12 +75,10 @@ export class EvmWeb3Public extends Web3Public {
     }
 
     public async getBalance(userAddress: string, tokenAddress?: string): Promise<BigNumber> {
-        let balance;
-        if (tokenAddress && !EvmWeb3Pure.isNativeAddress(tokenAddress)) {
-            balance = await this.getTokenBalance(userAddress, tokenAddress);
-        } else {
-            balance = await this.web3.eth.getBalance(userAddress);
-        }
+        const isToken = tokenAddress && !EvmWeb3Pure.isNativeAddress(tokenAddress);
+        const balance = isToken
+            ? await this.getTokenBalance(userAddress, tokenAddress)
+            : await this.web3.eth.getBalance(userAddress);
         return new BigNumber(balance);
     }
 
@@ -203,13 +201,17 @@ export class EvmWeb3Public extends Web3Public {
         options: {
             from?: string;
             value?: string;
+            gasPrice?: string;
+            gas?: string;
         } = {}
     ): Promise<T> {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
-
-        return contract.methods[methodName](...methodArguments).call({
+        const callableContract = contract.methods[methodName](...methodArguments);
+        return callableContract.call({
             ...(options.from && { from: options.from }),
-            ...(options.value && { value: options.value })
+            ...(options.value && { value: options.value }),
+            ...(options.gasPrice && { value: options.gasPrice }),
+            ...(options.gas && { value: options.gas })
         });
     }
 

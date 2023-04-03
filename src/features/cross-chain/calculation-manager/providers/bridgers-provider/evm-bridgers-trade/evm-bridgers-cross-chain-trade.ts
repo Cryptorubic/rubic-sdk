@@ -12,6 +12,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { BridgersEvmCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { EvmBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/evm-bridgers-trade/models/evm-bridgers-transaction-data';
 import { getMethodArgumentsAndTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/utils/get-method-arguments-and-transaction-data';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
@@ -103,8 +104,13 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     private readonly contractAddress: string;
 
     protected get fromContractAddress(): string {
-        // return rubicProxyContractAddress[this.from.blockchain];
-        return this.contractAddress;
+        return this.isProxyTrade
+            ? rubicProxyContractAddress[this.from.blockchain].gateway
+            : this.contractAddress;
+    }
+
+    protected get methodName(): string {
+        return '';
     }
 
     constructor(
@@ -131,7 +137,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         this.contractAddress = crossChainTrade.contractAddress;
     }
 
-    public async swap(
+    protected async swapDirect(
         options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
     ): Promise<string | never> {
         await this.checkTradeErrors();
@@ -230,8 +236,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact ? { total: this.priceImpact } : null,
-            slippage: { total: this.slippage * 100 }
+            priceImpact: this.priceImpact || 0,
+            slippage: this.slippage * 100
         };
     }
 }

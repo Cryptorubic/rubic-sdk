@@ -86,7 +86,7 @@ export abstract class CurveAbstractProvider<
             fullOptions
         );
 
-        const to = await PriceTokenAmount.createFromToken({
+        const to = new PriceTokenAmount({
             ...toToken.asStruct,
             weiAmount: new BigNumber(amountOut)
         });
@@ -102,7 +102,8 @@ export abstract class CurveAbstractProvider<
             withDeflation: fullOptions.withDeflation,
             path: [fromToken, toToken],
             registryExchangeAddress,
-            poolAddress
+            poolAddress,
+            usedForCrossChain: fullOptions.usedForCrossChain
         };
 
         return new this.Trade(tradeStruct, fullOptions.providerAddress);

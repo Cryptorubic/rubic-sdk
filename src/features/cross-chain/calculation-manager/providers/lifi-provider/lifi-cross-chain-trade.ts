@@ -3,14 +3,15 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import {
@@ -21,6 +22,7 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
 import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
 
@@ -120,8 +122,13 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public get fromContractAddress(): string {
-        // return rubicProxyContractAddress[this.fromBlockchain];
-        return this.providerGateway;
+        return this.isProxyTrade
+            ? rubicProxyContractAddress[this.fromBlockchain].gateway
+            : this.providerGateway;
+    }
+
+    protected get methodName(): string {
+        return 'startBridgeTokensViaGenericCrossChain';
     }
 
     constructor(
@@ -155,9 +162,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         this.bridgeType = crossChainTrade.bridgeType;
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         try {
-            // return await super.swap(options);
             await this.checkTradeErrors();
             if (options.receiverAddress) {
                 throw new RubicSdkError('Receiver address not supported');
@@ -176,7 +182,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
             // eslint-disable-next-line no-useless-catch
             try {
-                const { data, value, to } = await this.getSwapData(options?.receiverAddress);
+                const { data, value, to } = await this.fetchSwapData(options?.receiverAddress);
 
                 await this.web3Private.trySendTransaction(to, {
                     data,
@@ -203,43 +209,75 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.getSwapData(options?.receiverAddress);
-        await this.checkProviderIsWhitelisted(providerRouter, this.providerGateway);
+        } = await this.fetchSwapData(options?.receiverAddress);
+        // await this.checkProviderIsWhitelisted(providerRouter, this.providerGateway);
 
-        const toChainId = blockchainId[this.to.blockchain];
+        // const toChainId = blockchainId[this.to.blockchain];
+        //
+        // const swapArguments = [
+        //     this.from.address,
+        //     this.from.stringWeiAmount,
+        //     toChainId,
+        //     this.to.address,
+        //     Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
+        //     options?.receiverAddress || this.walletAddress,
+        //     this.providerAddress,
+        //     providerRouter
+        // ];
+        //
+        // const methodArguments: unknown[] = [
+        //     `${this.type.toLowerCase()}:${this.bridgeType}`,
+        //     swapArguments
+        // ];
+        // if (!this.from.isNative) {
+        //     methodArguments.push(this.providerGateway);
+        // }
+        // methodArguments.push(data);
+        //
+        // const value = this.getSwapValue(providerValue);
+        //
+        // return {
+        //     contractAddress: this.fromContractAddress,
+        //     contractAbi: evmCommonCrossChainAbi,
+        //     methodName: this.methodName,
+        //     methodArguments,
+        //     value
+        // };
+        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
+            walletAddress: this.walletAddress,
+            fromTokenAmount: this.from,
+            toTokenAmount: this.to,
+            srcChainTrade: null,
+            providerAddress: this.providerAddress,
+            type: this.type,
+            fromAddress: this.walletAddress
+        });
+        const providerData = ProxyCrossChainEvmTrade.getGenericProviderData(providerRouter, data!);
 
-        const swapArguments = [
-            this.from.address,
-            this.from.stringWeiAmount,
-            toChainId,
-            this.to.address,
-            Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
-            options?.receiverAddress || this.walletAddress,
-            this.providerAddress,
-            providerRouter
-        ];
-
-        const methodArguments: unknown[] = [
-            `${this.type.toLowerCase()}:${this.bridgeType}`,
-            swapArguments
-        ];
-        if (!this.from.isNative) {
-            methodArguments.push(this.providerGateway);
-        }
-        methodArguments.push(data);
+        const methodArguments = [bridgeData, providerData];
 
         const value = this.getSwapValue(providerValue);
 
-        return {
-            contractAddress: this.fromContractAddress,
-            contractAbi: evmCommonCrossChainAbi,
-            methodName: this.methodName,
+        const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
+            rubicProxyContractAddress[this.from.blockchain].router,
+            evmCommonCrossChainAbi,
+            this.methodName,
             methodArguments,
+            value
+        );
+        const sendingToken = this.from.isNative ? [] : [this.from.address];
+        const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
+
+        return {
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
+            contractAbi: gatewayRubicCrossChainAbi,
+            methodName: 'startViaRubic',
+            methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
             value
         };
     }
 
-    private async getSwapData(receiverAddress?: string): Promise<LifiTransactionRequest> {
+    private async fetchSwapData(receiverAddress?: string): Promise<LifiTransactionRequest> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
@@ -281,8 +319,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: { total: this.priceImpact },
-            slippage: { total: this.slippage * 100 }
+            priceImpact: this.priceImpact || null,
+            slippage: this.slippage * 100
         };
     }
 }

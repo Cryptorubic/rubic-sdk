@@ -10,16 +10,24 @@ import { Mutable } from 'src/common/utils/types';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { ProviderAddress } from 'src/core/sdk/models/provider-address';
+import {
+    ProxySupportedBlockchain,
+    proxySupportedBlockchains
+} from 'src/features/common/constants/proxy-supported-blockchain';
 import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
 import { CrossChainProviders } from 'src/features/cross-chain/calculation-manager/constants/cross-chain-providers';
 import { defaultCrossChainCalculationOptions } from 'src/features/cross-chain/calculation-manager/constants/default-cross-chain-calculation-options';
+import { defaultProviderAddresses } from 'src/features/cross-chain/calculation-manager/constants/default-provider-addresses';
 import {
     CrossChainManagerCalculationOptions,
     RequiredCrossChainManagerCalculationOptions
 } from 'src/features/cross-chain/calculation-manager/models/cross-chain-manager-options';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CrossChainReactivelyCalculatedTradeData } from 'src/features/cross-chain/calculation-manager/models/cross-chain-reactively-calculated-trade-data';
-import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import {
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTradeType
+} from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainTypedTradeProviders } from 'src/features/cross-chain/calculation-manager/models/cross-chain-typed-trade-provider';
 import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculation-manager/models/wrapped-cross-chain-trade-or-null';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
@@ -86,14 +94,16 @@ export class CrossChainManager {
             | {
                   address: string;
                   blockchain: BlockchainName;
-              },
+              }
+            | PriceToken,
         fromAmount: string | number | BigNumber,
         toToken:
             | Token
             | {
                   address: string;
                   blockchain: BlockchainName;
-              },
+              }
+            | PriceToken,
         options?: CrossChainManagerCalculationOptions
     ): Promise<WrappedCrossChainTrade[]> {
         if (toToken instanceof Token && fromToken.blockchain === toToken.blockchain) {
@@ -169,14 +179,16 @@ export class CrossChainManager {
             | {
                   address: string;
                   blockchain: BlockchainName;
-              },
+              }
+            | PriceToken,
         fromAmount: string | number | BigNumber,
         toToken:
             | Token
             | {
                   address: string;
                   blockchain: BlockchainName;
-              },
+              }
+            | PriceToken,
         options?: CrossChainManagerCalculationOptions
     ): Observable<CrossChainReactivelyCalculatedTradeData> {
         if (toToken instanceof Token && fromToken.blockchain === toToken.blockchain) {
@@ -225,14 +237,17 @@ export class CrossChainManager {
         fromBlockchain: BlockchainName,
         options?: CrossChainManagerCalculationOptions
     ): RequiredCrossChainManagerCalculationOptions {
-        let chainType: keyof ProviderAddress | undefined;
-        try {
-            chainType = BlockchainsInfo.getChainType(fromBlockchain) as keyof ProviderAddress;
-        } catch {}
-        return combineOptions(options, {
-            ...defaultCrossChainCalculationOptions,
-            providerAddress: chainType ? this.providerAddress[chainType] : ''
-        });
+        const providerAddress = this.getProviderAddress(fromBlockchain);
+        const useProxy = this.getProxyConfig(fromBlockchain, options);
+
+        return combineOptions(
+            { ...options, useProxy },
+            {
+                ...defaultCrossChainCalculationOptions,
+                providerAddress,
+                useProxy
+            }
+        );
     }
 
     private getNotDisabledProviders(
@@ -288,5 +303,41 @@ export class CrossChainManager {
                 error: CrossChainProvider.parseError(err)
             };
         }
+    }
+
+    private getProviderAddress(fromBlockchain: BlockchainName): string {
+        let chainType: keyof ProviderAddress | undefined;
+        try {
+            chainType = BlockchainsInfo.getChainType(fromBlockchain) as keyof ProviderAddress;
+        } catch {}
+
+        let providerAddress = defaultProviderAddresses.crossChain;
+        if (
+            chainType &&
+            this.providerAddress?.[chainType] &&
+            this.providerAddress[chainType] !== undefined
+        ) {
+            providerAddress = this.providerAddress[chainType]!;
+        }
+        return providerAddress;
+    }
+
+    private getProxyConfig(
+        fromBlockchain: BlockchainName,
+        options: CrossChainManagerCalculationOptions | undefined
+    ) {
+        const isBlockchainSupportedByProxy = proxySupportedBlockchains.includes(
+            fromBlockchain as ProxySupportedBlockchain
+        );
+        return Object.fromEntries(
+            Object.values(CROSS_CHAIN_TRADE_TYPE).map(key => {
+                return [
+                    key,
+                    isBlockchainSupportedByProxy
+                        ? options?.useProxy?.[key as CrossChainTradeType] ?? true
+                        : false
+                ];
+            })
+        ) as Record<CrossChainTradeType, boolean>;
     }
 }

@@ -1,3 +1,4 @@
+import { createClient } from '@layerzerolabs/scan-client';
 import { Via } from '@viaprotocol/router-sdk';
 import { StatusResponse, TransactionStatus } from 'rango-sdk-basic';
 import { RubicSdkError } from 'src/common/errors';
@@ -51,6 +52,8 @@ import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy
 export class CrossChainStatusManager {
     private readonly httpClient = Injector.httpClient;
 
+    private readonly LayzerZeroScanClient = createClient('mainnet');
+
     private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, GetDstTxDataFn | null> = {
         [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
@@ -62,7 +65,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: this.getMultichainDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE]: this.getCelerBridgeDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.CHANGENOW]: this.getChangenowDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.CHANGENOW]: this.getChangenowDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getStargateDstSwapStatus
     };
 
     /**
@@ -135,6 +139,40 @@ export class CrossChainStatusManager {
     }
 
     /**
+     * Get Stargate trade dst transaction status and hash.
+     * @param data Trade data.
+     * @returns Cross-chain transaction status and hash.
+     */
+    private async getStargateDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const scanResponse = await this.LayzerZeroScanClient.getMessagesBySrcTxHash(data.srcTxHash);
+        const targetTrade = scanResponse.messages.find(
+            item => item.srcTxHash.toLocaleLowerCase() === data.srcTxHash.toLocaleLowerCase()
+        );
+        const txStatusData: TxStatusData = {
+            status: TxStatus.PENDING,
+            hash: null
+        };
+
+        if (targetTrade?.dstTxHash) {
+            txStatusData.hash = targetTrade.dstTxHash;
+        }
+
+        if (targetTrade?.status === 'DELIVERED') {
+            txStatusData.status = TxStatus.SUCCESS;
+        }
+
+        if (targetTrade?.status === 'INFLIGHT') {
+            txStatusData.status = TxStatus.PENDING;
+        }
+
+        if (targetTrade?.status === 'FAILED') {
+            txStatusData.status = TxStatus.FAIL;
+        }
+
+        return txStatusData;
+    }
+
+    /**
      * Get Rango trade dst transaction status and hash.
      * @param data Trade data.
      * @returns Cross-chain transaction status and hash.
@@ -200,6 +238,7 @@ export class CrossChainStatusManager {
         if (symbiosisTxIndexingTimeSpent) {
             try {
                 const srcChainId = blockchainId[data.fromBlockchain];
+                const toBlockchainId = blockchainId[data.toBlockchain];
                 const {
                     status: { text: dstTxStatus },
                     tx
@@ -211,22 +250,27 @@ export class CrossChainStatusManager {
                     hash: tx?.hash || null
                 };
 
+                const targetTokenNetwork = tx?.chainId;
+
                 if (
                     dstTxStatus === SymbiosisSwapStatus.PENDING ||
                     dstTxStatus === SymbiosisSwapStatus.NOT_FOUND
                 ) {
-                    dstTxData.status = TxStatus.PENDING;
+                    return { ...dstTxData, status: TxStatus.PENDING };
                 }
 
                 if (dstTxStatus === SymbiosisSwapStatus.STUCKED) {
-                    dstTxData.status = TxStatus.REVERT;
+                    return { ...dstTxData, status: TxStatus.REVERT };
                 }
 
                 if (dstTxStatus === SymbiosisSwapStatus.REVERTED) {
-                    dstTxData.status = TxStatus.FALLBACK;
+                    return { ...dstTxData, status: TxStatus.FALLBACK };
                 }
 
-                if (dstTxStatus === SymbiosisSwapStatus.SUCCESS) {
+                if (
+                    dstTxStatus === SymbiosisSwapStatus.SUCCESS &&
+                    targetTokenNetwork === toBlockchainId
+                ) {
                     if (data.toBlockchain !== BLOCKCHAIN_NAME.BITCOIN) {
                         dstTxData.status = TxStatus.SUCCESS;
                     } else {

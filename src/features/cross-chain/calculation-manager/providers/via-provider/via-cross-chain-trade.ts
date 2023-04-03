@@ -128,6 +128,10 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
         return this.route.actions[0]!.uuid;
     }
 
+    protected get methodName(): string {
+        return '';
+    }
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
@@ -184,6 +188,10 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
             }
             throw err;
         }
+    }
+
+    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
+        return this.swap(options);
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
@@ -267,8 +275,8 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: { total: this.priceImpact },
-            slippage: { total: this.slippage }
+            priceImpact: this.priceImpact,
+            slippage: this.slippage
         };
     }
 }

@@ -126,8 +126,8 @@ export class PriceTokenAmount<T extends BlockchainName = BlockchainName> extends
      */
     public calculatePriceImpactPercent(toToken: PriceTokenAmount): number | null {
         if (
-            !this.price ||
-            !toToken.price ||
+            !this.price?.isFinite() ||
+            !toToken.price?.isFinite() ||
             !this.tokenAmount?.isFinite() ||
             !toToken.tokenAmount?.isFinite()
         ) {

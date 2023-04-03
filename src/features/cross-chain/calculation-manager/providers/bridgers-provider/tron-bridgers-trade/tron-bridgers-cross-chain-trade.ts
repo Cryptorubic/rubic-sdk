@@ -46,6 +46,10 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
         return this.contractAddress;
     }
 
+    protected get methodName(): string {
+        return '';
+    }
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<TronBlockchainName>;
@@ -69,6 +73,12 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
     }
 
     public async swap(
+        options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
+    ): Promise<string | never> {
+        return this.swapDirect(options);
+    }
+
+    private async swapDirect(
         options: MarkRequired<SwapTransactionOptions, 'receiverAddress'>
     ): Promise<string | never> {
         await this.checkTradeErrors();
@@ -105,7 +115,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
             await this.web3Private.executeContractMethod(
                 transactionData.to,
                 tronNativeSwapAbi,
-                this.methodName,
+                this.from.isNative ? 'swapEth' : 'swap',
                 transactionData.parameter.map(el => el.value),
                 {
                     onTransactionHash,
@@ -169,8 +179,8 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
         return {
             estimatedGas: null,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact ? { total: this.priceImpact } : null,
-            slippage: { total: this.slippage * 100 }
+            priceImpact: this.priceImpact || null,
+            slippage: this.slippage * 100
         };
     }
 }

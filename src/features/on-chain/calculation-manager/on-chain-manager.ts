@@ -6,6 +6,7 @@ import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/bl
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { ProviderAddress } from 'src/core/sdk/models/provider-address';
 import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
+import { defaultProviderAddresses } from 'src/features/cross-chain/calculation-manager/constants/default-provider-addresses';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
@@ -78,9 +79,10 @@ export class OnChainManager {
             | {
                   address: string;
                   blockchain: BlockchainName;
-              },
+              }
+            | PriceToken,
         fromAmount: string | number,
-        toToken: Token | string,
+        toToken: Token | string | PriceToken,
         options?: OnChainManagerCalculationOptions
     ): Promise<Array<OnChainTrade | OnChainTradeError>> {
         if (toToken instanceof Token && fromToken.blockchain !== toToken.blockchain) {
@@ -122,7 +124,8 @@ export class OnChainManager {
             {
                 timeout: OnChainManager.defaultCalculationTimeout,
                 disabledProviders: [],
-                providerAddress: this.providerAddress[chainType],
+                providerAddress:
+                    this.providerAddress?.[chainType] || defaultProviderAddresses.onChain,
                 useProxy,
                 withDeflation: {
                     from: isDeflationFrom,
@@ -141,14 +144,12 @@ export class OnChainManager {
             ([type]) => !options.disabledProviders.includes(type as OnChainTradeType)
         ) as [OnChainTradeType, OnChainProvider][];
         const dexesTradesPromise = this.calculateDexes(from, to, dexesProviders, options);
-
         const lifiTradesPromise = this.calculateLifiTrades(
             from,
             to,
             dexesProviders.map(dexProvider => dexProvider[0]),
             options
         );
-
         // const openOceanTradePromise = this.openOceanProvider.calculate(
         //     from as PriceTokenAmount<EvmBlockchainName>,
         //     to as PriceTokenAmount<EvmBlockchainName>,
