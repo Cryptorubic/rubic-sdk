@@ -1,4 +1,6 @@
 import BigNumber from 'bignumber.js';
+import { UnapprovedContractError } from 'src/common/errors/proxy/unapproved-contract-error';
+import { UnapprovedMethodError } from 'src/common/errors/proxy/unapproved-method-error';
 import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { compareAddresses } from 'src/common/utils/blockchain';
@@ -240,10 +242,19 @@ export class ProxyCrossChainEvmTrade {
             supportFee: false
         });
 
+        const routerAddress = swapData.to;
+        const signature = swapData.data.slice(0, 10);
+
+        await ProxyCrossChainEvmTrade.checkDexWhiteList(
+            tradeParams.fromTokenAmount.blockchain,
+            routerAddress,
+            signature
+        );
+
         return [
             [
-                swapData.to,
-                swapData.to,
+                routerAddress,
+                routerAddress,
                 tradeParams.fromTokenAmount.address,
                 tradeParams.toTokenAmount.address,
                 tradeParams.fromTokenAmount.stringWeiAmount,
@@ -258,5 +269,39 @@ export class ProxyCrossChainEvmTrade {
         providerData: string
     ): [string, string] {
         return [providerAddress, providerData];
+    }
+
+    public static async checkDexWhiteList(
+        fromBlockchain: EvmBlockchainName,
+        routerAddress: string,
+        method: string
+    ): Promise<never | void> {
+        const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+
+        let isRouterApproved = false;
+        try {
+            isRouterApproved = await web3Public.callContractMethod<boolean>(
+                rubicProxyContractAddress[fromBlockchain].router,
+                evmCommonCrossChainAbi,
+                'isContractApproved',
+                [routerAddress]
+            );
+        } catch {}
+        if (!isRouterApproved) {
+            throw new UnapprovedContractError(method, routerAddress);
+        }
+
+        let isMethodApproved = false;
+        try {
+            isMethodApproved = await web3Public.callContractMethod<boolean>(
+                rubicProxyContractAddress[fromBlockchain].router,
+                evmCommonCrossChainAbi,
+                'isMethodApproved',
+                [method]
+            );
+        } catch {}
+        if (!isMethodApproved) {
+            throw new UnapprovedMethodError(method, routerAddress);
+        }
     }
 }
