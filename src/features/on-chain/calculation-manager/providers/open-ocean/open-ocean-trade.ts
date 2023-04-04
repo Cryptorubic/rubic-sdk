@@ -16,8 +16,8 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { onChainProxyContractAddress } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { openOceanApiUrl } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/get-open-ocean-api-url';
 import { openOceanBlockchainName } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/open-ocean-blockchain';
@@ -78,7 +78,7 @@ export class OpenOceanTrade extends EvmOnChainTrade {
                 : '0x6352a56caadC4F1E25CD6c75970Fa768A3304e64';
 
         return this.useProxy
-            ? onChainProxyContractAddress[this.from.blockchain]
+            ? rubicProxyContractAddress[this.from.blockchain].gateway
             : openOceanContractAddress;
     }
 
@@ -101,7 +101,10 @@ export class OpenOceanTrade extends EvmOnChainTrade {
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         await this.checkFromAddress(options.fromAddress, true);
-        checkUnsupportedReceiverAddress(options?.receiverAddress, this.walletAddress);
+        checkUnsupportedReceiverAddress(
+            options?.receiverAddress,
+            options?.fromAddress || this.walletAddress
+        );
 
         try {
             const transactionData = await this.getTransactionData();
@@ -155,7 +158,8 @@ export class OpenOceanTrade extends EvmOnChainTrade {
                         .multipliedBy(10 ** 9)
                         .toFixed(0),
                     slippage: this.slippageTolerance * 100,
-                    account: walletAddress
+                    account: walletAddress,
+                    referrer: '0x429A3A1a2623DFb520f1D93F64F38c0738418F1f'
                 }
             }
         );

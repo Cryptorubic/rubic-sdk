@@ -207,7 +207,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             let transitAmount: BigNumber;
             if (compareAddresses(from.address, transitToken?.address || '')) {
                 transitAmount = from.tokenAmount;
-            } else if (transitToken && this.onChainProviders[fromBlockchain]) {
+            } else if (transitToken && this.onChainProviders[fromBlockchain] && useProxy) {
                 transitAmount = (
                     await this.onChainProviders[fromBlockchain]!.calculate(
                         from,
