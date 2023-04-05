@@ -246,7 +246,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
                 toTokenAmount: this.onChainTrade.to,
                 onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
             }));
-        //
+
         const providerData = [this.routerAddress];
 
         const methodArguments = swapData

@@ -1,11 +1,9 @@
 import BigNumber from 'bignumber.js';
 import {
     FailedToCheckForTransactionReceiptError,
-    NotWhitelistedProviderError,
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
@@ -15,8 +13,6 @@ import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-publ
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
-import { wlContractAbi } from 'src/features/common/constants/wl-contract-abi';
-import { wlContractAddress } from 'src/features/common/constants/wl-contract-address';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
@@ -200,29 +196,4 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
     protected abstract getContractParams(
         options: GetContractParamsOptions
     ): Promise<ContractParams>;
-
-    protected async checkProviderIsWhitelisted(
-        providerRouter: string,
-        providerGateway?: string
-    ): Promise<void> {
-        const whitelistedContracts = await Injector.web3PublicService
-            .getWeb3Public(this.from.blockchain)
-            .callContractMethod<string[]>(
-                wlContractAddress[this.from.blockchain as EvmBlockchainName],
-                wlContractAbi,
-                'getAvailableCrossChains'
-            );
-
-        if (
-            !whitelistedContracts.find(whitelistedContract =>
-                compareAddresses(whitelistedContract, providerRouter)
-            ) ||
-            (providerGateway &&
-                !whitelistedContracts.find(whitelistedContract =>
-                    compareAddresses(whitelistedContract, providerGateway)
-                ))
-        ) {
-            throw new NotWhitelistedProviderError(providerRouter, providerGateway, 'crosschain');
-        }
-    }
 }
