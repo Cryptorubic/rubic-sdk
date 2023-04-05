@@ -107,7 +107,7 @@ export class OpenOceanTrade extends EvmOnChainTrade {
         );
 
         try {
-            const transactionData = await this.getTransactionData();
+            const transactionData = await this.getTransactionData(options?.receiverAddress);
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gasLimit,
                 gasPrice: transactionData.gasPrice
@@ -131,7 +131,9 @@ export class OpenOceanTrade extends EvmOnChainTrade {
         }
     }
 
-    private async getTransactionData(): Promise<OpenOceanTransactionRequest> {
+    private async getTransactionData(
+        receiverAddress?: string
+    ): Promise<OpenOceanTransactionRequest> {
         const gasPrice = await Injector.web3PublicService
             .getWeb3Public(this.from.blockchain)
             .getGasPrice();
@@ -158,7 +160,7 @@ export class OpenOceanTrade extends EvmOnChainTrade {
                         .multipliedBy(10 ** 9)
                         .toFixed(0),
                     slippage: this.slippageTolerance * 100,
-                    account: walletAddress,
+                    account: receiverAddress || walletAddress,
                     referrer: '0x429A3A1a2623DFb520f1D93F64F38c0738418F1f'
                 }
             }
