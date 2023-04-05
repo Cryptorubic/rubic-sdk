@@ -134,12 +134,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
             const slippageTolerance = options.slippageTolerance * 10000;
 
-            const {
-                tokenAmountOut,
-                priceImpact,
-                fee: transitTokenFee,
-                route
-            } = await this.getTrade(fromBlockchain, toBlockchain, {
+            const trade = await this.getTrade(fromBlockchain, toBlockchain, {
                 tokenAmountIn,
                 tokenOut,
                 fromAddress,
@@ -148,6 +143,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 slippage: slippageTolerance,
                 deadline
             });
+            const { tokenAmountOut, priceImpact, fee: transitTokenFee, route } = trade;
 
             const transitToken = this.getTransferToken(route, from);
 
@@ -207,7 +203,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             let transitAmount: BigNumber;
             if (compareAddresses(from.address, transitToken?.address || '')) {
                 transitAmount = from.tokenAmount;
-            } else if (transitToken && this.onChainProviders[fromBlockchain]) {
+            } else if (transitToken && this.onChainProviders[fromBlockchain] && useProxy) {
                 transitAmount = (
                     await this.onChainProviders[fromBlockchain]!.calculate(
                         from,
@@ -374,7 +370,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 swapParams.deadline,
                 true
             ];
-
             return this.getBestSwappingSwapResult(swappingParams);
         }
 
