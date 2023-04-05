@@ -982,5 +982,19 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
         outputs: [],
         stateMutability: 'payable',
         type: 'function'
+    },
+    {
+        inputs: [{ internalType: 'address', name: '_contract', type: 'address' }],
+        name: 'isContractApproved',
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        stateMutability: 'view',
+        type: 'function'
+    },
+    {
+        inputs: [{ internalType: 'bytes4', name: '_signature', type: 'bytes4' }],
+        name: 'isFunctionApproved',
+        outputs: [{ internalType: 'bool', name: 'approved', type: 'bool' }],
+        stateMutability: 'view',
+        type: 'function'
     }
 ];

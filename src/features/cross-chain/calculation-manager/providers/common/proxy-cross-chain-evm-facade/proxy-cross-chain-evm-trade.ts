@@ -296,7 +296,7 @@ export class ProxyCrossChainEvmTrade {
             isMethodApproved = await web3Public.callContractMethod<boolean>(
                 rubicProxyContractAddress[fromBlockchain].router,
                 evmCommonCrossChainAbi,
-                'isMethodApproved',
+                'isFunctionApproved',
                 [method]
             );
         } catch {}
