@@ -24,6 +24,7 @@ import { multichainContractAbi } from 'src/features/cross-chain/calculation-mana
 import { MultichainMethodName } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/multichain-method-name';
 import { MultichainCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/multichain-provider/models/supported-blockchain';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { TransactionConfig } from 'web3-core';
 
 export class MultichainCrossChainTrade extends EvmCrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.MULTICHAIN;
@@ -120,8 +121,8 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
 
     protected get methodName(): string {
         return this.onChainTrade
-            ? 'swapAndStartBridgeTokensViaMultichain'
-            : 'startBridgeTokensViaMultichain';
+            ? 'swapAndStartBridgeTokensViaGenericCrossChain'
+            : 'startBridgeTokensViaGenericCrossChain';
     }
 
     public readonly onChainSubtype: OnChainSubtype;
@@ -246,8 +247,12 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
                 toTokenAmount: this.onChainTrade.to,
                 onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
             }));
-        //
-        const providerData = [this.routerAddress];
+
+        let providerData = [this.routerAddress];
+        if (this.routerMethodName !== 'Swapout') {
+            const { data, to: providerRouter } = this.getSwapData(options);
+            providerData = ProxyCrossChainEvmTrade.getGenericProviderData(providerRouter!, data!);
+        }
 
         const methodArguments = swapData
             ? [bridgeData, swapData, providerData]
@@ -289,5 +294,37 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
             priceImpact: this.priceImpact,
             slippage: this.slippage * 100
         };
+    }
+
+    private getSwapData(options: GetContractParamsOptions): TransactionConfig {
+        const toChainId = blockchainId[this.to.blockchain];
+        const receiverAddress = options?.receiverAddress || this.walletAddress;
+
+        const fromAmountWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo.rubicProxy?.platformFee?.percent
+        ).stringWeiAmount;
+
+        let multichainMethodArguments: unknown[];
+        if (this.routerMethodName === 'anySwapOutNative') {
+            multichainMethodArguments = [this.anyTokenAddress, receiverAddress, toChainId];
+        } else {
+            multichainMethodArguments = [
+                this.anyTokenAddress,
+                receiverAddress,
+                fromAmountWithoutFee,
+                toChainId
+            ];
+        }
+        const fromToken = this.onChainTrade ? this.onChainTrade.to : this.from;
+        const value = fromToken.isNative ? fromAmountWithoutFee : '0';
+
+        return EvmWeb3Pure.encodeMethodCall(
+            this.routerAddress,
+            multichainContractAbi,
+            this.routerMethodName,
+            multichainMethodArguments,
+            value
+        );
     }
 }

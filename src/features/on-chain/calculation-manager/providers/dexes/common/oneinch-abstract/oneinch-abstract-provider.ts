@@ -6,12 +6,12 @@ import { Cache } from 'src/common/utils/decorators';
 import { combineOptions } from 'src/common/utils/options';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { onChainProxyContractAddress } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/constants/on-chain-proxy-contract';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
@@ -69,7 +69,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
     ): Promise<OneinchTrade> {
         const fromAddress =
             options?.useProxy || this.defaultOptions.useProxy
-                ? onChainProxyContractAddress[from.blockchain]
+                ? rubicProxyContractAddress[from.blockchain].gateway
                 : this.walletAddress;
         const fullOptions = combineOptions(options, {
             ...this.defaultOptions,

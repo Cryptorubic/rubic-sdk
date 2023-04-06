@@ -234,7 +234,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
         }
         methodArguments.push(swapTransaction.data);
 
-        await this.checkProviderIsWhitelisted(providerRouter, providerGateway);
+        // await this.checkProviderIsWhitelisted(providerRouter, providerGateway);
 
         const value = this.getSwapValue(swapTransaction.value);
 

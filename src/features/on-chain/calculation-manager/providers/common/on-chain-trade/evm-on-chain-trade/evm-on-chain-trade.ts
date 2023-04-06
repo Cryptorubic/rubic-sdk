@@ -323,14 +323,23 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         const availableDexs = (
             await ProxyCrossChainEvmTrade.getWhitelistedDexes(this.from.blockchain)
         ).map(address => address.toLowerCase());
-        if (!availableDexs.includes(directTransactionConfig.to.toLowerCase())) {
-            throw new NotWhitelistedProviderError(directTransactionConfig.to, undefined, 'dex');
+
+        const routerAddress = directTransactionConfig.to;
+        const method = directTransactionConfig.data.slice(0, 10);
+
+        if (!availableDexs.includes(routerAddress.toLowerCase())) {
+            throw new NotWhitelistedProviderError(routerAddress, undefined, 'dex');
         }
+        await ProxyCrossChainEvmTrade.checkDexWhiteList(
+            this.from.blockchain,
+            routerAddress,
+            method
+        );
 
         return [
             [
-                directTransactionConfig.to,
-                directTransactionConfig.to,
+                routerAddress,
+                routerAddress,
                 this.from.address,
                 this.to.address,
                 this.from.stringWeiAmount,

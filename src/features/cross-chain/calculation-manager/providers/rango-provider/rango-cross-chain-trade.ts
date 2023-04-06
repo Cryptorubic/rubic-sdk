@@ -185,7 +185,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
     public async getContractParams(): Promise<ContractParams> {
         const { txData, value: providerValue, txTo } = await this.refetchTxData();
 
-        await this.checkProviderIsWhitelisted(txTo);
+        // await this.checkProviderIsWhitelisted(txTo);
 
         const routerCallParams = [
             this.from.address,
