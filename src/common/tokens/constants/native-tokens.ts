@@ -3,6 +3,7 @@ import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/bloc
 import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/bitcoin-web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { IcpWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/icp-web3-pure';
+import { KavaCosmosWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/kava-cosmos-web3-pure';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 
 export const nativeTokensList: Record<BlockchainName, Token> = {
@@ -240,5 +241,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Internet Computer',
         symbol: 'ICP',
         decimals: 8
+    }),
+    [BLOCKCHAIN_NAME.KAVA_COSMOS]: new Token({
+        blockchain: BLOCKCHAIN_NAME.KAVA_COSMOS,
+        address: KavaCosmosWeb3Pure.nativeTokenAddress,
+        name: 'Kava',
+        symbol: 'KAVA',
+        decimals: 18
     })
 };
