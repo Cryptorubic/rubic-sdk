@@ -33,6 +33,7 @@ export const changenowApiBlockchain = {
     [BLOCKCHAIN_NAME.ALGORAND]: 'algo',
     [BLOCKCHAIN_NAME.APTOS]: 'apt',
     [BLOCKCHAIN_NAME.ARDOR]: 'ardr',
+    [BLOCKCHAIN_NAME.ASTAR]: 'astr',
     [BLOCKCHAIN_NAME.ARK]: 'ark',
     [BLOCKCHAIN_NAME.COSMOS]: 'atom',
     [BLOCKCHAIN_NAME.BAND_PROTOCOL]: 'band',
