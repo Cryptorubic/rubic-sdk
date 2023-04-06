@@ -17,7 +17,6 @@ export const changenowApiBlockchain = {
     [BLOCKCHAIN_NAME.FLARE]: 'flr',
     [BLOCKCHAIN_NAME.FANTOM]: 'ftm',
     [BLOCKCHAIN_NAME.IOTEX]: 'iotx',
-    [BLOCKCHAIN_NAME.KAVA]: 'kava',
     [BLOCKCHAIN_NAME.KLAYTN]: 'klay',
     [BLOCKCHAIN_NAME.ONTOLOGY]: 'ont',
     [BLOCKCHAIN_NAME.OPTIMISM]: 'op',
@@ -96,7 +95,8 @@ export const changenowApiBlockchain = {
     [BLOCKCHAIN_NAME.ZCASH]: 'zec',
     [BLOCKCHAIN_NAME.HORIZEN]: 'zen',
     [BLOCKCHAIN_NAME.ZILLIQA]: 'zil',
-    [BLOCKCHAIN_NAME.TRON]: 'trx'
+    [BLOCKCHAIN_NAME.TRON]: 'trx',
+    [BLOCKCHAIN_NAME.KAVA_COSMOS]: 'kava'
 };
 
 export type ChangenowCrossChainSupportedBlockchain = keyof typeof changenowApiBlockchain;

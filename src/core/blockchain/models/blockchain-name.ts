@@ -112,7 +112,8 @@ export const BLOCKCHAIN_NAME = {
     ZCASH: 'ZCASH',
     HORIZEN: 'HORIZEN',
     ZILLIQA: 'ZILLIQA',
-    FILECOIN: 'FILECOIN'
+    FILECOIN: 'FILECOIN',
+    KAVA_COSMOS: 'KAVA_COSMOS'
 } as const;
 
 export type BlockchainName = (typeof BLOCKCHAIN_NAME)[keyof typeof BLOCKCHAIN_NAME];
