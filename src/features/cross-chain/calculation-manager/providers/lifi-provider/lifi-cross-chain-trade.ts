@@ -210,39 +210,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             value: providerValue,
             to: providerRouter
         } = await this.fetchSwapData(options?.receiverAddress);
-        // await this.checkProviderIsWhitelisted(providerRouter, this.providerGateway);
 
-        // const toChainId = blockchainId[this.to.blockchain];
-        //
-        // const swapArguments = [
-        //     this.from.address,
-        //     this.from.stringWeiAmount,
-        //     toChainId,
-        //     this.to.address,
-        //     Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
-        //     options?.receiverAddress || this.walletAddress,
-        //     this.providerAddress,
-        //     providerRouter
-        // ];
-        //
-        // const methodArguments: unknown[] = [
-        //     `${this.type.toLowerCase()}:${this.bridgeType}`,
-        //     swapArguments
-        // ];
-        // if (!this.from.isNative) {
-        //     methodArguments.push(this.providerGateway);
-        // }
-        // methodArguments.push(data);
-        //
-        // const value = this.getSwapValue(providerValue);
-        //
-        // return {
-        //     contractAddress: this.fromContractAddress,
-        //     contractAbi: evmCommonCrossChainAbi,
-        //     methodName: this.methodName,
-        //     methodArguments,
-        //     value
-        // };
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: this.walletAddress,
             fromTokenAmount: this.from,
