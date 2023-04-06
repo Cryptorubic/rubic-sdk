@@ -242,7 +242,7 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         decimals: 8
     }),
     [BLOCKCHAIN_NAME.ZK_SYNC]: new Token({
-        blockchain: BLOCKCHAIN_NAME.OPTIMISM,
+        blockchain: BLOCKCHAIN_NAME.ZK_SYNC,
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'ETH',
         symbol: 'ETH',
