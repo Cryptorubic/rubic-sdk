@@ -24,7 +24,7 @@ export class KavaCosmosWeb3Pure {
         return isChangenowReceiverAddressCorrect(
             address,
             changenowApiBlockchain.KAVA_COSMOS,
-            /^[A-Z0-9]{58}/
+            /^(kava1)[0-9a-z]{38}$/
         );
     }
 }
