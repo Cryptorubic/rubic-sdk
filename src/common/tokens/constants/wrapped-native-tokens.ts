@@ -142,8 +142,8 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'WBOBA',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.ASTAR]: new Token({
-        blockchain: BLOCKCHAIN_NAME.ASTAR,
+    [BLOCKCHAIN_NAME.ASTAR_EVM]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ASTAR_EVM,
         address: '0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720',
         name: 'Wrapped Astar',
         symbol: 'WASTR',
