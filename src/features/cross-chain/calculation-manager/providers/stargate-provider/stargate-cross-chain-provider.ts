@@ -89,6 +89,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         try {
             const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
             const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
+            const useProxy = options?.useProxy?.[this.type] ?? true;
 
             if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
                 return {
@@ -110,7 +111,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 fromBlockchain,
                 options.providerAddress,
                 from,
-                options?.useProxy?.[this.type] ?? true
+                useProxy
             );
             const fromWithoutFee = getFromWithoutFee(
                 from,
@@ -123,6 +124,12 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             let transitAmount: BigNumber = fromWithoutFee.tokenAmount;
 
             if (!hasDirectRoute) {
+                if (!useProxy) {
+                    return {
+                        trade: null,
+                        error: new NotSupportedTokensError()
+                    };
+                }
                 const trade = await ProxyCrossChainEvmTrade.getOnChainTrade(
                     fromWithoutFee,
                     transitToken,
