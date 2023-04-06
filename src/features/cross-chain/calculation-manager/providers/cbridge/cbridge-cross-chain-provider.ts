@@ -60,6 +60,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = fromToken.blockchain as CbridgeCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as CbridgeCrossChainSupportedBlockchain;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
+
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return null;
         }
@@ -74,7 +76,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                 fromBlockchain,
                 options.providerAddress,
                 fromToken,
-                options?.useProxy?.[this.type] ?? true
+                useProxy
             );
             const fromWithoutFee = getFromWithoutFee(
                 fromToken,
@@ -87,6 +89,12 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             let transitToken = fromWithoutFee;
 
             if (!config.isBridge) {
+                if (!useProxy) {
+                    return {
+                        trade: null,
+                        error: new NotSupportedTokensError()
+                    };
+                }
                 onChainTrade = await this.getOnChainTrade(
                     fromWithoutFee,
                     [],
