@@ -54,10 +54,10 @@ export const xyContractAddress: Record<XyCrossChainSupportedBlockchain, Universa
         providerRouter: '0x7a6e01880693093abACcF442fcbED9E0435f1030',
         rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.OPTIMISM].router
     },
-    [BLOCKCHAIN_NAME.ASTAR]: {
+    [BLOCKCHAIN_NAME.ASTAR_EVM]: {
         providerGateway: '0x5C6C12Fd8b1f7E60E5B60512712cFbE0192E795E',
         providerRouter: '0x5C6C12Fd8b1f7E60E5B60512712cFbE0192E795E',
-        rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ASTAR].router
+        rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ASTAR_EVM].router
     },
     [BLOCKCHAIN_NAME.MOONRIVER]: {
         providerGateway: '0xc67Dd7054915a2B0aA3e48f35DA714Ff861e71BD',

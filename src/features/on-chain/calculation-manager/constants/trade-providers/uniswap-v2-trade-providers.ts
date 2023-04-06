@@ -1,4 +1,5 @@
 import { SushiSwapArbitrumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/arbitrum/sushi-swap-arbitrum/sushi-swap-arbitrum-provider';
+import { ArthSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/astar-evm/arth-swap/arth-swap-provider';
 import { TrisolarisAuroraProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/aurora/trisolaris-aurora/trisolaris-aurora-provider';
 import { WannaSwapAuroraProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/aurora/wanna-swap-aurora/wanna-swap-aurora-provider';
 import { JoeProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/joe/joe-provider';
@@ -102,5 +103,7 @@ export const UniswapV2TradeProviders = [
     // Cronos
     CronaSwapProvider,
     CroSwapProvider,
-    CrodexProvider
+    CrodexProvider,
+    // Astar EVM
+    ArthSwapProvider
 ] as const;

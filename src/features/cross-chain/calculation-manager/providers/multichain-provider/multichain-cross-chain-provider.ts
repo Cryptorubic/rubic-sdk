@@ -55,7 +55,9 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
 
         try {
             const tokensInfo = await this.getMultichainTokens(from, toBlockchain);
-            const isPureBridge = tokensInfo?.targetToken.address === toToken.address;
+            const isPureBridge =
+                tokensInfo?.targetToken.address === toToken.address ||
+                (tokensInfo?.targetToken.tokenType === 'NATIVE' && toToken.isNative);
 
             let targetToken: MultichainTargetToken;
             let routerMethodName: MultichainMethodName;

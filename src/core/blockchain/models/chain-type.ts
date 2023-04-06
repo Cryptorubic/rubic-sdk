@@ -11,6 +11,7 @@ export enum CHAIN_TYPE {
     APTOS = 'APTOS',
     ARDOR = 'ARDOR',
     ARK = 'ARK',
+    ASTAR = 'ASTAR',
     COSMOS = 'COSMOS',
     BAND_PROTOCOL = 'BAND_PROTOCOL',
     BITCOIN_DIAMOND = 'BITCOIN_DIAMOND',

@@ -151,8 +151,8 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         symbol: 'BOBA',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.ASTAR]: new Token({
-        blockchain: BLOCKCHAIN_NAME.ASTAR,
+    [BLOCKCHAIN_NAME.ASTAR_EVM]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ASTAR_EVM,
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'ASTR',
         symbol: 'ASTR',
