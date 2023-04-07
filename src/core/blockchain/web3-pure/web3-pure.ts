@@ -6,9 +6,11 @@ import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/b
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { IcpWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/icp-web3-pure';
 import { AlgorandWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/algorand-web3-pure';
+import { AstarWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/astar-web3-pure';
 import { CardanoWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/cardano-web3-pure';
 import { DashWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/dash-web3-pure';
 import { DogecoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/dogecoin-web3-pure';
+import { KavaCosmosWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/kava-cosmos-web3-pure';
 import { LitecoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/litecoin-web3-pure';
 import { MoneroWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/monero-web3-pure';
 import { NearWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/near-web3-pure';
@@ -56,6 +58,10 @@ export class Web3Pure {
 
     public static [CHAIN_TYPE.ZILLIQA] = ZilliqaWeb3Pure;
 
+    public static [CHAIN_TYPE.KAVA_COSMOS] = KavaCosmosWeb3Pure;
+
+    // @TODO create web3pure file before release
+
     public static [CHAIN_TYPE.AION] = SolanaWeb3Pure;
 
     public static [CHAIN_TYPE.BITCOIN_DIAMOND] = BitcoinWeb3Pure;
@@ -69,6 +75,8 @@ export class Web3Pure {
     public static [CHAIN_TYPE.ARDOR] = SolanaWeb3Pure;
 
     public static [CHAIN_TYPE.ARK] = SolanaWeb3Pure;
+
+    public static [CHAIN_TYPE.ASTAR] = AstarWeb3Pure;
 
     public static [CHAIN_TYPE.COSMOS] = SolanaWeb3Pure;
 

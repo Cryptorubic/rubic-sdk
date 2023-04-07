@@ -27,6 +27,7 @@ export const multichainCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.KLAYTN,
     BLOCKCHAIN_NAME.VELAS,
     BLOCKCHAIN_NAME.SYSCOIN,
+    BLOCKCHAIN_NAME.ASTAR_EVM,
     BLOCKCHAIN_NAME.ZK_SYNC
 ] as const;
 

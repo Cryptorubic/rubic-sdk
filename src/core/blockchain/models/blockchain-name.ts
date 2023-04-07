@@ -19,7 +19,7 @@ export const EVM_BLOCKCHAIN_NAME = {
     BOBA: 'BOBA',
     BOBA_BSC: 'BOBA_BSC',
     BOBA_AVALANCHE: 'BOBA_AVALANCHE',
-    ASTAR: 'ASTAR',
+    ASTAR_EVM: 'ASTAR_EVM',
     ETHEREUM_POW: 'ETHW',
     KAVA: 'KAVA',
     BITGERT: 'BITGERT',
@@ -53,6 +53,7 @@ export const BLOCKCHAIN_NAME = {
     APTOS: 'APTOS',
     ARDOR: 'ARDOR',
     ARK: 'ARK',
+    ASTAR: 'ASTAR',
     COSMOS: 'COSMOS',
     BAND_PROTOCOL: 'BAND_PROTOCOL',
     BITCOIN_DIAMOND: 'BITCOIN_DIAMOND',
@@ -112,7 +113,8 @@ export const BLOCKCHAIN_NAME = {
     ZCASH: 'ZCASH',
     HORIZEN: 'HORIZEN',
     ZILLIQA: 'ZILLIQA',
-    FILECOIN: 'FILECOIN'
+    FILECOIN: 'FILECOIN',
+    KAVA_COSMOS: 'KAVA_COSMOS'
 } as const;
 
 export type BlockchainName = (typeof BLOCKCHAIN_NAME)[keyof typeof BLOCKCHAIN_NAME];
