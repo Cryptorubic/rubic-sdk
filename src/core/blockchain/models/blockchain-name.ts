@@ -36,7 +36,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     ONTOLOGY: 'ONTOLOGY',
     THETA: 'THETA',
     XDC: 'XDC',
-    BITCOIN_CASH: 'BITCOIN_CASH'
+    BITCOIN_CASH: 'BITCOIN_CASH',
+    ZK_SYNC: 'ZK_SYNC'
 } as const;
 
 export const BLOCKCHAIN_NAME = {

@@ -47,6 +47,7 @@ export const blockchainId: Record<BlockchainName, number> = {
     [BLOCKCHAIN_NAME.THETA]: 361,
     [BLOCKCHAIN_NAME.XDC]: 50,
     [BLOCKCHAIN_NAME.BITCOIN_CASH]: 10000,
+    [BLOCKCHAIN_NAME.ZK_SYNC]: 324,
     // Non EVN blockchains
     [BLOCKCHAIN_NAME.BITCOIN]: 5555,
     [BLOCKCHAIN_NAME.FILECOIN]: 314

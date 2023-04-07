@@ -10,5 +10,5 @@
 /cache/
 /scripts/node.log
 stats.json
-
+.DS_Store
 /docs/

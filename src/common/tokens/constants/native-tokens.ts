@@ -248,5 +248,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Kava',
         symbol: 'KAVA',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ZK_SYNC]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ZK_SYNC,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
     })
 };

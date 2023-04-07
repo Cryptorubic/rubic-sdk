@@ -1,3 +1,5 @@
+import { waitFor } from 'src/common/utils/waitFor';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
@@ -12,7 +14,13 @@ export async function getSrcTxStatus(
 ): Promise<TxStatus> {
     try {
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-        return await web3Public.getTransactionStatus(srcTxHash);
+        const status = await web3Public.getTransactionStatus(srcTxHash);
+        if (status === TxStatus.FAIL && fromBlockchain === BLOCKCHAIN_NAME.ZK_SYNC) {
+            const zkSyncAwarenessTime = 4000;
+            await waitFor(zkSyncAwarenessTime);
+            return web3Public.getTransactionStatus(srcTxHash);
+        }
+        return status;
     } catch {
         return TxStatus.PENDING;
     }
