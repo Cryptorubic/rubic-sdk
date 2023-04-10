@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { nativeTokensList, PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -129,12 +129,16 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                             error: new NotSupportedTokensError()
                         };
                     }
+                    const transitToken =
+                        sourceTransitToken.tokenType === 'NATIVE'
+                            ? nativeTokensList[fromBlockchain]
+                            : {
+                                  address: sourceTransitToken.address,
+                                  blockchain: fromBlockchain
+                              };
                     onChainTrade = await ProxyCrossChainEvmTrade.getOnChainTrade(
                         fromWithoutFee,
-                        {
-                            ...sourceTransitToken,
-                            blockchain: fromBlockchain
-                        },
+                        transitToken,
                         options.slippageTolerance
                     );
                     if (!onChainTrade) {
