@@ -48,7 +48,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
     private readonly symbiosis = new Symbiosis(getSymbiosisV2Config(), 'rubic');
 
-    private readonly onChainProviders: Partial<
+    private readonly onChainProxyProviders: Partial<
         Record<SymbiosisCrossChainSupportedBlockchain, OnChainProvider>
     > = {
         [BLOCKCHAIN_NAME.ETHEREUM]: new OneinchEthereumProvider(),
@@ -203,9 +203,9 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             let transitAmount: BigNumber;
             if (compareAddresses(from.address, transitToken?.address || '')) {
                 transitAmount = from.tokenAmount;
-            } else if (transitToken && this.onChainProviders[fromBlockchain] && useProxy) {
+            } else if (transitToken && this.onChainProxyProviders?.[fromBlockchain] && useProxy) {
                 transitAmount = (
-                    await this.onChainProviders[fromBlockchain]!.calculate(
+                    await this.onChainProxyProviders[fromBlockchain]!.calculate(
                         from,
                         new PriceTokenAmount({
                             ...transitToken,
@@ -276,7 +276,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         if (err.code === ErrorCode.AMOUNT_TOO_LOW) {
             const index = err.message!.lastIndexOf('$');
             const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
-            if (this.onChainProviders[from.blockchain]) {
+            if (this.onChainProxyProviders[from.blockchain]) {
                 const minAmount = await this.getFromTokenAmount(from, transitTokenAmount, 'min');
                 const minAmountWithSlippage = minAmount.dividedBy(1 - slippage);
 
@@ -288,7 +288,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         if (err?.code === ErrorCode.AMOUNT_TOO_HIGH) {
             const index = err.message!.lastIndexOf('$');
             const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
-            if (this.onChainProviders[from.blockchain]) {
+            if (this.onChainProxyProviders[from.blockchain]) {
                 const maxAmount = await this.getFromTokenAmount(from, transitTokenAmount, 'max');
 
                 return new MaxAmountError(maxAmount, from.symbol);
@@ -312,7 +312,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         }
 
         const amount = (
-            await this.onChainProviders[blockchain]!.calculate(
+            await this.onChainProxyProviders[blockchain]!.calculate(
                 new PriceTokenAmount({
                     ...transitToken,
                     price: new BigNumber(1),
