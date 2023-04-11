@@ -17,5 +17,5 @@ export interface XyTransactionRequest extends XyEstimationRequest {
     /**
      * Ref address to support stuck transactions.
      */
-    readonly referer: string;
+    readonly referrer: string;
 }
