@@ -1,4 +1,3 @@
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { UniversalContract } from 'src/features/cross-chain/calculation-manager/providers/common/models/universal-contract';
 import {
     DeBridgeCrossChainSupportedBlockchain,
@@ -17,8 +16,8 @@ export const DE_BRIDGE_CONTRACT_ADDRESS: Record<
     return {
         ...acc,
         [blockchain]: {
-            ...defaultContracts,
-            rubicRouter: rubicProxyContractAddress[blockchain].gateway
+            ...defaultContracts
+            // rubicRouter: rubicProxyContractAddress[blockchain].gateway
         }
     };
 }, {} as Record<DeBridgeCrossChainSupportedBlockchain, UniversalContract>);

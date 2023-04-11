@@ -107,7 +107,12 @@
                 }
             },
             // if you are whitelisted integrator, provide your wallet address here
-            providerAddress: '0x0000000000000000000000000000000000000000'
+           providerAddress: {
+              [CHAIN_TYPE.EVM]: {
+                 crossChain: '0x0000000000000000000000000000000000000000', // Address for cross chain fee
+                 onChain: '0x0000000000000000000000000000000000000000' // Address for on chain fee
+              }
+           }
         }
         
         async function main() {
@@ -156,7 +161,12 @@
             }
         },
         // if you are whitelisted integrator, provide your wallet address here
-        providerAddress: '0x0000000000000000000000000000000000000000'
+        providerAddress: {
+              [CHAIN_TYPE.EVM]: {
+                 crossChain: '0x0000000000000000000000000000000000000000', // Address for cross chain fee
+                 onChain: '0x0000000000000000000000000000000000000000' // Address for on chain fee
+              }
+        }
     }
     ```
 2. Create sdk instance

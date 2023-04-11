@@ -100,7 +100,10 @@ export class SDK {
         const { providerAddress } = configuration;
         return new SDK({
             [CHAIN_TYPE.EVM]: providerAddress?.[CHAIN_TYPE.EVM] || undefined,
-            [CHAIN_TYPE.TRON]: providerAddress?.[CHAIN_TYPE.TRON] || TronWeb3Pure.EMPTY_ADDRESS
+            [CHAIN_TYPE.TRON]: providerAddress?.[CHAIN_TYPE.TRON] || {
+                crossChain: TronWeb3Pure.EMPTY_ADDRESS,
+                onChain: TronWeb3Pure.EMPTY_ADDRESS
+            }
         });
     }
 
