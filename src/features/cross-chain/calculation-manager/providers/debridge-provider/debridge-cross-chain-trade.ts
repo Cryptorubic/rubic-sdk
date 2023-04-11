@@ -131,7 +131,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return DE_BRIDGE_CONTRACT_ADDRESS[this.fromBlockchain].rubicRouter;
+        return DE_BRIDGE_CONTRACT_ADDRESS[this.fromBlockchain].providerGateway;
     }
 
     public readonly feeInfo: FeeInfo;

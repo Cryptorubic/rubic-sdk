@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "4.1202.2-alpha",
+  "version": "4.1202.3-alpha",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
