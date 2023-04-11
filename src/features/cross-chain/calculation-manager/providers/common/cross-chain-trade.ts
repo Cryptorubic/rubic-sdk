@@ -98,7 +98,11 @@ export abstract class CrossChainTrade {
     }
 
     protected get isProxyTrade(): boolean {
-        return Boolean(this.feeInfo.rubicProxy?.fixedFee?.amount?.gt(0));
+        const fee = this.feeInfo.rubicProxy;
+        const hasFixedFee = Boolean(fee?.fixedFee?.amount?.gt(0));
+        const hasPlatformFee = Number(fee?.platformFee?.percent) > 0;
+
+        return hasFixedFee || hasPlatformFee;
     }
 
     protected constructor(protected readonly providerAddress: string) {}
