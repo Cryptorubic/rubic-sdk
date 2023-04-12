@@ -13,4 +13,9 @@ export interface XyTransactionRequest extends XyEstimationRequest {
      * Swap slippage tolerance.
      */
     readonly slippage: string;
+
+    /**
+     * Ref address to support stuck transactions.
+     */
+    readonly referrer: string;
 }

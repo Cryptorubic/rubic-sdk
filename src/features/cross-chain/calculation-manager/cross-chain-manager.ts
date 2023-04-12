@@ -314,10 +314,10 @@ export class CrossChainManager {
         let providerAddress = defaultProviderAddresses.crossChain;
         if (
             chainType &&
-            this.providerAddress?.[chainType] &&
-            this.providerAddress[chainType] !== undefined
+            this.providerAddress?.[chainType]?.crossChain &&
+            this.providerAddress[chainType]!.crossChain !== undefined
         ) {
-            providerAddress = this.providerAddress[chainType]!;
+            providerAddress = this.providerAddress[chainType]!.crossChain!;
         }
         return providerAddress;
     }
