@@ -77,7 +77,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 toTokenAddress: toToken.isNative
                     ? XyCrossChainTrade.nativeAddress
                     : toToken.address,
-                referer: '0xCb022eBa97B53f74E0901618252682F0728cd192',
+                referrer: '0xCb022eBa97B53f74E0901618252682F0728cd192',
                 receiveAddress: receiverAddress || EvmWeb3Pure.EMPTY_ADDRESS
             };
 
