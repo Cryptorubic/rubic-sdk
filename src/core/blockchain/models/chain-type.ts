@@ -71,6 +71,5 @@ export enum CHAIN_TYPE {
     ZCASH = 'ZCASH',
     HORIZEN = 'HORIZEN',
     ZILLIQA = 'ZILLIQA',
-    FILECOIN = 'FILECOIN',
     KAVA_COSMOS = 'KAVA_COSMOS'
 }

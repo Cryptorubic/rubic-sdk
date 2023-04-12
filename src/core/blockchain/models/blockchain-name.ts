@@ -14,6 +14,7 @@ export const EVM_BLOCKCHAIN_NAME = {
     OKE_X_CHAIN: 'OKX',
     GNOSIS: 'GNOSIS',
     FUSE: 'FUSE',
+    FILECOIN: 'FILECOIN',
     MOONBEAM: 'MOONBEAM',
     CELO: 'CELO',
     BOBA: 'BOBA',
@@ -113,7 +114,6 @@ export const BLOCKCHAIN_NAME = {
     ZCASH: 'ZCASH',
     HORIZEN: 'HORIZEN',
     ZILLIQA: 'ZILLIQA',
-    FILECOIN: 'FILECOIN',
     KAVA_COSMOS: 'KAVA_COSMOS'
 } as const;
 
