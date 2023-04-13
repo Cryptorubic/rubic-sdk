@@ -49,7 +49,7 @@ export class OpenOceanProvider {
                     chain: openOceanBlockchainName[blockchain],
                     inTokenAddress: fromWithoutFee.address,
                     outTokenAddress: toToken.address,
-                    amount: fromWithoutFee.tokenAmount.toString() as unknown as number,
+                    amount: fromWithoutFee.tokenAmount.toString(),
                     slippage: options.slippageTolerance! * 100,
                     gasPrice: Web3Pure.fromWei(gasPrice, nativeTokensList[from.blockchain].decimals)
                         .multipliedBy(10 ** 9)
