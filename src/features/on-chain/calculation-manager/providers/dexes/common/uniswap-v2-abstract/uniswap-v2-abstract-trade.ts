@@ -97,7 +97,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         return (this.constructor as typeof UniswapV2AbstractTrade).type;
     }
 
-    private get deadlineMinutesTimestamp(): number {
+    protected get deadlineMinutesTimestamp(): number {
         return deadlineMinutesTimestamp(this.deadlineMinutes);
     }
 
@@ -138,7 +138,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         this.wrappedPath = tradeStruct.wrappedPath;
     }
 
-    private getAmountInAndAmountOut(): { amountIn: string; amountOut: string } {
+    protected getAmountInAndAmountOut(): { amountIn: string; amountOut: string } {
         let amountIn = this.fromWithoutFee.stringWeiAmount;
         let amountOut = this.toTokenAmountMin.stringWeiAmount;
 
@@ -195,7 +195,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         }
     }
 
-    private getCallParameters(receiverAddress?: string) {
+    protected getCallParameters(receiverAddress?: string): unknown[] {
         const { amountIn, amountOut } = this.getAmountInAndAmountOut();
         const amountParameters = this.from.isNative ? [amountOut] : [amountIn, amountOut];
 

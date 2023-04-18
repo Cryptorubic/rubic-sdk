@@ -211,5 +211,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped SYS',
         symbol: 'WSYS',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ZK_SYNC]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ZK_SYNC,
+        address: '0x5aea5775959fbc2557cc8789bc1bf90a239d9a91',
+        name: 'Wrapped Ether',
+        symbol: 'Weth',
+        decimals: 18
     })
 };
