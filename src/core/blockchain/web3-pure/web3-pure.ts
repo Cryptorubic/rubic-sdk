@@ -11,6 +11,7 @@ import { AlgorandWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/
 import { AptosWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/aptos-web3-pure';
 import { AstarWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/astar-web3-pure';
 import { CardanoWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/cardano-web3-pure';
+import { CasperWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/casper-web3-pure';
 import { CosmosWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/cosmos-web3-pure';
 import { DashWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/dash-web3-pure';
 import { DogecoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/dogecoin-web3-pure';
@@ -128,6 +129,8 @@ export class Web3Pure {
 
     public static [CHAIN_TYPE.FILECOIN] = FilecoinWeb3Pure;
 
+    public static [CHAIN_TYPE.CASPER] = CasperWeb3Pure;
+
     // @TODO create web3pure file before release
 
     public static [CHAIN_TYPE.AION] = SolanaWeb3Pure;
@@ -137,8 +140,6 @@ export class Web3Pure {
     public static [CHAIN_TYPE.ARK] = SolanaWeb3Pure;
 
     public static [CHAIN_TYPE.BAND_PROTOCOL] = SolanaWeb3Pure;
-
-    public static [CHAIN_TYPE.CASPER] = SolanaWeb3Pure;
 
     public static [CHAIN_TYPE.DECRED] = SolanaWeb3Pure;
 
