@@ -3,7 +3,9 @@ import { staticImplements } from 'src/common/utils/decorators';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Web3PureContainer } from 'src/core/blockchain/web3-pure/models/web3-pure-container';
 import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/bitcoin-web3-pure';
+import { EosWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/eos-web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { FilecoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/filecoin-web3-pure';
 import { IcpWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/icp-web3-pure';
 import { AlgorandWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/algorand-web3-pure';
 import { AptosWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/aptos-web3-pure';
@@ -35,7 +37,9 @@ import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-e
 import { WavesWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/waves-web3-pure';
 import { WaxWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/wax-web3-pure';
 import { ZilliqaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/zilliqa-web3-pure';
+import { OntologyWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ontology-web3-pure';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
+import { XdcWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/xdc-web3-pure';
 
 /**
  * Contains common methods, connected with web3, e.g. wei conversion, encoding data, etc.
@@ -115,6 +119,14 @@ export class Web3Pure {
     public static [CHAIN_TYPE.WAX] = WaxWeb3Pure;
 
     public static [CHAIN_TYPE.STELLAR] = StellarWeb3Pure;
+
+    public static [CHAIN_TYPE.XDC] = XdcWeb3Pure;
+
+    public static [CHAIN_TYPE.ONTOLOGY] = OntologyWeb3Pure;
+
+    public static [CHAIN_TYPE.EOS] = EosWeb3Pure;
+
+    public static [CHAIN_TYPE.FILECOIN] = FilecoinWeb3Pure;
 
     // @TODO create web3pure file before release
 
