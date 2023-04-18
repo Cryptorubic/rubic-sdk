@@ -52,11 +52,17 @@ export abstract class CurveAbstractProvider<
             ? CurveAbstractProvider.nativeAddress
             : fromToken.address;
         const toAddress = toToken.isNative ? CurveAbstractProvider.nativeAddress : toToken.address;
-        const fromAmount = fromToken.stringWeiAmount;
 
         const registryExchangeAddress = await this.fetchRegistryExchangeAddress();
         const registryAddress = await this.fetchRegistryAddress();
         let poolAddress = await this.fetchPoolAddress(fromAddress, toAddress, registryAddress);
+
+        const fullOptions = combineOptions(options, this.defaultOptions);
+        const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(
+            fromToken,
+            fullOptions
+        );
+        const fromAmount = fromWithoutFee.stringWeiAmount;
 
         if (compareAddresses(poolAddress, EvmWeb3Pure.EMPTY_ADDRESS)) {
             const bestRate = await this.fetchBestRate(
@@ -78,12 +84,6 @@ export abstract class CurveAbstractProvider<
             fromAmount,
             poolAddress,
             registryExchangeAddress
-        );
-
-        const fullOptions = combineOptions(options, this.defaultOptions);
-        const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(
-            fromToken,
-            fullOptions
         );
 
         const to = new PriceTokenAmount({

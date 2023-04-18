@@ -152,7 +152,7 @@ export class OpenOceanTrade extends EvmOnChainTrade {
                     ],
                     inTokenAddress: this.from.address,
                     outTokenAddress: this.to.address,
-                    amount: this.from.tokenAmount.toString() as unknown as number,
+                    amount: this.fromWithoutFee.tokenAmount.toString(),
                     gasPrice: Web3Pure.fromWei(
                         gasPrice,
                         nativeTokensList[this.from.blockchain].decimals
