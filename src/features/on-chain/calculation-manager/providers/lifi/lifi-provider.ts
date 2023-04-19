@@ -1,9 +1,10 @@
 import LIFI, { RouteOptions, RoutesRequest, Step } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { notNull } from 'src/common/utils/object';
 import { combineOptions } from 'src/common/utils/options';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -19,6 +20,10 @@ import { OnChainTrade } from 'src/features/on-chain/calculation-manager/provider
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
+import {
+    LifiForbiddenBlockchains,
+    lifiForbiddenBlockchains
+} from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-forbidden-blockchains';
 import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-providers';
 import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/lifi/lifi-trade';
 import {
@@ -39,11 +44,23 @@ export class LifiProvider {
 
     constructor() {}
 
+    private isForbiddenBlockchain(
+        blockchain: BlockchainName
+    ): blockchain is LifiForbiddenBlockchains {
+        return lifiForbiddenBlockchains.some(
+            supportedBlockchain => supportedBlockchain === blockchain
+        );
+    }
+
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: LifiCalculationOptions
     ): Promise<OnChainTrade[]> {
+        if (this.isForbiddenBlockchain(from.blockchain)) {
+            throw new RubicSdkError('Blockchain is not supported');
+        }
+
         const fullOptions = combineOptions(options, {
             ...this.defaultOptions,
             disabledProviders: [...options.disabledProviders, ON_CHAIN_TRADE_TYPE.DODO]
