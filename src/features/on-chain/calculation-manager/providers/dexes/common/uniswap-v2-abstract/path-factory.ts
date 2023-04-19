@@ -92,21 +92,24 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
     public async getAmountAndPath(
         gasPriceInUsd: BigNumber | undefined
     ): Promise<UniswapCalculatedInfo> {
-        const routes = (await this.getAllRoutes()).sort(
-            (a, b) =>
-                b.outputAbsoluteAmount.comparedTo(a.outputAbsoluteAmount) *
-                (this.exact === 'input' ? 1 : -1)
-        );
-        if (routes.length === 0) {
+        const allRoutes = await this.getAllRoutes();
+        const sortedRoutes = allRoutes
+            .filter(route => route.outputAbsoluteAmount.gt(0))
+            .sort(
+                (a, b) =>
+                    b.outputAbsoluteAmount.comparedTo(a.outputAbsoluteAmount) *
+                    (this.exact === 'input' ? 1 : -1)
+            );
+        if (sortedRoutes.length === 0) {
             throw new InsufficientLiquidityError();
         }
 
         if (this.options.gasCalculation === 'disabled') {
-            if (!hasLengthAtLeast(routes, 1)) {
+            if (!hasLengthAtLeast(sortedRoutes, 1)) {
                 throw new RubicSdkError('Routes array length has to be bigger than 0');
             }
             return {
-                route: routes[0]
+                route: sortedRoutes[0]
             };
         }
 
@@ -115,10 +118,10 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             this.to.price?.isFinite() &&
             gasPriceInUsd
         ) {
-            const gasLimits = this.getDefaultGases(routes);
+            const gasLimits = this.getDefaultGases(sortedRoutes);
 
             if (this.walletAddress) {
-                const gasRequests = await Promise.all(this.getGasRequests(routes));
+                const gasRequests = await Promise.all(this.getGasRequests(sortedRoutes));
                 const estimatedGasLimits = await this.web3Public.batchEstimatedGas(
                     this.walletAddress,
                     gasRequests
@@ -130,7 +133,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
                 });
             }
 
-            const routesWithProfit: UniswapCalculatedInfoWithProfit[] = routes.map(
+            const routesWithProfit: UniswapCalculatedInfoWithProfit[] = sortedRoutes.map(
                 (route, index) => {
                     const estimatedGas = gasLimits[index];
                     if (!estimatedGas) {
@@ -168,10 +171,10 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             return sortedByProfitRoutes[0];
         }
 
-        let gasLimit = this.getDefaultGases(routes.slice(0, 1))[0];
+        let gasLimit = this.getDefaultGases(sortedRoutes.slice(0, 1))[0];
 
         if (this.walletAddress) {
-            const callData = await this.getGasRequests(routes.slice(0, 1))[0];
+            const callData = await this.getGasRequests(sortedRoutes.slice(0, 1))[0];
             if (!callData) {
                 throw new RubicSdkError('Call data has to be defined');
             }
@@ -183,12 +186,12 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
             }
         }
 
-        if (!routes?.[0]) {
+        if (!sortedRoutes?.[0]) {
             throw new RubicSdkError('Routes length has to be bigger than 0');
         }
 
         return {
-            route: routes[0],
+            route: sortedRoutes[0],
             estimatedGas: gasLimit
         };
     }
