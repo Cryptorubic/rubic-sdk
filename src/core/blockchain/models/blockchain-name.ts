@@ -29,13 +29,10 @@ export const EVM_BLOCKCHAIN_NAME = {
     KLAYTN: 'KLAYTN',
     VELAS: 'VELAS',
     SYSCOIN: 'SYSCOIN',
-    EOS: 'EOS',
     ETHEREUM_CLASSIC: 'ETHEREUM_CLASSIC',
     FLARE: 'FLARE',
     IOTEX: 'IOTEX',
-    ONTOLOGY: 'ONTOLOGY',
     THETA: 'THETA',
-    XDC: 'XDC',
     BITCOIN_CASH: 'BITCOIN_CASH',
     ZK_SYNC: 'ZK_SYNC'
 } as const;
@@ -113,8 +110,11 @@ export const BLOCKCHAIN_NAME = {
     ZCASH: 'ZCASH',
     HORIZEN: 'HORIZEN',
     ZILLIQA: 'ZILLIQA',
+    KAVA_COSMOS: 'KAVA_COSMOS',
     FILECOIN: 'FILECOIN',
-    KAVA_COSMOS: 'KAVA_COSMOS'
+    EOS: 'EOS',
+    ONTOLOGY: 'ONTOLOGY',
+    XDC: 'XDC'
 } as const;
 
 export type BlockchainName = (typeof BLOCKCHAIN_NAME)[keyof typeof BLOCKCHAIN_NAME];
