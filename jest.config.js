@@ -7,12 +7,14 @@ module.exports = {
   testEnvironment: 'node',
   transform: {
     "node_modules/(ethereum-cryptography)/.+\\.(j|t)sx?$": "ts-jest",
+    "node_modules/@layerzerolabs/.+\\.(j|t)sx?$": "ts-jest"
   },
-  transformIgnorePatterns: [ 'node_modules/((?!ethereum-cryptography)/.*)'],
+  transformIgnorePatterns: [ 'node_modules/((?!ethereum-cryptography)/.*)', "node_modules/(?!@layerzerolabs/.*)"],
   testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
   globals: {
     'ts-jest': {
-      tsconfig: 'tsconfig.test.json'
+      tsconfig: 'tsconfig.test.json',
+      useESM: true
     }
   },
   moduleNameMapper: {

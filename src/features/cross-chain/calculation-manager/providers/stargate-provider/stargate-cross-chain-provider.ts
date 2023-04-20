@@ -183,6 +183,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 }
             };
 
+            const nativeToken = await PriceToken.createFromToken(nativeTokensList[fromBlockchain]);
+
             return {
                 trade: new StargateCrossChainTrade(
                     {
@@ -194,7 +196,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                         gasData: null,
                         feeInfo,
                         srcChainTrade,
-                        dstChainTrade
+                        dstChainTrade,
+                        cryptoFeeToken: nativeToken
                     },
                     options.providerAddress
                 )
