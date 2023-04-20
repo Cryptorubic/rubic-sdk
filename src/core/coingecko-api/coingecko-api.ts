@@ -46,7 +46,8 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.ONTOLOGY,
     BLOCKCHAIN_NAME.THETA,
     BLOCKCHAIN_NAME.XDC,
-    BLOCKCHAIN_NAME.BITCOIN_CASH
+    BLOCKCHAIN_NAME.BITCOIN_CASH,
+    BLOCKCHAIN_NAME.ZK_SYNC
 ] as const;
 
 type SupportedBlockchain = (typeof supportedBlockchains)[number];
@@ -107,7 +108,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.ONTOLOGY]: 'ontology',
             [BLOCKCHAIN_NAME.THETA]: 'theta',
             [BLOCKCHAIN_NAME.XDC]: 'xdc-network',
-            [BLOCKCHAIN_NAME.BITCOIN_CASH]: 'bitcoin-cash'
+            [BLOCKCHAIN_NAME.BITCOIN_CASH]: 'bitcoin-cash',
+            [BLOCKCHAIN_NAME.ZK_SYNC]: 'zksync'
         };
 
         this.tokenBlockchainId = {
@@ -149,7 +151,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.ONTOLOGY]: 'ontology',
             [BLOCKCHAIN_NAME.THETA]: 'theta',
             [BLOCKCHAIN_NAME.XDC]: 'xdc-network',
-            [BLOCKCHAIN_NAME.BITCOIN_CASH]: 'bitcoin-cash'
+            [BLOCKCHAIN_NAME.BITCOIN_CASH]: 'bitcoin-cash',
+            [BLOCKCHAIN_NAME.ZK_SYNC]: 'zksync'
         };
     }
 
