@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { BytesLike } from 'ethers';
-import { nativeTokensList, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -77,7 +77,8 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                         },
                         feeInfo: {},
                         srcChainTrade: null,
-                        dstChainTrade: null
+                        dstChainTrade: null,
+                        cryptoFeeToken: null
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -145,6 +146,8 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly dstChainTrade: EvmOnChainTrade | null;
 
+    private readonly cryptoFeeToken: PriceToken | null;
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
@@ -156,6 +159,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             feeInfo: FeeInfo;
             srcChainTrade: EvmOnChainTrade | null;
             dstChainTrade: EvmOnChainTrade | null;
+            cryptoFeeToken: PriceToken | null;
         },
         providerAddress: string
     ) {
@@ -173,6 +177,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             from: this.onChainTrade?.type,
             to: this.dstChainTrade?.type
         };
+        this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
     }
 
     protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -376,8 +381,17 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    public getTradeAmountRatio(_fromUsd: BigNumber): BigNumber {
-        return new BigNumber(1);
+    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
+        const usdCryptoFee = this.cryptoFeeToken?.price.multipliedBy(
+            this.feeInfo.provider?.cryptoFee?.amount || 0
+        );
+        if (usdCryptoFee && usdCryptoFee.gt(0)) {
+            return fromUsd
+                .plus(usdCryptoFee.isNaN() ? 0 : usdCryptoFee)
+                .dividedBy(this.to.tokenAmount);
+        }
+
+        return fromUsd.dividedBy(this.to.tokenAmount);
     }
 
     public getUsdPrice(): BigNumber {
