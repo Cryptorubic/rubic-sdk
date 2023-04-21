@@ -38,6 +38,7 @@ export class OnChainProxyService {
 
         let fixedCryptoFeeWei: string | undefined;
         let platformFeePercent: number;
+        let isIntegrator = true;
 
         if (providerAddress !== EvmWeb3Pure.EMPTY_ADDRESS) {
             const fee = await OnChainProxyService.handleIntegratorFee(
@@ -45,11 +46,12 @@ export class OnChainProxyService {
                 contractAddress,
                 providerAddress
             );
+            isIntegrator = fee.isIntegrator;
             fixedCryptoFeeWei = fee.fixedCryptoFeeWei;
             platformFeePercent = fee.platformFeePercent;
         }
 
-        if (fixedCryptoFeeWei === undefined) {
+        if (fixedCryptoFeeWei === undefined || !isIntegrator) {
             const fee = await OnChainProxyService.handleRubicFee(web3Public, contractAddress);
             fixedCryptoFeeWei = fee.fixedCryptoFeeWei;
             platformFeePercent = fee.platformFeePercent;
@@ -77,7 +79,11 @@ export class OnChainProxyService {
         web3Public: EvmWeb3Public,
         contractAddress: string,
         providerAddress: string
-    ): Promise<{ fixedCryptoFeeWei: string | undefined; platformFeePercent: number }> {
+    ): Promise<{
+        fixedCryptoFeeWei: string | undefined;
+        platformFeePercent: number;
+        isIntegrator: boolean;
+    }> {
         const integratorToFeeInfo = await web3Public.callContractMethod<{
             isIntegrator: boolean;
             fixedFeeAmount: string;
@@ -86,7 +92,8 @@ export class OnChainProxyService {
 
         return {
             fixedCryptoFeeWei: integratorToFeeInfo.fixedFeeAmount,
-            platformFeePercent: parseInt(integratorToFeeInfo.tokenFee) / 10_000
+            platformFeePercent: parseInt(integratorToFeeInfo.tokenFee) / 10_000,
+            isIntegrator: integratorToFeeInfo.isIntegrator
         };
     }
 
