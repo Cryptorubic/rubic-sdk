@@ -45,10 +45,6 @@ export const SYMBIOSIS_CONTRACT_ADDRESS_V2: Record<
     [BLOCKCHAIN_NAME.ARBITRUM]: {
         providerRouter: '0x0000000000000000000000000000000000000000',
         providerGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278'
-    },
-    [BLOCKCHAIN_NAME.KAVA]: {
-        providerRouter: '0xA7544C409d772944017BB95B99484B6E0d7B6388',
-        providerGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278'
     }
     // [BLOCKCHAIN_NAME.BITCOIN]: {
     //     providerRouter: '',
