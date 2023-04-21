@@ -1,6 +1,12 @@
 import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
-import { nativeTokensList, PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import {
+    nativeTokensList,
+    PriceToken,
+    PriceTokenAmount,
+    Token,
+    wrappedNativeTokensList
+} from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -109,6 +115,7 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 routerMethodName = tokens?.targetToken.routerABI.split(
                     '('
                 )[0]! as MultichainMethodName;
+
                 if (!tokens || (useProxy && !this.isMultichainMethodName(routerMethodName))) {
                     return {
                         trade: null,
@@ -116,10 +123,14 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                     };
                 }
                 targetToken = tokens.targetToken;
-                if (
-                    (from.isNative && sourceTransitToken.tokenType === 'NATIVE') ||
-                    compareAddresses(from.address, sourceTransitToken.address)
-                ) {
+                const similarAddress = compareAddresses(from.address, sourceTransitToken.address);
+                const isFromNative = from.isNative && sourceTransitToken.tokenType === 'NATIVE';
+                const isFromWrap = compareAddresses(
+                    from.address,
+                    wrappedNativeTokensList[from.blockchain]!.address
+                );
+
+                if ((isFromNative || similarAddress) && !isFromWrap) {
                     transitTokenAmount = fromWithoutFee.tokenAmount;
                     transitMinAmount = transitTokenAmount;
                 } else {
