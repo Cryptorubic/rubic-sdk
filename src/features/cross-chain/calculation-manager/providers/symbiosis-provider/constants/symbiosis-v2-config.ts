@@ -461,6 +461,19 @@ export function getSymbiosisV2Config(): Config {
                             large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
                             small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
                         }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        symbol: 'sUSDC',
+                        address: '0xA8d058ed41B216175400E8B2CC8cD55853596462',
+                        chainId: 56288,
+                        chainFromId: 42161,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
                     }
                 ],
                 nerves: [],
@@ -506,6 +519,39 @@ export function getSymbiosisV2Config(): Config {
                 portal: '0x39dE19C9fF25693A2311AAD1dc5C790194084A39',
                 fabric: '0x0000000000000000000000000000000000000000',
                 multicallRouter: '0xe004DE550074856bD64Cc1A89A8B3b56bD3eAf31',
+                aavePool: '0x0000000000000000000000000000000000000000',
+                creamComptroller: '0x0000000000000000000000000000000000000000',
+                renGatewayRegistry: '0x0000000000000000000000000000000000000000'
+            },
+            {
+                id: 42161,
+                rpc: 'https://arb1.arbitrum.io/rpc',
+                filterBlockOffset: 2000,
+                waitForBlocksCount: 240,
+                stables: [
+                    {
+                        name: 'USDC',
+                        symbol: 'USDC',
+                        address: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
+                        chainId: 42161,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    }
+                ],
+                nerves: [],
+                router: '0x0000000000000000000000000000000000000000',
+                dexFee: 30,
+                metaRouter: '0xcE8f24A58D85eD5c5A6824f7be1F8d4711A0eb4C',
+                metaRouterGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278',
+                bridge: '0x5523985926Aa12BA58DC5Ad00DDca99678D7227E',
+                synthesis: '0x0000000000000000000000000000000000000000',
+                portal: '0x01A3c8E513B758EBB011F7AFaf6C37616c9C24d9',
+                fabric: '0x0000000000000000000000000000000000000000',
+                multicallRouter: '0xda8057acB94905eb6025120cB2c38415Fd81BfEB',
                 aavePool: '0x0000000000000000000000000000000000000000',
                 creamComptroller: '0x0000000000000000000000000000000000000000',
                 renGatewayRegistry: '0x0000000000000000000000000000000000000000'

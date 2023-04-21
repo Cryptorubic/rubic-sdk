@@ -41,6 +41,10 @@ export const SYMBIOSIS_CONTRACT_ADDRESS_V2: Record<
     [BLOCKCHAIN_NAME.ZK_SYNC]: {
         providerRouter: '0x8B791913eB07C32779a16750e3868aA8495F5964',
         providerGateway: '0x2F7c5901DeBFb7faD804Db800F226de3dd0cffd5'
+    },
+    [BLOCKCHAIN_NAME.ARBITRUM]: {
+        providerRouter: '0x0000000000000000000000000000000000000000',
+        providerGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278'
     }
     // [BLOCKCHAIN_NAME.BITCOIN]: {
     //     providerRouter: '',
