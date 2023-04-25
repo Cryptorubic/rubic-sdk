@@ -4,7 +4,6 @@ import {
     nativeTokensList,
     PriceToken,
     PriceTokenAmount,
-    Token,
     wrappedNativeTokensList
 } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
@@ -45,7 +44,6 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    // eslint-disable-next-line complexity
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
@@ -60,17 +58,11 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            const tokensInfo = await this.getMultichainTokens(from, toBlockchain);
-            const isPureBridge =
-                tokensInfo?.targetToken.address === toToken.address ||
-                (tokensInfo?.targetToken.tokenType === 'NATIVE' && toToken.isNative);
-
-            let targetToken: MultichainTargetToken;
-            let routerMethodName: MultichainMethodName;
-            let onChainTrade: EvmOnChainTrade | null = null;
-            let transitTokenAmount: BigNumber;
-            let transitMinAmount: BigNumber;
-
+            const tokensInfo = await this.getTokensData(from, toToken);
+            const isPureBridge = this.checkIsBridge(tokensInfo, from, toToken);
+            const routerMethodName = tokensInfo.target.routerABI.split(
+                '('
+            )[0]! as MultichainMethodName;
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
@@ -81,59 +73,29 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                 from,
                 feeInfo.rubicProxy?.platformFee?.percent
             );
+            const targetToken = tokensInfo!.target;
 
-            if (isPureBridge) {
-                targetToken = tokensInfo!.targetToken;
-                transitTokenAmount = fromWithoutFee.tokenAmount;
-                transitMinAmount = transitTokenAmount;
-                routerMethodName = targetToken.routerABI.split('(')[0]! as MultichainMethodName;
-                if (useProxy && !this.isMultichainMethodName(routerMethodName)) {
-                    return {
-                        trade: null,
-                        error: new NotSupportedTokensError()
-                    };
-                }
-            } else {
-                const sourceTransitToken = await this.getSourceTransitToken(
-                    fromBlockchain,
-                    toToken
-                );
-                if (!sourceTransitToken) {
-                    return {
-                        trade: null,
-                        error: new NotSupportedTokensError()
-                    };
-                }
-                const tokens = await this.getMultichainTokens(
-                    {
-                        blockchain: fromBlockchain,
-                        address: sourceTransitToken.address,
-                        isNative: sourceTransitToken.tokenType === 'NATIVE'
-                    },
-                    toBlockchain
-                );
-                routerMethodName = tokens?.targetToken.routerABI.split(
-                    '('
-                )[0]! as MultichainMethodName;
+            let onChainTrade: EvmOnChainTrade | null = null;
+            let transitTokenAmount = fromWithoutFee.tokenAmount;
+            let transitMinAmount = transitTokenAmount;
 
-                if (!tokens || (useProxy && !this.isMultichainMethodName(routerMethodName))) {
-                    return {
-                        trade: null,
-                        error: new NotSupportedTokensError()
-                    };
-                }
-                targetToken = tokens.targetToken;
-                const similarAddress = compareAddresses(from.address, sourceTransitToken.address);
-                const isFromNative = from.isNative && sourceTransitToken.tokenType === 'NATIVE';
+            if (isPureBridge && !this.isMultichainMethodName(routerMethodName)) {
+                return {
+                    trade: null,
+                    error: new NotSupportedTokensError()
+                };
+            }
+
+            if (!isPureBridge) {
+                const similarAddress = compareAddresses(from.address, tokensInfo.source.address);
+                const isFromNative = from.isNative && tokensInfo.source.tokenType === 'NATIVE';
                 const isFromWrap = compareAddresses(
                     from.address,
                     wrappedNativeTokensList[from.blockchain]!.address
                 );
+                const shouldSwap = !((isFromNative || similarAddress) && !isFromWrap);
 
-                if ((isFromNative || similarAddress) && !isFromWrap) {
-                    transitTokenAmount = fromWithoutFee.tokenAmount;
-                    transitMinAmount = transitTokenAmount;
-                } else {
+                if (shouldSwap) {
                     if (!useProxy) {
                         return {
                             trade: null,
@@ -141,10 +103,10 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                         };
                     }
                     const transitToken =
-                        sourceTransitToken.tokenType === 'NATIVE'
+                        tokensInfo.source.tokenType === 'NATIVE'
                             ? nativeTokensList[fromBlockchain]
                             : {
-                                  address: sourceTransitToken.address,
+                                  address: tokensInfo.source.address,
                                   blockchain: fromBlockchain
                               };
                     onChainTrade = await ProxyCrossChainEvmTrade.getOnChainTrade(
@@ -239,17 +201,6 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
         }
     }
 
-    private async getSourceTransitToken(
-        fromBlockchain: BlockchainName,
-        toToken: Token
-    ): Promise<MultichainTargetToken | null> {
-        const tokens = await this.getMultichainTokens(toToken, fromBlockchain);
-        if (!tokens) {
-            return null;
-        }
-        return tokens.targetToken;
-    }
-
     private getProtocolFee(
         targetToken: MultichainTargetToken,
         fromAmount: BigNumber
@@ -308,48 +259,6 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
         }
     }
 
-    private async getMultichainTokens(
-        from: {
-            blockchain: BlockchainName;
-            address: string;
-            isNative: boolean;
-        },
-        toBlockchain: BlockchainName
-    ): Promise<{ sourceToken: MultichainSourceToken; targetToken: MultichainTargetToken } | null> {
-        const fromChainId = blockchainId[from.blockchain];
-        const tokensList = await Injector.httpClient.get<MultichainTokensResponse>(
-            `https://bridgeapi.anyswap.exchange/v4/tokenlistv4/${fromChainId}`
-        );
-        const sourceToken = Object.entries(tokensList).find(([address, token]) => {
-            return (
-                (token.tokenType === 'NATIVE' && from.isNative) ||
-                (token.tokenType === 'TOKEN' &&
-                    address.toLowerCase().endsWith(from.address.toLowerCase()))
-            );
-        })?.[1];
-        if (!sourceToken) {
-            return null;
-        }
-
-        const toChainId = blockchainId[toBlockchain];
-        const dstChainInformation = sourceToken?.destChains[toChainId.toString()];
-        if (!sourceToken || !dstChainInformation) {
-            return null;
-        }
-        const dstTokens = Object.values(dstChainInformation);
-
-        const anyToken = dstTokens.find(token => {
-            const method = token.routerABI.split('(')[0]!;
-            return multichainMethodNames.includes(method as MultichainMethodName);
-        });
-        const targetToken = anyToken || dstTokens[0];
-        if (!targetToken) {
-            return null;
-        }
-
-        return { sourceToken, targetToken };
-    }
-
     private getToFeeAmount(fromAmount: BigNumber, targetToken: MultichainTargetToken): BigNumber {
         return BigNumber.min(
             BigNumber.max(
@@ -364,5 +273,56 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
         return multichainMethodNames.some(
             multichainMethodName => multichainMethodName === methodName
         );
+    }
+
+    private async getTokensData(
+        from: {
+            blockchain: BlockchainName;
+            address: string;
+        },
+        toToken: PriceToken
+    ): Promise<{ source: MultichainSourceToken; target: MultichainTargetToken }> {
+        const fromChainId = blockchainId[from.blockchain];
+        const toChainId = blockchainId[toToken.blockchain];
+        const tokensList = await Injector.httpClient.get<MultichainTokensResponse>(
+            `https://bridgeapi.anyswap.exchange/v4/tokenlistv4/${fromChainId}`
+        );
+        let possibleTargetToken: MultichainTargetToken | undefined | null = null;
+        const sourceToken = Object.values(tokensList).find(sourceToken => {
+            const possibleTargetTokens = Object.values(sourceToken.destChains?.[toChainId] || {});
+            const possibleTargetTokenInner = possibleTargetTokens.find(targetToken => {
+                const isNative = targetToken.tokenType === 'NATIVE';
+                return (
+                    (compareAddresses(targetToken.address, toToken.address) && !isNative) ||
+                    (isNative && toToken.isNative)
+                );
+            });
+            possibleTargetToken = possibleTargetTokenInner;
+            return possibleTargetTokenInner;
+        });
+
+        if (!sourceToken || !possibleTargetToken) {
+            throw new NotSupportedTokensError();
+        }
+
+        return { source: sourceToken, target: possibleTargetToken };
+    }
+
+    private checkIsBridge(
+        tokensInfo: { source: MultichainSourceToken; target: MultichainTargetToken },
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken
+    ): boolean {
+        const fromNative = tokensInfo.source.tokenType === 'NATIVE';
+        const toNative = tokensInfo.target.tokenType === 'NATIVE';
+
+        const fromTokenMatch =
+            (compareAddresses(tokensInfo.source.address, from.address) && !fromNative) ||
+            (fromNative && from.isNative);
+        const toTokenMatch =
+            (compareAddresses(tokensInfo.target.address, toToken.address) && !toNative) ||
+            (toNative && toToken.isNative);
+
+        return fromTokenMatch && toTokenMatch;
     }
 }
