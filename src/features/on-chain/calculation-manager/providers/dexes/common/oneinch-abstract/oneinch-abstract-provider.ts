@@ -96,6 +96,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             ...toToken.asStruct,
             weiAmount: toTokenAmountInWei
         });
+        const availableProtocols = this.getAvailableProtocols();
 
         const oneinchTradeStruct: OneinchTradeStruct = {
             dexContractAddress,
@@ -110,7 +111,8 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             proxyFeeInfo,
             fromWithoutFee,
             withDeflation: fullOptions.withDeflation,
-            usedForCrossChain: fullOptions.usedForCrossChain
+            usedForCrossChain: fullOptions.usedForCrossChain,
+            availableProtocols
         };
         if (fullOptions.gasCalculation === 'disabled') {
             return new OneinchTrade(oneinchTradeStruct, fullOptions.providerAddress);
@@ -243,5 +245,9 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         });
 
         return [fromToken, ...tokensPath, toToken];
+    }
+
+    protected getAvailableProtocols(): string | undefined {
+        return undefined;
     }
 }
