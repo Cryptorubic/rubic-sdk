@@ -25,7 +25,7 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
 
 export class DebridgeCrossChainProvider extends CrossChainProvider {
-    public static readonly apiEndpoint = 'https://deswap.debridge.finance/v1.0/transaction';
+    public static readonly apiEndpoint = 'https://api.dln.trade/v1.0/dln/quote';
 
     private readonly deBridgeReferralCode = '4350';
 
