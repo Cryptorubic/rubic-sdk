@@ -44,7 +44,6 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    // eslint-disable-next-line complexity
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
@@ -60,17 +59,7 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
 
         try {
             const tokensInfo = await this.getTokensData(from, toToken);
-            const fromNative = tokensInfo.source.tokenType === 'NATIVE';
-            const toNative = tokensInfo.target.tokenType === 'NATIVE';
-
-            const fromTokenMatch =
-                (compareAddresses(tokensInfo.source.address, from.address) && !fromNative) ||
-                (fromNative && from.isNative);
-            const toTokenMatch =
-                (compareAddresses(tokensInfo.target.address, toToken.address) && !toNative) ||
-                (toNative && toToken.isNative);
-
-            const isPureBridge = fromTokenMatch && toTokenMatch;
+            const isPureBridge = this.checkIsBridge(tokensInfo, from, toToken);
             const routerMethodName = tokensInfo.target.routerABI.split(
                 '('
             )[0]! as MultichainMethodName;
@@ -317,5 +306,23 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
         }
 
         return { source: sourceToken, target: possibleTargetToken };
+    }
+
+    private checkIsBridge(
+        tokensInfo: { source: MultichainSourceToken; target: MultichainTargetToken },
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken
+    ): boolean {
+        const fromNative = tokensInfo.source.tokenType === 'NATIVE';
+        const toNative = tokensInfo.target.tokenType === 'NATIVE';
+
+        const fromTokenMatch =
+            (compareAddresses(tokensInfo.source.address, from.address) && !fromNative) ||
+            (fromNative && from.isNative);
+        const toTokenMatch =
+            (compareAddresses(tokensInfo.target.address, toToken.address) && !toNative) ||
+            (toNative && toToken.isNative);
+
+        return fromTokenMatch && toTokenMatch;
     }
 }
