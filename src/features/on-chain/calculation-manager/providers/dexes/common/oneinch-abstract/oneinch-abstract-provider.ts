@@ -172,13 +172,15 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
                     options.useProxy
                 );
             }
+            const availableProtocols = this.getAvailableProtocols();
 
             const swapTradeParams: OneinchSwapRequest = {
                 params: {
                     ...quoteTradeParams.params,
                     slippage: (options.slippageTolerance * 100).toString(),
                     fromAddress: options.fromAddress,
-                    disableEstimate: options.gasCalculation === 'disabled'
+                    disableEstimate: options.gasCalculation === 'disabled',
+                    ...(availableProtocols && { protocols: availableProtocols })
                 }
             };
             oneInchTrade = await this.httpClient.get<OneinchSwapResponse>(
