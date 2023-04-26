@@ -25,7 +25,7 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
 
 export class DebridgeCrossChainProvider extends CrossChainProvider {
-    public static readonly apiEndpoint = 'https://api.dln.trade/v1.0/dln/quote';
+    public static readonly apiEndpoint = 'https://api.dln.trade/v1.0/dln';
 
     private readonly deBridgeReferralCode = '4350';
 
@@ -74,7 +74,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             };
 
             const { tx, estimation } = await Injector.httpClient.get<TransactionResponse>(
-                DebridgeCrossChainProvider.apiEndpoint,
+                `${DebridgeCrossChainProvider.apiEndpoint}/quote`,
                 {
                     params: requestParams as unknown as {}
                 }

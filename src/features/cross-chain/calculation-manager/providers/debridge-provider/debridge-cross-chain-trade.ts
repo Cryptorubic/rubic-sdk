@@ -241,13 +241,18 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         value: string;
         to: string;
     }> {
+        const walletAddress = this.web3Private.address;
         const params = {
             ...this.transactionRequest,
-            ...(receiverAddress && { dstChainTokenOutRecipient: receiverAddress })
+            ...(receiverAddress && { dstChainTokenOutRecipient: receiverAddress }),
+            // @TODO Check proxy when deBridge proxy returned
+            senderAddress: walletAddress,
+            srcChainRefundAddress: walletAddress,
+            dstChainOrderAuthorityAddress: receiverAddress || walletAddress
         };
 
         const { tx } = await Injector.httpClient.get<TransactionResponse>(
-            DebridgeCrossChainProvider.apiEndpoint,
+            `${DebridgeCrossChainProvider.apiEndpoint}/createOrder`,
             { params }
         );
         return tx;
