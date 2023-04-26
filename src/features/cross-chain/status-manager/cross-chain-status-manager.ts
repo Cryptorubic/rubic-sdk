@@ -40,7 +40,9 @@ import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-man
 import {
     BtcStatusResponse,
     CelerXtransferStatusResponse,
-    DeBridgeApiResponse,
+    DeBridgeApiStateStatus,
+    DeBridgeFilteredListApiResponse,
+    DeBridgeOrderApiResponse,
     GetDstTxDataFn,
     SymbiosisApiResponse
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
@@ -416,22 +418,43 @@ export class CrossChainStatusManager {
      */
     private async getDebridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
-            const params = { filter: data.srcTxHash, filterType: 1 };
-            const { send = null, claim = null } = await this.httpClient.get<DeBridgeApiResponse>(
-                'https://api.debridge.finance/api/Transactions/GetFullSubmissionInfo',
-                { params }
+            const { orders } = await this.httpClient.post<DeBridgeFilteredListApiResponse>(
+                'https://stats-api.dln.trade/api/Orders/filteredList',
+                { filter: data.srcTxHash, skip: 0, take: 1 }
             );
-            const dstTxData: TxStatusData = {
-                status: TxStatus.FAIL,
-                hash: claim?.transactionHash || null
-            };
 
-            if (!send || !claim) {
-                dstTxData.status = TxStatus.PENDING;
+            if (!orders.length) {
+                return {
+                    status: TxStatus.PENDING,
+                    hash: null
+                };
             }
 
-            if (claim?.transactionHash) {
+            const orderId = orders[0].orderId.stringValue;
+            const status = orders[0].state;
+            const dstTxData: TxStatusData = {
+                status: TxStatus.PENDING,
+                hash: null
+            };
+
+            if (
+                status === DeBridgeApiStateStatus.FULFILLED ||
+                status === DeBridgeApiStateStatus.SENTUNLOCK ||
+                status === DeBridgeApiStateStatus.CLAIMEDUNLOCK
+            ) {
+                const { fulfilledDstEventMetadata } =
+                    await this.httpClient.get<DeBridgeOrderApiResponse>(
+                        `https://stats-api.dln.trade/api/Orders/${orderId}`
+                    );
+
+                dstTxData.hash = fulfilledDstEventMetadata.transactionHash.stringValue;
                 dstTxData.status = TxStatus.SUCCESS;
+            } else if (
+                status === DeBridgeApiStateStatus.ORDERCANCELLED ||
+                status === DeBridgeApiStateStatus.SENTORDERCANCEL ||
+                status === DeBridgeApiStateStatus.CLAIMEDORDERCANCEL
+            ) {
+                dstTxData.status = TxStatus.FAIL;
             }
 
             return dstTxData;

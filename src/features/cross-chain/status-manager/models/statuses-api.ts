@@ -2,15 +2,33 @@ import { TxStatusData } from 'src/features/common/status-manager/models/tx-statu
 import { CelerTransferStatus } from 'src/features/cross-chain/status-manager/models/celer-transfer-status.enum';
 import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 
-export interface DeBridgeApiResponse {
-    claim: {
-        transactionHash?: string;
-    } | null;
-    send: {
-        isExecuted: boolean;
-        confirmationsCount: number;
-        transactionHash: string;
-    } | null;
+export interface DeBridgeFilteredListApiResponse {
+    orders: [
+        {
+            orderId: {
+                stringValue: string;
+            };
+            state: string;
+        }
+    ];
+}
+
+export interface DeBridgeOrderApiResponse {
+    fulfilledDstEventMetadata: {
+        transactionHash: {
+            stringValue: string;
+        };
+    };
+}
+
+export enum DeBridgeApiStateStatus {
+    FULFILLED = 'FULFILLED',
+    SENTUNLOCK = 'SENTUNLOCK',
+    CLAIMEDUNLOCK = 'CLAIMEDUNLOCK',
+    ORDERCANCELLED = 'ORDERCANCELLED',
+    SENTORDERCANCEL = 'SENTORDERCANCEL',
+    CLAIMEDORDERCANCEL = 'CLAIMEDORDERCANCEL',
+    CREATED = 'CREATED'
 }
 
 export interface SymbiosisApiResponse {
