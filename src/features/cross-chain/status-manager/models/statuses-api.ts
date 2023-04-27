@@ -22,13 +22,13 @@ export interface DeBridgeOrderApiResponse {
 }
 
 export enum DeBridgeApiStateStatus {
-    FULFILLED = 'FULFILLED',
-    SENTUNLOCK = 'SENTUNLOCK',
-    CLAIMEDUNLOCK = 'CLAIMEDUNLOCK',
-    ORDERCANCELLED = 'ORDERCANCELLED',
-    SENTORDERCANCEL = 'SENTORDERCANCEL',
-    CLAIMEDORDERCANCEL = 'CLAIMEDORDERCANCEL',
-    CREATED = 'CREATED'
+    FULFILLED = 'Fulfilled',
+    SENTUNLOCK = 'SentUnlock',
+    CLAIMEDUNLOCK = 'ClaimedUnlock',
+    ORDERCANCELLED = 'OrderCancelled',
+    SENTORDERCANCEL = 'SentOrderCancel',
+    CLAIMEDORDERCANCEL = 'ClaimedOrderCancel',
+    CREATED = 'Created'
 }
 
 export interface SymbiosisApiResponse {
