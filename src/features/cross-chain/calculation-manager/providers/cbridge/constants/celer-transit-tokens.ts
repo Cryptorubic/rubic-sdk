@@ -95,5 +95,14 @@ export const celerTransitTokens: Record<CbridgeCrossChainSupportedBlockchain, To
             symbol: 'USDC',
             decimals: 6
         }
+    ],
+    [BLOCKCHAIN_NAME.ASTAR_EVM]: [
+        {
+            blockchain: BLOCKCHAIN_NAME.ASTAR_EVM,
+            address: '0x6a2d262D56735DbA19Dd70682B39F6bE9a931D98',
+            name: 'USDC',
+            symbol: 'USDC',
+            decimals: 6
+        }
     ]
 };

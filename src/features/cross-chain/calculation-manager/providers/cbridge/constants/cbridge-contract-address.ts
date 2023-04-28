@@ -45,5 +45,10 @@ export const cbridgeContractAddress: Record<
         providerGateway: '0x9D39Fc627A6d9d9F8C831c16995b209548cc3401',
         providerRouter: '0x9D39Fc627A6d9d9F8C831c16995b209548cc3401',
         rubicRouter: '0x33798753ec66aEc00ed7E337B41F444f53A63333'
+    },
+    [BLOCKCHAIN_NAME.ASTAR_EVM]: {
+        providerGateway: '0x841ce48F9446C8E281D3F1444cB859b4A6D0738C',
+        providerRouter: '0x841ce48F9446C8E281D3F1444cB859b4A6D0738C',
+        rubicRouter: '0x841ce48F9446C8E281D3F1444cB859b4A6D0738C'
     }
 };

@@ -8,7 +8,7 @@ export class CbridgeCrossChainApiService {
     public static readonly apiEndpoint = 'https://cbridge-prod2.celer.app/v2/';
 
     public static async getTransferConfigs(): Promise<CbridgeTransferConfigsResponse> {
-        return Injector.httpClient.get(
+        return Injector.httpClient.get<CbridgeTransferConfigsResponse>(
             `${CbridgeCrossChainApiService.apiEndpoint}getTransferConfigs`
         );
     }
