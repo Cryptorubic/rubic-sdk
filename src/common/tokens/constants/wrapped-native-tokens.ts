@@ -218,5 +218,26 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped Ether',
         symbol: 'Weth',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET,
+        address: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MUMBAI]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MUMBAI,
+        address: '0x9c3c9283d3e44854697cd22d3faa240cfb032889',
+        name: 'Wrapped Matic',
+        symbol: 'WMATIC',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.FUJI]: new Token({
+        blockchain: BLOCKCHAIN_NAME.FUJI,
+        address: '0x1d308089a2d1ced3f1ce36b1fcaf815b07217be3',
+        name: 'Wrapped Avax',
+        symbol: 'WAVAX',
+        decimals: 18
     })
 };

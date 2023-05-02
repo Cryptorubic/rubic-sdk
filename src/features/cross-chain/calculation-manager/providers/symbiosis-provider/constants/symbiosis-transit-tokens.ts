@@ -72,6 +72,34 @@ export const symbiosisTransitTokens: Record<SymbiosisCrossChainSupportedBlockcha
         name: 'USDC',
         symbol: 'USDC',
         decimals: 6
+    },
+    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: {
+        blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET,
+        address: '0x9a01bf917477dd9f5d715d188618fc8b7350cd22',
+        name: 'Binance USD',
+        symbol: 'BUSD',
+        decimals: 18
+    },
+    [BLOCKCHAIN_NAME.FUJI]: {
+        blockchain: BLOCKCHAIN_NAME.FUJI,
+        address: '0x9a01bf917477dd9f5d715d188618fc8b7350cd22',
+        name: 'USDT',
+        symbol: 'USDT',
+        decimals: 6
+    },
+    [BLOCKCHAIN_NAME.GOERLI]: {
+        blockchain: BLOCKCHAIN_NAME.GOERLI,
+        address: '0x07865c6E87B9F70255377e024ace6630C1Eaa37F',
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6
+    },
+    [BLOCKCHAIN_NAME.MUMBAI]: {
+        blockchain: BLOCKCHAIN_NAME.MUMBAI,
+        address: '0x9a01bf917477dd9f5d715d188618fc8b7350cd22',
+        name: 'USDT',
+        symbol: 'USDT',
+        decimals: 6
     }
     // [BLOCKCHAIN_NAME.BITCOIN]: {
     //     blockchain: BLOCKCHAIN_NAME.BITCOIN,

@@ -63,6 +63,11 @@ export interface CrossChainOptions {
     changenowFullyEnabled?: boolean;
 
     useProxy?: Record<CrossChainTradeType, boolean>;
+
+    /**
+     * True if test networks are enabled.
+     */
+    enableTestnets?: boolean;
 }
 
 export type RequiredCrossChainOptions = MarkRequired<
@@ -75,4 +80,5 @@ export type RequiredCrossChainOptions = MarkRequired<
     | 'providerAddress'
     | 'timeout'
     | 'changenowFullyEnabled'
+    | 'enableTestnets'
 >;
