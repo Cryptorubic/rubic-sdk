@@ -166,7 +166,6 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
         this.spenderAddress = crossChainTrade.spenderAddress;
         this.routerMethodName = crossChainTrade.routerMethodName;
         this.anyTokenAddress = crossChainTrade.anyTokenAddress;
-        this.priceImpact = crossChainTrade.priceImpact;
         this.slippage = crossChainTrade.slippage;
 
         this.onChainSubtype = crossChainTrade.onChainTrade
