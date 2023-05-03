@@ -1,4 +1,3 @@
-import { createClient } from '@layerzerolabs/scan-client';
 import { Via } from '@viaprotocol/router-sdk';
 import { StatusResponse, TransactionStatus } from 'rango-sdk-basic';
 import { RubicSdkError } from 'src/common/errors';
@@ -51,8 +50,6 @@ import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy
  */
 export class CrossChainStatusManager {
     private readonly httpClient = Injector.httpClient;
-
-    private readonly LayzerZeroScanClient = createClient('mainnet');
 
     private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, GetDstTxDataFn | null> = {
         [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
@@ -144,7 +141,10 @@ export class CrossChainStatusManager {
      * @returns Cross-chain transaction status and hash.
      */
     private async getStargateDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        const scanResponse = await this.LayzerZeroScanClient.getMessagesBySrcTxHash(data.srcTxHash);
+        const layerZero = await import('@layerzerolabs/scan-client');
+        const scanResponse = await layerZero
+            .createClient('mainnet')
+            .getMessagesBySrcTxHash(data.srcTxHash);
         const targetTrade = scanResponse.messages.find(
             item => item.srcTxHash.toLocaleLowerCase() === data.srcTxHash.toLocaleLowerCase()
         );

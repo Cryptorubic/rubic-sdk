@@ -1,8 +1,7 @@
+import * as CRC32 from 'crc-32';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { staticImplements } from 'src/common/utils/decorators';
 import { TypedWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/typed-web3-pure';
-
-const CRC32 = require('crc-32');
 
 @staticImplements<TypedWeb3Pure>()
 export class IcpWeb3Pure {

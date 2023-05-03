@@ -1,6 +1,5 @@
 import BigNumber from 'bignumber.js';
 // @ts-ignore
-import { getRequestOptions } from 'cbridge-revert-manager';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Injector } from 'src/core/injector/injector';
@@ -20,6 +19,8 @@ export class CrossChainCbridgeManager {
         transferId: string,
         estimatedReceivedAmt: string
     ): Promise<void> {
+        // @ts-ignore
+        const getRequestOptions = await import('cbridge-revert-manager').then(el => el.default);
         const body: object = await getRequestOptions(transferId, estimatedReceivedAmt);
         return Injector.httpClient.post(
             `${CbridgeCrossChainApiService.apiEndpoint}withdrawLiquidity`,
