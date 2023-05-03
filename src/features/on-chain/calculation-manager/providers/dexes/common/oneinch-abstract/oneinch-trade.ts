@@ -85,6 +85,8 @@ export class OneinchTrade extends EvmOnChainTrade {
 
     private readonly disableMultihops: boolean;
 
+    private readonly availableProtocols: string | undefined;
+
     /**
      * @internal
      * Path with wrapped native address.
@@ -109,6 +111,7 @@ export class OneinchTrade extends EvmOnChainTrade {
         this.dexContractAddress = tradeStruct.dexContractAddress;
         this.disableMultihops = tradeStruct.disableMultihops;
         this.transactionData = tradeStruct.data;
+        this.availableProtocols = tradeStruct.availableProtocols;
         this.wrappedPath = createTokenNativeAddressProxyInPathStartAndEnd(
             this.path,
             oneinchApiParams.nativeAddress
@@ -177,7 +180,8 @@ export class OneinchTrade extends EvmOnChainTrade {
                 ...(this.disableMultihops && {
                     connectorTokens: `${fromTokenAddress},${toTokenAddress}`
                 }),
-                ...(receiverAddress && { destReceiver: receiverAddress })
+                ...(receiverAddress && { destReceiver: receiverAddress }),
+                ...(this.availableProtocols && { protocols: this.availableProtocols })
             }
         };
 
