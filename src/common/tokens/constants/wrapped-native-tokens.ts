@@ -239,5 +239,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped Avax',
         symbol: 'WAVAX',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.GOERLI]: new Token({
+        blockchain: BLOCKCHAIN_NAME.GOERLI,
+        address: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
     })
 };
