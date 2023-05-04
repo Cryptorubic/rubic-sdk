@@ -1,6 +1,10 @@
 import BigNumber from 'bignumber.js';
 import { BytesLike } from 'ethers';
-import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
+import {
+    FailedToCheckForTransactionReceiptError,
+    RubicSdkError,
+    TooLowAmountError
+} from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -175,16 +179,17 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         this.checkWalletConnected();
         await this.checkAllowanceAndApprove(options);
-        const { data, value, to } = await this.getTransactionRequest(options?.receiverAddress);
-        const { onConfirm } = options;
         let transactionHash: string;
-        const onTransactionHash = (hash: string) => {
-            if (onConfirm) {
-                onConfirm(hash);
-            }
-            transactionHash = hash;
-        };
+
         try {
+            const { data, value, to } = await this.getTransactionRequest(options?.receiverAddress);
+            const { onConfirm } = options;
+            const onTransactionHash = (hash: string) => {
+                if (onConfirm) {
+                    onConfirm(hash);
+                }
+                transactionHash = hash;
+            };
             await this.web3Private.trySendTransaction(to, {
                 onTransactionHash,
                 data,
@@ -195,6 +200,9 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
 
             return transactionHash!;
         } catch (err) {
+            if (err?.error?.errorId === 'ERROR_LOW_GIVE_AMOUNT') {
+                throw new TooLowAmountError();
+            }
             if (err instanceof FailedToCheckForTransactionReceiptError) {
                 return transactionHash!;
             }

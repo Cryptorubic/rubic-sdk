@@ -190,7 +190,10 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
     private parseDebridgeApiError(httpErrorResponse: {
         error: TransactionErrorResponse;
     }): RubicSdkError | null {
-        if (httpErrorResponse?.error?.errorId === 'INCLUDED_GAS_FEE_NOT_COVERED_BY_INPUT_AMOUNT') {
+        if (
+            httpErrorResponse?.error?.errorId === 'INCLUDED_GAS_FEE_NOT_COVERED_BY_INPUT_AMOUNT' ||
+            httpErrorResponse?.error?.errorId === 'ERROR_LOW_GIVE_AMOUNT'
+        ) {
             return new TooLowAmountError();
         }
 
