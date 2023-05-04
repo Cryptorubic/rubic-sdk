@@ -22,7 +22,6 @@ import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/provid
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
-import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/contract-address';
 import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-cross-chain-supported-blockchain';
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
 import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
@@ -73,6 +72,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                         transactionRequest,
                         gasData: null,
                         priceImpact: 0,
+                        allowanceTarget: '',
                         slippage: 0,
                         feeInfo: {},
                         transitAmount: new BigNumber(NaN),
@@ -128,6 +128,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly priceImpact: number;
 
+    public readonly allowanceTarget: string;
+
     public readonly gasData: GasData | null;
 
     private get fromBlockchain(): DeBridgeCrossChainSupportedBlockchain {
@@ -135,7 +137,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return DE_BRIDGE_CONTRACT_ADDRESS[this.fromBlockchain].providerGateway;
+        return this.allowanceTarget;
     }
 
     public readonly feeInfo: FeeInfo;
@@ -151,6 +153,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             transactionRequest: TransactionRequest;
             gasData: GasData | null;
             priceImpact: number;
+            allowanceTarget: string;
             slippage: number;
             feeInfo: FeeInfo;
             transitAmount: BigNumber;
@@ -166,6 +169,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         this.transactionRequest = crossChainTrade.transactionRequest;
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.allowanceTarget = crossChainTrade.allowanceTarget;
         this.slippage = crossChainTrade.slippage;
         this.onChainTrade = crossChainTrade.onChainTrade;
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
