@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "4.0.13-alpha-price-impact.1",
+  "version": "4.0.13-alpha-price-impact.2",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

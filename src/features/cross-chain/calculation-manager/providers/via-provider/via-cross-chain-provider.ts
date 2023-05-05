@@ -165,7 +165,7 @@ export class ViaCrossChainProvider extends CrossChainProvider {
                         to,
                         route: bestRoute,
                         gasData,
-                        priceImpact: 0, // @TODO add price impact
+                        priceImpact: from.calculatePriceImpactPercent(to) || 0,
                         toTokenAmountMin,
                         feeInfo,
                         cryptoFeeToken,

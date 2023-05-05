@@ -145,7 +145,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             });
             const {
                 tokenAmountOut,
-                priceImpact,
                 fee: transitTokenFee,
                 route,
                 inTradeType,
@@ -235,7 +234,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                         to,
                         swapFunction,
                         gasData,
-                        priceImpact: parseFloat(priceImpact.toFixed()),
+                        priceImpact: from.calculatePriceImpactPercent(to) || 0,
                         slippage: options.slippageTolerance,
                         feeInfo: {
                             ...feeInfo,
