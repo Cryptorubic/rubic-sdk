@@ -25,6 +25,7 @@ export interface MultichainSourceToken {
             [hash: string]: MultichainTargetToken;
         };
     };
+    address: string;
 }
 
 export interface MultichainTokensResponse {

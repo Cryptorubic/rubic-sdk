@@ -3,7 +3,11 @@ import { BytesLike } from 'ethers';
 import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { TokenStruct } from 'src/common/tokens/token';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -28,8 +32,12 @@ import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain
 import { SymbiosisCallDataDecode } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-call-data-decode';
 import { SymbiosisTradeData } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import { MethodDecoder } from 'src/features/cross-chain/calculation-manager/utils/decode-method';
-import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import {
+    ON_CHAIN_TRADE_TYPE,
+    OnChainTradeType
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { SymbiosisTradeType } from 'symbiosis-js-sdk/dist/crosschain/trade';
 
 /**
  * Calculated Symbiosis cross-chain trade.
@@ -68,7 +76,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                             name: 'test',
                             symbol: 'test',
                             decimals: 18
-                        }
+                        },
+                        tradeType: { in: undefined, out: undefined }
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -163,6 +172,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             transitAmount: BigNumber;
             onChainTrade: EvmOnChainTrade | null;
             transitToken: TokenStruct;
+            tradeType: { in?: SymbiosisTradeType; out?: SymbiosisTradeType };
         },
         providerAddress: string
     ) {
@@ -179,13 +189,10 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         this.slippage = crossChainTrade.slippage;
         this.transitAmount = crossChainTrade.transitAmount;
         this.onChainTrade = crossChainTrade?.onChainTrade || null;
-        this.onChainSubtype = {
-            from: this.onChainTrade?.type,
-            to:
-                crossChainTrade.to.blockchain === BLOCKCHAIN_NAME.BITCOIN
-                    ? ON_CHAIN_TRADE_TYPE.REN_BTC
-                    : ON_CHAIN_TRADE_TYPE.ONE_INCH
-        };
+        this.onChainSubtype = this.getSubtype(
+            crossChainTrade.tradeType,
+            crossChainTrade.to.blockchain
+        );
         this.transitToken = crossChainTrade.transitToken;
     }
 
@@ -332,5 +339,27 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             relay,
             data
         ];
+    }
+
+    private getSubtype(
+        tradeType: {
+            in?: SymbiosisTradeType;
+            out?: SymbiosisTradeType;
+        },
+        toBlockchain: BlockchainName
+    ): OnChainSubtype {
+        const mapping: Record<SymbiosisTradeType | 'default', OnChainTradeType | undefined> = {
+            dex: ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP,
+            '1inch': ON_CHAIN_TRADE_TYPE.ONE_INCH,
+            'open-ocean': ON_CHAIN_TRADE_TYPE.OPEN_OCEAN,
+            default: undefined
+        };
+        return {
+            from: this.onChainTrade?.type || mapping?.[tradeType?.in || 'default'],
+            to:
+                toBlockchain === BLOCKCHAIN_NAME.BITCOIN
+                    ? ON_CHAIN_TRADE_TYPE.REN_BTC
+                    : mapping?.[tradeType?.out || 'default']
+        };
     }
 }

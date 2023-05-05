@@ -143,7 +143,14 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 slippage: slippageTolerance,
                 deadline
             });
-            const { tokenAmountOut, priceImpact, fee: transitTokenFee, route } = trade;
+            const {
+                tokenAmountOut,
+                priceImpact,
+                fee: transitTokenFee,
+                route,
+                inTradeType,
+                outTradeType
+            } = trade;
 
             const transitToken = this.getTransferToken(route, from);
 
@@ -241,7 +248,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                         },
                         transitAmount,
                         onChainTrade,
-                        transitToken: transitToken || from
+                        transitToken: transitToken || from,
+                        tradeType: { in: inTradeType, out: outTradeType }
                     },
                     options.providerAddress
                 )
