@@ -111,7 +111,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly bridgeType: BridgeType;
 
-    public readonly priceImpact: number;
+    public readonly priceImpact: number | null;
 
     public readonly feeInfo: FeeInfo;
 
@@ -139,7 +139,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             gasData: GasData | null;
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
-            priceImpact: number;
+            priceImpact: number | null;
             onChainSubtype: OnChainSubtype;
             bridgeType: BridgeType;
             slippage: number;

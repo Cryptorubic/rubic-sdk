@@ -131,7 +131,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                             dstChainTokenOutRecipient: fromAddress
                         },
                         gasData,
-                        priceImpact: from.calculatePriceImpactPercent(to) || 0,
+                        priceImpact: from.calculatePriceImpactPercent(to),
                         allowanceTarget: tx.allowanceTarget,
                         slippage: options.slippageTolerance,
                         feeInfo: {

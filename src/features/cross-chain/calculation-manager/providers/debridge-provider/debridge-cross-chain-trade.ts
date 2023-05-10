@@ -126,7 +126,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly toTokenAmountMin: BigNumber;
 
-    public readonly priceImpact: number;
+    public readonly priceImpact: number | null;
 
     public readonly allowanceTarget: string;
 
@@ -152,7 +152,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             to: PriceTokenAmount<EvmBlockchainName>;
             transactionRequest: TransactionRequest;
             gasData: GasData | null;
-            priceImpact: number;
+            priceImpact: number | null;
             allowanceTarget: string;
             slippage: number;
             feeInfo: FeeInfo;
@@ -174,7 +174,6 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         this.onChainTrade = crossChainTrade.onChainTrade;
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
         this.feeInfo = crossChainTrade.feeInfo;
-        this.priceImpact = crossChainTrade.priceImpact;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
 
         this.transitAmount = crossChainTrade.transitAmount;

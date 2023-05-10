@@ -35,7 +35,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly to: PriceTokenAmount;
 
-    public readonly priceImpact: number;
+    public readonly priceImpact: number | null;
 
     public readonly toTokenAmountMin: BigNumber;
 
@@ -142,7 +142,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
             from: PriceTokenAmount<EvmBlockchainName>;
             to: PriceTokenAmount;
             gasData: GasData;
-            priceImpact: number;
+            priceImpact: number | null;
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
             routerAddress: string;
@@ -166,7 +166,6 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
         this.spenderAddress = crossChainTrade.spenderAddress;
         this.routerMethodName = crossChainTrade.routerMethodName;
         this.anyTokenAddress = crossChainTrade.anyTokenAddress;
-        this.priceImpact = crossChainTrade.priceImpact;
         this.slippage = crossChainTrade.slippage;
 
         this.onChainSubtype = crossChainTrade.onChainTrade
