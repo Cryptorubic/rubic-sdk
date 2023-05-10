@@ -91,6 +91,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     STELLA_SWAP: 'STELLA_SWAP',
     SURFDEX: 'SURFDEX',
     SUSHI_SWAP: 'SUSHI_SWAP',
+    SYNC_SWAP: 'SYNC_SWAP',
 
     SYMBIOSIS_SWAP: 'SYMBIOSIS_SWAP', // Fake to show swap via unknown symbiosis dex
 
