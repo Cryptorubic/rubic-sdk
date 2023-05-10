@@ -1,6 +1,10 @@
 import BigNumber from 'bignumber.js';
 import { BytesLike } from 'ethers';
-import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
+import {
+    FailedToCheckForTransactionReceiptError,
+    RubicSdkError,
+    TooLowAmountError
+} from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -18,7 +22,6 @@ import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/provid
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
-import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/contract-address';
 import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-cross-chain-supported-blockchain';
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
 import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
@@ -69,6 +72,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                         transactionRequest,
                         gasData: null,
                         priceImpact: 0,
+                        allowanceTarget: '',
                         slippage: 0,
                         feeInfo: {},
                         transitAmount: new BigNumber(NaN),
@@ -124,6 +128,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly priceImpact: number | null;
 
+    public readonly allowanceTarget: string;
+
     public readonly gasData: GasData | null;
 
     private get fromBlockchain(): DeBridgeCrossChainSupportedBlockchain {
@@ -131,7 +137,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return DE_BRIDGE_CONTRACT_ADDRESS[this.fromBlockchain].providerGateway;
+        return this.allowanceTarget;
     }
 
     public readonly feeInfo: FeeInfo;
@@ -147,6 +153,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             transactionRequest: TransactionRequest;
             gasData: GasData | null;
             priceImpact: number | null;
+            allowanceTarget: string;
             slippage: number;
             feeInfo: FeeInfo;
             transitAmount: BigNumber;
@@ -162,6 +169,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         this.transactionRequest = crossChainTrade.transactionRequest;
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
+        this.allowanceTarget = crossChainTrade.allowanceTarget;
         this.slippage = crossChainTrade.slippage;
         this.onChainTrade = crossChainTrade.onChainTrade;
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
@@ -174,16 +182,17 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         this.checkWalletConnected();
         await this.checkAllowanceAndApprove(options);
-        const { data, value, to } = await this.getTransactionRequest(options?.receiverAddress);
-        const { onConfirm } = options;
         let transactionHash: string;
-        const onTransactionHash = (hash: string) => {
-            if (onConfirm) {
-                onConfirm(hash);
-            }
-            transactionHash = hash;
-        };
+
         try {
+            const { data, value, to } = await this.getTransactionRequest(options?.receiverAddress);
+            const { onConfirm } = options;
+            const onTransactionHash = (hash: string) => {
+                if (onConfirm) {
+                    onConfirm(hash);
+                }
+                transactionHash = hash;
+            };
             await this.web3Private.trySendTransaction(to, {
                 onTransactionHash,
                 data,
@@ -194,6 +203,9 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
 
             return transactionHash!;
         } catch (err) {
+            if (err?.error?.errorId === 'ERROR_LOW_GIVE_AMOUNT') {
+                throw new TooLowAmountError();
+            }
             if (err instanceof FailedToCheckForTransactionReceiptError) {
                 return transactionHash!;
             }
@@ -240,13 +252,18 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         value: string;
         to: string;
     }> {
+        const walletAddress = this.web3Private.address;
         const params = {
             ...this.transactionRequest,
-            ...(receiverAddress && { dstChainTokenOutRecipient: receiverAddress })
+            ...(receiverAddress && { dstChainTokenOutRecipient: receiverAddress }),
+            // @TODO Check proxy when deBridge proxy returned
+            senderAddress: walletAddress,
+            srcChainRefundAddress: walletAddress,
+            dstChainOrderAuthorityAddress: receiverAddress || walletAddress
         };
 
         const { tx } = await Injector.httpClient.get<TransactionResponse>(
-            DebridgeCrossChainProvider.apiEndpoint,
+            `${DebridgeCrossChainProvider.apiEndpoint}/createOrder`,
             { params }
         );
         return tx;

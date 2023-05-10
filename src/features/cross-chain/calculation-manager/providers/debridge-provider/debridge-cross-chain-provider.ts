@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError, TooLowAmountError } from 'src/common/errors';
+import { NotSupportedTokensError, RubicSdkError, TooLowAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -23,9 +23,10 @@ import {
     TransactionErrorResponse,
     TransactionResponse
 } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
+import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 
 export class DebridgeCrossChainProvider extends CrossChainProvider {
-    public static readonly apiEndpoint = 'https://deswap.debridge.finance/v1.0/transaction';
+    public static readonly apiEndpoint = 'https://api.dln.trade/v1.0/dln';
 
     private readonly deBridgeReferralCode = '4350';
 
@@ -51,6 +52,14 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         }
 
         try {
+            const deflationStatus = await new DeflationTokenManager().isDeflationToken(toToken);
+            if (deflationStatus.isDeflation) {
+                return {
+                    trade: null,
+                    error: new NotSupportedTokensError()
+                };
+            }
+
             const fromAddress = options.fromAddress || this.getWalletAddress(fromBlockchain);
 
             // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
@@ -74,7 +83,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             };
 
             const { tx, estimation } = await Injector.httpClient.get<TransactionResponse>(
-                DebridgeCrossChainProvider.apiEndpoint,
+                `${DebridgeCrossChainProvider.apiEndpoint}/quote`,
                 {
                     params: requestParams as unknown as {}
                 }
@@ -123,6 +132,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         },
                         gasData,
                         priceImpact: from.calculatePriceImpactPercent(to),
+                        allowanceTarget: tx.allowanceTarget,
                         slippage: options.slippageTolerance,
                         feeInfo: {
                             provider: {
@@ -181,7 +191,10 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
     private parseDebridgeApiError(httpErrorResponse: {
         error: TransactionErrorResponse;
     }): RubicSdkError | null {
-        if (httpErrorResponse?.error?.errorId === 'INCLUDED_GAS_FEE_NOT_COVERED_BY_INPUT_AMOUNT') {
+        if (
+            httpErrorResponse?.error?.errorId === 'INCLUDED_GAS_FEE_NOT_COVERED_BY_INPUT_AMOUNT' ||
+            httpErrorResponse?.error?.errorId === 'ERROR_LOW_GIVE_AMOUNT'
+        ) {
             return new TooLowAmountError();
         }
 
