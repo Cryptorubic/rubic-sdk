@@ -104,7 +104,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly toTokenAmountMin: BigNumber;
 
-    public readonly priceImpact: number;
+    public readonly priceImpact: number | null;
 
     public readonly gasData: GasData | null;
 
@@ -136,7 +136,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             to: PriceTokenAmount<EvmBlockchainName>;
             transactionRequest: XyTransactionRequest;
             gasData: GasData | null;
-            priceImpact: number;
+            priceImpact: number | null;
             slippage: number;
             feeInfo: FeeInfo;
             onChainTrade: EvmOnChainTrade | null;
@@ -153,7 +153,6 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         this.slippage = crossChainTrade.slippage;
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
         this.feeInfo = crossChainTrade.feeInfo;
-        this.priceImpact = crossChainTrade.priceImpact;
         this.onChainTrade = crossChainTrade.onChainTrade;
     }
 

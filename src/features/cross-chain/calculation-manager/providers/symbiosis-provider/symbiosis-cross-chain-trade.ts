@@ -131,7 +131,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
     /**
      * Overall price impact, fetched from symbiosis api.
      */
-    public readonly priceImpact: number;
+    public readonly priceImpact: number | null;
 
     public readonly gasData: GasData | null;
 
@@ -166,7 +166,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             to: PriceTokenAmount;
             swapFunction: (fromAddress: string, receiver?: string) => Promise<SymbiosisTradeData>;
             gasData: GasData | null;
-            priceImpact: number;
+            priceImpact: number | null;
             slippage: number;
             feeInfo: FeeInfo;
             transitAmount: BigNumber;
@@ -185,7 +185,6 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         this.priceImpact = crossChainTrade.priceImpact;
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
         this.feeInfo = crossChainTrade.feeInfo;
-        this.priceImpact = crossChainTrade.priceImpact;
         this.slippage = crossChainTrade.slippage;
         this.transitAmount = crossChainTrade.transitAmount;
         this.onChainTrade = crossChainTrade?.onChainTrade || null;
