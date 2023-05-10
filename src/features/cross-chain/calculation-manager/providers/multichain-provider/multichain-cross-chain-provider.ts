@@ -158,7 +158,8 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                     from,
                     to,
                     gasData,
-                    priceImpact: onChainTrade?.from ? from.calculatePriceImpactPercent(to) || 0 : 0,
+                    priceImpact:
+                        (onChainTrade?.from && from.calculatePriceImpactPercent(to)) || null,
                     toTokenAmountMin,
                     feeInfo: {
                         ...feeInfo,

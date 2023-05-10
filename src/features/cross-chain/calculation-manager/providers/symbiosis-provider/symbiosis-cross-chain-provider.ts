@@ -234,7 +234,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                         to,
                         swapFunction,
                         gasData,
-                        priceImpact: from.calculatePriceImpactPercent(to) || 0,
+                        priceImpact: from.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
                         feeInfo: {
                             ...feeInfo,
