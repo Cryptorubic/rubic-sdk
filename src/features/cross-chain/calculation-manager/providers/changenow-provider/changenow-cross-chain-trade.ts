@@ -261,7 +261,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact || null,
+            priceImpact: this.priceImpact ?? null,
             slippage: 0
         };
     }
