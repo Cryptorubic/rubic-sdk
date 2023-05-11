@@ -420,9 +420,8 @@ export class CrossChainStatusManager {
      */
     private async getDebridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
-            const { orderIds } = await this.httpClient.post<DeBridgeFilteredListApiResponse>(
-                `${DebridgeCrossChainProvider.apiEndpoint}/tx/${data.srcTxHash}/order-ids`,
-                {}
+            const { orderIds } = await this.httpClient.get<DeBridgeFilteredListApiResponse>(
+                `${DebridgeCrossChainProvider.apiEndpoint}/tx/${data.srcTxHash}/order-ids`
             );
 
             if (!orderIds.length) {
