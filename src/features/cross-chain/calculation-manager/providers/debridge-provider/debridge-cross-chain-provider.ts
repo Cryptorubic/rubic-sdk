@@ -60,15 +60,12 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 };
             }
 
-            // const fromAddress = options.fromAddress || this.getWalletAddress(fromBlockchain);
-
             // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
             // const fromWithoutFee = getFromWithoutFee(
             //     from,
             //     feeInfo.rubicProxy?.platformFee?.percent
             // );
 
-            // const slippageTolerance = options.slippageTolerance * 100;
             const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
 
             const requestParams: TransactionRequest = {
