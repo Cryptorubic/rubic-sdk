@@ -422,7 +422,7 @@ export class CrossChainStatusManager {
         try {
             const { orderIds } = await this.httpClient.post<DeBridgeFilteredListApiResponse>(
                 `${DebridgeCrossChainProvider.apiEndpoint}/tx/${data.srcTxHash}/order-ids`,
-                { filter: data.srcTxHash, skip: 0, take: 1 }
+                {}
             );
 
             if (!orderIds.length) {
