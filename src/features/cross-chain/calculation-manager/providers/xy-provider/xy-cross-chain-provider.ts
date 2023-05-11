@@ -44,6 +44,8 @@ export class XyCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = fromToken.blockchain as XyCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as XyCrossChainSupportedBlockchain;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
+
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return null;
         }
@@ -56,7 +58,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 fromBlockchain,
                 options.providerAddress,
                 fromToken,
-                options?.useProxy?.[this.type] ?? true
+                useProxy
             );
 
             const fromWithoutFee = getFromWithoutFee(

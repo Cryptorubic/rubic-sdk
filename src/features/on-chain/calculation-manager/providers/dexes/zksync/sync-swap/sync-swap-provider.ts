@@ -1,16 +1,18 @@
 import BigNumber from 'bignumber.js';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { NotSupportedTokensError } from 'src/common/errors';
+import { PriceToken, PriceTokenAmount, wrappedNativeTokensList } from 'src/common/tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { combineOptions } from 'src/common/utils/options';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { PoolInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/models/pool-info';
@@ -39,23 +41,37 @@ export class SyncSwapProvider extends EvmOnChainProvider {
             ...this.defaultOptions,
             fromAddress
         });
+        const fromProxy = createTokenNativeAddressProxy(
+            from,
+            wrappedNativeTokensList[from.blockchain]!.address
+        );
+        const toProxy = createTokenNativeAddressProxy(
+            toToken,
+            wrappedNativeTokensList[from.blockchain]!.address
+        );
 
-        const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
+        const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(
+            fromProxy,
+            fullOptions
+        );
 
-        const test = (await this.fetchRoutePools(from.address, toToken.address)) as {
-            poolsBase: PoolInfo[];
-        };
-        const amountOut = Web3Pure.fromWei(
-            this.getAmountOut(from.weiAmount, from.address, test.poolsBase[0]!),
-            toToken.decimals
+        const routePools = await this.fetchRoutePools(fromWithoutFee.address, toProxy.address);
+        const poolData = this.getPoolData(routePools);
+        if (compareAddresses(poolData.pool, EvmWeb3Pure.EMPTY_ADDRESS)) {
+            throw new NotSupportedTokensError();
+        }
+        const weiAmountOut = this.getAmountOut(
+            fromWithoutFee.weiAmount,
+            fromWithoutFee.address,
+            poolData
         );
 
         const to = new PriceTokenAmount({
             ...toToken.asStruct,
-            weiAmount: new BigNumber(amountOut)
+            weiAmount: weiAmountOut
         });
 
-        const tradeStruct: EvmOnChainTradeStruct = {
+        const tradeStruct = {
             from,
             to,
             slippageTolerance: fullOptions.slippageTolerance,
@@ -65,7 +81,8 @@ export class SyncSwapProvider extends EvmOnChainProvider {
             fromWithoutFee,
             withDeflation: fullOptions.withDeflation,
             usedForCrossChain: fullOptions.usedForCrossChain,
-            path: [from, toToken]
+            path: [from, toToken],
+            poolData
         };
 
         return new SyncSwapTrade(tradeStruct, fullOptions.providerAddress);
@@ -91,14 +108,19 @@ export class SyncSwapProvider extends EvmOnChainProvider {
         );
     }
 
+    public getPoolData(poolsInfo: unknown): PoolInfo {
+        return (poolsInfo as { poolsBase: PoolInfo[] }).poolsBase[0]!;
+    }
+
     private getAmountOut(amountIn: BigNumber, fromAddress: string, poolInfo: PoolInfo): BigNumber {
-        const [reserveFrom, reserveTo] =
-            poolInfo.tokenA === fromAddress
-                ? [poolInfo.reserveA, poolInfo.reserveB, poolInfo.swapFeeAB]
-                : [poolInfo.reserveB, poolInfo.reserveA, poolInfo.swapFeeBA];
-        const amountInWithFee = amountIn.multipliedBy(998);
+        const [reserveFrom, reserveTo, fee] = compareAddresses(poolInfo.tokenA, fromAddress)
+            ? [poolInfo.reserveA, poolInfo.reserveB, poolInfo.swapFeeAB]
+            : [poolInfo.reserveB, poolInfo.reserveA, poolInfo.swapFeeBA];
+        const k = Number(fee) / 100;
+        const amountInWithFee = amountIn.multipliedBy(1000 - k);
         const numerator = amountInWithFee.multipliedBy(reserveTo);
         const denominator = new BigNumber(reserveFrom).multipliedBy(1000).plus(amountInWithFee);
-        return numerator.dividedBy(denominator).plus(1);
+        const weiAmount = numerator.dividedBy(denominator).plus(1);
+        return weiAmount.integerValue();
     }
 }

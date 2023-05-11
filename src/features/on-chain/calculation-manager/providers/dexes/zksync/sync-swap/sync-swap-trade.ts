@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { Cache } from 'src/common/utils/decorators';
+import { parseError } from 'src/common/utils/errors';
+import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
@@ -14,14 +14,18 @@ import {
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
-import { OneinchTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-trade-struct';
-import { getOneinchApiBaseUrl } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/utils';
+import { PoolInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/models/pool-info';
+import { syncSwapAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/sync-swap-abi';
 
 export class SyncSwapTrade extends EvmOnChainTrade {
     public readonly dexContractAddress = '0x2da10A1e27bF85cEdD8FFb1AbBe97e53391C0295';
 
+    private readonly poolData: PoolInfo;
+
     /** @internal */
-    public static async getGasLimit(tradeStruct: OneinchTradeStruct): Promise<BigNumber | null> {
+    public static async getGasLimit(
+        tradeStruct: EvmOnChainTradeStruct & { poolData: PoolInfo }
+    ): Promise<BigNumber | null> {
         const fromBlockchain = tradeStruct.from.blockchain;
         const walletAddress =
             Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
@@ -57,12 +61,10 @@ export class SyncSwapTrade extends EvmOnChainTrade {
         return ON_CHAIN_TRADE_TYPE.SYNC_SWAP;
     }
 
-    @Cache
-    private get apiBaseUrl(): string {
-        return getOneinchApiBaseUrl(this.from.blockchain);
-    }
-
-    constructor(tradeStruct: EvmOnChainTradeStruct, providerAddress: string) {
+    constructor(
+        tradeStruct: EvmOnChainTradeStruct & { poolData: PoolInfo },
+        providerAddress: string
+    ) {
         super(tradeStruct, providerAddress);
 
         this.nativeSupportedFromWithoutFee = createTokenNativeAddressProxy(
@@ -73,41 +75,53 @@ export class SyncSwapTrade extends EvmOnChainTrade {
             tradeStruct.to,
             oneinchApiParams.nativeAddress
         );
+        this.poolData = tradeStruct.poolData;
     }
 
-    public async encodeDirect(_options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        // await this.checkFromAddress(options.fromAddress, true);
-        // await this.checkReceiverAddress(options.receiverAddress);
-        //
-        // try {
-        //     const apiTradeData = await this.getTradeData(
-        //         true,
-        //         options.fromAddress,
-        //         options.receiverAddress
-        //     );
-        //     const { gas, gasPrice } = this.getGasParams(options, {
-        //         gasLimit: apiTradeData.tx.gas.toString(),
-        //         gasPrice: apiTradeData.tx.gasPrice
-        //     });
-        //
-        //     return {
-        //         ...apiTradeData.tx,
-        //         gas,
-        //         gasPrice
-        //     };
-        // } catch (err) {
-        //     const inchSpecificError = this.specifyError(err);
-        //     if (inchSpecificError) {
-        //         throw inchSpecificError;
-        //     }
-        //     if ([400, 500, 503].includes(err.code)) {
-        //         throw new SwapRequestError();
-        //     }
-        //     if (this.isDeflationError()) {
-        //         throw new LowSlippageDeflationaryTokenError();
-        //     }
-        //     throw parseError(err, err?.response?.data?.description || err.message);
-        // }
-        throw new RubicSdkError('Test');
+    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+        await this.checkFromAddress(options.fromAddress, true);
+        await this.checkReceiverAddress(options.receiverAddress);
+
+        try {
+            const params = this.getCallParameters(options?.receiverAddress);
+            const gasParams = this.getGasParams(options);
+            const value = this.from.isNative ? this.from.stringWeiAmount : '0';
+
+            return EvmWeb3Pure.encodeMethodCall(
+                this.dexContractAddress,
+                syncSwapAbi,
+                'swap',
+                params,
+                value,
+                gasParams
+            );
+        } catch (err) {
+            console.debug(err);
+            throw parseError(err);
+        }
+    }
+
+    private getCallParameters(receiverAddress?: string): unknown[] {
+        const poolType = this.to.isNative ? '1' : '2';
+        const swapData = EvmWeb3Pure.encodeParameters(
+            ['address', 'address', 'uint8'],
+            [this.from.address, receiverAddress || this.walletAddress, poolType]
+        );
+        const steps = [
+            {
+                pool: this.poolData.pool,
+                data: swapData,
+                callback: EvmWeb3Pure.EMPTY_ADDRESS,
+                callbackData: '0x'
+            }
+        ];
+        const paths = [
+            {
+                steps,
+                tokenIn: this.from.address,
+                amountIn: this.fromWithoutFee.stringWeiAmount
+            }
+        ];
+        return [paths, this.toTokenAmountMin.stringWeiAmount, String(deadlineMinutesTimestamp(30))];
     }
 }
