@@ -21,6 +21,7 @@ import {
     TransferHistoryStatus,
     XferStatus
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
+import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
 import { LifiSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
 import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
 import { SymbiosisSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
@@ -43,6 +44,7 @@ import {
     DeBridgeApiStateStatus,
     DeBridgeFilteredListApiResponse,
     DeBridgeOrderApiResponse,
+    DeBridgeOrderApiStatusResponse,
     GetDstTxDataFn,
     SymbiosisApiResponse
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
@@ -418,24 +420,27 @@ export class CrossChainStatusManager {
      */
     private async getDebridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
-            const { orders } = await this.httpClient.post<DeBridgeFilteredListApiResponse>(
-                'https://stats-api.dln.trade/api/Orders/filteredList',
+            const { orderIds } = await this.httpClient.post<DeBridgeFilteredListApiResponse>(
+                `${DebridgeCrossChainProvider.apiEndpoint}/tx/${data.srcTxHash}/order-ids`,
                 { filter: data.srcTxHash, skip: 0, take: 1 }
             );
 
-            if (!orders.length) {
+            if (!orderIds.length) {
                 return {
                     status: TxStatus.PENDING,
                     hash: null
                 };
             }
 
-            const orderId = orders[0].orderId.stringValue;
-            const status = orders[0].state;
+            const orderId = orderIds[0];
             const dstTxData: TxStatusData = {
                 status: TxStatus.PENDING,
                 hash: null
             };
+
+            const { status } = await this.httpClient.get<DeBridgeOrderApiStatusResponse>(
+                `${DebridgeCrossChainProvider.apiEndpoint}/order/${orderId}/status`
+            );
 
             if (
                 status === DeBridgeApiStateStatus.FULFILLED ||

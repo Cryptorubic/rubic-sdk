@@ -60,7 +60,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 };
             }
 
-            const fromAddress = options.fromAddress || this.getWalletAddress(fromBlockchain);
+            // const fromAddress = options.fromAddress || this.getWalletAddress(fromBlockchain);
 
             // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
             // const fromWithoutFee = getFromWithoutFee(
@@ -68,23 +68,21 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             //     feeInfo.rubicProxy?.platformFee?.percent
             // );
 
-            const slippageTolerance = options.slippageTolerance * 100;
+            // const slippageTolerance = options.slippageTolerance * 100;
             const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
 
             const requestParams: TransactionRequest = {
                 srcChainId: blockchainId[fromBlockchain],
                 srcChainTokenIn: from.address,
                 srcChainTokenInAmount: from.stringWeiAmount,
-                slippage: slippageTolerance,
                 dstChainId: blockchainId[toBlockchain],
                 dstChainTokenOut: toToken.address,
                 dstChainTokenOutRecipient: this.getWalletAddress(fromBlockchain) || fakeAddress,
-                referralCode: this.deBridgeReferralCode,
                 prependOperatingExpenses: false
             };
 
             const { tx, estimation } = await Injector.httpClient.get<TransactionResponse>(
-                `${DebridgeCrossChainProvider.apiEndpoint}/quote`,
+                `${DebridgeCrossChainProvider.apiEndpoint}/order/quote`,
                 {
                     params: requestParams as unknown as {}
                 }
@@ -128,8 +126,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         from,
                         to,
                         transactionRequest: {
-                            ...requestParams,
-                            dstChainTokenOutRecipient: fromAddress
+                            ...requestParams
                         },
                         gasData,
                         priceImpact: from.calculatePriceImpactPercent(to),

@@ -12,7 +12,7 @@ export interface TransactionResponse {
     /**
      * Tells API server to prepend operating expenses to the input amount.
      */
-    prependedOperatingExpenseCost: 'string';
+    prependedOperatingExpenseCost: string;
 
     /**
      * Transaction data.
@@ -21,8 +21,8 @@ export interface TransactionResponse {
         to: string;
         data: string;
         value: string;
-        allowanceTarget: 'string';
-        allowanceValue: 'string';
+        allowanceTarget: string;
+        allowanceValue: string;
     };
 }
 

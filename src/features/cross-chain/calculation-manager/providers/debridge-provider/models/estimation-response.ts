@@ -11,6 +11,7 @@ interface TokenAmount extends BaseToken {
 
 interface TokenMinAmount extends TokenAmount {
     minAmount: string;
+    recommendedAmount: string;
 }
 
 /**
