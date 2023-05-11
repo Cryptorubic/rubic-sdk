@@ -10,6 +10,11 @@ export interface TransactionResponse {
     estimation: Estimation;
 
     /**
+     * Tells API server to prepend operating expenses to the input amount.
+     */
+    prependedOperatingExpenseCost: 'string';
+
+    /**
      * Transaction data.
      */
     tx: {

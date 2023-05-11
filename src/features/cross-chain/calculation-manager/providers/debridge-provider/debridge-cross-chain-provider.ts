@@ -79,7 +79,8 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 dstChainId: blockchainId[toBlockchain],
                 dstChainTokenOut: toToken.address,
                 dstChainTokenOutRecipient: this.getWalletAddress(fromBlockchain) || fakeAddress,
-                referralCode: this.deBridgeReferralCode
+                referralCode: this.deBridgeReferralCode,
+                prependOperatingExpenses: false
             };
 
             const { tx, estimation } = await Injector.httpClient.get<TransactionResponse>(
