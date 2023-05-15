@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { BigNumber as BigNumberEthers } from 'ethers';
 import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, wrappedNativeTokensList } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
@@ -17,7 +18,9 @@ import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-man
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { PoolInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/models/pool-info';
 import { routerSupportAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/router-support-abi';
+import { syncSwapStablePool } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/sync-swap-stable-pool';
 import { SyncSwapTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/sync-swap-trade';
+import { getAmountOutStable } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/utils';
 
 export class SyncSwapProvider extends EvmOnChainProvider {
     public readonly blockchain = BLOCKCHAIN_NAME.ZK_SYNC;
@@ -65,7 +68,7 @@ export class SyncSwapProvider extends EvmOnChainProvider {
             throw new NotSupportedTokensError();
         }
 
-        const weiAmountOut = this.getAmountOut(
+        const weiAmountOut = await this.getAmountOut(
             fromWithoutFee.weiAmount,
             fromWithoutFee.address,
             poolData
@@ -114,18 +117,85 @@ export class SyncSwapProvider extends EvmOnChainProvider {
     }
 
     public getPoolData(poolsInfo: unknown): PoolInfo {
-        return (poolsInfo as { poolsBase: PoolInfo[] }).poolsBase[0]!;
+        const { poolsBase } = poolsInfo as { poolsBase: PoolInfo[] };
+        const isFirstPoolReserveABetter = new BigNumber(poolsBase[0]?.reserveA || 0).gt(
+            new BigNumber(poolsBase[1]?.reserveA || 0)
+        );
+        const isFirstPoolReserveBBetter = new BigNumber(poolsBase[0]?.reserveB || 0).gt(
+            new BigNumber(poolsBase[1]?.reserveB || 0)
+        );
+
+        return isFirstPoolReserveABetter && isFirstPoolReserveBBetter
+            ? poolsBase[0]!
+            : poolsBase[1]!;
     }
 
-    private getAmountOut(amountIn: BigNumber, fromAddress: string, poolInfo: PoolInfo): BigNumber {
-        const [reserveFrom, reserveTo, fee] = compareAddresses(poolInfo.tokenA, fromAddress)
-            ? [poolInfo.reserveA, poolInfo.reserveB, poolInfo.swapFeeAB]
-            : [poolInfo.reserveB, poolInfo.reserveA, poolInfo.swapFeeBA];
-        const k = Number(fee) / 100;
-        const amountInWithFee = amountIn.multipliedBy(1000 - k);
-        const numerator = amountInWithFee.multipliedBy(reserveTo);
-        const denominator = new BigNumber(reserveFrom).multipliedBy(1000).plus(amountInWithFee);
-        const weiAmount = numerator.dividedBy(denominator).plus(1);
-        return weiAmount.integerValue();
+    private async getAmountOut(
+        amountIn: BigNumber,
+        fromAddress: string,
+        poolInfo: PoolInfo
+    ): Promise<BigNumber> {
+        const [reserveFrom, reserveTo, fee, tokenFromAddress] = compareAddresses(
+            poolInfo.tokenA,
+            fromAddress
+        )
+            ? [poolInfo.reserveA, poolInfo.reserveB, poolInfo.swapFeeAB, poolInfo.tokenA]
+            : [poolInfo.reserveB, poolInfo.reserveA, poolInfo.swapFeeBA, poolInfo.tokenB];
+        const maxFee = new BigNumber(100_000);
+
+        // Stable swap
+        if (poolInfo.poolType === '2') {
+            const { fromPrecisionMultiplier, toPrecisionMultiplier } = await this.getPoolPrecision(
+                poolInfo.pool,
+                tokenFromAddress
+            );
+            const out = getAmountOutStable({
+                amountIn: BigNumberEthers.from(amountIn.toFixed()),
+                reserveIn: BigNumberEthers.from(reserveFrom),
+                reserveOut: BigNumberEthers.from(reserveTo),
+                swapFee: BigNumberEthers.from(fee),
+                A: BigNumberEthers.from(1000),
+                tokenInPrecisionMultiplier: BigNumberEthers.from(fromPrecisionMultiplier),
+                tokenOutPrecisionMultiplier: BigNumberEthers.from(toPrecisionMultiplier)
+            });
+            return new BigNumber(out.toHexString());
+        }
+        const amountInWithFee = amountIn.multipliedBy(maxFee.minus(fee));
+        return amountInWithFee
+            .multipliedBy(reserveTo)
+            .dividedBy(new BigNumber(reserveFrom).multipliedBy(maxFee).plus(amountInWithFee));
+    }
+
+    private async getPoolPrecision(
+        address: string,
+        fromAddress: string
+    ): Promise<{ fromPrecisionMultiplier: string; toPrecisionMultiplier: string }> {
+        const token0 = await this.web3Public.callContractMethod(
+            address,
+            syncSwapStablePool,
+            'token0',
+            []
+        );
+        const token0PM = await this.web3Public.callContractMethod(
+            address,
+            syncSwapStablePool,
+            'token0PrecisionMultiplier',
+            []
+        );
+        const token1PM = await this.web3Public.callContractMethod(
+            address,
+            syncSwapStablePool,
+            'token1PrecisionMultiplier',
+            []
+        );
+        return compareAddresses(token0, fromAddress)
+            ? {
+                  fromPrecisionMultiplier: token0PM,
+                  toPrecisionMultiplier: token1PM
+              }
+            : {
+                  fromPrecisionMultiplier: token1PM,
+                  toPrecisionMultiplier: token0PM
+              };
     }
 }
