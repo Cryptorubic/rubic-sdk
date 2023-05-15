@@ -1,6 +1,6 @@
 import { AbiItem } from 'web3-utils';
 
-export const DE_BRIDGE_GATE_CONTRACT_ABI = [
+export const DE_BRIDGE_GATE_CONTRACT_ABI: AbiItem[] = [
     {
         inputs: [],
         name: 'globalFixedNativeFee',
@@ -8,4 +8,4 @@ export const DE_BRIDGE_GATE_CONTRACT_ABI = [
         stateMutability: 'view',
         type: 'function'
     }
-] as AbiItem[];
+];

@@ -4,6 +4,7 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
@@ -42,6 +43,33 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         );
     }
 
+    private static async getDeBridgeGateAddress(
+        web3Public: EvmWeb3Public,
+        fromBlockchain: DeBridgeCrossChainSupportedBlockchain
+    ): Promise<string> {
+        return await web3Public.callContractMethod(
+            DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].providerRouter,
+            DE_BRIDGE_CONTRACT_ABI,
+            'deBridgeGate'
+        );
+    }
+
+    private static async getCryptoFeeAmount(
+        web3Public: EvmWeb3Public,
+        fromBlockchain: DeBridgeCrossChainSupportedBlockchain
+    ): Promise<string> {
+        const deBridgeGateAddress = await DebridgeCrossChainProvider.getDeBridgeGateAddress(
+            web3Public,
+            fromBlockchain
+        );
+
+        return web3Public.callContractMethod(
+            deBridgeGateAddress,
+            DE_BRIDGE_GATE_CONTRACT_ABI,
+            'globalFixedNativeFee'
+        );
+    }
+
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
@@ -61,12 +89,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                     error: new NotSupportedTokensError()
                 };
             }
-
-            // const feeInfo = await this.getFeeInfo(fromBlockchain, options.providerAddress);
-            // const fromWithoutFee = getFromWithoutFee(
-            //     from,
-            //     feeInfo.rubicProxy?.platformFee?.percent
-            // );
 
             const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
 
@@ -102,29 +124,11 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
 
             const transitToken = estimation.srcChainTokenOut || estimation.srcChainTokenIn;
 
-            // const cryptoFeeAmount = new BigNumber(tx.value).minus(
-            //     from.isNative ? from.stringWeiAmount : 0
-            // );
-
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const deBridgeGateAddress = await web3Public.callContractMethod(
-                DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].providerRouter,
-                DE_BRIDGE_CONTRACT_ABI,
-                'deBridgeGate'
+            const cryptoFeeAmount = await DebridgeCrossChainProvider.getCryptoFeeAmount(
+                web3Public,
+                fromBlockchain
             );
-            const cryptoFeeAmount = await web3Public.callContractMethod(
-                deBridgeGateAddress,
-                DE_BRIDGE_GATE_CONTRACT_ABI,
-                'globalFixedNativeFee'
-            );
-
-            // feeInfo.provider = {
-            //     ...feeInfo?.provider,
-            //     cryptoFee: {
-            //         amount: Web3Pure.fromWei(cryptoFeeAmount),
-            //         tokenSymbol: nativeTokensList[fromBlockchain].symbol
-            //     }
-            // };
 
             const nativeToken = nativeTokensList[fromBlockchain];
             const cryptoFeeToken = await PriceTokenAmount.createFromToken({
