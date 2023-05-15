@@ -57,9 +57,14 @@ export class SyncSwapProvider extends EvmOnChainProvider {
 
         const routePools = await this.fetchRoutePools(fromWithoutFee.address, toProxy.address);
         const poolData = this.getPoolData(routePools);
-        if (compareAddresses(poolData.pool, EvmWeb3Pure.EMPTY_ADDRESS)) {
+        if (
+            poolData.reserveA === '0' ||
+            poolData.reserveB === '0' ||
+            compareAddresses(poolData.pool, EvmWeb3Pure.EMPTY_ADDRESS)
+        ) {
             throw new NotSupportedTokensError();
         }
+
         const weiAmountOut = this.getAmountOut(
             fromWithoutFee.weiAmount,
             fromWithoutFee.address,
