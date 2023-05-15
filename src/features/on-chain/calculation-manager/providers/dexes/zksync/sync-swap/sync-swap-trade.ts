@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { parseError } from 'src/common/utils/errors';
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -103,9 +104,11 @@ export class SyncSwapTrade extends EvmOnChainTrade {
 
     private getCallParameters(receiverAddress?: string): unknown[] {
         const poolType = this.to.isNative ? '1' : '2';
+        const fromTokenAddress = this.getFromTokenAddress();
+
         const swapData = EvmWeb3Pure.encodeParameters(
             ['address', 'address', 'uint8'],
-            [this.from.address, receiverAddress || this.walletAddress, poolType]
+            [fromTokenAddress, receiverAddress || this.walletAddress, poolType]
         );
         const steps = [
             {
@@ -124,4 +127,40 @@ export class SyncSwapTrade extends EvmOnChainTrade {
         ];
         return [paths, this.toTokenAmountMin.stringWeiAmount, String(deadlineMinutesTimestamp(30))];
     }
+
+    private getFromTokenAddress(): string {
+        if (compareAddresses(this.from.address, this.poolData.tokenA)) {
+            return this.poolData.tokenA;
+        }
+
+        if (
+            compareAddresses(this.from.address, this.poolData.tokenB) ||
+            compareAddresses(this.to.address, this.poolData.tokenA)
+        ) {
+            return this.poolData.tokenB;
+        }
+
+        return this.poolData.tokenA;
+    }
 }
+
+//     [
+//         [
+//             "0x80115c708E12eDd42E504c1cD52Aea96C547c05c",
+//             "0x0000000000000000000000005aea5775959fbc2557cc8789bc1bf90a239d9a910000000000000000000000001996ecc218f6f5182732a34e92a2c6ab294dc3500000000000000000000000000000000000000000000000000000000000000000",
+//             "0x0000000000000000000000000000000000000000",
+//             "0x"
+//         ],
+//         [
+//             "0x1996EcC218F6F5182732a34E92a2c6aB294DC350",
+//             "0x0000000000000000000000003355df6d4c9c3035724fd0e3914de96a5a83aaf4000000000000000000000000b72de277a58577c955b0c52acd8fd2a7cfdafd170000000000000000000000000000000000000000000000000000000000000002",
+//             "0x0000000000000000000000000000000000000000",
+//             "0x"
+//         ]
+//     ],
+//     "0x0000000000000000000000000000000000000000",
+//     {
+//         "type": "BigNumber",
+//         "hex": "0x5af3107a4000"
+//     }
+//   ]
