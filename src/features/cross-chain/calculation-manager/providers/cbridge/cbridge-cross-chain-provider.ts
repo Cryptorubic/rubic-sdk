@@ -167,7 +167,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                         from: fromToken,
                         to,
                         gasData,
-                        priceImpact: fromToken.calculatePriceImpactPercent(to) || 0,
+                        priceImpact: fromToken.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
                         feeInfo: {
                             ...feeInfo,

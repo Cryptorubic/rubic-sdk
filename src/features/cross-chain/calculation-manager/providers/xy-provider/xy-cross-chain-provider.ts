@@ -146,7 +146,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                             receiveAddress: receiverAddress
                         },
                         gasData,
-                        priceImpact: fromToken.calculatePriceImpactPercent(to) || 0,
+                        priceImpact: fromToken.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
                         feeInfo,
                         onChainTrade

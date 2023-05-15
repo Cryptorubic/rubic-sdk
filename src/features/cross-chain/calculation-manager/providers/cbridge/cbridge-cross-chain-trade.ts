@@ -95,7 +95,7 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly toTokenAmountMin: BigNumber;
 
-    public readonly priceImpact: number;
+    public readonly priceImpact: number | null;
 
     public readonly gasData: GasData | null;
 
@@ -132,7 +132,7 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             from: PriceTokenAmount<EvmBlockchainName>;
             to: PriceTokenAmount<EvmBlockchainName>;
             gasData: GasData | null;
-            priceImpact: number;
+            priceImpact: number | null;
             slippage: number;
             feeInfo: FeeInfo;
             maxSlippage: number;
@@ -153,7 +153,6 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             1 - crossChainTrade.maxSlippage / 10_000_000
         );
         this.feeInfo = crossChainTrade.feeInfo;
-        this.priceImpact = crossChainTrade.priceImpact;
         this.maxSlippage = crossChainTrade.maxSlippage;
         this.celerContractAddress = crossChainTrade.contractAddress;
 
@@ -271,7 +270,7 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact || 0,
+            priceImpact: this.priceImpact ?? null,
             slippage: this.maxSlippage / 10_000
         };
     }

@@ -16,6 +16,8 @@ export interface TransactionResponse {
         to: string;
         data: string;
         value: string;
+        allowanceTarget: 'string';
+        allowanceValue: 'string';
     };
 }
 

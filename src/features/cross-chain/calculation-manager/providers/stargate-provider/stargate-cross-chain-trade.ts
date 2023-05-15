@@ -402,7 +402,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact || null,
+            priceImpact: this.priceImpact ?? null,
             slippage: this.slippageTolerance * 100
         };
     }

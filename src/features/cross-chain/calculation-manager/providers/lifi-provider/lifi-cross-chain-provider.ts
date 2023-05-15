@@ -113,15 +113,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             weiAmount: new BigNumber(bestRoute.toAmount)
         });
 
-        const { fromAmountUSD, toAmountUSD } = bestRoute;
-        const priceImpact =
-            fromAmountUSD && toAmountUSD
-                ? new BigNumber(fromAmountUSD)
-                      .minus(toAmountUSD)
-                      .dividedBy(fromAmountUSD)
-                      .dp(4)
-                      .toNumber()
-                : from.calculatePriceImpactPercent(to)!;
+        const priceImpact = from.calculatePriceImpactPercent(to);
 
         const gasData =
             options.gasCalculation === 'enabled'

@@ -102,7 +102,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly route: IRoute;
 
-    public readonly priceImpact: number;
+    public readonly priceImpact: number | null;
 
     public readonly toTokenAmountMin: BigNumber;
 
@@ -138,7 +138,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
             to: PriceTokenAmount;
             route: IRoute;
             gasData: GasData;
-            priceImpact: number;
+            priceImpact: number | null;
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
             cryptoFeeToken: PriceTokenAmount;
@@ -275,7 +275,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact,
+            priceImpact: this.priceImpact ?? null,
             slippage: this.slippage
         };
     }
