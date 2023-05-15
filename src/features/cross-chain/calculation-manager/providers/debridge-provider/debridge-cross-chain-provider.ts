@@ -12,11 +12,13 @@ import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { DE_BRIDGE_CONTRACT_ABI } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/contract-abi';
 import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/contract-address';
 import {
     DeBridgeCrossChainSupportedBlockchain,
     deBridgeCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-cross-chain-supported-blockchain';
+import { DE_BRIDGE_GATE_CONTRACT_ABI } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/gate-contract-abi';
 import { DebridgeCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-trade';
 import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
 import {
@@ -100,9 +102,22 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
 
             const transitToken = estimation.srcChainTokenOut || estimation.srcChainTokenIn;
 
-            const cryptoFeeAmount = new BigNumber(tx.value).minus(
-                from.isNative ? from.stringWeiAmount : 0
+            // const cryptoFeeAmount = new BigNumber(tx.value).minus(
+            //     from.isNative ? from.stringWeiAmount : 0
+            // );
+
+            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+            const deBridgeGateAddress = await web3Public.callContractMethod(
+                DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].providerRouter,
+                DE_BRIDGE_CONTRACT_ABI,
+                'deBridgeGate'
             );
+            const cryptoFeeAmount = await web3Public.callContractMethod(
+                deBridgeGateAddress,
+                DE_BRIDGE_GATE_CONTRACT_ABI,
+                'globalFixedNativeFee'
+            );
+
             // feeInfo.provider = {
             //     ...feeInfo?.provider,
             //     cryptoFee: {
@@ -114,7 +129,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             const nativeToken = nativeTokensList[fromBlockchain];
             const cryptoFeeToken = await PriceTokenAmount.createFromToken({
                 ...nativeToken,
-                weiAmount: cryptoFeeAmount
+                weiAmount: new BigNumber(cryptoFeeAmount)
             });
 
             return {
@@ -128,11 +143,11 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         gasData,
                         priceImpact: from.calculatePriceImpactPercent(to),
                         allowanceTarget: tx.allowanceTarget,
-                        slippage: options.slippageTolerance,
+                        slippage: 0,
                         feeInfo: {
                             provider: {
                                 cryptoFee: {
-                                    amount: Web3Pure.fromWei(cryptoFeeAmount),
+                                    amount: Web3Pure.fromWei(new BigNumber(cryptoFeeAmount)),
                                     tokenSymbol: nativeTokensList[fromBlockchain].symbol
                                 }
                             }
