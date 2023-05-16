@@ -111,7 +111,7 @@ export class SyncSwapProvider extends EvmOnChainProvider {
                 ],
                 [tokenFrom, tokenTo],
                 '0xbb05918e9b4ba9fe2c8384d223f0844867909ffb',
-                this.walletAddress
+                this.walletAddress || EvmWeb3Pure.EMPTY_ADDRESS
             ]
         );
     }
