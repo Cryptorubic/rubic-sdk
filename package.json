@@ -85,7 +85,7 @@
     "lodash.clonedeep": "^4.5.0",
     "rango-sdk-basic": "^0.0.7",
     "rxjs": "^7.8.0",
-    "symbiosis-js-sdk": "2.9.40",
+    "symbiosis-js-sdk": "^2.9.52",
     "tronweb": "^4.3.0",
     "web3": "^1.8.1"
   },
