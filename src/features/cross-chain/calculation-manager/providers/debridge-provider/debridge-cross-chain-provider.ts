@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { NotSupportedTokensError, RubicSdkError, TooLowAmountError } from 'src/common/errors';
+import { RubicSdkError, TooLowAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -26,7 +26,6 @@ import {
     TransactionErrorResponse,
     TransactionResponse
 } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
-import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 
 export class DebridgeCrossChainProvider extends CrossChainProvider {
     public static readonly apiEndpoint = 'https://api.dln.trade/v1.0/dln';
@@ -82,14 +81,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            const deflationStatus = await new DeflationTokenManager().isDeflationToken(toToken);
-            if (deflationStatus.isDeflation) {
-                return {
-                    trade: null,
-                    error: new NotSupportedTokensError()
-                };
-            }
-
             const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
 
             const requestParams: TransactionRequest = {
