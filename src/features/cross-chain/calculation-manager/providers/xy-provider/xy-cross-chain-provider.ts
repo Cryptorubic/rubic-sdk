@@ -104,11 +104,12 @@ export class XyCrossChainProvider extends CrossChainProvider {
                       blockchain: fromBlockchain
                   }
                 : null;
+            const halfSlippageTolerance = (options.slippageTolerance - 0.005) / 2;
             const onChainTrade = transitToken
                 ? (await ProxyCrossChainEvmTrade.getOnChainTrade(
                       fromWithoutFee,
                       transitToken,
-                      (options.slippageTolerance - 0.005) / 2
+                      halfSlippageTolerance
                   ))!
                 : null;
 
@@ -126,10 +127,29 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 }
             };
 
-            const to = new PriceTokenAmount({
+            let to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(toTokenAmount, toToken.decimals)
             });
+
+            if (transitToken && onChainTrade) {
+                const { toTokenAmount: finalTokenAmount } =
+                    await Injector.httpClient.get<XyTransactionResponse>(
+                        `${XyCrossChainProvider.apiEndpoint}/swap`,
+                        {
+                            params: {
+                                ...requestParams,
+                                fromTokenAddress: transitToken.address,
+                                amount: onChainTrade.to.stringWeiAmount,
+                                slippage: String(halfSlippageTolerance * 100)
+                            }
+                        }
+                    );
+                to = new PriceTokenAmount({
+                    ...toToken.asStruct,
+                    tokenAmount: Web3Pure.fromWei(finalTokenAmount, toToken.decimals)
+                });
+            }
 
             const gasData =
                 options.gasCalculation === 'enabled'
