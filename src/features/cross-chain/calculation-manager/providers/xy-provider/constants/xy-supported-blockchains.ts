@@ -13,6 +13,7 @@ export const xySupportedBlockchains = [
     BLOCKCHAIN_NAME.OPTIMISM,
     BLOCKCHAIN_NAME.ASTAR_EVM,
     BLOCKCHAIN_NAME.MOONRIVER
+    // BLOCKCHAIN_NAME.ZK_SYNC
     // BLOCKCHAIN_NAME.KLAYTN
 ] as const;
 
