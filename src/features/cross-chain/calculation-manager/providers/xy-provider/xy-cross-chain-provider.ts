@@ -133,13 +133,19 @@ export class XyCrossChainProvider extends CrossChainProvider {
             });
 
             if (transitToken && onChainTrade) {
+                const fromTokenAddress = compareAddresses(
+                    transitToken.address,
+                    EvmWeb3Pure.EMPTY_ADDRESS
+                )
+                    ? XyCrossChainTrade.nativeAddress
+                    : transitToken.address;
                 const { toTokenAmount: finalTokenAmount } =
                     await Injector.httpClient.get<XyTransactionResponse>(
                         `${XyCrossChainProvider.apiEndpoint}/swap`,
                         {
                             params: {
                                 ...requestParams,
-                                fromTokenAddress: transitToken.address,
+                                fromTokenAddress,
                                 amount: onChainTrade.to.stringWeiAmount,
                                 slippage: String(halfSlippageTolerance * 100)
                             }
