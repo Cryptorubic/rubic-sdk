@@ -217,7 +217,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             toTokenAmount: this.to,
             srcChainTrade: null,
             providerAddress: this.providerAddress,
-            type: `native:${this.bridgeType}`,
+            type: `lifi:${this.bridgeType}`,
             fromAddress: this.walletAddress
         });
         const providerData = ProxyCrossChainEvmTrade.getGenericProviderData(providerRouter, data!);
