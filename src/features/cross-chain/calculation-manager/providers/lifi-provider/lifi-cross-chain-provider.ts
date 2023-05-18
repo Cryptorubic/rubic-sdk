@@ -105,7 +105,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         }
 
         const providerFee = bestRoute.steps[0]!.estimate.feeCosts?.find(
-            (el: FeeCost & { included?: boolean }) => el.included
+            (el: FeeCost & { included?: boolean }) => el?.included === false
         );
         if (providerFee) {
             feeInfo.provider = {
