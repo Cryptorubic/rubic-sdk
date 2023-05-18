@@ -11,4 +11,14 @@ export interface EvmBasicTransactionOptions extends BasicTransactionOptions {
      * Transaction gas price.
      */
     gasPrice?: BigNumber | string | number;
+
+    /**
+     * EIP-1559 Transaction miner's tip.
+     */
+    maxPriorityFeePerGas?: number | string;
+
+    /**
+     * EIP-1559 Transaction maximum fee.
+     */
+    maxFeePerGas?: number | string;
 }

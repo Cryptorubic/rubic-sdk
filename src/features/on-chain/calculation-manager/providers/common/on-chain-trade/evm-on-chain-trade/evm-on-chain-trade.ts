@@ -205,7 +205,9 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 data: transactionConfig.data,
                 value: transactionConfig.value,
                 gas: options.gasLimit,
-                gasPrice: options.gasPrice
+                gasPrice: options.gasPrice,
+                maxPriorityFeePerGas: options.maxPriorityFeePerGas,
+                maxFeePerGas: options.maxFeePerGas
             });
 
             return transactionHash!;

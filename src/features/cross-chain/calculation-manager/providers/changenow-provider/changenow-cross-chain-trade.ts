@@ -165,7 +165,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
             CROSS_CHAIN_TRADE_TYPE.CHANGENOW
         );
 
-        const { onConfirm, gasLimit, gasPrice } = options;
+        const { onConfirm, gasLimit, gasPrice, maxFeePerGas, maxPriorityFeePerGas } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -192,7 +192,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
                     ERC20_TOKEN_ABI,
                     'transfer',
                     [payinAddress, this.from.stringWeiAmount],
-                    { onTransactionHash, gas: gasLimit, gasPrice }
+                    { onTransactionHash, gas: gasLimit, gasPrice, maxFeePerGas, maxPriorityFeePerGas }
                 );
             }
 
