@@ -15,17 +15,17 @@ import {
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
-import { PoolInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/models/pool-info';
 import { syncSwapAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/sync-swap-abi';
+import { RoutePoolData } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/typings';
 
 export class SyncSwapTrade extends EvmOnChainTrade {
     public readonly dexContractAddress = '0x2da10A1e27bF85cEdD8FFb1AbBe97e53391C0295';
 
-    private readonly poolData: PoolInfo;
+    private readonly poolData: RoutePoolData;
 
     /** @internal */
     public static async getGasLimit(
-        tradeStruct: EvmOnChainTradeStruct & { poolData: PoolInfo }
+        tradeStruct: EvmOnChainTradeStruct & { poolData: RoutePoolData }
     ): Promise<BigNumber | null> {
         const fromBlockchain = tradeStruct.from.blockchain;
         const walletAddress =
@@ -63,7 +63,7 @@ export class SyncSwapTrade extends EvmOnChainTrade {
     }
 
     constructor(
-        tradeStruct: EvmOnChainTradeStruct & { poolData: PoolInfo },
+        tradeStruct: EvmOnChainTradeStruct & { poolData: RoutePoolData },
         providerAddress: string
     ) {
         super(tradeStruct, providerAddress);
