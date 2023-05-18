@@ -3,14 +3,12 @@ import { CelerTransferStatus } from 'src/features/cross-chain/status-manager/mod
 import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 
 export interface DeBridgeFilteredListApiResponse {
-    orders: [
-        {
-            orderId: {
-                stringValue: string;
-            };
-            state: string;
-        }
-    ];
+    orderIds: [string];
+}
+
+export interface DeBridgeOrderApiStatusResponse {
+    orderId: string;
+    status: DeBridgeApiStateStatus;
 }
 
 export interface DeBridgeOrderApiResponse {

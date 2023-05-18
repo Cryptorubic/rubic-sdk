@@ -259,11 +259,12 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             // @TODO Check proxy when deBridge proxy returned
             senderAddress: walletAddress,
             srcChainRefundAddress: walletAddress,
-            dstChainOrderAuthorityAddress: receiverAddress || walletAddress
+            dstChainOrderAuthorityAddress: receiverAddress || walletAddress,
+            srcChainOrderAuthorityAddress: receiverAddress || walletAddress
         };
 
         const { tx } = await Injector.httpClient.get<TransactionResponse>(
-            `${DebridgeCrossChainProvider.apiEndpoint}/createOrder`,
+            `${DebridgeCrossChainProvider.apiEndpoint}/order/create-tx`,
             { params }
         );
         return tx;
@@ -278,7 +279,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
-            slippage: this.slippage * 100
+            slippage: 0
         };
     }
 

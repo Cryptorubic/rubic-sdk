@@ -19,4 +19,9 @@ export interface TransactionRequest extends EstimationRequest {
      * Invitation code.
      */
     readonly referralCode?: string;
+
+    /**
+     * Tells API server to prepend operating expenses to the input amount.
+     */
+    readonly prependOperatingExpenses?: boolean;
 }

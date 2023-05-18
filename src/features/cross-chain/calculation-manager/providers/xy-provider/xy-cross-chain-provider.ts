@@ -44,6 +44,8 @@ export class XyCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = fromToken.blockchain as XyCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as XyCrossChainSupportedBlockchain;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
+
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return null;
         }
@@ -56,7 +58,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 fromBlockchain,
                 options.providerAddress,
                 fromToken,
-                options?.useProxy?.[this.type] ?? true
+                useProxy
             );
 
             const fromWithoutFee = getFromWithoutFee(
@@ -102,11 +104,12 @@ export class XyCrossChainProvider extends CrossChainProvider {
                       blockchain: fromBlockchain
                   }
                 : null;
+            const halfSlippageTolerance = (options.slippageTolerance - 0.005) / 2;
             const onChainTrade = transitToken
                 ? (await ProxyCrossChainEvmTrade.getOnChainTrade(
                       fromWithoutFee,
                       transitToken,
-                      (options.slippageTolerance - 0.005) / 2
+                      halfSlippageTolerance
                   ))!
                 : null;
 
@@ -124,10 +127,35 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 }
             };
 
-            const to = new PriceTokenAmount({
+            let to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(toTokenAmount, toToken.decimals)
             });
+
+            if (transitToken && onChainTrade) {
+                const fromTokenAddress = compareAddresses(
+                    transitToken.address,
+                    EvmWeb3Pure.EMPTY_ADDRESS
+                )
+                    ? XyCrossChainTrade.nativeAddress
+                    : transitToken.address;
+                const { toTokenAmount: finalTokenAmount } =
+                    await Injector.httpClient.get<XyTransactionResponse>(
+                        `${XyCrossChainProvider.apiEndpoint}/swap`,
+                        {
+                            params: {
+                                ...requestParams,
+                                fromTokenAddress,
+                                amount: onChainTrade.to.stringWeiAmount,
+                                slippage: String(halfSlippageTolerance * 100)
+                            }
+                        }
+                    );
+                to = new PriceTokenAmount({
+                    ...toToken.asStruct,
+                    tokenAmount: Web3Pure.fromWei(finalTokenAmount, toToken.decimals)
+                });
+            }
 
             const gasData =
                 options.gasCalculation === 'enabled'
