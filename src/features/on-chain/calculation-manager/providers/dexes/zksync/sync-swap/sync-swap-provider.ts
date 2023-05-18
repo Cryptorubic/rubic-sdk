@@ -1,5 +1,10 @@
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import BigNumber from 'bignumber.js';
+import { NotSupportedTokensError } from 'src/common/errors';
+import { PriceToken, PriceTokenAmount, wrappedNativeTokensList } from 'src/common/tokens';
+import { combineOptions } from 'src/common/utils/options';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import {
     ON_CHAIN_TRADE_TYPE,
@@ -11,6 +16,7 @@ import { SyncSwapTrade } from 'src/features/on-chain/calculation-manager/provide
 import { PathFactoryV2 } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/path-factory-v2';
 import { PoolFactory } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/pool-factory';
 import { findBestAmountsForPathsExactIn } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/router';
+import { RoutePools } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/typings';
 
 export class SyncSwapProvider extends EvmOnChainProvider {
     public readonly blockchain = BLOCKCHAIN_NAME.ZK_SYNC;
@@ -24,57 +30,43 @@ export class SyncSwapProvider extends EvmOnChainProvider {
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
-        _options?: OnChainCalculationOptions
+        options?: OnChainCalculationOptions
     ): Promise<SyncSwapTrade> {
-        const test = await PoolFactory.fetchRoutePools(
-            from.address,
-            toToken.address,
-            this.walletAddress,
-            '0x621425a1Ef6abE91058E9712575dcc4258F8d091',
-            [
-                '0xf2dad89f2788a8cd54625c60b55cd3d2d0aca7cb',
-                '0x5b9f21d407f35b10cbfddca17d5d84b129356ea3'
-            ],
-            [
-                '0x5aea5775959fbc2557cc8789bc1bf90a239d9a91',
-                '0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4'
-            ].map(el => el.toLowerCase()),
-            '0xbb05918e9b4ba9fe2c8384d223f0844867909ffb'
-        );
-        console.log(test);
-
-        if (!test) {
-            throw new Error('Test');
+        const availablePools = await this.getAvailablePools(from, toToken);
+        if (!availablePools) {
+            throw new NotSupportedTokensError();
         }
 
-        const test2 = PathFactoryV2.findAllPossiblePaths(from.address, toToken.address, test);
-        console.log(test2);
+        const paths = PathFactoryV2.findAllPossiblePaths(
+            from.address,
+            toToken.address,
+            availablePools
+        );
+        const filteredPaths = PathFactoryV2.getBestPath(paths, from.stringWeiAmount);
 
-        const test3 = await findBestAmountsForPathsExactIn(test2, from.stringWeiAmount);
-        console.log(test3);
+        const bestRoute = await findBestAmountsForPathsExactIn(filteredPaths, from.stringWeiAmount);
 
-        throw new Error('Test');
-        // const fromAddress =
-        //     options?.useProxy || this.defaultOptions.useProxy
-        //         ? rubicProxyContractAddress[from.blockchain].gateway
-        //         : this.walletAddress;
-        // const fullOptions = combineOptions(options, {
-        //     ...this.defaultOptions,
-        //     fromAddress
-        // });
-        // const fromProxy = createTokenNativeAddressProxy(
-        //     from,
-        //     wrappedNativeTokensList[from.blockchain]!.address
-        // );
+        const fromAddress =
+            options?.useProxy || this.defaultOptions.useProxy
+                ? rubicProxyContractAddress[from.blockchain].gateway
+                : this.walletAddress;
+        const fullOptions = combineOptions(options, {
+            ...this.defaultOptions,
+            fromAddress
+        });
+        const fromProxy = createTokenNativeAddressProxy(
+            from,
+            wrappedNativeTokensList[from.blockchain]!.address
+        );
         // const toProxy = createTokenNativeAddressProxy(
         //     toToken,
         //     wrappedNativeTokensList[from.blockchain]!.address
         // );
         //
-        // const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(
-        //     fromProxy,
-        //     fullOptions
-        // );
+        const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(
+            fromProxy,
+            fullOptions
+        );
         //
         // const routePools = await this.fetchRoutePools(fromWithoutFee.address, toProxy.address);
         // const poolData = this.getPoolData(routePools);
@@ -91,27 +83,27 @@ export class SyncSwapProvider extends EvmOnChainProvider {
         //     fromWithoutFee.address,
         //     poolData
         // );
-        //
-        // const to = new PriceTokenAmount({
-        //     ...toToken.asStruct,
-        //     weiAmount: weiAmountOut
-        // });
-        //
-        // const tradeStruct = {
-        //     from,
-        //     to,
-        //     slippageTolerance: fullOptions.slippageTolerance,
-        //     gasFeeInfo: null,
-        //     useProxy: fullOptions.useProxy,
-        //     proxyFeeInfo,
-        //     fromWithoutFee,
-        //     withDeflation: fullOptions.withDeflation,
-        //     usedForCrossChain: fullOptions.usedForCrossChain,
-        //     path: [from, toToken],
-        //     poolData
-        // };
-        //
-        // return new SyncSwapTrade(tradeStruct, fullOptions.providerAddress);
+
+        const to = new PriceTokenAmount({
+            ...toToken.asStruct,
+            weiAmount: new BigNumber(bestRoute.amountOut.toString())
+        });
+
+        const tradeStruct = {
+            from,
+            to,
+            slippageTolerance: fullOptions.slippageTolerance,
+            gasFeeInfo: null,
+            useProxy: fullOptions.useProxy,
+            proxyFeeInfo,
+            fromWithoutFee,
+            withDeflation: fullOptions.withDeflation,
+            usedForCrossChain: fullOptions.usedForCrossChain,
+            path: [from, toToken],
+            bestPathWithAmounts: bestRoute
+        };
+
+        return new SyncSwapTrade(tradeStruct, fullOptions.providerAddress);
     }
 
     // private fetchRoutePools(tokenFrom: string, tokenTo: string): Promise<unknown> {
@@ -216,4 +208,25 @@ export class SyncSwapProvider extends EvmOnChainProvider {
     //               toPrecisionMultiplier: token0PM
     //           };
     // }
+
+    private async getAvailablePools(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>
+    ): Promise<RoutePools | null> {
+        return PoolFactory.fetchRoutePools(
+            from.address,
+            toToken.address,
+            this.walletAddress,
+            '0x621425a1Ef6abE91058E9712575dcc4258F8d091',
+            [
+                '0xf2dad89f2788a8cd54625c60b55cd3d2d0aca7cb',
+                '0x5b9f21d407f35b10cbfddca17d5d84b129356ea3'
+            ],
+            [
+                '0x5aea5775959fbc2557cc8789bc1bf90a239d9a91',
+                '0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4'
+            ].map(el => el.toLowerCase()),
+            '0xbb05918e9b4ba9fe2c8384d223f0844867909ffb'
+        );
+    }
 }

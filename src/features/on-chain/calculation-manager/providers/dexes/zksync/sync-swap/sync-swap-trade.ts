@@ -1,8 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { compareAddresses } from 'src/common/utils/blockchain';
 import { parseError } from 'src/common/utils/errors';
-import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
@@ -16,16 +14,16 @@ import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/provi
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 import { syncSwapAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/sync-swap-abi';
-import { RoutePoolData } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/typings';
+import { BestPathsWithAmounts } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/typings';
 
 export class SyncSwapTrade extends EvmOnChainTrade {
     public readonly dexContractAddress = '0x2da10A1e27bF85cEdD8FFb1AbBe97e53391C0295';
 
-    private readonly poolData: RoutePoolData;
+    private readonly bestPathWithAmounts: BestPathsWithAmounts;
 
     /** @internal */
     public static async getGasLimit(
-        tradeStruct: EvmOnChainTradeStruct & { poolData: RoutePoolData }
+        tradeStruct: EvmOnChainTradeStruct & { bestPathWithAmounts: BestPathsWithAmounts }
     ): Promise<BigNumber | null> {
         const fromBlockchain = tradeStruct.from.blockchain;
         const walletAddress =
@@ -63,7 +61,7 @@ export class SyncSwapTrade extends EvmOnChainTrade {
     }
 
     constructor(
-        tradeStruct: EvmOnChainTradeStruct & { poolData: RoutePoolData },
+        tradeStruct: EvmOnChainTradeStruct & { bestPathWithAmounts: BestPathsWithAmounts },
         providerAddress: string
     ) {
         super(tradeStruct, providerAddress);
@@ -76,7 +74,7 @@ export class SyncSwapTrade extends EvmOnChainTrade {
             tradeStruct.to,
             oneinchApiParams.nativeAddress
         );
-        this.poolData = tradeStruct.poolData;
+        this.bestPathWithAmounts = tradeStruct.bestPathWithAmounts;
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
@@ -102,44 +100,46 @@ export class SyncSwapTrade extends EvmOnChainTrade {
         }
     }
 
-    private getCallParameters(receiverAddress?: string): unknown[] {
-        const poolType = this.to.isNative ? '1' : '2';
-        const fromTokenAddress = this.getFromTokenAddress();
-
-        const swapData = EvmWeb3Pure.encodeParameters(
-            ['address', 'address', 'uint8'],
-            [fromTokenAddress, receiverAddress || this.walletAddress, poolType]
-        );
-        const steps = [
-            {
-                pool: this.poolData.pool,
-                data: swapData,
-                callback: EvmWeb3Pure.EMPTY_ADDRESS,
-                callbackData: '0x'
-            }
-        ];
-        const paths = [
-            {
-                steps,
-                tokenIn: this.from.address,
-                amountIn: this.fromWithoutFee.stringWeiAmount
-            }
-        ];
-        return [paths, this.toTokenAmountMin.stringWeiAmount, String(deadlineMinutesTimestamp(30))];
+    private getCallParameters(_receiverAddress?: string): unknown[] {
+        // const poolType = this.to.isNative ? '1' : '2';
+        // const fromTokenAddress = this.getFromTokenAddress();
+        //
+        // const swapData = EvmWeb3Pure.encodeParameters(
+        //     ['address', 'address', 'uint8'],
+        //     [fromTokenAddress, receiverAddress || this.walletAddress, poolType]
+        // );
+        // const steps = [
+        //     {
+        //         pool: this.poolData.pool,
+        //         data: swapData,
+        //         callback: EvmWeb3Pure.EMPTY_ADDRESS,
+        //         callbackData: '0x'
+        //     }
+        // ];
+        // const paths = [
+        //     {
+        //         steps,
+        //         tokenIn: this.from.address,
+        //         amountIn: this.fromWithoutFee.stringWeiAmount
+        //     }
+        // ];
+        // return [paths, this.toTokenAmountMin.stringWeiAmount, String(deadlineMinutesTimestamp(30))];
+        return [];
     }
 
     private getFromTokenAddress(): string {
-        if (compareAddresses(this.from.address, this.poolData.tokenA)) {
-            return this.poolData.tokenA;
-        }
-
-        if (
-            compareAddresses(this.from.address, this.poolData.tokenB) ||
-            compareAddresses(this.to.address, this.poolData.tokenA)
-        ) {
-            return this.poolData.tokenB;
-        }
-
-        return this.poolData.tokenA;
+        // if (compareAddresses(this.from.address, this.poolData.tokenA)) {
+        //     return this.poolData.tokenA;
+        // }
+        //
+        // if (
+        //     compareAddresses(this.from.address, this.poolData.tokenB) ||
+        //     compareAddresses(this.to.address, this.poolData.tokenA)
+        // ) {
+        //     return this.poolData.tokenB;
+        // }
+        //
+        // return this.poolData.tokenA;
+        return '';
     }
 }

@@ -846,7 +846,7 @@ function calculateAmountOutForStep(
 
 // Calculate output amount and amounts of every steps for a path.
 // Returns `null` if path failed.
-function calculatePathAmountsByInput(
+export function calculatePathAmountsByInput(
     path: Path,
     amountIn: BigNumber,
     _updateReserves: boolean
@@ -949,3 +949,35 @@ export async function calculateGroupAmounts(
         quoteOut
     };
 }
+
+// function xm(e, n, r, t) {
+//     const mm = 3;
+//     if (e.length <= mm) return e;
+//     let i;
+//     const a = [];
+//     const s = new Map();
+//     const o = (0, m.Z)(e);
+//     try {
+//         for (o.s(); !(i = o.n()).done; ) {
+//             const l = i.value;
+//             const d = Om(l, r, !1);
+//             d !== null && (a.push(l), s.set(l, d));
+//         }
+//     } catch (h) {
+//         o.e(h);
+//     } finally {
+//         o.f();
+//     }
+//     if (a.length <= mm) return a;
+//     if (
+//         (a.sort(function (e, n) {
+//             const r = s.get(e);
+//             const t = s.get(n);
+//             return (
+//                 (0, c.Z)(r && t, 'No amounts for available path'),
+//                 r.amountOut.gt(t.amountOut) ? -1 : 1
+//             );
+//         })
+//     )
+//     return a.slice(0, u ? mm : 1);
+// }

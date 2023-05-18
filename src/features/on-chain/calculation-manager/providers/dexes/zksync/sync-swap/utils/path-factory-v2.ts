@@ -1,4 +1,5 @@
 import { BigNumber } from 'ethers';
+import { calculatePathAmountsByInput } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/route-utils';
 
 import { Path, RoutePoolData, RoutePools, Step } from './typings';
 
@@ -204,5 +205,26 @@ export class PathFactoryV2 {
         }
 
         return paths;
+    }
+
+    public static getBestPath(paths: Path[], amountIn: string): Path[] {
+        const pathAmountIn = BigNumber.from(amountIn);
+        const sortedIndexes = paths
+            .map((path, index) => ({
+                pathWithAmounts: calculatePathAmountsByInput(path, pathAmountIn, false),
+                index
+            }))
+            .sort((next, prev) => {
+                if (!prev.pathWithAmounts) {
+                    return next.pathWithAmounts?.amountOut ? -1 : 1;
+                }
+                if (!next.pathWithAmounts) {
+                    return 1;
+                }
+                console.log(prev.pathWithAmounts.amountOut.toString());
+                return prev.pathWithAmounts.amountOut.lte(next.pathWithAmounts.amountOut) ? 1 : -1;
+            })
+            .map(path => path.index);
+        return paths.filter((_el, index) => sortedIndexes.slice(0, 4).includes(index));
     }
 }
