@@ -3,6 +3,7 @@ import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token, wrappedNativeTokensList } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
@@ -108,7 +109,7 @@ export class SyncSwapProvider extends EvmOnChainProvider {
         return SyncSwapFactory.fetchRoutePools(
             from.address,
             toToken.address,
-            this.walletAddress,
+            this.walletAddress || EvmWeb3Pure.EMPTY_ADDRESS,
             '0x621425a1Ef6abE91058E9712575dcc4258F8d091',
             [
                 '0xf2dad89f2788a8cd54625c60b55cd3d2d0aca7cb', // Stable
