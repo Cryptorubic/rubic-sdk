@@ -1,6 +1,8 @@
+import { ZERO_ADDRESS } from '@1inch/limit-order-protocol-utils';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
+import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
@@ -100,46 +102,40 @@ export class SyncSwapTrade extends EvmOnChainTrade {
         }
     }
 
-    private getCallParameters(_receiverAddress?: string): unknown[] {
-        // const poolType = this.to.isNative ? '1' : '2';
-        // const fromTokenAddress = this.getFromTokenAddress();
-        //
-        // const swapData = EvmWeb3Pure.encodeParameters(
-        //     ['address', 'address', 'uint8'],
-        //     [fromTokenAddress, receiverAddress || this.walletAddress, poolType]
-        // );
-        // const steps = [
-        //     {
-        //         pool: this.poolData.pool,
-        //         data: swapData,
-        //         callback: EvmWeb3Pure.EMPTY_ADDRESS,
-        //         callbackData: '0x'
-        //     }
-        // ];
-        // const paths = [
-        //     {
-        //         steps,
-        //         tokenIn: this.from.address,
-        //         amountIn: this.fromWithoutFee.stringWeiAmount
-        //     }
-        // ];
-        // return [paths, this.toTokenAmountMin.stringWeiAmount, String(deadlineMinutesTimestamp(30))];
-        return [];
-    }
+    public getCallParameters(receiverAddress?: string): unknown[] {
+        const paths = this.bestPathWithAmounts.pathsWithAmounts.map(path => {
+            const pathTokenInRoute = path.stepsWithAmount[0]!.tokenIn;
+            const pathTokenIn = this.from.isNative ? ZERO_ADDRESS : pathTokenInRoute;
 
-    private getFromTokenAddress(): string {
-        // if (compareAddresses(this.from.address, this.poolData.tokenA)) {
-        //     return this.poolData.tokenA;
-        // }
-        //
-        // if (
-        //     compareAddresses(this.from.address, this.poolData.tokenB) ||
-        //     compareAddresses(this.to.address, this.poolData.tokenA)
-        // ) {
-        //     return this.poolData.tokenB;
-        // }
-        //
-        // return this.poolData.tokenA;
-        return '';
+            return {
+                steps: path.stepsWithAmount.map((step, i) => {
+                    const isLastStep = i === path.stepsWithAmount.length - 1;
+                    const stepTo = isLastStep
+                        ? receiverAddress || this.walletAddress
+                        : path.stepsWithAmount[i + 1]!.pool.pool;
+
+                    let withdrawMode = 0;
+                    if (isLastStep) {
+                        withdrawMode = this.to.isNative ? 1 : 2;
+                    }
+
+                    const data = EvmWeb3Pure.encodeParameters(
+                        ['address', 'address', 'uint8'],
+                        [step.tokenIn, stepTo, withdrawMode]
+                    );
+
+                    return {
+                        pool: step.pool.pool,
+                        data,
+                        callback: ZERO_ADDRESS,
+                        callbackData: '0x'
+                    };
+                }),
+
+                tokenIn: pathTokenIn,
+                amountIn: path.amountIn
+            };
+        });
+        return [paths, this.toTokenAmountMin.stringWeiAmount, String(deadlineMinutesTimestamp(30))];
     }
 }

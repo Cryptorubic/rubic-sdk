@@ -1,11 +1,8 @@
 import { BigNumber } from 'ethers';
 
-export const LIQUIDITY_MIN_RESERVE = BigNumber.from(1000);
 export const MAX_LOOP_LIMIT = 256;
 export const MAX_FEE = BigNumber.from(100000); // 1e5
-export const TWO_MAX_FEE = MAX_FEE.mul(2); // 1e5
 export const STABLE_POOL_A = BigNumber.from(1000);
-export const MINIMUM_LIQUIDITY = BigNumber.from(1000);
 export const ZERO = BigNumber.from(0);
 export const ONE = BigNumber.from(1);
 export const TWO = BigNumber.from(2);

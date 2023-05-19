@@ -20,7 +20,7 @@ interface RoutePoolsBlockchainResponse {
     poolsDirect: StringRoutePoolData[];
 }
 
-export class PoolFactory {
+export class SyncSwapFactory {
     private static normalizePool(vault: string, pool: RoutePoolData): RoutePoolData {
         return {
             ...pool,
@@ -31,7 +31,7 @@ export class PoolFactory {
     }
 
     private static normalizePools(vault: string, pools: RoutePoolData[]): RoutePoolData[] {
-        return [...pools].map(pool => PoolFactory.normalizePool(vault, pool));
+        return [...pools].map(pool => SyncSwapFactory.normalizePool(vault, pool));
     }
 
     private static transformResponse(routes: RoutePoolsBlockchainResponse): RoutePoolsBlockchain {
@@ -66,10 +66,9 @@ export class PoolFactory {
                 [tokenA, tokenB, factories, routeTokens, masterAddress, account]
             )) as unknown as RoutePoolsBlockchainResponse;
 
-            const payload = PoolFactory.transformResponse(response);
-            const poolsDirect = PoolFactory.normalizePools(vault, payload.poolsDirect);
+            const payload = SyncSwapFactory.transformResponse(response);
+            const poolsDirect = SyncSwapFactory.normalizePools(vault, payload.poolsDirect);
 
-            // Finds the optimal pool.
             const [directPoolClassic, directPoolStable] = [poolsDirect[0]!, poolsDirect[1]!];
             const directPoolOptimal =
                 directPoolClassic.reserveA > directPoolStable.reserveA.mul(2)
@@ -84,9 +83,9 @@ export class PoolFactory {
                 timestamp: Date.now(),
                 pools: {
                     poolsDirect,
-                    poolsA: PoolFactory.normalizePools(vault, payload.poolsA),
-                    poolsB: PoolFactory.normalizePools(vault, payload.poolsB),
-                    poolsBase: PoolFactory.normalizePools(vault, payload.poolsBase)
+                    poolsA: SyncSwapFactory.normalizePools(vault, payload.poolsA),
+                    poolsB: SyncSwapFactory.normalizePools(vault, payload.poolsB),
+                    poolsBase: SyncSwapFactory.normalizePools(vault, payload.poolsBase)
                 }
             };
         } catch (error) {
