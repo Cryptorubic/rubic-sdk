@@ -1,6 +1,6 @@
 {
   "name": "rubic-sdk",
-  "version": "4.0.23",
+  "version": "4.0.24",
   "description": "Simplify dApp creation",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -72,7 +72,7 @@
   "dependencies": {
     "@1inch/limit-order-protocol-utils": "^3.0.0",
     "@layerzerolabs/scan-client": "^0.0.0-beta.6",
-    "@lifi/sdk": "^1.6.3",
+    "@lifi/sdk": "^1.7.2",
     "@viaprotocol/router-sdk": "^1.0.7",
     "assert": "^2.0.0",
     "axios": "^0.26.1",

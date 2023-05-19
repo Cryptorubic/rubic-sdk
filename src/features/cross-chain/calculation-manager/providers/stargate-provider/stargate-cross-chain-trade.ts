@@ -318,7 +318,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             toTokenAmount: this.to,
             srcChainTrade: this.onChainTrade,
             providerAddress: this.providerAddress,
-            type: this.type,
+            type: `native:${this.type}`,
             fromAddress: this.walletAddress,
             dstChainTrade: this.dstChainTrade || undefined
         });

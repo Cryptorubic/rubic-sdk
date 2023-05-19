@@ -216,7 +216,7 @@ export class ProxyCrossChainEvmTrade {
 
         return [
             EvmWeb3Pure.randomHex(32),
-            `native:${tradeParams.type.toLowerCase()}`,
+            tradeParams.type.toLowerCase(),
             tradeParams.providerAddress,
             EvmWeb3Pure.randomHex(20),
             fromToken.address,
