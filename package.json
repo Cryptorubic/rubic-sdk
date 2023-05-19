@@ -72,7 +72,7 @@
   "dependencies": {
     "@1inch/limit-order-protocol-utils": "^3.0.0",
     "@layerzerolabs/scan-client": "^0.0.0-beta.6",
-    "@lifi/sdk": "^1.6.3",
+    "@lifi/sdk": "^1.7.2",
     "@viaprotocol/router-sdk": "^1.0.7",
     "assert": "^2.0.0",
     "axios": "^0.26.1",
@@ -85,7 +85,7 @@
     "lodash.clonedeep": "^4.5.0",
     "rango-sdk-basic": "^0.0.7",
     "rxjs": "^7.8.0",
-    "symbiosis-js-sdk": "2.9.40",
+    "symbiosis-js-sdk": "^2.9.52",
     "tronweb": "^4.3.0",
     "web3": "^1.8.1"
   },

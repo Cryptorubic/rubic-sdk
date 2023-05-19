@@ -1,4 +1,4 @@
-import LIFI, { LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
+import LIFI, { FeeCost, LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { MinAmountError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
@@ -102,6 +102,21 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
         if (!bestRoute) {
             throw new RubicSdkError('No available routes');
+        }
+
+        const providerFee = bestRoute.steps[0]!.estimate.feeCosts?.find(
+            (el: FeeCost & { included?: boolean }) => el?.included === false
+        );
+        if (providerFee) {
+            feeInfo.provider = {
+                cryptoFee: {
+                    amount: Web3Pure.fromWei(
+                        new BigNumber(providerFee.amount),
+                        providerFee.token.decimals
+                    ),
+                    tokenSymbol: providerFee.token.symbol
+                }
+            };
         }
 
         from = new PriceTokenAmount({

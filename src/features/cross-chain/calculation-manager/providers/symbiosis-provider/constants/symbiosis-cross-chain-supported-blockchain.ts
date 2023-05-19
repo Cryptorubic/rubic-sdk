@@ -10,8 +10,8 @@ export const symbiosisCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.BOBA_AVALANCHE,
     BLOCKCHAIN_NAME.TELOS,
     BLOCKCHAIN_NAME.ZK_SYNC,
-    BLOCKCHAIN_NAME.ARBITRUM
-    // BLOCKCHAIN_NAME.BITCOIN
+    BLOCKCHAIN_NAME.ARBITRUM,
+    BLOCKCHAIN_NAME.OPTIMISM
 ] as const;
 
 export type SymbiosisCrossChainSupportedBlockchain =
