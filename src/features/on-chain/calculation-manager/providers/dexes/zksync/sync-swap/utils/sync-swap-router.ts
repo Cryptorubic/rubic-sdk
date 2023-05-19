@@ -454,7 +454,7 @@ export class SyncSwapRouter {
             tokenOutPrecisionMultiplier = ZERO;
         }
 
-        const swapFee = BigNumber.from(step.swapFee); // wrap
+        const swapFee = BigNumber.from(step.swapFee);
         const amountOut = SyncSwapRouter.calculateAmountOut(
             {
                 stable,

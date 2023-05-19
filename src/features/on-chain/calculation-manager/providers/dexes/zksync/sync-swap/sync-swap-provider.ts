@@ -32,23 +32,6 @@ export class SyncSwapProvider extends EvmOnChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options?: OnChainCalculationOptions
     ): Promise<SyncSwapTrade> {
-        const availablePools = await this.getAvailablePools(from, toToken);
-        if (!availablePools) {
-            throw new NotSupportedTokensError();
-        }
-
-        const paths = SyncSwapPathFactory.findAllPossiblePaths(
-            from.address,
-            toToken.address,
-            availablePools
-        );
-        const filteredPaths = await SyncSwapPathFactory.getBestPath(paths, from.stringWeiAmount);
-
-        const bestRoute = await SyncSwapRouter.findBestAmountsForPathsExactIn(
-            filteredPaths,
-            from.stringWeiAmount
-        );
-
         const fromAddress =
             options?.useProxy || this.defaultOptions.useProxy
                 ? rubicProxyContractAddress[from.blockchain].gateway
@@ -61,10 +44,34 @@ export class SyncSwapProvider extends EvmOnChainProvider {
             from,
             wrappedNativeTokensList[from.blockchain]!.address
         );
-
+        const toProxy = createTokenNativeAddressProxy(
+            toToken,
+            wrappedNativeTokensList[from.blockchain]!.address
+        );
         const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(
             fromProxy,
             fullOptions
+        );
+
+        const availablePools = await this.getAvailablePools(fromWithoutFee, toProxy);
+        if (!availablePools) {
+            throw new NotSupportedTokensError();
+        }
+
+        const paths = SyncSwapPathFactory.findAllPossiblePaths(
+            fromProxy.address,
+            toProxy.address,
+            availablePools
+        );
+
+        const filteredPaths = await SyncSwapPathFactory.getBestPath(
+            paths,
+            fromWithoutFee.stringWeiAmount
+        );
+
+        const bestRoute = await SyncSwapRouter.findBestAmountsForPathsExactIn(
+            filteredPaths,
+            fromWithoutFee.stringWeiAmount
         );
 
         const to = new PriceTokenAmount({
@@ -75,7 +82,6 @@ export class SyncSwapProvider extends EvmOnChainProvider {
         const transitAddresses = bestRoute.pathsWithAmounts[0]!.stepsWithAmount.slice(1).map(
             step => step.tokenIn
         );
-
         const transitTokens = await Token.createTokens(transitAddresses, from.blockchain);
 
         const tradeStruct = {
