@@ -138,9 +138,9 @@ export class EvmWeb3Public extends Web3Public {
                         output:
                             output.success && output.returnData.length > 2
                                 ? (this.web3.eth.abi.decodeParameters(
-                                    methodOutputAbi,
-                                    output.returnData
-                                )[0] as Output)
+                                      methodOutputAbi,
+                                      output.returnData
+                                  )[0] as Output)
                                 : null
                     };
                 })
@@ -388,7 +388,11 @@ export class EvmWeb3Public extends Web3Public {
             maxFeePerGas = block.baseFeePerGas * 2 + maxPriorityFeePerGas;
         }
 
-        return { baseFee: lastBaseFeePerGas?.toFixed(), maxFeePerGas: maxFeePerGas?.toFixed(), maxPriorityFeePerGas: maxPriorityFeePerGas?.toFixed() };
+        return {
+            baseFee: lastBaseFeePerGas?.toFixed(),
+            maxFeePerGas: maxFeePerGas?.toFixed(),
+            maxPriorityFeePerGas: maxPriorityFeePerGas?.toFixed()
+        };
     }
 
     /**
@@ -414,8 +418,8 @@ export class EvmWeb3Public extends Web3Public {
             const gasUsedDelta = parentGasUsed - parentGasTarget;
             const baseFeePerGasDelta = Math.max(
                 (parentBaseFeePerGas * gasUsedDelta) /
-                parentGasTarget /
-                BASE_FEE_MAX_CHANGE_DENOMINATOR,
+                    parentGasTarget /
+                    BASE_FEE_MAX_CHANGE_DENOMINATOR,
                 1
             );
             lastBaseFeePerGas = parentBaseFeePerGas + baseFeePerGasDelta;
