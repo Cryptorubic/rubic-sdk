@@ -2,12 +2,12 @@ import BigNumber from 'bignumber.js';
 
 export type GasPrice = EIP1559Gas & SingleGasPrice;
 export interface EIP1559Gas {
-    baseFee?: number | string | null;
-    maxFeePerGas?: number | string | null;
-    maxPriorityFeePerGas?: number | string | null;
+    baseFee?: string | null;
+    maxFeePerGas?: string | null;
+    maxPriorityFeePerGas?: string | null;
 }
 export interface SingleGasPrice {
-    gasPrice?: number | string | null;
+    gasPrice?: string | null;
 }
 
 export type GasPriceBN = {

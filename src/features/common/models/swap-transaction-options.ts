@@ -26,12 +26,12 @@ export interface SwapTransactionOptions {
     /**
      * EIP-1559 Transaction miner's tip.
      */
-    maxPriorityFeePerGas?: number | string;
+    maxPriorityFeePerGas?: string;
 
     /**
      * EIP-1559 Transaction maximum fee.
      */
-    maxFeePerGas?: number | string;
+    maxFeePerGas?: string;
 
     /**
      * Evm-transaction gas limit.
