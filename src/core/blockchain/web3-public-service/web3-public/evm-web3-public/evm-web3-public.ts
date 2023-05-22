@@ -25,7 +25,8 @@ import { BlockNumber, HttpProvider, provider as Provider } from 'web3-core';
 import { BlockTransactionString, TransactionReceipt } from 'web3-eth';
 import { EventData } from 'web3-eth-contract';
 import { AbiItem } from 'web3-utils';
-import { GasPrice } from "./models/gas-price";
+
+import { GasPrice } from './models/gas-price';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
@@ -348,7 +349,7 @@ export class EvmWeb3Public extends Web3Public {
      * @returns Average gas price in wei.
      */
     public async getGasPrice(): Promise<string> {
-        return this.web3.eth.getGasPrice()
+        return this.web3.eth.getGasPrice();
     }
 
     /**
@@ -357,14 +358,16 @@ export class EvmWeb3Public extends Web3Public {
      * @returns Average maxPriorityFeePerGas in wei
      */
     public async getMaxPriorityFeePerGas(): Promise<number> {
-        const HISTORICAL_BLOCKS = 20
+        const HISTORICAL_BLOCKS = 20;
 
-        const feeHistory = await this.web3.eth.getFeeHistory(HISTORICAL_BLOCKS, 'pending', [50])
-        const blocks = feeHistory.reward.map(x => x.map(reward => Number(reward)))
+        const feeHistory = await this.web3.eth.getFeeHistory(HISTORICAL_BLOCKS, 'pending', [50]);
+        const blocks = feeHistory.reward.map(x => x.map(reward => Number(reward)));
 
-        const rewardSum = blocks.map(x => x[0]).reduce((acc: number, v: number | undefined) => acc + (v || 0), 0)
+        const rewardSum = blocks
+            .map(x => x[0])
+            .reduce((acc: number, v: number | undefined) => acc + (v || 0), 0);
 
-        return Math.round(rewardSum / blocks.length)
+        return Math.round(rewardSum / blocks.length);
     }
 
     /**
@@ -373,19 +376,19 @@ export class EvmWeb3Public extends Web3Public {
      * @returns block baseFee, average maxPriorityFeePerGas, and maxFeePerGas.
      */
     public async getPriorityFeeGas(): Promise<GasPrice> {
-
         const block = await this.getBlock('latest');
 
-        let lastBaseFeePerGas = null, maxFeePerGas = null, maxPriorityFeePerGas = null;
+        let lastBaseFeePerGas = null;
+        let maxFeePerGas = null;
+        let maxPriorityFeePerGas = null;
 
         if (block && block.baseFeePerGas) {
-            lastBaseFeePerGas = this.getBaseFee(block)
-            maxPriorityFeePerGas = await this.getMaxPriorityFeePerGas()
-            maxFeePerGas = block.baseFeePerGas * 2 + maxPriorityFeePerGas
+            lastBaseFeePerGas = this.getBaseFee(block);
+            maxPriorityFeePerGas = await this.getMaxPriorityFeePerGas();
+            maxFeePerGas = block.baseFeePerGas * 2 + maxPriorityFeePerGas;
         }
 
         return { baseFee: lastBaseFeePerGas, maxFeePerGas, maxPriorityFeePerGas };
-
     }
 
     /**
@@ -395,30 +398,37 @@ export class EvmWeb3Public extends Web3Public {
      * @returns Base fee for a given block
      */
     private getBaseFee(block: BlockTransactionString): number | null {
+        if (!block.baseFeePerGas) return null;
 
-        if (!block.baseFeePerGas) return null
+        const BASE_FEE_MAX_CHANGE_DENOMINATOR = 8;
 
-        const BASE_FEE_MAX_CHANGE_DENOMINATOR = 8
+        const parentGasUsed = block.gasUsed;
+        const parentGasTarget = block.gasLimit;
+        const parentBaseFeePerGas = block.baseFeePerGas;
 
-        const parentGasUsed = block.gasUsed
-        const parentGasTarget = block.gasLimit
-        const parentBaseFeePerGas = block.baseFeePerGas
-
-        let lastBaseFeePerGas = null
+        let lastBaseFeePerGas = null;
 
         if (parentGasUsed === parentGasTarget) {
-            lastBaseFeePerGas = block.baseFeePerGas
+            lastBaseFeePerGas = block.baseFeePerGas;
         } else if (parentGasUsed > parentGasTarget) {
-            const gasUsedDelta = parentGasUsed - parentGasTarget
-            const baseFeePerGasDelta = Math.max(parentBaseFeePerGas * gasUsedDelta / parentGasTarget / BASE_FEE_MAX_CHANGE_DENOMINATOR, 1)
-            lastBaseFeePerGas = parentBaseFeePerGas + baseFeePerGasDelta
+            const gasUsedDelta = parentGasUsed - parentGasTarget;
+            const baseFeePerGasDelta = Math.max(
+                (parentBaseFeePerGas * gasUsedDelta) /
+                    parentGasTarget /
+                    BASE_FEE_MAX_CHANGE_DENOMINATOR,
+                1
+            );
+            lastBaseFeePerGas = parentBaseFeePerGas + baseFeePerGasDelta;
         } else {
-            const gasUsedDelta = parentGasTarget - parentGasUsed
-            const baseFeePerGasDelta = parentBaseFeePerGas * gasUsedDelta / parentGasTarget / BASE_FEE_MAX_CHANGE_DENOMINATOR
-            lastBaseFeePerGas = parentBaseFeePerGas - baseFeePerGasDelta
+            const gasUsedDelta = parentGasTarget - parentGasUsed;
+            const baseFeePerGasDelta =
+                (parentBaseFeePerGas * gasUsedDelta) /
+                parentGasTarget /
+                BASE_FEE_MAX_CHANGE_DENOMINATOR;
+            lastBaseFeePerGas = parentBaseFeePerGas - baseFeePerGasDelta;
         }
 
-        return lastBaseFeePerGas
+        return lastBaseFeePerGas;
     }
 
     /**

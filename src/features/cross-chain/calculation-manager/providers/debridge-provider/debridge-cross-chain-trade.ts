@@ -33,6 +33,8 @@ import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/p
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 
+import { convertGasDataToBN } from '../../utils/convert-gas-price';
+
 /**
  * Calculated DeBridge cross-chain trade.
  */
@@ -83,7 +85,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                 ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasPrice] = await Promise.all([
+            const [gasLimit, gasDetails] = await Promise.all([
                 web3Public.getEstimatedGas(
                     contractAbi,
                     contractAddress,
@@ -92,7 +94,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                     walletAddress,
                     value
                 ),
-                new BigNumber(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
             ]);
 
             if (!gasLimit?.isFinite()) {
@@ -102,7 +104,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
             return {
                 gasLimit: increasedGasLimit,
-                gasPrice
+                ...gasDetails
             };
         } catch (_err) {
             return null;
@@ -198,7 +200,9 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                 data,
                 value,
                 gas: options.gasLimit,
-                gasPrice: options.gasPrice
+                gasPrice: options.gasPrice,
+                maxFeePerGas: options.maxFeePerGas,
+                maxPriorityFeePerGas: options.maxPriorityFeePerGas
             });
 
             return transactionHash!;

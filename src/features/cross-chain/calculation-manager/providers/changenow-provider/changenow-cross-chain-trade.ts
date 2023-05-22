@@ -30,6 +30,8 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 import { MarkRequired } from 'ts-essentials';
 import { TransactionConfig } from 'web3-core';
 
+import { convertGasDataToBN } from '../../utils/convert-gas-price';
+
 export class ChangenowCrossChainTrade extends CrossChainTrade {
     /** @internal */
     public static async getGasData(
@@ -52,7 +54,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
                 ).getContractParams({ receiverAddress });
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasPrice] = await Promise.all([
+            const [gasLimit, gasDetails] = await Promise.all([
                 web3Public.getEstimatedGas(
                     contractAbi,
                     contractAddress,
@@ -61,7 +63,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
                     walletAddress,
                     value
                 ),
-                new BigNumber(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
+                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
             ]);
 
             if (!gasLimit?.isFinite()) {
@@ -71,7 +73,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
             const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
             return {
                 gasLimit: increasedGasLimit,
-                gasPrice
+                ...gasDetails
             };
         } catch (_err) {
             return null;
@@ -126,7 +128,18 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
         if (!this.gasData) {
             return null;
         }
-        return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
+
+        if (this.gasData.baseFee && this.gasData.maxPriorityFeePerGas) {
+            return Web3Pure.fromWei(this.gasData.baseFee).plus(
+                Web3Pure.fromWei(this.gasData.maxPriorityFeePerGas)
+            );
+        }
+
+        if (this.gasData.gasPrice) {
+            return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
+        }
+
+        return null;
     }
 
     constructor(crossChainTrade: ChangenowTrade, providerAddress: string) {
@@ -192,7 +205,13 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
                     ERC20_TOKEN_ABI,
                     'transfer',
                     [payinAddress, this.from.stringWeiAmount],
-                    { onTransactionHash, gas: gasLimit, gasPrice, maxFeePerGas, maxPriorityFeePerGas }
+                    {
+                        onTransactionHash,
+                        gas: gasLimit,
+                        gasPrice,
+                        maxFeePerGas,
+                        maxPriorityFeePerGas
+                    }
                 );
             }
 
@@ -278,7 +297,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
             CROSS_CHAIN_TRADE_TYPE.CHANGENOW
         );
 
-        const { gasLimit, gasPrice } = options;
+        const { gasLimit, gasPrice, maxFeePerGas, maxPriorityFeePerGas } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getContractParams({
@@ -294,7 +313,10 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
             value,
             {
                 gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
-                gasPrice: gasPrice || this.gasData?.gasPrice.toFixed()
+                gasPrice: gasPrice || this.gasData?.gasPrice?.toFixed(),
+                maxPriorityFeePerGas:
+                    maxPriorityFeePerGas || this.gasData?.maxPriorityFeePerGas?.toFixed(),
+                maxFeePerGas: maxFeePerGas || this.gasData?.maxFeePerGas?.toFixed()
             }
         );
     }

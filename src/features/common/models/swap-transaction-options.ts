@@ -16,19 +16,21 @@ export interface SwapTransactionOptions {
      */
     receiverAddress?: string;
 
+    // gasPriceOptions: SingleGasPrice | EIP1559Gas
+
     /**
      * Evm-Transaction gas price.
      */
     gasPrice?: string;
 
     /**
-      * EIP-1559 Transaction miner's tip.
-      */
+     * EIP-1559 Transaction miner's tip.
+     */
     maxPriorityFeePerGas?: number | string;
 
     /**
-    * EIP-1559 Transaction maximum fee.
-    */
+     * EIP-1559 Transaction maximum fee.
+     */
     maxFeePerGas?: number | string;
 
     /**

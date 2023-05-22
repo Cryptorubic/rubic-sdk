@@ -1,10 +1,12 @@
-import BigNumber from 'bignumber.js';
 import { Cache } from 'src/common/utils/decorators';
 import pTimeout from 'src/common/utils/p-timeout';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { Injector } from 'src/core/injector/injector';
+
+import { GasPrice } from '../blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
+import { EIP1559CompatibleBlockchains } from './constants/eip1559-compatible-blockchains';
+import { OneInchGasResponse } from './models/1inch-gas-response';
 
 /**
  * Uses different api or web3 to retrieve current gas price.
@@ -21,7 +23,7 @@ export class GasPriceApi {
      * Gets gas price in Wei for selected blockchain.
      * @param blockchain Blockchain to get gas price from.
      */
-    public getGasPrice(blockchain: EvmBlockchainName): Promise<string> {
+    public getGasPrice(blockchain: EvmBlockchainName): Promise<GasPrice> {
         if (blockchain === BLOCKCHAIN_NAME.ETHEREUM) {
             return this.fetchEthGas();
         }
@@ -32,8 +34,8 @@ export class GasPriceApi {
      * Gets gas price in Eth units for selected blockchain.
      * @param blockchain Blockchain to get gas price from.
      */
-    public async getGasPriceInEthUnits(blockchain: EvmBlockchainName): Promise<BigNumber> {
-        return Web3Pure.fromWei(await this.getGasPrice(blockchain));
+    public async getGasPriceInEthUnits(blockchain: EvmBlockchainName): Promise<GasPrice> {
+        return await this.getGasPrice(blockchain);
     }
 
     /**
@@ -43,27 +45,23 @@ export class GasPriceApi {
     @Cache({
         maxAge: GasPriceApi.requestInterval
     })
-    private async fetchEthGas(): Promise<string> {
+    private async fetchEthGas(): Promise<GasPrice> {
         const requestTimeout = 3000;
 
         try {
-            const response: { high: { maxFeePerGas: string } } = await pTimeout(
+            const response: OneInchGasResponse = await pTimeout(
                 this.httpClient.get('https://gas-price-api.1inch.io/v1.2/1'),
                 requestTimeout
             );
-            return response.high.maxFeePerGas;
-        } catch (_err) {}
-
-        try {
-            const response: { average: number } = await pTimeout(
-                this.httpClient.get('https://ethgasstation.info/api/ethgasAPI.json'),
-                requestTimeout
-            );
-            return new BigNumber(response.average / 10).multipliedBy(10 ** 9).toFixed(0);
+            return {
+                baseFee: response.baseFee,
+                maxFeePerGas: response.high.maxFeePerGas,
+                maxPriorityFeePerGas: response.high.maxPriorityFee
+            };
         } catch (_err) {}
 
         const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ETHEREUM);
-        return web3Public.getGasPrice();
+        return web3Public.getPriorityFeeGas();
     }
 
     /**
@@ -73,8 +71,13 @@ export class GasPriceApi {
     @Cache({
         maxAge: GasPriceApi.requestInterval
     })
-    private fetchGas(blockchain: EvmBlockchainName): Promise<string> {
+    private async fetchGas(blockchain: EvmBlockchainName): Promise<GasPrice> {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
-        return web3Public.getGasPrice();
+        if (EIP1559CompatibleBlockchains[blockchain]) {
+            return await web3Public.getPriorityFeeGas();
+        }
+        return {
+            gasPrice: await web3Public.getGasPrice()
+        };
     }
 }

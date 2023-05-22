@@ -5,14 +5,16 @@ import { Injector } from 'src/core/injector/injector';
 import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/models/gas-price-info';
 
 export async function getGasPriceInfo(blockchain: EvmBlockchainName): Promise<GasPriceInfo> {
-    const [gasPrice, nativeCoinPrice] = await Promise.all([
+    const [{ gasPrice, maxFeePerGas }, nativeCoinPrice] = await Promise.all([
         Injector.gasPriceApi.getGasPrice(blockchain),
         Injector.coingeckoApi.getNativeCoinPrice(blockchain)
     ]);
-    const gasPriceInEth = Web3Pure.fromWei(gasPrice);
+
+    const gasPriceInEth = Web3Pure.fromWei(maxFeePerGas || gasPrice || 0);
+
     const gasPriceInUsd = gasPriceInEth.multipliedBy(nativeCoinPrice);
     return {
-        gasPrice: new BigNumber(gasPrice),
+        gasPrice: new BigNumber(gasPrice || 0),
         gasPriceInEth,
         gasPriceInUsd
     };

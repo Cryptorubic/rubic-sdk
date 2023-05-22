@@ -31,6 +31,7 @@ import { stargatePoolId } from 'src/features/cross-chain/calculation-manager/pro
 import { stargatePoolsDecimals } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pools-decimals';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
+import { convertGasDataToBN } from '../../utils/convert-gas-price';
 import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { stargateChainId } from './constants/stargate-chain-id';
 import {
@@ -83,7 +84,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
 
-            const [gasLimit, gasPrice] = await Promise.all([
+            const [gasLimit, gasDetails] = await Promise.all([
                 web3Public.getEstimatedGas(
                     contractAbi,
                     contractAddress,
@@ -92,7 +93,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                     walletAddress,
                     value
                 ),
-                new BigNumber(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
+                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
             ]);
 
             if (!gasLimit?.isFinite()) {
@@ -103,7 +104,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
 
             return {
                 gasLimit: increasedGasLimit,
-                gasPrice
+                ...gasDetails
             };
         } catch (_err) {
             return null;
@@ -186,7 +187,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice } = options;
+        const { onConfirm, gasLimit, gasPrice, maxFeePerGas, maxPriorityFeePerGas } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -218,7 +219,9 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                 value,
                 onTransactionHash,
                 gas: gasLimit,
-                gasPrice
+                gasPrice,
+                maxFeePerGas,
+                maxPriorityFeePerGas
             });
 
             return transactionHash!;

@@ -85,7 +85,9 @@ export class EvmWeb3Pure {
             data,
             value: value || '0',
             gas: options.gas,
-            gasPrice: options.gasPrice
+            gasPrice: options.gasPrice,
+            maxFeePerGas: options.maxFeePerGas,
+            maxPriorityFeePerGas: options.maxPriorityFeePerGas
         };
     }
 

@@ -45,7 +45,18 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         if (!this.gasData) {
             return null;
         }
-        return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
+
+        if (this.gasData.baseFee && this.gasData.maxPriorityFeePerGas) {
+            return Web3Pure.fromWei(this.gasData.baseFee).plus(
+                Web3Pure.fromWei(this.gasData.maxPriorityFeePerGas)
+            );
+        }
+
+        if (this.gasData.gasPrice) {
+            return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
+        }
+
+        return null;
     }
 
     public async approve(
@@ -87,7 +98,9 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         const approveOptions: EvmBasicTransactionOptions = {
             onTransactionHash: options?.onApprove,
             gas: options?.approveGasLimit,
-            gasPrice: options?.gasPrice
+            gasPrice: options?.gasPrice,
+            maxFeePerGas: options?.maxFeePerGas,
+            maxPriorityFeePerGas: options?.maxPriorityFeePerGas
         };
 
         await this.approve(approveOptions, false);
@@ -144,7 +157,14 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
                 contractAbi,
                 methodName,
                 methodArguments,
-                { value, onTransactionHash, gas: gasLimit, gasPrice, maxPriorityFeePerGas, maxFeePerGas }
+                {
+                    value,
+                    onTransactionHash,
+                    gas: gasLimit,
+                    gasPrice,
+                    maxPriorityFeePerGas,
+                    maxFeePerGas
+                }
             );
 
             return transactionHash!;
@@ -163,7 +183,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
             !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
         );
 
-        const { gasLimit, gasPrice } = options;
+        const { gasLimit, gasPrice, maxFeePerGas, maxPriorityFeePerGas } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getContractParams({
@@ -179,7 +199,10 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
             value,
             {
                 gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
-                gasPrice: gasPrice || this.gasData?.gasPrice.toFixed()
+                gasPrice: gasPrice || this.gasData?.gasPrice?.toFixed(),
+                maxPriorityFeePerGas:
+                    maxPriorityFeePerGas || this.gasData?.maxPriorityFeePerGas?.toFixed(),
+                maxFeePerGas: maxFeePerGas || this.gasData?.maxFeePerGas?.toFixed()
             }
         );
     }

@@ -15,6 +15,16 @@ export interface EncodeTransactionOptions {
     gasPrice?: string;
 
     /**
+     * EIP-1559 Transaction miner's tip.
+     */
+    maxPriorityFeePerGas?: string;
+
+    /**
+     * EIP-1559 Transaction maximum fee.
+     */
+    maxFeePerGas?: string;
+
+    /**
      * Evm-transaction gas limit.
      */
     gasLimit?: string;

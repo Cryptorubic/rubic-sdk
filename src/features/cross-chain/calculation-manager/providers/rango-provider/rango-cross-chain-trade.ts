@@ -27,6 +27,8 @@ import { RANGO_BLOCKCHAIN_NAME } from 'src/features/cross-chain/calculation-mana
 import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
 import { RangoBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/models/rango-bridge-types';
 
+import { convertGasDataToBN } from '../../utils/convert-gas-price';
+
 export class RangoCrossChainTrade extends EvmCrossChainTrade {
     /**  @internal */
     public static async getGasData(
@@ -68,7 +70,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams();
 
-            const [gasLimit, gasPrice] = await Promise.all([
+            const [gasLimit, gasDetails] = await Promise.all([
                 web3Public.getEstimatedGas(
                     contractAbi,
                     contractAddress,
@@ -77,7 +79,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
                     walletAddress,
                     value
                 ),
-                new BigNumber(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
+                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
             ]);
 
             if (!gasLimit?.isFinite()) {
@@ -88,7 +90,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
 
             return {
                 gasLimit: increasedGasLimit,
-                gasPrice
+                ...gasDetails
             };
         } catch (_err) {
             return null;
