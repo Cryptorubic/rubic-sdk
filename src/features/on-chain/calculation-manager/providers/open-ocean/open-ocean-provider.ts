@@ -53,7 +53,7 @@ export class OpenOceanProvider {
                     slippage: options.slippageTolerance! * 100,
                     gasPrice: Web3Pure.fromWei(gasPrice, nativeTokensList[from.blockchain].decimals)
                         .multipliedBy(10 ** 9)
-                        .toFixed(0)
+                        .toString()
                 }
             });
 
