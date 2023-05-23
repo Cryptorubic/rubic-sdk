@@ -54,7 +54,7 @@ export class SyncSwapProvider extends EvmOnChainProvider {
             fullOptions
         );
 
-        const availablePools = await this.getAvailablePools(fromWithoutFee, toProxy);
+        const availablePools = await this.getAvailablePools(fromProxy, toProxy);
         if (!availablePools) {
             throw new NotSupportedTokensError();
         }

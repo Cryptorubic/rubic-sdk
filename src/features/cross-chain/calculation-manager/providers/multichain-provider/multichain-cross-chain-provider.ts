@@ -7,7 +7,11 @@ import {
     wrappedNativeTokensList
 } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -51,8 +55,10 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as MultichainCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as MultichainCrossChainSupportedBlockchain;
-        const useProxy = options?.useProxy?.[this.type] ?? true;
-
+        let useProxy = options?.useProxy?.[this.type] ?? true;
+        if (fromBlockchain === BLOCKCHAIN_NAME.ZK_SYNC) {
+            useProxy = false;
+        }
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return null;
         }
