@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import pTimeout from 'src/common/utils/p-timeout';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -44,18 +45,24 @@ export class OpenOceanProvider {
                 .getWeb3Public(blockchain)
                 .getGasPrice();
             const apiUrl = openOceanApiUrl.quote(openOceanBlockchainName[blockchain]);
-            const quoteResponse = await Injector.httpClient.get<OpenOceanQuoteResponse>(apiUrl, {
-                params: {
-                    chain: openOceanBlockchainName[blockchain],
-                    inTokenAddress: fromWithoutFee.address,
-                    outTokenAddress: toToken.address,
-                    amount: fromWithoutFee.tokenAmount.toString(),
-                    slippage: options.slippageTolerance! * 100,
-                    gasPrice: Web3Pure.fromWei(gasPrice, nativeTokensList[from.blockchain].decimals)
-                        .multipliedBy(10 ** 9)
-                        .toFixed(0)
-                }
-            });
+            const quoteResponse = await pTimeout(
+                Injector.httpClient.get<OpenOceanQuoteResponse>(apiUrl, {
+                    params: {
+                        chain: openOceanBlockchainName[blockchain],
+                        inTokenAddress: fromWithoutFee.address,
+                        outTokenAddress: toToken.address,
+                        amount: fromWithoutFee.tokenAmount.toString(),
+                        slippage: options.slippageTolerance! * 100,
+                        gasPrice: Web3Pure.fromWei(
+                            gasPrice,
+                            nativeTokensList[from.blockchain].decimals
+                        )
+                            .multipliedBy(10 ** 9)
+                            .toFixed(0)
+                    }
+                }),
+                7_000
+            );
 
             if ([500, 400].includes(quoteResponse.code)) {
                 return {
