@@ -5,6 +5,7 @@ import {
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { getGasOptions } from 'src/common/utils/options';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
@@ -178,7 +179,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
             CROSS_CHAIN_TRADE_TYPE.CHANGENOW
         );
 
-        const { onConfirm, gasLimit, gasPrice, maxFeePerGas, maxPriorityFeePerGas } = options;
+        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -209,8 +210,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
                         onTransactionHash,
                         gas: gasLimit,
                         gasPrice,
-                        maxFeePerGas,
-                        maxPriorityFeePerGas
+                        gasPriceOptions
                     }
                 );
             }
@@ -297,7 +297,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
             CROSS_CHAIN_TRADE_TYPE.CHANGENOW
         );
 
-        const { gasLimit, gasPrice, maxFeePerGas, maxPriorityFeePerGas } = options;
+        const { gasLimit } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getContractParams({
@@ -313,10 +313,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
             value,
             {
                 gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
-                gasPrice: gasPrice || this.gasData?.gasPrice?.toFixed(),
-                maxPriorityFeePerGas:
-                    maxPriorityFeePerGas || this.gasData?.maxPriorityFeePerGas?.toFixed(),
-                maxFeePerGas: maxFeePerGas || this.gasData?.maxFeePerGas?.toFixed()
+                ...getGasOptions(options)
             }
         );
     }

@@ -10,6 +10,7 @@ import {
     UserRejectError
 } from 'src/common/errors';
 import { parseError } from 'src/common/utils/errors';
+import { getGasOptions } from 'src/common/utils/options';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
@@ -121,16 +122,7 @@ export class EvmWeb3Private extends Web3Private {
                     to: toAddress,
                     value: Web3Private.stringifyAmount(options.value || 0),
                     ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
-                    ...(options.gasPrice && {
-                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                    }),
-                    ...(options.maxPriorityFeePerGas &&
-                        options.maxFeePerGas && {
-                            maxPriorityFeePerGas: Web3Private.stringifyAmount(
-                                options.maxPriorityFeePerGas
-                            ),
-                            maxFeePerGas: Web3Private.stringifyAmount(options.maxFeePerGas)
-                        }),
+                    ...getGasOptions(options),
                     ...(options.data && { data: options.data })
                 })
                 .on('transactionHash', options.onTransactionHash || (() => {}))
@@ -158,16 +150,7 @@ export class EvmWeb3Private extends Web3Private {
                 to: toAddress,
                 value: Web3Private.stringifyAmount(options.value || 0),
                 ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
-                ...(options.gasPrice && {
-                    gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                }),
-                ...(options.maxPriorityFeePerGas &&
-                    options.maxFeePerGas && {
-                        maxFeePerGas: Web3Private.stringifyAmount(options.maxFeePerGas),
-                        maxPriorityFeePerGas: Web3Private.stringifyAmount(
-                            options.maxPriorityFeePerGas
-                        )
-                    }),
+                ...getGasOptions(options),
                 ...(options.data && { data: options.data })
             });
             return this.sendTransaction(toAddress, {
@@ -212,9 +195,7 @@ export class EvmWeb3Private extends Web3Private {
                     ...(options.gas && {
                         gas: Web3Private.stringifyAmount(options.gas)
                     }),
-                    ...(options.gasPrice && {
-                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                    })
+                    ...getGasOptions(options)
                 })
                 .on('transactionHash', options.onTransactionHash || (() => {}))
                 .on('receipt', resolve)
@@ -249,16 +230,7 @@ export class EvmWeb3Private extends Web3Private {
                 from: this.address,
                 ...(options.value && { value: Web3Private.stringifyAmount(options.value) }),
                 ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
-                ...(options.gasPrice && {
-                    gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                }),
-                ...(options.maxPriorityFeePerGas &&
-                    options.maxFeePerGas && {
-                        maxPriorityFeePerGas: Web3Private.stringifyAmount(
-                            options.maxPriorityFeePerGas
-                        ),
-                        maxFeePerGas: Web3Private.stringifyAmount(options.maxFeePerGas)
-                    })
+                ...getGasOptions(options)
             });
             return this.executeContractMethod(
                 contractAddress,
@@ -332,16 +304,7 @@ export class EvmWeb3Private extends Web3Private {
                 .send({
                     from: this.address,
                     ...(gas && { gas: Web3Private.stringifyAmount(gas) }),
-                    ...(options.gasPrice && {
-                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                    }),
-                    ...(options.maxPriorityFeePerGas &&
-                        options.maxFeePerGas && {
-                            maxPriorityFeePerGas: Web3Private.stringifyAmount(
-                                options.maxPriorityFeePerGas
-                            ),
-                            maxFeePerGas: Web3Private.stringifyAmount(options.maxFeePerGas)
-                        })
+                    ...getGasOptions(options)
                 })
                 .on('transactionHash', options.onTransactionHash || (() => {}))
                 .on('receipt', resolve)
@@ -384,16 +347,7 @@ export class EvmWeb3Private extends Web3Private {
             undefined,
             {
                 ...(gas && { gas: Web3Private.stringifyAmount(gas) }),
-                ...(options.gasPrice && {
-                    gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                }),
-                ...(options.maxPriorityFeePerGas &&
-                    options.maxFeePerGas && {
-                        maxPriorityFeePerGas: Web3Private.stringifyAmount(
-                            options.maxPriorityFeePerGas
-                        ),
-                        maxFeePerGas: Web3Private.stringifyAmount(options.maxFeePerGas)
-                    })
+                ...getGasOptions(options)
             }
         );
     }

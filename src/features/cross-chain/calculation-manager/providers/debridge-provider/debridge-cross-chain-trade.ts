@@ -201,8 +201,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                 value,
                 gas: options.gasLimit,
                 gasPrice: options.gasPrice,
-                maxFeePerGas: options.maxFeePerGas,
-                maxPriorityFeePerGas: options.maxPriorityFeePerGas
+                gasPriceOptions: options.gasPriceOptions
             });
 
             return transactionHash!;

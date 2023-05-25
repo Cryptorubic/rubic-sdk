@@ -168,8 +168,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             onTransactionHash: options?.onApprove,
             gas: options?.approveGasLimit || undefined,
             gasPrice: options?.gasPrice || undefined,
-            maxFeePerGas: options?.maxFeePerGas || undefined,
-            maxPriorityFeePerGas: options?.maxPriorityFeePerGas || undefined
+            gasPriceOptions: options?.gasPriceOptions || undefined
         };
 
         await this.approve(approveOptions, false);
@@ -208,8 +207,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 value: transactionConfig.value,
                 gas: options.gasLimit,
                 gasPrice: options.gasPrice,
-                maxPriorityFeePerGas: options.maxPriorityFeePerGas,
-                maxFeePerGas: options.maxFeePerGas
+                gasPriceOptions: options.gasPriceOptions
             });
 
             return transactionHash!;

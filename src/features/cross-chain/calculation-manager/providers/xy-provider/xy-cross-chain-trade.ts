@@ -162,7 +162,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice, maxFeePerGas, maxPriorityFeePerGas } = options;
+        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -181,8 +181,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
                 onTransactionHash,
                 gas: gasLimit,
                 gasPrice,
-                maxFeePerGas,
-                maxPriorityFeePerGas
+                gasPriceOptions
             });
 
             return transactionHash!;

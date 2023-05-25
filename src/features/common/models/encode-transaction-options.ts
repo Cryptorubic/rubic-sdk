@@ -1,3 +1,8 @@
+import {
+    EIP1559Gas,
+    SingleGasPrice
+} from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
+
 /**
  * Stores options for transaction in `encode` function.
  */
@@ -10,19 +15,15 @@ export interface EncodeTransactionOptions {
     receiverAddress?: string;
 
     /**
+     * @deprecated Use gasPriceOptions instead.
      * Evm-transaction gas price.
      */
     gasPrice?: string;
 
     /**
-     * EIP-1559 Transaction miner's tip.
+     * Transaction gas price options.
      */
-    maxPriorityFeePerGas?: string;
-
-    /**
-     * EIP-1559 Transaction maximum fee.
-     */
-    maxFeePerGas?: string;
+    gasPriceOptions?: EIP1559Gas | SingleGasPrice;
 
     /**
      * Evm-transaction gas limit.

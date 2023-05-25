@@ -1,5 +1,9 @@
 import BigNumber from 'bignumber.js';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
+import {
+    EIP1559Gas,
+    SingleGasPrice
+} from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 
 export interface EvmBasicTransactionOptions extends BasicTransactionOptions {
     /**
@@ -8,17 +12,13 @@ export interface EvmBasicTransactionOptions extends BasicTransactionOptions {
     gas?: BigNumber | string | number;
 
     /**
+     * @deprecated Use gasPriceOptions instead.
      * Transaction gas price.
      */
     gasPrice?: BigNumber | string | number;
 
     /**
-     * EIP-1559 Transaction miner's tip.
+     * Transaction gas price options.
      */
-    maxPriorityFeePerGas?: number | string;
-
-    /**
-     * EIP-1559 Transaction maximum fee.
-     */
-    maxFeePerGas?: number | string;
+    gasPriceOptions?: EIP1559Gas | SingleGasPrice;
 }
