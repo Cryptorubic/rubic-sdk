@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import pTimeout from 'src/common/utils/p-timeout';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
@@ -51,20 +52,23 @@ export class OpenOceanProvider {
                 .getGasPrice();
             const isArbitrum = blockchain === BLOCKCHAIN_NAME.ARBITRUM;
             const apiUrl = openOceanApiUrl.quote(openOceanBlockchainName[blockchain]);
-            const quoteResponse = await Injector.httpClient.get<OpenOceanQuoteResponse>(apiUrl, {
-                params: {
-                    chain: openOceanBlockchainName[blockchain],
-                    inTokenAddress: fromWithoutFee.address,
-                    outTokenAddress: toToken.address,
-                    amount: fromWithoutFee.tokenAmount.toString(),
-                    slippage: options.slippageTolerance! * 100,
-                    gasPrice: isArbitrum
-                        ? ARBITRUM_GAS_PRICE
-                        : Web3Pure.fromWei(gasPrice, nativeTokensList[from.blockchain].decimals)
-                              .multipliedBy(10 ** 9)
-                              .toString()
-                }
-            });
+            const quoteResponse = await pTimeout(
+                Injector.httpClient.get<OpenOceanQuoteResponse>(apiUrl, {
+                    params: {
+                        chain: openOceanBlockchainName[blockchain],
+                        inTokenAddress: fromWithoutFee.address,
+                        outTokenAddress: toToken.address,
+                        amount: fromWithoutFee.tokenAmount.toString(),
+                        slippage: options.slippageTolerance! * 100,
+                        gasPrice: isArbitrum
+                            ? ARBITRUM_GAS_PRICE
+                            : Web3Pure.fromWei(gasPrice, nativeTokensList[from.blockchain].decimals)
+                                  .multipliedBy(10 ** 9)
+                                  .toString()
+                    }
+                }),
+                7_000
+            );
 
             if ([500, 400].includes(quoteResponse.code)) {
                 return {
