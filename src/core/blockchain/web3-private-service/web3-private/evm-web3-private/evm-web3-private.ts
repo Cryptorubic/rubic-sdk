@@ -150,7 +150,6 @@ export class EvmWeb3Private extends Web3Private {
                 to: toAddress,
                 value: Web3Private.stringifyAmount(options.value || 0),
                 ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
-                ...getGasOptions(options),
                 ...(options.data && { data: options.data })
             });
             return this.sendTransaction(toAddress, {
@@ -229,8 +228,7 @@ export class EvmWeb3Private extends Web3Private {
             const gas = await contract.methods[methodName](...methodArguments).estimateGas({
                 from: this.address,
                 ...(options.value && { value: Web3Private.stringifyAmount(options.value) }),
-                ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
-                ...getGasOptions(options)
+                ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) })
             });
             return this.executeContractMethod(
                 contractAddress,

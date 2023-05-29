@@ -198,7 +198,9 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
             if (this.from.isNative) {
                 await this.web3Private.trySendTransaction(payinAddress, {
                     value: this.from.weiAmount,
-                    onTransactionHash
+                    onTransactionHash,
+                    gasPrice,
+                    gasPriceOptions
                 });
             } else {
                 await this.web3Private.tryExecuteContractMethod(
