@@ -834,6 +834,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                         type: 'address'
                     },
                     {
+                        internalType: 'address',
+                        name: 'approveTo',
+                        type: 'address'
+                    },
+                    {
                         internalType: 'bytes',
                         name: 'callData',
                         type: 'bytes'
@@ -965,6 +970,11 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                     {
                         internalType: 'address',
                         name: 'router',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'approveTo',
                         type: 'address'
                     },
                     {

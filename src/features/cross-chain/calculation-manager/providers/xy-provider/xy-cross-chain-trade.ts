@@ -125,7 +125,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
     private readonly slippage: number;
 
     protected get methodName(): string {
-        return 'startBridgeTokensViaGenericCrossChain'
+        return 'startBridgeTokensViaGenericCrossChain';
     }
 
     private readonly onChainTrade: EvmOnChainTrade | null;
@@ -189,9 +189,11 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const receiverAddress = options?.receiverAddress || this.walletAddress;
-        const { data,
+        const {
+            data,
             value: providerValue,
-            to: providerRouter } = await this.getTransactionRequest(receiverAddress);
+            to: providerRouter
+        } = await this.getTransactionRequest(receiverAddress);
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
@@ -203,7 +205,11 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             fromAddress: this.walletAddress
         });
 
-        const providerData = ProxyCrossChainEvmTrade.getGenericProviderData(providerRouter, data!);
+        const providerData = ProxyCrossChainEvmTrade.getGenericProviderData(
+            providerRouter,
+            data!,
+            providerRouter
+        );
 
         const methodArguments = [bridgeData, providerData];
 

@@ -8,8 +8,8 @@ export const rubicProxyContractAddress: Record<
     }
 > = Object.values(BLOCKCHAIN_NAME).reduce(
     (acc, blockchain) => {
-        let gateway = '0x3335733c454805df6a77f825f266e136FB4a3333';
-        let router = '0x6AA981bFF95eDfea36Bdae98C26B274FfcafE8d3';
+        let gateway = '0x91ba630F63991A15D35f69F57ef0C931fD8BB5f6';
+        let router = '0xb177ba361941bA2C382484e83ba521451557901f';
         if (blockchain === BLOCKCHAIN_NAME.TELOS) {
             router = '0xA2d8CF32C16f070702c45a5686Fdb0a1d7171AAD';
         }
