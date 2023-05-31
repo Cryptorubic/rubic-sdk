@@ -91,7 +91,7 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.VELAS]: 'velas',
             [BLOCKCHAIN_NAME.SYSCOIN]: 'syscoin',
             [BLOCKCHAIN_NAME.ICP]: 'internet-computer',
-            [BLOCKCHAIN_NAME.OPTIMISM]: 'optimism',
+            [BLOCKCHAIN_NAME.OPTIMISM]: 'ethereum',
             [BLOCKCHAIN_NAME.CRONOS]: 'cronos',
             [BLOCKCHAIN_NAME.OKE_X_CHAIN]: 'okex-chain',
             [BLOCKCHAIN_NAME.GNOSIS]: 'xdai',
