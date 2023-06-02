@@ -114,20 +114,21 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             usedForCrossChain: fullOptions.usedForCrossChain,
             availableProtocols
         };
-        if (fullOptions.gasCalculation === 'disabled') {
+
+        try {
+            const gasPriceInfo = await this.getGasPriceInfo();
+            const gasLimit = (await OneinchTrade.getGasLimit(oneinchTradeStruct)) || estimatedGas;
+            const gasFeeInfo = getGasFeeInfo(gasLimit, gasPriceInfo);
+            return new OneinchTrade(
+                {
+                    ...oneinchTradeStruct,
+                    gasFeeInfo
+                },
+                fullOptions.providerAddress
+            );
+        } catch {
             return new OneinchTrade(oneinchTradeStruct, fullOptions.providerAddress);
         }
-
-        const gasPriceInfo = await this.getGasPriceInfo();
-        const gasLimit = (await OneinchTrade.getGasLimit(oneinchTradeStruct)) || estimatedGas;
-        const gasFeeInfo = getGasFeeInfo(gasLimit, gasPriceInfo);
-        return new OneinchTrade(
-            {
-                ...oneinchTradeStruct,
-                gasFeeInfo
-            },
-            fullOptions.providerAddress
-        );
     }
 
     private async getTradeInfo(

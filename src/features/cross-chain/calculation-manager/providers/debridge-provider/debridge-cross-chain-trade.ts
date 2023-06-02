@@ -263,7 +263,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             senderAddress: walletAddress,
             srcChainRefundAddress: walletAddress,
             dstChainOrderAuthorityAddress: receiverAddress || walletAddress,
-            srcChainOrderAuthorityAddress: receiverAddress || walletAddress
+            srcChainOrderAuthorityAddress: receiverAddress || walletAddress,
+            referralCode: '4350'
         };
 
         const { tx } = await Injector.httpClient.get<TransactionResponse>(
