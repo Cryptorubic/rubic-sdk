@@ -724,7 +724,7 @@ export class CrossChainStatusManager {
                     return { status: TxStatus.PENDING, hash: null };
             }
         } catch (error) {
-            return { status: TxStatus.FAIL, hash: null };
+            return { status: TxStatus.PENDING, hash: null };
         }
     }
 }
