@@ -1,3 +1,11 @@
+import {
+    L1ToL2MessageStatus,
+    L1TransactionReceipt,
+    L2ToL1MessageReader,
+    L2ToL1MessageStatus,
+    L2TransactionReceipt
+} from '@arbitrum/sdk';
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { createClient } from '@layerzerolabs/scan-client';
 import { Via } from '@viaprotocol/router-sdk';
 import { StatusResponse, TransactionStatus } from 'rango-sdk-basic';
@@ -70,7 +78,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE]: this.getCelerBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CHANGENOW]: this.getChangenowDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getStargateDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getStargateDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus
     };
 
     /**
@@ -658,6 +667,64 @@ export class CrossChainStatusManager {
             return { status: TxStatus.PENDING, hash: null };
         } catch {
             return { status: TxStatus.PENDING, hash: null };
+        }
+    }
+
+    public async getArbitrumBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const rpcProviders = Injector.web3PublicService.rpcProvider;
+
+        const l1Provider = new JsonRpcProvider(
+            rpcProviders[BLOCKCHAIN_NAME.ETHEREUM]!.rpcList[0]!,
+            1
+        );
+        const l2Provider = new JsonRpcProvider(
+            rpcProviders[BLOCKCHAIN_NAME.ARBITRUM]!.rpcList[0]!,
+            42161
+        );
+
+        // L1 to L2 deposit
+        if (data.fromBlockchain === BLOCKCHAIN_NAME.ETHEREUM) {
+            const sourceTx = await l1Provider.getTransactionReceipt(data.srcTxHash);
+            const l1TxReceipt = new L1TransactionReceipt(sourceTx);
+
+            const [l1ToL2Msg] = await l1TxReceipt.getL1ToL2Messages(l2Provider);
+            const response = await l1ToL2Msg!.getSuccessfulRedeem();
+
+            switch (response.status) {
+                case L1ToL2MessageStatus.EXPIRED:
+                case L1ToL2MessageStatus.CREATION_FAILED:
+                case L1ToL2MessageStatus.FUNDS_DEPOSITED_ON_L2:
+                    return { status: TxStatus.FAIL, hash: null };
+                case L1ToL2MessageStatus.REDEEMED:
+                    return { status: TxStatus.SUCCESS, hash: response.l2TxReceipt.transactionHash };
+                case L1ToL2MessageStatus.NOT_YET_CREATED:
+                default:
+                    return { status: TxStatus.PENDING, hash: null };
+            }
+        }
+        // L2 to L1 withdraw
+        const targetReceipt = await l2Provider.getTransactionReceipt(data.srcTxHash);
+        const l2TxReceipt = new L2TransactionReceipt(targetReceipt);
+        const [event] = l2TxReceipt.getL2ToL1Events();
+        if (!event) {
+            return { status: TxStatus.PENDING, hash: null };
+        }
+
+        const messageReader = new L2ToL1MessageReader(l1Provider, event);
+
+        try {
+            const status = await messageReader.status(l2Provider);
+            switch (status) {
+                case L2ToL1MessageStatus.CONFIRMED:
+                    return { status: TxStatus.READY_TO_CLAIM, hash: null };
+                case L2ToL1MessageStatus.EXECUTED:
+                    return { status: TxStatus.SUCCESS, hash: null };
+                case L2ToL1MessageStatus.UNCONFIRMED:
+                default:
+                    return { status: TxStatus.PENDING, hash: null };
+            }
+        } catch (error) {
+            return { status: TxStatus.FAIL, hash: null };
         }
     }
 }

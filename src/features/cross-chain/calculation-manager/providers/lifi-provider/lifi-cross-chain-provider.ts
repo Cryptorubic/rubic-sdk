@@ -1,6 +1,6 @@
 import LIFI, { FeeCost, LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
-import { MinAmountError, RubicSdkError } from 'src/common/errors';
+import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -50,7 +50,11 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as LifiCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as LifiCrossChainSupportedBlockchain;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
 
         if (
@@ -158,12 +162,14 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         } catch (err) {
             return {
                 trade,
-                error: err
+                error: err,
+                tradeType: this.type
             };
         }
 
         return {
-            trade
+            trade,
+            tradeType: this.type
         };
     }
 

@@ -1,5 +1,10 @@
 import BigNumber from 'bignumber.js';
-import { InsufficientLiquidityError, MinAmountError, RubicSdkError } from 'src/common/errors';
+import {
+    InsufficientLiquidityError,
+    MinAmountError,
+    NotSupportedTokensError,
+    RubicSdkError
+} from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { compareAddresses } from 'src/common/utils/blockchain';
@@ -47,7 +52,11 @@ export class XyCrossChainProvider extends CrossChainProvider {
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
 
         try {
@@ -116,7 +125,8 @@ export class XyCrossChainProvider extends CrossChainProvider {
             if (transitToken && !onChainTrade) {
                 return {
                     trade: null,
-                    error: new RubicSdkError('Can not estimate source swap trade. ')
+                    error: new RubicSdkError('Can not estimate source swap trade. '),
+                    tradeType: this.type
                 };
             }
 
@@ -178,14 +188,16 @@ export class XyCrossChainProvider extends CrossChainProvider {
                         onChainTrade
                     },
                     options.providerAddress
-                )
+                ),
+                tradeType: this.type
             };
         } catch (err) {
             const rubicSdkError = CrossChainProvider.parseError(err);
 
             return {
                 trade: null,
-                error: rubicSdkError
+                error: rubicSdkError,
+                tradeType: this.type
             };
         }
     }

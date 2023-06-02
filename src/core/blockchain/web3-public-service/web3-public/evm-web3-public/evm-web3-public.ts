@@ -96,10 +96,15 @@ export class EvmWeb3Public extends Web3Public {
         ownerAddress: string,
         spenderAddress: string
     ): Promise<BigNumber> {
-        const contract = new this.web3.eth.Contract(this.tokenContractAbi, tokenAddress);
+        try {
+            const contract = new this.web3.eth.Contract(this.tokenContractAbi, tokenAddress);
 
-        const allowance = await contract.methods.allowance(ownerAddress, spenderAddress).call();
-        return new BigNumber(allowance);
+            const allowance = await contract.methods.allowance(ownerAddress, spenderAddress).call();
+            return new BigNumber(allowance);
+        } catch (err) {
+            console.error(err);
+            return new BigNumber(0);
+        }
     }
 
     public async multicallContractsMethods<Output extends Web3PrimitiveType>(
