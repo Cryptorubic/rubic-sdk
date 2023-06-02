@@ -1,6 +1,7 @@
 import {
     Erc20Bridger,
     getL2Network,
+    L1TransactionReceipt,
     L2Network,
     L2ToL1MessageReader,
     L2TransactionReceipt
@@ -21,6 +22,7 @@ import { arbitrumRbcBridgeContractAddress } from 'src/features/cross-chain/calcu
 import { l1Erc20GatewayAbi } from 'src/features/cross-chain/calculation-manager/providers/arbitrum-rbc-bridge/constants/l1-erc20-gateway-abi';
 import { l2Erc20GatewayAbi } from 'src/features/cross-chain/calculation-manager/providers/arbitrum-rbc-bridge/constants/l2-erc20-gateway-abi';
 import { outboxAbi } from 'src/features/cross-chain/calculation-manager/providers/arbitrum-rbc-bridge/constants/outbox-abi';
+import { retryableFactoryAbi } from 'src/features/cross-chain/calculation-manager/providers/arbitrum-rbc-bridge/constants/retryable-factory-abi';
 import { ArbitrumRbcBridgeSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/arbitrum-rbc-bridge/models/arbitrum-rbc-bridge-supported-blockchain';
 import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
@@ -302,6 +304,54 @@ export class ArbitrumRbcBridgeTrade extends EvmCrossChainTrade {
                 event.callvalue.toString(),
                 event.data
             ],
+            {
+                onTransactionHash,
+                gas: gasLimit,
+                gasPrice,
+                gasPriceOptions
+            }
+        );
+    }
+
+    public static async redeemTokens(
+        sourceTransactionHash: string,
+        options: SwapTransactionOptions
+    ): Promise<TransactionReceipt> {
+        const rpcProviders = Injector.web3PublicService.rpcProvider;
+        const l1Provider = new JsonRpcProvider(
+            rpcProviders[BLOCKCHAIN_NAME.ETHEREUM]!.rpcList[0]!,
+            1
+        );
+        const l2Provider = new JsonRpcProvider(
+            rpcProviders[BLOCKCHAIN_NAME.ARBITRUM]!.rpcList[0]!,
+            42161
+        );
+
+        const receipt = await l1Provider.getTransactionReceipt(sourceTransactionHash);
+        const messages = await new L1TransactionReceipt(receipt).getL1ToL2Messages(l2Provider);
+        const creationIdMessage = messages.find(el => el.retryableCreationId);
+        if (!creationIdMessage) {
+            throw new RubicSdkError('Can not find creation id message.');
+        }
+        const { retryableCreationId } = creationIdMessage;
+
+        const web3Private = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
+            BLOCKCHAIN_NAME.ARBITRUM
+        );
+        await web3Private.checkBlockchainCorrect(BLOCKCHAIN_NAME.ARBITRUM);
+
+        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+        };
+
+        return web3Private.tryExecuteContractMethod(
+            '0x000000000000000000000000000000000000006E',
+            retryableFactoryAbi,
+            'redeem',
+            [retryableCreationId],
             {
                 onTransactionHash,
                 gas: gasLimit,

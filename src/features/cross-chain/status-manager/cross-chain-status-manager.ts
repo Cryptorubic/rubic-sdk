@@ -672,7 +672,6 @@ export class CrossChainStatusManager {
 
     public async getArbitrumBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         const rpcProviders = Injector.web3PublicService.rpcProvider;
-
         const l1Provider = new JsonRpcProvider(
             rpcProviders[BLOCKCHAIN_NAME.ETHEREUM]!.rpcList[0]!,
             1
@@ -681,38 +680,45 @@ export class CrossChainStatusManager {
             rpcProviders[BLOCKCHAIN_NAME.ARBITRUM]!.rpcList[0]!,
             42161
         );
-
         // L1 to L2 deposit
         if (data.fromBlockchain === BLOCKCHAIN_NAME.ETHEREUM) {
-            const sourceTx = await l1Provider.getTransactionReceipt(data.srcTxHash);
-            const l1TxReceipt = new L1TransactionReceipt(sourceTx);
+            try {
+                const sourceTx = await l1Provider.getTransactionReceipt(data.srcTxHash);
+                const l1TxReceipt = new L1TransactionReceipt(sourceTx);
 
-            const [l1ToL2Msg] = await l1TxReceipt.getL1ToL2Messages(l2Provider);
-            const response = await l1ToL2Msg!.getSuccessfulRedeem();
+                const [l1ToL2Msg] = await l1TxReceipt.getL1ToL2Messages(l2Provider);
+                const response = await l1ToL2Msg!.getSuccessfulRedeem();
 
-            switch (response.status) {
-                case L1ToL2MessageStatus.EXPIRED:
-                case L1ToL2MessageStatus.CREATION_FAILED:
-                case L1ToL2MessageStatus.FUNDS_DEPOSITED_ON_L2:
-                    return { status: TxStatus.FAIL, hash: null };
-                case L1ToL2MessageStatus.REDEEMED:
-                    return { status: TxStatus.SUCCESS, hash: response.l2TxReceipt.transactionHash };
-                case L1ToL2MessageStatus.NOT_YET_CREATED:
-                default:
-                    return { status: TxStatus.PENDING, hash: null };
+                switch (response.status) {
+                    case L1ToL2MessageStatus.FUNDS_DEPOSITED_ON_L2:
+                        return { status: TxStatus.REVERT, hash: null };
+                    case L1ToL2MessageStatus.EXPIRED:
+                    case L1ToL2MessageStatus.CREATION_FAILED:
+                        return { status: TxStatus.FAIL, hash: null };
+                    case L1ToL2MessageStatus.REDEEMED:
+                        return {
+                            status: TxStatus.SUCCESS,
+                            hash: response.l2TxReceipt.transactionHash
+                        };
+                    case L1ToL2MessageStatus.NOT_YET_CREATED:
+                    default:
+                        return { status: TxStatus.PENDING, hash: null };
+                }
+            } catch {
+                return { status: TxStatus.PENDING, hash: null };
             }
         }
         // L2 to L1 withdraw
-        const targetReceipt = await l2Provider.getTransactionReceipt(data.srcTxHash);
-        const l2TxReceipt = new L2TransactionReceipt(targetReceipt);
-        const [event] = l2TxReceipt.getL2ToL1Events();
-        if (!event) {
-            return { status: TxStatus.PENDING, hash: null };
-        }
-
-        const messageReader = new L2ToL1MessageReader(l1Provider, event);
-
         try {
+            const targetReceipt = await l2Provider.getTransactionReceipt(data.srcTxHash);
+            const l2TxReceipt = new L2TransactionReceipt(targetReceipt);
+            const [event] = l2TxReceipt.getL2ToL1Events();
+            if (!event) {
+                return { status: TxStatus.PENDING, hash: null };
+            }
+
+            const messageReader = new L2ToL1MessageReader(l1Provider, event);
+
             const status = await messageReader.status(l2Provider);
             switch (status) {
                 case L2ToL1MessageStatus.CONFIRMED:
