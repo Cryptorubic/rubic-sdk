@@ -109,7 +109,7 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.THETA]: 'theta',
             [BLOCKCHAIN_NAME.XDC]: 'xdc-network',
             [BLOCKCHAIN_NAME.BITCOIN_CASH]: 'bitcoin-cash',
-            [BLOCKCHAIN_NAME.ZK_SYNC]: 'zksync'
+            [BLOCKCHAIN_NAME.ZK_SYNC]: 'ethereum'
         };
 
         this.tokenBlockchainId = {
