@@ -59,7 +59,7 @@ export abstract class CurveAbstractTrade extends EvmOnChainTrade {
             const exchangeParams = [
                 this.poolAddress,
                 this.from.isNative ? CurveAbstractProvider.nativeAddress : this.from.address,
-                this.to.address,
+                this.to.isNative ? CurveAbstractProvider.nativeAddress : this.to.address,
                 this.fromWithoutFee.stringWeiAmount,
                 this.toTokenAmountMin.stringWeiAmount
             ];
