@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError, TooLowAmountError } from 'src/common/errors';
+import { NotSupportedTokensError, RubicSdkError, TooLowAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -75,7 +75,11 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as DeBridgeCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as DeBridgeCrossChainSupportedBlockchain;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
 
         try {
@@ -150,7 +154,8 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         onChainTrade: null
                     },
                     options.providerAddress
-                )
+                ),
+                tradeType: this.type
             };
         } catch (err) {
             const rubicSdkError = CrossChainProvider.parseError(err);
@@ -158,7 +163,8 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
 
             return {
                 trade: null,
-                error: debridgeApiError || rubicSdkError
+                error: debridgeApiError || rubicSdkError,
+                tradeType: this.type
             };
         }
     }

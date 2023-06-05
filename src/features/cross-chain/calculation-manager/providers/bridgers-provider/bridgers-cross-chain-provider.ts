@@ -1,5 +1,10 @@
 import BigNumber from 'bignumber.js';
-import { BridgersPairIsUnavailableError, MaxAmountError, MinAmountError } from 'src/common/errors';
+import {
+    BridgersPairIsUnavailableError,
+    MaxAmountError,
+    MinAmountError,
+    NotSupportedTokensError
+} from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import {
@@ -61,7 +66,11 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as BridgersCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as BridgersCrossChainSupportedBlockchain;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
 
         try {
@@ -105,7 +114,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
             if (quoteResponse.resCode !== 100 || !transactionData) {
                 return {
                     trade: null,
-                    error: CrossChainProvider.parseError(new BridgersPairIsUnavailableError())
+                    error: CrossChainProvider.parseError(new BridgersPairIsUnavailableError()),
+                    tradeType: this.type
                 };
             }
 
@@ -115,7 +125,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                     error: new MinAmountError(
                         new BigNumber(transactionData.depositMin),
                         from.symbol
-                    )
+                    ),
+                    tradeType: this.type
                 };
             }
             if (from.tokenAmount.gt(transactionData.depositMax)) {
@@ -124,7 +135,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                     error: new MaxAmountError(
                         new BigNumber(transactionData.depositMax),
                         from.symbol
-                    )
+                    ),
+                    tradeType: this.type
                 };
             }
 
@@ -174,7 +186,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                             contractAddress: transactionData.contractAddress
                         },
                         options.providerAddress
-                    )
+                    ),
+                    tradeType: this.type
                 };
             }
             return {
@@ -188,12 +201,14 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                         contractAddress: transactionData.contractAddress
                     },
                     options.providerAddress
-                )
+                ),
+                tradeType: this.type
             };
         } catch (err: unknown) {
             return {
                 trade: null,
-                error: CrossChainProvider.parseError(err)
+                error: CrossChainProvider.parseError(err),
+                tradeType: this.type
             };
         }
     }

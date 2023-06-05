@@ -94,7 +94,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
                 return {
                     trade: null,
-                    error: new NotSupportedTokensError()
+                    error: new NotSupportedTokensError(),
+                    tradeType: this.type
                 };
             }
 
@@ -103,7 +104,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             if (hasDirectRoute && from.isNative && toToken.isNative) {
                 return {
                     trade: null,
-                    error: new RubicSdkError('Native bridge is not supported.')
+                    error: new RubicSdkError('Native bridge is not supported.'),
+                    tradeType: this.type
                 };
             }
 
@@ -127,7 +129,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 if (!useProxy) {
                     return {
                         trade: null,
-                        error: new NotSupportedTokensError()
+                        error: new NotSupportedTokensError(),
+                        tradeType: this.type
                     };
                 }
                 const trade = await ProxyCrossChainEvmTrade.getOnChainTrade(
@@ -138,7 +141,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 if (!trade) {
                     return {
                         trade: null,
-                        error: new NotSupportedTokensError()
+                        error: new NotSupportedTokensError(),
+                        tradeType: this.type
                     };
                 }
                 srcChainTrade = trade;
@@ -200,13 +204,15 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                         cryptoFeeToken: nativeToken
                     },
                     options.providerAddress
-                )
+                ),
+                tradeType: this.type
             };
         } catch (error) {
             console.error({ 'CALCULATE ERROR': error });
             return {
                 trade: null,
-                error: parseError(error)
+                error: parseError(error),
+                tradeType: this.type
             };
         }
     }
