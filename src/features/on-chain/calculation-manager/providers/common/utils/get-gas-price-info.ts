@@ -7,7 +7,7 @@ import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/provider
 export async function getGasPriceInfo(blockchain: EvmBlockchainName): Promise<GasPriceInfo> {
     const [{ gasPrice, maxFeePerGas }, nativeCoinPrice] = await Promise.all([
         Injector.gasPriceApi.getGasPrice(blockchain),
-        Injector.coingeckoApi.getNativeCoinPrice(blockchain)
+        Injector.coingeckoApi.getNativeCoinPrice(blockchain).catch(() => new BigNumber(0))
     ]);
 
     const gasPriceInEth = Web3Pure.fromWei(maxFeePerGas || gasPrice || 0);

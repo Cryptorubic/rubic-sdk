@@ -85,17 +85,21 @@ export abstract class ZrxAbstractProvider extends EvmOnChainProvider {
             return new ZrxTrade(tradeStruct, fullOptions.providerAddress);
         }
 
-        const gasPriceInfo = await this.getGasPriceInfo();
-        const gasLimit = (await ZrxTrade.getGasLimit(tradeStruct)) || apiTradeData.gas;
-        const gasFeeInfo = await getGasFeeInfo(gasLimit, gasPriceInfo);
+        try {
+            const gasPriceInfo = await this.getGasPriceInfo();
+            const gasLimit = (await ZrxTrade.getGasLimit(tradeStruct)) || apiTradeData.gas;
+            const gasFeeInfo = await getGasFeeInfo(gasLimit, gasPriceInfo);
 
-        return new ZrxTrade(
-            {
-                ...tradeStruct,
-                gasFeeInfo
-            },
-            fullOptions.providerAddress
-        );
+            return new ZrxTrade(
+                {
+                    ...tradeStruct,
+                    gasFeeInfo
+                },
+                fullOptions.providerAddress
+            );
+        } catch {
+            return new ZrxTrade(tradeStruct, fullOptions.providerAddress);
+        }
     }
 
     /**

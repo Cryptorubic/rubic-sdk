@@ -30,8 +30,6 @@ import {
 export class DebridgeCrossChainProvider extends CrossChainProvider {
     public static readonly apiEndpoint = 'https://api.dln.trade/v1.0/dln';
 
-    private readonly deBridgeReferralCode = '4350';
-
     public readonly type = CROSS_CHAIN_TRADE_TYPE.DEBRIDGE;
 
     public isSupportedBlockchain(
@@ -94,7 +92,9 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 dstChainId: blockchainId[toBlockchain],
                 dstChainTokenOut: toToken.address,
                 dstChainTokenOutRecipient: this.getWalletAddress(fromBlockchain) || fakeAddress,
-                prependOperatingExpenses: false
+                prependOperatingExpenses: false,
+                affiliateFeePercent: 0.1,
+                affiliateFeeRecipient: '0x0D582aC954E954419F3c2F27fD54323Ca488258A'
             };
 
             const { tx, estimation } = await Injector.httpClient.get<TransactionResponse>(
@@ -136,9 +136,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                     {
                         from,
                         to,
-                        transactionRequest: {
-                            ...requestParams
-                        },
+                        transactionRequest: requestParams,
                         gasData,
                         priceImpact: from.calculatePriceImpactPercent(to),
                         allowanceTarget: tx.allowanceTarget,
