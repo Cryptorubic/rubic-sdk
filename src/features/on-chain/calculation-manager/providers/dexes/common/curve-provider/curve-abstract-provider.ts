@@ -14,6 +14,8 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
+import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 import { addressProviderAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/common/curve-provider/constants/address-provider-abi';
 import { registryAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/common/curve-provider/constants/registry-abi';
 import { registryExchangeAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/common/curve-provider/constants/registry-exchange-abi';
@@ -106,7 +108,34 @@ export abstract class CurveAbstractProvider<
             usedForCrossChain: fullOptions.usedForCrossChain
         };
 
-        return new this.Trade(tradeStruct, fullOptions.providerAddress);
+        const trade = new this.Trade(tradeStruct, fullOptions.providerAddress);
+
+        let gasFeeInfo = null;
+        const spenderAddress = options?.fromAddress || this.walletAddress;
+        if (spenderAddress) {
+            const params = await trade.encodeDirect({
+                fromAddress: spenderAddress,
+                supportFee: false
+            });
+            const gasPrice = await getGasPriceInfo(fromToken.blockchain);
+
+            let gasLimit: null | BigNumber;
+
+            try {
+                gasLimit = await this.web3Public.getEstimatedGasByData(
+                    spenderAddress,
+                    registryExchangeAddress,
+                    {
+                        data: params.data
+                    }
+                );
+            } catch {
+                gasLimit = new BigNumber(400_000); // Default gas limit
+            }
+            gasFeeInfo = getGasFeeInfo(gasLimit, gasPrice);
+        }
+
+        return new this.Trade({ ...tradeStruct, gasFeeInfo }, fullOptions.providerAddress);
     }
 
     private async fetchRegistryExchangeAddress(): Promise<string> {
