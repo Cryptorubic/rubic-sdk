@@ -7,6 +7,7 @@ import {
 } from 'src/core/blockchain/constants/healthcheck';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
+import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { EVM_MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/evm-multicall-abi';
 import { BatchCall } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/batch-call';
@@ -247,6 +248,32 @@ export class EvmWeb3Public extends Web3Public {
                 from: fromAddress,
                 gas: 10000000,
                 ...(value && { value })
+            });
+            return new BigNumber(gasLimit);
+        } catch (err) {
+            console.debug(err);
+            return null;
+        }
+    }
+
+    public async getEstimatedGasByData(
+        fromAddress: string,
+        toAddress: string,
+        options: {
+            from?: string;
+            value?: string;
+            gasPrice?: string;
+            gas?: string;
+            data: string;
+        }
+    ): Promise<BigNumber | null> {
+        try {
+            const gasLimit = await this.web3.eth.estimateGas({
+                from: fromAddress,
+                to: toAddress,
+                value: Web3Private.stringifyAmount(options.value || 0),
+                ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
+                ...(options.data && { data: options.data })
             });
             return new BigNumber(gasLimit);
         } catch (err) {
