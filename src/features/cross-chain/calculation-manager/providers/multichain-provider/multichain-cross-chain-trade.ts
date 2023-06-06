@@ -250,7 +250,11 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
         let providerData = [this.routerAddress];
         if (this.routerMethodName !== 'Swapout') {
             const { data, to: providerRouter } = this.getSwapData(options);
-            providerData = ProxyCrossChainEvmTrade.getGenericProviderData(providerRouter!, data!);
+            providerData = ProxyCrossChainEvmTrade.getGenericProviderData(
+                providerRouter!,
+                data!,
+                providerRouter!
+            );
         }
 
         const methodArguments = swapData

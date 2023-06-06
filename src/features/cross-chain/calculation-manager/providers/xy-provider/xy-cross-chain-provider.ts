@@ -1,8 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { InsufficientLiquidityError, MinAmountError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
-import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -73,7 +71,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 fromTokenAddress: fromToken.isNative
                     ? XyCrossChainTrade.nativeAddress
                     : fromToken.address,
-                amount: fromToken.stringWeiAmount,
+                amount: fromWithoutFee.stringWeiAmount,
                 slippage: String(slippageTolerance),
                 destChainId: blockchainId[toBlockchain],
                 toTokenAddress: toToken.isNative
@@ -83,7 +81,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 receiveAddress: receiverAddress || EvmWeb3Pure.EMPTY_ADDRESS
             };
 
-            const { toTokenAmount, statusCode, msg, xyFee, quote } =
+            const { toTokenAmount, statusCode, msg, xyFee } =
                 await Injector.httpClient.get<XyTransactionResponse>(
                     `${XyCrossChainProvider.apiEndpoint}/swap`,
                     {
@@ -92,34 +90,6 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 );
             this.analyzeStatusCode(statusCode, msg);
 
-            const sourceTransitToken = quote.sourceChainSwaps?.toToken;
-            const transitToken: TokenBaseStruct<EvmBlockchainName> | null = sourceTransitToken
-                ? {
-                      address: compareAddresses(
-                          sourceTransitToken.tokenAddress,
-                          XyCrossChainTrade.nativeAddress
-                      )
-                          ? EvmWeb3Pure.EMPTY_ADDRESS
-                          : sourceTransitToken.tokenAddress,
-                      blockchain: fromBlockchain
-                  }
-                : null;
-            const halfSlippageTolerance = (options.slippageTolerance - 0.005) / 2;
-            const onChainTrade = transitToken
-                ? (await ProxyCrossChainEvmTrade.getOnChainTrade(
-                      fromWithoutFee,
-                      transitToken,
-                      halfSlippageTolerance
-                  ))!
-                : null;
-
-            if (transitToken && !onChainTrade) {
-                return {
-                    trade: null,
-                    error: new RubicSdkError('Can not estimate source swap trade. ')
-                };
-            }
-
             feeInfo.provider = {
                 cryptoFee: {
                     amount: new BigNumber(xyFee!.amount),
@@ -127,35 +97,10 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 }
             };
 
-            let to = new PriceTokenAmount({
+            const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(toTokenAmount, toToken.decimals)
             });
-
-            if (transitToken && onChainTrade) {
-                const fromTokenAddress = compareAddresses(
-                    transitToken.address,
-                    EvmWeb3Pure.EMPTY_ADDRESS
-                )
-                    ? XyCrossChainTrade.nativeAddress
-                    : transitToken.address;
-                const { toTokenAmount: finalTokenAmount } =
-                    await Injector.httpClient.get<XyTransactionResponse>(
-                        `${XyCrossChainProvider.apiEndpoint}/swap`,
-                        {
-                            params: {
-                                ...requestParams,
-                                fromTokenAddress,
-                                amount: onChainTrade.to.stringWeiAmount,
-                                slippage: String(halfSlippageTolerance * 100)
-                            }
-                        }
-                    );
-                to = new PriceTokenAmount({
-                    ...toToken.asStruct,
-                    tokenAmount: Web3Pure.fromWei(finalTokenAmount, toToken.decimals)
-                });
-            }
 
             const gasData =
                 options.gasCalculation === 'enabled'
@@ -175,7 +120,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                         priceImpact: fromToken.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
                         feeInfo,
-                        onChainTrade
+                        onChainTrade: null
                     },
                     options.providerAddress
                 )

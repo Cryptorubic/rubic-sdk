@@ -267,9 +267,9 @@ export class ProxyCrossChainEvmTrade {
     public static getGenericProviderData(
         providerAddress: string,
         providerData: string,
-        approveTo?: string
+        gatewayAddress: string
     ): [string, string, string] {
-        return [providerAddress, approveTo || '', providerData];
+        return [providerAddress, gatewayAddress, providerData];
     }
 
     public static async checkDexWhiteList(
