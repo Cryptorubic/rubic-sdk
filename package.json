@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "4.3.3q",
+    "version": "4.3.4-alpha.pulsechain.0",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
