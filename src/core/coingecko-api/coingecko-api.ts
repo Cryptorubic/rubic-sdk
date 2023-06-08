@@ -47,7 +47,8 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.THETA,
     BLOCKCHAIN_NAME.XDC,
     BLOCKCHAIN_NAME.BITCOIN_CASH,
-    BLOCKCHAIN_NAME.ZK_SYNC
+    BLOCKCHAIN_NAME.ZK_SYNC,
+    BLOCKCHAIN_NAME.PULSECHAIN
 ] as const;
 
 type SupportedBlockchain = (typeof supportedBlockchains)[number];
@@ -109,7 +110,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.THETA]: 'theta',
             [BLOCKCHAIN_NAME.XDC]: 'xdc-network',
             [BLOCKCHAIN_NAME.BITCOIN_CASH]: 'bitcoin-cash',
-            [BLOCKCHAIN_NAME.ZK_SYNC]: 'ethereum'
+            [BLOCKCHAIN_NAME.ZK_SYNC]: 'ethereum',
+            [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulsechain'
         };
 
         this.tokenBlockchainId = {
@@ -152,7 +154,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.THETA]: 'theta',
             [BLOCKCHAIN_NAME.XDC]: 'xdc-network',
             [BLOCKCHAIN_NAME.BITCOIN_CASH]: 'bitcoin-cash',
-            [BLOCKCHAIN_NAME.ZK_SYNC]: 'zksync'
+            [BLOCKCHAIN_NAME.ZK_SYNC]: 'zksync',
+            [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulsechain'
         };
     }
 
