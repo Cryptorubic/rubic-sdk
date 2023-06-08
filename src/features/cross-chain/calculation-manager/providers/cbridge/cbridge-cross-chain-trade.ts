@@ -230,7 +230,12 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
                 toTokenAmount: this.onChainTrade.to,
                 onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
             }));
-        const providerData = ProxyCrossChainEvmTrade.getGenericProviderData(to, data!);
+
+        const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
+            to,
+            data!,
+            this.fromBlockchain
+        );
 
         const methodArguments = swapData
             ? [bridgeData, swapData, providerData]
