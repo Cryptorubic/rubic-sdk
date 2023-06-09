@@ -84,10 +84,12 @@ export class OpenOceanProvider {
             const toTokenWeiAmountMin = new BigNumber(quoteResponse.data.outAmount).multipliedBy(
                 1 - options.slippageTolerance
             );
-            const openOceanTradeStruct = {
+            const openOceanTradeStruct: OpenOceanTradeStruct = {
                 from,
                 to,
-                gasFeeInfo: null,
+                gasFeeInfo: {
+                    gasLimit: new BigNumber(quoteResponse.data.estimatedGas)
+                },
                 slippageTolerance: options.slippageTolerance!,
                 path: [from, to],
                 toTokenWeiAmountMin,
@@ -143,7 +145,9 @@ export class OpenOceanProvider {
     private async getGasFeeInfo(tradeStruct: OpenOceanTradeStruct): Promise<GasFeeInfo | null> {
         try {
             const gasPriceInfo = await getGasPriceInfo(tradeStruct.from.blockchain);
-            const gasLimit = await OpenOceanTrade.getGasLimit(tradeStruct);
+            const gasLimit =
+                tradeStruct?.gasFeeInfo?.gasLimit ||
+                (await OpenOceanTrade.getGasLimit(tradeStruct));
             return getGasFeeInfo(gasLimit, gasPriceInfo);
         } catch {
             return null;

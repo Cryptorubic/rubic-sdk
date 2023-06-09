@@ -12,14 +12,15 @@ export abstract class Web3Private {
     /**
      * Converts number, string or BigNumber value to integer string.
      * @param amount Value to convert.
+     * @param multiplier Amount multiplier.
      */
-    public static stringifyAmount(amount: number | string | BigNumber): string {
+    public static stringifyAmount(amount: number | string | BigNumber, multiplier = 1): string {
         const bnAmount = new BigNumber(amount);
         if (!bnAmount.isInteger()) {
             throw new RubicSdkError(`Value ${amount} is not integer`);
         }
 
-        return bnAmount.toFixed(0);
+        return bnAmount.multipliedBy(multiplier).toFixed(0);
     }
 
     protected abstract readonly Web3Pure: TypedWeb3Pure;
