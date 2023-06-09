@@ -255,5 +255,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'ETH',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.PULSECHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.PULSECHAIN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'PLS',
+        symbol: 'PLS',
+        decimals: 18
     })
 };

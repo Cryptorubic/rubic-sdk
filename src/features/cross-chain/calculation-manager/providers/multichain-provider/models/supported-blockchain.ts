@@ -28,7 +28,8 @@ export const multichainCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.VELAS,
     BLOCKCHAIN_NAME.SYSCOIN,
     BLOCKCHAIN_NAME.ASTAR_EVM,
-    BLOCKCHAIN_NAME.ZK_SYNC
+    BLOCKCHAIN_NAME.ZK_SYNC,
+    BLOCKCHAIN_NAME.PULSECHAIN
 ] as const;
 
 export type MultichainCrossChainSupportedBlockchain =

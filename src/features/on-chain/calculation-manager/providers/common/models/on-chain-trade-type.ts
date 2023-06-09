@@ -117,7 +117,10 @@ export const ON_CHAIN_TRADE_TYPE = {
     ZIP_SWAP: 'ZIP_SWAP',
     ZRX: 'ZRX',
 
-    YUZU_SWAP: 'YUZU_SWAP'
+    YUZU_SWAP: 'YUZU_SWAP',
+
+    PULSEX_V1: 'PULSEX_V1',
+    PULSEX_V2: 'PULSEX_V2'
 } as const;
 
 /**
