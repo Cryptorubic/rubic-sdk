@@ -26,6 +26,7 @@ import { UniswapV3AlgebraAbstractTrade } from 'src/features/on-chain/calculation
 import { getFromToTokensAmountsByExact } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
 import { AlgebraTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/algebra-trade';
 import { QuickSwapV3Trade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/quick-swap-v3-trade';
+import { QuickSwapV3PolygonZKEVMTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon-zkevm/quick-swap-v3/quick-swap-v3-trade';
 import { AbiItem } from 'web3-utils';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
@@ -38,7 +39,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
     protected abstract readonly OnChainTradeClass:
         | UniswapV3TradeClass<T>
         | typeof AlgebraTrade
-        | typeof QuickSwapV3Trade;
+        | typeof QuickSwapV3Trade
+        | typeof QuickSwapV3PolygonZKEVMTrade;
 
     protected abstract readonly quoterController: UniswapV3AlgebraQuoterController;
 

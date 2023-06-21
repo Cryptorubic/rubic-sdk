@@ -420,6 +420,12 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         swappingParams: SwappingParams
     ): Promise<SymbiosisTradeData> {
         const swapping = this.symbiosis.newSwapping();
+        try {
+            swapping.exactIn(...swappingParams).then(res => console.log(res));
+        } catch (e) {
+            console.log('e: ', e);
+        }
+
         return swapping.exactIn(...swappingParams);
     }
 

@@ -13,7 +13,7 @@ const defaultPolygonZKEVMRoutingProvidersAddresses = [
 const defaultPolygonZKEVMWethAddress =
     wrappedNativeTokensList[BLOCKCHAIN_NAME.POLYGON_ZKEVM]!.address;
 
-export const defaultPolygonProviderConfiguration: UniswapV2ProviderConfiguration = {
+export const defaultPolygonZKEVMProviderConfiguration: UniswapV2ProviderConfiguration = {
     maxTransitTokens: 3,
     routingProvidersAddresses: defaultPolygonZKEVMRoutingProvidersAddresses,
     wethAddress: defaultPolygonZKEVMWethAddress

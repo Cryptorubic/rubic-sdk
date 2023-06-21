@@ -79,6 +79,13 @@ export const symbiosisTransitTokens: Record<SymbiosisCrossChainSupportedBlockcha
         name: 'USDC',
         symbol: 'USDC',
         decimals: 6
+    },
+    [BLOCKCHAIN_NAME.POLYGON_ZKEVM]: {
+        blockchain: BLOCKCHAIN_NAME.POLYGON_ZKEVM,
+        address: '0xA8CE8aee21bC2A48a5EF670afCc9274C7bbbC035',
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 6
     }
     // [BLOCKCHAIN_NAME.BITCOIN]: {
     //     blockchain: BLOCKCHAIN_NAME.BITCOIN,
