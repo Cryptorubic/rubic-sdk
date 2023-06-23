@@ -7223,10 +7223,10 @@ swarm-js@^0.1.40:
     tar "^4.0.2"
     xhr-request "^1.0.1"
 
-symbiosis-js-sdk@^2.9.52:
-  version "2.9.52"
-  resolved "https://registry.yarnpkg.com/symbiosis-js-sdk/-/symbiosis-js-sdk-2.9.52.tgz#48604ccb4675fa174f1d389222eff2e999b9fef8"
-  integrity sha512-lOt138165q10k0F1mT56VrQ3dutMNc5pdqfpfWDgxRZWKGLy05fXu6NdeYGFIjtfOuil6LKz3OXyJQl60IOCbQ==
+symbiosis-js-sdk@2.9.60:
+  version "2.9.60"
+  resolved "https://registry.yarnpkg.com/symbiosis-js-sdk/-/symbiosis-js-sdk-2.9.60.tgz#1683f0efc83b34e3ea7aee814d5e3f99224bf7e2"
+  integrity sha512-z3csd5/hXgemBjLOdaP45eFAXMDtRdisRyIrG2Nwe+/EkZpfU9Osk7BZn3rTiZgBZueqDxwyw2d+Y9rbt+Hf+Q==
   dependencies:
     "@renproject/chains-bitcoin" "^3.4.2"
     "@renproject/chains-ethereum" "^3.4.3"

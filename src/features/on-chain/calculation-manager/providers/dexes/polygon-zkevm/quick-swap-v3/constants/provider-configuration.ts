@@ -5,5 +5,5 @@ import { UniswapV3AlgebraProviderConfiguration } from 'src/features/on-chain/cal
 export const QUICK_SWAP_V3_POLYGON_ZKEVM_PROVIDER_CONFIGURATION: UniswapV3AlgebraProviderConfiguration =
     {
         wethAddress: wrappedNativeTokensList[BLOCKCHAIN_NAME.POLYGON_ZKEVM]!.address,
-        maxTransitTokens: 1
+        maxTransitTokens: 3
     };
