@@ -8,6 +8,7 @@ import {
 import { AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/algebra/algebra-quoter-controller';
 import { UniswapV3AlgebraTradeStructOmitPath } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
 import { UniswapV3AlgebraAbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
+import { defaultPolygonProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/default-constants';
 import { QUICK_SWAP_V3_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/constants/provider-configuration';
 import {
     QUICK_SWAP_V3_ROUTER_CONTRACT_ABI,
@@ -31,7 +32,9 @@ export class QuickSwapV3Provider extends UniswapV3AlgebraAbstractProvider<QuickS
 
     protected readonly quoterController = new AlgebraQuoterController(
         QUICK_SWAP_V3_QUOTER_CONTRACT_ABI,
-        QUICK_SWAP_V3_QUOTER_CONTRACT_ADDRESS
+        QUICK_SWAP_V3_QUOTER_CONTRACT_ADDRESS,
+        this.blockchain,
+        defaultPolygonProviderConfiguration.routingProvidersAddresses
     );
 
     public readonly providerConfiguration = QUICK_SWAP_V3_PROVIDER_CONFIGURATION;

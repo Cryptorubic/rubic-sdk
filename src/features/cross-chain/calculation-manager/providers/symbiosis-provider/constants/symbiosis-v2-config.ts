@@ -487,6 +487,32 @@ export function getSymbiosisV2Config(): Config {
                             large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
                             small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
                         }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        symbol: 'sUSDC',
+                        address: '0x9d152fcb9692b5b2d31b81a4a5f86aa1bab42677',
+                        chainId: 56288,
+                        chainFromId: 42170,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        symbol: 'sUSDC',
+                        address: '0xa5CA3277041Bf6e8D6eEC2740010B7C6d10E4012',
+                        chainId: 56288,
+                        chainFromId: 1101,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
                     }
                 ],
                 nerves: [],
@@ -591,6 +617,39 @@ export function getSymbiosisV2Config(): Config {
                 nerves: [],
                 router: '0x0000000000000000000000000000000000000000',
                 dexFee: 0,
+                metaRouter: '0xcE8f24A58D85eD5c5A6824f7be1F8d4711A0eb4C',
+                metaRouterGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278',
+                bridge: '0x5523985926Aa12BA58DC5Ad00DDca99678D7227E',
+                synthesis: '0x0000000000000000000000000000000000000000',
+                portal: '0x292fC50e4eB66C3f6514b9E402dBc25961824D62',
+                fabric: '0x0000000000000000000000000000000000000000',
+                multicallRouter: '0xb8f275fBf7A959F4BCE59999A2EF122A099e81A8',
+                aavePool: '0x0000000000000000000000000000000000000000',
+                creamComptroller: '0x0000000000000000000000000000000000000000',
+                renGatewayRegistry: '0x0000000000000000000000000000000000000000'
+            },
+            {
+                id: 42170,
+                rpc: 'https://nova.arbitrum.io/rpc',
+                filterBlockOffset: 2000,
+                waitForBlocksCount: 60,
+                stables: [
+                    {
+                        name: 'USDC',
+                        symbol: 'USDC',
+                        address: '0x750ba8b76187092B0D1E87E28daaf484d1b5273b',
+                        chainId: 42170,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    }
+                ],
+                nerves: [],
+                router: '0xEe01c0CD76354C383B8c7B4e65EA88D00B06f36f',
+                dexFee: 30,
                 metaRouter: '0xcE8f24A58D85eD5c5A6824f7be1F8d4711A0eb4C',
                 metaRouterGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278',
                 bridge: '0x5523985926Aa12BA58DC5Ad00DDca99678D7227E',
