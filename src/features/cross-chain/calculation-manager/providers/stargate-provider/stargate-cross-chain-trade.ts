@@ -69,7 +69,6 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                     {
                         from,
                         to,
-                        toTokenAmountMin: new BigNumber(0),
                         slippageTolerance: 4,
                         priceImpact: null,
                         gasData: {
@@ -153,7 +152,6 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
             to: PriceTokenAmount<EvmBlockchainName>;
-            toTokenAmountMin: BigNumber;
             slippageTolerance: number;
             priceImpact: number | null;
             gasData: GasData | null;
@@ -167,13 +165,18 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         super(providerAddress);
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
-        this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.slippageTolerance = crossChainTrade.slippageTolerance;
         this.priceImpact = crossChainTrade.priceImpact;
         this.gasData = crossChainTrade.gasData;
         this.feeInfo = crossChainTrade.feeInfo;
         this.onChainTrade = crossChainTrade.srcChainTrade;
         this.dstChainTrade = crossChainTrade.dstChainTrade;
+        this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(
+            1 -
+                (crossChainTrade.srcChainTrade
+                    ? this.slippageTolerance / 2
+                    : this.slippageTolerance)
+        );
         this.onChainSubtype = {
             from: this.onChainTrade?.type,
             to: this.dstChainTrade?.type
@@ -201,7 +204,6 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             const { data, to } = await StargateCrossChainTrade.getLayerZeroSwapData(
                 this.from,
                 this.to,
-                this.toTokenAmountMin,
                 options?.receiverAddress
             );
 
@@ -232,7 +234,6 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
     public static async getLayerZeroSwapData(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
-        amountOutMin: BigNumber,
         receiverAddress?: string,
         dstData?: string
     ): Promise<EvmEncodeConfig> {
@@ -279,7 +280,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                   walletAddress,
                   from.stringWeiAmount,
                   Web3Pure.toWei(
-                      amountOutMin,
+                      to.tokenAmount,
                       stargatePoolsDecimals[to.symbol as StargateBridgeToken]
                   ),
                   dstConfig,
@@ -309,7 +310,6 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         const lzTxConfig = await StargateCrossChainTrade.getLayerZeroSwapData(
             this.onChainTrade ? this.onChainTrade.to : this.from,
             this.to,
-            this.toTokenAmountMin,
             options?.receiverAddress,
             dstSwapData
         );
