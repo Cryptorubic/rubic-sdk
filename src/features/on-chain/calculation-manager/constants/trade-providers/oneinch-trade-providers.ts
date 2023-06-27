@@ -5,6 +5,7 @@ import { OneinchEthereumProvider } from 'src/features/on-chain/calculation-manag
 import { OneinchFantomProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/oneinch-fantom/oneinch-fantom-provider';
 import { OneinchOptimismProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/optimism/oneinch-optimism/oneinch-optimism-provider';
 import { OneinchPolygonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
+import { OneinchPulsechainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/oneinch-pulsechain/oneinch-ethereum-provider';
 import { OneinchZksyncProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/oneinch-zksync/oneinch-zksync-provider';
 
 export const OneinchTradeProviders = [
@@ -15,5 +16,6 @@ export const OneinchTradeProviders = [
     OneinchFantomProvider,
     OneinchArbitrumProvider,
     OneinchOptimismProvider,
-    OneinchZksyncProvider
+    OneinchZksyncProvider,
+    OneinchPulsechainProvider
 ] as const;
