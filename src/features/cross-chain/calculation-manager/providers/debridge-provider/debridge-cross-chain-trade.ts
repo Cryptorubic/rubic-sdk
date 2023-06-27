@@ -267,10 +267,16 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             referralCode: '4350'
         };
 
-        const { tx } = await Injector.httpClient.get<TransactionResponse>(
+        const { tx, estimation } = await Injector.httpClient.get<TransactionResponse>(
             `${DebridgeCrossChainProvider.apiEndpoint}/order/create-tx`,
             { params }
         );
+
+        const newAmount = Web3Pure.fromWei(estimation.dstChainTokenOut.amount);
+        if (newAmount.lt(this.to.tokenAmount)) {
+            throw new RubicSdkError('The rate has changed, update the trade');
+        }
+
         return tx;
     }
 
