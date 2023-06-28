@@ -24,6 +24,7 @@ import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-m
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-cross-chain-supported-blockchain';
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
+import { Estimation } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/estimation-response';
 import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
 import { TransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
 import { meteRouterAbi } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/mete-router-abi';
@@ -272,10 +273,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             { params }
         );
 
-        const newAmount = Web3Pure.fromWei(estimation.dstChainTokenOut.amount);
-        if (newAmount.lt(this.to.tokenAmount)) {
-            throw new RubicSdkError('The rate has changed, update the trade');
-        }
+        this.checkOrderAmount(estimation);
 
         return tx;
     }
@@ -362,5 +360,33 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             return decodeData.otherSideCalldata;
         }
         throw new RubicSdkError('Wrong call data');
+    }
+
+    private checkOrderAmount(estimation: Estimation): never | void {
+        const newAmount = Web3Pure.fromWei(estimation.dstChainTokenOut.amount);
+        if (newAmount.lt(this.to.tokenAmount)) {
+            throw new RubicSdkError('The rate has changed, update the trade');
+        }
+
+        const acceptableExpensesChangePercent = 10;
+        const acceptablePriceChangeFromAmount = 0.05;
+
+        const feeAmount = Web3Pure.fromWei(
+            estimation.costsDetails.find(fee => fee.type === 'EstimatedOperatingExpenses')?.payload
+                .feeAmount || '0',
+            this.to.decimals
+        );
+
+        const acceptablePriceChangeFromExpenses = feeAmount
+            .dividedBy(newAmount)
+            .multipliedBy(acceptableExpensesChangePercent);
+
+        const acceptablePriceChange = acceptablePriceChangeFromExpenses
+            .plus(acceptablePriceChangeFromAmount)
+            .dividedBy(100);
+
+        if (this.to.tokenAmount.multipliedBy(acceptablePriceChange.plus(1)).lt(newAmount)) {
+            throw new RubicSdkError('The rate has changed, update the trade');
+        }
     }
 }
