@@ -136,7 +136,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 const trade = await ProxyCrossChainEvmTrade.getOnChainTrade(
                     fromWithoutFee,
                     transitToken,
-                    options.slippageTolerance
+                    options.slippageTolerance / 2
                 );
                 if (!trade) {
                     return {
@@ -170,12 +170,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                   ).data
                 : undefined;
 
-            const layerZeroFeeWei = await this.getLayerZeroFee(
-                transitTokenAmount,
-                to,
-                amountOutMin,
-                dstSwapData
-            );
+            const layerZeroFeeWei = await this.getLayerZeroFee(transitTokenAmount, to, dstSwapData);
             const layerZeroFeeAmount = Web3Pure.fromWei(
                 layerZeroFeeWei,
                 nativeTokensList[fromBlockchain].decimals
@@ -194,7 +189,6 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                     {
                         from,
                         to,
-                        toTokenAmountMin: amountOutMin,
                         slippageTolerance: options.slippageTolerance,
                         priceImpact: transitTokenAmount.calculatePriceImpactPercent(to),
                         gasData: null,
@@ -220,7 +214,6 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     private async getLayerZeroFee(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
-        amountOutMin: BigNumber,
         dstSwapData?: string
     ): Promise<BigNumber> {
         const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
@@ -228,7 +221,6 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         const layerZeroTxData = await StargateCrossChainTrade.getLayerZeroSwapData(
             from,
             to,
-            amountOutMin,
             undefined,
             dstSwapData
         );
