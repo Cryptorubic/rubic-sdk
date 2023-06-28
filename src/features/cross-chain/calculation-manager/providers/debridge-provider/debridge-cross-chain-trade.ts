@@ -363,29 +363,44 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     }
 
     private checkOrderAmount(estimation: Estimation): never | void {
-        const newAmount = Web3Pure.fromWei(estimation.dstChainTokenOut.amount);
-        if (newAmount.lt(this.to.tokenAmount)) {
-            throw new RubicSdkError('The rate has changed, update the trade');
-        }
+        const newAmount = Web3Pure.fromWei(estimation.dstChainTokenOut.amount, this.to.decimals);
+        console.info('oldAmount: ', this.to.tokenAmount.toFixed());
+        console.info('newAmount: ', newAmount.toFixed());
 
-        const acceptableExpensesChangePercent = 10;
+        const acceptableExpensesChangePercent = 3;
+        console.info('acceptableExpensesChangePercent: ', acceptableExpensesChangePercent);
         const acceptablePriceChangeFromAmount = 0.05;
+        console.info('acceptablePriceChangeFromAmount: ', acceptablePriceChangeFromAmount);
 
         const feeAmount = Web3Pure.fromWei(
             estimation.costsDetails.find(fee => fee.type === 'EstimatedOperatingExpenses')?.payload
                 .feeAmount || '0',
             this.to.decimals
         );
+        console.info('feeAmount: ', feeAmount.toFixed());
 
         const acceptablePriceChangeFromExpenses = feeAmount
             .dividedBy(newAmount)
             .multipliedBy(acceptableExpensesChangePercent);
+        console.info(
+            'acceptablePriceChangeFromExpenses: ',
+            acceptablePriceChangeFromExpenses.toFixed()
+        );
 
-        const acceptablePriceChange = acceptablePriceChangeFromExpenses
-            .plus(acceptablePriceChangeFromAmount)
-            .dividedBy(100);
+        const acceptablePriceChange = acceptablePriceChangeFromExpenses.plus(
+            acceptablePriceChangeFromAmount
+        );
+        console.info('acceptablePriceChange: ', acceptablePriceChange.toFixed());
 
-        if (this.to.tokenAmount.multipliedBy(acceptablePriceChange.plus(1)).lt(newAmount)) {
+        const amountPlusPercent = this.to.tokenAmount.multipliedBy(
+            acceptablePriceChange.dividedBy(100).plus(1)
+        );
+        const amountMinusPercent = this.to.tokenAmount.multipliedBy(
+            new BigNumber(1).minus(acceptablePriceChange.dividedBy(100))
+        );
+        console.info('amountPlusPercent: ', amountPlusPercent.toFixed());
+
+        if (amountPlusPercent.lt(newAmount) || amountMinusPercent.gt(newAmount)) {
             throw new RubicSdkError('The rate has changed, update the trade');
         }
     }

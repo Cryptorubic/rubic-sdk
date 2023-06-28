@@ -995,7 +995,7 @@
   dependencies:
     axios "^0.27.2"
 
-"@lifi/sdk@^1.7.2":
+"@lifi/sdk@^1.6.3", "@lifi/sdk@^1.7.2":
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/@lifi/sdk/-/sdk-1.7.2.tgz#a3cda45ca67c747cf13ab593b572e14a2d3a41cb"
   integrity sha512-FOkPDOPF9EcNv13FpCEDmrzFz2aDqqsOcgOEsRbiF59QfdUU2jNMhI19D9xGthdda4amx0cXHANykPRYLWtkQA==
@@ -6712,6 +6712,30 @@ rlp@^2.2.3, rlp@^2.2.4:
   dependencies:
     bn.js "^5.2.0"
 
+rubic-sdk@4.1.0-beta.0:
+  version "4.1.0-beta.0"
+  resolved "https://registry.yarnpkg.com/rubic-sdk/-/rubic-sdk-4.1.0-beta.0.tgz#81dd834b4ea1ac1300eca98f1607b5d6b7e12b91"
+  integrity sha512-+/gCFIepD5lhumVBA6I9DM5gxkzxeNuc8tyrOfurFh0yPAK+vpF5Fh0UGiQWqKCWTLMfoAOnlQq2ZNJSm++bsg==
+  dependencies:
+    "@1inch/limit-order-protocol-utils" "^3.0.0"
+    "@layerzerolabs/scan-client" "^0.0.0-beta.6"
+    "@lifi/sdk" "^1.6.3"
+    "@viaprotocol/router-sdk" "^1.0.7"
+    assert "^2.0.0"
+    axios "^0.26.1"
+    bignumber.js "9.1.0"
+    bitcoin-address-validation "2.2.1"
+    cbridge-revert-manager "1.1.0"
+    crc32 "^0.2.2"
+    ethers "^5.6.8"
+    grpc-web "^1.4.2"
+    lodash.clonedeep "^4.5.0"
+    rango-sdk-basic "^0.0.7"
+    rxjs "^7.8.0"
+    symbiosis-js-sdk "2.9.40"
+    tronweb "^4.3.0"
+    web3 "^1.8.1"
+
 run-parallel@^1.1.9:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/run-parallel/-/run-parallel-1.2.0.tgz#66d1368da7bdf921eb9d95bd1a9229e7f21a43ee"
@@ -7222,6 +7246,24 @@ swarm-js@^0.1.40:
     setimmediate "^1.0.5"
     tar "^4.0.2"
     xhr-request "^1.0.1"
+
+symbiosis-js-sdk@2.9.40:
+  version "2.9.40"
+  resolved "https://registry.yarnpkg.com/symbiosis-js-sdk/-/symbiosis-js-sdk-2.9.40.tgz#7b8f61fb3775892ea586a365fddcfff32cedb24f"
+  integrity sha512-91hI8EhhHqACziFi2iFzfgo16VqpnC/vUY13oGN6cuyaq/mXMBRfuHq2LifhZrALwkz+umP+cXuNuIK2PTEoXA==
+  dependencies:
+    "@renproject/chains-bitcoin" "^3.4.2"
+    "@renproject/chains-ethereum" "^3.4.3"
+    "@renproject/ren" "~3.3.0"
+    big.js "^5.2.2"
+    bignumber.js "^9.0.1"
+    decimal.js-light "^2.5.0"
+    isomorphic-unfetch "^3.1.0"
+    jsbi "^3.1.1"
+    lodash.flatmap "^4.5.0"
+    tiny-invariant "^1.1.0"
+    tiny-warning "^1.0.3"
+    toformat "^2.0.0"
 
 symbiosis-js-sdk@^2.9.52:
   version "2.9.52"
