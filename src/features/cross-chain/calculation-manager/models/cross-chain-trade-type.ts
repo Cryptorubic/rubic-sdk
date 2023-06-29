@@ -1,5 +1,4 @@
 export const CROSS_CHAIN_TRADE_TYPE = {
-    CELER: 'cbridge',
     SYMBIOSIS: 'symbiosis',
     LIFI: 'lifi',
     DEBRIDGE: 'dln',
