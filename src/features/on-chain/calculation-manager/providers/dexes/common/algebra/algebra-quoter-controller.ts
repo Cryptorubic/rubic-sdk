@@ -142,6 +142,17 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
             )
             .flat();
 
+        // const results_1 = await Promise.all(
+        //     quoterMethodsData.map(async data => {
+        //         return await this.web3Public.callContractMethod(
+        //             this.quoterContractAddress,
+        //             this.quoterContractABI,
+        //             data.methodData.methodName,
+        //             data.methodData.methodArguments
+        //         );
+        //     })
+        // );
+
         const results = await this.web3Public.multicallContractMethods<string>(
             this.quoterContractAddress,
             this.quoterContractABI,
