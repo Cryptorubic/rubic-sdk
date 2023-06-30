@@ -5,6 +5,7 @@ import {
     RubicSdkError,
     TooLowAmountError
 } from 'src/common/errors';
+import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -273,7 +274,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             { params }
         );
 
-        this.checkOrderAmount(estimation);
+        await this.checkOrderAmount(estimation);
 
         return tx;
     }
@@ -362,35 +363,25 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         throw new RubicSdkError('Wrong call data');
     }
 
-    private checkOrderAmount(estimation: Estimation): never | void {
+    private async checkOrderAmount(estimation: Estimation): Promise<never | void> {
         const newAmount = Web3Pure.fromWei(estimation.dstChainTokenOut.amount, this.to.decimals);
-        console.info('oldAmount: ', this.to.tokenAmount.toFixed());
-        console.info('newAmount: ', newAmount.toFixed());
 
         const acceptableExpensesChangePercent = 3;
-        console.info('acceptableExpensesChangePercent: ', acceptableExpensesChangePercent);
         const acceptablePriceChangeFromAmount = 0.05;
-        console.info('acceptablePriceChangeFromAmount: ', acceptablePriceChangeFromAmount);
 
         const feeAmount = Web3Pure.fromWei(
             estimation.costsDetails.find(fee => fee.type === 'EstimatedOperatingExpenses')?.payload
                 .feeAmount || '0',
             this.to.decimals
         );
-        console.info('feeAmount: ', feeAmount.toFixed());
 
         const acceptablePriceChangeFromExpenses = feeAmount
             .dividedBy(newAmount)
             .multipliedBy(acceptableExpensesChangePercent);
-        console.info(
-            'acceptablePriceChangeFromExpenses: ',
-            acceptablePriceChangeFromExpenses.toFixed()
-        );
 
         const acceptablePriceChange = acceptablePriceChangeFromExpenses.plus(
             acceptablePriceChangeFromAmount
         );
-        console.info('acceptablePriceChange: ', acceptablePriceChange.toFixed());
 
         const amountPlusPercent = this.to.tokenAmount.multipliedBy(
             acceptablePriceChange.dividedBy(100).plus(1)
@@ -398,10 +389,30 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         const amountMinusPercent = this.to.tokenAmount.multipliedBy(
             new BigNumber(1).minus(acceptablePriceChange.dividedBy(100))
         );
-        console.info('amountPlusPercent: ', amountPlusPercent.toFixed());
 
         if (amountPlusPercent.lt(newAmount) || amountMinusPercent.gt(newAmount)) {
-            throw new RubicSdkError('The rate has changed, update the trade');
+            const newTo = await PriceTokenAmount.createFromToken({
+                ...this.to,
+                tokenAmount: newAmount
+            });
+            throw new UpdatedRatesError(
+                new DebridgeCrossChainTrade(
+                    {
+                        from: this.from,
+                        to: newTo,
+                        transactionRequest: this.transactionRequest,
+                        gasData: this.gasData,
+                        priceImpact: this.from.calculatePriceImpactPercent(newTo),
+                        allowanceTarget: this.allowanceTarget,
+                        slippage: 0,
+                        feeInfo: this.feeInfo,
+                        transitAmount: this.transitAmount,
+                        cryptoFeeToken: this.cryptoFeeToken,
+                        onChainTrade: null
+                    },
+                    this.providerAddress
+                )
+            );
         }
     }
 }
