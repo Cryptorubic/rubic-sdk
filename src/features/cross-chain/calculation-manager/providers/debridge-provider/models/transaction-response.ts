@@ -1,5 +1,13 @@
 import { Estimation } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/estimation-response';
 
+export interface DlnTransaction {
+    to: string;
+    data: string;
+    value: string;
+    allowanceTarget: string;
+    allowanceValue: string;
+}
+
 /**
  * Swap transaction response.
  */
@@ -17,13 +25,7 @@ export interface TransactionResponse {
     /**
      * Transaction data.
      */
-    tx: {
-        to: string;
-        data: string;
-        value: string;
-        allowanceTarget: string;
-        allowanceValue: string;
-    };
+    tx: DlnTransaction;
 }
 
 /**
