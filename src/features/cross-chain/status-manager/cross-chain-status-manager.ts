@@ -38,7 +38,6 @@ import { ViaSwapStatus } from 'src/features/cross-chain/calculation-manager/prov
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
 import { MultichainStatusMapping } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
-import { CelerTransferStatus } from 'src/features/cross-chain/status-manager/models/celer-transfer-status.enum';
 import {
     ChangenowApiResponse,
     ChangenowApiStatus
@@ -48,7 +47,6 @@ import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/mod
 import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
 import {
     BtcStatusResponse,
-    CelerXtransferStatusResponse,
     DeBridgeApiStateStatus,
     DeBridgeFilteredListApiResponse,
     DeBridgeOrderApiResponse,
@@ -67,7 +65,6 @@ export class CrossChainStatusManager {
     private readonly LayzerZeroScanClient = createClient('mainnet');
 
     private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, GetDstTxDataFn | null> = {
-        [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus,
@@ -355,66 +352,6 @@ export class CrossChainStatusManager {
             return dstTxData;
         } catch (error) {
             console.debug('[Li-fi Trade] error retrieving tx status', error);
-            return {
-                status: TxStatus.PENDING,
-                hash: null
-            };
-        }
-    }
-
-    /**
-     * Get Celer trade dst transaction status.
-     * @param data Trade data.
-     * @returns Cross-chain transaction status.
-     */
-    private async getCelerDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        try {
-            const dstTxData: TxStatusData = {
-                status: TxStatus.PENDING,
-                hash: null
-            };
-            const txSearchResult = await Injector.httpClient.get<CelerXtransferStatusResponse>(
-                'https://api.celerscan.com/scan/searchByTxHash',
-                {
-                    params: {
-                        tx: data.srcTxHash
-                    }
-                }
-            );
-
-            if (txSearchResult.txSearchInfo.length === 0) {
-                return dstTxData;
-            }
-
-            const trade = txSearchResult.txSearchInfo[0]!.transfer[0]!;
-
-            if (
-                [
-                    CelerTransferStatus.XS_UNKNOWN,
-                    CelerTransferStatus.XS_WAITING_FOR_SGN_CONFIRMATION,
-                    CelerTransferStatus.XS_WAITING_FOR_FUND_RELEASE
-                ].includes(trade.xfer_status)
-            ) {
-                dstTxData.status = TxStatus.PENDING;
-            }
-
-            if (trade.xfer_status === CelerTransferStatus.XS_COMPLETED) {
-                dstTxData.status = TxStatus.SUCCESS;
-            }
-
-            if (
-                [
-                    CelerTransferStatus.XS_REFUNDED,
-                    CelerTransferStatus.XS_TO_BE_REFUND,
-                    CelerTransferStatus.XS_REFUND_TO_BE_CONFIRMED
-                ].includes(trade.xfer_status)
-            ) {
-                dstTxData.status = TxStatus.FALLBACK;
-            }
-
-            return dstTxData;
-        } catch (error) {
-            console.debug('[Celer Trade] error retrieving tx status', error);
             return {
                 status: TxStatus.PENDING,
                 hash: null
