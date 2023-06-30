@@ -85,7 +85,6 @@
         "grpc-web": "^1.4.2",
         "lodash.clonedeep": "^4.5.0",
         "rango-sdk-basic": "^0.0.7",
-        "rubic-sdk": "4.1.0-beta.0",
         "rxjs": "^7.8.0",
         "symbiosis-js-sdk": "^2.9.52",
         "tronweb": "^4.3.0",
