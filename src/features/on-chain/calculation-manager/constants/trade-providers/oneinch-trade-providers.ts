@@ -1,4 +1,5 @@
 import { OneinchArbitrumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/arbitrum/oneinch-arbitrum/oneinch-arbitrum-provider';
+import { OneinchAuroraProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/aurora/oneinch-arbitrum/oneinch-aurora-provider';
 import { OneinchAvalancheProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
 import { OneinchBscProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
 import { OneinchEthereumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
@@ -15,5 +16,6 @@ export const OneinchTradeProviders = [
     OneinchFantomProvider,
     OneinchArbitrumProvider,
     OneinchOptimismProvider,
-    OneinchZksyncProvider
+    OneinchZksyncProvider,
+    OneinchAuroraProvider
 ] as const;
