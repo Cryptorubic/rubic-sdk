@@ -24,15 +24,15 @@ interface GetQuoterMethodsDataOptions {
  * Works with requests, related to Uniswap v3 liquidity pools.
  */
 export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController {
-    private routerTokens: Token[] | undefined;
+    protected routerTokens: Token[] | undefined;
 
-    private readonly blockchainName: BlockchainName;
+    protected blockchainName: BlockchainName;
 
-    private readonly routingTokensAddresses: string[];
+    protected routingTokensAddresses: string[];
 
-    private readonly quoterContractABI: AbiItem[];
+    protected quoterContractABI: AbiItem[];
 
-    private readonly quoterContractAddress: string;
+    protected quoterContractAddress: string;
 
     constructor(
         quoterContractABI: AbiItem[],
@@ -98,11 +98,11 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
         };
     }
 
-    private get web3Public(): EvmWeb3Public {
+    protected get web3Public(): EvmWeb3Public {
         return Injector.web3PublicService.getWeb3Public(this.blockchainName);
     }
 
-    private async getOrCreateRouterTokens(): Promise<Token[]> {
+    protected async getOrCreateRouterTokens(): Promise<Token[]> {
         if (!this.routerTokens) {
             this.routerTokens = await Token.createTokens(
                 this.routingTokensAddresses,
@@ -142,17 +142,6 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
             )
             .flat();
 
-        // const results_1 = await Promise.all(
-        //     quoterMethodsData.map(async data => {
-        //         return await this.web3Public.callContractMethod(
-        //             this.quoterContractAddress,
-        //             this.quoterContractABI,
-        //             data.methodData.methodName,
-        //             data.methodData.methodArguments
-        //         );
-        //     })
-        // );
-
         const results = await this.web3Public.multicallContractMethods<string>(
             this.quoterContractAddress,
             this.quoterContractABI,
@@ -179,7 +168,7 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
     /**
      * Returns swap methods' names and arguments, built with passed pools' addresses, to use it in Quoter contract.
      */
-    private getQuoterMethodsData(
+    protected getQuoterMethodsData(
         options: GetQuoterMethodsDataOptions,
         path: Token[]
     ): { path: Token[]; methodData: MethodData }[] {

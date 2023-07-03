@@ -5,7 +5,7 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/algebra/algebra-quoter-controller';
+import { QuickswapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/quickswap-v3/quickswap-v3-quoter-controller';
 import { UniswapV3AlgebraTradeStructOmitPath } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
 import { UniswapV3AlgebraAbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
 import { QUICK_SWAP_V3_ROUTER_CONTRACT_ABI } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/constants/swap-router-contract-data';
@@ -28,7 +28,7 @@ export class QuickSwapV3PolygonZKEVMProvider extends UniswapV3AlgebraAbstractPro
 
     protected readonly OnChainTradeClass = QuickSwapV3PolygonZKEVMTrade;
 
-    protected readonly quoterController = new AlgebraQuoterController(
+    protected readonly quoterController = new QuickswapV3QuoterController(
         QUICK_SWAP_V3_POLYGON_ZKEVM_QUOTER_CONTRACT_ABI,
         QUICK_SWAP_V3_POLYGON_ZKEVM_QUOTER_CONTRACT_ADDRESS,
         this.blockchain,
