@@ -21,7 +21,6 @@ import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-m
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { RangoCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-cross-chain-supported-blockchain';
 import { relayersAddresses } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/relayers-addresses';
 import {
     StargateBridgeToken,
@@ -54,7 +53,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>
     ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as RangoCrossChainSupportedBlockchain;
+        const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
         const walletAddress =
             Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;

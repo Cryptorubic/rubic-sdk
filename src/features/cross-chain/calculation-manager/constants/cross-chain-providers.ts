@@ -28,10 +28,4 @@ const nonProxyProviders = [
     ArbitrumRbcBridgeProvider
 ] as const;
 
-export const CrossChainProviders = [
-    ...proxyProviders,
-    ...nonProxyProviders
-    // CelerCrossChainProvider,
-    // RangoCrossChainProvider,
-    // ViaCrossChainProvider,
-] as const;
+export const CrossChainProviders = [...proxyProviders, ...nonProxyProviders] as const;

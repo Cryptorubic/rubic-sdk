@@ -7,8 +7,6 @@ import {
 } from '@arbitrum/sdk';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { createClient } from '@layerzerolabs/scan-client';
-import { Via } from '@viaprotocol/router-sdk';
-import { StatusResponse, TransactionStatus } from 'rango-sdk-basic';
 import { RubicSdkError } from 'src/common/errors';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -31,10 +29,7 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
 import { LifiSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
-import { RANGO_API_KEY } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/constants/rango-api-key';
 import { SymbiosisSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
-import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-default-api-key';
-import { ViaSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/via-provider/models/via-swap-status';
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
 import { MultichainStatusMapping } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
@@ -70,8 +65,6 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.VIA]: this.getViaDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.BRIDGERS]: this.getBridgersDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.MULTICHAIN]: this.getMultichainDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus,
@@ -183,61 +176,6 @@ export class CrossChainStatusManager {
         }
 
         return txStatusData;
-    }
-
-    /**
-     * Get Rango trade dst transaction status and hash.
-     * @param data Trade data.
-     * @returns Cross-chain transaction status and hash.
-     */
-    private async getRangoDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        try {
-            const { rangoRequestId: requestId } = data;
-            const rangoTradeStatusResponse = await Injector.httpClient.get<StatusResponse>(
-                'https://api.rango.exchange/basic/status',
-                {
-                    params: {
-                        apiKey: RANGO_API_KEY,
-                        requestId: requestId as string,
-                        txId: data.srcTxHash
-                    }
-                }
-            );
-            const dstTxData: TxStatusData = {
-                status: TxStatus.UNKNOWN,
-                hash: rangoTradeStatusResponse.bridgeData?.destTxHash || null
-            };
-
-            if (rangoTradeStatusResponse.status === TransactionStatus.SUCCESS) {
-                dstTxData.status = TxStatus.SUCCESS;
-            }
-
-            if (rangoTradeStatusResponse.status === TransactionStatus.FAILED) {
-                dstTxData.status = TxStatus.FAIL;
-
-                const type = rangoTradeStatusResponse?.output?.type;
-                if (type === 'MIDDLE_ASSET_IN_SRC' || type === 'MIDDLE_ASSET_IN_DEST') {
-                    dstTxData.status = TxStatus.FALLBACK;
-                }
-                if (type === 'REVERTED_TO_INPUT') {
-                    dstTxData.status = TxStatus.REVERT;
-                }
-            }
-
-            if (
-                rangoTradeStatusResponse.status === TransactionStatus.RUNNING ||
-                rangoTradeStatusResponse.status === null
-            ) {
-                dstTxData.status = TxStatus.PENDING;
-            }
-
-            return dstTxData;
-        } catch {
-            return {
-                status: TxStatus.PENDING,
-                hash: null
-            };
-        }
     }
 
     /**
@@ -407,38 +345,6 @@ export class CrossChainStatusManager {
                 status === DeBridgeApiStateStatus.SENTORDERCANCEL ||
                 status === DeBridgeApiStateStatus.CLAIMEDORDERCANCEL
             ) {
-                dstTxData.status = TxStatus.FAIL;
-            }
-
-            return dstTxData;
-        } catch {
-            return {
-                status: TxStatus.PENDING,
-                hash: null
-            };
-        }
-    }
-
-    /**
-     * Get Via trade dst transaction status and hash.
-     * @param data Trade data.
-     * @returns Cross-chain transaction status and hash.
-     */
-    private async getViaDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        try {
-            const txStatusResponse = await new Via(VIA_DEFAULT_CONFIG).checkTx({
-                actionUuid: data.viaUuid!
-            });
-            const status = txStatusResponse.event as unknown as ViaSwapStatus;
-            const dstTxData: TxStatusData = {
-                status: TxStatus.PENDING,
-                hash: txStatusResponse.data?.txHash || null
-            };
-
-            if (status === ViaSwapStatus.SUCCESS) {
-                dstTxData.status = TxStatus.SUCCESS;
-            }
-            if (status === ViaSwapStatus.FAIL) {
                 dstTxData.status = TxStatus.FAIL;
             }
 

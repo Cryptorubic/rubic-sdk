@@ -2,8 +2,6 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     SYMBIOSIS: 'symbiosis',
     LIFI: 'lifi',
     DEBRIDGE: 'dln',
-    VIA: 'via',
-    RANGO: 'rango',
     BRIDGERS: 'bridgers',
     MULTICHAIN: 'multichain',
     XY: 'xy',
