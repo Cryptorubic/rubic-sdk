@@ -45,6 +45,8 @@ import {
 import { CrossChainStatus } from 'src/features/cross-chain/status-manager/models/cross-chain-status';
 import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
+import { SquidrouterApiResponse } from 'src/features/cross-chain/status-manager/models/squidrouter-api-response';
+import { SquidrouterTransferStatus } from 'src/features/cross-chain/status-manager/models/squidrouter-transfer-status.enum';
 import {
     BtcStatusResponse,
     DeBridgeApiStateStatus,
@@ -76,7 +78,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE]: this.getCelerBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CHANGENOW]: this.getChangenowDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getStargateDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER]: this.getSquidrouterDstSwapStatus
     };
 
     /**
@@ -667,6 +670,28 @@ export class CrossChainStatusManager {
                     return { status: TxStatus.PENDING, hash: null };
             }
         } catch (error) {
+            return { status: TxStatus.PENDING, hash: null };
+        }
+    }
+
+    private async getSquidrouterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        try {
+            const { status, toChain } = await this.httpClient.get<SquidrouterApiResponse>(
+                `${XyCrossChainProvider.apiEndpoint}/crossChainStatus?srcChainId=${
+                    blockchainId[data.fromBlockchain]
+                }&transactionHash=${data.srcTxHash}`
+            );
+
+            if (status === SquidrouterTransferStatus.DEST_EXECUTED) {
+                return { status: TxStatus.SUCCESS, hash: toChain!.transactionId! };
+            }
+
+            if (status === SquidrouterTransferStatus.DEST_ERROR) {
+                return { status: TxStatus.FAIL, hash: null };
+            }
+
+            return { status: TxStatus.PENDING, hash: null };
+        } catch {
             return { status: TxStatus.PENDING, hash: null };
         }
     }
