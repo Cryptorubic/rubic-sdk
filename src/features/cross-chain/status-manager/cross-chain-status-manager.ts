@@ -29,6 +29,7 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
 import { LifiSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
+import { SquidrouterCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/squidrouter-cross-chain-provider';
 import { SymbiosisSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
@@ -583,9 +584,8 @@ export class CrossChainStatusManager {
     private async getSquidrouterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
             const { status, toChain } = await this.httpClient.get<SquidrouterApiResponse>(
-                `${XyCrossChainProvider.apiEndpoint}/crossChainStatus?srcChainId=${
-                    blockchainId[data.fromBlockchain]
-                }&transactionHash=${data.srcTxHash}`
+                `${SquidrouterCrossChainProvider.apiEndpoint}status?transactionId=${data.srcTxHash}`,
+                { headers: { 'x-integrator-id': 'rubic-api' } }
             );
 
             if (status === SquidrouterTransferStatus.DEST_EXECUTED) {

@@ -15,13 +15,15 @@ export interface SquirouterTransaction {
  * Swap transaction response.
  */
 export interface SquidrouterTransactionResponse {
-    /**
-     * Trade estimation response.
-     */
-    estimate: SquidrouterEstimation;
+    readonly route: {
+        /**
+         * Trade estimation response.
+         */
+        readonly estimate: SquidrouterEstimation;
 
-    /**
-     * Transaction data.
-     */
-    transactionRequest: SquirouterTransaction;
+        /**
+         * Transaction data.
+         */
+        readonly transactionRequest: SquirouterTransaction;
+    };
 }

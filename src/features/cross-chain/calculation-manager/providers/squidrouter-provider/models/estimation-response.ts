@@ -59,7 +59,7 @@ export interface SquidrouterEstimation {
     readonly sendAmount: string;
     readonly toAmount: string;
     readonly toAmountMin: string;
-    readonly router: {
+    readonly route: {
         readonly fromChain: RouteElement[];
         readonly toChain: RouteElement[];
     };

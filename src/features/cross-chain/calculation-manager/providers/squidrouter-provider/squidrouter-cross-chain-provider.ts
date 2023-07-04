@@ -59,12 +59,12 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
             const transactionRequest = async (receiverAddress: string) => {
                 const requestParams: SquidrouterTransactionRequest = {
                     fromChain: blockchainId[fromBlockchain],
-                    fromToken: from.address,
+                    fromToken: from.isNative ? this.nativeAddress : from.address,
                     fromAmount: from.stringWeiAmount,
                     toChain: blockchainId[toBlockchain],
-                    toToken: toToken.address,
+                    toToken: toToken.isNative ? this.nativeAddress : toToken.address,
                     toAddress: receiverAddress,
-                    slippage: Number(options.slippageTolerance)
+                    slippage: Number(options.slippageTolerance * 100)
                 };
 
                 return Injector.httpClient.get<SquidrouterTransactionResponse>(
@@ -78,7 +78,9 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                 );
             };
 
-            const { estimate, transactionRequest: tx } = await transactionRequest(
+            const {
+                route: { estimate, transactionRequest: tx }
+            } = await transactionRequest(
                 options?.receiverAddress || this.getWalletAddress(fromBlockchain) || fakeAddress
             );
 
@@ -101,7 +103,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                 weiAmount: new BigNumber(feeAmount)
             });
 
-            const transitRoute = estimate.router.fromChain.at(-1)!;
+            const transitRoute = estimate.route.fromChain.at(-1)!;
             const transitAmount = transitRoute.toAmount;
             const transitToken = transitRoute.toToken;
 
@@ -125,7 +127,8 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                         },
                         transitAmount: Web3Pure.fromWei(transitAmount, transitToken.decimals),
                         cryptoFeeToken,
-                        onChainTrade: null
+                        onChainTrade: null,
+                        onChainSubtype: { from: undefined, to: undefined }
                     },
                     options.providerAddress
                 ),

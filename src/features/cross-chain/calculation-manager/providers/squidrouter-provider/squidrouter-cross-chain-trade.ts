@@ -16,12 +16,12 @@ import { GasData } from 'src/features/cross-chain/calculation-manager/providers/
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { SquidrouterContractAddress } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/constants/squidrouter-contract-address';
 import { SquidrouterCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/constants/squidrouter-cross-chain-supported-blockchain';
 import { SquidrouterTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/transaction-response';
-import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
@@ -70,7 +70,8 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
                         feeInfo: {},
                         transitAmount: new BigNumber(NaN),
                         cryptoFeeToken: from,
-                        onChainTrade: null
+                        onChainTrade: null,
+                        onChainSubtype: { from: undefined, to: undefined }
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -106,9 +107,9 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly isAggregator = false;
 
-    public readonly onChainSubtype = {
-        from: ON_CHAIN_TRADE_TYPE.ONE_INCH,
-        to: ON_CHAIN_TRADE_TYPE.ONE_INCH
+    public readonly onChainSubtype: OnChainSubtype = {
+        from: undefined,
+        to: undefined
     };
 
     public readonly bridgeType = BRIDGE_TYPE.SQUIDROUTER;
@@ -156,6 +157,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
             transitAmount: BigNumber;
             cryptoFeeToken: PriceTokenAmount;
             onChainTrade: EvmOnChainTrade | null;
+            onChainSubtype: OnChainSubtype;
         },
         providerAddress: string
     ) {
@@ -172,6 +174,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
         this.feeInfo = crossChainTrade.feeInfo;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
+        this.onChainSubtype = crossChainTrade.onChainSubtype;
 
         this.transitAmount = crossChainTrade.transitAmount;
     }
@@ -183,7 +186,9 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
 
         try {
             const {
-                transactionRequest: { data, value, targetAddress }
+                route: {
+                    transactionRequest: { data, value, targetAddress }
+                }
             } = await this.transactionRequest(options?.receiverAddress || this.walletAddress);
             const { onConfirm } = options;
             const onTransactionHash = (hash: string) => {
@@ -212,7 +217,9 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const {
-            transactionRequest: { data, value: providerValue, targetAddress }
+            route: {
+                transactionRequest: { data, value: providerValue, targetAddress }
+            }
         } = await this.transactionRequest(options?.receiverAddress || this.walletAddress);
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
@@ -259,7 +266,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
-            slippage: 0
+            slippage: this.slippage * 100
         };
     }
 }
