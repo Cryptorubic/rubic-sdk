@@ -1016,5 +1016,89 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
         ],
         stateMutability: 'view',
         type: 'function'
+    },
+    {
+        inputs: [
+            {
+                components: [
+                    { internalType: 'bytes32', name: 'transactionId', type: 'bytes32' },
+                    { internalType: 'string', name: 'bridge', type: 'string' },
+                    { internalType: 'address', name: 'integrator', type: 'address' },
+                    { internalType: 'address', name: 'referrer', type: 'address' },
+                    { internalType: 'address', name: 'sendingAssetId', type: 'address' },
+                    { internalType: 'address', name: 'receivingAssetId', type: 'address' },
+                    { internalType: 'address', name: 'receiver', type: 'address' },
+                    { internalType: 'address', name: 'refundee', type: 'address' },
+                    { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
+                    { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
+                    { internalType: 'bool', name: 'hasSourceSwaps', type: 'bool' },
+                    { internalType: 'bool', name: 'hasDestinationCall', type: 'bool' }
+                ],
+                internalType: 'struct IRubic.BridgeData',
+                name: '_bridgeData',
+                type: 'tuple'
+            },
+            {
+                components: [
+                    { internalType: 'address payable', name: 'destination', type: 'address' }
+                ],
+                internalType: 'struct TransferFacet.TransferData',
+                name: '_transferData',
+                type: 'tuple'
+            }
+        ],
+        name: 'startBridgeTokensViaTransfer',
+        outputs: [],
+        stateMutability: 'payable',
+        type: 'function'
+    },
+    {
+        inputs: [
+            {
+                components: [
+                    { internalType: 'bytes32', name: 'transactionId', type: 'bytes32' },
+                    { internalType: 'string', name: 'bridge', type: 'string' },
+                    { internalType: 'address', name: 'integrator', type: 'address' },
+                    { internalType: 'address', name: 'referrer', type: 'address' },
+                    { internalType: 'address', name: 'sendingAssetId', type: 'address' },
+                    { internalType: 'address', name: 'receivingAssetId', type: 'address' },
+                    { internalType: 'address', name: 'receiver', type: 'address' },
+                    { internalType: 'address', name: 'refundee', type: 'address' },
+                    { internalType: 'uint256', name: 'minAmount', type: 'uint256' },
+                    { internalType: 'uint256', name: 'destinationChainId', type: 'uint256' },
+                    { internalType: 'bool', name: 'hasSourceSwaps', type: 'bool' },
+                    { internalType: 'bool', name: 'hasDestinationCall', type: 'bool' }
+                ],
+                internalType: 'struct IRubic.BridgeData',
+                name: '_bridgeData',
+                type: 'tuple'
+            },
+            {
+                components: [
+                    { internalType: 'address', name: 'callTo', type: 'address' },
+                    { internalType: 'address', name: 'approveTo', type: 'address' },
+                    { internalType: 'address', name: 'sendingAssetId', type: 'address' },
+                    { internalType: 'address', name: 'receivingAssetId', type: 'address' },
+                    { internalType: 'uint256', name: 'fromAmount', type: 'uint256' },
+                    { internalType: 'bytes', name: 'callData', type: 'bytes' },
+                    { internalType: 'bool', name: 'requiresDeposit', type: 'bool' }
+                ],
+                internalType: 'struct LibSwap.SwapData[]',
+                name: '_swapData',
+                type: 'tuple[]'
+            },
+            {
+                components: [
+                    { internalType: 'address payable', name: 'destination', type: 'address' }
+                ],
+                internalType: 'struct TransferFacet.TransferData',
+                name: '_transferData',
+                type: 'tuple'
+            }
+        ],
+        name: 'swapAndStartBridgeTokensViaTransfer',
+        outputs: [],
+        stateMutability: 'payable',
+        type: 'function'
     }
 ];

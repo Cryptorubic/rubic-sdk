@@ -1,20 +1,15 @@
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
-export const changenowApiBlockchain = {
-    // Evm
+export const changeNowEvmSupportedBlockchain = {
     [BLOCKCHAIN_NAME.ETHEREUM]: 'eth',
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: 'bsc',
     [BLOCKCHAIN_NAME.POLYGON]: 'matic',
     [BLOCKCHAIN_NAME.ARBITRUM]: 'arbitrum',
-    [BLOCKCHAIN_NAME.BITCOIN_CASH]: 'bch',
     [BLOCKCHAIN_NAME.BITGERT]: 'brise',
     [BLOCKCHAIN_NAME.AVALANCHE]: 'avaxc',
     [BLOCKCHAIN_NAME.CELO]: 'celo',
-    [BLOCKCHAIN_NAME.EOS]: 'eos',
     [BLOCKCHAIN_NAME.ETHEREUM_CLASSIC]: 'etc',
     [BLOCKCHAIN_NAME.ETHEREUM_POW]: 'ethw',
-    [BLOCKCHAIN_NAME.FILECOIN]: 'fil',
-    [BLOCKCHAIN_NAME.FLARE]: 'flr',
     [BLOCKCHAIN_NAME.FANTOM]: 'ftm',
     [BLOCKCHAIN_NAME.IOTEX]: 'iotx',
     [BLOCKCHAIN_NAME.KLAYTN]: 'klay',
@@ -22,10 +17,22 @@ export const changenowApiBlockchain = {
     [BLOCKCHAIN_NAME.OPTIMISM]: 'op',
     [BLOCKCHAIN_NAME.OASIS]: 'rose',
     [BLOCKCHAIN_NAME.SYSCOIN]: 'sys',
-    [BLOCKCHAIN_NAME.THETA]: 'theta',
     [BLOCKCHAIN_NAME.XDC]: 'xdc',
-    [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulse',
+    [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulse'
+};
+
+export type ChangenowEvmCrossChainSupportedBlockchain =
+    keyof typeof changeNowEvmSupportedBlockchain;
+
+export const changenowApiBlockchain = {
+    // Evm
+    ...changeNowEvmSupportedBlockchain,
     // Non evm
+    [BLOCKCHAIN_NAME.THETA]: 'theta',
+    [BLOCKCHAIN_NAME.FLARE]: 'flr',
+    [BLOCKCHAIN_NAME.FILECOIN]: 'fil',
+    [BLOCKCHAIN_NAME.EOS]: 'eos',
+    [BLOCKCHAIN_NAME.BITCOIN_CASH]: 'bch',
     [BLOCKCHAIN_NAME.BITCOIN]: 'btc',
     [BLOCKCHAIN_NAME.ICP]: 'icp',
     [BLOCKCHAIN_NAME.CARDANO]: 'ada',
