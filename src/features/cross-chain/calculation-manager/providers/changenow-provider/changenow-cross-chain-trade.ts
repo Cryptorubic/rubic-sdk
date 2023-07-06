@@ -118,8 +118,15 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly toCurrency: ChangenowCurrency;
 
+    private get transitToken(): PriceTokenAmount {
+        return this.onChainTrade ? this.onChainTrade.toTokenAmountMin : this.from;
+    }
+
     protected get fromContractAddress(): string {
-        return rubicProxyContractAddress[this.from.blockchain].gateway;
+        if (this.isProxyTrade) {
+            return rubicProxyContractAddress[this.from.blockchain].gateway;
+        }
+        throw new RubicSdkError('No contract address for changenow provider');
     }
 
     protected get web3Private(): EvmWeb3Private {
@@ -170,10 +177,6 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         this.onChainTrade = crossChainTrade.onChainTrade;
     }
 
-    public async needApprove(): Promise<boolean> {
-        return false;
-    }
-
     public async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         if (!BlockchainsInfo.isEvmBlockchainName(this.from.blockchain)) {
             throw new RubicSdkError("For non-evm chains use 'getChangenowPostTrade' method");
@@ -197,7 +200,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
 
         try {
             const { id, payinAddress } = await this.getPaymentInfo(
-                this.from.tokenAmount,
+                this.transitToken.tokenAmount,
                 options.receiverAddress ? options.receiverAddress : this.walletAddress
             );
             this.id = id;
@@ -275,7 +278,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
     ): Promise<ContractParams> {
         const paymentInfo = await this.getPaymentInfo(
-            this.from.tokenAmount,
+            this.transitToken.tokenAmount,
             options?.receiverAddress || this.walletAddress
         );
 

@@ -91,6 +91,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
 
         let onChainTrade: EvmOnChainTrade | null = null;
         let transitMinAmount = fromWithoutFee.tokenAmount;
+        let transitFromToken = fromWithoutFee;
 
         if (!fromCurrency) {
             if (!useProxy) {
@@ -125,6 +126,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             }
 
             transitMinAmount = onChainTrade.toTokenAmountMin.tokenAmount;
+            transitFromToken = onChainTrade.to;
         }
         const transit = onChainTrade ? transitCurrency! || nativeCurrency! : fromCurrency!;
 
@@ -157,7 +159,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 options.providerAddress
             );
 
-            const error = await this.checkMinMaxAmounts(from, transit, toCurrency);
+            const error = await this.checkMinMaxAmounts(transitFromToken, transit, toCurrency);
             if (error) {
                 return {
                     trade,
@@ -168,7 +170,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
 
             return { trade, tradeType: this.type };
         } catch {
-            const error = await this.checkMinMaxAmounts(from, transit, toCurrency);
+            const error = await this.checkMinMaxAmounts(transitFromToken, transit, toCurrency);
             if (error) {
                 return {
                     trade: null,
