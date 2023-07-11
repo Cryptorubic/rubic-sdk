@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { BytesLike } from 'ethers';
-import { nativeTokensList, PriceTokenAmount } from 'src/common/tokens';
+import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -213,10 +213,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             data!,
             this.fromBlockchain,
             providerRouter,
-            Web3Pure.toWei(
-                this.feeInfo.provider?.cryptoFee?.amount || '0',
-                nativeTokensList[this.fromBlockchain].decimals
-            )
+            '0'
         );
 
         const methodArguments = [bridgeData, providerData];
