@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@1inch/limit-order-protocol-utils@^3.0.0":
+"@1inch/limit-order-protocol-utils@3.0.1":
   version "3.0.1"
-  resolved "https://registry.npmjs.org/@1inch/limit-order-protocol-utils/-/limit-order-protocol-utils-3.0.1.tgz"
+  resolved "https://registry.yarnpkg.com/@1inch/limit-order-protocol-utils/-/limit-order-protocol-utils-3.0.1.tgz#0f7437ec7c2eb1162e4a1f0738df771d30c122d4"
   integrity sha512-HpZ1ZRP0PKNOuma1zvffdEfXl64CH/9oajug9Q26HPgyf0Ot+epiArI6rzqKRFvALOHp5Kl6kixiA2qFmGDQzA==
   dependencies:
     "@ethersproject/abi" "^5.1.1"
@@ -6719,10 +6719,10 @@ run-parallel@^1.1.9:
   dependencies:
     queue-microtask "^1.2.2"
 
-rxjs@^7.8.0:
-  version "7.8.0"
-  resolved "https://registry.npmjs.org/rxjs/-/rxjs-7.8.0.tgz"
-  integrity sha512-F2+gxDshqmIub1KdvZkaEfGDwLNpPvk9Fs6LD/MyQxNgMds/WH9OdDDXOmxUZpME+iSK3rQCctkL0DYyytUqMg==
+rxjs@7.8.1:
+  version "7.8.1"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-7.8.1.tgz#6f6f3d99ea8044291efd92e7c7fcf562c4057543"
+  integrity sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==
   dependencies:
     tslib "^2.1.0"
 
