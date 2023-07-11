@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import {
     MaxAmountError,
     MinAmountError,
+    NotSupportedTokensError,
     RubicSdkError,
     TooLowAmountError
 } from 'src/common/errors';
@@ -67,7 +68,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         const toBlockchain = toToken.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
 
         try {
@@ -179,7 +184,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                         tradeType: { in: inTradeType, out: outTradeType }
                     },
                     options.providerAddress
-                )
+                ),
+                tradeType: this.type
             };
         } catch (err: unknown) {
             let rubicSdkError = CrossChainProvider.parseError(err);
@@ -194,7 +200,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
             return {
                 trade: null,
-                error: rubicSdkError
+                error: rubicSdkError,
+                tradeType: this.type
             };
         }
     }

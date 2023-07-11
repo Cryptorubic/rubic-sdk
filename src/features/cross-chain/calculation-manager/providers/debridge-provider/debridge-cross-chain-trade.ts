@@ -5,6 +5,7 @@ import {
     RubicSdkError,
     TooLowAmountError
 } from 'src/common/errors';
+import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -24,6 +25,7 @@ import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-m
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-cross-chain-supported-blockchain';
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
+import { Estimation } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/estimation-response';
 import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
 import { TransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
 import { meteRouterAbi } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/mete-router-abi';
@@ -32,6 +34,8 @@ import { MethodDecoder } from 'src/features/cross-chain/calculation-manager/util
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
+
+import { convertGasDataToBN } from '../../utils/convert-gas-price';
 
 /**
  * Calculated DeBridge cross-chain trade.
@@ -83,7 +87,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                 ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasPrice] = await Promise.all([
+            const [gasLimit, gasDetails] = await Promise.all([
                 web3Public.getEstimatedGas(
                     contractAbi,
                     contractAddress,
@@ -92,7 +96,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                     walletAddress,
                     value
                 ),
-                new BigNumber(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
             ]);
 
             if (!gasLimit?.isFinite()) {
@@ -102,7 +106,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
             return {
                 gasLimit: increasedGasLimit,
-                gasPrice
+                ...gasDetails
             };
         } catch (_err) {
             return null;
@@ -198,7 +202,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                 data,
                 value,
                 gas: options.gasLimit,
-                gasPrice: options.gasPrice
+                gasPrice: options.gasPrice,
+                gasPriceOptions: options.gasPriceOptions
             });
 
             return transactionHash!;
@@ -260,13 +265,17 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             senderAddress: walletAddress,
             srcChainRefundAddress: walletAddress,
             dstChainOrderAuthorityAddress: receiverAddress || walletAddress,
-            srcChainOrderAuthorityAddress: receiverAddress || walletAddress
+            srcChainOrderAuthorityAddress: receiverAddress || walletAddress,
+            referralCode: '4350'
         };
 
-        const { tx } = await Injector.httpClient.get<TransactionResponse>(
+        const { tx, estimation } = await Injector.httpClient.get<TransactionResponse>(
             `${DebridgeCrossChainProvider.apiEndpoint}/order/create-tx`,
             { params }
         );
+
+        await this.checkOrderAmount(estimation);
+
         return tx;
     }
 
@@ -352,5 +361,58 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             return decodeData.otherSideCalldata;
         }
         throw new RubicSdkError('Wrong call data');
+    }
+
+    private async checkOrderAmount(estimation: Estimation): Promise<never | void> {
+        const newAmount = Web3Pure.fromWei(estimation.dstChainTokenOut.amount, this.to.decimals);
+
+        const acceptableExpensesChangePercent = 3;
+        const acceptablePriceChangeFromAmount = 0.05;
+
+        const feeAmount = Web3Pure.fromWei(
+            estimation.costsDetails.find(fee => fee.type === 'EstimatedOperatingExpenses')?.payload
+                .feeAmount || '0',
+            this.to.decimals
+        );
+
+        const acceptablePriceChangeFromExpenses = feeAmount
+            .dividedBy(newAmount)
+            .multipliedBy(acceptableExpensesChangePercent);
+
+        const acceptablePriceChange = acceptablePriceChangeFromExpenses.plus(
+            acceptablePriceChangeFromAmount
+        );
+
+        const amountPlusPercent = this.to.tokenAmount.multipliedBy(
+            acceptablePriceChange.dividedBy(100).plus(1)
+        );
+        const amountMinusPercent = this.to.tokenAmount.multipliedBy(
+            new BigNumber(1).minus(acceptablePriceChange.dividedBy(100))
+        );
+
+        if (amountPlusPercent.lt(newAmount) || amountMinusPercent.gt(newAmount)) {
+            const newTo = await PriceTokenAmount.createFromToken({
+                ...this.to,
+                tokenAmount: newAmount
+            });
+            throw new UpdatedRatesError(
+                new DebridgeCrossChainTrade(
+                    {
+                        from: this.from,
+                        to: newTo,
+                        transactionRequest: this.transactionRequest,
+                        gasData: this.gasData,
+                        priceImpact: this.from.calculatePriceImpactPercent(newTo),
+                        allowanceTarget: this.allowanceTarget,
+                        slippage: 0,
+                        feeInfo: this.feeInfo,
+                        transitAmount: this.transitAmount,
+                        cryptoFeeToken: this.cryptoFeeToken,
+                        onChainTrade: null
+                    },
+                    this.providerAddress
+                )
+            );
+        }
     }
 }

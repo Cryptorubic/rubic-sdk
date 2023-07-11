@@ -26,6 +26,8 @@ import { MultichainCrossChainSupportedBlockchain } from 'src/features/cross-chai
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { TransactionConfig } from 'web3-core';
 
+import { convertGasDataToBN } from '../../utils/convert-gas-price';
+
 export class MultichainCrossChainTrade extends EvmCrossChainTrade {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.MULTICHAIN;
 
@@ -93,7 +95,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
                 ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasPrice] = await Promise.all([
+            const [gasLimit, gasDetails] = await Promise.all([
                 web3Public.getEstimatedGas(
                     contractAbi,
                     contractAddress,
@@ -102,7 +104,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
                     walletAddress,
                     value
                 ),
-                new BigNumber(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
             ]);
 
             if (!gasLimit?.isFinite()) {
@@ -112,7 +114,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
             const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
             return {
                 gasLimit: increasedGasLimit,
-                gasPrice
+                ...gasDetails
             };
         } catch (_err) {
             return null;
@@ -178,7 +180,7 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice } = options;
+        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
 
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -216,8 +218,9 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
                 {
                     value,
                     onTransactionHash,
+                    gas: gasLimit,
                     gasPrice,
-                    gas: gasLimit
+                    gasPriceOptions
                 }
             );
             return receipt.blockHash;
@@ -250,10 +253,10 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
         let providerData = [this.routerAddress];
         if (this.routerMethodName !== 'Swapout') {
             const { data, to: providerRouter } = this.getSwapData(options);
-            providerData = ProxyCrossChainEvmTrade.getGenericProviderData(
+            providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
                 providerRouter!,
                 data!,
-                providerRouter!
+                this.from.blockchain
             );
         }
 

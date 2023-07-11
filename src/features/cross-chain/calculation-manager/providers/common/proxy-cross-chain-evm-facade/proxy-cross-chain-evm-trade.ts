@@ -264,12 +264,36 @@ export class ProxyCrossChainEvmTrade {
         ];
     }
 
-    public static getGenericProviderData(
+    public static async getGenericProviderData(
         providerAddress: string,
         providerData: string,
+        fromBlockchain: EvmBlockchainName,
         gatewayAddress: string
-    ): [string, string, string] {
+    ): Promise<[string, string, string]> {
+        await ProxyCrossChainEvmTrade.checkCrossChainWhiteList(
+            fromBlockchain,
+            providerAddress,
+            providerData.slice(0, 10)
+        );
+
         return [providerAddress, gatewayAddress, providerData];
+    }
+
+    public static async checkCrossChainWhiteList(
+        fromBlockchain: EvmBlockchainName,
+        routerAddress: string,
+        offset: string
+    ): Promise<void | never> {
+        const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+        const result = await web3Public.callContractMethod<{ isAvailable: boolean }>(
+            rubicProxyContractAddress[fromBlockchain].router,
+            evmCommonCrossChainAbi,
+            'getSelectorInfo',
+            [routerAddress, offset]
+        );
+        if (!result.isAvailable) {
+            throw new UnapprovedContractError(offset, routerAddress);
+        }
     }
 
     public static async checkDexWhiteList(

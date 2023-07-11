@@ -4,4 +4,6 @@ export interface EvmEncodeConfig {
     value: string;
     gas?: string;
     gasPrice?: string;
+    maxFeePerGas?: string;
+    maxPriorityFeePerGas?: string;
 }

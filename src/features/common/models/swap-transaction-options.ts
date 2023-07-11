@@ -1,3 +1,8 @@
+import {
+    EIP1559Gas,
+    SingleGasPrice
+} from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
+
 export interface SwapTransactionOptions {
     /**
      * Callback to be called, when user confirm swap transaction.
@@ -16,10 +21,18 @@ export interface SwapTransactionOptions {
      */
     receiverAddress?: string;
 
+    // gasPriceOptions: SingleGasPrice | EIP1559Gas
+
     /**
+     * @deprecated Use gasPriceOptions instead.
      * Evm-Transaction gas price.
      */
     gasPrice?: string;
+
+    /**
+     * Transaction gas price options.
+     */
+    gasPriceOptions?: EIP1559Gas | SingleGasPrice;
 
     /**
      * Evm-transaction gas limit.

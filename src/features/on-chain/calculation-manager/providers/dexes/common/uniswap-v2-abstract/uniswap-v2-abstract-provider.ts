@@ -118,7 +118,9 @@ export abstract class UniswapV2AbstractProvider<
 
         let gasPriceInfo: GasPriceInfo | undefined;
         if (fullOptions.gasCalculation !== 'disabled') {
-            gasPriceInfo = await this.getGasPriceInfo();
+            try {
+                gasPriceInfo = await this.getGasPriceInfo();
+            } catch {}
         }
 
         const { route, estimatedGas } = await this.getAmountAndPath(

@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError, TooLowAmountError } from 'src/common/errors';
+import { NotSupportedTokensError, RubicSdkError, TooLowAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -29,8 +29,6 @@ import {
 
 export class DebridgeCrossChainProvider extends CrossChainProvider {
     public static readonly apiEndpoint = 'https://api.dln.trade/v1.0/dln';
-
-    private readonly deBridgeReferralCode = '4350';
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.DEBRIDGE;
 
@@ -77,7 +75,11 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as DeBridgeCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as DeBridgeCrossChainSupportedBlockchain;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
 
         try {
@@ -90,7 +92,9 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 dstChainId: blockchainId[toBlockchain],
                 dstChainTokenOut: toToken.address,
                 dstChainTokenOutRecipient: this.getWalletAddress(fromBlockchain) || fakeAddress,
-                prependOperatingExpenses: false
+                prependOperatingExpenses: false,
+                affiliateFeePercent: 0.1,
+                affiliateFeeRecipient: '0x0D582aC954E954419F3c2F27fD54323Ca488258A'
             };
 
             const { tx, estimation } = await Injector.httpClient.get<TransactionResponse>(
@@ -132,9 +136,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                     {
                         from,
                         to,
-                        transactionRequest: {
-                            ...requestParams
-                        },
+                        transactionRequest: requestParams,
                         gasData,
                         priceImpact: from.calculatePriceImpactPercent(to),
                         allowanceTarget: tx.allowanceTarget,
@@ -152,7 +154,8 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         onChainTrade: null
                     },
                     options.providerAddress
-                )
+                ),
+                tradeType: this.type
             };
         } catch (err) {
             const rubicSdkError = CrossChainProvider.parseError(err);
@@ -160,7 +163,8 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
 
             return {
                 trade: null,
-                error: debridgeApiError || rubicSdkError
+                error: debridgeApiError || rubicSdkError,
+                tradeType: this.type
             };
         }
     }

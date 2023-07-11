@@ -10,6 +10,7 @@ import {
     UserRejectError
 } from 'src/common/errors';
 import { parseError } from 'src/common/utils/errors';
+import { getGasOptions } from 'src/common/utils/options';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
@@ -17,7 +18,6 @@ import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 import { proxyHashErrors } from 'src/features/cross-chain/calculation-manager/providers/common/constants/proxy-hash-errors';
 import Web3 from 'web3';
@@ -121,9 +121,7 @@ export class EvmWeb3Private extends Web3Private {
                     to: toAddress,
                     value: Web3Private.stringifyAmount(options.value || 0),
                     ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
-                    ...(options.gasPrice && {
-                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                    }),
+                    ...getGasOptions(options),
                     ...(options.data && { data: options.data })
                 })
                 .on('transactionHash', options.onTransactionHash || (() => {}))
@@ -146,20 +144,27 @@ export class EvmWeb3Private extends Web3Private {
         options: EvmTransactionOptions = {}
     ): Promise<TransactionReceipt> {
         try {
-            const gas = await this.web3.eth.estimateGas({
+            const gaslessParams = {
                 from: this.address,
                 to: toAddress,
                 value: Web3Private.stringifyAmount(options.value || 0),
-                ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
-                ...(options.gasPrice && {
-                    gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                }),
                 ...(options.data && { data: options.data })
-            });
-            return this.sendTransaction(toAddress, {
+            };
+            const gas = await this.web3.eth.estimateGas(gaslessParams);
+
+            const gasfullParams = {
+                ...gaslessParams,
+                ...getGasOptions(options),
+                gas: Web3Private.stringifyAmount(gas, 1.05)
+            };
+            await this.web3.eth.estimateGas(gasfullParams);
+
+            const sendParams = {
                 ...options,
-                gas: options.gas || Web3Pure.calculateGasMargin(gas, 1.15)
-            });
+                ...gasfullParams
+            };
+
+            return this.sendTransaction(toAddress, sendParams);
         } catch (err) {
             console.debug('Call tokens transfer error', err);
             const shouldIgnore = this.shouldIgnoreError(err);
@@ -198,9 +203,7 @@ export class EvmWeb3Private extends Web3Private {
                     ...(options.gas && {
                         gas: Web3Private.stringifyAmount(options.gas)
                     }),
-                    ...(options.gasPrice && {
-                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                    })
+                    ...getGasOptions(options)
                 })
                 .on('transactionHash', options.onTransactionHash || (() => {}))
                 .on('receipt', resolve)
@@ -231,23 +234,34 @@ export class EvmWeb3Private extends Web3Private {
         const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
 
         try {
-            const gas = await contract.methods[methodName](...methodArguments).estimateGas({
+            const gaslessParams = {
                 from: this.address,
-                ...(options.value && { value: Web3Private.stringifyAmount(options.value) }),
-                ...(options.gas && { gas: Web3Private.stringifyAmount(options.gas) }),
-                ...(options.gasPrice && {
-                    gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                })
-            });
+                ...(options.value && { value: Web3Private.stringifyAmount(options.value) })
+            };
+
+            const gas = await contract.methods[methodName](...methodArguments).estimateGas(
+                gaslessParams
+            );
+
+            const gasfullParams = {
+                ...gaslessParams,
+                ...getGasOptions(options),
+                gas: Web3Private.stringifyAmount(gas, 1.05)
+            };
+
+            await contract.methods[methodName](...methodArguments).estimateGas(gasfullParams);
+
+            const sendParams = {
+                ...options,
+                ...gasfullParams
+            };
+
             return this.executeContractMethod(
                 contractAddress,
                 contractAbi,
                 methodName,
                 methodArguments,
-                {
-                    ...options,
-                    gas: options.gas || Web3Pure.calculateGasMargin(gas, 1.15)
-                }
+                sendParams
             );
         } catch (err) {
             if ((allowError && allowError(err as Web3Error)) || this.shouldIgnoreError(err)) {
@@ -295,26 +309,27 @@ export class EvmWeb3Private extends Web3Private {
         options: EvmTransactionOptions = {}
     ): Promise<TransactionReceipt> {
         const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
-
         const rawValue = value === 'infinity' ? new BigNumber(2).pow(256).minus(1) : value;
+        const gaslessParams = { from: this.address };
 
-        let { gas } = options;
-        if (!gas) {
-            gas = await contract.methods.approve(spenderAddress, rawValue.toFixed(0)).estimateGas({
-                from: this.address
-            });
-        }
+        const gas = await contract.methods
+            .approve(spenderAddress, rawValue.toFixed(0))
+            .estimateGas(gaslessParams);
+
+        const gasfullParams = {
+            ...gaslessParams,
+            ...getGasOptions(options),
+            gas: Web3Private.stringifyAmount(gas, 1)
+        };
+
+        await contract.methods
+            .approve(spenderAddress, rawValue.toFixed(0))
+            .estimateGas(gasfullParams);
 
         return new Promise((resolve, reject) => {
             contract.methods
                 .approve(spenderAddress, rawValue.toFixed(0))
-                .send({
-                    from: this.address,
-                    ...(gas && { gas: Web3Private.stringifyAmount(gas) }),
-                    ...(options.gasPrice && {
-                        gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                    })
-                })
+                .send(gasfullParams)
                 .on('transactionHash', options.onTransactionHash || (() => {}))
                 .on('receipt', resolve)
                 .on('error', (err: Web3Error) => {
@@ -340,13 +355,21 @@ export class EvmWeb3Private extends Web3Private {
     ): Promise<TransactionConfig> {
         const rawValue = value === 'infinity' ? new BigNumber(2).pow(256).minus(1) : value;
         const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
+        const gaslessParams = { from: this.address };
 
-        let { gas } = options;
-        if (!gas) {
-            gas = await contract.methods.approve(spenderAddress, rawValue.toFixed(0)).estimateGas({
-                from: this.address
-            });
-        }
+        const gas = await contract.methods
+            .approve(spenderAddress, rawValue.toFixed(0))
+            .estimateGas(gaslessParams);
+
+        const gasfullParams = {
+            ...gaslessParams,
+            ...getGasOptions(options),
+            gas: Web3Private.stringifyAmount(gas)
+        };
+
+        await contract.methods
+            .approve(spenderAddress, rawValue.toFixed(0))
+            .estimateGas(gasfullParams);
 
         return EvmWeb3Pure.encodeMethodCall(
             tokenAddress,
@@ -354,12 +377,7 @@ export class EvmWeb3Private extends Web3Private {
             'approve',
             [spenderAddress, rawValue.toFixed(0)],
             undefined,
-            {
-                ...(gas && { gas: Web3Private.stringifyAmount(gas) }),
-                ...(options.gasPrice && {
-                    gasPrice: Web3Private.stringifyAmount(options.gasPrice)
-                })
-            }
+            gasfullParams
         );
     }
 }

@@ -5,7 +5,8 @@ export const deBridgeCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
     BLOCKCHAIN_NAME.POLYGON,
     BLOCKCHAIN_NAME.ARBITRUM,
-    BLOCKCHAIN_NAME.AVALANCHE
+    BLOCKCHAIN_NAME.AVALANCHE,
+    BLOCKCHAIN_NAME.FANTOM
 ] as const;
 
 export type DeBridgeCrossChainSupportedBlockchain =

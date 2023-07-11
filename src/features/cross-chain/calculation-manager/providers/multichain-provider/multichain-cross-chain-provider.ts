@@ -60,7 +60,11 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
             useProxy = false;
         }
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
 
         try {
@@ -88,7 +92,8 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
             if (isPureBridge && !this.isMultichainMethodName(routerMethodName)) {
                 return {
                     trade: null,
-                    error: new NotSupportedTokensError()
+                    error: new NotSupportedTokensError(),
+                    tradeType: this.type
                 };
             }
 
@@ -105,7 +110,8 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                     if (!useProxy) {
                         return {
                             trade: null,
-                            error: new NotSupportedTokensError()
+                            error: new NotSupportedTokensError(),
+                            tradeType: this.type
                         };
                     }
                     const transitToken =
@@ -123,7 +129,8 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                     if (!onChainTrade) {
                         return {
                             trade: null,
-                            error: new NotSupportedTokensError()
+                            error: new NotSupportedTokensError(),
+                            tradeType: this.type
                         };
                     }
 
@@ -194,14 +201,16 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
             } catch (error) {
                 return {
                     trade,
-                    error
+                    error,
+                    tradeType: this.type
                 };
             }
-            return { trade };
+            return { trade, tradeType: this.type };
         } catch (err: unknown) {
             return {
                 trade: null,
-                error: CrossChainProvider.parseError(err)
+                error: CrossChainProvider.parseError(err),
+                tradeType: this.type
             };
         }
     }

@@ -1,3 +1,11 @@
+import {
+    L1ToL2MessageStatus,
+    L1TransactionReceipt,
+    L2ToL1MessageReader,
+    L2ToL1MessageStatus,
+    L2TransactionReceipt
+} from '@arbitrum/sdk';
+import { JsonRpcProvider } from '@ethersproject/providers';
 import { createClient } from '@layerzerolabs/scan-client';
 import { Via } from '@viaprotocol/router-sdk';
 import { StatusResponse, TransactionStatus } from 'rango-sdk-basic';
@@ -30,7 +38,6 @@ import { ViaSwapStatus } from 'src/features/cross-chain/calculation-manager/prov
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
 import { MultichainStatusMapping } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
-import { CelerTransferStatus } from 'src/features/cross-chain/status-manager/models/celer-transfer-status.enum';
 import {
     ChangenowApiResponse,
     ChangenowApiStatus
@@ -40,7 +47,6 @@ import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/mod
 import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
 import {
     BtcStatusResponse,
-    CelerXtransferStatusResponse,
     DeBridgeApiStateStatus,
     DeBridgeFilteredListApiResponse,
     DeBridgeOrderApiResponse,
@@ -59,7 +65,6 @@ export class CrossChainStatusManager {
     private readonly LayzerZeroScanClient = createClient('mainnet');
 
     private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, GetDstTxDataFn | null> = {
-        [CROSS_CHAIN_TRADE_TYPE.CELER]: this.getCelerDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS]: this.getSymbiosisDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.DEBRIDGE]: this.getDebridgeDstSwapStatus,
@@ -70,7 +75,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE]: this.getCelerBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CHANGENOW]: this.getChangenowDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getStargateDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getStargateDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus
     };
 
     /**
@@ -354,66 +360,6 @@ export class CrossChainStatusManager {
     }
 
     /**
-     * Get Celer trade dst transaction status.
-     * @param data Trade data.
-     * @returns Cross-chain transaction status.
-     */
-    private async getCelerDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        try {
-            const dstTxData: TxStatusData = {
-                status: TxStatus.PENDING,
-                hash: null
-            };
-            const txSearchResult = await Injector.httpClient.get<CelerXtransferStatusResponse>(
-                'https://api.celerscan.com/scan/searchByTxHash',
-                {
-                    params: {
-                        tx: data.srcTxHash
-                    }
-                }
-            );
-
-            if (txSearchResult.txSearchInfo.length === 0) {
-                return dstTxData;
-            }
-
-            const trade = txSearchResult.txSearchInfo[0]!.transfer[0]!;
-
-            if (
-                [
-                    CelerTransferStatus.XS_UNKNOWN,
-                    CelerTransferStatus.XS_WAITING_FOR_SGN_CONFIRMATION,
-                    CelerTransferStatus.XS_WAITING_FOR_FUND_RELEASE
-                ].includes(trade.xfer_status)
-            ) {
-                dstTxData.status = TxStatus.PENDING;
-            }
-
-            if (trade.xfer_status === CelerTransferStatus.XS_COMPLETED) {
-                dstTxData.status = TxStatus.SUCCESS;
-            }
-
-            if (
-                [
-                    CelerTransferStatus.XS_REFUNDED,
-                    CelerTransferStatus.XS_TO_BE_REFUND,
-                    CelerTransferStatus.XS_REFUND_TO_BE_CONFIRMED
-                ].includes(trade.xfer_status)
-            ) {
-                dstTxData.status = TxStatus.FALLBACK;
-            }
-
-            return dstTxData;
-        } catch (error) {
-            console.debug('[Celer Trade] error retrieving tx status', error);
-            return {
-                status: TxStatus.PENDING,
-                hash: null
-            };
-        }
-    }
-
-    /**
      * Get DeBridge trade dst transaction status.
      * @param data Trade data.
      * @returns Cross-chain transaction status and hash.
@@ -657,6 +603,70 @@ export class CrossChainStatusManager {
             }
             return { status: TxStatus.PENDING, hash: null };
         } catch {
+            return { status: TxStatus.PENDING, hash: null };
+        }
+    }
+
+    public async getArbitrumBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const rpcProviders = Injector.web3PublicService.rpcProvider;
+        const l1Provider = new JsonRpcProvider(
+            rpcProviders[BLOCKCHAIN_NAME.ETHEREUM]!.rpcList[0]!,
+            1
+        );
+        const l2Provider = new JsonRpcProvider(
+            rpcProviders[BLOCKCHAIN_NAME.ARBITRUM]!.rpcList[0]!,
+            42161
+        );
+        // L1 to L2 deposit
+        if (data.fromBlockchain === BLOCKCHAIN_NAME.ETHEREUM) {
+            try {
+                const sourceTx = await l1Provider.getTransactionReceipt(data.srcTxHash);
+                const l1TxReceipt = new L1TransactionReceipt(sourceTx);
+
+                const [l1ToL2Msg] = await l1TxReceipt.getL1ToL2Messages(l2Provider);
+                const response = await l1ToL2Msg!.getSuccessfulRedeem();
+
+                switch (response.status) {
+                    case L1ToL2MessageStatus.FUNDS_DEPOSITED_ON_L2:
+                        return { status: TxStatus.REVERT, hash: null };
+                    case L1ToL2MessageStatus.EXPIRED:
+                    case L1ToL2MessageStatus.CREATION_FAILED:
+                        return { status: TxStatus.FAIL, hash: null };
+                    case L1ToL2MessageStatus.REDEEMED:
+                        return {
+                            status: TxStatus.SUCCESS,
+                            hash: response.l2TxReceipt.transactionHash
+                        };
+                    case L1ToL2MessageStatus.NOT_YET_CREATED:
+                    default:
+                        return { status: TxStatus.PENDING, hash: null };
+                }
+            } catch {
+                return { status: TxStatus.PENDING, hash: null };
+            }
+        }
+        // L2 to L1 withdraw
+        try {
+            const targetReceipt = await l2Provider.getTransactionReceipt(data.srcTxHash);
+            const l2TxReceipt = new L2TransactionReceipt(targetReceipt);
+            const [event] = l2TxReceipt.getL2ToL1Events();
+            if (!event) {
+                return { status: TxStatus.PENDING, hash: null };
+            }
+
+            const messageReader = new L2ToL1MessageReader(l1Provider, event);
+
+            const status = await messageReader.status(l2Provider);
+            switch (status) {
+                case L2ToL1MessageStatus.CONFIRMED:
+                    return { status: TxStatus.READY_TO_CLAIM, hash: null };
+                case L2ToL1MessageStatus.EXECUTED:
+                    return { status: TxStatus.SUCCESS, hash: null };
+                case L2ToL1MessageStatus.UNCONFIRMED:
+                default:
+                    return { status: TxStatus.PENDING, hash: null };
+            }
+        } catch (error) {
             return { status: TxStatus.PENDING, hash: null };
         }
     }

@@ -1,5 +1,10 @@
 import BigNumber from 'bignumber.js';
-import { InsufficientLiquidityError, MinAmountError, RubicSdkError } from 'src/common/errors';
+import {
+    InsufficientLiquidityError,
+    MinAmountError,
+    NotSupportedTokensError,
+    RubicSdkError
+} from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -45,7 +50,11 @@ export class XyCrossChainProvider extends CrossChainProvider {
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
 
         try {
@@ -123,14 +132,16 @@ export class XyCrossChainProvider extends CrossChainProvider {
                         onChainTrade: null
                     },
                     options.providerAddress
-                )
+                ),
+                tradeType: this.type
             };
         } catch (err) {
             const rubicSdkError = CrossChainProvider.parseError(err);
 
             return {
                 trade: null,
-                error: rubicSdkError
+                error: rubicSdkError,
+                tradeType: this.type
             };
         }
     }

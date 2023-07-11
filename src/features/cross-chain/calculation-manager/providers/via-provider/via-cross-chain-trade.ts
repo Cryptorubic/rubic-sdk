@@ -29,6 +29,8 @@ import { ViaCrossChainSupportedBlockchain } from 'src/features/cross-chain/calcu
 import { VIA_DEFAULT_CONFIG } from 'src/features/cross-chain/calculation-manager/providers/via-provider/constants/via-default-api-key';
 import { MethodDecoder } from 'src/features/cross-chain/calculation-manager/utils/decode-method';
 
+import { convertGasDataToBN } from '../../utils/convert-gas-price';
+
 export class ViaCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
@@ -64,7 +66,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
                 ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasPrice] = await Promise.all([
+            const [gasLimit, gasDetails] = await Promise.all([
                 web3Public.getEstimatedGas(
                     contractAbi,
                     contractAddress,
@@ -73,7 +75,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
                     walletAddress,
                     value
                 ),
-                new BigNumber(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
             ]);
 
             if (!gasLimit?.isFinite()) {
@@ -83,7 +85,7 @@ export class ViaCrossChainTrade extends EvmCrossChainTrade {
             const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
             return {
                 gasLimit: increasedGasLimit,
-                gasPrice
+                ...gasDetails
             };
         } catch (_err) {
             return null;

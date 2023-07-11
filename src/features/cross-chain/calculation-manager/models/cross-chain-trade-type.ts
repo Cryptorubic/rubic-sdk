@@ -1,5 +1,4 @@
 export const CROSS_CHAIN_TRADE_TYPE = {
-    CELER: 'cbridge',
     SYMBIOSIS: 'symbiosis',
     LIFI: 'lifi',
     DEBRIDGE: 'dln',
@@ -10,7 +9,8 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     XY: 'xy',
     CELER_BRIDGE: 'celer_bridge',
     CHANGENOW: 'changenow',
-    STARGATE: 'stargate'
+    STARGATE: 'stargate',
+    ARBITRUM: 'arbitrum'
 } as const;
 
 export type CrossChainTradeType =

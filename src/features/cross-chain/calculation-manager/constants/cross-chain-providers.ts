@@ -1,3 +1,4 @@
+import { ArbitrumRbcBridgeProvider } from 'src/features/cross-chain/calculation-manager/providers/arbitrum-rbc-bridge/arbitrum-rbc-bridge-provider';
 import { BridgersCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/bridgers-cross-chain-provider';
 import { CbridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-provider';
 import { ChangenowCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/changenow-cross-chain-provider';
@@ -21,7 +22,8 @@ const proxyProviders = [
 const nonProxyProviders = [
     DebridgeCrossChainProvider,
     BridgersCrossChainProvider,
-    ChangenowCrossChainProvider
+    ChangenowCrossChainProvider,
+    ArbitrumRbcBridgeProvider
 ] as const;
 
 export const CrossChainProviders = [

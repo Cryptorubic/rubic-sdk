@@ -4,5 +4,6 @@ export enum TxStatus {
     FAIL = 'FAIL',
     FALLBACK = 'FALLBACK',
     REVERT = 'REVERT',
-    UNKNOWN = 'UNKNOWN'
+    UNKNOWN = 'UNKNOWN',
+    READY_TO_CLAIM = 'READY_TO_CLAIM'
 }

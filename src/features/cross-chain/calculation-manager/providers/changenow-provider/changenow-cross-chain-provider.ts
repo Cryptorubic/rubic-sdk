@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { MaxAmountError, MinAmountError } from 'src/common/errors';
+import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
 import { nativeTokensList, PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -51,7 +51,11 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             !this.areSupportedBlockchains(fromBlockchain, toBlockchain) ||
             (!options.changenowFullyEnabled && !BlockchainsInfo.isEvmBlockchainName(fromBlockchain))
         ) {
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
 
         const { fromCurrency, toCurrency } = await this.getChangenowCurrencies(
@@ -59,7 +63,11 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             toToken as Token<ChangenowCrossChainSupportedBlockchain>
         );
         if (!fromCurrency || !toCurrency) {
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
 
         // todo return after proxy fix
@@ -106,20 +114,26 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             if (error) {
                 return {
                     trade,
-                    error
+                    error,
+                    tradeType: this.type
                 };
             }
 
-            return { trade };
+            return { trade, tradeType: this.type };
         } catch {
             const error = await this.checkMinMaxAmounts(from, fromCurrency, toCurrency);
             if (error) {
                 return {
                     trade: null,
-                    error
+                    error,
+                    tradeType: this.type
                 };
             }
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
     }
 
