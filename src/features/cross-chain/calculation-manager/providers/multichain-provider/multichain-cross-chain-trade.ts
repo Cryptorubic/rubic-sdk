@@ -256,7 +256,8 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
             providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
                 providerRouter!,
                 data!,
-                this.from.blockchain
+                this.from.blockchain,
+                providerRouter!
             );
         }
 

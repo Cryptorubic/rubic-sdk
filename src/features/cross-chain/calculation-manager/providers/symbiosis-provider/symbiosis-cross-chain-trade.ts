@@ -192,6 +192,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         const providerData = ProxyCrossChainEvmTrade.getGenericProviderData(
             to!,
             data! as string,
+            this.fromBlockchain,
             SYMBIOSIS_CONTRACT_ADDRESS_V2[this.fromBlockchain].providerGateway
         );
 

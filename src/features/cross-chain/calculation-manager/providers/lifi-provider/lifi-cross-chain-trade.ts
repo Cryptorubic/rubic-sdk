@@ -226,7 +226,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             providerRouter,
             data!,
-            this.fromBlockchain
+            this.fromBlockchain,
+            providerRouter
         );
 
         const methodArguments = [bridgeData, providerData];

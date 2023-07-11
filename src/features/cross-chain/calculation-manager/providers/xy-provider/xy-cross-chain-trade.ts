@@ -211,6 +211,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         const providerData = ProxyCrossChainEvmTrade.getGenericProviderData(
             providerRouter,
             data!,
+            this.fromBlockchain,
             providerRouter
         );
 
