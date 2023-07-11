@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
-import { PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList, PriceTokenAmount } from 'src/common/tokens';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
@@ -194,7 +194,10 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             data! as string,
             this.fromBlockchain,
             SYMBIOSIS_CONTRACT_ADDRESS_V2[this.fromBlockchain].providerGateway,
-            this.feeInfo.provider?.cryptoFee?.amount?.toFixed() || '0'
+            Web3Pure.toWei(
+                this.feeInfo.provider?.cryptoFee?.amount || '0',
+                nativeTokensList[this.fromBlockchain].decimals
+            )
         );
 
         const methodArguments = [bridgeData, providerData];
