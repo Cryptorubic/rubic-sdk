@@ -235,7 +235,8 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             to,
             data!,
             this.fromBlockchain,
-            to
+            to,
+            this.feeInfo.provider?.cryptoFee?.amount?.toFixed() || '0'
         );
 
         const methodArguments = swapData

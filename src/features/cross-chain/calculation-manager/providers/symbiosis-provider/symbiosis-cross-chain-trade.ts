@@ -193,7 +193,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             to!,
             data! as string,
             this.fromBlockchain,
-            SYMBIOSIS_CONTRACT_ADDRESS_V2[this.fromBlockchain].providerGateway
+            SYMBIOSIS_CONTRACT_ADDRESS_V2[this.fromBlockchain].providerGateway,
+            this.feeInfo.provider?.cryptoFee?.amount?.toFixed() || '0'
         );
 
         const methodArguments = [bridgeData, providerData];

@@ -268,15 +268,16 @@ export class ProxyCrossChainEvmTrade {
         providerAddress: string,
         providerData: string,
         fromBlockchain: EvmBlockchainName,
-        gatewayAddress: string
-    ): Promise<[string, string, string]> {
+        gatewayAddress: string,
+        extraNative: string
+    ): Promise<[string, string, string, string]> {
         await ProxyCrossChainEvmTrade.checkCrossChainWhiteList(
             fromBlockchain,
             providerAddress,
             providerData.slice(0, 10)
         );
 
-        return [providerAddress, gatewayAddress, providerData];
+        return [providerAddress, gatewayAddress, extraNative, providerData];
     }
 
     public static async checkCrossChainWhiteList(

@@ -257,7 +257,8 @@ export class MultichainCrossChainTrade extends EvmCrossChainTrade {
                 providerRouter!,
                 data!,
                 this.from.blockchain,
-                providerRouter!
+                providerRouter!,
+                this.feeInfo.provider?.cryptoFee?.amount?.toFixed() || '0'
             );
         }
 

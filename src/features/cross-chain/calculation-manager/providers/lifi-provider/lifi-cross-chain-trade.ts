@@ -227,7 +227,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             providerRouter,
             data!,
             this.fromBlockchain,
-            providerRouter
+            providerRouter,
+            this.feeInfo.provider?.cryptoFee?.amount?.toFixed() || '0'
         );
 
         const methodArguments = [bridgeData, providerData];
