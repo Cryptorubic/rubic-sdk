@@ -14,7 +14,7 @@ module.exports = function(env, argv) {
                         {
                             loader: require.resolve('ts-loader'),
                             options: {
-                                compiler: 'ttypescript',
+                                compiler: 'ts-patch/compiler',
                             },
                         },
                     ], 
@@ -63,7 +63,9 @@ module.exports = function(env, argv) {
                 "http": require.resolve("http-browserify"),
                 "https": require.resolve("https-browserify"),
                 "stream": require.resolve("stream-browserify"),
-                "crypto": require.resolve("crypto-browserify")
+                "crypto": require.resolve("crypto-browserify"),
+                "@pancakeswap/sdk": require.resolve("pancake-rubic-sdk"),
+                "querystring": require.resolve('querystring-es3')
             }
         },
         output: {

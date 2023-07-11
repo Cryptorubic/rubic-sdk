@@ -354,6 +354,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             dex: ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP,
             '1inch': ON_CHAIN_TRADE_TYPE.ONE_INCH,
             'open-ocean': ON_CHAIN_TRADE_TYPE.OPEN_OCEAN,
+            wrap: undefined,
             default: undefined
         };
         return {
