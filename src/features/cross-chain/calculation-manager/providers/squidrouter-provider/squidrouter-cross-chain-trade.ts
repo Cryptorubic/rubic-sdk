@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
-import { PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList, PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -231,10 +231,19 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
             type: `native:${this.type}`,
             fromAddress: this.walletAddress
         });
+
+        const extraNativeFee = this.from.isNative
+            ? Web3Pure.toWei(
+                  new BigNumber(providerValue).minus(this.from.stringWeiAmount),
+                  nativeTokensList[this.fromBlockchain].decimals
+              )
+            : '0';
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             targetAddress,
             data!,
-            this.fromBlockchain
+            this.fromBlockchain,
+            targetAddress,
+            extraNativeFee
         );
 
         const methodArguments = [bridgeData, providerData];
