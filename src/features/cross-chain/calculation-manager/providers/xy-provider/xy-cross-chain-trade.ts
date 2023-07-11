@@ -127,7 +127,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
     private readonly slippage: number;
 
     protected get methodName(): string {
-        return this.onChainTrade ? 'swapAndStartBridgeTokensViaXY' : 'startBridgeTokensViaXY';
+        return 'startBridgeTokensViaGenericCrossChain';
     }
 
     private readonly onChainTrade: EvmOnChainTrade | null;
@@ -192,33 +192,33 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const receiverAddress = options?.receiverAddress || this.walletAddress;
-        const { data } = await this.getTransactionRequest(receiverAddress);
+        const {
+            data,
+            value: providerValue,
+            to: providerRouter
+        } = await this.getTransactionRequest(receiverAddress);
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
             fromTokenAmount: this.from,
             toTokenAmount: this.to,
-            srcChainTrade: this.onChainTrade,
+            srcChainTrade: null,
             providerAddress: this.providerAddress,
             type: `native:${this.type}`,
             fromAddress: this.walletAddress
         });
-        const swapData =
-            this.onChainTrade &&
-            (await ProxyCrossChainEvmTrade.getSwapData(options, {
-                walletAddress: this.walletAddress,
-                contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
-                fromTokenAmount: this.from,
-                toTokenAmount: this.onChainTrade.to,
-                onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
-            }));
-        const providerData = this.getProviderData(data!);
 
-        const methodArguments = swapData
-            ? [bridgeData, swapData, providerData]
-            : [bridgeData, providerData];
+        const providerData = ProxyCrossChainEvmTrade.getGenericProviderData(
+            providerRouter,
+            data!,
+            this.fromBlockchain,
+            providerRouter,
+            '0'
+        );
 
-        const value = this.getSwapValue();
+        const methodArguments = [bridgeData, providerData];
+
+        const value = this.getSwapValue(providerValue);
 
         const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,
