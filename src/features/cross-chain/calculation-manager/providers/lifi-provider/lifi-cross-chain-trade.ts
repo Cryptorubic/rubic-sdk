@@ -1,7 +1,7 @@
 import { Route } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError, SwapRequestError } from 'src/common/errors';
-import { nativeTokensList, PriceTokenAmount } from 'src/common/tokens';
+import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -224,10 +224,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             fromAddress: this.walletAddress
         });
         const extraNativeFee = this.from.isNative
-            ? Web3Pure.toWei(
-                  new BigNumber(providerValue).minus(this.from.stringWeiAmount),
-                  nativeTokensList[this.fromBlockchain].decimals
-              )
+            ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
             : '0';
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             providerRouter,

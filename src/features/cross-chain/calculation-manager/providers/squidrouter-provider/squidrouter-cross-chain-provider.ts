@@ -7,14 +7,13 @@ import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/bl
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-cross-chain-supported-blockchain';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
     SquidrouterCrossChainSupportedBlockchain,
     squidrouterCrossChainSupportedBlockchains
@@ -54,13 +53,24 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
         }
 
         try {
+            const feeInfo = await this.getFeeInfo(
+                fromBlockchain,
+                options.providerAddress,
+                from,
+                options?.useProxy?.[this.type] ?? true
+            );
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
+
             const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
 
             const transactionRequest = async (receiverAddress: string) => {
                 const requestParams: SquidrouterTransactionRequest = {
                     fromChain: blockchainId[fromBlockchain],
                     fromToken: from.isNative ? this.nativeAddress : from.address,
-                    fromAmount: from.stringWeiAmount,
+                    fromAmount: fromWithoutFee.stringWeiAmount,
                     toChain: blockchainId[toBlockchain],
                     toToken: toToken.isNative ? this.nativeAddress : toToken.address,
                     toAddress: receiverAddress,
@@ -146,30 +156,16 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
     }
 
     protected async getFeeInfo(
-        fromBlockchain: DeBridgeCrossChainSupportedBlockchain,
-        providerAddress: string
+        fromBlockchain: SquidrouterCrossChainSupportedBlockchain,
+        providerAddress: string,
+        percentFeeToken: PriceTokenAmount,
+        useProxy: boolean
     ): Promise<FeeInfo> {
-        return {
-            rubicProxy: {
-                fixedFee: {
-                    amount: await this.getFixedFee(
-                        fromBlockchain,
-                        providerAddress,
-                        rubicProxyContractAddress[fromBlockchain].router,
-                        evmCommonCrossChainAbi
-                    ),
-                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
-                },
-                platformFee: {
-                    percent: await this.getFeePercent(
-                        fromBlockchain,
-                        providerAddress,
-                        rubicProxyContractAddress[fromBlockchain].router,
-                        evmCommonCrossChainAbi
-                    ),
-                    tokenSymbol: 'USDC'
-                }
-            }
-        };
+        return ProxyCrossChainEvmTrade.getFeeInfo(
+            fromBlockchain,
+            providerAddress,
+            percentFeeToken,
+            useProxy
+        );
     }
 }
