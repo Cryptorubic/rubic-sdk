@@ -128,6 +128,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                         allowanceTarget: tx.targetAddress,
                         slippage: options.slippageTolerance,
                         feeInfo: {
+                            ...feeInfo,
                             provider: {
                                 cryptoFee: {
                                     amount: Web3Pure.fromWei(feeAmount, nativeToken.decimals),
