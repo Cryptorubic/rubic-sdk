@@ -70,7 +70,7 @@
         "publish:alpha": "yarn publish --access public --tag alpha"
     },
     "dependencies": {
-        "@1inch/limit-order-protocol-utils": "^3.0.0",
+        "@1inch/limit-order-protocol-utils": "3.0.1",
         "@arbitrum/sdk": "^3.1.3",
         "@layerzerolabs/scan-client": "^0.0.0-beta.6",
         "@lifi/sdk": "^1.7.2",
@@ -85,8 +85,8 @@
         "grpc-web": "^1.4.2",
         "lodash.clonedeep": "^4.5.0",
         "rango-sdk-basic": "^0.0.7",
-        "rxjs": "^7.8.0",
-        "symbiosis-js-sdk": "2.9.57",
+        "rxjs": "7.8.1",
+        "symbiosis-js-sdk": "^2.9.57",
         "tronweb": "^4.3.0",
         "web3": "^1.8.1"
     },
