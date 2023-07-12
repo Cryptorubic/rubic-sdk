@@ -250,7 +250,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         return {
             contractAddress: this.fromContractAddress,
             contractAbi: evmCommonCrossChainAbi,
-            methodName: this.methodName,
+            methodName: 'startViaRubic',
             methodArguments,
             value
         };
