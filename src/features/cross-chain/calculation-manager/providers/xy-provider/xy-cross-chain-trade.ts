@@ -208,7 +208,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             fromAddress: this.walletAddress
         });
 
-        const providerData = ProxyCrossChainEvmTrade.getGenericProviderData(
+        const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             providerRouter,
             data!,
             this.fromBlockchain,

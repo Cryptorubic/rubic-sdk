@@ -189,7 +189,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             type: `native:${this.type}`,
             fromAddress: this.walletAddress
         });
-        const providerData = ProxyCrossChainEvmTrade.getGenericProviderData(
+        const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             to!,
             data! as string,
             this.fromBlockchain,
