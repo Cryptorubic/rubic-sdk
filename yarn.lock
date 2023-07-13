@@ -7223,7 +7223,7 @@ swarm-js@^0.1.40:
     tar "^4.0.2"
     xhr-request "^1.0.1"
 
-symbiosis-js-sdk@^2.9.57:
+symbiosis-js-sdk@2.10.5:
   version "2.10.5"
   resolved "https://registry.yarnpkg.com/symbiosis-js-sdk/-/symbiosis-js-sdk-2.10.5.tgz#bca3f5ffd03f8957d7ae8fee4374428eeecbda7f"
   integrity sha512-3GS6b0q3eIuCI8Nyrm+O+ue82JedA+RutIWVl88cuTYdytb7emukQy4tp1Q5L7Oz256bxW3znCbJ3cfaEWWLng==

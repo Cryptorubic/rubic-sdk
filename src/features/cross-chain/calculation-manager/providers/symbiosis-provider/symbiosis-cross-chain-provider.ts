@@ -109,7 +109,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 chainId: blockchainId[fromBlockchain],
                 address: from.isNative ? '' : from.address,
                 decimals: from.decimals,
-                isNative: from.isNative
+                isNative: from.isNative,
+                symbol: from.symbol
             });
 
             const feeInfo = await this.getFeeInfo(
@@ -133,7 +134,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                       chainId: blockchainId[toBlockchain],
                       address: toToken.isNative ? '' : toToken.address,
                       decimals: toToken.decimals,
-                      isNative: toToken.isNative
+                      isNative: toToken.isNative,
+                      symbol: toToken.symbol
                   });
 
             const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
