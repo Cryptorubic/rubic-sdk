@@ -1,3 +1,6 @@
+import { Percent, TradeType } from '@pancakeswap/sdk';
+import { SwapRouter } from '@pancakeswap/smart-router/evm';
+import { SmartRouterTrade } from '@pancakeswap/smart-router/evm/v3-router/types';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import {
@@ -5,23 +8,31 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { PANCAKE_SWAP_CONTRACT_ADDRESS } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/pancake-swap/constants';
-import {
-    EvmOnChainTradeStruct
-} from "src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct";
-
+import { PancakeRouterTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/pancake-router/models/pancake-router-trade-struct';
 export class PancakeRouterTrade extends EvmOnChainTrade {
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.PANCAKE_SWAP;
     }
 
-    public readonly dexContractAddress = PANCAKE_SWAP_CONTRACT_ADDRESS;
+    public readonly dexContractAddress = '0x13f4EA83D0bd40E75C8222255bc855a974568Dd4';
 
     public async encodeDirect(_options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        return undefined as unknown as EvmEncodeConfig;
+        const slippage = Number.parseInt(String(this.slippageTolerance * 100));
+        const slippagePercent = new Percent(slippage, 100);
+        const payload = SwapRouter.swapCallParameters(this.trade, {
+            slippageTolerance: slippagePercent
+        });
+        return {
+            to: this.dexContractAddress,
+            value: payload.value,
+            data: payload.calldata
+        };
     }
 
-    constructor(evmOnChainTradeStruct: EvmOnChainTradeStruct, providerAddress: string) {
-        super(evmOnChainTradeStruct, providerAddress);
+    private readonly trade: SmartRouterTrade<TradeType>;
+
+    constructor(tradeStruct: PancakeRouterTradeStruct, providerAddress: string) {
+        super(tradeStruct, providerAddress);
+        this.trade = tradeStruct.trade;
     }
 }

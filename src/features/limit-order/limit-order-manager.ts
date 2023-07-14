@@ -1,9 +1,9 @@
 import {
     ChainId,
+    limirOrderProtocolAdresses,
     LimitOrderBuilder,
     LimitOrderPredicateBuilder,
     LimitOrderPredicateCallData,
-    limitOrderProtocolAddresses,
     LimitOrderProtocolFacade,
     NonceSeriesV2,
     seriesNonceManagerContractAddresses,
@@ -85,7 +85,7 @@ export class LimitOrderManager {
         });
         const { blockchain } = fromToken;
         const chainId = blockchainId[blockchain] as ChainId;
-        const contractAddress = limitOrderProtocolAddresses[chainId];
+        const contractAddress = limirOrderProtocolAdresses[chainId];
         const allowance = await this.getWeb3Public(blockchain).getAllowance(
             fromToken.address,
             this.walletAddress,
@@ -123,7 +123,7 @@ export class LimitOrderManager {
                 : 'infinity';
 
         const chainId = blockchainId[blockchain] as ChainId;
-        const contractAddress = limitOrderProtocolAddresses[chainId];
+        const contractAddress = limirOrderProtocolAdresses[chainId];
         return this.web3Private.approveTokens(
             fromTokenAmount.address,
             contractAddress,
@@ -173,7 +173,7 @@ export class LimitOrderManager {
         const chainId = blockchainId[blockchain] as ChainId;
 
         const connector = new Web3ProviderConnector(this.web3Private.web3);
-        const contractAddress = limitOrderProtocolAddresses[chainId];
+        const contractAddress = limirOrderProtocolAdresses[chainId];
 
         const simpleLimitOrderPredicate = await this.getLimitOrderPredicate(
             chainId,
@@ -216,7 +216,7 @@ export class LimitOrderManager {
         connector: Web3ProviderConnector,
         deadline: number
     ): Promise<LimitOrderPredicateCallData> {
-        const contractAddress = limitOrderProtocolAddresses[chainId];
+        const contractAddress = limirOrderProtocolAdresses[chainId];
         const seriesContractAddress = seriesNonceManagerContractAddresses[chainId];
 
         const limitOrderProtocolFacade = new LimitOrderProtocolFacade(
@@ -263,7 +263,7 @@ export class LimitOrderManager {
         await this.web3Private.checkBlockchainCorrect(blockchain);
 
         const chainId = blockchainId[blockchain] as ChainId;
-        const contractAddress = limitOrderProtocolAddresses[chainId];
+        const contractAddress = limirOrderProtocolAdresses[chainId];
         const callData = await this.getCancelCallData(blockchain, orderHash);
 
         let transactionHash: string;
@@ -306,7 +306,7 @@ export class LimitOrderManager {
         const chainId = blockchainId[blockchain] as ChainId;
         const connector = new Web3ProviderConnector(this.web3Private.web3);
         const limitOrderProtocolFacade = new LimitOrderProtocolFacade(
-            limitOrderProtocolAddresses[chainId],
+            limirOrderProtocolAdresses[chainId],
             chainId,
             connector
         );
@@ -323,7 +323,7 @@ export class LimitOrderManager {
         await this.web3Private.checkBlockchainCorrect(blockchain);
 
         const chainId = blockchainId[blockchain] as ChainId;
-        const contractAddress = limitOrderProtocolAddresses[chainId];
+        const contractAddress = limirOrderProtocolAdresses[chainId];
         const callData = await this.getFillCallData(
             blockchain,
             orderHash,
@@ -371,7 +371,7 @@ export class LimitOrderManager {
         const chainId = blockchainId[blockchain] as ChainId;
         const connector = new Web3ProviderConnector(this.web3Private.web3);
         const limitOrderProtocolFacade = new LimitOrderProtocolFacade(
-            limitOrderProtocolAddresses[chainId],
+            limirOrderProtocolAdresses[chainId],
             chainId,
             connector
         );
