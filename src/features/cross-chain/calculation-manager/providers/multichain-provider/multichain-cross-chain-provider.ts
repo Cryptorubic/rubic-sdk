@@ -7,7 +7,11 @@ import {
     wrappedNativeTokensList
 } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -51,10 +55,16 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as MultichainCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as MultichainCrossChainSupportedBlockchain;
-        const useProxy = options?.useProxy?.[this.type] ?? true;
-
+        let useProxy = options?.useProxy?.[this.type] ?? true;
+        if (fromBlockchain === BLOCKCHAIN_NAME.ZK_SYNC) {
+            useProxy = false;
+        }
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
 
         try {
@@ -82,7 +92,8 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
             if (isPureBridge && !this.isMultichainMethodName(routerMethodName)) {
                 return {
                     trade: null,
-                    error: new NotSupportedTokensError()
+                    error: new NotSupportedTokensError(),
+                    tradeType: this.type
                 };
             }
 
@@ -99,7 +110,8 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                     if (!useProxy) {
                         return {
                             trade: null,
-                            error: new NotSupportedTokensError()
+                            error: new NotSupportedTokensError(),
+                            tradeType: this.type
                         };
                     }
                     const transitToken =
@@ -117,7 +129,8 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                     if (!onChainTrade) {
                         return {
                             trade: null,
-                            error: new NotSupportedTokensError()
+                            error: new NotSupportedTokensError(),
+                            tradeType: this.type
                         };
                     }
 
@@ -158,9 +171,8 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
                     from,
                     to,
                     gasData,
-                    priceImpact: onChainTrade?.from
-                        ? from.calculatePriceImpactPercent(onChainTrade?.to) || 0
-                        : 0,
+                    priceImpact:
+                        (onChainTrade?.from && from.calculatePriceImpactPercent(to)) || null,
                     toTokenAmountMin,
                     feeInfo: {
                         ...feeInfo,
@@ -189,14 +201,16 @@ export class MultichainCrossChainProvider extends CrossChainProvider {
             } catch (error) {
                 return {
                     trade,
-                    error
+                    error,
+                    tradeType: this.type
                 };
             }
-            return { trade };
+            return { trade, tradeType: this.type };
         } catch (err: unknown) {
             return {
                 trade: null,
-                error: CrossChainProvider.parseError(err)
+                error: CrossChainProvider.parseError(err),
+                tradeType: this.type
             };
         }
     }

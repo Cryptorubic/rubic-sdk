@@ -25,6 +25,8 @@ import { OpenoceanOnChainSupportedBlockchain } from 'src/features/on-chain/calcu
 import { OpenoceanSwapQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/open-ocean/models/open-cean-swap-quote-response';
 import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/open-ocean/models/open-ocean-trade-struct';
 
+import { ARBITRUM_GAS_PRICE } from './constants/arbitrum-gas-price';
+
 interface OpenOceanTransactionRequest {
     to: string;
     data: string;
@@ -143,6 +145,7 @@ export class OpenOceanTrade extends EvmOnChainTrade {
         const apiUrl = openOceanApiUrl.swapQuote(
             openOceanBlockchainName[this.from.blockchain as OpenoceanOnChainSupportedBlockchain]
         );
+        const isArbitrum = this.from.blockchain === BLOCKCHAIN_NAME.ARBITRUM;
         const swapQuoteResponse = await Injector.httpClient.get<OpenoceanSwapQuoteResponse>(
             apiUrl,
             {
@@ -153,12 +156,14 @@ export class OpenOceanTrade extends EvmOnChainTrade {
                     inTokenAddress: this.from.address,
                     outTokenAddress: this.to.address,
                     amount: this.fromWithoutFee.tokenAmount.toString(),
-                    gasPrice: Web3Pure.fromWei(
-                        gasPrice,
-                        nativeTokensList[this.from.blockchain].decimals
-                    )
-                        .multipliedBy(10 ** 9)
-                        .toFixed(0),
+                    gasPrice: isArbitrum
+                        ? ARBITRUM_GAS_PRICE
+                        : Web3Pure.fromWei(
+                              gasPrice,
+                              nativeTokensList[this.from.blockchain].decimals
+                          )
+                              .multipliedBy(10 ** 9)
+                              .toString(),
                     slippage: this.slippageTolerance * 100,
                     account: receiverAddress || walletAddress,
                     referrer: '0x429A3A1a2623DFb520f1D93F64F38c0738418F1f'

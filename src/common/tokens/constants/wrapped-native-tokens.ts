@@ -219,6 +219,13 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'Weth',
         decimals: 18
     }),
+    [BLOCKCHAIN_NAME.PULSECHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.PULSECHAIN,
+        address: '0xa1077a294dde1b09bb078844df40758a5d0f9a27',
+        name: 'Wrapped PLS',
+        symbol: 'WPLS',
+        decimals: 18
+    }),
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: new Token({
         blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET,
         address: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',

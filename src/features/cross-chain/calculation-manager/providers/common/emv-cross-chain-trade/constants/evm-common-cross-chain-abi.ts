@@ -996,5 +996,25 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
         outputs: [{ internalType: 'bool', name: 'approved', type: 'bool' }],
         stateMutability: 'view',
         type: 'function'
+    },
+    {
+        inputs: [
+            { internalType: 'address', name: '_router', type: 'address' },
+            { internalType: 'bytes4', name: '_selector', type: 'bytes4' }
+        ],
+        name: 'getSelectorInfo',
+        outputs: [
+            {
+                components: [
+                    { internalType: 'bool', name: 'isAvailable', type: 'bool' },
+                    { internalType: 'uint256', name: 'offset', type: 'uint256' }
+                ],
+                internalType: 'struct LibMappings.ProviderFunctionInfo',
+                name: '',
+                type: 'tuple'
+            }
+        ],
+        stateMutability: 'view',
+        type: 'function'
     }
 ];

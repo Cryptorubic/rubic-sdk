@@ -24,6 +24,7 @@ export const changenowApiBlockchain = {
     [BLOCKCHAIN_NAME.SYSCOIN]: 'sys',
     [BLOCKCHAIN_NAME.THETA]: 'theta',
     [BLOCKCHAIN_NAME.XDC]: 'xdc',
+    [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulse',
     // Non evm
     [BLOCKCHAIN_NAME.BITCOIN]: 'btc',
     [BLOCKCHAIN_NAME.ICP]: 'icp',

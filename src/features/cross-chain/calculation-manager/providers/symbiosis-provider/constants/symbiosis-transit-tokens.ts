@@ -73,6 +73,14 @@ export const symbiosisTransitTokens: Record<SymbiosisCrossChainSupportedBlockcha
         symbol: 'USDC',
         decimals: 6
     },
+    [BLOCKCHAIN_NAME.OPTIMISM]: {
+        blockchain: BLOCKCHAIN_NAME.ARBITRUM,
+        address: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+        name: 'USDC',
+        symbol: 'USDC',
+        decimals: 6
+    },
+    // Testnets
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: {
         blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET,
         address: '0x9a01bf917477dd9f5d715d188618fc8b7350cd22',

@@ -5,7 +5,7 @@ import {
     IRoute
 } from '@viaprotocol/router-sdk/dist/types';
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
+import { NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -61,7 +61,11 @@ export class ViaCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as ViaCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as ViaCrossChainSupportedBlockchain;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
 
         try {
@@ -100,7 +104,11 @@ export class ViaCrossChainProvider extends CrossChainProvider {
                 route => this.parseBridge(route) && this.isAvailableProvider(route)
             );
             if (!routes.length) {
-                return { trade: null, error: new RubicSdkError('No available routes') };
+                return {
+                    trade: null,
+                    error: new RubicSdkError('No available routes'),
+                    tradeType: this.type
+                };
             }
 
             const [fromTokenPrice, nativeTokenPrice] = await this.getTokensPrice(fromBlockchain, [
@@ -112,7 +120,11 @@ export class ViaCrossChainProvider extends CrossChainProvider {
             ]);
             const bestRoute = await this.getBestRoute(from, toToken, nativeTokenPrice!, routes);
             if (!bestRoute) {
-                return null;
+                return {
+                    trade: null,
+                    error: new NotSupportedTokensError(),
+                    tradeType: this.type
+                };
             }
 
             from = new PriceTokenAmount({
@@ -165,7 +177,7 @@ export class ViaCrossChainProvider extends CrossChainProvider {
                         to,
                         route: bestRoute,
                         gasData,
-                        priceImpact: 0, // @TODO add price impact
+                        priceImpact: from.calculatePriceImpactPercent(to),
                         toTokenAmountMin,
                         feeInfo,
                         cryptoFeeToken,
@@ -175,12 +187,14 @@ export class ViaCrossChainProvider extends CrossChainProvider {
                     },
                     options.providerAddress,
                     fromAddress
-                )
+                ),
+                tradeType: this.type
             };
         } catch (err: unknown) {
             return {
                 trade: null,
-                error: CrossChainProvider.parseError(err)
+                error: CrossChainProvider.parseError(err),
+                tradeType: this.type
             };
         }
     }

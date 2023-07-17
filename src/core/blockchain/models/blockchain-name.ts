@@ -42,7 +42,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     IOTEX: 'IOTEX',
     THETA: 'THETA',
     BITCOIN_CASH: 'BITCOIN_CASH',
-    ZK_SYNC: 'ZK_SYNC'
+    ZK_SYNC: 'ZK_SYNC',
+    PULSECHAIN: 'PULSECHAIN'
 } as const;
 
 export const BLOCKCHAIN_NAME = {

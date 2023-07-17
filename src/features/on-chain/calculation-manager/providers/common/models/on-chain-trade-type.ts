@@ -91,6 +91,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     STELLA_SWAP: 'STELLA_SWAP',
     SURFDEX: 'SURFDEX',
     SUSHI_SWAP: 'SUSHI_SWAP',
+    SYNC_SWAP: 'SYNC_SWAP',
 
     SYMBIOSIS_SWAP: 'SYMBIOSIS_SWAP', // Fake to show swap via unknown symbiosis dex
 
@@ -116,7 +117,10 @@ export const ON_CHAIN_TRADE_TYPE = {
     ZIP_SWAP: 'ZIP_SWAP',
     ZRX: 'ZRX',
 
-    YUZU_SWAP: 'YUZU_SWAP'
+    YUZU_SWAP: 'YUZU_SWAP',
+
+    PULSEX_V1: 'PULSEX_V1',
+    PULSEX_V2: 'PULSEX_V2'
 } as const;
 
 /**

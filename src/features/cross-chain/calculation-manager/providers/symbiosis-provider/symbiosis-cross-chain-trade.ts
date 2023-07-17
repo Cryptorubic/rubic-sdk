@@ -39,6 +39,8 @@ import {
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { SymbiosisTradeType } from 'symbiosis-js-sdk/dist/crosschain/trade';
 
+import { convertGasDataToBN } from '../../utils/convert-gas-price';
+
 /**
  * Calculated Symbiosis cross-chain trade.
  */
@@ -83,7 +85,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                 ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasPrice] = await Promise.all([
+            const [gasLimit, gasDetails] = await Promise.all([
                 web3Public.getEstimatedGas(
                     contractAbi,
                     contractAddress,
@@ -92,7 +94,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                     walletAddress,
                     value
                 ),
-                new BigNumber(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
             ]);
 
             if (!gasLimit?.isFinite()) {
@@ -102,7 +104,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
             return {
                 gasLimit: increasedGasLimit,
-                gasPrice
+                ...gasDetails
             };
         } catch (_err) {
             return null;
@@ -131,7 +133,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
     /**
      * Overall price impact, fetched from symbiosis api.
      */
-    public readonly priceImpact: number;
+    public readonly priceImpact: number | null;
 
     public readonly gasData: GasData | null;
 
@@ -166,7 +168,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             to: PriceTokenAmount;
             swapFunction: (fromAddress: string, receiver?: string) => Promise<SymbiosisTradeData>;
             gasData: GasData | null;
-            priceImpact: number;
+            priceImpact: number | null;
             slippage: number;
             feeInfo: FeeInfo;
             transitAmount: BigNumber;
@@ -185,7 +187,6 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         this.priceImpact = crossChainTrade.priceImpact;
         this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
         this.feeInfo = crossChainTrade.feeInfo;
-        this.priceImpact = crossChainTrade.priceImpact;
         this.slippage = crossChainTrade.slippage;
         this.transitAmount = crossChainTrade.transitAmount;
         this.onChainTrade = crossChainTrade?.onChainTrade || null;
@@ -209,7 +210,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             toTokenAmount: this.to,
             srcChainTrade: this.onChainTrade,
             providerAddress: this.providerAddress,
-            type: this.type,
+            type: `native:${this.type}`,
             fromAddress: this.walletAddress
         });
         const swapData =
@@ -263,7 +264,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
 
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice } = options;
+        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -283,7 +284,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                 value: transactionRequest.value?.toString() || '0',
                 onTransactionHash,
                 gas: gasLimit,
-                gasPrice
+                gasPrice,
+                gasPriceOptions
             });
 
             return transactionHash!;
@@ -307,7 +309,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact,
+            priceImpact: this.priceImpact ?? null,
             slippage: this.slippage * 100
         };
     }

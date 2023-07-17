@@ -94,7 +94,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
                 return {
                     trade: null,
-                    error: new NotSupportedTokensError()
+                    error: new NotSupportedTokensError(),
+                    tradeType: this.type
                 };
             }
 
@@ -103,7 +104,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             if (hasDirectRoute && from.isNative && toToken.isNative) {
                 return {
                     trade: null,
-                    error: new RubicSdkError('Native bridge is not supported.')
+                    error: new RubicSdkError('Native bridge is not supported.'),
+                    tradeType: this.type
                 };
             }
 
@@ -127,18 +129,20 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 if (!useProxy) {
                     return {
                         trade: null,
-                        error: new NotSupportedTokensError()
+                        error: new NotSupportedTokensError(),
+                        tradeType: this.type
                     };
                 }
                 const trade = await ProxyCrossChainEvmTrade.getOnChainTrade(
                     fromWithoutFee,
                     transitToken,
-                    options.slippageTolerance
+                    options.slippageTolerance / 2
                 );
                 if (!trade) {
                     return {
                         trade: null,
-                        error: new NotSupportedTokensError()
+                        error: new NotSupportedTokensError(),
+                        tradeType: this.type
                     };
                 }
                 srcChainTrade = trade;
@@ -166,12 +170,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                   ).data
                 : undefined;
 
-            const layerZeroFeeWei = await this.getLayerZeroFee(
-                transitTokenAmount,
-                to,
-                amountOutMin,
-                dstSwapData
-            );
+            const layerZeroFeeWei = await this.getLayerZeroFee(transitTokenAmount, to, dstSwapData);
             const layerZeroFeeAmount = Web3Pure.fromWei(
                 layerZeroFeeWei,
                 nativeTokensList[fromBlockchain].decimals
@@ -190,7 +189,6 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                     {
                         from,
                         to,
-                        toTokenAmountMin: amountOutMin,
                         slippageTolerance: options.slippageTolerance,
                         priceImpact: transitTokenAmount.calculatePriceImpactPercent(to),
                         gasData: null,
@@ -200,13 +198,15 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                         cryptoFeeToken: nativeToken
                     },
                     options.providerAddress
-                )
+                ),
+                tradeType: this.type
             };
         } catch (error) {
             console.error({ 'CALCULATE ERROR': error });
             return {
                 trade: null,
-                error: parseError(error)
+                error: parseError(error),
+                tradeType: this.type
             };
         }
     }
@@ -214,7 +214,6 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     private async getLayerZeroFee(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
-        amountOutMin: BigNumber,
         dstSwapData?: string
     ): Promise<BigNumber> {
         const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
@@ -222,7 +221,6 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         const layerZeroTxData = await StargateCrossChainTrade.getLayerZeroSwapData(
             from,
             to,
-            amountOutMin,
             undefined,
             dstSwapData
         );

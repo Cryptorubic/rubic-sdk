@@ -23,6 +23,8 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 import { MarkRequired } from 'ts-essentials';
 import { TransactionConfig } from 'web3-core';
 
+import { convertGasDataToBN } from '../../../utils/convert-gas-price';
+
 export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
@@ -53,7 +55,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                 ).getContractParams({ receiverAddress });
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasPrice] = await Promise.all([
+            const [gasLimit, gasDetails] = await Promise.all([
                 web3Public.getEstimatedGas(
                     contractAbi,
                     contractAddress,
@@ -62,7 +64,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                     walletAddress,
                     value
                 ),
-                new BigNumber(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
             ]);
 
             if (!gasLimit?.isFinite()) {
@@ -72,7 +74,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
             return {
                 gasLimit: increasedGasLimit,
-                gasPrice
+                ...gasDetails
             };
         } catch (_err) {
             return null;
@@ -145,7 +147,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
 
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice } = options;
+        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -177,7 +179,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                 value: transactionData.value,
                 onTransactionHash,
                 gas: gasLimit,
-                gasPrice
+                gasPrice,
+                gasPriceOptions
             });
 
             return transactionHash!;
@@ -236,7 +239,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact || 0,
+            priceImpact: this.priceImpact ?? null,
             slippage: this.slippage * 100
         };
     }

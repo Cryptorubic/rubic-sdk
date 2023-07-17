@@ -4,6 +4,7 @@ import {
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { getGasOptions } from 'src/common/utils/options';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
@@ -45,7 +46,18 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         if (!this.gasData) {
             return null;
         }
-        return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
+
+        if (this.gasData.baseFee && this.gasData.maxPriorityFeePerGas) {
+            return Web3Pure.fromWei(this.gasData.baseFee).plus(
+                Web3Pure.fromWei(this.gasData.maxPriorityFeePerGas)
+            );
+        }
+
+        if (this.gasData.gasPrice) {
+            return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
+        }
+
+        return null;
     }
 
     public async approve(
@@ -87,7 +99,8 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         const approveOptions: EvmBasicTransactionOptions = {
             onTransactionHash: options?.onApprove,
             gas: options?.approveGasLimit,
-            gasPrice: options?.gasPrice
+            gasPrice: options?.gasPrice,
+            gasPriceOptions: options?.gasPriceOptions
         };
 
         await this.approve(approveOptions, false);
@@ -111,7 +124,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
 
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice } = options;
+        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -134,7 +147,8 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
                     methodName,
                     value,
                     gasLimit,
-                    gasPrice
+                    gasPrice,
+                    gasPriceOptions
                 );
                 method = 'executeContractMethod';
             }
@@ -144,7 +158,13 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
                 contractAbi,
                 methodName,
                 methodArguments,
-                { value, onTransactionHash, gas: gasLimit, gasPrice }
+                {
+                    value,
+                    onTransactionHash,
+                    gas: gasLimit,
+                    gasPrice,
+                    gasPriceOptions
+                }
             );
 
             return transactionHash!;
@@ -163,7 +183,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
             !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
         );
 
-        const { gasLimit, gasPrice } = options;
+        const { gasLimit } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getContractParams({
@@ -179,7 +199,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
             value,
             {
                 gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
-                gasPrice: gasPrice || this.gasData?.gasPrice.toFixed()
+                ...getGasOptions(options)
             }
         );
     }

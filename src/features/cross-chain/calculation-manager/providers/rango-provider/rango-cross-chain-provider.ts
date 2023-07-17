@@ -6,7 +6,12 @@ import {
     RangoClient,
     SwapRequest
 } from 'rango-sdk-basic/lib';
-import { MaxAmountError, MinAmountError, RubicSdkError } from 'src/common/errors';
+import {
+    MaxAmountError,
+    MinAmountError,
+    NotSupportedTokensError,
+    RubicSdkError
+} from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -57,7 +62,11 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as RangoCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as RangoCrossChainSupportedBlockchain;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
 
         await this.checkContractState(
@@ -72,7 +81,8 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         if (price && amountUsdPrice.lt(101)) {
             return {
                 trade: null,
-                error: new MinAmountError(new BigNumber(101).dividedBy(price), from.symbol)
+                error: new MinAmountError(new BigNumber(101).dividedBy(price), from.symbol),
+                tradeType: this.type
             };
         }
 
@@ -96,7 +106,8 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                         error: new MinAmountError(
                             Web3Pure.fromWei(amountRestriction.min, from.decimals),
                             from.symbol
-                        )
+                        ),
+                        tradeType: this.type
                     };
                 }
 
@@ -106,7 +117,8 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                         error: new MaxAmountError(
                             Web3Pure.fromWei(amountRestriction.max, from.decimals),
                             from.symbol
-                        )
+                        ),
+                        tradeType: this.type
                     };
                 }
             }
@@ -164,13 +176,17 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                     options.providerAddress
                 );
 
-                return { trade: rangoTrade };
+                return { trade: rangoTrade, tradeType: this.type };
             }
 
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         } catch (error: unknown) {
             const rubicSdkError = CrossChainProvider.parseError(error);
-            return { trade: null, error: rubicSdkError };
+            return { trade: null, error: rubicSdkError, tradeType: this.type };
         }
     }
 

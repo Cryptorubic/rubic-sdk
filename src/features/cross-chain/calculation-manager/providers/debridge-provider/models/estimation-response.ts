@@ -17,6 +17,12 @@ interface TokenMinAmount extends TokenAmount {
  * Estimation object.
  */
 export interface Estimation {
+    readonly costsDetails: {
+        payload: {
+            feeAmount: string;
+        };
+        type: string;
+    }[];
     /**
      * Source chain token in.
      */

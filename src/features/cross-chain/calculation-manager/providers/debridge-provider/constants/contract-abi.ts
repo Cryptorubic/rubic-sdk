@@ -74,5 +74,12 @@ export const DE_BRIDGE_CONTRACT_ABI = [
         outputs: [],
         stateMutability: 'payable',
         type: 'function'
+    },
+    {
+        inputs: [],
+        name: 'deBridgeGate',
+        outputs: [{ internalType: 'contract IDeBridgeGateExtended', name: '', type: 'address' }],
+        stateMutability: 'view',
+        type: 'function'
     }
 ] as AbiItem[];

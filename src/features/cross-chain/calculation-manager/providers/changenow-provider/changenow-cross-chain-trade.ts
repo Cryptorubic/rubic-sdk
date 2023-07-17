@@ -5,6 +5,7 @@ import {
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { getGasOptions } from 'src/common/utils/options';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
@@ -30,6 +31,8 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 import { MarkRequired } from 'ts-essentials';
 import { TransactionConfig } from 'web3-core';
 
+import { convertGasDataToBN } from '../../utils/convert-gas-price';
+
 export class ChangenowCrossChainTrade extends CrossChainTrade {
     /** @internal */
     public static async getGasData(
@@ -52,7 +55,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
                 ).getContractParams({ receiverAddress });
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasPrice] = await Promise.all([
+            const [gasLimit, gasDetails] = await Promise.all([
                 web3Public.getEstimatedGas(
                     contractAbi,
                     contractAddress,
@@ -61,7 +64,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
                     walletAddress,
                     value
                 ),
-                new BigNumber(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
+                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
             ]);
 
             if (!gasLimit?.isFinite()) {
@@ -71,7 +74,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
             const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
             return {
                 gasLimit: increasedGasLimit,
-                gasPrice
+                ...gasDetails
             };
         } catch (_err) {
             return null;
@@ -126,7 +129,18 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
         if (!this.gasData) {
             return null;
         }
-        return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
+
+        if (this.gasData.baseFee && this.gasData.maxPriorityFeePerGas) {
+            return Web3Pure.fromWei(this.gasData.baseFee).plus(
+                Web3Pure.fromWei(this.gasData.maxPriorityFeePerGas)
+            );
+        }
+
+        if (this.gasData.gasPrice) {
+            return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
+        }
+
+        return null;
     }
 
     constructor(crossChainTrade: ChangenowTrade, providerAddress: string) {
@@ -165,7 +179,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
             CROSS_CHAIN_TRADE_TYPE.CHANGENOW
         );
 
-        const { onConfirm, gasLimit, gasPrice } = options;
+        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -184,7 +198,9 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
             if (this.from.isNative) {
                 await this.web3Private.trySendTransaction(payinAddress, {
                     value: this.from.weiAmount,
-                    onTransactionHash
+                    onTransactionHash,
+                    gasPrice,
+                    gasPriceOptions
                 });
             } else {
                 await this.web3Private.tryExecuteContractMethod(
@@ -192,7 +208,12 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
                     ERC20_TOKEN_ABI,
                     'transfer',
                     [payinAddress, this.from.stringWeiAmount],
-                    { onTransactionHash, gas: gasLimit, gasPrice }
+                    {
+                        onTransactionHash,
+                        gas: gasLimit,
+                        gasPrice,
+                        gasPriceOptions
+                    }
                 );
             }
 
@@ -261,7 +282,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact || null,
+            priceImpact: this.priceImpact ?? null,
             slippage: 0
         };
     }
@@ -278,7 +299,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
             CROSS_CHAIN_TRADE_TYPE.CHANGENOW
         );
 
-        const { gasLimit, gasPrice } = options;
+        const { gasLimit } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getContractParams({
@@ -294,7 +315,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
             value,
             {
                 gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
-                gasPrice: gasPrice || this.gasData?.gasPrice.toFixed()
+                ...getGasOptions(options)
             }
         );
     }

@@ -31,6 +31,7 @@ import { stargatePoolId } from 'src/features/cross-chain/calculation-manager/pro
 import { stargatePoolsDecimals } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pools-decimals';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
+import { convertGasDataToBN } from '../../utils/convert-gas-price';
 import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { stargateChainId } from './constants/stargate-chain-id';
 import {
@@ -68,7 +69,6 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                     {
                         from,
                         to,
-                        toTokenAmountMin: new BigNumber(0),
                         slippageTolerance: 4,
                         priceImpact: null,
                         gasData: {
@@ -83,7 +83,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
 
-            const [gasLimit, gasPrice] = await Promise.all([
+            const [gasLimit, gasDetails] = await Promise.all([
                 web3Public.getEstimatedGas(
                     contractAbi,
                     contractAddress,
@@ -92,7 +92,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                     walletAddress,
                     value
                 ),
-                new BigNumber(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
+                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
             ]);
 
             if (!gasLimit?.isFinite()) {
@@ -103,7 +103,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
 
             return {
                 gasLimit: increasedGasLimit,
-                gasPrice
+                ...gasDetails
             };
         } catch (_err) {
             return null;
@@ -152,7 +152,6 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
             to: PriceTokenAmount<EvmBlockchainName>;
-            toTokenAmountMin: BigNumber;
             slippageTolerance: number;
             priceImpact: number | null;
             gasData: GasData | null;
@@ -166,13 +165,18 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         super(providerAddress);
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
-        this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.slippageTolerance = crossChainTrade.slippageTolerance;
         this.priceImpact = crossChainTrade.priceImpact;
         this.gasData = crossChainTrade.gasData;
         this.feeInfo = crossChainTrade.feeInfo;
         this.onChainTrade = crossChainTrade.srcChainTrade;
         this.dstChainTrade = crossChainTrade.dstChainTrade;
+        this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(
+            1 -
+                (crossChainTrade.srcChainTrade
+                    ? this.slippageTolerance / 2
+                    : this.slippageTolerance)
+        );
         this.onChainSubtype = {
             from: this.onChainTrade?.type,
             to: this.dstChainTrade?.type
@@ -186,7 +190,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice } = options;
+        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -200,7 +204,6 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             const { data, to } = await StargateCrossChainTrade.getLayerZeroSwapData(
                 this.from,
                 this.to,
-                this.toTokenAmountMin,
                 options?.receiverAddress
             );
 
@@ -218,7 +221,8 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                 value,
                 onTransactionHash,
                 gas: gasLimit,
-                gasPrice
+                gasPrice,
+                gasPriceOptions
             });
 
             return transactionHash!;
@@ -230,7 +234,6 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
     public static async getLayerZeroSwapData(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
-        amountOutMin: BigNumber,
         receiverAddress?: string,
         dstData?: string
     ): Promise<EvmEncodeConfig> {
@@ -277,7 +280,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                   walletAddress,
                   from.stringWeiAmount,
                   Web3Pure.toWei(
-                      amountOutMin,
+                      to.tokenAmount,
                       stargatePoolsDecimals[to.symbol as StargateBridgeToken]
                   ),
                   dstConfig,
@@ -307,7 +310,6 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         const lzTxConfig = await StargateCrossChainTrade.getLayerZeroSwapData(
             this.onChainTrade ? this.onChainTrade.to : this.from,
             this.to,
-            this.toTokenAmountMin,
             options?.receiverAddress,
             dstSwapData
         );
@@ -318,7 +320,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             toTokenAmount: this.to,
             srcChainTrade: this.onChainTrade,
             providerAddress: this.providerAddress,
-            type: this.type,
+            type: `native:${this.type}`,
             fromAddress: this.walletAddress,
             dstChainTrade: this.dstChainTrade || undefined
         });
@@ -402,7 +404,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact || null,
+            priceImpact: this.priceImpact ?? null,
             slippage: this.slippageTolerance * 100
         };
     }

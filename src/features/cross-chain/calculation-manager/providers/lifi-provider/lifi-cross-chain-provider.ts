@@ -1,6 +1,6 @@
-import LIFI, { LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
+import LIFI, { FeeCost, LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
-import { MinAmountError, RubicSdkError } from 'src/common/errors';
+import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -50,7 +50,11 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as LifiCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as LifiCrossChainSupportedBlockchain;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
 
         if (
@@ -60,13 +64,16 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             throw new RubicSdkError('Incorrect bridges filter param');
         }
 
+        const defaultDisabled = options.lifiDisabledBridgeTypes || [];
+        const denyBridges = from.isNative
+            ? options.lifiDisabledBridgeTypes
+            : Array.from(new Set([...defaultDisabled, LifiBridgeTypes.STARGATE]));
+
         const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
             order: 'RECOMMENDED',
             allowSwitchChain: false,
-            bridges: {
-                deny: options.lifiDisabledBridgeTypes
-            }
+            bridges: { deny: denyBridges }
         };
 
         const fromChainId = blockchainId[fromBlockchain];
@@ -104,6 +111,21 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             throw new RubicSdkError('No available routes');
         }
 
+        const providerFee = bestRoute.steps[0]!.estimate.feeCosts?.find(
+            (el: FeeCost & { included?: boolean }) => el?.included === false
+        );
+        if (providerFee) {
+            feeInfo.provider = {
+                cryptoFee: {
+                    amount: Web3Pure.fromWei(
+                        new BigNumber(providerFee.amount),
+                        providerFee.token.decimals
+                    ),
+                    tokenSymbol: providerFee.token.symbol
+                }
+            };
+        }
+
         from = new PriceTokenAmount({
             ...from.asStructWithAmount,
             price: new BigNumber(bestRoute.fromAmountUSD).dividedBy(from.tokenAmount)
@@ -113,15 +135,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             weiAmount: new BigNumber(bestRoute.toAmount)
         });
 
-        const { fromAmountUSD, toAmountUSD } = bestRoute;
-        const priceImpact =
-            fromAmountUSD && toAmountUSD
-                ? new BigNumber(fromAmountUSD)
-                      .minus(toAmountUSD)
-                      .dividedBy(fromAmountUSD)
-                      .dp(4)
-                      .toNumber()
-                : from.calculatePriceImpactPercent(to)!;
+        const priceImpact = from.calculatePriceImpactPercent(to);
 
         const gasData =
             options.gasCalculation === 'enabled'
@@ -151,12 +165,14 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         } catch (err) {
             return {
                 trade,
-                error: err
+                error: err,
+                tradeType: this.type
             };
         }
 
         return {
-            trade
+            trade,
+            tradeType: this.type
         };
     }
 

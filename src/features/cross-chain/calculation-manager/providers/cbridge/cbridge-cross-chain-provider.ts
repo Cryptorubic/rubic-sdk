@@ -66,7 +66,11 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return null;
+            return {
+                trade: null,
+                error: new NotSupportedTokensError(),
+                tradeType: this.type
+            };
         }
 
         try {
@@ -95,7 +99,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                 if (!useProxy) {
                     return {
                         trade: null,
-                        error: new NotSupportedTokensError()
+                        error: new NotSupportedTokensError(),
+                        tradeType: this.type
                     };
                 }
                 onChainTrade = await this.getOnChainTrade(
@@ -107,7 +112,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                 if (!onChainTrade) {
                     return {
                         trade: null,
-                        error: new NotSupportedTokensError()
+                        error: new NotSupportedTokensError(),
+                        tradeType: this.type
                     };
                 }
 
@@ -170,7 +176,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                         from: fromToken,
                         to,
                         gasData,
-                        priceImpact: fromToken.calculatePriceImpactPercent(to) || 0,
+                        priceImpact: fromToken.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
                         feeInfo: {
                             ...feeInfo,
@@ -188,14 +194,16 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                     },
                     options.providerAddress
                 ),
-                error: amountsErrors
+                error: amountsErrors,
+                tradeType: this.type
             };
         } catch (err) {
             const rubicSdkError = CrossChainProvider.parseError(err);
 
             return {
                 trade: null,
-                error: rubicSdkError
+                error: rubicSdkError,
+                tradeType: this.type
             };
         }
     }

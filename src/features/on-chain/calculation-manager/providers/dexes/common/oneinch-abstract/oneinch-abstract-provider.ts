@@ -114,20 +114,21 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             usedForCrossChain: fullOptions.usedForCrossChain,
             availableProtocols
         };
-        if (fullOptions.gasCalculation === 'disabled') {
+
+        try {
+            const gasPriceInfo = await this.getGasPriceInfo();
+            const gasLimit = (await OneinchTrade.getGasLimit(oneinchTradeStruct)) || estimatedGas;
+            const gasFeeInfo = getGasFeeInfo(gasLimit, gasPriceInfo);
+            return new OneinchTrade(
+                {
+                    ...oneinchTradeStruct,
+                    gasFeeInfo
+                },
+                fullOptions.providerAddress
+            );
+        } catch {
             return new OneinchTrade(oneinchTradeStruct, fullOptions.providerAddress);
         }
-
-        const gasPriceInfo = await this.getGasPriceInfo();
-        const gasLimit = (await OneinchTrade.getGasLimit(oneinchTradeStruct)) || estimatedGas;
-        const gasFeeInfo = getGasFeeInfo(gasLimit, gasPriceInfo);
-        return new OneinchTrade(
-            {
-                ...oneinchTradeStruct,
-                gasFeeInfo
-            },
-            fullOptions.providerAddress
-        );
     }
 
     private async getTradeInfo(
@@ -145,6 +146,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         const fromTokenAddress =
             isNative && !isDefaultWrappedAddress ? options.wrappedAddress : from.address;
         const toTokenAddress = toToken.address;
+        const availableProtocols = this.getAvailableProtocols();
         const quoteTradeParams: OneinchQuoteRequest = {
             params: {
                 fromTokenAddress,
@@ -152,7 +154,8 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
                 amount: from.stringWeiAmount,
                 ...(options.disableMultihops && {
                     connectorTokens: `${fromTokenAddress},${toTokenAddress}`
-                })
+                }),
+                ...(availableProtocols && { protocols: availableProtocols })
             }
         };
 
@@ -172,15 +175,13 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
                     options.useProxy
                 );
             }
-            const availableProtocols = this.getAvailableProtocols();
 
             const swapTradeParams: OneinchSwapRequest = {
                 params: {
                     ...quoteTradeParams.params,
                     slippage: (options.slippageTolerance * 100).toString(),
                     fromAddress: options.fromAddress,
-                    disableEstimate: options.gasCalculation === 'disabled',
-                    ...(availableProtocols && { protocols: availableProtocols })
+                    disableEstimate: options.gasCalculation === 'disabled'
                 }
             };
             oneInchTrade = await this.httpClient.get<OneinchSwapResponse>(

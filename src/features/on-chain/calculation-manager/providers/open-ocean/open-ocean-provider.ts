@@ -1,7 +1,12 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import pTimeout from 'src/common/utils/p-timeout';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -25,6 +30,8 @@ import { OpenOceanTokenListResponse } from 'src/features/on-chain/calculation-ma
 import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/open-ocean/models/open-ocean-trade-struct';
 import { OpenOceanTrade } from 'src/features/on-chain/calculation-manager/providers/open-ocean/open-ocean-trade';
 
+import { ARBITRUM_GAS_PRICE } from './constants/arbitrum-gas-price';
+
 export class OpenOceanProvider {
     private readonly onChainProxyService = new OnChainProxyService();
 
@@ -43,19 +50,25 @@ export class OpenOceanProvider {
             const gasPrice = await Injector.web3PublicService
                 .getWeb3Public(blockchain)
                 .getGasPrice();
+            const isArbitrum = blockchain === BLOCKCHAIN_NAME.ARBITRUM;
             const apiUrl = openOceanApiUrl.quote(openOceanBlockchainName[blockchain]);
-            const quoteResponse = await Injector.httpClient.get<OpenOceanQuoteResponse>(apiUrl, {
-                params: {
-                    chain: openOceanBlockchainName[blockchain],
-                    inTokenAddress: fromWithoutFee.address,
-                    outTokenAddress: toToken.address,
-                    amount: fromWithoutFee.tokenAmount.toString(),
-                    slippage: options.slippageTolerance! * 100,
-                    gasPrice: Web3Pure.fromWei(gasPrice, nativeTokensList[from.blockchain].decimals)
-                        .multipliedBy(10 ** 9)
-                        .toFixed(0)
-                }
-            });
+            const quoteResponse = await pTimeout(
+                Injector.httpClient.get<OpenOceanQuoteResponse>(apiUrl, {
+                    params: {
+                        chain: openOceanBlockchainName[blockchain],
+                        inTokenAddress: fromWithoutFee.address,
+                        outTokenAddress: toToken.address,
+                        amount: fromWithoutFee.tokenAmount.toString(),
+                        slippage: options.slippageTolerance! * 100,
+                        gasPrice: isArbitrum
+                            ? ARBITRUM_GAS_PRICE
+                            : Web3Pure.fromWei(gasPrice, nativeTokensList[from.blockchain].decimals)
+                                  .multipliedBy(10 ** 9)
+                                  .toString()
+                    }
+                }),
+                7_000
+            );
 
             if ([500, 400].includes(quoteResponse.code)) {
                 return {
@@ -71,10 +84,12 @@ export class OpenOceanProvider {
             const toTokenWeiAmountMin = new BigNumber(quoteResponse.data.outAmount).multipliedBy(
                 1 - options.slippageTolerance
             );
-            const openOceanTradeStruct = {
+            const openOceanTradeStruct: OpenOceanTradeStruct = {
                 from,
                 to,
-                gasFeeInfo: null,
+                gasFeeInfo: {
+                    gasLimit: new BigNumber(quoteResponse.data.estimatedGas)
+                },
                 slippageTolerance: options.slippageTolerance!,
                 path: [from, to],
                 toTokenWeiAmountMin,
@@ -130,7 +145,9 @@ export class OpenOceanProvider {
     private async getGasFeeInfo(tradeStruct: OpenOceanTradeStruct): Promise<GasFeeInfo | null> {
         try {
             const gasPriceInfo = await getGasPriceInfo(tradeStruct.from.blockchain);
-            const gasLimit = await OpenOceanTrade.getGasLimit(tradeStruct);
+            const gasLimit =
+                tradeStruct?.gasFeeInfo?.gasLimit ||
+                (await OpenOceanTrade.getGasLimit(tradeStruct));
             return getGasFeeInfo(gasLimit, gasPriceInfo);
         } catch {
             return null;

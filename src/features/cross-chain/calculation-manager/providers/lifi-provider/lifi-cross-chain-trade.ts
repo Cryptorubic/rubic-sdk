@@ -26,6 +26,8 @@ import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-ma
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
 import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
 
+import { convertGasDataToBN } from '../../utils/convert-gas-price';
+
 /**
  * Calculated Celer cross-chain trade.
  */
@@ -65,7 +67,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                 ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasPrice] = await Promise.all([
+            const [gasLimit, gasDetails] = await Promise.all([
                 web3Public.getEstimatedGas(
                     contractAbi,
                     contractAddress,
@@ -74,7 +76,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                     walletAddress,
                     value
                 ),
-                new BigNumber(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
             ]);
 
             if (!gasLimit?.isFinite()) {
@@ -84,7 +86,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
             return {
                 gasLimit: increasedGasLimit,
-                gasPrice
+                ...gasDetails
             };
         } catch (_err) {
             return null;
@@ -111,7 +113,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly bridgeType: BridgeType;
 
-    public readonly priceImpact: number;
+    public readonly priceImpact: number | null;
 
     public readonly feeInfo: FeeInfo;
 
@@ -139,7 +141,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             gasData: GasData | null;
             toTokenAmountMin: BigNumber;
             feeInfo: FeeInfo;
-            priceImpact: number;
+            priceImpact: number | null;
             onChainSubtype: OnChainSubtype;
             bridgeType: BridgeType;
             slippage: number;
@@ -171,7 +173,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
             await this.checkAllowanceAndApprove(options);
 
-            const { onConfirm, gasLimit, gasPrice } = options;
+            const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
             let transactionHash: string;
             const onTransactionHash = (hash: string) => {
                 if (onConfirm) {
@@ -189,7 +191,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                     value,
                     onTransactionHash,
                     gas: gasLimit,
-                    gasPrice
+                    gasPrice,
+                    gasPriceOptions
                 });
 
                 return transactionHash!;
@@ -217,10 +220,14 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             toTokenAmount: this.to,
             srcChainTrade: null,
             providerAddress: this.providerAddress,
-            type: this.type,
+            type: `lifi:${this.bridgeType}`,
             fromAddress: this.walletAddress
         });
-        const providerData = ProxyCrossChainEvmTrade.getGenericProviderData(providerRouter, data!);
+        const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
+            providerRouter,
+            data!,
+            this.fromBlockchain
+        );
 
         const methodArguments = [bridgeData, providerData];
 
