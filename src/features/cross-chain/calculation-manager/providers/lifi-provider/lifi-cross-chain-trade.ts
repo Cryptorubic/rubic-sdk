@@ -223,10 +223,15 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             type: `lifi:${this.bridgeType}`,
             fromAddress: this.walletAddress
         });
+        const extraNativeFee = this.from.isNative
+            ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
+            : new BigNumber(providerValue).toFixed();
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             providerRouter,
             data!,
-            this.fromBlockchain
+            this.fromBlockchain,
+            providerRouter,
+            extraNativeFee
         );
 
         const methodArguments = [bridgeData, providerData];

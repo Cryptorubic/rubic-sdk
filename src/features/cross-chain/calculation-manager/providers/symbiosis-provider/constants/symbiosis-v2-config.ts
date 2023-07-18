@@ -12,6 +12,585 @@ export function getSymbiosisV2Config(): Config {
             address: '0x6148FD6C649866596C3d8a971fC313E5eCE84882',
             oracle: '0x7775b274f0C3fA919B756b22A4d9674e55927ab8'
         },
+        omniPools: [
+            {
+                chainId: 56288,
+                address: '0x6148FD6C649866596C3d8a971fC313E5eCE84882',
+                oracle: '0x7775b274f0C3fA919B756b22A4d9674e55927ab8',
+                tokens: [
+                    {
+                        name: 'USD Coin',
+                        address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+                        symbol: 'USDC',
+                        decimals: 6,
+                        chainId: 1,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Binance USD',
+                        address: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
+                        symbol: 'BUSD',
+                        decimals: 18,
+                        chainId: 56,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png'
+                        }
+                    },
+                    {
+                        name: 'USD Coin',
+                        address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
+                        symbol: 'USDC',
+                        decimals: 18,
+                        chainId: 56,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'USD Coin',
+                        address: '0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664',
+                        symbol: 'USDC.e',
+                        decimals: 6,
+                        chainId: 43114,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'USD Coin',
+                        address: '0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
+                        symbol: 'USDC',
+                        isStable: true,
+                        decimals: 6,
+                        chainId: 137,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'USDC',
+                        symbol: 'USDC',
+                        address: '0x818ec0a7fe18ff94269904fced6ae3dae6d6dc0b',
+                        chainId: 40,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'USDC',
+                        symbol: 'USDC',
+                        address: '0xfA9343C3897324496A05fC75abeD6bAC29f8A40f',
+                        chainId: 2222,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'USD Coin',
+                        address: '0x66a2A913e447d6b4BF33EFbec43aAeF87890FBbc',
+                        symbol: 'USDC',
+                        decimals: 6,
+                        chainId: 288,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'USD Coin',
+                        address: '0x9F98f9F312D23d078061962837042b8918e6aff2',
+                        symbol: 'USDC',
+                        isStable: true,
+                        decimals: 18,
+                        chainId: 56288,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        symbol: 'sUSDC',
+                        address: '0x7d6EC42b5d9566931560411a8652Cea00b90d982',
+                        chainId: 56288,
+                        chainFromId: 1,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic BUSD',
+                        symbol: 'sBUSD',
+                        address: '0x1a25BEB8E75626ADDb983d46fbDfcE5fdC29Ae58',
+                        chainId: 56288,
+                        chainFromId: 56,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4687.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        symbol: 'sUSDC',
+                        address: '0x5e19eFc6AC9C80bfAA755259c9fab2398A8E87eB',
+                        chainId: 56288,
+                        chainFromId: 56,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic USDC.e',
+                        symbol: 'sUSDC.e',
+                        address: '0x6dF9C221F52537DFD63d70721EEAA0C4d4472C18',
+                        chainId: 56288,
+                        chainFromId: 43114,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        symbol: 'sUSDC',
+                        address: '0x59AA2e5F628659918A4890A2a732E6C8bD334E7A',
+                        chainId: 56288,
+                        chainFromId: 137,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        symbol: 'sUSDC',
+                        address: '0x1a3d48492Cd334AD140587091AC382E5695a4934',
+                        chainId: 56288,
+                        chainFromId: 288,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic USDC.e',
+                        symbol: 'sUSDC.e',
+                        address: '0xa9441f2995763e38d18A725646b00D90938d2FBf',
+                        chainId: 56288,
+                        chainFromId: 43288,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        symbol: 'sUSDC',
+                        address: '0x7Af28c655F1EF73E1Fb15204f025A25D686A3Ca7',
+                        chainId: 56288,
+                        chainFromId: 40,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        symbol: 'sUSDC',
+                        address: '0x437640130BAE97dAD55161a6F1AEC58d0F30fE8F',
+                        chainId: 56288,
+                        chainFromId: 2222,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        symbol: 'sUSDC',
+                        address: '0xc6cc7e50a0f20268db1bab041ff18b2c7e97a9d3',
+                        chainId: 56288,
+                        chainFromId: 324,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic Bridged USDC',
+                        symbol: 'sUSDC.e',
+                        address: '0xA8d058ed41B216175400E8B2CC8cD55853596462',
+                        chainId: 56288,
+                        chainFromId: 42161,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        symbol: 'sUSDC',
+                        address: '0xf072f11Bf151038BD8732cd1088b7C98762b839C',
+                        chainId: 56288,
+                        chainFromId: 10,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        symbol: 'sUSDC',
+                        address: '0x9d152fcb9692b5b2d31b81a4a5f86aa1bab42677',
+                        chainId: 56288,
+                        chainFromId: 42170,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        symbol: 'sUSDC',
+                        address: '0xa5CA3277041Bf6e8D6eEC2740010B7C6d10E4012',
+                        chainId: 56288,
+                        chainFromId: 1101,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'USDC',
+                        symbol: 'USDC',
+                        address: '0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4',
+                        chainId: 324,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Bridged USDC',
+                        symbol: 'USDC.e',
+                        address: '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8',
+                        chainId: 42161,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'USDC',
+                        symbol: 'USDC',
+                        address: '0x7F5c764cBc14f9669B88837ca1490cCa17c31607',
+                        chainId: 10,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'USDC',
+                        symbol: 'USDC',
+                        address: '0x750ba8b76187092B0D1E87E28daaf484d1b5273b',
+                        chainId: 42170,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'USDC',
+                        symbol: 'USDC',
+                        address: '0xA8CE8aee21bC2A48a5EF670afCc9274C7bbbC035',
+                        chainId: 1101,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    }
+                ]
+            },
+            {
+                chainId: 56288,
+                address: '0xBcc2637DFa64999F75abB53a7265b5B4932e40eB',
+                oracle: '0x628613064b1902a1A422825cf11B687C6f17961E',
+                tokens: [
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'WETH',
+                        address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+                        chainId: 1,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'WETH',
+                        address: '0x2170ed0880ac9a755fd29b2688956bd959f933f8',
+                        chainId: 56,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'ETH',
+                        address: '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619',
+                        chainId: 137,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0x1CE4E75E2Bd6bbbACDE1E10D6813228138337E86',
+                        chainId: 56288,
+                        chainFromId: 1,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0xe3db9ad5a3c6387bece39fafc26dbb2b594fb7ff',
+                        chainId: 56288,
+                        chainFromId: 324,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0x4994b8bb0b58708cc6a66079d22db35c95650b4b',
+                        chainId: 56288,
+                        chainFromId: 42161,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0x20418d1bcd353f81fb11f10689ca6f3a1b353794',
+                        chainId: 56288,
+                        chainFromId: 42170,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0x93a973297e492d4e7a2b4abab3bfb4f140d1e3bb',
+                        chainId: 56288,
+                        chainFromId: 137,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0x424190072b7db5352bb91cc70dabd82f547ae003',
+                        chainId: 56288,
+                        chainFromId: 56,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0x983e6839e84004e78fbfe76431d879cf9cf2f084',
+                        chainId: 56288,
+                        chainFromId: 10,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0x52b50a6f8564b4895c7edc9ad3b232bba0108ba6',
+                        chainId: 56288,
+                        chainFromId: 1101,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0xe0B51250bE54fEaF51BDdfAE0828D29BDc7fE87C',
+                        chainId: 56288,
+                        chainFromId: 42170,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'WETH',
+                        address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+                        chainId: 42161,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'WETH',
+                        address: '0x5aea5775959fbc2557cc8789bc1bf90a239d9a91',
+                        chainId: 324,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'WETH',
+                        address: '0x4200000000000000000000000000000000000006',
+                        chainId: 10,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'WETH',
+                        address: '0x4f9a0e7fd2bf6067db6994cf12e4495df938e6e9',
+                        chainId: 1101,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'WETH',
+                        address: '0x722e8bdd2ce80a4422e880164f2079488e115365',
+                        chainId: 42170,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
+                        }
+                    }
+                ]
+            }
+        ],
         chains: [
             {
                 id: 1,
@@ -41,6 +620,18 @@ export function getSymbiosisV2Config(): Config {
                         icons: {
                             large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/15084.png',
                             small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/15084.png'
+                        }
+                    },
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'WETH',
+                        address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+                        chainId: 1,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
                         }
                     }
                 ],
@@ -99,6 +690,18 @@ export function getSymbiosisV2Config(): Config {
                         icons: {
                             large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/15084.png',
                             small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/15084.png'
+                        }
+                    },
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'WETH',
+                        address: '0x2170ed0880ac9a755fd29b2688956bd959f933f8',
+                        chainId: 56,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
                         }
                     }
                 ],
@@ -165,6 +768,18 @@ export function getSymbiosisV2Config(): Config {
                         icons: {
                             large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
                             small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'ETH',
+                        address: '0x7ceb23fd6bc0add59e62ac25578270cff1b9f619',
+                        chainId: 137,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
                         }
                     }
                 ],
@@ -487,6 +1102,149 @@ export function getSymbiosisV2Config(): Config {
                             large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
                             small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
                         }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        symbol: 'sUSDC',
+                        address: '0x9d152fcb9692b5b2d31b81a4a5f86aa1bab42677',
+                        chainId: 56288,
+                        chainFromId: 42170,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic USDC',
+                        symbol: 'sUSDC',
+                        address: '0xa5CA3277041Bf6e8D6eEC2740010B7C6d10E4012',
+                        chainId: 56288,
+                        chainFromId: 1101,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0x1CE4E75E2Bd6bbbACDE1E10D6813228138337E86',
+                        chainId: 56288,
+                        chainFromId: 1,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0xe3db9ad5a3c6387bece39fafc26dbb2b594fb7ff',
+                        chainId: 56288,
+                        chainFromId: 324,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0x4994b8bb0b58708cc6a66079d22db35c95650b4b',
+                        chainId: 56288,
+                        chainFromId: 42161,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0x20418d1bcd353f81fb11f10689ca6f3a1b353794',
+                        chainId: 56288,
+                        chainFromId: 42170,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0x93a973297e492d4e7a2b4abab3bfb4f140d1e3bb',
+                        chainId: 56288,
+                        chainFromId: 137,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0x424190072b7db5352bb91cc70dabd82f547ae003',
+                        chainId: 56288,
+                        chainFromId: 56,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0x983e6839e84004e78fbfe76431d879cf9cf2f084',
+                        chainId: 56288,
+                        chainFromId: 10,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0x52b50a6f8564b4895c7edc9ad3b232bba0108ba6',
+                        chainId: 56288,
+                        chainFromId: 1101,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
+                    },
+                    {
+                        name: 'Synthetic WETH',
+                        symbol: 'sWETH',
+                        address: '0xe0B51250bE54fEaF51BDdfAE0828D29BDc7fE87C',
+                        chainId: 56288,
+                        chainFromId: 42170,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png'
+                        }
                     }
                 ],
                 nerves: [],
@@ -519,6 +1277,18 @@ export function getSymbiosisV2Config(): Config {
                         icons: {
                             large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
                             small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'WETH',
+                        address: '0x5aea5775959fbc2557cc8789bc1bf90a239d9a91',
+                        chainId: 324,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
                         }
                     }
                 ],
@@ -553,6 +1323,18 @@ export function getSymbiosisV2Config(): Config {
                             large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
                             small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
                         }
+                    },
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'WETH',
+                        address: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
+                        chainId: 42161,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
+                        }
                     }
                 ],
                 nerves: [],
@@ -586,11 +1368,113 @@ export function getSymbiosisV2Config(): Config {
                             large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
                             small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
                         }
+                    },
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'WETH',
+                        address: '0x4200000000000000000000000000000000000006',
+                        chainId: 10,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
+                        }
                     }
                 ],
                 nerves: [],
                 router: '0x0000000000000000000000000000000000000000',
                 dexFee: 0,
+                metaRouter: '0xcE8f24A58D85eD5c5A6824f7be1F8d4711A0eb4C',
+                metaRouterGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278',
+                bridge: '0x5523985926Aa12BA58DC5Ad00DDca99678D7227E',
+                synthesis: '0x0000000000000000000000000000000000000000',
+                portal: '0x292fC50e4eB66C3f6514b9E402dBc25961824D62',
+                fabric: '0x0000000000000000000000000000000000000000',
+                multicallRouter: '0xb8f275fBf7A959F4BCE59999A2EF122A099e81A8',
+                aavePool: '0x0000000000000000000000000000000000000000',
+                creamComptroller: '0x0000000000000000000000000000000000000000',
+                renGatewayRegistry: '0x0000000000000000000000000000000000000000'
+            },
+            {
+                id: 42170,
+                rpc: 'https://nova.arbitrum.io/rpc',
+                filterBlockOffset: 2000,
+                waitForBlocksCount: 60,
+                stables: [
+                    {
+                        name: 'USDC',
+                        symbol: 'USDC',
+                        address: '0x750ba8b76187092B0D1E87E28daaf484d1b5273b',
+                        chainId: 42170,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'WETH',
+                        address: '0x722e8bdd2ce80a4422e880164f2079488e115365',
+                        chainId: 42170,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
+                        }
+                    }
+                ],
+                nerves: [],
+                router: '0xEe01c0CD76354C383B8c7B4e65EA88D00B06f36f',
+                dexFee: 30,
+                metaRouter: '0xcE8f24A58D85eD5c5A6824f7be1F8d4711A0eb4C',
+                metaRouterGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278',
+                bridge: '0x5523985926Aa12BA58DC5Ad00DDca99678D7227E',
+                synthesis: '0x0000000000000000000000000000000000000000',
+                portal: '0x292fC50e4eB66C3f6514b9E402dBc25961824D62',
+                fabric: '0x0000000000000000000000000000000000000000',
+                multicallRouter: '0xb8f275fBf7A959F4BCE59999A2EF122A099e81A8',
+                aavePool: '0x0000000000000000000000000000000000000000',
+                creamComptroller: '0x0000000000000000000000000000000000000000',
+                renGatewayRegistry: '0x0000000000000000000000000000000000000000'
+            },
+            {
+                id: 1101,
+                rpc: 'https://zkevm-rpc.com/',
+                filterBlockOffset: 2000,
+                waitForBlocksCount: 0,
+                stables: [
+                    {
+                        name: 'USDC',
+                        symbol: 'USDC',
+                        address: '0xA8CE8aee21bC2A48a5EF670afCc9274C7bbbC035',
+                        chainId: 1101,
+                        decimals: 6,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/64x64/3408.png'
+                        }
+                    },
+                    {
+                        name: 'Wrapped Ether',
+                        symbol: 'WETH',
+                        address: '0x4f9a0e7fd2bf6067db6994cf12e4495df938e6e9',
+                        chainId: 1101,
+                        decimals: 18,
+                        isStable: true,
+                        icons: {
+                            large: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+                            small: 'https://s2.coinmarketcap.com/static/img/coins/128x128/1027.png'
+                        }
+                    }
+                ],
+                nerves: [],
+                router: '0x0000000000000000000000000000000000000000',
+                dexFee: 30,
                 metaRouter: '0xcE8f24A58D85eD5c5A6824f7be1F8d4711A0eb4C',
                 metaRouterGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278',
                 bridge: '0x5523985926Aa12BA58DC5Ad00DDca99678D7227E',

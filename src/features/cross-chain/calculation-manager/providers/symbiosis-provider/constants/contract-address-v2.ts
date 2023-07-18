@@ -49,5 +49,9 @@ export const SYMBIOSIS_CONTRACT_ADDRESS_V2: Record<
     [BLOCKCHAIN_NAME.OPTIMISM]: {
         providerRouter: '0xcE8f24A58D85eD5c5A6824f7be1F8d4711A0eb4C',
         providerGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278'
+    },
+    [BLOCKCHAIN_NAME.POLYGON_ZKEVM]: {
+        providerRouter: '0xcE8f24A58D85eD5c5A6824f7be1F8d4711A0eb4C',
+        providerGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278'
     }
 };
