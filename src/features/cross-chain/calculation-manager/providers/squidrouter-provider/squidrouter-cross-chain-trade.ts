@@ -235,7 +235,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
 
         const extraNativeFee = this.from.isNative
             ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
-            : '0';
+            : new BigNumber(providerValue).toFixed();
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             targetAddress,
             data!,
