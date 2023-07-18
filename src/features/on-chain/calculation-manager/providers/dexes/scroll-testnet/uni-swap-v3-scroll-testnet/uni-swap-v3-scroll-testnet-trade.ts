@@ -1,28 +1,33 @@
-import { Token } from 'src/common/tokens';
+import { RubicSdkError } from 'src/common/errors';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
-import { AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/algebra/algebra-quoter-controller';
+import {
+    ON_CHAIN_TRADE_TYPE,
+    OnChainTradeType
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
+import { UniswapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
+import { UniswapV3TradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-struct';
+import { UniswapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
 import { UniswapV3AlgebraAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
-import { ALGEBRA_SWAP_ROUTER_CONTRACT_ABI } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/constants/swap-router-contract-data';
-import { AlgebraRoute } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/models/algebra-route';
-import { AlgebraTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/models/algebra-trade-struct';
 
 export class UniSwapV3ScrollTestnetTrade extends UniswapV3AlgebraAbstractTrade {
     public readonly dexContractAddress = '0xD9880690bd717189cC3Fbe7B9020F27fae7Ac76F';
 
-    protected readonly contractAbi = ALGEBRA_SWAP_ROUTER_CONTRACT_ABI;
+    protected readonly contractAbi = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
 
     protected readonly unwrapWethMethodName = 'unwrapWNativeToken';
 
-    private readonly route: AlgebraRoute;
+    private readonly route: UniswapV3Route;
 
-    public readonly wrappedPath: ReadonlyArray<Token>;
+    public static get type(): OnChainTradeType {
+        return ON_CHAIN_TRADE_TYPE.UNI_SWAP_V3;
+    }
 
-    constructor(tradeStruct: AlgebraTradeStruct, providerAddress: string) {
+    constructor(tradeStruct: UniswapV3TradeStruct, providerAddress: string) {
         super(tradeStruct, providerAddress);
 
         this.route = tradeStruct.route;
-
-        this.wrappedPath = this.route.path;
     }
 
     /**
@@ -31,15 +36,31 @@ export class UniSwapV3ScrollTestnetTrade extends UniswapV3AlgebraAbstractTrade {
     protected getSwapRouterExactInputMethodData(walletAddress: string): MethodData {
         const amountParams = this.getAmountParams();
 
-        if (this.route.path.length === 2 && this.route?.path?.[0] && this.route?.path?.[1]) {
+        if (this.route.poolsPath.length === 1) {
             const methodName = this.exact === 'input' ? 'exactInputSingle' : 'exactOutputSingle';
+
+            const pool = this.route.poolsPath[0];
+            if (!pool) {
+                throw new RubicSdkError('Initial pool has to be defined');
+            }
+            const toTokenAddress = compareAddresses(
+                pool.token0.address,
+                this.route.initialTokenAddress
+            )
+                ? pool.token1.address
+                : pool.token0.address;
+
+            if (!this.route?.poolsPath?.[0]) {
+                throw new RubicSdkError('PoolsPath[0] has to be defined');
+            }
 
             return {
                 methodName,
                 methodArguments: [
                     [
-                        this.route.path[0].address,
-                        this.route.path[1].address,
+                        this.route.initialTokenAddress,
+                        toTokenAddress,
+                        this.route.poolsPath[0].fee,
                         walletAddress,
                         this.deadlineMinutesTimestamp,
                         ...amountParams,
@@ -55,7 +76,10 @@ export class UniSwapV3ScrollTestnetTrade extends UniswapV3AlgebraAbstractTrade {
             methodName,
             methodArguments: [
                 [
-                    AlgebraQuoterController.getEncodedPath(this.route.path),
+                    UniswapV3QuoterController.getEncodedPoolsPath(
+                        this.route.poolsPath,
+                        this.route.initialTokenAddress
+                    ),
                     walletAddress,
                     this.deadlineMinutesTimestamp,
                     ...amountParams

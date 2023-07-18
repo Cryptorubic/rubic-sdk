@@ -19,8 +19,6 @@ import { ChainId } from 'symbiosis-js-sdk/dist/constants';
 import { TransactionReceipt } from 'web3-eth';
 
 export class CrossChainSymbiosisManager {
-    private readonly symbiosis = new Symbiosis(getSymbiosisV2Config(), 'rubic');
-
     private get web3Private(): EvmWeb3Private {
         return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM);
     }
@@ -113,10 +111,11 @@ export class CrossChainSymbiosisManager {
     ): Promise<EthersLog> {
         const fromChainId = blockchainId[fromBlockchain] as ChainId;
         const toChainId = blockchainId[toBlockchain] as ChainId;
+        const symbiosis = new Symbiosis(getSymbiosisV2Config(fromBlockchain), 'rubic');
 
         return await new WaitForComplete({
             direction: this.getDirection(fromChainId, toChainId),
-            symbiosis: this.symbiosis,
+            symbiosis,
             revertableAddress: this.walletAddress,
             chainIdOut: toChainId,
             chainIdIn: fromChainId

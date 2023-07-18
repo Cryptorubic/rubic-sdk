@@ -18,7 +18,7 @@ export class CbridgeCrossChainApiService {
             ? CbridgeCrossChainApiService.testnetApiEndpoint
             : CbridgeCrossChainApiService.apiEndpoint;
         return Injector.httpClient.get<CbridgeTransferConfigsResponse>(
-            `${apiUrl}}getTransferConfigs`
+            `${apiUrl}getTransferConfigs`
         );
     }
 

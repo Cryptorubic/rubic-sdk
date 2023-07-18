@@ -47,8 +47,6 @@ import { Error, ErrorCode, Symbiosis, Token, TokenAmount } from 'symbiosis-js-sd
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
 
-    private readonly symbiosis = new Symbiosis(getSymbiosisV2Config(), 'rubic');
-
     private readonly onChainProxyProviders: Partial<
         Record<SymbiosisCrossChainSupportedBlockchain, OnChainProvider>
     > = {
@@ -89,6 +87,9 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
+
+        const symbiosis = new Symbiosis(getSymbiosisV2Config(from.blockchain), 'rubic');
+
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return {
                 trade: null,
@@ -139,15 +140,20 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
             const slippageTolerance = options.slippageTolerance * 10000;
 
-            const trade = await this.getTrade(fromBlockchain, toBlockchain, {
-                tokenAmountIn,
-                tokenOut,
-                fromAddress,
-                receiverAddress,
-                refundAddress: fromAddress,
-                slippage: slippageTolerance,
-                deadline
-            });
+            const trade = await this.getTrade(
+                fromBlockchain,
+                toBlockchain,
+                {
+                    tokenAmountIn,
+                    tokenOut,
+                    fromAddress,
+                    receiverAddress,
+                    refundAddress: fromAddress,
+                    slippage: slippageTolerance,
+                    deadline
+                },
+                symbiosis
+            );
             const {
                 tokenAmountOut,
                 fee: transitTokenFee,
@@ -191,15 +197,20 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                     Web3Pure.toWei(amountIn, from.decimals)
                 );
 
-                return this.getTrade(fromBlockchain, toBlockchain, {
-                    tokenAmountIn,
-                    tokenOut,
-                    fromAddress: fromUserAddress,
-                    receiverAddress,
-                    refundAddress,
-                    slippage: slippageTolerance,
-                    deadline
-                });
+                return this.getTrade(
+                    fromBlockchain,
+                    toBlockchain,
+                    {
+                        tokenAmountIn,
+                        tokenOut,
+                        fromAddress: fromUserAddress,
+                        receiverAddress,
+                        refundAddress,
+                        slippage: slippageTolerance,
+                        deadline
+                    },
+                    symbiosis
+                );
             };
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -371,7 +382,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             refundAddress: string;
             slippage: number;
             deadline: number;
-        }
+        },
+        symbiosis: Symbiosis
     ): Promise<SymbiosisTradeData> {
         if (toBlockchain !== BLOCKCHAIN_NAME.BITCOIN && swapParams.tokenOut) {
             const swappingParams: SwappingParams = [
@@ -384,7 +396,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 swapParams.deadline,
                 true
             ];
-            return this.getBestSwappingSwapResult(swappingParams);
+            return this.getBestSwappingSwapResult(swappingParams, symbiosis);
         }
 
         const poolId =
@@ -403,7 +415,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         ];
 
         try {
-            return await this.getBestZappingSwapResult(zappingParams);
+            return await this.getBestZappingSwapResult(zappingParams, symbiosis);
         } catch (err) {
             if (
                 err.code === ErrorCode.AMOUNT_TOO_LOW ||
@@ -412,21 +424,23 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 throw err;
             }
 
-            return this.getBestZappingSwapResult(zappingParams);
+            return this.getBestZappingSwapResult(zappingParams, symbiosis);
         }
     }
 
     private async getBestSwappingSwapResult(
-        swappingParams: SwappingParams
+        swappingParams: SwappingParams,
+        symbiosis: Symbiosis
     ): Promise<SymbiosisTradeData> {
-        const swapping = this.symbiosis.newSwapping();
+        const swapping = symbiosis.newSwapping();
         return swapping.exactIn(...swappingParams);
     }
 
     private async getBestZappingSwapResult(
-        zappingParams: ZappingParams
+        zappingParams: ZappingParams,
+        symbiosis: Symbiosis
     ): Promise<SymbiosisTradeData> {
-        const zapping = this.symbiosis.newZappingRenBTC();
+        const zapping = symbiosis.newZappingRenBTC();
         return zapping.exactIn(...zappingParams);
     }
 

@@ -127,7 +127,9 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
 
     constructor(
         private readonly blockchain: EvmBlockchainName,
-        private readonly routerConfiguration: UniswapV3RouterConfiguration<string>
+        private readonly routerConfiguration: UniswapV3RouterConfiguration<string>,
+        private readonly factoryAddress = FACTORY_CONTRACT_ADDRESS,
+        private readonly quoterAddress = UNISWAP_V3_QUOTER_CONTRACT_ADDRESS
     ) {}
 
     private async getOrCreateRouterTokensAndLiquidityPools(): Promise<{
@@ -213,7 +215,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
 
         const poolsAddresses = (
             await this.web3Public.multicallContractMethod<string>(
-                FACTORY_CONTRACT_ADDRESS,
+                this.factoryAddress,
                 FACTORY_CONTRACT_ABI,
                 'getPool',
                 getPoolsMethodArguments.map(methodArguments => [
@@ -274,7 +276,7 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
 
         return this.web3Public
             .multicallContractMethods<string>(
-                UNISWAP_V3_QUOTER_CONTRACT_ADDRESS,
+                this.quoterAddress,
                 UNISWAP_V3_QUOTER_CONTRACT_ABI,
                 quoterMethodsData.map(quoterMethodData => quoterMethodData.methodData)
             )

@@ -336,7 +336,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     protected getProviderData(sourceData: BytesLike): unknown[] {
         const targetCallData = this.decodeCallData(sourceData);
         const fromChainId = blockchainId[this.from.blockchain];
-        const portalAddress = getSymbiosisV2Config().chains.find(
+        const portalAddress = getSymbiosisV2Config(this.from.blockchain).chains.find(
             chain => chain.id === fromChainId
         )!.portal;
 
