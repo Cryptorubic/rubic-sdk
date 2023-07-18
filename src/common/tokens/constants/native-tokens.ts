@@ -38,6 +38,13 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         name: 'Test Binance Coin',
         symbol: 'tBNB',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SCROLL_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SCROLL_TESTNET,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
     })
 };
 

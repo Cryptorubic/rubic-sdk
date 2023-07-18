@@ -1,7 +1,7 @@
 import { Token } from 'src/common/tokens/token';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
-export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> = {
+export const wrappedNativeTokensList: Record<EvmBlockchainName, Token> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: new Token({
         blockchain: BLOCKCHAIN_NAME.ETHEREUM,
         address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
@@ -252,6 +252,55 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         address: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',
         name: 'Wrapped Ether',
         symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.GOERLI]: new Token({
+        blockchain: BLOCKCHAIN_NAME.GOERLI,
+        address: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SCROLL_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SCROLL_TESTNET,
+        address: '0xa1ea0b2354f5a344110af2b6ad68e75545009a03',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ETHEREUM_CLASSIC]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ETHEREUM_CLASSIC,
+        address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.FLARE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.FLARE,
+        address: '0x1D80c49BbBCd1C0911346656B529DF9E5c2F783d',
+        name: 'Wrapper Flare',
+        symbol: 'WFLR',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.IOTEX]: new Token({
+        blockchain: BLOCKCHAIN_NAME.IOTEX,
+        address: '0xa00744882684c3e4747faefd68d283ea44099d03',
+        name: 'Wrapped IoTeX',
+        symbol: 'WIOTX',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.THETA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.THETA,
+        address: '0xaf537fb7e4c77c97403de94ce141b7edb9f7fcf0',
+        name: 'Wrapped Theta',
+        symbol: 'wTHETA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BITCOIN_CASH]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BITCOIN_CASH,
+        address: '0x3743eC0673453E5009310C727Ba4eaF7b3a1cc04',
+        name: 'Wrapped BCH',
+        symbol: 'WBCH',
         decimals: 18
     })
 };

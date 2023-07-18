@@ -2,7 +2,8 @@ export const TEST_EVM_BLOCKCHAIN_NAME = {
     MUMBAI: 'MUMBAI',
     BINANCE_SMART_CHAIN_TESTNET: 'BSCT',
     GOERLI: 'GOERLI',
-    FUJI: 'FUJI'
+    FUJI: 'FUJI',
+    SCROLL_TESTNET: 'SCROLL_TESTNET'
 } as const;
 
 export const EVM_BLOCKCHAIN_NAME = {

@@ -29,12 +29,13 @@ export class QuickSwapV3Provider extends UniswapV3AlgebraAbstractProvider<QuickS
 
     protected readonly OnChainTradeClass = QuickSwapV3Trade;
 
+    public readonly providerConfiguration = QUICK_SWAP_V3_PROVIDER_CONFIGURATION;
+
     protected readonly quoterController = new AlgebraQuoterController(
         QUICK_SWAP_V3_QUOTER_CONTRACT_ABI,
-        QUICK_SWAP_V3_QUOTER_CONTRACT_ADDRESS
+        QUICK_SWAP_V3_QUOTER_CONTRACT_ADDRESS,
+        BLOCKCHAIN_NAME.POLYGON
     );
-
-    public readonly providerConfiguration = QUICK_SWAP_V3_PROVIDER_CONFIGURATION;
 
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.QUICK_SWAP_V3;

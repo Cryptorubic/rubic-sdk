@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, Token } from 'src/common/tokens';
 import { notNull } from 'src/common/utils/object';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
@@ -35,12 +35,20 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
 
     private readonly quoterContractAddress: string;
 
+    private readonly blockchain: EvmBlockchainName;
+
+    private readonly routerTokensAddresses: string[];
+
     constructor(
         quoterContractABI: AbiItem[] = ALGEBRA_QUOTER_CONTRACT_ABI,
-        quoterContractAddress: string = ALGEBRA_QUOTER_CONTRACT_ADDRESS
+        quoterContractAddress: string = ALGEBRA_QUOTER_CONTRACT_ADDRESS,
+        blockchain: EvmBlockchainName = BLOCKCHAIN_NAME.POLYGON,
+        routerTokensAddresses: string[] = ROUTER_TOKENS
     ) {
         this.quoterContractABI = quoterContractABI;
         this.quoterContractAddress = quoterContractAddress;
+        this.blockchain = blockchain;
+        this.routerTokensAddresses = routerTokensAddresses;
     }
 
     /**
@@ -96,12 +104,15 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
     }
 
     private get web3Public(): EvmWeb3Public {
-        return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.POLYGON);
+        return Injector.web3PublicService.getWeb3Public(this.blockchain);
     }
 
     private async getOrCreateRouterTokens(): Promise<Token[]> {
         if (!this.routerTokens) {
-            this.routerTokens = await Token.createTokens(ROUTER_TOKENS, BLOCKCHAIN_NAME.POLYGON);
+            this.routerTokens = await Token.createTokens(
+                this.routerTokensAddresses,
+                this.blockchain
+            );
         }
 
         return this.routerTokens;
