@@ -1,4 +1,10 @@
-import { ChainId } from 'symbiosis-js-sdk/dist/constants';
-import { TokenAmount } from 'symbiosis-js-sdk/dist/entities';
+import { TokenAmount } from 'symbiosis-js-sdk';
 
-export type ZappingParams = [TokenAmount, ChainId, string, string, string, number, number, boolean];
+export type ZappingParams = {
+    tokenAmountIn: TokenAmount;
+    from: string;
+    to: string;
+    revertableAddress: string;
+    slippage: number;
+    deadline: number;
+};

@@ -31,7 +31,7 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { SymbiosisTradeType } from 'symbiosis-js-sdk/dist/crosschain/trade';
+import { SymbiosisTradeType } from 'symbiosis-js-sdk';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
 

@@ -27,18 +27,17 @@ import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { getSymbiosisV2Config } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-v2-config';
 import { SwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/swapping-params';
 import { SymbiosisTradeData } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import { ZappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/zapping-params';
 import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-trade';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
-import { Error, ErrorCode, Symbiosis, Token, TokenAmount } from 'symbiosis-js-sdk';
+import { Error, ErrorCode, OmniPoolConfig, Symbiosis, Token, TokenAmount } from 'symbiosis-js-sdk';
 
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
 
-    private readonly symbiosis = new Symbiosis(getSymbiosisV2Config(), 'rubic');
+    private readonly symbiosis = new Symbiosis('mainnet', 'rubic');
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
@@ -119,7 +118,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
             const slippageTolerance = options.slippageTolerance * 10000;
 
-            const trade = await this.getTrade(fromBlockchain, toBlockchain, {
+            const trade = await this.getTrade(toBlockchain, {
                 tokenAmountIn,
                 tokenOut,
                 fromAddress,
@@ -143,7 +142,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                     Web3Pure.toWei(amountIn, from.decimals)
                 );
 
-                return this.getTrade(fromBlockchain, toBlockchain, {
+                return this.getTrade(toBlockchain, {
                     tokenAmountIn,
                     tokenOut,
                     fromAddress: fromUserAddress,
@@ -239,7 +238,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     }
 
     private async getTrade(
-        fromBlockchain: BlockchainName,
         toBlockchain: BlockchainName,
         swapParams: {
             tokenAmountIn: TokenAmount;
@@ -252,36 +250,36 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         }
     ): Promise<SymbiosisTradeData> {
         if (toBlockchain !== BLOCKCHAIN_NAME.BITCOIN && swapParams.tokenOut) {
-            const swappingParams: SwappingParams = [
-                swapParams.tokenAmountIn,
-                swapParams.tokenOut,
-                swapParams.fromAddress,
-                swapParams.receiverAddress || swapParams.fromAddress,
-                swapParams.fromAddress,
-                swapParams.slippage,
-                swapParams.deadline,
-                true
-            ];
+            const swappingParams: SwappingParams = {
+                tokenAmountIn: swapParams.tokenAmountIn,
+                tokenOut: swapParams.tokenOut,
+                from: swapParams.fromAddress,
+                to: swapParams.receiverAddress || swapParams.fromAddress,
+                revertableAddress: swapParams.fromAddress,
+                slippage: swapParams.slippage,
+                deadline: swapParams.deadline
+            };
+
             return this.getBestSwappingSwapResult(swappingParams);
         }
 
-        const poolId =
-            fromBlockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN
-                ? blockchainId[BLOCKCHAIN_NAME.POLYGON]
-                : blockchainId[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN];
-        const zappingParams: ZappingParams = [
-            swapParams.tokenAmountIn,
-            poolId,
-            swapParams.fromAddress,
-            swapParams.receiverAddress,
-            swapParams.fromAddress,
-            swapParams.slippage,
-            swapParams.deadline,
-            true
-        ];
+        const zappingParams: ZappingParams = {
+            tokenAmountIn: swapParams.tokenAmountIn,
+            from: swapParams.fromAddress,
+            to: swapParams.receiverAddress,
+            revertableAddress: swapParams.fromAddress,
+            slippage: swapParams.slippage,
+            deadline: swapParams.deadline
+        };
+
+        const omniPoolConfig: OmniPoolConfig = {
+            chainId: 56288,
+            address: '0x6148FD6C649866596C3d8a971fC313E5eCE84882',
+            oracle: '0x7775b274f0C3fA919B756b22A4d9674e55927ab8'
+        };
 
         try {
-            return await this.getBestZappingSwapResult(zappingParams);
+            return await this.getBestZappingSwapResult(zappingParams, omniPoolConfig);
         } catch (err) {
             if (
                 err.code === ErrorCode.AMOUNT_TOO_LOW ||
@@ -290,22 +288,23 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 throw err;
             }
 
-            return this.getBestZappingSwapResult(zappingParams);
+            return this.getBestZappingSwapResult(zappingParams, omniPoolConfig);
         }
     }
 
     private async getBestSwappingSwapResult(
         swappingParams: SwappingParams
     ): Promise<SymbiosisTradeData> {
-        const swapping = this.symbiosis.newSwapping();
-        return swapping.exactIn(...swappingParams);
+        const swapping = this.symbiosis.bestPoolSwapping();
+        return swapping.exactIn(swappingParams);
     }
 
     private async getBestZappingSwapResult(
-        zappingParams: ZappingParams
+        zappingParams: ZappingParams,
+        omniPoolConfig: OmniPoolConfig
     ): Promise<SymbiosisTradeData> {
-        const zapping = this.symbiosis.newZappingRenBTC();
-        return zapping.exactIn(...zappingParams);
+        const zapping = this.symbiosis.newZapping(omniPoolConfig);
+        return zapping.exactIn(zappingParams);
     }
 
     private getTransferToken(
