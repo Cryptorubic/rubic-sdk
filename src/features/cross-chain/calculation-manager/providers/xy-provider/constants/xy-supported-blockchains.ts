@@ -15,7 +15,8 @@ export const xySupportedBlockchains = [
     BLOCKCHAIN_NAME.MOONRIVER,
     BLOCKCHAIN_NAME.ZK_SYNC,
     // BLOCKCHAIN_NAME.KLAYTN
-    BLOCKCHAIN_NAME.POLYGON_ZKEVM
+    BLOCKCHAIN_NAME.POLYGON_ZKEVM,
+    BLOCKCHAIN_NAME.LINEA
 ] as const;
 
 export type XyCrossChainSupportedBlockchain = (typeof xySupportedBlockchains)[number];
