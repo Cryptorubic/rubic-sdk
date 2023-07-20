@@ -16,7 +16,7 @@ export class UniSwapV3ScrollTestnetTrade extends UniswapV3AlgebraAbstractTrade {
 
     protected readonly contractAbi = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
 
-    protected readonly unwrapWethMethodName = 'unwrapWNativeToken';
+    protected readonly unwrapWethMethodName = 'unwrapWETH9';
 
     private readonly route: UniswapV3Route;
 

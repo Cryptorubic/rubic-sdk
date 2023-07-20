@@ -48,6 +48,7 @@ import {
 import { CrossChainStatus } from 'src/features/cross-chain/status-manager/models/cross-chain-status';
 import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
+import { ScrollApiResponse } from 'src/features/cross-chain/status-manager/models/scroll-api-response';
 import {
     BtcStatusResponse,
     DeBridgeApiStateStatus,
@@ -79,7 +80,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE]: this.getCelerBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CHANGENOW]: this.getChangenowDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getStargateDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.SCROLL_BRIDGE]: this.getScrollBridgeDstSwapStatus
     };
 
     /**
@@ -675,5 +677,21 @@ export class CrossChainStatusManager {
         } catch (error) {
             return { status: TxStatus.PENDING, hash: null };
         }
+    }
+
+    public async getScrollBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const response = await Injector.httpClient.post<ScrollApiResponse>(
+            'https://alpha-api.scroll.io/bridgehistory/api/txsbyhashes',
+            {
+                txs: [data.srcTxHash]
+            }
+        );
+        const sourceTx = response!.data!.result[0]!;
+        const targetHash = sourceTx?.finalizeTx?.hash;
+        if (targetHash) {
+            return { status: TxStatus.SUCCESS, hash: targetHash };
+        }
+
+        return { status: TxStatus.PENDING, hash: null };
     }
 }

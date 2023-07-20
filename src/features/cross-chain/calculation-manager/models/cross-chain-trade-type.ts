@@ -10,7 +10,8 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     CELER_BRIDGE: 'celer_bridge',
     CHANGENOW: 'changenow',
     STARGATE: 'stargate',
-    ARBITRUM: 'arbitrum'
+    ARBITRUM: 'arbitrum',
+    SCROLL_BRIDGE: 'scroll_bridge'
 } as const;
 
 export type CrossChainTradeType =
