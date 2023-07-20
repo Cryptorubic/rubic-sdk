@@ -27,10 +27,8 @@ import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { getSymbiosisV2Config } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-v2-config';
 import { SwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/swapping-params';
 import { SymbiosisTradeData } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
-import { ZappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/zapping-params';
 import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-trade';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 import { Error, ErrorCode, Symbiosis, Token, TokenAmount } from 'symbiosis-js-sdk';
@@ -38,7 +36,7 @@ import { Error, ErrorCode, Symbiosis, Token, TokenAmount } from 'symbiosis-js-sd
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
 
-    private readonly symbiosis = new Symbiosis(getSymbiosisV2Config(), 'rubic');
+    private readonly symbiosis = new Symbiosis('mainnet', 'rubic');
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
@@ -76,8 +74,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            const isBitcoinSwap = false;
-
             const fromAddress =
                 options.fromAddress ||
                 this.getWalletAddress(fromBlockchain as Web3PrivateSupportedBlockchain) ||
@@ -106,20 +102,18 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
             const tokenAmountIn = new TokenAmount(tokenIn, fromWithoutFee.stringWeiAmount);
 
-            const tokenOut = isBitcoinSwap
-                ? null
-                : new Token({
-                      chainId: blockchainId[toBlockchain],
-                      address: toToken.isNative ? '' : toToken.address,
-                      decimals: toToken.decimals,
-                      isNative: toToken.isNative,
-                      symbol: toToken.symbol
-                  });
+            const tokenOut = new Token({
+                chainId: blockchainId[toBlockchain],
+                address: toToken.isNative ? '' : toToken.address,
+                decimals: toToken.decimals,
+                isNative: toToken.isNative,
+                symbol: toToken.symbol
+            });
 
             const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
             const slippageTolerance = options.slippageTolerance * 10000;
 
-            const trade = await this.getTrade(fromBlockchain, toBlockchain, {
+            const trade = await this.getTrade({
                 tokenAmountIn,
                 tokenOut,
                 fromAddress,
@@ -131,11 +125,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const { tokenAmountOut, fee: transitTokenFee, inTradeType, outTradeType } = trade;
 
             const swapFunction = (fromUserAddress: string, receiver?: string) => {
-                if (isBitcoinSwap && !receiver) {
-                    throw new RubicSdkError('No receiver address provider for bitcoin swap.');
-                }
-                const refundAddress = isBitcoinSwap ? fromUserAddress : receiver || fromAddress;
-                const receiverAddress = isBitcoinSwap ? receiver! : receiver || fromUserAddress;
+                const refundAddress = receiver || fromAddress;
+                const receiverAddress = receiver || fromUserAddress;
 
                 const amountIn = fromWithoutFee.tokenAmount;
                 const tokenAmountIn = new TokenAmount(
@@ -143,7 +134,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                     Web3Pure.toWei(amountIn, from.decimals)
                 );
 
-                return this.getTrade(fromBlockchain, toBlockchain, {
+                return this.getTrade({
                     tokenAmountIn,
                     tokenOut,
                     fromAddress: fromUserAddress,
@@ -238,74 +229,33 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    private async getTrade(
-        fromBlockchain: BlockchainName,
-        toBlockchain: BlockchainName,
-        swapParams: {
-            tokenAmountIn: TokenAmount;
-            tokenOut: Token | null;
-            fromAddress: string;
-            receiverAddress: string;
-            refundAddress: string;
-            slippage: number;
-            deadline: number;
-        }
-    ): Promise<SymbiosisTradeData> {
-        if (toBlockchain !== BLOCKCHAIN_NAME.BITCOIN && swapParams.tokenOut) {
-            const swappingParams: SwappingParams = [
-                swapParams.tokenAmountIn,
-                swapParams.tokenOut,
-                swapParams.fromAddress,
-                swapParams.receiverAddress || swapParams.fromAddress,
-                swapParams.fromAddress,
-                swapParams.slippage,
-                swapParams.deadline,
-                true
-            ];
-            return this.getBestSwappingSwapResult(swappingParams);
-        }
+    private async getTrade(swapParams: {
+        tokenAmountIn: TokenAmount;
+        tokenOut: Token;
+        fromAddress: string;
+        receiverAddress: string;
+        refundAddress: string;
+        slippage: number;
+        deadline: number;
+    }): Promise<SymbiosisTradeData> {
+        const swappingParams: SwappingParams = {
+            tokenAmountIn: swapParams.tokenAmountIn,
+            tokenOut: swapParams.tokenOut,
+            from: swapParams.fromAddress,
+            to: swapParams.receiverAddress || swapParams.fromAddress,
+            revertableAddress: swapParams.fromAddress,
+            slippage: swapParams.slippage,
+            deadline: swapParams.deadline
+        };
 
-        const poolId =
-            fromBlockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN
-                ? blockchainId[BLOCKCHAIN_NAME.POLYGON]
-                : blockchainId[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN];
-        const zappingParams: ZappingParams = [
-            swapParams.tokenAmountIn,
-            poolId,
-            swapParams.fromAddress,
-            swapParams.receiverAddress,
-            swapParams.fromAddress,
-            swapParams.slippage,
-            swapParams.deadline,
-            true
-        ];
-
-        try {
-            return await this.getBestZappingSwapResult(zappingParams);
-        } catch (err) {
-            if (
-                err.code === ErrorCode.AMOUNT_TOO_LOW ||
-                err.code === ErrorCode.AMOUNT_LESS_THAN_FEE
-            ) {
-                throw err;
-            }
-
-            return this.getBestZappingSwapResult(zappingParams);
-        }
+        return this.getBestSwappingSwapResult(swappingParams);
     }
 
     private async getBestSwappingSwapResult(
         swappingParams: SwappingParams
     ): Promise<SymbiosisTradeData> {
-        const swapping = this.symbiosis.newSwapping();
-        return swapping.exactIn(...swappingParams);
-    }
-
-    private async getBestZappingSwapResult(
-        zappingParams: ZappingParams
-    ): Promise<SymbiosisTradeData> {
-        const zapping = this.symbiosis.newZappingRenBTC();
-        return zapping.exactIn(...zappingParams);
+        const swapping = this.symbiosis.bestPoolSwapping();
+        return swapping.exactIn(swappingParams);
     }
 
     private getTransferToken(
