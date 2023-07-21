@@ -13,6 +13,7 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
 import Web3 from 'web3';
 import { TransactionReceipt } from 'web3-eth';
+import {BlockchainsInfo} from "src/core/blockchain/utils/blockchains-info/blockchains-info";
 
 export class CrossChainCbridgeManager {
     public static async getTransferId(
@@ -47,7 +48,7 @@ export class CrossChainCbridgeManager {
         onTransactionHash: (hash: string) => void
     ): Promise<TransactionReceipt | null> {
         try {
-            const useTestnet = fromBlockchain in TEST_EVM_BLOCKCHAIN_NAME;
+            const useTestnet = BlockchainsInfo.isTestBlockchainName(fromBlockchain);
 
             const transferId = await CrossChainCbridgeManager.getTransferId(
                 sourceTransaction,

@@ -10,10 +10,8 @@ import { createClient } from '@layerzerolabs/scan-client';
 import { Via } from '@viaprotocol/router-sdk';
 import { StatusResponse, TransactionStatus } from 'rango-sdk-basic';
 import { RubicSdkError } from 'src/common/errors';
-import {
-    BLOCKCHAIN_NAME,
-    TEST_EVM_BLOCKCHAIN_NAME
-} from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
@@ -549,7 +547,7 @@ export class CrossChainStatusManager {
                 data.srcTxHash,
                 data.fromBlockchain as CbridgeCrossChainSupportedBlockchain
             );
-            const useTestnet = data.fromBlockchain in TEST_EVM_BLOCKCHAIN_NAME;
+            const useTestnet = BlockchainsInfo.isTestBlockchainName(data.fromBlockchain);
             const swapData = await CbridgeCrossChainApiService.fetchTradeStatus(transferId, {
                 useTestnet
             });

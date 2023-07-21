@@ -9,11 +9,8 @@ import { PriceToken, PriceTokenAmount, wrappedNativeTokensList } from 'src/commo
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { PriceTokenAmountStruct } from 'src/common/tokens/price-token-amount';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import {
-    BlockchainName,
-    EvmBlockchainName,
-    TEST_EVM_BLOCKCHAIN_NAME
-} from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -213,7 +210,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         toTokenOrNative: PriceToken<EvmBlockchainName>
     ): Promise<CelerConfig> {
         let fromToken = fromTokenOrNative;
-        const useTestnet = fromToken.blockchain in TEST_EVM_BLOCKCHAIN_NAME;
+        const useTestnet = BlockchainsInfo.isTestBlockchainName(fromToken.blockchain);
         if (fromToken.isNative) {
             const wrappedFrom = wrappedNativeTokensList[fromTokenOrNative.blockchain]!;
             const token = await PriceTokenAmount.createToken({
@@ -267,7 +264,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         config: CelerConfig
     ): Promise<{ amount: string; maxSlippage: number; fee: string }> {
         let tokenSymbol = fromToken.symbol;
-        const useTestnet = fromToken.blockchain in TEST_EVM_BLOCKCHAIN_NAME;
+        const useTestnet = BlockchainsInfo.isTestBlockchainName(fromToken.blockchain);
         if (config.isBridge) {
             tokenSymbol = config.supportedFromToken?.token.symbol || tokenSymbol;
         }

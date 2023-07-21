@@ -1,7 +1,5 @@
-import {
-    BlockchainName,
-    TEST_EVM_BLOCKCHAIN_NAME
-} from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Config } from 'symbiosis-js-sdk';
 
 const testnetConfig = {
@@ -272,7 +270,7 @@ const testnetConfig = {
 };
 
 export function getSymbiosisV2Config(blockchain: BlockchainName): Config {
-    if (blockchain in TEST_EVM_BLOCKCHAIN_NAME) {
+    if (BlockchainsInfo.isTestBlockchainName(blockchain)) {
         return testnetConfig;
     }
     return {

@@ -6,6 +6,8 @@ import {
     BlockchainName,
     EVM_BLOCKCHAIN_NAME,
     EvmBlockchainName,
+    TEST_EVM_BLOCKCHAIN_NAME,
+    TestnetEvmBlockchain,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
@@ -44,6 +46,14 @@ export class BlockchainsInfo {
     ): blockchainName is EvmBlockchainName {
         return Object.values(EVM_BLOCKCHAIN_NAME).some(
             evmBlockchainName => evmBlockchainName === blockchainName
+        );
+    }
+
+    public static isTestBlockchainName(
+        blockchainName: BlockchainName
+    ): blockchainName is TestnetEvmBlockchain {
+        return Object.values(TEST_EVM_BLOCKCHAIN_NAME).some(
+            testBlockchainName => testBlockchainName === blockchainName
         );
     }
 
