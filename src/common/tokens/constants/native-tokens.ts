@@ -269,5 +269,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'PLS',
         symbol: 'PLS',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.LINEA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.LINEA,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
     })
 };

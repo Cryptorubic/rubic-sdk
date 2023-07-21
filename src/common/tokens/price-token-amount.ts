@@ -129,7 +129,9 @@ export class PriceTokenAmount<T extends BlockchainName = BlockchainName> extends
             !this.price?.isFinite() ||
             !toToken.price?.isFinite() ||
             !this.tokenAmount?.isFinite() ||
-            !toToken.tokenAmount?.isFinite()
+            !toToken.tokenAmount?.isFinite() ||
+            !this.price?.gt(0) ||
+            !toToken.price?.gt(0)
         ) {
             return null;
         }
