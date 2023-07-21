@@ -1725,6 +1725,11 @@
   resolved "https://registry.yarnpkg.com/@wagmi/chains/-/chains-1.2.0.tgz#d59eaa70ec51a5fdcd113975926992acfb17ab12"
   integrity sha512-dmDRipsE54JfyudOBkuhEexqQWcrZqxn/qiujG8SBzMh/az/AH5xlJSA+j1CPWTx9+QofSMF3B7A4gb6XRmSaQ==
 
+"@wagmi/chains@1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@wagmi/chains/-/chains-1.6.0.tgz#eb992ad28dbaaab729b5bcab3e5b461e8a035656"
+  integrity sha512-5FRlVxse5P4ZaHG3GTvxwVANSmYJas1eQrTBHhjxVtqXoorm0aLmCHbhmN8Xo1yu09PaWKlleEvfE98yH4AgIw==
+
 "@webassemblyjs/ast@1.11.6", "@webassemblyjs/ast@^1.11.5":
   version "1.11.6"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.11.6.tgz#db046555d3c413f8966ca50a95176a0e2c642e24"
@@ -1882,6 +1887,11 @@ abitype@0.8.11:
   version "0.8.11"
   resolved "https://registry.yarnpkg.com/abitype/-/abitype-0.8.11.tgz#66e1cf2cbf46f48d0e57132d7c1c392447536cc1"
   integrity sha512-bM4v2dKvX08sZ9IU38IN5BKmN+ZkOSd2oI4a9f0ejHYZQYV6cDr7j+d95ga0z2XHG36Y4jzoG5Z7qDqxp7fi/A==
+
+abitype@0.9.3:
+  version "0.9.3"
+  resolved "https://registry.yarnpkg.com/abitype/-/abitype-0.9.3.tgz#294d25288ee683d72baf4e1fed757034e3c8c277"
+  integrity sha512-dz4qCQLurx97FQhnb/EIYTk/ldQ+oafEDUqC0VVIeQS1Q48/YWt/9YNfMmp9SLFqN41ktxny3c8aYxHjmFIB/w==
 
 abortcontroller-polyfill@^1.7.3:
   version "1.7.5"
@@ -8095,6 +8105,21 @@ viem@^1.2.9:
     "@scure/bip39" "1.2.0"
     "@wagmi/chains" "1.2.0"
     abitype "0.8.11"
+    isomorphic-ws "5.0.0"
+    ws "8.12.0"
+
+viem@^1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/viem/-/viem-1.3.1.tgz#47ed788180f693736a177a9c68b4b43a07d84b7e"
+  integrity sha512-Yv+y3/exrrEN4EAkVUtUuQxsjF4+3taHY2aSinJnNWtcA4fBZ+WfPJBTywcnFIa/Q5oDcQN85yqPFBbkXqWHdw==
+  dependencies:
+    "@adraffy/ens-normalize" "1.9.0"
+    "@noble/curves" "1.0.0"
+    "@noble/hashes" "1.3.0"
+    "@scure/bip32" "1.3.0"
+    "@scure/bip39" "1.2.0"
+    "@wagmi/chains" "1.6.0"
+    abitype "0.9.3"
     isomorphic-ws "5.0.0"
     ws "8.12.0"
 

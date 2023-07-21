@@ -16,11 +16,12 @@ export class PancakeRouterTrade extends EvmOnChainTrade {
 
     public readonly dexContractAddress = '0x13f4EA83D0bd40E75C8222255bc855a974568Dd4';
 
-    public async encodeDirect(_options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         const slippage = Number.parseInt(String(this.slippageTolerance * 100));
         const slippagePercent = new Percent(slippage, 100);
         const payload = SwapRouter.swapCallParameters(this.trade, {
-            slippageTolerance: slippagePercent
+            slippageTolerance: slippagePercent,
+            ...(options.receiverAddress && { recipient: options.receiverAddress as `0x${string}` })
         });
         return {
             to: this.dexContractAddress,

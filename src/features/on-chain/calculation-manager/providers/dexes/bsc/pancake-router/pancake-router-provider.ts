@@ -1,21 +1,12 @@
-import { Native as PancakeNative, Token as PancakeToken } from '@pancakeswap/sdk';
-import {
-    OnChainProvider,
-    Pool,
-    SmartRouter,
-    SubgraphProvider
-} from '@pancakeswap/smart-router/evm';
+import { Native as PancakeNative, Token as PancakeToken, TradeType } from '@pancakeswap/sdk';
+import { Pool, SmartRouter } from '@pancakeswap/smart-router/evm';
 import { Currency, CurrencyAmount } from '@pancakeswap/swap-sdk-core';
 import BigNumber from 'bignumber.js';
 import { GraphQLClient } from 'graphql-request';
-import { createPublicClient, http } from 'rubic-viem/dist';
-import { bsc, mainnet } from 'rubic-viem/dist/chains';
-import { PublicClient } from 'rubic-viem/dist/clients/createPublicClient';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Injector } from 'src/core/injector/injector';
 import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
@@ -25,7 +16,6 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { subgraphUrls } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/pancake-router/constants';
 import { PancakeRouterTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/pancake-router/models/pancake-router-trade-struct';
 import { PancakeRouterTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/pancake-router/pancake-router-trade';
 import { PANCAKE_SWAP_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/pancake-swap/constants';
@@ -33,6 +23,8 @@ import { PancakeSwapTrade } from 'src/features/on-chain/calculation-manager/prov
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { UniswapV2CalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-calculation-options';
+import { createPublicClient, http, PublicClient } from 'viem';
+import { bsc, mainnet } from 'viem/chains';
 
 export class PancakeRouterProvider extends EvmOnChainProvider {
     public readonly blockchain = BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN;
@@ -69,22 +61,27 @@ export class PancakeRouterProvider extends EvmOnChainProvider {
 
         const fromCurrency = CurrencyAmount.fromRawAmount(currencyA, from.stringWeiAmount);
 
-        // @ts-ignore
-        const viemProviders = (({ chainId }) =>
-            this.getViemProvider(chainId)) as unknown as OnChainProvider;
-        const onChainQuoteProvider = SmartRouter.createQuoteProvider({
-            onChainProvider: viemProviders
+        const viemProviders = this.getViemProvider(toChainId);
+
+        const quoteProvider = SmartRouter.createQuoteProvider({
+            // @ts-ignore
+            onChainProvider: () => viemProviders
         });
         const pools = await this.getPools(currencyA, currencyB, viemProviders);
 
-        const trade = await SmartRouter.getBestTrade(fromCurrency, currencyB, 0, {
-            poolProvider: SmartRouter.createStaticPoolProvider(pools),
-            quoteProvider: onChainQuoteProvider,
-            maxHops: 2,
-            maxSplits: 2,
-            quoterOptimization: false,
-            gasPriceWei: '1'
-        });
+        const trade = await SmartRouter.getBestTrade(
+            fromCurrency,
+            currencyB,
+            TradeType.EXACT_INPUT,
+            {
+                poolProvider: SmartRouter.createStaticPoolProvider(pools),
+                quoteProvider,
+                maxHops: 2,
+                maxSplits: 2,
+                quoterOptimization: true,
+                gasPriceWei: () => viemProviders.getGasPrice()
+            }
+        );
         if (!trade) {
             throw new RubicSdkError('');
         }
@@ -128,25 +125,37 @@ export class PancakeRouterProvider extends EvmOnChainProvider {
     private async getPools(
         currencyA: Currency,
         currencyB: Currency,
-        viemProviders: OnChainProvider
+        viemProviders: PublicClient
     ): Promise<Pool[]> {
+        const v3SubgraphClient = new GraphQLClient(
+            'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-bsc'
+        );
+        const v2SubgraphClient = new GraphQLClient(
+            'https://proxy-worker-api.pancakeswap.com/bsc-exchange'
+        );
+
         const pairs = SmartRouter.getPairCombinations(currencyA, currencyB);
 
-        const blockchainName = BlockchainsInfo.getBlockchainNameById(
-            currencyA.chainId
-        ) as unknown as EvmBlockchainName;
-        // @ts-ignore
-        const v3SubgraphProvider: SubgraphProvider = () => {
-            return new GraphQLClient(
-                subgraphUrls[blockchainName] || subgraphUrls[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]!
-            );
-        };
-
         const allPools = await Promise.allSettled([
-            SmartRouter.getV3PoolSubgraph({ provider: v3SubgraphProvider, pairs }).then(res =>
-                SmartRouter.v3PoolSubgraphSelection(currencyA, currencyB, res)
-            ),
-            SmartRouter.getV2PoolsOnChain(pairs, viemProviders),
+            SmartRouter.getV2CandidatePools({
+                // @ts-ignore
+                onChainProvider: () => viemProviders,
+                // @ts-ignore
+                v2SubgraphProvider: () => v2SubgraphClient,
+                // @ts-ignore
+                v3SubgraphProvider: () => v3SubgraphClient,
+                currencyA,
+                currencyB
+            }),
+            SmartRouter.getV3CandidatePools({
+                // @ts-ignore
+                onChainProvider: () => viemProviders,
+                // @ts-ignore
+                subgraphProvider: () => v3SubgraphClient,
+                currencyA,
+                currencyB
+            }),
+            // @ts-ignore
             SmartRouter.getStablePoolsOnChain(pairs, viemProviders)
         ]);
 
@@ -180,11 +189,23 @@ export class PancakeRouterProvider extends EvmOnChainProvider {
         if (!chain || !rpc) {
             createPublicClient({
                 chain: bsc,
-                transport: http(rpcList.BSC!.rpcList[0] as unknown as string)
+                transport: http(rpcList.BSC!.rpcList[0] as unknown as string),
+                batch: {
+                    multicall: {
+                        batchSize: 1024 * 200
+                    }
+                }
             });
         }
 
-        // @ts-ignore
-        return createPublicClient({ chain, transport: http(rpc!.rpcList[0]) });
+        return createPublicClient({
+            chain,
+            transport: http(rpc!.rpcList[0]),
+            batch: {
+                multicall: {
+                    batchSize: 1024 * 200
+                }
+            }
+        });
     }
 }
