@@ -287,7 +287,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
             fromTokenAmount: this.from,
             toTokenAmount: this.to,
             srcChainTrade: this.onChainTrade,
-            providerAddress: paymentInfo.payinAddress,
+            providerAddress: this.providerAddress,
             type: `native:${this.bridgeType}`,
             fromAddress: this.walletAddress
         });
