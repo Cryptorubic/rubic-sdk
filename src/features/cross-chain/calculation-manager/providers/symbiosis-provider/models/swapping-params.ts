@@ -1,3 +1,12 @@
-import { Token, TokenAmount } from 'symbiosis-js-sdk/dist/entities';
+import { TokenAmount } from 'symbiosis-js-sdk';
+import { Token } from 'symbiosis-js-sdk/dist';
 
-export type SwappingParams = [TokenAmount, Token, string, string, string, number, number, boolean];
+export type SwappingParams = {
+    tokenAmountIn: TokenAmount;
+    tokenOut: Token;
+    from: string;
+    to: string;
+    revertableAddress: string;
+    slippage: number;
+    deadline: number;
+};

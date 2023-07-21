@@ -234,7 +234,9 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             to,
             data!,
-            this.fromBlockchain
+            this.fromBlockchain,
+            to,
+            '0'
         );
 
         const methodArguments = swapData

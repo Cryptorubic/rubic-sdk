@@ -11,12 +11,11 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { Injector } from 'src/core/injector/injector';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { getSymbiosisV2Config } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-v2-config';
 import { SymbiosisRevertResponse } from 'src/features/cross-chain/symbiosis-manager/models/symbiosis-revert-api';
 import { SymbiosisStuckedResponse } from 'src/features/cross-chain/symbiosis-manager/models/symbiosis-stucked-api';
-import { CHAINS_PRIORITY, Symbiosis, WaitForComplete } from 'symbiosis-js-sdk';
-import { ChainId } from 'symbiosis-js-sdk/dist/constants';
+import { ChainId, CHAINS_PRIORITY, Symbiosis, WaitForComplete } from 'symbiosis-js-sdk';
 import { TransactionReceipt } from 'web3-eth';
+import {BlockchainsInfo} from "src/core/blockchain/utils/blockchains-info/blockchains-info";
 
 export class CrossChainSymbiosisManager {
     private get web3Private(): EvmWeb3Private {
@@ -111,7 +110,8 @@ export class CrossChainSymbiosisManager {
     ): Promise<EthersLog> {
         const fromChainId = blockchainId[fromBlockchain] as ChainId;
         const toChainId = blockchainId[toBlockchain] as ChainId;
-        const symbiosis = new Symbiosis(getSymbiosisV2Config(fromBlockchain), 'rubic');
+        const config = BlockchainsInfo.isTestBlockchainName(fromBlockchain) ? 'testnet' : 'mainnet';
+        const symbiosis = new Symbiosis(config, 'rubic');
 
         return await new WaitForComplete({
             direction: this.getDirection(fromChainId, toChainId),

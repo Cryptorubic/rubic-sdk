@@ -68,6 +68,16 @@ export const xyContractAddress: Record<XyCrossChainSupportedBlockchain, Universa
         providerGateway: '0xe4e156167cc9C7AC4AbD8d39d203a5495F775547',
         providerRouter: '0xe4e156167cc9C7AC4AbD8d39d203a5495F775547',
         rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ZK_SYNC].router
+    },
+    [BLOCKCHAIN_NAME.POLYGON_ZKEVM]: {
+        providerGateway: '0x3689D3B912d4D73FfcAad3a80861e7caF2d4F049',
+        providerRouter: '0x3689D3B912d4D73FfcAad3a80861e7caF2d4F049',
+        rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.POLYGON_ZKEVM].router
+    },
+    [BLOCKCHAIN_NAME.LINEA]: {
+        providerGateway: '0x73Ce60416035B8D7019f6399778c14ccf5C9c7A1',
+        providerRouter: '0x73Ce60416035B8D7019f6399778c14ccf5C9c7A1',
+        rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.LINEA].router
     }
     // [BLOCKCHAIN_NAME.KLAYTN]: {
     //     providerGateway: '0x52075Fd1fF67f03beABCb5AcdA9679b02d98cA37',

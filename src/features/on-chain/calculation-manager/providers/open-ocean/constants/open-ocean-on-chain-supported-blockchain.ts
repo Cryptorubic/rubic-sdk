@@ -11,7 +11,8 @@ export const openoceanOnChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.HARMONY,
     BLOCKCHAIN_NAME.BOBA,
     BLOCKCHAIN_NAME.GNOSIS,
-    BLOCKCHAIN_NAME.OPTIMISM
+    BLOCKCHAIN_NAME.OPTIMISM,
+    BLOCKCHAIN_NAME.LINEA
 ] as const;
 
 export type OpenoceanOnChainSupportedBlockchain =

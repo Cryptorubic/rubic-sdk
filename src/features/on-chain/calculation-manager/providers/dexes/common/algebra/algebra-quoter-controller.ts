@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, Token } from 'src/common/tokens';
 import { notNull } from 'src/common/utils/object';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
@@ -10,11 +10,6 @@ import { Injector } from 'src/core/injector/injector';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
 import { UniswapV3AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
 import { AlgebraRoute } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/models/algebra-route';
-import {
-    ALGEBRA_QUOTER_CONTRACT_ABI,
-    ALGEBRA_QUOTER_CONTRACT_ADDRESS
-} from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/utils/quoter-controller/constants/quoter-contract-data';
-import { ROUTER_TOKENS } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/utils/quoter-controller/constants/router-tokens';
 import { AbiItem } from 'web3-utils';
 
 interface GetQuoterMethodsDataOptions {
@@ -35,20 +30,16 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
 
     private readonly quoterContractAddress: string;
 
-    private readonly blockchain: EvmBlockchainName;
-
-    private readonly routerTokensAddresses: string[];
-
     constructor(
-        quoterContractABI: AbiItem[] = ALGEBRA_QUOTER_CONTRACT_ABI,
-        quoterContractAddress: string = ALGEBRA_QUOTER_CONTRACT_ADDRESS,
-        blockchain: EvmBlockchainName = BLOCKCHAIN_NAME.POLYGON,
-        routerTokensAddresses: string[] = ROUTER_TOKENS
+        quoterContractABI: AbiItem[],
+        quoterContractAddress: string,
+        blockchainName: BlockchainName,
+        routerTokens: string[]
     ) {
         this.quoterContractABI = quoterContractABI;
         this.quoterContractAddress = quoterContractAddress;
-        this.blockchain = blockchain;
-        this.routerTokensAddresses = routerTokensAddresses;
+        this.blockchainName = blockchainName;
+        this.routingTokensAddresses = routerTokens;
     }
 
     /**
@@ -103,15 +94,15 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
         };
     }
 
-    private get web3Public(): EvmWeb3Public {
-        return Injector.web3PublicService.getWeb3Public(this.blockchain);
+    protected get web3Public(): EvmWeb3Public {
+        return Injector.web3PublicService.getWeb3Public(this.blockchainName);
     }
 
-    private async getOrCreateRouterTokens(): Promise<Token[]> {
+    protected async getOrCreateRouterTokens(): Promise<Token[]> {
         if (!this.routerTokens) {
             this.routerTokens = await Token.createTokens(
-                this.routerTokensAddresses,
-                this.blockchain
+                this.routingTokensAddresses,
+                this.blockchainName
             );
         }
 
@@ -173,7 +164,7 @@ export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController
     /**
      * Returns swap methods' names and arguments, built with passed pools' addresses, to use it in Quoter contract.
      */
-    private getQuoterMethodsData(
+    protected getQuoterMethodsData(
         options: GetQuoterMethodsDataOptions,
         path: Token[]
     ): { path: Token[]; methodData: MethodData }[] {

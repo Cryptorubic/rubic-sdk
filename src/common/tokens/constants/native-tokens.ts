@@ -75,6 +75,13 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         symbol: 'MATIC',
         decimals: 18
     }),
+    [BLOCKCHAIN_NAME.POLYGON_ZKEVM]: new Token({
+        blockchain: BLOCKCHAIN_NAME.POLYGON_ZKEVM,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
+    }),
     [BLOCKCHAIN_NAME.AVALANCHE]: new Token({
         blockchain: BLOCKCHAIN_NAME.AVALANCHE,
         address: EvmWeb3Pure.nativeTokenAddress,
@@ -304,6 +311,13 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'PLS',
         symbol: 'PLS',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.LINEA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.LINEA,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'ETH',
         decimals: 18
     })
 };
