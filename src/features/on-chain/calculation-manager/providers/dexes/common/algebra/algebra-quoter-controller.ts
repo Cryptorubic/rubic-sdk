@@ -26,9 +26,13 @@ interface GetQuoterMethodsDataOptions {
 export class AlgebraQuoterController implements UniswapV3AlgebraQuoterController {
     private routerTokens: Token[] | undefined;
 
-    private readonly quoterContractABI: AbiItem[];
+    protected readonly quoterContractABI: AbiItem[];
 
-    private readonly quoterContractAddress: string;
+    protected readonly quoterContractAddress: string;
+
+    private readonly blockchainName: BlockchainName;
+
+    private readonly routingTokensAddresses: string[];
 
     constructor(
         quoterContractABI: AbiItem[],

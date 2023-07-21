@@ -13,6 +13,7 @@ import {
     BlockchainName,
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -32,7 +33,6 @@ import { SymbiosisTradeData } from 'src/features/cross-chain/calculation-manager
 import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-trade';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 import { Error, ErrorCode, Symbiosis, Token, TokenAmount } from 'symbiosis-js-sdk';
-import {BlockchainsInfo} from "src/core/blockchain/utils/blockchains-info/blockchains-info";
 
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
@@ -116,15 +116,18 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
             const slippageTolerance = options.slippageTolerance * 10000;
 
-            const trade = await this.getTrade({
-                tokenAmountIn,
-                tokenOut,
-                fromAddress,
-                receiverAddress,
-                refundAddress: fromAddress,
-                slippage: slippageTolerance,
-                deadline,
-            });
+            const trade = await this.getTrade(
+                {
+                    tokenAmountIn,
+                    tokenOut,
+                    fromAddress,
+                    receiverAddress,
+                    refundAddress: fromAddress,
+                    slippage: slippageTolerance,
+                    deadline
+                },
+                symbiosis
+            );
             const { tokenAmountOut, fee: transitTokenFee, inTradeType, outTradeType } = trade;
 
             const swapFunction = (fromUserAddress: string, receiver?: string) => {
@@ -137,15 +140,18 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                     Web3Pure.toWei(amountIn, from.decimals)
                 );
 
-                return this.getTrade({
-                    tokenAmountIn,
-                    tokenOut,
-                    fromAddress: fromUserAddress,
-                    receiverAddress,
-                    refundAddress,
-                    slippage: slippageTolerance,
-                    deadline
-                });
+                return this.getTrade(
+                    {
+                        tokenAmountIn,
+                        tokenOut,
+                        fromAddress: fromUserAddress,
+                        receiverAddress,
+                        refundAddress,
+                        slippage: slippageTolerance,
+                        deadline
+                    },
+                    symbiosis
+                );
             };
 
             const to = new PriceTokenAmount({
@@ -233,8 +239,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     }
 
     private async getTrade(
-        fromBlockchain: BlockchainName,
-        toBlockchain: BlockchainName,
         swapParams: {
             tokenAmountIn: TokenAmount;
             tokenOut: Token | null;
@@ -248,7 +252,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     ): Promise<SymbiosisTradeData> {
         const swappingParams: SwappingParams = {
             tokenAmountIn: swapParams.tokenAmountIn,
-            tokenOut: swapParams.tokenOut,
+            tokenOut: swapParams.tokenOut!,
             from: swapParams.fromAddress,
             to: swapParams.receiverAddress || swapParams.fromAddress,
             revertableAddress: swapParams.fromAddress,
