@@ -19,7 +19,8 @@ export const symbiosisCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.GOERLI,
     BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET,
     BLOCKCHAIN_NAME.FUJI,
-    BLOCKCHAIN_NAME.MUMBAI
+    BLOCKCHAIN_NAME.MUMBAI,
+    BLOCKCHAIN_NAME.SCROLL_TESTNET
 ] as const;
 
 export type SymbiosisCrossChainSupportedBlockchain =

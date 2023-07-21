@@ -73,5 +73,9 @@ export const SYMBIOSIS_CONTRACT_ADDRESS_V2: Record<
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: {
         providerRouter: '0xd3F98c243374D79Bfd9a8ac03964623221D53F0f',
         providerGateway: '0x4Ee7B1e8Ad6E1682318f1c47F83634dAa1197eEf'
+    },
+    [BLOCKCHAIN_NAME.SCROLL_TESTNET]: {
+        providerRouter: '0xAED47A51AeFa6f95A388aDA3c459d94FF46fC4BB',
+        providerGateway: '0x8Daf3F19dD8a27554BaE525075E90Df4E56a4c46'
     }
 };
