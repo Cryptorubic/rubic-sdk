@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "4.10.0-alpha.1",
+    "version": "4.10.1",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -88,10 +88,9 @@
         "graphql-request": "^6.1.0",
         "grpc-web": "^1.4.2",
         "lodash.clonedeep": "^4.5.0",
-        "pancake-rubic-sdk": "^1.0.0",
         "rango-sdk-basic": "^0.0.7",
         "rxjs": "7.8.1",
-        "symbiosis-js-sdk": "^2.9.52",
+        "symbiosis-js-sdk": "2.10.8",
         "tronweb": "^4.3.0",
         "viem": "^1.3.1",
         "web3": "^1.8.1"

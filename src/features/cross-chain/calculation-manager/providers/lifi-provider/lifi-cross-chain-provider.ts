@@ -64,11 +64,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             throw new RubicSdkError('Incorrect bridges filter param');
         }
 
-        const defaultDisabled = options.lifiDisabledBridgeTypes || [];
-        const denyBridges = from.isNative
-            ? options.lifiDisabledBridgeTypes
-            : Array.from(new Set([...defaultDisabled, LifiBridgeTypes.STARGATE]));
-
+        const denyBridges = options.lifiDisabledBridgeTypes || [];
         const routeOptions: RouteOptions = {
             slippage: options.slippageTolerance,
             order: 'RECOMMENDED',

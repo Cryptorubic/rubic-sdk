@@ -15,6 +15,11 @@ import {
     ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS
 } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/constants/swap-router-contract-data';
 import { AlgebraRoute } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/models/algebra-route';
+import {
+    ALGEBRA_QUOTER_CONTRACT_ABI,
+    ALGEBRA_QUOTER_CONTRACT_ADDRESS
+} from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/utils/quoter-controller/constants/quoter-contract-data';
+import { defaultPolygonProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/default-constants';
 
 export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider<AlgebraTrade> {
     public readonly contractAddress = ALGEBRA_SWAP_ROUTER_CONTRACT_ADDRESS;
@@ -25,7 +30,12 @@ export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider<AlgebraTra
 
     protected readonly OnChainTradeClass = AlgebraTrade;
 
-    protected readonly quoterController = new AlgebraQuoterController();
+    protected readonly quoterController = new AlgebraQuoterController(
+        ALGEBRA_QUOTER_CONTRACT_ABI,
+        ALGEBRA_QUOTER_CONTRACT_ADDRESS,
+        this.blockchain,
+        defaultPolygonProviderConfiguration.routingProvidersAddresses
+    );
 
     public readonly providerConfiguration = ALGEBRA_V3_PROVIDER_CONFIGURATION;
 

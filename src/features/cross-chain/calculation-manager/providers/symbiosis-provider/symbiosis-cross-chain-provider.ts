@@ -8,7 +8,6 @@ import {
 } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { TokenStruct } from 'src/common/tokens/token';
-import { compareAddresses } from 'src/common/utils/blockchain';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
@@ -28,38 +27,16 @@ import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { symbiosisTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-transit-tokens';
-import { getSymbiosisV2Config } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-v2-config';
 import { SwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/swapping-params';
 import { SymbiosisTradeData } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
-import { ZappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/zapping-params';
 import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-trade';
-import { OneinchAvalancheProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/oneinch-avalanche/oneinch-avalanche-provider';
-import { OolongSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/boba/oolong-swap/oolong-swap-provider';
-import { OneinchBscProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/oneinch-bsc/oneinch-bsc-provider';
-import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
-import { OneinchEthereumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/oneinch-ethereum/oneinch-ethereum-provider';
-import { OneinchPolygonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/oneinch-polygon/oneinch-polygon-provider';
-import { ZappyProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/zappy/trisolaris-aurora-provider';
 import { Error, ErrorCode, Symbiosis, Token, TokenAmount } from 'symbiosis-js-sdk';
 
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
 
-    private readonly symbiosis = new Symbiosis(getSymbiosisV2Config(), 'rubic');
-
-    private readonly onChainProxyProviders: Partial<
-        Record<SymbiosisCrossChainSupportedBlockchain, OnChainProvider>
-    > = {
-        [BLOCKCHAIN_NAME.ETHEREUM]: new OneinchEthereumProvider(),
-        [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: new OneinchBscProvider(),
-        [BLOCKCHAIN_NAME.POLYGON]: new OneinchPolygonProvider(),
-        [BLOCKCHAIN_NAME.AVALANCHE]: new OneinchAvalancheProvider(),
-        [BLOCKCHAIN_NAME.BOBA]: new OolongSwapProvider(),
-        [BLOCKCHAIN_NAME.TELOS]: new ZappyProvider()
-        // [BLOCKCHAIN_NAME.BITCOIN]: new OneinchEthereumProvider()
-    };
+    private readonly symbiosis = new Symbiosis('mainnet', 'rubic');
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
@@ -80,7 +57,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         return super.areSupportedBlockchains(fromBlockchain, toBlockchain);
     }
 
-    // eslint-disable-next-line complexity
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
@@ -98,8 +74,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            const isBitcoinSwap = false;
-
             const fromAddress =
                 options.fromAddress ||
                 this.getWalletAddress(fromBlockchain as Web3PrivateSupportedBlockchain) ||
@@ -109,7 +83,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 chainId: blockchainId[fromBlockchain],
                 address: from.isNative ? '' : from.address,
                 decimals: from.decimals,
-                isNative: from.isNative
+                isNative: from.isNative,
+                symbol: from.symbol
             });
 
             const feeInfo = await this.getFeeInfo(
@@ -125,21 +100,20 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
             const receiverAddress = options.receiverAddress || fromAddress;
 
-            const tokenAmountIn = new TokenAmount(tokenIn, from.stringWeiAmount);
+            const tokenAmountIn = new TokenAmount(tokenIn, fromWithoutFee.stringWeiAmount);
 
-            const tokenOut = isBitcoinSwap
-                ? null
-                : new Token({
-                      chainId: blockchainId[toBlockchain],
-                      address: toToken.isNative ? '' : toToken.address,
-                      decimals: toToken.decimals,
-                      isNative: toToken.isNative
-                  });
+            const tokenOut = new Token({
+                chainId: blockchainId[toBlockchain],
+                address: toToken.isNative ? '' : toToken.address,
+                decimals: toToken.decimals,
+                isNative: toToken.isNative,
+                symbol: toToken.symbol
+            });
 
             const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
             const slippageTolerance = options.slippageTolerance * 10000;
 
-            const trade = await this.getTrade(fromBlockchain, toBlockchain, {
+            const trade = await this.getTrade({
                 tokenAmountIn,
                 tokenOut,
                 fromAddress,
@@ -148,50 +122,19 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 slippage: slippageTolerance,
                 deadline
             });
-            const {
-                tokenAmountOut,
-                fee: transitTokenFee,
-                route,
-                inTradeType,
-                outTradeType
-            } = trade;
-
-            const transitToken = this.getTransferToken(route, from);
-
-            const onChainSlippage =
-                transitToken?.address === from.address
-                    ? 0
-                    : (options.slippageTolerance - 0.005) / 2;
-
-            const onChainTrade =
-                transitToken && useProxy
-                    ? await ProxyCrossChainEvmTrade.getOnChainTrade(
-                          fromWithoutFee,
-                          transitToken,
-                          onChainSlippage
-                      )
-                    : null;
-
-            if (transitToken && !onChainTrade && useProxy) {
-                throw new RubicSdkError('No on chain trade found.');
-            }
+            const { tokenAmountOut, fee: transitTokenFee, inTradeType, outTradeType } = trade;
 
             const swapFunction = (fromUserAddress: string, receiver?: string) => {
-                if (isBitcoinSwap && !receiver) {
-                    throw new RubicSdkError('No receiver address provider for bitcoin swap.');
-                }
-                const refundAddress = isBitcoinSwap ? fromUserAddress : receiver || fromAddress;
-                const receiverAddress = isBitcoinSwap ? receiver! : receiver || fromUserAddress;
+                const refundAddress = receiver || fromAddress;
+                const receiverAddress = receiver || fromUserAddress;
 
-                const amountIn = onChainTrade
-                    ? fromWithoutFee.tokenAmount.multipliedBy(1 - onChainSlippage)
-                    : fromWithoutFee.tokenAmount;
+                const amountIn = fromWithoutFee.tokenAmount;
                 const tokenAmountIn = new TokenAmount(
                     tokenIn,
                     Web3Pure.toWei(amountIn, from.decimals)
                 );
 
-                return this.getTrade(fromBlockchain, toBlockchain, {
+                return this.getTrade({
                     tokenAmountIn,
                     tokenOut,
                     fromAddress: fromUserAddress,
@@ -201,6 +144,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                     deadline
                 });
             };
+
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: new BigNumber(tokenAmountOut.toFixed())
@@ -210,27 +154,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 options.gasCalculation === 'enabled'
                     ? await SymbiosisCrossChainTrade.getGasData(from, to)
                     : null;
-
-            let transitAmount: BigNumber;
-            if (compareAddresses(from.address, transitToken?.address || '')) {
-                transitAmount = from.tokenAmount;
-            } else if (transitToken && this.onChainProxyProviders?.[fromBlockchain] && useProxy) {
-                transitAmount = (
-                    await this.onChainProxyProviders[fromBlockchain]!.calculate(
-                        from,
-                        new PriceTokenAmount({
-                            ...transitToken,
-                            price: new BigNumber(1),
-                            tokenAmount: new BigNumber(1)
-                        }),
-                        {
-                            gasCalculation: 'disabled'
-                        }
-                    )
-                ).to.tokenAmount;
-            } else {
-                transitAmount = from.tokenAmount;
-            }
 
             return {
                 trade: new SymbiosisCrossChainTrade(
@@ -250,9 +173,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                                 }
                             }
                         },
-                        transitAmount,
-                        onChainTrade,
-                        transitToken: transitToken || from,
+                        transitAmount: from.tokenAmount,
                         tradeType: { in: inTradeType, out: outTradeType }
                     },
                     options.providerAddress
@@ -267,11 +188,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 rubicSdkError =
                     symbiosisError.code === ErrorCode.AMOUNT_LESS_THAN_FEE
                         ? new TooLowAmountError()
-                        : await this.checkMinMaxErrors(
-                              symbiosisError,
-                              from as PriceTokenAmount<SymbiosisCrossChainSupportedBlockchain>,
-                              options.slippageTolerance
-                          );
+                        : await this.checkMinMaxErrors(symbiosisError);
             }
 
             return {
@@ -282,68 +199,20 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         }
     }
 
-    private async checkMinMaxErrors(
-        err: Error,
-        from: PriceTokenAmount<SymbiosisCrossChainSupportedBlockchain>,
-        slippage: number
-    ): Promise<RubicSdkError> {
+    private async checkMinMaxErrors(err: Error): Promise<RubicSdkError> {
         if (err.code === ErrorCode.AMOUNT_TOO_LOW) {
             const index = err.message!.lastIndexOf('$');
             const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
-            if (this.onChainProxyProviders[from.blockchain]) {
-                const minAmount = await this.getFromTokenAmount(from, transitTokenAmount, 'min');
-                const minAmountWithSlippage = minAmount.dividedBy(1 - slippage);
-
-                return new MinAmountError(minAmountWithSlippage, from.symbol);
-            }
             return new MinAmountError(transitTokenAmount, 'USDC');
         }
 
         if (err?.code === ErrorCode.AMOUNT_TOO_HIGH) {
             const index = err.message!.lastIndexOf('$');
             const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
-            if (this.onChainProxyProviders[from.blockchain]) {
-                const maxAmount = await this.getFromTokenAmount(from, transitTokenAmount, 'max');
-
-                return new MaxAmountError(maxAmount, from.symbol);
-            }
             return new MaxAmountError(transitTokenAmount, 'USDC');
         }
 
         return new RubicSdkError(err.message);
-    }
-
-    private async getFromTokenAmount(
-        from: PriceTokenAmount,
-        transitTokenAmount: BigNumber,
-        type: 'min' | 'max'
-    ): Promise<BigNumber> {
-        const blockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
-
-        const transitToken = symbiosisTransitTokens[blockchain];
-        if (compareAddresses(from.address, transitToken.address)) {
-            return transitTokenAmount;
-        }
-
-        const amount = (
-            await this.onChainProxyProviders[blockchain]!.calculate(
-                new PriceTokenAmount({
-                    ...transitToken,
-                    price: new BigNumber(1),
-                    tokenAmount: transitTokenAmount
-                }),
-                from,
-                {
-                    gasCalculation: 'disabled'
-                }
-            )
-        ).to.tokenAmount;
-        const approximatePercentDifference = 0.1;
-
-        if (type === 'min') {
-            return amount.multipliedBy(1 + approximatePercentDifference);
-        }
-        return amount.multipliedBy(1 - approximatePercentDifference);
     }
 
     protected async getFeeInfo(
@@ -360,74 +229,33 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    private async getTrade(
-        fromBlockchain: BlockchainName,
-        toBlockchain: BlockchainName,
-        swapParams: {
-            tokenAmountIn: TokenAmount;
-            tokenOut: Token | null;
-            fromAddress: string;
-            receiverAddress: string;
-            refundAddress: string;
-            slippage: number;
-            deadline: number;
-        }
-    ): Promise<SymbiosisTradeData> {
-        if (toBlockchain !== BLOCKCHAIN_NAME.BITCOIN && swapParams.tokenOut) {
-            const swappingParams: SwappingParams = [
-                swapParams.tokenAmountIn,
-                swapParams.tokenOut,
-                swapParams.fromAddress,
-                swapParams.receiverAddress || swapParams.fromAddress,
-                swapParams.fromAddress,
-                swapParams.slippage,
-                swapParams.deadline,
-                true
-            ];
-            return this.getBestSwappingSwapResult(swappingParams);
-        }
+    private async getTrade(swapParams: {
+        tokenAmountIn: TokenAmount;
+        tokenOut: Token;
+        fromAddress: string;
+        receiverAddress: string;
+        refundAddress: string;
+        slippage: number;
+        deadline: number;
+    }): Promise<SymbiosisTradeData> {
+        const swappingParams: SwappingParams = {
+            tokenAmountIn: swapParams.tokenAmountIn,
+            tokenOut: swapParams.tokenOut,
+            from: swapParams.fromAddress,
+            to: swapParams.receiverAddress || swapParams.fromAddress,
+            revertableAddress: swapParams.fromAddress,
+            slippage: swapParams.slippage,
+            deadline: swapParams.deadline
+        };
 
-        const poolId =
-            fromBlockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN
-                ? blockchainId[BLOCKCHAIN_NAME.POLYGON]
-                : blockchainId[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN];
-        const zappingParams: ZappingParams = [
-            swapParams.tokenAmountIn,
-            poolId,
-            swapParams.fromAddress,
-            swapParams.receiverAddress,
-            swapParams.fromAddress,
-            swapParams.slippage,
-            swapParams.deadline,
-            true
-        ];
-
-        try {
-            return await this.getBestZappingSwapResult(zappingParams);
-        } catch (err) {
-            if (
-                err.code === ErrorCode.AMOUNT_TOO_LOW ||
-                err.code === ErrorCode.AMOUNT_LESS_THAN_FEE
-            ) {
-                throw err;
-            }
-
-            return this.getBestZappingSwapResult(zappingParams);
-        }
+        return this.getBestSwappingSwapResult(swappingParams);
     }
 
     private async getBestSwappingSwapResult(
         swappingParams: SwappingParams
     ): Promise<SymbiosisTradeData> {
-        const swapping = this.symbiosis.newSwapping();
-        return swapping.exactIn(...swappingParams);
-    }
-
-    private async getBestZappingSwapResult(
-        zappingParams: ZappingParams
-    ): Promise<SymbiosisTradeData> {
-        const zapping = this.symbiosis.newZappingRenBTC();
-        return zapping.exactIn(...zappingParams);
+        const swapping = this.symbiosis.bestPoolSwapping();
+        return swapping.exactIn(swappingParams);
     }
 
     private getTransferToken(

@@ -23,6 +23,13 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'WMATIC',
         decimals: 18
     }),
+    [BLOCKCHAIN_NAME.POLYGON_ZKEVM]: new Token({
+        blockchain: BLOCKCHAIN_NAME.POLYGON_ZKEVM,
+        address: '0x4F9A0e7FD2Bf6067db6994CF12E4495Df938E6e9',
+        name: 'Wrapped Ether',
+        symbol: 'Weth',
+        decimals: 18
+    }),
     [BLOCKCHAIN_NAME.AVALANCHE]: new Token({
         blockchain: BLOCKCHAIN_NAME.AVALANCHE,
         address: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
@@ -224,6 +231,13 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         address: '0xa1077a294dde1b09bb078844df40758a5d0f9a27',
         name: 'Wrapped PLS',
         symbol: 'WPLS',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.LINEA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.LINEA,
+        address: '0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f',
+        name: 'Wrapped ETH',
+        symbol: 'WETH',
         decimals: 18
     })
 };
