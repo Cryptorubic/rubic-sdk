@@ -4,4 +4,5 @@ import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager
 
 export interface PancakeRouterTradeStruct extends EvmOnChainTradeStruct {
     readonly trade: SmartRouterTrade<TradeType>;
+    readonly dexContractAddress: string;
 }

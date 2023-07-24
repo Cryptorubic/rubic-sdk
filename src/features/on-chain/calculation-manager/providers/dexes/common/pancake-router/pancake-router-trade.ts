@@ -8,13 +8,13 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { PancakeRouterTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/pancake-router/models/pancake-router-trade-struct';
+import { PancakeRouterTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/pancake-router/models/pancake-router-trade-struct';
 export class PancakeRouterTrade extends EvmOnChainTrade {
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.PANCAKE_SWAP;
     }
 
-    public readonly dexContractAddress = '0x13f4EA83D0bd40E75C8222255bc855a974568Dd4';
+    public readonly dexContractAddress: string;
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         const slippage = Number.parseInt(String(this.slippageTolerance * 100));
@@ -35,5 +35,6 @@ export class PancakeRouterTrade extends EvmOnChainTrade {
     constructor(tradeStruct: PancakeRouterTradeStruct, providerAddress: string) {
         super(tradeStruct, providerAddress);
         this.trade = tradeStruct.trade;
+        this.dexContractAddress = tradeStruct.dexContractAddress;
     }
 }
