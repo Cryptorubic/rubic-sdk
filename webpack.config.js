@@ -64,7 +64,6 @@ module.exports = function(env, argv) {
                 "https": require.resolve("https-browserify"),
                 "stream": require.resolve("stream-browserify"),
                 "crypto": require.resolve("crypto-browserify"),
-                "@pancakeswap/sdk": require.resolve("pancake-rubic-sdk"),
                 "querystring": require.resolve('querystring-es3')
             }
         },
