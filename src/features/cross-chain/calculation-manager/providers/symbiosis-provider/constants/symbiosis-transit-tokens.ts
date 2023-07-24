@@ -86,6 +86,13 @@ export const symbiosisTransitTokens: Record<SymbiosisCrossChainSupportedBlockcha
         name: 'USDC',
         symbol: 'USDC',
         decimals: 6
+    },
+    [BLOCKCHAIN_NAME.LINEA]: {
+        blockchain: BLOCKCHAIN_NAME.LINEA,
+        address: '0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
     }
     // [BLOCKCHAIN_NAME.BITCOIN]: {
     //     blockchain: BLOCKCHAIN_NAME.BITCOIN,

@@ -232,5 +232,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped PLS',
         symbol: 'WPLS',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.LINEA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.LINEA,
+        address: '0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f',
+        name: 'Wrapped ETH',
+        symbol: 'WETH',
+        decimals: 18
     })
 };
