@@ -55,7 +55,11 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = toToken.blockchain;
-        const useProxy = options?.useProxy?.[this.type] ?? true;
+        // let useProxy = options?.useProxy?.[this.type] ?? true;
+        const useProxy =
+            (options?.useProxy?.[this.type] &&
+                fromBlockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN) ||
+            false;
 
         if (
             !this.areSupportedBlockchains(fromBlockchain, toBlockchain) ||
@@ -105,7 +109,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 ? await this.getOnChainTrade(
                       fromWithoutFee,
                       [],
-                      options.slippageTolerance,
+                      0.02,
                       transitCurrency.tokenContract!
                   )
                 : null;
