@@ -66,7 +66,7 @@ export class ProxyCrossChainEvmTrade {
             rubicProxy: {
                 fixedFee: {
                     amount: fixedFeeAmount,
-                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                    tokenSymbol: nativeTokensList?.[fromBlockchain]?.symbol || 'Unknown'
                 },
                 platformFee: {
                     percent: feePercent,

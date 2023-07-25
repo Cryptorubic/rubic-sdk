@@ -345,6 +345,9 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         currencies: ChangenowCurrenciesResponse,
         token: Token<ChangenowCrossChainSupportedBlockchain>
     ): ChangenowCurrency | undefined {
+        if (!token) {
+            return undefined;
+        }
         const apiBlockchain =
             token.blockchain === BLOCKCHAIN_NAME.AVALANCHE &&
             EvmWeb3Pure.isNativeAddress(token.address)
