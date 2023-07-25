@@ -150,7 +150,8 @@ export abstract class PancakeRouterProvider extends EvmOnChainProvider {
                 // @ts-ignore
                 subgraphProvider: () => v3SubgraphClient,
                 currencyA,
-                currencyB
+                currencyB,
+                subgraphCacheFallback: false
             })
         ]);
 
