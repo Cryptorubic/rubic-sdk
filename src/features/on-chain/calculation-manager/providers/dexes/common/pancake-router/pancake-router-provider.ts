@@ -129,11 +129,11 @@ export abstract class PancakeRouterProvider extends EvmOnChainProvider {
         const v3SubgraphClient = new GraphQLClient(this.v3subgraphAddress);
         const v2SubgraphClient = new GraphQLClient(this.v2subgraphAddress);
 
-        // const pairs = SmartRouter.getPairCombinations(currencyA, currencyB);
+        const pairs = SmartRouter.getPairCombinations(currencyA, currencyB);
 
         const allPools = await Promise.allSettled([
             // // @ts-ignore
-            // SmartRouter.getStablePoolsOnChain(pairs, viemProviders)
+            SmartRouter.getStablePoolsOnChain(pairs, () => this.createPublicClient()),
             SmartRouter.getV2CandidatePools({
                 // @ts-ignore
                 onChainProvider: () => this.createPublicClient(),
