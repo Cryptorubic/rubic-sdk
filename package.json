@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "4.9.0-alpha-cn-proxy-bsc.7",
+    "version": "4.11.0",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
