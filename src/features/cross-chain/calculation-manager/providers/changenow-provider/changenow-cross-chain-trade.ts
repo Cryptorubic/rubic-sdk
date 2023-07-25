@@ -343,7 +343,9 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
-            slippage: 0
+            slippage: this.onChainTrade?.slippageTolerance
+                ? this.onChainTrade.slippageTolerance * 100
+                : 0
         };
     }
 
