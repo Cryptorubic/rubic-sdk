@@ -12,7 +12,7 @@ export function createTokenNativeAddressProxy<T extends Token>(
                 return undefined;
             }
             if (key === 'address') {
-                return wethAbleAddress;
+                return wethAbleAddress.toLowerCase();
             }
             return target[key as keyof T];
         }

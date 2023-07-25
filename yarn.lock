@@ -7053,10 +7053,10 @@ swarm-js@^0.1.40:
     tar "^4.0.2"
     xhr-request "^1.0.1"
 
-symbiosis-js-sdk@2.10.6:
-  version "2.10.6"
-  resolved "https://registry.yarnpkg.com/symbiosis-js-sdk/-/symbiosis-js-sdk-2.10.6.tgz#0f82ee15828996ea01fb1ff2a1d7501f5b9142f8"
-  integrity sha512-GcPubwy/4Wp6t2zibD4k9qHOrwT7PBgvJO7uAnNzblHlSPMj1zwXBpr+HE/xZOmSuSaLEB1i4tzZKCaJCjKgIQ==
+symbiosis-js-sdk@2.10.8:
+  version "2.10.8"
+  resolved "https://registry.yarnpkg.com/symbiosis-js-sdk/-/symbiosis-js-sdk-2.10.8.tgz#c6196cfe5243b079b59c9b4e0a2044530f36771d"
+  integrity sha512-50/XTh3dAuMVxnooyPQ1a9yFXPEeQgF2naU8B17I44cAZlTrwZzEaGeRe8pOKfkCTxplVDNjgJa7m/5Z3KKnoQ==
   dependencies:
     big.js "^5.2.2"
     bignumber.js "^9.0.1"
