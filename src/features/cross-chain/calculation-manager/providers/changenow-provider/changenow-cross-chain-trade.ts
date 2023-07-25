@@ -281,6 +281,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
             this.transitToken.tokenAmount,
             options?.receiverAddress || this.walletAddress
         );
+        this.id = paymentInfo.id;
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: this.walletAddress,
@@ -381,5 +382,12 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
 
     public encodeApprove(): Promise<TransactionConfig> {
         throw new RubicSdkError('Cannot encode approve for changenow');
+    }
+
+    public async needApprove(): Promise<boolean> {
+        if (this.isProxyTrade) {
+            return super.needApprove();
+        }
+        return false;
     }
 }
