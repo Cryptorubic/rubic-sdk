@@ -1,4 +1,4 @@
-# Rubic SDK 
+# Rubic SDK
 
 ## API Documentation
 
@@ -19,29 +19,29 @@
 
 2. `npm install --save-dev http-browserify https-browserify stream-browserify crypto-browserify`
 3. modify webpack.config.js. If you use create-react-app, run `npm run eject` to extract config
-    1. add to `plugins`
-       ```javascript
-       new webpack.ProvidePlugin({
-         Buffer: ['buffer', 'Buffer'],
-         process: 'process/browser'
-       })
-       ```
-    2. add `resolve.fallback`
-       ```json
-       "fallback": {
-         "fs": false,
-         "constants": false,
-         "querystring": false,
-         "url": false,
-         "path": false,
-         "os": false,
-         "http": require.resolve("http-browserify"),
-         "https": require.resolve("https-browserify"),
-         "zlib": false,
-         "stream": require.resolve("stream-browserify"),
-         "crypto": require.resolve("crypto-browserify")
-       }
-       ```
+   1. add to `plugins`
+      ```javascript
+      new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+        process: 'process/browser'
+      })
+      ```
+   2. add `resolve.fallback`
+      ```json
+      "fallback": {
+        "fs": false,
+        "constants": false,
+        "querystring": false,
+        "url": false,
+        "path": false,
+        "os": false,
+        "http": require.resolve("http-browserify"),
+        "https": require.resolve("https-browserify"),
+        "zlib": false,
+        "stream": require.resolve("stream-browserify"),
+        "crypto": require.resolve("crypto-browserify")
+      }
+      ```
 
 ### Installation with npm for Angular
 1. `npm install rubic-sdk`
@@ -85,63 +85,54 @@
 ## Trades usage
 
 ### Get started after cdn installation
-
 ```html
-
-<script>
-    // you have to declare rpc links only for networks you will use
-    const configuration = {
-        rpcProviders: {
-            ETH: {
-                rpcList: ['<your ethereum rpc>']
+ <script>
+        // you have to declare rpc links only for networks you will use
+        const configuration = {
+            rpcProviders: {
+                ETH: {
+                    rpcList: ['<your ethereum rpc>']
+                },
+                BSC: {
+                    rpcList: ['<your bsc rpc>']
+                },
+                ...
+                TRON: {
+                    rpcList: [
+                      {
+                        fullHost: '<tron-api>',
+                        headers: { "TRON-PRO-API-KEY": 'your api key' }
+                      }
+                    ]
+                }
             },
-            BSC: {
-                rpcList: ['<your bsc rpc>']
-            },
-            ...
-                    TRON
-    :
-    {
-        rpcList: [
-            {
-                fullHost: '<tron-api>',
-                headers: {"TRON-PRO-API-KEY": 'your api key'}
-            }
-        ]
-    }
-    },
-    // if you are whitelisted integrator, provide your wallet address here
-    providerAddress: {
-        [CHAIN_TYPE.EVM]
-    :
-        {
-            crossChain: '0x0000000000000000000000000000000000000000', // Address for cross chain fee
-                    onChain
-        :
-            '0x0000000000000000000000000000000000000000' // Address for on chain fee
+            // if you are whitelisted integrator, provide your wallet address here
+           providerAddress: {
+              [CHAIN_TYPE.EVM]: {
+                 crossChain: '0x0000000000000000000000000000000000000000', // Address for cross chain fee
+                 onChain: '0x0000000000000000000000000000000000000000' // Address for on chain fee
+              }
+           }
         }
-    }
-    }
-
-    async function main() {
-        // create SDK instance
-        const sdk = await RubicSDK.SDK.createSDK(configuration);
-
-        // define example trade parameters
-        const blockchain = 'ETH';
-        const fromTokenAddress = '0x0000000000000000000000000000000000000000';
-        const fromAmount = 1;
-        const toTokenAddress = '0xdac17f958d2ee523a2206206994597c13d831ec7';
-
-        // calculate trades
-        const trades = await sdk.onChainManager
+        
+        async function main() {
+            // create SDK instance
+            const sdk = await RubicSDK.SDK.createSDK(configuration);
+            
+            // define example trade parameters
+            const blockchain = 'ETH';
+            const fromTokenAddress = '0x0000000000000000000000000000000000000000';
+            const fromAmount = 1;
+            const toTokenAddress = '0xdac17f958d2ee523a2206206994597c13d831ec7';
+            
+            // calculate trades
+            const trades = await sdk.onChainManager
                 .calculateTrade({blockchain, address: fromTokenAddress}, fromAmount, toTokenAddress);
-
-        console.log(trades);
-    }
-
-    main();
-</script>
+            
+            console.log(trades);
+        }
+        main();
+    </script>
 ```
 
 
@@ -171,7 +162,7 @@
         },
         // if you are whitelisted integrator, provide your wallet address here
         providerAddress: {
-              [chainType.EVM]: {
+              [CHAIN_TYPE.EVM]: {
                  crossChain: '0x0000000000000000000000000000000000000000', // Address for cross chain fee
                  onChain: '0x0000000000000000000000000000000000000000' // Address for on chain fee
               }
@@ -220,16 +211,16 @@
     ```
 
 4. When user connects wallet (e.g. MetaMask) you should change configuration to use trade `swap` method.<br />
-**⚠️ Recalculate trades after this**.
+   **⚠️ Recalculate trades after this**.
     ```typescript
     import { WalletProvider, CHAIN_TYPE, Configuration } from 'rubic-sdk';
    
     const walletProvider: WalletProvider = {
-        [chainType.EVM]: {
+        [CHAIN_TYPE.EVM]: {
             address: '0x123...', // user wallet address
             core: window.ethereum
         },
-        [chainType.TRON]: {
+        [CHAIN_TYPE.TRON]: {
             address: 'T123...', // user wallet address
             core: window.tronLink.tronWeb // or window.tronWeb
         }
@@ -247,7 +238,7 @@
     sdk.updateWalletProvider(walletProvider);
    
     // Example #2:
-    sdk.updateWalletAddress(chainType.EVM, address);
+    sdk.updateWalletAddress(CHAIN_TYPE.EVM, address);
 
     ```
 
@@ -259,7 +250,7 @@
     сonst bestTrade = trades[0];
     const receipt = await bestTrade.swap({ onConfirm });
     ```
-   
+
 ### Get started with cross-chain swaps
 Steps 1. and 2. are the same. You can use single sdk instance for on-chain trades and cross-chain swaps calculations.
 

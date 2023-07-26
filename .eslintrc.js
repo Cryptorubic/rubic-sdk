@@ -79,8 +79,7 @@ module.exports = {
                         "message": "Don't declare enums"
                     },
                     'LabeledStatement',
-                    'WithStatement',
-
+                    'WithStatement'
                 ],
                 'no-console': [
                     'warn',
