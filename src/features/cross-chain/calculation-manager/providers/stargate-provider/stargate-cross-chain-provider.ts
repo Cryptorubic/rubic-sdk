@@ -73,10 +73,9 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             throw new RubicSdkError('Tokens are not supported.');
         }
 
-        const poolPathExists =
-            stargatePoolMapping[fromBlockchain]?.[from.symbol as StargateBridgeToken]?.[
-                toBlockchain
-            ]?.includes(dstPoolId);
+        const poolPathExists = stargatePoolMapping[fromBlockchain]?.[
+            from.symbol as StargateBridgeToken
+        ]?.[toBlockchain]?.includes(to.symbol as StargateBridgeToken);
 
         return Boolean(poolPathExists);
     }
@@ -458,9 +457,17 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             throw new RubicSdkError('Tokens are not supported.');
         }
 
-        const fromPoolNumber = fromBlockchainDirection[0]!;
+        const possibleTransitSymbol: StargateBridgeToken | undefined = Object.values(
+            stargateBridgeToken
+        ).find(symbol => symbol === toSymbol);
+        if (!possibleTransitSymbol) {
+            throw new RubicSdkError('Tokens are not supported.');
+        }
 
-        return this.getPoolToken(fromPoolNumber, fromBlockchain);
+        return this.getPoolToken(
+            stargatePoolId[possibleTransitSymbol as unknown as StargateBridgeToken],
+            fromBlockchain
+        );
     }
 
     private async getDstSwap(
