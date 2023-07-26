@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { Token } from 'src/common/tokens';
-import { LIMIT_ORDER_STATUS } from 'src/features/limit-order/models/limit-order-status';
+import { LimitOrderStatus } from 'src/features/limit-order/models/limit-order-status';
 
 /**
  * Parsed limit order, returned from 1inch api.
@@ -17,7 +17,7 @@ export interface LimitOrder {
     toAmount: BigNumber;
     fromBalance: BigNumber;
 
-    status: LIMIT_ORDER_STATUS;
+    status: LimitOrderStatus;
     /**
      * From 0 to 100, stores filled percent of order.
      */

@@ -23,7 +23,10 @@ import {
     lifiCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
 import { LifiCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/lifi-cross-chain-trade';
-import { LifiBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
+import {
+    LIFI_BRIDGE_TYPES,
+    LifiBridgeTypes
+} from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-providers';
 
@@ -235,7 +238,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
     }
 
     private checkBridgeTypes(notAllowedBridgeTypes: LifiBridgeTypes[]): boolean {
-        const lifiBridgeTypes = Object.values(LifiBridgeTypes);
-        return notAllowedBridgeTypes.every(bridgeType => lifiBridgeTypes.includes(bridgeType));
+        const lifiBridgeTypesArray = Object.values(LIFI_BRIDGE_TYPES);
+        return notAllowedBridgeTypes.every(bridgeType => lifiBridgeTypesArray.includes(bridgeType));
     }
 }

@@ -73,10 +73,12 @@ export interface StepWithAmount extends Step {
     // amountOut: BigNumber;
 }
 
-export enum RouteDirection {
-    EXACT_IN,
-    EXACT_OUT
-}
+export const routeDirection = {
+    EXACT_IN: 'EXACT_IN',
+    EXACT_OUT: 'EXACT_OUT'
+} as const;
+
+export type RouteDirection = (typeof routeDirection)[keyof typeof routeDirection];
 
 export interface PathWithAmounts {
     direction: RouteDirection;

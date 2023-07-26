@@ -11,7 +11,10 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
-import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
+import {
+    TX_STATUS,
+    TxStatus
+} from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { TRC20_CONTRACT_ABI } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/constants/trc-20-contract-abi';
 import { TRON_MULTICALL_ABI } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/constants/tron-multicall-abi';
 import { TronBlock } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-block';
@@ -166,11 +169,11 @@ export class TronWeb3Public extends Web3Public {
 
         if (txReceipt?.receipt) {
             if (txReceipt.result === 'FAILED') {
-                return TxStatus.FAIL;
+                return TX_STATUS.FAIL;
             }
-            return TxStatus.SUCCESS;
+            return TX_STATUS.SUCCESS;
         }
-        return TxStatus.PENDING;
+        return TX_STATUS.PENDING;
     }
 
     public async getBlock(): Promise<TronBlock> {

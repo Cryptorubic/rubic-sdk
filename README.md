@@ -1,4 +1,4 @@
-# Rubic SDK 
+# Rubic SDK
 
 ## API Documentation
 
@@ -19,29 +19,29 @@
 
 2. `npm install --save-dev http-browserify https-browserify stream-browserify crypto-browserify`
 3. modify webpack.config.js. If you use create-react-app, run `npm run eject` to extract config
-    1. add to `plugins`
-       ```javascript
-       new webpack.ProvidePlugin({
-         Buffer: ['buffer', 'Buffer'],
-         process: 'process/browser'
-       })
-       ```
-    2. add `resolve.fallback`
-       ```json
-       "fallback": {
-         "fs": false,
-         "constants": false,
-         "querystring": false,
-         "url": false,
-         "path": false,
-         "os": false,
-         "http": require.resolve("http-browserify"),
-         "https": require.resolve("https-browserify"),
-         "zlib": false,
-         "stream": require.resolve("stream-browserify"),
-         "crypto": require.resolve("crypto-browserify")
-       }
-       ```
+   1. add to `plugins`
+      ```javascript
+      new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+        process: 'process/browser'
+      })
+      ```
+   2. add `resolve.fallback`
+      ```json
+      "fallback": {
+        "fs": false,
+        "constants": false,
+        "querystring": false,
+        "url": false,
+        "path": false,
+        "os": false,
+        "http": require.resolve("http-browserify"),
+        "https": require.resolve("https-browserify"),
+        "zlib": false,
+        "stream": require.resolve("stream-browserify"),
+        "crypto": require.resolve("crypto-browserify")
+      }
+      ```
 
 ### Installation with npm for Angular
 1. `npm install rubic-sdk`
@@ -211,7 +211,7 @@
     ```
 
 4. When user connects wallet (e.g. MetaMask) you should change configuration to use trade `swap` method.<br />
-**⚠️ Recalculate trades after this**.
+   **⚠️ Recalculate trades after this**.
     ```typescript
     import { WalletProvider, CHAIN_TYPE, Configuration } from 'rubic-sdk';
    
@@ -250,7 +250,7 @@
     сonst bestTrade = trades[0];
     const receipt = await bestTrade.swap({ onConfirm });
     ```
-   
+
 ### Get started with cross-chain swaps
 Steps 1. and 2. are the same. You can use single sdk instance for on-chain trades and cross-chain swaps calculations.
 
