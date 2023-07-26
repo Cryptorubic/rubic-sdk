@@ -185,12 +185,14 @@ export class LifiProvider {
         from: Token<EvmBlockchainName>,
         to: Token
     ): Promise<ReadonlyArray<Token>> {
-        const estimatedPath = step.includedSteps.map(item => {
-            return [item.action.fromAddress, item.action.toAddress];
-        });
-        const xxx = estimatedPath.flat();
-        return xxx
-            ? await Token.createTokens([from.address, to.address], from.blockchain)
+        const estimatedPath = step.includedSteps
+            .map(item => {
+                return [item.action.fromToken.address, item.action.toToken.address];
+            })
+            .flat();
+
+        return estimatedPath
+            ? await Token.createTokens(estimatedPath, from.blockchain)
             : [from, to];
     }
 }
