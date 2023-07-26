@@ -283,15 +283,23 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         );
         this.id = paymentInfo.id;
 
-        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
-            walletAddress: this.walletAddress,
-            fromTokenAmount: this.from,
-            toTokenAmount: this.to,
-            srcChainTrade: this.onChainTrade,
-            providerAddress: this.providerAddress,
-            type: `native:${this.bridgeType}`,
-            fromAddress: this.walletAddress
-        });
+        const toToken = this.to.clone({ address: EvmWeb3Pure.EMPTY_ADDRESS });
+
+        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(
+            {
+                ...options,
+                receiverAddress: this.walletAddress
+            },
+            {
+                walletAddress: this.walletAddress,
+                fromTokenAmount: this.from,
+                toTokenAmount: toToken,
+                srcChainTrade: this.onChainTrade,
+                providerAddress: this.providerAddress,
+                type: `native:${this.bridgeType}`,
+                fromAddress: this.walletAddress
+            }
+        );
 
         const providerData = [paymentInfo.payinAddress];
 
