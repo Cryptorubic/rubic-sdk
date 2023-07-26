@@ -1,4 +1,4 @@
-import { MultichainStatusMapping } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
+import { MULTICHAIN_STATUS_MAPPING } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
 
 interface Info {
     bind: string;
@@ -11,7 +11,7 @@ interface Info {
     historyType: string;
     label: string;
     pairid: string;
-    status: keyof typeof MultichainStatusMapping;
+    status: keyof typeof MULTICHAIN_STATUS_MAPPING;
     statusmsg: string;
     swapinfo: unknown;
     swaptx: string;

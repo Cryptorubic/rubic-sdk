@@ -14,7 +14,10 @@ import {
     LimitOrderApi,
     LimitOrderApiResponse
 } from 'src/features/limit-order/models/limit-order-api';
-import { LIMIT_ORDER_STATUS } from 'src/features/limit-order/models/limit-order-status';
+import {
+    LIMIT_ORDER_STATUS,
+    LimitOrderStatus
+} from 'src/features/limit-order/models/limit-order-status';
 import { limitOrderSupportedBlockchains } from 'src/features/limit-order/models/supported-blockchains';
 
 const baseApi = (chainId: number) => `https://limit-orders.1inch.io/v3.0/${chainId}/limit-order`;
@@ -103,7 +106,7 @@ export class LimitOrderApiService {
             expiration = new Date(Number(BigInt(timeNonceSeriesAccount) >> 216n) * 1000);
         } catch {}
 
-        let status: LIMIT_ORDER_STATUS;
+        let status: LimitOrderStatus;
         if (orderInvalidReason === null) {
             status = LIMIT_ORDER_STATUS.VALID;
         } else if (orderInvalidReason === 'order filled') {

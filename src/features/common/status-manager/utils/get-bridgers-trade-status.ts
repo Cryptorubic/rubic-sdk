@@ -1,4 +1,4 @@
-import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
+import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
 import {
@@ -33,7 +33,7 @@ export async function getBridgersTradeStatus(
         const orderId = updateDataAndStatusResponse.data?.orderId;
         if (!orderId) {
             return {
-                status: TxStatus.PENDING,
+                status: TX_STATUS.PENDING,
                 hash: null
             };
         }
@@ -49,27 +49,27 @@ export async function getBridgersTradeStatus(
         const transactionData = getTransDataByIdResponse.data;
         if (!transactionData?.status) {
             return {
-                status: TxStatus.PENDING,
+                status: TX_STATUS.PENDING,
                 hash: null
             };
         }
 
         if (transactionData.status === 'receive_complete') {
             return {
-                status: TxStatus.SUCCESS,
+                status: TX_STATUS.SUCCESS,
                 hash: transactionData.toHash
             };
         }
         if (transactionData.status.includes('error') || transactionData.status.includes('fail')) {
             return {
-                status: TxStatus.FAIL,
+                status: TX_STATUS.FAIL,
                 hash: null
             };
         }
     } catch {}
 
     return {
-        status: TxStatus.PENDING,
+        status: TX_STATUS.PENDING,
         hash: null
     };
 }

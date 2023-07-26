@@ -3,7 +3,7 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { ChainType } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -114,7 +114,7 @@ export class Token<T extends BlockchainName = BlockchainName> {
     public readonly decimals: number;
 
     public get isNative(): boolean {
-        const chainType: CHAIN_TYPE = BlockchainsInfo.getChainType(this.blockchain);
+        const chainType: ChainType = BlockchainsInfo.getChainType(this.blockchain);
 
         if (chainType && Web3Pure[chainType].isNativeAddress(this.address)) {
             return Web3Pure[BlockchainsInfo.getChainType(this.blockchain)].isNativeAddress(

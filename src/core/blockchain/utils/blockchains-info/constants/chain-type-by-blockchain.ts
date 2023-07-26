@@ -4,15 +4,15 @@ import {
     EVM_BLOCKCHAIN_NAME,
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { CHAIN_TYPE, ChainType } from 'src/core/blockchain/models/chain-type';
 
-export const chainTypeByBlockchain: Record<BlockchainName, CHAIN_TYPE> = {
+export const chainTypeByBlockchain: Record<BlockchainName, ChainType> = {
     ...Object.values(EVM_BLOCKCHAIN_NAME).reduce(
         (acc, evmBlockchainName) => ({
             ...acc,
             [evmBlockchainName]: CHAIN_TYPE.EVM
         }),
-        {} as Record<EvmBlockchainName, CHAIN_TYPE.EVM>
+        {} as Record<EvmBlockchainName, 'EVM'>
     ),
     [BLOCKCHAIN_NAME.BITCOIN]: CHAIN_TYPE.BITCOIN,
     [BLOCKCHAIN_NAME.TRON]: CHAIN_TYPE.TRON,

@@ -4,10 +4,10 @@ import { AlgebraTradeProviders } from 'src/features/on-chain/calculation-manager
 import { BridgersTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/bridgers-trade-providers';
 import { CurveTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/curve-trade-providers';
 import { OneinchTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/oneinch-trade-providers';
+import { pancakeRouterProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/pancake-router-providers';
 import { UniswapV2TradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/uniswap-v2-trade-providers';
 import { UniswapV3TradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/uniswap-v3-trade-providers';
 import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
-import { SyncSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/sync-swap-provider';
 
 export const typedTradeProviders: OnChainTypedTradeProviders = [
     ...UniswapV2TradeProviders,
@@ -16,7 +16,8 @@ export const typedTradeProviders: OnChainTypedTradeProviders = [
     ...AlgebraTradeProviders,
     ...BridgersTradeProviders,
     ...CurveTradeProviders,
-    SyncSwapProvider
+    ...pancakeRouterProviders
+    // SyncSwapProvider Removed because of possible hack
 ].reduce(
     (acc, ProviderClass) => {
         const provider = new ProviderClass();
