@@ -26,7 +26,7 @@ import {
     GroupAmounts,
     Path,
     PathWithAmounts,
-    RouteDirection,
+    routeDirection,
     RoutePoolData,
     Step,
     StepWithAmount
@@ -87,7 +87,7 @@ export class SyncSwapRouter {
 
         return {
             found: bestAmountOut !== null,
-            direction: RouteDirection.EXACT_IN,
+            direction: routeDirection.EXACT_IN,
             pathsWithAmounts: bestPathsWithAmounts,
             amountIn,
             amountOut: bestAmountOut,
@@ -527,7 +527,7 @@ export class SyncSwapRouter {
         const pathQuoteOut = quoteInNext;
 
         return {
-            direction: RouteDirection.EXACT_IN,
+            direction: routeDirection.EXACT_IN,
             stepsWithAmount,
             amountOut: pathAmountOut,
             amountIn,

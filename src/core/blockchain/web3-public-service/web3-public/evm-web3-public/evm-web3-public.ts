@@ -16,7 +16,10 @@ import { EvmMulticallResponse } from 'src/core/blockchain/web3-public-service/we
 import { RpcResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/rpc-response';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
-import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
+import {
+    TX_STATUS,
+    TxStatus
+} from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
@@ -377,12 +380,12 @@ export class EvmWeb3Public extends Web3Public {
         const txReceipt = await this.getTransactionReceipt(hash);
 
         if (txReceipt === null) {
-            return TxStatus.PENDING;
+            return TX_STATUS.PENDING;
         }
         if (txReceipt.status) {
-            return TxStatus.SUCCESS;
+            return TX_STATUS.SUCCESS;
         }
-        return TxStatus.FAIL;
+        return TX_STATUS.FAIL;
     }
 
     /**
