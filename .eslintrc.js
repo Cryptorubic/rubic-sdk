@@ -74,8 +74,13 @@ module.exports = {
                 'no-return-assign': 'off',
                 'no-restricted-syntax': [
                     'error',
+                    {
+                        "selector": "TSEnumDeclaration",
+                        "message": "Don't declare enums"
+                    },
                     'LabeledStatement',
-                    'WithStatement'
+                    'WithStatement',
+
                 ],
                 'no-console': [
                     'warn',

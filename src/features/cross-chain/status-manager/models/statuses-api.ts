@@ -19,15 +19,18 @@ export interface DeBridgeOrderApiResponse {
     };
 }
 
-export enum DeBridgeApiStateStatus {
-    FULFILLED = 'Fulfilled',
-    SENTUNLOCK = 'SentUnlock',
-    CLAIMEDUNLOCK = 'ClaimedUnlock',
-    ORDERCANCELLED = 'OrderCancelled',
-    SENTORDERCANCEL = 'SentOrderCancel',
-    CLAIMEDORDERCANCEL = 'ClaimedOrderCancel',
-    CREATED = 'Created'
-}
+export const DE_BRIDGE_API_STATE_STATUS = {
+    FULFILLED: 'Fulfilled',
+    SENTUNLOCK: 'SentUnlock',
+    CLAIMEDUNLOCK: 'ClaimedUnlock',
+    ORDERCANCELLED: 'OrderCancelled',
+    SENTORDERCANCEL: 'SentOrderCancel',
+    CLAIMEDORDERCANCEL: 'ClaimedOrderCancel',
+    CREATED: 'Created'
+} as const;
+
+export type DeBridgeApiStateStatus =
+    (typeof DE_BRIDGE_API_STATE_STATUS)[keyof typeof DE_BRIDGE_API_STATE_STATUS];
 
 export interface SymbiosisApiResponse {
     status: {

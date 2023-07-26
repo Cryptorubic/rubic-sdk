@@ -85,54 +85,63 @@
 ## Trades usage
 
 ### Get started after cdn installation
+
 ```html
- <script>
-        // you have to declare rpc links only for networks you will use
-        const configuration = {
-            rpcProviders: {
-                ETH: {
-                    rpcList: ['<your ethereum rpc>']
-                },
-                BSC: {
-                    rpcList: ['<your bsc rpc>']
-                },
-                ...
-                TRON: {
-                    rpcList: [
-                      {
-                        fullHost: '<tron-api>',
-                        headers: { "TRON-PRO-API-KEY": 'your api key' }
-                      }
-                    ]
-                }
+
+<script>
+    // you have to declare rpc links only for networks you will use
+    const configuration = {
+        rpcProviders: {
+            ETH: {
+                rpcList: ['<your ethereum rpc>']
             },
-            // if you are whitelisted integrator, provide your wallet address here
-           providerAddress: {
-              [CHAIN_TYPE.EVM]: {
-                 crossChain: '0x0000000000000000000000000000000000000000', // Address for cross chain fee
-                 onChain: '0x0000000000000000000000000000000000000000' // Address for on chain fee
-              }
-           }
+            BSC: {
+                rpcList: ['<your bsc rpc>']
+            },
+            ...
+                    TRON
+    :
+    {
+        rpcList: [
+            {
+                fullHost: '<tron-api>',
+                headers: {"TRON-PRO-API-KEY": 'your api key'}
+            }
+        ]
+    }
+    },
+    // if you are whitelisted integrator, provide your wallet address here
+    providerAddress: {
+        [CHAIN_TYPE.EVM]
+    :
+        {
+            crossChain: '0x0000000000000000000000000000000000000000', // Address for cross chain fee
+                    onChain
+        :
+            '0x0000000000000000000000000000000000000000' // Address for on chain fee
         }
-        
-        async function main() {
-            // create SDK instance
-            const sdk = await RubicSDK.SDK.createSDK(configuration);
-            
-            // define example trade parameters
-            const blockchain = 'ETH';
-            const fromTokenAddress = '0x0000000000000000000000000000000000000000';
-            const fromAmount = 1;
-            const toTokenAddress = '0xdac17f958d2ee523a2206206994597c13d831ec7';
-            
-            // calculate trades
-            const trades = await sdk.onChainManager
+    }
+    }
+
+    async function main() {
+        // create SDK instance
+        const sdk = await RubicSDK.SDK.createSDK(configuration);
+
+        // define example trade parameters
+        const blockchain = 'ETH';
+        const fromTokenAddress = '0x0000000000000000000000000000000000000000';
+        const fromAmount = 1;
+        const toTokenAddress = '0xdac17f958d2ee523a2206206994597c13d831ec7';
+
+        // calculate trades
+        const trades = await sdk.onChainManager
                 .calculateTrade({blockchain, address: fromTokenAddress}, fromAmount, toTokenAddress);
-            
-            console.log(trades);
-        }
-        main();
-    </script>
+
+        console.log(trades);
+    }
+
+    main();
+</script>
 ```
 
 
@@ -162,7 +171,7 @@
         },
         // if you are whitelisted integrator, provide your wallet address here
         providerAddress: {
-              [CHAIN_TYPE.EVM]: {
+              [chainType.EVM]: {
                  crossChain: '0x0000000000000000000000000000000000000000', // Address for cross chain fee
                  onChain: '0x0000000000000000000000000000000000000000' // Address for on chain fee
               }
@@ -216,11 +225,11 @@
     import { WalletProvider, CHAIN_TYPE, Configuration } from 'rubic-sdk';
    
     const walletProvider: WalletProvider = {
-        [CHAIN_TYPE.EVM]: {
+        [chainType.EVM]: {
             address: '0x123...', // user wallet address
             core: window.ethereum
         },
-        [CHAIN_TYPE.TRON]: {
+        [chainType.TRON]: {
             address: 'T123...', // user wallet address
             core: window.tronLink.tronWeb // or window.tronWeb
         }
@@ -238,7 +247,7 @@
     sdk.updateWalletProvider(walletProvider);
    
     // Example #2:
-    sdk.updateWalletAddress(CHAIN_TYPE.EVM, address);
+    sdk.updateWalletAddress(chainType.EVM, address);
 
     ```
 

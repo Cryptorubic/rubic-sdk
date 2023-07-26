@@ -10,7 +10,7 @@ import { cbridgeContractAddress } from 'src/features/cross-chain/calculation-man
 import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
 import {
     CbridgeStatusResponse,
-    TransferHistoryStatus
+    TRANSFER_HISTORY_STATUS
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
 import Web3 from 'web3';
 import { TransactionReceipt } from 'web3-eth';
@@ -64,7 +64,7 @@ export class CrossChainCbridgeManager {
                 fromBlockchain
             );
             const statusResponse = await CbridgeCrossChainApiService.fetchTradeStatus(transferId);
-            if (statusResponse.status === TransferHistoryStatus.TRANSFER_TO_BE_REFUNDED) {
+            if (statusResponse.status === TRANSFER_HISTORY_STATUS.TRANSFER_TO_BE_REFUNDED) {
                 await CrossChainCbridgeManager.withdrawLiquidity(transferId, estimateAmount);
                 await new Promise(resolve => setTimeout(resolve, 10_000));
                 return CrossChainCbridgeManager.transferRefund(
@@ -73,7 +73,7 @@ export class CrossChainCbridgeManager {
                     onTransactionHash
                 );
             }
-            if (statusResponse.status === TransferHistoryStatus.TRANSFER_REFUND_TO_BE_CONFIRMED) {
+            if (statusResponse.status === TRANSFER_HISTORY_STATUS.TRANSFER_REFUND_TO_BE_CONFIRMED) {
                 return CrossChainCbridgeManager.transferRefund(
                     fromBlockchain,
                     statusResponse,
