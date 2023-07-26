@@ -52,7 +52,6 @@ export const UniswapV2TradeProviders = [
     SushiSwapEthereumProvider,
     VerseProvider,
     // bsc
-    // PancakeSwapProvider,
     SushiSwapBscProvider,
     // polygon
     QuickSwapProvider,
