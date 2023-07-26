@@ -1,4 +1,4 @@
-import LIFI, { RouteOptions, RoutesRequest, Step } from '@lifi/sdk';
+import { LiFi, LifiStep, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
@@ -33,7 +33,7 @@ import {
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-trade-struct';
 
 export class LifiProvider {
-    private readonly lifi = new LIFI(getLifiConfig());
+    private readonly lifi = new LiFi(getLifiConfig());
 
     private readonly onChainProxyService = new OnChainProxyService();
 
@@ -181,13 +181,16 @@ export class LifiProvider {
     }
 
     private async getPath(
-        step: Step,
+        step: LifiStep,
         from: Token<EvmBlockchainName>,
         to: Token
     ): Promise<ReadonlyArray<Token>> {
-        const estimatedPath = step.estimate?.data?.path;
-        return estimatedPath
-            ? await Token.createTokens(estimatedPath, from.blockchain)
+        const estimatedPath = step.includedSteps.map(item => {
+            return [item.action.fromAddress, item.action.toAddress];
+        });
+        const xxx = estimatedPath.flat();
+        return xxx
+            ? await Token.createTokens([from.address, to.address], from.blockchain)
             : [from, to];
     }
 }

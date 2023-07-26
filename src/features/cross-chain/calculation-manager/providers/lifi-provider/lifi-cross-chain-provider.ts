@@ -1,4 +1,4 @@
-import LIFI, { FeeCost, LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
+import { FeeCost, LiFi, LifiStep, Route, RouteOptions, RoutesRequest, Step } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
@@ -30,7 +30,7 @@ import { lifiProviders } from 'src/features/on-chain/calculation-manager/provide
 export class LifiCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
 
-    private readonly lifi = new LIFI(getLifiConfig());
+    private readonly lifi = new LiFi(getLifiConfig());
 
     private readonly MIN_AMOUNT_USD = new BigNumber(30);
 
@@ -212,12 +212,13 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                 ? steps?.[0].toolDetails.name.toLowerCase()
                 : undefined;
 
-        const targetDex = steps
-            ?.slice(1)
+        const typedSteps = steps?.slice(1) as (LifiStep | Step)[];
+
+        const targetDex = typedSteps
             ?.find(provider => provider.action.fromChainId === provider.action.toChainId)
             ?.toolDetails.name.toLowerCase();
 
-        const subType = steps
+        const subType = typedSteps
             ?.find(provider => provider.action.fromChainId !== provider.action.toChainId)
             ?.tool.toLowerCase();
 
