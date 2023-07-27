@@ -75,6 +75,10 @@ export class ScrollBridgeProvider extends CrossChainProvider {
                         throw new RubicSdkError('Swap is not allowed.');
                     }
                 }
+            } else {
+                if (!toToken.isNative) {
+                    throw new RubicSdkError('Swap is not allowed.');
+                }
             }
 
             const to = new PriceTokenAmount({

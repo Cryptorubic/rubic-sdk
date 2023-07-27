@@ -48,9 +48,9 @@ import {
 import { CrossChainStatus } from 'src/features/cross-chain/status-manager/models/cross-chain-status';
 import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
+import { ScrollApiResponse } from 'src/features/cross-chain/status-manager/models/scroll-api-response';
 import { SquidrouterApiResponse } from 'src/features/cross-chain/status-manager/models/squidrouter-api-response';
 import { SQUIDROUTER_TRANSFER_STATUS } from 'src/features/cross-chain/status-manager/models/squidrouter-transfer-status.enum';
-import { ScrollApiResponse } from 'src/features/cross-chain/status-manager/models/scroll-api-response';
 import {
     BtcStatusResponse,
     DE_BRIDGE_API_STATE_STATUS,
@@ -627,9 +627,9 @@ export class CrossChainStatusManager {
         const sourceTx = response!.data!.result[0]!;
         const targetHash = sourceTx?.finalizeTx?.hash;
         if (targetHash) {
-            return { status: TxStatus.SUCCESS, hash: targetHash };
+            return { status: TX_STATUS.SUCCESS, hash: targetHash };
         }
 
-        return { status: TxStatus.PENDING, hash: null };
+        return { status: TX_STATUS.PENDING, hash: null };
     }
 }
