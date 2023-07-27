@@ -280,6 +280,9 @@ export const stargatePoolMapping: StargatePoolMapping = {
         },
         [stargateBridgeToken.sUSD]: {
             [BLOCKCHAIN_NAME.ETHEREUM]: [stargateBridgeToken.sUSD]
+        },
+        [stargateBridgeToken.ETH]: {
+            [BLOCKCHAIN_NAME.ETHEREUM]: [stargateBridgeToken.ETH]
         }
     },
     [BLOCKCHAIN_NAME.METIS]: {
