@@ -10,7 +10,7 @@ import {
     TestnetEvmBlockchain,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { ChainType } from 'src/core/blockchain/models/chain-type';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { chainTypeByBlockchain } from 'src/core/blockchain/utils/blockchains-info/constants/chain-type-by-blockchain';
 
@@ -29,7 +29,7 @@ export class BlockchainsInfo {
         )?.[0] as BlockchainName;
     }
 
-    public static getChainType(blockchainName: BlockchainName): CHAIN_TYPE {
+    public static getChainType(blockchainName: BlockchainName): ChainType {
         const chainType = chainTypeByBlockchain[blockchainName];
         if (!chainType) {
             throw new RubicSdkError(`No supported chain type for ${blockchainName}`);

@@ -13,8 +13,8 @@ import { Configuration } from 'src/core/sdk/models/configuration';
 import * as util from 'util';
 import Web3 from 'web3';
 import { HttpProvider } from 'web3-core';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { Token } from 'src/common/tokens';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 
 export class Chain {
     private static walletsNumber = 10;

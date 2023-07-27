@@ -32,7 +32,13 @@ import { SwappingParams } from 'src/features/cross-chain/calculation-manager/pro
 import { SymbiosisTradeData } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-trade';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
-import { Error, ErrorCode, Symbiosis, Token, TokenAmount } from 'symbiosis-js-sdk';
+import {
+    Error as SymbiosisError,
+    ErrorCode,
+    Symbiosis,
+    Token,
+    TokenAmount
+} from 'symbiosis-js-sdk';
 
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
@@ -193,7 +199,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             let rubicSdkError = CrossChainProvider.parseError(err);
 
             if ((err as { message: string })?.message?.includes('$')) {
-                const symbiosisError = err as Error;
+                const symbiosisError = err as SymbiosisError;
                 rubicSdkError =
                     symbiosisError.code === ErrorCode.AMOUNT_LESS_THAN_FEE
                         ? new TooLowAmountError()
@@ -208,7 +214,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         }
     }
 
-    private async checkMinMaxErrors(err: Error): Promise<RubicSdkError> {
+    private async checkMinMaxErrors(err: SymbiosisError): Promise<RubicSdkError> {
         if (err.code === ErrorCode.AMOUNT_TOO_LOW) {
             const index = err.message!.lastIndexOf('$');
             const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));

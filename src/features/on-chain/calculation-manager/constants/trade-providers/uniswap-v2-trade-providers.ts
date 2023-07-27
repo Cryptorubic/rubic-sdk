@@ -6,7 +6,6 @@ import { JoeProvider } from 'src/features/on-chain/calculation-manager/providers
 import { PangolinProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/pangolin/pangolin-provider';
 import { SushiSwapAvalancheProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
 import { OolongSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/boba/oolong-swap/oolong-swap-provider';
-import { PancakeSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/pancake-swap/pancake-swap-provider';
 import { SushiSwapBscProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
 import { PancakeSwapTestnetProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsct/pancake-swap-testnet/pancake-swap-testnet-provider';
 import { TraderJoeBsctProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsct/trader-joe-bsct/trader-joe-bsct-provider';
@@ -60,7 +59,6 @@ export const UniswapV2TradeProviders = [
     SushiSwapEthereumProvider,
     VerseProvider,
     // bsc
-    PancakeSwapProvider,
     SushiSwapBscProvider,
     // polygon
     QuickSwapProvider,

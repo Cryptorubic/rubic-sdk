@@ -4,7 +4,7 @@ import {
     EvmBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { CHAIN_TYPE, ChainType } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { CreateWeb3Private } from 'src/core/blockchain/web3-private-service/models/create-web3-private';
 import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
@@ -27,7 +27,7 @@ import Web3 from 'web3';
 
 export class Web3PrivateService {
     public static isSupportedChainType(
-        chainType: CHAIN_TYPE
+        chainType: ChainType
     ): chainType is Web3PrivateSupportedChainType {
         return web3PrivateSupportedChainTypes.some(
             supportedChainType => supportedChainType === chainType
@@ -45,10 +45,10 @@ export class Web3PrivateService {
         this.web3PrivateStorage = this.createWeb3PrivateStorage(walletProvider);
     }
 
-    public getWeb3Private(chainType: CHAIN_TYPE.EVM): EvmWeb3Private;
-    public getWeb3Private(chainType: CHAIN_TYPE.TRON): TronWeb3Private;
-    public getWeb3Private(chainType: CHAIN_TYPE): never;
-    public getWeb3Private(chainType: CHAIN_TYPE) {
+    public getWeb3Private(chainType: 'EVM'): EvmWeb3Private;
+    public getWeb3Private(chainType: 'TRON'): TronWeb3Private;
+    public getWeb3Private(chainType: ChainType): never;
+    public getWeb3Private(chainType: ChainType) {
         if (!Web3PrivateService.isSupportedChainType(chainType)) {
             throw new RubicSdkError(`Chain type ${chainType} is not supported in web3 private`);
         }

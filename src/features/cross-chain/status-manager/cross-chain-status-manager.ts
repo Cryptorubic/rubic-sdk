@@ -11,7 +11,10 @@ import { RubicSdkError } from 'src/common/errors';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
+import {
+    TX_STATUS,
+    TxStatus
+} from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { changenowApiKey } from 'src/features/common/providers/changenow/constants/changenow-api-key';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
@@ -25,29 +28,32 @@ import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/
 import { CbridgeCrossChainApiService } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-api-service';
 import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
 import {
-    TransferHistoryStatus,
-    XferStatus
+    TRANSFER_HISTORY_STATUS,
+    XFER_STATUS
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
-import { LifiSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
+import {
+    LIFI_SWAP_STATUS,
+    LifiSwapStatus
+} from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/l-i-f-i_-s-w-a-p_-s-t-a-t-u-s';
 import { SquidrouterCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/squidrouter-cross-chain-provider';
-import { SymbiosisSwapStatus } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
+import { SYMBIOSIS_SWAP_STATUS } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
-import { MultichainStatusMapping } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
+import { MULTICHAIN_STATUS_MAPPING } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
 import {
-    ChangenowApiResponse,
-    ChangenowApiStatus
+    CHANGENOW_API_STATUS,
+    ChangenowApiResponse
 } from 'src/features/cross-chain/status-manager/models/changenow-api-response';
 import { CrossChainStatus } from 'src/features/cross-chain/status-manager/models/cross-chain-status';
 import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
 import { SquidrouterApiResponse } from 'src/features/cross-chain/status-manager/models/squidrouter-api-response';
-import { SquidrouterTransferStatus } from 'src/features/cross-chain/status-manager/models/squidrouter-transfer-status.enum';
+import { SQUIDROUTER_TRANSFER_STATUS } from 'src/features/cross-chain/status-manager/models/squidrouter-transfer-status.enum';
 import { ScrollApiResponse } from 'src/features/cross-chain/status-manager/models/scroll-api-response';
 import {
     BtcStatusResponse,
-    DeBridgeApiStateStatus,
+    DE_BRIDGE_API_STATE_STATUS,
     DeBridgeFilteredListApiResponse,
     DeBridgeOrderApiResponse,
     DeBridgeOrderApiStatusResponse,
@@ -108,8 +114,8 @@ export class CrossChainStatusManager {
         let srcTxStatus = await getSrcTxStatus(fromBlockchain, srcTxHash);
 
         const dstTxData = await this.getDstTxData(srcTxStatus, data, tradeType);
-        if (dstTxData.status === TxStatus.FAIL && srcTxStatus === TxStatus.PENDING) {
-            srcTxStatus = TxStatus.FAIL;
+        if (dstTxData.status === TX_STATUS.FAIL && srcTxStatus === TX_STATUS.PENDING) {
+            srcTxStatus = TX_STATUS.FAIL;
         }
 
         return {
@@ -132,12 +138,12 @@ export class CrossChainStatusManager {
         tradeData: CrossChainTradeData,
         tradeType: CrossChainTradeType
     ): Promise<TxStatusData> {
-        if (srcTxStatus === TxStatus.FAIL) {
-            return { hash: null, status: TxStatus.FAIL };
+        if (srcTxStatus === TX_STATUS.FAIL) {
+            return { hash: null, status: TX_STATUS.FAIL };
         }
 
-        if (srcTxStatus === TxStatus.PENDING) {
-            return { hash: null, status: TxStatus.PENDING };
+        if (srcTxStatus === TX_STATUS.PENDING) {
+            return { hash: null, status: TX_STATUS.PENDING };
         }
 
         const getDstTxStatusFn = this.getDstTxStatusFnMap[tradeType];
@@ -159,7 +165,7 @@ export class CrossChainStatusManager {
             item => item.srcTxHash.toLocaleLowerCase() === data.srcTxHash.toLocaleLowerCase()
         );
         const txStatusData: TxStatusData = {
-            status: TxStatus.PENDING,
+            status: TX_STATUS.PENDING,
             hash: null
         };
 
@@ -168,15 +174,15 @@ export class CrossChainStatusManager {
         }
 
         if (targetTrade?.status === 'DELIVERED') {
-            txStatusData.status = TxStatus.SUCCESS;
+            txStatusData.status = TX_STATUS.SUCCESS;
         }
 
         if (targetTrade?.status === 'INFLIGHT') {
-            txStatusData.status = TxStatus.PENDING;
+            txStatusData.status = TX_STATUS.PENDING;
         }
 
         if (targetTrade?.status === 'FAILED') {
-            txStatusData.status = TxStatus.FAIL;
+            txStatusData.status = TX_STATUS.FAIL;
         }
 
         return txStatusData;
@@ -201,33 +207,33 @@ export class CrossChainStatusManager {
                     `https://api-v2.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
                 );
                 let dstTxData: TxStatusData = {
-                    status: TxStatus.PENDING,
+                    status: TX_STATUS.PENDING,
                     hash: tx?.hash || null
                 };
 
                 const targetTokenNetwork = tx?.chainId;
 
                 if (
-                    dstTxStatus === SymbiosisSwapStatus.PENDING ||
-                    dstTxStatus === SymbiosisSwapStatus.NOT_FOUND
+                    dstTxStatus === SYMBIOSIS_SWAP_STATUS.PENDING ||
+                    dstTxStatus === SYMBIOSIS_SWAP_STATUS.NOT_FOUND
                 ) {
-                    return { ...dstTxData, status: TxStatus.PENDING };
+                    return { ...dstTxData, status: TX_STATUS.PENDING };
                 }
 
-                if (dstTxStatus === SymbiosisSwapStatus.STUCKED) {
-                    return { ...dstTxData, status: TxStatus.REVERT };
+                if (dstTxStatus === SYMBIOSIS_SWAP_STATUS.STUCKED) {
+                    return { ...dstTxData, status: TX_STATUS.REVERT };
                 }
 
-                if (dstTxStatus === SymbiosisSwapStatus.REVERTED) {
-                    return { ...dstTxData, status: TxStatus.FALLBACK };
+                if (dstTxStatus === SYMBIOSIS_SWAP_STATUS.REVERTED) {
+                    return { ...dstTxData, status: TX_STATUS.FALLBACK };
                 }
 
                 if (
-                    dstTxStatus === SymbiosisSwapStatus.SUCCESS &&
+                    dstTxStatus === SYMBIOSIS_SWAP_STATUS.SUCCESS &&
                     targetTokenNetwork === toBlockchainId
                 ) {
                     if (data.toBlockchain !== BLOCKCHAIN_NAME.BITCOIN) {
-                        dstTxData.status = TxStatus.SUCCESS;
+                        dstTxData.status = TX_STATUS.SUCCESS;
                     } else {
                         dstTxData = await this.getBitcoinStatus(tx!.hash);
                     }
@@ -237,14 +243,14 @@ export class CrossChainStatusManager {
             } catch (error) {
                 console.debug('[Symbiosis Trade] Error retrieving dst tx status', error);
                 return {
-                    status: TxStatus.PENDING,
+                    status: TX_STATUS.PENDING,
                     hash: null
                 };
             }
         }
 
         return {
-            status: TxStatus.PENDING,
+            status: TX_STATUS.PENDING,
             hash: null
         };
     }
@@ -257,7 +263,7 @@ export class CrossChainStatusManager {
     private async getLifiDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         if (!data.lifiBridgeType) {
             return {
-                status: TxStatus.PENDING,
+                status: TX_STATUS.PENDING,
                 hash: null
             };
         }
@@ -274,31 +280,31 @@ export class CrossChainStatusManager {
                 receiving: { txHash: string };
             }>('https://li.quest/v1/status', { params });
             const dstTxData: TxStatusData = {
-                status: TxStatus.UNKNOWN,
+                status: TX_STATUS.UNKNOWN,
                 hash: receiving?.txHash || null
             };
 
-            if (status === LifiSwapStatus.DONE) {
-                dstTxData.status = TxStatus.SUCCESS;
+            if (status === LIFI_SWAP_STATUS.DONE) {
+                dstTxData.status = TX_STATUS.SUCCESS;
             }
 
-            if (status === LifiSwapStatus.FAILED) {
-                dstTxData.status = TxStatus.FAIL;
+            if (status === LIFI_SWAP_STATUS.FAILED) {
+                dstTxData.status = TX_STATUS.FAIL;
             }
 
-            if (status === LifiSwapStatus.INVALID) {
-                dstTxData.status = TxStatus.UNKNOWN;
+            if (status === LIFI_SWAP_STATUS.INVALID) {
+                dstTxData.status = TX_STATUS.UNKNOWN;
             }
 
-            if (status === LifiSwapStatus.NOT_FOUND || status === LifiSwapStatus.PENDING) {
-                dstTxData.status = TxStatus.PENDING;
+            if (status === LIFI_SWAP_STATUS.NOT_FOUND || status === LIFI_SWAP_STATUS.PENDING) {
+                dstTxData.status = TX_STATUS.PENDING;
             }
 
             return dstTxData;
         } catch (error) {
             console.debug('[Li-fi Trade] error retrieving tx status', error);
             return {
-                status: TxStatus.PENDING,
+                status: TX_STATUS.PENDING,
                 hash: null
             };
         }
@@ -317,14 +323,14 @@ export class CrossChainStatusManager {
 
             if (!orderIds.length) {
                 return {
-                    status: TxStatus.PENDING,
+                    status: TX_STATUS.PENDING,
                     hash: null
                 };
             }
 
             const orderId = orderIds[0];
             const dstTxData: TxStatusData = {
-                status: TxStatus.PENDING,
+                status: TX_STATUS.PENDING,
                 hash: null
             };
 
@@ -333,9 +339,9 @@ export class CrossChainStatusManager {
             );
 
             if (
-                status === DeBridgeApiStateStatus.FULFILLED ||
-                status === DeBridgeApiStateStatus.SENTUNLOCK ||
-                status === DeBridgeApiStateStatus.CLAIMEDUNLOCK
+                status === DE_BRIDGE_API_STATE_STATUS.FULFILLED ||
+                status === DE_BRIDGE_API_STATE_STATUS.SENTUNLOCK ||
+                status === DE_BRIDGE_API_STATE_STATUS.CLAIMEDUNLOCK
             ) {
                 const { fulfilledDstEventMetadata } =
                     await this.httpClient.get<DeBridgeOrderApiResponse>(
@@ -343,19 +349,19 @@ export class CrossChainStatusManager {
                     );
 
                 dstTxData.hash = fulfilledDstEventMetadata.transactionHash.stringValue;
-                dstTxData.status = TxStatus.SUCCESS;
+                dstTxData.status = TX_STATUS.SUCCESS;
             } else if (
-                status === DeBridgeApiStateStatus.ORDERCANCELLED ||
-                status === DeBridgeApiStateStatus.SENTORDERCANCEL ||
-                status === DeBridgeApiStateStatus.CLAIMEDORDERCANCEL
+                status === DE_BRIDGE_API_STATE_STATUS.ORDERCANCELLED ||
+                status === DE_BRIDGE_API_STATE_STATUS.SENTORDERCANCEL ||
+                status === DE_BRIDGE_API_STATE_STATUS.CLAIMEDORDERCANCEL
             ) {
-                dstTxData.status = TxStatus.FAIL;
+                dstTxData.status = TX_STATUS.FAIL;
             }
 
             return dstTxData;
         } catch {
             return {
-                status: TxStatus.PENDING,
+                status: TX_STATUS.PENDING,
                 hash: null
             };
         }
@@ -386,7 +392,7 @@ export class CrossChainStatusManager {
     private async getBitcoinStatus(hash: string): Promise<TxStatusData> {
         let bitcoinTransactionStatus: BtcStatusResponse;
         const dstTxData: TxStatusData = {
-            status: TxStatus.PENDING,
+            status: TX_STATUS.PENDING,
             hash: null
         };
         try {
@@ -397,14 +403,14 @@ export class CrossChainStatusManager {
             dstTxData.hash = bitcoinTransactionStatus?.hash || null;
         } catch {
             return {
-                status: TxStatus.PENDING,
+                status: TX_STATUS.PENDING,
                 hash: null
             };
         }
 
         const isCompleted = bitcoinTransactionStatus?.block_index !== undefined;
         if (isCompleted) {
-            dstTxData.status = TxStatus.SUCCESS;
+            dstTxData.status = TX_STATUS.SUCCESS;
         }
 
         return dstTxData;
@@ -419,12 +425,12 @@ export class CrossChainStatusManager {
             );
 
             return {
-                status: MultichainStatusMapping?.[status] || TxStatus.PENDING,
+                status: MULTICHAIN_STATUS_MAPPING?.[status] || TX_STATUS.PENDING,
                 hash: swaptx || null
             };
         } catch {
             return {
-                status: TxStatus.PENDING,
+                status: TX_STATUS.PENDING,
                 hash: null
             };
         }
@@ -439,15 +445,15 @@ export class CrossChainStatusManager {
             );
 
             if (isSuccess && status === 'Done') {
-                return { status: TxStatus.SUCCESS, hash: txHash };
+                return { status: TX_STATUS.SUCCESS, hash: txHash };
             }
 
             if (!isSuccess) {
-                return { status: TxStatus.FAIL, hash: null };
+                return { status: TX_STATUS.FAIL, hash: null };
             }
-            return { status: TxStatus.PENDING, hash: null };
+            return { status: TX_STATUS.PENDING, hash: null };
         } catch {
-            return { status: TxStatus.PENDING, hash: null };
+            return { status: TX_STATUS.PENDING, hash: null };
         }
     }
 
@@ -463,38 +469,38 @@ export class CrossChainStatusManager {
             });
 
             switch (swapData.status) {
-                case TransferHistoryStatus.TRANSFER_UNKNOWN:
-                case TransferHistoryStatus.TRANSFER_SUBMITTING:
-                case TransferHistoryStatus.TRANSFER_WAITING_FOR_SGN_CONFIRMATION:
-                case TransferHistoryStatus.TRANSFER_REQUESTING_REFUND:
-                case TransferHistoryStatus.TRANSFER_CONFIRMING_YOUR_REFUND:
+                case TRANSFER_HISTORY_STATUS.TRANSFER_UNKNOWN:
+                case TRANSFER_HISTORY_STATUS.TRANSFER_SUBMITTING:
+                case TRANSFER_HISTORY_STATUS.TRANSFER_WAITING_FOR_SGN_CONFIRMATION:
+                case TRANSFER_HISTORY_STATUS.TRANSFER_REQUESTING_REFUND:
+                case TRANSFER_HISTORY_STATUS.TRANSFER_CONFIRMING_YOUR_REFUND:
                 default:
-                    return { status: TxStatus.PENDING, hash: null };
-                case TransferHistoryStatus.TRANSFER_REFUNDED:
-                case TransferHistoryStatus.TRANSFER_COMPLETED:
+                    return { status: TX_STATUS.PENDING, hash: null };
+                case TRANSFER_HISTORY_STATUS.TRANSFER_REFUNDED:
+                case TRANSFER_HISTORY_STATUS.TRANSFER_COMPLETED:
                     return {
-                        status: TxStatus.SUCCESS,
+                        status: TX_STATUS.SUCCESS,
                         hash: swapData.dst_block_tx_link.split('/').at(-1)!
                     };
-                case TransferHistoryStatus.TRANSFER_FAILED:
+                case TRANSFER_HISTORY_STATUS.TRANSFER_FAILED:
                     return {
-                        status: TxStatus.FAIL,
+                        status: TX_STATUS.FAIL,
                         hash: null
                     };
-                case TransferHistoryStatus.TRANSFER_WAITING_FOR_FUND_RELEASE:
-                case TransferHistoryStatus.TRANSFER_TO_BE_REFUNDED:
-                    return swapData.refund_reason === XferStatus.OK_TO_RELAY
+                case TRANSFER_HISTORY_STATUS.TRANSFER_WAITING_FOR_FUND_RELEASE:
+                case TRANSFER_HISTORY_STATUS.TRANSFER_TO_BE_REFUNDED:
+                    return swapData.refund_reason === XFER_STATUS.OK_TO_RELAY
                         ? {
-                              status: TxStatus.PENDING,
+                              status: TX_STATUS.PENDING,
                               hash: null
                           }
                         : {
-                              status: TxStatus.REVERT,
+                              status: TX_STATUS.REVERT,
                               hash: null
                           };
             }
         } catch {
-            return { status: TxStatus.PENDING, hash: null };
+            return { status: TX_STATUS.PENDING, hash: null };
         }
     }
 
@@ -511,15 +517,18 @@ export class CrossChainStatusManager {
                 }
             );
 
-            if (status === ChangenowApiStatus.FINISHED || status === ChangenowApiStatus.REFUNDED) {
-                return { status: TxStatus.SUCCESS, hash: payoutHash };
+            if (
+                status === CHANGENOW_API_STATUS.FINISHED ||
+                status === CHANGENOW_API_STATUS.REFUNDED
+            ) {
+                return { status: TX_STATUS.SUCCESS, hash: payoutHash };
             }
-            if (status === ChangenowApiStatus.FAILED) {
-                return { status: TxStatus.FAIL, hash: null };
+            if (status === CHANGENOW_API_STATUS.FAILED) {
+                return { status: TX_STATUS.FAIL, hash: null };
             }
-            return { status: TxStatus.PENDING, hash: null };
+            return { status: TX_STATUS.PENDING, hash: null };
         } catch {
-            return { status: TxStatus.PENDING, hash: null };
+            return { status: TX_STATUS.PENDING, hash: null };
         }
     }
 
@@ -544,21 +553,21 @@ export class CrossChainStatusManager {
 
                 switch (response.status) {
                     case L1ToL2MessageStatus.FUNDS_DEPOSITED_ON_L2:
-                        return { status: TxStatus.REVERT, hash: null };
+                        return { status: TX_STATUS.REVERT, hash: null };
                     case L1ToL2MessageStatus.EXPIRED:
                     case L1ToL2MessageStatus.CREATION_FAILED:
-                        return { status: TxStatus.FAIL, hash: null };
+                        return { status: TX_STATUS.FAIL, hash: null };
                     case L1ToL2MessageStatus.REDEEMED:
                         return {
-                            status: TxStatus.SUCCESS,
+                            status: TX_STATUS.SUCCESS,
                             hash: response.l2TxReceipt.transactionHash
                         };
                     case L1ToL2MessageStatus.NOT_YET_CREATED:
                     default:
-                        return { status: TxStatus.PENDING, hash: null };
+                        return { status: TX_STATUS.PENDING, hash: null };
                 }
             } catch {
-                return { status: TxStatus.PENDING, hash: null };
+                return { status: TX_STATUS.PENDING, hash: null };
             }
         }
         // L2 to L1 withdraw
@@ -567,7 +576,7 @@ export class CrossChainStatusManager {
             const l2TxReceipt = new L2TransactionReceipt(targetReceipt);
             const [event] = l2TxReceipt.getL2ToL1Events();
             if (!event) {
-                return { status: TxStatus.PENDING, hash: null };
+                return { status: TX_STATUS.PENDING, hash: null };
             }
 
             const messageReader = new L2ToL1MessageReader(l1Provider, event);
@@ -575,15 +584,15 @@ export class CrossChainStatusManager {
             const status = await messageReader.status(l2Provider);
             switch (status) {
                 case L2ToL1MessageStatus.CONFIRMED:
-                    return { status: TxStatus.READY_TO_CLAIM, hash: null };
+                    return { status: TX_STATUS.READY_TO_CLAIM, hash: null };
                 case L2ToL1MessageStatus.EXECUTED:
-                    return { status: TxStatus.SUCCESS, hash: null };
+                    return { status: TX_STATUS.SUCCESS, hash: null };
                 case L2ToL1MessageStatus.UNCONFIRMED:
                 default:
-                    return { status: TxStatus.PENDING, hash: null };
+                    return { status: TX_STATUS.PENDING, hash: null };
             }
         } catch (error) {
-            return { status: TxStatus.PENDING, hash: null };
+            return { status: TX_STATUS.PENDING, hash: null };
         }
     }
 
@@ -594,17 +603,17 @@ export class CrossChainStatusManager {
                 { headers: { 'x-integrator-id': 'rubic-api' } }
             );
 
-            if (status === SquidrouterTransferStatus.DEST_EXECUTED) {
-                return { status: TxStatus.SUCCESS, hash: toChain!.transactionId! };
+            if (status === SQUIDROUTER_TRANSFER_STATUS.DEST_EXECUTED) {
+                return { status: TX_STATUS.SUCCESS, hash: toChain!.transactionId! };
             }
 
-            if (status === SquidrouterTransferStatus.DEST_ERROR) {
-                return { status: TxStatus.FAIL, hash: null };
+            if (status === SQUIDROUTER_TRANSFER_STATUS.DEST_ERROR) {
+                return { status: TX_STATUS.FAIL, hash: null };
             }
 
-            return { status: TxStatus.PENDING, hash: null };
+            return { status: TX_STATUS.PENDING, hash: null };
         } catch {
-            return { status: TxStatus.PENDING, hash: null };
+            return { status: TX_STATUS.PENDING, hash: null };
         }
     }
 

@@ -16,7 +16,10 @@ import { EvmMulticallResponse } from 'src/core/blockchain/web3-public-service/we
 import { RpcResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/rpc-response';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
-import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
+import {
+    TX_STATUS,
+    TxStatus
+} from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { DefaultHttpClient } from 'src/core/http-client/default-http-client';
@@ -116,41 +119,50 @@ export class EvmWeb3Public extends Web3Public {
         }[]
     ): Promise<ContractMulticallResponse<Output>[][]> {
         if (this.multicallAddress) {
-            const calls: EvmCall[][] = contractsData.map(({ contractAddress, methodsData }) => {
-                const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
-                return methodsData.map(({ methodName, methodArguments }) => ({
-                    callData: contract.methods[methodName](...methodArguments).encodeABI(),
-                    target: contractAddress
-                }));
-            });
+            try {
+                const calls: EvmCall[][] = contractsData.map(({ contractAddress, methodsData }) => {
+                    const contract = new this.web3.eth.Contract(contractAbi, contractAddress);
+                    return methodsData.map(({ methodName, methodArguments }) => ({
+                        callData: contract.methods[methodName](...methodArguments).encodeABI(),
+                        target: contractAddress
+                    }));
+                });
 
-            const outputs = await this.multicall(calls.flat());
+                const outputs = await this.multicall(calls.flat());
 
-            let outputIndex = 0;
-            return contractsData.map(contractData =>
-                contractData.methodsData.map(methodData => {
-                    const methodOutputAbi = contractAbi.find(
-                        funcSignature => funcSignature.name === methodData.methodName
-                    )!.outputs!;
-                    const output = outputs[outputIndex];
-                    if (!output) {
-                        throw new RubicSdkError('Output has to be defined');
+                let outputIndex = 0;
+                return contractsData.map(contractData =>
+                    contractData.methodsData.map(methodData => {
+                        const methodOutputAbi = contractAbi.find(
+                            funcSignature => funcSignature.name === methodData.methodName
+                        )!.outputs!;
+                        const output = outputs[outputIndex];
+                        if (!output) {
+                            throw new RubicSdkError('Output has to be defined');
+                        }
+
+                        outputIndex++;
+
+                        return {
+                            success: output.success,
+                            output:
+                                output.success && output.returnData.length > 2
+                                    ? (this.web3.eth.abi.decodeParameters(
+                                          methodOutputAbi,
+                                          output.returnData
+                                      )[0] as Output)
+                                    : null
+                        };
+                    })
+                );
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    if (err.message.includes('unsigned transaction')) {
+                        return this.multicallContractsMethodsByOne(contractAbi, contractsData);
                     }
-
-                    outputIndex++;
-
-                    return {
-                        success: output.success,
-                        output:
-                            output.success && output.returnData.length > 2
-                                ? (this.web3.eth.abi.decodeParameters(
-                                      methodOutputAbi,
-                                      output.returnData
-                                  )[0] as Output)
-                                : null
-                    };
-                })
-            );
+                }
+                throw err;
+            }
         }
 
         return this.multicallContractsMethodsByOne(contractAbi, contractsData);
@@ -368,12 +380,12 @@ export class EvmWeb3Public extends Web3Public {
         const txReceipt = await this.getTransactionReceipt(hash);
 
         if (txReceipt === null) {
-            return TxStatus.PENDING;
+            return TX_STATUS.PENDING;
         }
         if (txReceipt.status) {
-            return TxStatus.SUCCESS;
+            return TX_STATUS.SUCCESS;
         }
-        return TxStatus.FAIL;
+        return TX_STATUS.FAIL;
     }
 
     /**
