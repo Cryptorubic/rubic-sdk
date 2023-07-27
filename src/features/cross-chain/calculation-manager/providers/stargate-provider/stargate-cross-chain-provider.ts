@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { parseError } from 'src/common/utils/errors';
 import {
     BLOCKCHAIN_NAME,
@@ -417,6 +418,10 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             [poolId]
         );
 
+        if (compareAddresses(poolAddress, EvmWeb3Pure.EMPTY_ADDRESS)) {
+            throw new RubicSdkError('No possible pool');
+        }
+
         const tokenAddress = await web3Adapter.callContractMethod(
             poolAddress,
             stargatePoolAbi,
@@ -464,10 +469,19 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             throw new RubicSdkError('Tokens are not supported.');
         }
 
-        return this.getPoolToken(
-            stargatePoolId[possibleTransitSymbol as unknown as StargateBridgeToken],
-            fromBlockchain
-        );
+        try {
+            const poolToken = await this.getPoolToken(
+                stargatePoolId[possibleTransitSymbol as unknown as StargateBridgeToken],
+                fromBlockchain
+            );
+            return poolToken;
+        } catch {
+            const poolToken = await this.getPoolToken(
+                stargatePoolId[fromBlockchainDirection[0] as unknown as StargateBridgeToken],
+                fromBlockchain
+            );
+            return poolToken;
+        }
     }
 
     private async getDstSwap(
