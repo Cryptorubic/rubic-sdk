@@ -6,7 +6,7 @@ import { GraphQLClient } from 'graphql-request';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -167,6 +167,26 @@ export abstract class PancakeRouterProvider extends EvmOnChainProvider {
 
     private createPublicClient(): PublicClient {
         const transportUrl = Injector.web3PublicService.rpcProvider[this.blockchain]?.rpcList[0]!;
+
+        if (this.blockchain === BLOCKCHAIN_NAME.POLYGON_ZKEVM) {
+            return createPublicClient({
+                chain: {
+                    ...this.chain,
+                    contracts: {
+                        multicall3: {
+                            address: '0xcA11bde05977b3631167028862bE2a173976CA11',
+                            blockCreated: 57746
+                        }
+                    }
+                },
+                transport: http(transportUrl),
+                batch: {
+                    multicall: {
+                        batchSize: 512
+                    }
+                }
+            });
+        }
 
         return createPublicClient({
             chain: this.chain,
