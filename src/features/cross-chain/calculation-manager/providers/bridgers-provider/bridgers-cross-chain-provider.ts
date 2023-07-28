@@ -93,11 +93,13 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
 
             const fromTokenAddress = createTokenNativeAddressProxy(
                 from,
-                bridgersNativeAddress
+                bridgersNativeAddress,
+                false
             ).address;
             const toTokenAddress = createTokenNativeAddressProxy(
                 toToken,
-                bridgersNativeAddress
+                bridgersNativeAddress,
+                false
             ).address;
             const quoteRequest: BridgersQuoteRequest = {
                 fromTokenAddress,
