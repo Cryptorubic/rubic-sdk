@@ -61,22 +61,28 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     ): boolean {
         const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = to.blockchain as StargateCrossChainSupportedBlockchain;
+        const fromSymbol =
+            fromBlockchain === BLOCKCHAIN_NAME.ARBITRUM && from.symbol === 'AETH'
+                ? 'ETH'
+                : from.symbol;
+        const toSymbol =
+            toBlockchain === BLOCKCHAIN_NAME.ARBITRUM && to.symbol === 'AETH' ? 'ETH' : to.symbol;
 
-        const srcPoolId = stargatePoolId[from.symbol as StargateBridgeToken];
+        const srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
         const srcSupportedPools = stargateBlockchainSupportedPools[fromBlockchain];
         if (!srcPoolId || !srcSupportedPools.includes(srcPoolId)) {
             return false;
         }
 
-        const dstPoolId = stargatePoolId[to.symbol as StargateBridgeToken];
+        const dstPoolId = stargatePoolId[toSymbol as StargateBridgeToken];
         const dstSupportedPools = stargateBlockchainSupportedPools[toBlockchain];
         if (!dstSupportedPools.includes(dstPoolId)) {
             throw new RubicSdkError('Tokens are not supported.');
         }
 
         const poolPathExists = stargatePoolMapping[fromBlockchain]?.[
-            from.symbol as StargateBridgeToken
-        ]?.[toBlockchain]?.includes(to.symbol as StargateBridgeToken);
+            fromSymbol as StargateBridgeToken
+        ]?.[toBlockchain]?.includes(toSymbol as StargateBridgeToken);
 
         return Boolean(poolPathExists);
     }
@@ -100,14 +106,6 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             }
 
             const hasDirectRoute = StargateCrossChainProvider.hasDirectRoute(from, toToken);
-            // @TODO Remove after facet fix
-            if (hasDirectRoute && from.isNative && toToken.isNative) {
-                return {
-                    trade: null,
-                    error: new RubicSdkError('Native bridge is not supported.'),
-                    tradeType: this.type
-                };
-            }
 
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
