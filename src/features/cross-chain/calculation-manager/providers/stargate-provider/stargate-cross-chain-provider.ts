@@ -302,11 +302,20 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     ): Promise<BigNumber> {
         const fromBlockchain = fromToken.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
-        let srcPoolId = stargatePoolId[fromToken.symbol as StargateBridgeToken];
-        let dstPoolId = stargatePoolId[toToken.symbol as StargateBridgeToken];
+        const fromSymbol =
+            fromBlockchain === BLOCKCHAIN_NAME.ARBITRUM && fromToken.symbol === 'AETH'
+                ? 'ETH'
+                : fromToken.symbol;
+        const toSymbol =
+            toBlockchain === BLOCKCHAIN_NAME.ARBITRUM && toToken.symbol === 'AETH'
+                ? 'ETH'
+                : toToken.symbol;
+
+        let srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
+        let dstPoolId = stargatePoolId[toSymbol as StargateBridgeToken];
         const dstChainId = stargateChainId[toBlockchain as StargateCrossChainSupportedBlockchain];
 
-        const sdDecimals = stargatePoolsDecimals[fromToken.symbol as StargateBridgeToken];
+        const sdDecimals = stargatePoolsDecimals[fromSymbol as StargateBridgeToken];
         const amountSD = Web3Pure.toWei(transitAmount, sdDecimals);
 
         // @TODO FIX STARGATE MULTIPLE POOLS
@@ -341,53 +350,6 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 new BigNumber(eqFee).plus(protocolFee).minus(eqReward),
                 sdDecimals
             );
-        } catch (err) {
-            if (err instanceof Error) {
-                throw new RubicSdkError('Tokens are not supported.');
-            }
-            throw new RubicSdkError('Unknown error.');
-        }
-    }
-
-    private async fetchMultiplePoolFees(
-        fromToken: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceToken<EvmBlockchainName>
-    ): Promise<{ amount: BigNumber; pool: number }[]> {
-        const fromBlockchain = fromToken.blockchain as StargateCrossChainSupportedBlockchain;
-        const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
-        const srcPools = stargateBlockchainSupportedPools[fromBlockchain];
-        const dstPoolId = stargatePoolId[toToken.symbol as StargateBridgeToken];
-        const dstChainId = stargateChainId[toBlockchain as StargateCrossChainSupportedBlockchain];
-        const wallet = this.getWalletAddress(fromBlockchain);
-
-        const sdDecimals = stargatePoolsDecimals[fromToken.symbol as StargateBridgeToken];
-        const amountSD = Web3Pure.toWei(fromToken.tokenAmount, sdDecimals);
-
-        try {
-            const feeResponses = await Injector.web3PublicService
-                .getWeb3Public(fromBlockchain)
-                .multicallContractMethod<{ 1: string; 4: string }>(
-                    stargateFeeLibraryContractAddress[fromBlockchain],
-                    feeLibraryAbi,
-                    'getFees',
-                    srcPools.map(srcPoolId => [srcPoolId, dstPoolId, dstChainId, wallet, amountSD])
-                );
-
-            return feeResponses
-                .map((feeResponse, index) => {
-                    if (feeResponse.success && feeResponse.output) {
-                        const { 1: eqFee, 4: protocolFee } = feeResponse.output;
-                        return {
-                            amount: new BigNumber(eqFee).plus(protocolFee),
-                            pool: srcPools[index]!
-                        };
-                    }
-                    return {
-                        amount: new BigNumber(Infinity),
-                        pool: srcPools[index]!
-                    };
-                })
-                .sort((a, b) => (a.amount.gt(b.amount) ? 1 : -1));
         } catch (err) {
             if (err instanceof Error) {
                 throw new RubicSdkError('Tokens are not supported.');
@@ -448,7 +410,11 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             throw new RubicSdkError('Tokens are not supported.');
         }
 
-        const toSymbol = toToken.symbol as StargateBridgeToken;
+        const toSymbol = (
+            toBlockchain === BLOCKCHAIN_NAME.ARBITRUM && toToken.symbol === 'AETH'
+                ? 'ETH'
+                : toToken.symbol
+        ) as StargateBridgeToken;
         const toSymbolDirection = toBlockchainDirection[toSymbol];
         if (!toSymbolDirection) {
             throw new RubicSdkError('Tokens are not supported.');
