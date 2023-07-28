@@ -54,7 +54,9 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
     public isSupportedProxyBlockchain(
         blockchain: BlockchainName
     ): blockchain is ChangenowProxySupportedBlockchain {
-        return Object.keys(changenowProxySupportedBlockchains).includes(blockchain);
+        return changenowProxySupportedBlockchains.some(
+            supportedBlockchain => supportedBlockchain === blockchain
+        );
     }
 
     // eslint-disable-next-line complexity
