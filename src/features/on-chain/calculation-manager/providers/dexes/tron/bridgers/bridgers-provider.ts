@@ -38,10 +38,15 @@ export class BridgersProvider extends TronOnChainProvider {
     ): Promise<BridgersTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
 
-        const fromTokenAddress = createTokenNativeAddressProxy(from, bridgersNativeAddress).address;
+        const fromTokenAddress = createTokenNativeAddressProxy(
+            from,
+            bridgersNativeAddress,
+            false
+        ).address;
         const toTokenAddress = createTokenNativeAddressProxy(
             toToken,
-            bridgersNativeAddress
+            bridgersNativeAddress,
+            false
         ).address;
         const quoteRequest: BridgersQuoteRequest = {
             fromTokenAddress,
