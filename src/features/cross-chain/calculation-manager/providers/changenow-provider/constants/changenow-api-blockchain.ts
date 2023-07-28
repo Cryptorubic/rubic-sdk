@@ -18,8 +18,7 @@ export const changeNowEvmSupportedBlockchain = {
     [BLOCKCHAIN_NAME.OASIS]: 'rose',
     [BLOCKCHAIN_NAME.SYSCOIN]: 'sys',
     [BLOCKCHAIN_NAME.XDC]: 'xdc',
-    [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulse',
-    [BLOCKCHAIN_NAME.CRONOS]: 'cronos'
+    [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulse'
 };
 
 export type ChangenowEvmCrossChainSupportedBlockchain =
