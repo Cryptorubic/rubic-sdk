@@ -8,7 +8,7 @@ import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron
 
 export const nativeTokensList: Record<BlockchainName, Token> = {
     ...Object.values(BLOCKCHAIN_NAME).reduce(
-        (acc, blockchain) => ({ ...acc, [blockchain]: null }),
+        (acc, blockchain) => ({ ...acc, [blockchain]: blockchain }),
         {} as Record<BlockchainName, Token>
     ),
     [BLOCKCHAIN_NAME.ETHEREUM]: new Token({
