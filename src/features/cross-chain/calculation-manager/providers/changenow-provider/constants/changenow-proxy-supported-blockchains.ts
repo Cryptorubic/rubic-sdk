@@ -6,7 +6,8 @@ export const changenowProxySupportedBlockchains = [
     BLOCKCHAIN_NAME.POLYGON,
     BLOCKCHAIN_NAME.ARBITRUM,
     BLOCKCHAIN_NAME.OPTIMISM,
-    BLOCKCHAIN_NAME.FANTOM
+    BLOCKCHAIN_NAME.FANTOM,
+    BLOCKCHAIN_NAME.PULSECHAIN
 ] as const;
 
 export type ChangenowProxySupportedBlockchain = (typeof changenowProxySupportedBlockchains)[number];
