@@ -89,8 +89,8 @@ export abstract class PancakeRouterProvider extends EvmOnChainProvider {
             TradeType.EXACT_INPUT,
             {
                 gasPriceWei: () => this.createPublicClient().getGasPrice(),
-                maxHops: 2,
-                maxSplits: 2,
+                maxHops: 4,
+                maxSplits: 4,
                 poolProvider: SmartRouter.createStaticPoolProvider(pools),
                 quoteProvider,
                 quoterOptimization: true
