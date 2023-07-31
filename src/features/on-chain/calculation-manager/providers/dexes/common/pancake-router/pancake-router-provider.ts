@@ -45,6 +45,10 @@ export abstract class PancakeRouterProvider extends EvmOnChainProvider {
 
     protected abstract readonly v2subgraphAddress: string;
 
+    protected abstract readonly maxHops: number;
+
+    protected abstract readonly maxSplits: number;
+
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceToken<EvmBlockchainName>,
@@ -89,8 +93,8 @@ export abstract class PancakeRouterProvider extends EvmOnChainProvider {
             TradeType.EXACT_INPUT,
             {
                 gasPriceWei: () => this.createPublicClient().getGasPrice(),
-                maxHops: 4,
-                maxSplits: 4,
+                maxHops: this.maxHops,
+                maxSplits: this.maxSplits,
                 poolProvider: SmartRouter.createStaticPoolProvider(pools),
                 quoteProvider,
                 quoterOptimization: true
