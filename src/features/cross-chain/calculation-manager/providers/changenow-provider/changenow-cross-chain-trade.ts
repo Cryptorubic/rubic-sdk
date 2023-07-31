@@ -1,11 +1,8 @@
 import BigNumber from 'bignumber.js';
-import {
-    FailedToCheckForTransactionReceiptError,
-    RubicSdkError,
-    UnnecessaryApproveError
-} from 'src/common/errors';
+import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { getGasOptions } from 'src/common/utils/options';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
@@ -22,18 +19,23 @@ import { ChangenowCurrency } from 'src/features/cross-chain/calculation-manager/
 import { ChangenowExchangeResponse } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-exchange-api';
 import { ChangenowPaymentInfo } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-payment-info';
 import { ChangenowTrade } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-trade';
-import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-trade';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
+import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { MarkRequired } from 'ts-essentials';
 import { TransactionConfig } from 'web3-core';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
 
-export class ChangenowCrossChainTrade extends CrossChainTrade {
+export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
         changenowTrade: ChangenowTrade,
@@ -82,14 +84,16 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
     }
 
     protected get methodName(): string {
-        throw new RubicSdkError('No method name');
+        return this.onChainTrade
+            ? 'swapAndStartBridgeTokensViaTransfer'
+            : 'startBridgeTokensViaTransfer';
     }
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CHANGENOW;
 
     public readonly isAggregator = false;
 
-    public readonly from: PriceTokenAmount<ChangenowCrossChainSupportedBlockchain>;
+    public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount<ChangenowCrossChainSupportedBlockchain>;
 
@@ -99,7 +103,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
 
     public readonly feeInfo: FeeInfo;
 
-    public readonly onChainSubtype = { from: undefined, to: undefined };
+    public readonly onChainSubtype;
 
     public readonly bridgeType = BRIDGE_TYPE.CHANGENOW;
 
@@ -114,8 +118,15 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
 
     private readonly toCurrency: ChangenowCurrency;
 
+    private get transitToken(): PriceTokenAmount {
+        return this.onChainTrade ? this.onChainTrade.toTokenAmountMin : this.from;
+    }
+
     protected get fromContractAddress(): string {
-        throw new RubicSdkError('No contract address');
+        if (this.isProxyTrade) {
+            return rubicProxyContractAddress[this.from.blockchain].gateway;
+        }
+        throw new RubicSdkError('No contract address for changenow provider');
     }
 
     protected get web3Private(): EvmWeb3Private {
@@ -124,6 +135,8 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
         }
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
     }
+
+    public readonly onChainTrade: EvmOnChainTrade | null;
 
     public get estimatedGas(): BigNumber | null {
         if (!this.gasData) {
@@ -146,7 +159,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
     constructor(crossChainTrade: ChangenowTrade, providerAddress: string) {
         super(providerAddress);
 
-        this.from = crossChainTrade.from;
+        this.from = crossChainTrade.from as PriceTokenAmount<EvmBlockchainName>;
         this.to = crossChainTrade.to;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
 
@@ -157,17 +170,14 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
         this.gasData = crossChainTrade.gasData;
 
         this.priceImpact = this.from.calculatePriceImpactPercent(this.to);
+
+        this.onChainSubtype = crossChainTrade.onChainTrade
+            ? { from: crossChainTrade.onChainTrade.type, to: undefined }
+            : { from: undefined, to: undefined };
+        this.onChainTrade = crossChainTrade.onChainTrade;
     }
 
-    public async needApprove(): Promise<boolean> {
-        return false;
-    }
-
-    public approve(): Promise<unknown> {
-        throw new UnnecessaryApproveError();
-    }
-
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
+    public async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         if (!BlockchainsInfo.isEvmBlockchainName(this.from.blockchain)) {
             throw new RubicSdkError("For non-evm chains use 'getChangenowPostTrade' method");
         }
@@ -190,7 +200,7 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
 
         try {
             const { id, payinAddress } = await this.getPaymentInfo(
-                this.from.tokenAmount,
+                this.transitToken.tokenAmount,
                 options.receiverAddress ? options.receiverAddress : this.walletAddress
             );
             this.id = id;
@@ -264,10 +274,68 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
         );
     }
 
-    protected getContractParams(
-        _options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
+    protected async getContractParams(
+        options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
     ): Promise<ContractParams> {
-        throw new RubicSdkError('Not implemented');
+        const paymentInfo = await this.getPaymentInfo(
+            this.transitToken.tokenAmount,
+            options?.receiverAddress || this.walletAddress
+        );
+        this.id = paymentInfo.id;
+
+        const toToken = this.to.clone({ address: EvmWeb3Pure.EMPTY_ADDRESS });
+
+        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(
+            {
+                ...options,
+                receiverAddress: this.walletAddress
+            },
+            {
+                walletAddress: this.walletAddress,
+                fromTokenAmount: this.from,
+                toTokenAmount: toToken,
+                srcChainTrade: this.onChainTrade,
+                providerAddress: this.providerAddress,
+                type: `native:${this.bridgeType}`,
+                fromAddress: this.walletAddress
+            }
+        );
+
+        const providerData = [paymentInfo.payinAddress];
+
+        const swapData =
+            this.onChainTrade &&
+            (await ProxyCrossChainEvmTrade.getSwapData(options, {
+                walletAddress: this.walletAddress,
+                contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
+                fromTokenAmount: this.from,
+                toTokenAmount: this.onChainTrade.to,
+                onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
+            }));
+
+        const methodArguments = swapData
+            ? [bridgeData, swapData, providerData]
+            : [bridgeData, providerData];
+
+        const value = this.getSwapValue();
+
+        const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
+            rubicProxyContractAddress[this.from.blockchain].router,
+            evmCommonCrossChainAbi,
+            this.methodName,
+            methodArguments,
+            value
+        );
+        const sendingToken = this.from.isNative ? [] : [this.from.address];
+        const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
+
+        return {
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
+            contractAbi: gatewayRubicCrossChainAbi,
+            methodName: 'startViaRubic',
+            methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
+            value
+        };
     }
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
@@ -283,7 +351,9 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
-            slippage: 0
+            slippage: this.onChainTrade?.slippageTolerance
+                ? this.onChainTrade.slippageTolerance * 100
+                : 0
         };
     }
 
@@ -320,7 +390,14 @@ export class ChangenowCrossChainTrade extends CrossChainTrade {
         );
     }
 
-    public encodeApprove(): Promise<unknown> {
+    public encodeApprove(): Promise<TransactionConfig> {
         throw new RubicSdkError('Cannot encode approve for changenow');
+    }
+
+    public async needApprove(): Promise<boolean> {
+        if (this.isProxyTrade) {
+            return super.needApprove();
+        }
+        return false;
     }
 }
