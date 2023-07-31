@@ -14,7 +14,7 @@ export class PancakeRouterBscProvider extends PancakeRouterProvider {
 
     protected readonly v2subgraphAddress = 'https://proxy-worker-api.pancakeswap.com/bsc-exchange';
 
-    protected readonly maxHops = 3;
+    protected readonly maxHops = 2;
 
-    protected readonly maxSplits = 4;
+    protected readonly maxSplits = 3;
 }
