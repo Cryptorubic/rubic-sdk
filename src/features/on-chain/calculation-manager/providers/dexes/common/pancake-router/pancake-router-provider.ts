@@ -125,6 +125,14 @@ export abstract class PancakeRouterProvider extends EvmOnChainProvider {
             trade,
             dexContractAddress: this.dexAddress
         };
+        if (options?.gasCalculation) {
+            const gasPriceInfo = await this.getGasPriceInfo();
+            const gasLimit = new BigNumber(trade?.gasEstimate.toString());
+            tradeStruct.gasFeeInfo = {
+                gasLimit,
+                ...gasPriceInfo
+            };
+        }
 
         return new PancakeRouterTrade(tradeStruct, fullOptions.providerAddress);
     }

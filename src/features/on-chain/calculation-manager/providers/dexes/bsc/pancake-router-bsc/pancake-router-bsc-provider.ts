@@ -16,5 +16,5 @@ export class PancakeRouterBscProvider extends PancakeRouterProvider {
 
     protected readonly maxHops = 2;
 
-    protected readonly maxSplits = 3;
+    protected readonly maxSplits = 4;
 }
