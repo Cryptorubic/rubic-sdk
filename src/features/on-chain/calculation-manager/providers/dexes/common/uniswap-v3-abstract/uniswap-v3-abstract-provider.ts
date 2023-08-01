@@ -1,7 +1,6 @@
 import { RubicSdkError } from 'src/common/errors';
 import { Token } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { Cache } from 'src/common/utils/decorators';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { createTokenNativeAddressProxyInPathStartAndEnd } from 'src/features/common/utils/token-native-address-proxy';
 import {
@@ -33,10 +32,7 @@ export abstract class UniswapV3AbstractProvider<
 
     protected readonly isRubicOptimisationEnabled: boolean = false;
 
-    @Cache
-    protected get quoterController(): UniswapV3QuoterController {
-        return new UniswapV3QuoterController(this.blockchain, this.routerConfiguration);
-    }
+    protected abstract readonly quoterController: UniswapV3QuoterController;
 
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.UNI_SWAP_V3;

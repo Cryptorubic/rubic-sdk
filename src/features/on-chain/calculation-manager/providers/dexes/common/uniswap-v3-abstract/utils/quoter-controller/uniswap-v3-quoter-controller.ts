@@ -25,6 +25,7 @@ import {
     LiquidityPool
 } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
 import { UniswapV3AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-quoter-controller';
+import { AbiItem } from 'web3-utils';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
@@ -127,7 +128,9 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
 
     constructor(
         private readonly blockchain: EvmBlockchainName,
-        private readonly routerConfiguration: UniswapV3RouterConfiguration<string>
+        private readonly routerConfiguration: UniswapV3RouterConfiguration<string>,
+        private readonly quoterContractAddress: string = UNISWAP_V3_QUOTER_CONTRACT_ADDRESS,
+        private readonly quoterContractABI: AbiItem[] = UNISWAP_V3_QUOTER_CONTRACT_ABI
     ) {}
 
     private async getOrCreateRouterTokensAndLiquidityPools(): Promise<{
@@ -274,8 +277,8 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
 
         return this.web3Public
             .multicallContractMethods<string>(
-                UNISWAP_V3_QUOTER_CONTRACT_ADDRESS,
-                UNISWAP_V3_QUOTER_CONTRACT_ABI,
+                this.quoterContractAddress,
+                this.quoterContractABI,
                 quoterMethodsData.map(quoterMethodData => quoterMethodData.methodData)
             )
             .then(results => {
