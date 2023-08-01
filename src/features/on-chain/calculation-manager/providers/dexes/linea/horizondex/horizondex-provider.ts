@@ -1,12 +1,15 @@
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
-import { UniswapV2AbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-provider';
-import { HorizonDEXTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/horizondex/horizondex-trade';
-import { HORIZONDEX_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/horizondex/сonstants';
+import { UniswapV3AbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-provider';
+import { HORIZONDEX_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/horizondex/constants/provider-configuration';
+import { HORIZONDEX_ROUTER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/horizondex/constants/router-configuration';
+import { HorizondexTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/horizondex/horizondex-trade';
 
-export class HorizonDEXProvider extends UniswapV2AbstractProvider<HorizonDEXTrade> {
+export class HorizondexProvider extends UniswapV3AbstractProvider<HorizondexTrade> {
     public readonly blockchain = BLOCKCHAIN_NAME.LINEA;
 
-    public readonly UniswapV2TradeClass = HorizonDEXTrade;
+    public readonly OnChainTradeClass = HorizondexTrade;
 
-    public readonly providerSettings = HORIZONDEX_PROVIDER_CONFIGURATION;
+    public readonly providerConfiguration = HORIZONDEX_PROVIDER_CONFIGURATION;
+
+    public readonly routerConfiguration = HORIZONDEX_ROUTER_CONFIGURATION;
 }

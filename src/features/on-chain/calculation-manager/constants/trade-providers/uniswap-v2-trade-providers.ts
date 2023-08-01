@@ -27,7 +27,6 @@ import { JupiterSwapProvider } from 'src/features/on-chain/calculation-manager/p
 import { PhotonSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/photon-swap/photon-swap-provider';
 import { SurfdexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/surfdex/surfdex-provider';
 import { ClaimSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/klaytn/claim-swap/claim-swap-provider';
-import { HorizonDEXProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/horizondex/horizondex-provider';
 import { NetSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/metis/net-swap/net-swap-provider';
 import { SolarbeamProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/solarbeam/solarbeam-provider';
 import { SushiSwapMoonriverProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
@@ -116,7 +115,5 @@ export const UniswapV2TradeProviders = [
     PulseXV1Provider,
     PulseXV2Provider,
     UniSwapV2PulsechainProvider,
-    SushiSwapPulsechainProvider,
-    // Linea
-    HorizonDEXProvider
+    SushiSwapPulsechainProvider
 ] as const;
