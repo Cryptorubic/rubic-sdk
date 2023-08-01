@@ -69,8 +69,8 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         const toBlockchain = toToken.blockchain;
 
         const useProxy =
-            (options?.useProxy?.[this.type] && this.isSupportedProxyBlockchain(fromBlockchain)) ||
-            false;
+            this.isSupportedProxyBlockchain(fromBlockchain) &&
+            (options?.useProxy?.[this.type] || false);
 
         if (
             !this.areSupportedBlockchains(fromBlockchain, toBlockchain) ||
