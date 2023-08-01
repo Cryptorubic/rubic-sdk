@@ -17,6 +17,7 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { PancakeRouterTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/pancake-router/models/pancake-router-trade-struct';
@@ -125,13 +126,15 @@ export abstract class PancakeRouterProvider extends EvmOnChainProvider {
             trade,
             dexContractAddress: this.dexAddress
         };
-        if (options?.gasCalculation) {
-            const gasPriceInfo = await this.getGasPriceInfo();
-            const gasLimit = new BigNumber(trade?.gasEstimate.toString());
-            tradeStruct.gasFeeInfo = {
-                gasLimit,
-                ...gasPriceInfo
-            };
+        if (options?.gasCalculation === 'calculate') {
+            try {
+                const gasPriceInfo = await this.getGasPriceInfo();
+                const gasLimit = await PancakeRouterTrade.getGasLimit(
+                    tradeStruct,
+                    fullOptions.providerAddress
+                );
+                tradeStruct.gasFeeInfo = getGasFeeInfo(gasLimit, gasPriceInfo!);
+            } catch {}
         }
 
         return new PancakeRouterTrade(tradeStruct, fullOptions.providerAddress);
