@@ -155,7 +155,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             const changenowTrade: ChangenowTrade = {
                 from: from as PriceTokenAmount<ChangenowCrossChainSupportedBlockchain>,
                 to,
-                toTokenAmountMin: transitMinAmount,
+                toTokenAmountMin: toAmount,
                 fromCurrency: transit,
                 toCurrency,
                 feeInfo,
