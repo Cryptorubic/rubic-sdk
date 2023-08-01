@@ -18,6 +18,7 @@ import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-m
 import { ProxyBridgeParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/proxy-bridge-params';
 import { ProxySwapParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/proxy-swap-params';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
+import { OnChainManager } from 'src/features/on-chain/calculation-manager/on-chain-manager';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 import { AbiItem } from 'web3-utils';
@@ -162,12 +163,20 @@ export class ProxyCrossChainEvmTrade {
         if (compareAddresses(from.address, transitToken.address)) {
             return null;
         }
+        const to = await PriceToken.createToken(transitToken);
+
+        if ((from.isNative && to.isWrapped) || (from.isWrapped && to.isNative)) {
+            const trade = OnChainManager.getWrapTrade(from, to, { slippageTolerance })?.[0];
+            if (trade) {
+                return trade;
+            }
+        }
 
         const fromBlockchain = from.blockchain as EvmBlockchainName;
         const availableDexes = await ProxyCrossChainEvmTrade.getWhitelistedDexes(fromBlockchain);
 
         const dexes = Object.values(typedTradeProviders[fromBlockchain]);
-        const to = await PriceToken.createToken(transitToken);
+
         const allOnChainTrades = await Promise.allSettled(
             dexes.map(dex =>
                 dex.calculate(from, to, {

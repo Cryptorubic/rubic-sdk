@@ -15,9 +15,13 @@ import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/mod
 import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
 import { RequiredOnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/required-on-chain-manager-calculation-options';
 import { EvmWrapTrade } from 'src/features/on-chain/calculation-manager/providers/common/evm-wrap-trade/evm-wrap-trade';
-import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
+import {
+    OnChainCalculationOptions,
+    RequiredOnChainCalculationOptions
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
 import { LifiProvider } from 'src/features/on-chain/calculation-manager/providers/lifi/lifi-provider';
@@ -143,7 +147,7 @@ export class OnChainManager {
         options: RequiredOnChainManagerCalculationOptions
     ): Promise<Array<OnChainTrade | OnChainTradeError>> {
         if ((from.isNative && to.isWrapped) || (from.isWrapped && to.isNative)) {
-            return this.getWrapTrade(from, to, options);
+            return OnChainManager.getWrapTrade(from, to, options);
         }
 
         const dexesProviders = Object.entries(this.tradeProviders[from.blockchain]).filter(
@@ -234,11 +238,11 @@ export class OnChainManager {
         }
     }
 
-    private getWrapTrade(
+    public static getWrapTrade(
         from: PriceTokenAmount,
         to: PriceToken,
-        options: RequiredOnChainManagerCalculationOptions
-    ): [OnChainTrade] {
+        options: OnChainCalculationOptions
+    ): [EvmOnChainTrade] {
         const fromToken = from as PriceTokenAmount<EvmBlockchainName>;
         const toToken = to as PriceToken<EvmBlockchainName>;
         const trade = new EvmWrapTrade(
@@ -260,7 +264,7 @@ export class OnChainManager {
                     to: { isDeflation: false }
                 }
             },
-            options.providerAddress
+            options.providerAddress!
         );
         return [trade];
     }

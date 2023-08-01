@@ -123,7 +123,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             let srcChainTrade: EvmOnChainTrade | null = null;
             let transitAmount: BigNumber = fromWithoutFee.tokenAmount;
 
-            if (!hasDirectRoute) {
+            if (!hasDirectRoute || (hasDirectRoute && from.isNative)) {
                 if (!useProxy) {
                     return {
                         trade: null,
