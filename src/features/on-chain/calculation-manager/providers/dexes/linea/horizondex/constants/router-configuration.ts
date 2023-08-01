@@ -26,37 +26,37 @@ const routerLiquidityPools: UniswapV3RouterLiquidityPool<TokenSymbol>[] = [
         poolAddress: '0xe2df725e44ab983e8513ecfc9c3e13bc21ea867e',
         tokenSymbolA: 'BUSD',
         tokenSymbolB: 'WETH',
-        fee: 3000
+        fee: 300
     },
     {
         poolAddress: '0x0330fddd733ea64f92b348ff19a2bb4d29d379d5',
         tokenSymbolA: 'MATIC',
         tokenSymbolB: 'WETH',
-        fee: 500
+        fee: 300
     },
     {
         poolAddress: '0xfe7a3ab43d8db17643ba5dc2f132a74049dcf42f',
         tokenSymbolA: 'BUSD',
         tokenSymbolB: 'BNB',
-        fee: 3000
+        fee: 300
     },
     {
         poolAddress: '0xa6a69fddec12e7ee44474a92e9c549a612519411',
         tokenSymbolA: 'WETH',
         tokenSymbolB: 'BNB',
-        fee: 3000
+        fee: 300
     },
     {
         poolAddress: '0x76f12b1b0ff9a53810894f94b31ee2569e0d9bc4',
         tokenSymbolA: 'AVAX',
         tokenSymbolB: 'WETH',
-        fee: 500
+        fee: 1000
     },
     {
         poolAddress: '0x77557405a645c79e9f8b0096997b6a247b12b315',
         tokenSymbolA: 'deUSDC',
         tokenSymbolB: 'WETH',
-        fee: 500
+        fee: 300
     }
 ];
 
