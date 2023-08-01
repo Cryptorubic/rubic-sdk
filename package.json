@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "4.13.3-alpha-pancake-router-bsc-eth.5",
+    "version": "4.14.0",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",

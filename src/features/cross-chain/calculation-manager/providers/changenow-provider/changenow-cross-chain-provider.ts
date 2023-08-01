@@ -21,6 +21,10 @@ import {
     changenowApiBlockchain,
     ChangenowCrossChainSupportedBlockchain
 } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
+import {
+    ChangenowProxySupportedBlockchain,
+    changenowProxySupportedBlockchains
+} from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-proxy-supported-blockchains';
 import { nativeTokensData } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/native-addresses';
 import {
     ChangenowCurrenciesResponse,
@@ -47,6 +51,14 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         return Object.keys(changenowApiBlockchain).includes(blockchain);
     }
 
+    public isSupportedProxyBlockchain(
+        blockchain: BlockchainName
+    ): blockchain is ChangenowProxySupportedBlockchain {
+        return changenowProxySupportedBlockchains.some(
+            supportedBlockchain => supportedBlockchain === blockchain
+        );
+    }
+
     // eslint-disable-next-line complexity
     public async calculate(
         from: PriceTokenAmount,
@@ -55,11 +67,10 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = toToken.blockchain;
-        // let useProxy = options?.useProxy?.[this.type] ?? true;
+
         const useProxy =
-            (options?.useProxy?.[this.type] &&
-                fromBlockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN) ||
-            false;
+            this.isSupportedProxyBlockchain(fromBlockchain) &&
+            (options?.useProxy?.[this.type] || false);
 
         if (
             !this.areSupportedBlockchains(fromBlockchain, toBlockchain) ||
@@ -144,7 +155,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
             const changenowTrade: ChangenowTrade = {
                 from: from as PriceTokenAmount<ChangenowCrossChainSupportedBlockchain>,
                 to,
-                toTokenAmountMin: transitMinAmount,
+                toTokenAmountMin: toAmount,
                 fromCurrency: transit,
                 toCurrency,
                 feeInfo,
