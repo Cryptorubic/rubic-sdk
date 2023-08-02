@@ -134,7 +134,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 const trade = await ProxyCrossChainEvmTrade.getOnChainTrade(
                     fromWithoutFee,
                     transitToken,
-                    options.slippageTolerance / 2
+                    options.slippageTolerance / 2,
+                    true
                 );
                 if (!trade) {
                     return {
@@ -302,14 +303,9 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     ): Promise<BigNumber> {
         const fromBlockchain = fromToken.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
-        const fromSymbol =
-            fromBlockchain === BLOCKCHAIN_NAME.ARBITRUM && fromToken.symbol === 'AETH'
-                ? 'ETH'
-                : fromToken.symbol;
-        const toSymbol =
-            toBlockchain === BLOCKCHAIN_NAME.ARBITRUM && toToken.symbol === 'AETH'
-                ? 'ETH'
-                : toToken.symbol;
+
+        const fromSymbol = fromToken.symbol;
+        const toSymbol = toToken.symbol;
 
         let srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
         let dstPoolId = stargatePoolId[toSymbol as StargateBridgeToken];
@@ -400,7 +396,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>
     ) {
-        if (hasDirectRoute) {
+        if (hasDirectRoute && !fromToken.isNative) {
             return fromToken;
         }
 
