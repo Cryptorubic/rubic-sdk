@@ -3,7 +3,8 @@ import { Token } from 'src/common/tokens';
 
 export function createTokenNativeAddressProxy<T extends Token>(
     token: T,
-    wrappedNativeAddress: string
+    wrappedNativeAddress: string,
+    useLowerCase = true
 ): T {
     const wethAbleAddress = token.isNative ? wrappedNativeAddress : token.address;
     return new Proxy<T>(token, {
@@ -12,7 +13,7 @@ export function createTokenNativeAddressProxy<T extends Token>(
                 return undefined;
             }
             if (key === 'address') {
-                return wethAbleAddress.toLowerCase();
+                return useLowerCase ? wethAbleAddress.toLowerCase() : wethAbleAddress;
             }
             return target[key as keyof T];
         }

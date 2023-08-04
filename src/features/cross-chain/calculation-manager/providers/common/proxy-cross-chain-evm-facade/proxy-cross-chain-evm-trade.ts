@@ -66,7 +66,7 @@ export class ProxyCrossChainEvmTrade {
             rubicProxy: {
                 fixedFee: {
                     amount: fixedFeeAmount,
-                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                    tokenSymbol: nativeTokensList?.[fromBlockchain]?.symbol || 'Unknown'
                 },
                 platformFee: {
                     percent: feePercent,
@@ -208,7 +208,7 @@ export class ProxyCrossChainEvmTrade {
         tradeParams: ProxyBridgeParams
     ): BridgeParams {
         const receiverAddress = swapOptions?.receiverAddress || tradeParams.walletAddress;
-        const toChainId = blockchainId[tradeParams.toTokenAmount.blockchain];
+        const toChainId = blockchainId[tradeParams.toTokenAmount.blockchain] || 9999;
         const fromToken = tradeParams.srcChainTrade
             ? tradeParams.srcChainTrade.toTokenAmountMin
             : tradeParams.fromTokenAmount;

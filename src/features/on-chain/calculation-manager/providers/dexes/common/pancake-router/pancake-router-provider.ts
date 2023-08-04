@@ -6,7 +6,7 @@ import { GraphQLClient } from 'graphql-request';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -17,6 +17,7 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { PancakeRouterTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/pancake-router/models/pancake-router-trade-struct';
@@ -44,6 +45,10 @@ export abstract class PancakeRouterProvider extends EvmOnChainProvider {
     protected abstract readonly v3subgraphAddress: string;
 
     protected abstract readonly v2subgraphAddress: string;
+
+    protected abstract readonly maxHops: number;
+
+    protected abstract readonly maxSplits: number;
 
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -89,8 +94,8 @@ export abstract class PancakeRouterProvider extends EvmOnChainProvider {
             TradeType.EXACT_INPUT,
             {
                 gasPriceWei: () => this.createPublicClient().getGasPrice(),
-                maxHops: 2,
-                maxSplits: 2,
+                maxHops: this.maxHops,
+                maxSplits: this.maxSplits,
                 poolProvider: SmartRouter.createStaticPoolProvider(pools),
                 quoteProvider,
                 quoterOptimization: true
@@ -121,6 +126,16 @@ export abstract class PancakeRouterProvider extends EvmOnChainProvider {
             trade,
             dexContractAddress: this.dexAddress
         };
+        if (options?.gasCalculation === 'calculate') {
+            try {
+                const gasPriceInfo = await this.getGasPriceInfo();
+                const gasLimit = await PancakeRouterTrade.getGasLimit(
+                    tradeStruct,
+                    fullOptions.providerAddress
+                );
+                tradeStruct.gasFeeInfo = getGasFeeInfo(gasLimit, gasPriceInfo!);
+            } catch {}
+        }
 
         return new PancakeRouterTrade(tradeStruct, fullOptions.providerAddress);
     }
@@ -167,6 +182,26 @@ export abstract class PancakeRouterProvider extends EvmOnChainProvider {
 
     private createPublicClient(): PublicClient {
         const transportUrl = Injector.web3PublicService.rpcProvider[this.blockchain]?.rpcList[0]!;
+
+        if (this.blockchain === BLOCKCHAIN_NAME.POLYGON_ZKEVM) {
+            return createPublicClient({
+                chain: {
+                    ...this.chain,
+                    contracts: {
+                        multicall3: {
+                            address: '0xcA11bde05977b3631167028862bE2a173976CA11',
+                            blockCreated: 57746
+                        }
+                    }
+                },
+                transport: http(transportUrl),
+                batch: {
+                    multicall: {
+                        batchSize: 512
+                    }
+                }
+            });
+        }
 
         return createPublicClient({
             chain: this.chain,
