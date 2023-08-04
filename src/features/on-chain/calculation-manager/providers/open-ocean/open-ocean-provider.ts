@@ -35,6 +35,8 @@ import { ARBITRUM_GAS_PRICE } from './constants/arbitrum-gas-price';
 export class OpenOceanProvider {
     private readonly onChainProxyService = new OnChainProxyService();
 
+    public static readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+
     constructor() {}
 
     public async calculate(
@@ -56,8 +58,12 @@ export class OpenOceanProvider {
                 Injector.httpClient.get<OpenOceanQuoteResponse>(apiUrl, {
                     params: {
                         chain: openOceanBlockchainName[blockchain],
-                        inTokenAddress: fromWithoutFee.address,
-                        outTokenAddress: toToken.address,
+                        inTokenAddress: fromWithoutFee.isNative
+                            ? OpenOceanProvider.nativeAddress
+                            : fromWithoutFee.address,
+                        outTokenAddress: toToken.isNative
+                            ? OpenOceanProvider.nativeAddress
+                            : toToken.address,
                         amount: fromWithoutFee.tokenAmount.toString(),
                         slippage: options.slippageTolerance! * 100,
                         gasPrice: isArbitrum
