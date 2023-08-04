@@ -39,6 +39,10 @@ import { GasPrice } from './models/gas-price';
 export class EvmWeb3Public extends Web3Public {
     protected readonly tokenContractAbi = ERC20_TOKEN_ABI;
 
+    public get web3Provider(): Web3 {
+        return this.web3;
+    }
+
     constructor(
         private readonly web3: Web3,
         blockchainName: EvmBlockchainName,
