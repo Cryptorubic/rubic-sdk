@@ -5,16 +5,16 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
 import { UniswapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
 import { UniswapV3TradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-struct';
 import { UniswapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
 import { UniswapV3AlgebraAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
+import { SCROLL_UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-testnet/uni-swap-v3-scroll-testnet/constants/scroll-trade-abi';
 
 export class UniSwapV3ScrollTestnetTrade extends UniswapV3AlgebraAbstractTrade {
     public readonly dexContractAddress = '0xD9880690bd717189cC3Fbe7B9020F27fae7Ac76F';
 
-    protected readonly contractAbi = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
+    protected readonly contractAbi = SCROLL_UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
 
     protected readonly unwrapWethMethodName = 'unwrapWETH9';
 
@@ -62,7 +62,6 @@ export class UniSwapV3ScrollTestnetTrade extends UniswapV3AlgebraAbstractTrade {
                         toTokenAddress,
                         this.route.poolsPath[0].fee,
                         walletAddress,
-                        this.deadlineMinutesTimestamp,
                         ...amountParams,
                         0
                     ]
@@ -81,7 +80,6 @@ export class UniSwapV3ScrollTestnetTrade extends UniswapV3AlgebraAbstractTrade {
                         this.route.initialTokenAddress
                     ),
                     walletAddress,
-                    this.deadlineMinutesTimestamp,
                     ...amountParams
                 ]
             ]
