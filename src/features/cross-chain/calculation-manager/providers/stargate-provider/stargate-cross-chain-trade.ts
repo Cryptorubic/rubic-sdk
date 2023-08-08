@@ -28,7 +28,6 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-bridge-token';
 import { stargatePoolId } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-id';
 import { stargatePoolsDecimals } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pools-decimals';
-import { EvmWrapTrade } from 'src/features/on-chain/calculation-manager/providers/common/evm-wrap-trade/evm-wrap-trade';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
@@ -204,6 +203,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             const { data, to } = await StargateCrossChainTrade.getLayerZeroSwapData(
                 this.from,
                 this.to,
+                Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
                 options?.receiverAddress
             );
 
@@ -214,7 +214,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
 
             const value = this.from.isNative
                 ? this.from.weiAmount.plus(lzFeeWei).toFixed()
-                : this.getSwapValue(lzFeeWei);
+                : lzFeeWei;
 
             await this.web3Private.trySendTransaction(to, {
                 data,
@@ -234,6 +234,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
     public static async getLayerZeroSwapData(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
+        tokenAmountMin: string = to.stringWeiAmount,
         receiverAddress?: string,
         dstData?: string
     ): Promise<EvmEncodeConfig> {
@@ -272,17 +273,14 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             : ['0', '0', walletAddress];
 
         const methodArguments = isEthTrade
-            ? [dstChainId, walletAddress, walletAddress, from.stringWeiAmount, to.stringWeiAmount]
+            ? [dstChainId, walletAddress, walletAddress, from.stringWeiAmount, tokenAmountMin]
             : [
                   dstChainId,
                   srcPoolId,
                   dstPoolId,
                   walletAddress,
                   from.stringWeiAmount,
-                  Web3Pure.toWei(
-                      to.tokenAmount,
-                      stargatePoolsDecimals[to.symbol as StargateBridgeToken]
-                  ),
+                  tokenAmountMin,
                   dstConfig,
                   destinationAddress,
                   dstData || '0x'
@@ -307,9 +305,14 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
               ).data
             : undefined;
 
+        const fromToken = (
+            this.onChainTrade ? this.onChainTrade.toTokenAmountMin : this.from
+        ) as PriceTokenAmount<EvmBlockchainName>;
+
         const lzTxConfig = await StargateCrossChainTrade.getLayerZeroSwapData(
-            this.onChainTrade ? this.onChainTrade.to : this.from,
+            fromToken,
             this.to,
+            Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
             options?.receiverAddress,
             dstSwapData
         );
@@ -328,10 +331,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             this.onChainTrade &&
             (await ProxyCrossChainEvmTrade.getSwapData(options, {
                 walletAddress: this.walletAddress,
-                contractAddress:
-                    this.onChainTrade instanceof EvmWrapTrade
-                        ? this.walletAddress
-                        : rubicProxyContractAddress[this.from.blockchain].router,
+                contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
                 fromTokenAmount: this.from,
                 toTokenAmount: this.onChainTrade.to,
                 onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)

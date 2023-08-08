@@ -75,6 +75,10 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         }
 
         const dstPoolId = stargatePoolId[toSymbol as StargateBridgeToken];
+
+        if (srcPoolId === dstPoolId && srcPoolId === 13) {
+            return true;
+        }
         const dstSupportedPools = stargateBlockchainSupportedPools[toBlockchain];
         if (!dstSupportedPools.includes(dstPoolId)) {
             throw new RubicSdkError('Tokens are not supported.');
@@ -123,7 +127,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             let srcChainTrade: EvmOnChainTrade | null = null;
             let transitAmount: BigNumber = fromWithoutFee.tokenAmount;
 
-            if (!hasDirectRoute || (hasDirectRoute && from.isNative)) {
+            if (!hasDirectRoute || (useProxy && hasDirectRoute && from.isNative)) {
                 if (!useProxy) {
                     return {
                         trade: null,
@@ -220,6 +224,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         const layerZeroTxData = await StargateCrossChainTrade.getLayerZeroSwapData(
             from,
             to,
+            to.stringWeiAmount,
             undefined,
             dstSwapData
         );
@@ -255,45 +260,6 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             percentFeeToken,
             useProxy
         );
-    }
-
-    private async checkEqFee(
-        fromToken: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceToken<EvmBlockchainName>
-    ): Promise<void> {
-        const fromBlockchain = fromToken.blockchain as StargateCrossChainSupportedBlockchain;
-        const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
-        const srcPoolId = stargatePoolId[fromToken.symbol as StargateBridgeToken];
-        const dstPoolId = stargatePoolId[toToken.symbol as StargateBridgeToken];
-        const dstChainId = stargateChainId[toBlockchain as StargateCrossChainSupportedBlockchain];
-        const amountSD = Web3Pure.toWei(
-            fromToken.tokenAmount,
-            stargatePoolsDecimals[fromToken.symbol as StargateBridgeToken]
-        );
-        const whitelisted = false;
-        const hasEqReward = false;
-
-        try {
-            const { 0: fee, 1: protocolSubsidy } = await Injector.web3PublicService
-                .getWeb3Public(fromBlockchain)
-                .callContractMethod<{ 0: string; 1: string }>(
-                    stargateFeeLibraryContractAddress[fromBlockchain],
-                    feeLibraryAbi,
-                    'getEquilibriumFee',
-                    [srcPoolId, dstPoolId, dstChainId, amountSD, whitelisted, hasEqReward]
-                );
-
-            if (new BigNumber(protocolSubsidy).lt(fee)) {
-                throw new RubicSdkError('Rebalancing need detected.');
-            }
-        } catch (err) {
-            if (err instanceof Error) {
-                if (err.message.includes('Rebalancing need detected.')) {
-                    throw err;
-                }
-                throw new RubicSdkError('Tokens are not supported.');
-            }
-        }
     }
 
     private async fetchPoolFees(
