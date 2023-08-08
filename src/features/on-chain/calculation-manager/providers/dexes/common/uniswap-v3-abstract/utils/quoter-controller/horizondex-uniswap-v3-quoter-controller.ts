@@ -32,7 +32,13 @@ export class HorizondexUniswapV3QuoterController extends UniswapV3QuoterControll
         quoterContractAddress: string = UNISWAP_V3_QUOTER_CONTRACT_ADDRESS,
         quoterContractABI: AbiItem[] = UNISWAP_V3_QUOTER_CONTRACT_ABI
     ) {
-        super(blockchain, routerConfiguration, quoterContractAddress, quoterContractABI);
+        super(
+            blockchain,
+            routerConfiguration,
+            quoterContractAddress,
+            quoterContractABI,
+            [300, 500, 1000, 3000, 10000]
+        );
     }
 
     /**

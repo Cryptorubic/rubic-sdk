@@ -8,7 +8,7 @@ import {
 /**
  * Most popular tokens in uni v3 to use in a route.
  */
-const tokensSymbols = ['WETH', 'BNB', 'BUSD', 'AVAX', 'MATIC'] as const;
+const tokensSymbols = ['WETH', 'BNB', 'BUSD', 'MATIC', 'HZN', 'NFTE'] as const;
 
 type TokenSymbol = (typeof tokensSymbols)[number];
 
@@ -16,8 +16,9 @@ const routerTokens: Record<TokenSymbol, string> = {
     WETH: wrappedNativeTokensList[BLOCKCHAIN_NAME.LINEA]!.address,
     BNB: '0xf5C6825015280CdfD0b56903F9F8B5A2233476F5',
     BUSD: '0x7d43AABC515C356145049227CeE54B608342c0ad',
-    AVAX: '0x5471ea8f739dd37e9b81be9c5c77754d8aa953e4',
-    MATIC: '0x265b25e22bcd7f10a5bd6e6410f10537cc7567e8'
+    MATIC: '0x265b25e22bcd7f10a5bd6e6410f10537cc7567e8',
+    HZN: '0x0B1A02A7309dFbfAD1Cd4adC096582C87e8A3Ac1',
+    NFTE: '0x2140Ea50bc3B6Ac3971F9e9Ea93A1442665670e4'
 };
 
 const routerLiquidityPools: UniswapV3RouterLiquidityPool<TokenSymbol>[] = [
@@ -46,8 +47,20 @@ const routerLiquidityPools: UniswapV3RouterLiquidityPool<TokenSymbol>[] = [
         fee: 300
     },
     {
-        poolAddress: '0x76f12b1b0ff9a53810894f94b31ee2569e0d9bc4',
-        tokenSymbolA: 'AVAX',
+        poolAddress: '0x0003ecc56c19953ea2e2de626e44111ade02ad6e',
+        tokenSymbolA: 'HZN',
+        tokenSymbolB: 'WETH',
+        fee: 300
+    },
+    {
+        poolAddress: '0xa24b6a8698ee173ccf5a97f73f1f2d8bb7032feb',
+        tokenSymbolA: 'HZN',
+        tokenSymbolB: 'WETH',
+        fee: 1000
+    },
+    {
+        poolAddress: '0xc9dc3eda8f6b664e2e25d632bb4d4f28ab58ee3c',
+        tokenSymbolA: 'NFTE',
         tokenSymbolB: 'WETH',
         fee: 1000
     }

@@ -120,8 +120,6 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
 
     private routerLiquidityPools: LiquidityPool[] | undefined;
 
-    private readonly feeAmounts: FeeAmount[] = [500, 3000, 10000];
-
     protected get web3Public(): EvmWeb3Public {
         return Injector.web3PublicService.getWeb3Public(this.blockchain);
     }
@@ -130,7 +128,8 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
         protected readonly blockchain: EvmBlockchainName,
         protected readonly routerConfiguration: UniswapV3RouterConfiguration<string>,
         protected readonly quoterContractAddress: string = UNISWAP_V3_QUOTER_CONTRACT_ADDRESS,
-        protected readonly quoterContractABI: AbiItem[] = UNISWAP_V3_QUOTER_CONTRACT_ABI
+        protected readonly quoterContractABI: AbiItem[] = UNISWAP_V3_QUOTER_CONTRACT_ABI,
+        protected readonly feeAmounts: FeeAmount[] = [500, 3000, 10000]
     ) {}
 
     private async getOrCreateRouterTokensAndLiquidityPools(): Promise<{
