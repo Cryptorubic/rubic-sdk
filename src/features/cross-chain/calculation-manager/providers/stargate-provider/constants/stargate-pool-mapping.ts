@@ -36,7 +36,11 @@ export const stargatePoolMapping: StargatePoolMapping = {
                 stargatePoolId[stargateBridgeToken.USDT],
                 stargatePoolId[stargateBridgeToken.USDC]
             ],
-            [BLOCKCHAIN_NAME.OPTIMISM]: [stargatePoolId[stargateBridgeToken.USDC]]
+            [BLOCKCHAIN_NAME.OPTIMISM]: [stargatePoolId[stargateBridgeToken.USDC]],
+            [BLOCKCHAIN_NAME.BASE]: [
+                stargatePoolId[stargateBridgeToken.USDC],
+                stargatePoolId[stargateBridgeToken.ETH]
+            ]
         },
         [stargateBridgeToken.USDT]: {
             [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: [
@@ -114,7 +118,8 @@ export const stargatePoolMapping: StargatePoolMapping = {
             ],
             [BLOCKCHAIN_NAME.OPTIMISM]: [stargatePoolId[stargateBridgeToken.USDC]],
             [BLOCKCHAIN_NAME.FANTOM]: [stargatePoolId[stargateBridgeToken.USDC]],
-            [BLOCKCHAIN_NAME.METIS]: [stargatePoolId[stargateBridgeToken.mUSD]]
+            [BLOCKCHAIN_NAME.METIS]: [stargatePoolId[stargateBridgeToken.mUSD]],
+            [BLOCKCHAIN_NAME.BASE]: [stargatePoolId[stargateBridgeToken.USDC]]
         },
         [stargateBridgeToken.BUSD]: {
             [BLOCKCHAIN_NAME.ETHEREUM]: [
@@ -191,7 +196,8 @@ export const stargatePoolMapping: StargatePoolMapping = {
             ],
             [BLOCKCHAIN_NAME.OPTIMISM]: [stargatePoolId[stargateBridgeToken.USDC]],
             [BLOCKCHAIN_NAME.FANTOM]: [stargatePoolId[stargateBridgeToken.USDC]],
-            [BLOCKCHAIN_NAME.METIS]: [stargatePoolId[stargateBridgeToken.mUSD]]
+            [BLOCKCHAIN_NAME.METIS]: [stargatePoolId[stargateBridgeToken.mUSD]],
+            [BLOCKCHAIN_NAME.BASE]: [stargatePoolId[stargateBridgeToken.USDC]]
         },
         [stargateBridgeToken.DAI]: {
             [BLOCKCHAIN_NAME.ETHEREUM]: [stargatePoolId[stargateBridgeToken.DAI]],
@@ -224,7 +230,8 @@ export const stargatePoolMapping: StargatePoolMapping = {
                 stargatePoolId[stargateBridgeToken.USDT],
                 stargatePoolId[stargateBridgeToken.USDC]
             ],
-            [BLOCKCHAIN_NAME.OPTIMISM]: [stargatePoolId[stargateBridgeToken.USDC]]
+            [BLOCKCHAIN_NAME.OPTIMISM]: [stargatePoolId[stargateBridgeToken.USDC]],
+            [BLOCKCHAIN_NAME.BASE]: [stargatePoolId[stargateBridgeToken.USDC]]
         },
         [stargateBridgeToken.USDT]: {
             [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: [
@@ -299,7 +306,11 @@ export const stargatePoolMapping: StargatePoolMapping = {
                 stargatePoolId[stargateBridgeToken.USDC]
             ],
             [BLOCKCHAIN_NAME.OPTIMISM]: [stargatePoolId[stargateBridgeToken.USDC]],
-            [BLOCKCHAIN_NAME.FANTOM]: [stargatePoolId[stargateBridgeToken.USDC]]
+            [BLOCKCHAIN_NAME.FANTOM]: [stargatePoolId[stargateBridgeToken.USDC]],
+            [BLOCKCHAIN_NAME.BASE]: [
+                stargatePoolId[stargateBridgeToken.USDC],
+                stargatePoolId[stargateBridgeToken.ETH]
+            ]
         },
         [stargateBridgeToken.USDT]: {
             [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: [
@@ -362,7 +373,11 @@ export const stargatePoolMapping: StargatePoolMapping = {
                 stargatePoolId[stargateBridgeToken.USDC]
             ],
             [BLOCKCHAIN_NAME.ARBITRUM]: [stargatePoolId[stargateBridgeToken.USDC]],
-            [BLOCKCHAIN_NAME.FANTOM]: [stargatePoolId[stargateBridgeToken.USDC]]
+            [BLOCKCHAIN_NAME.FANTOM]: [stargatePoolId[stargateBridgeToken.USDC]],
+            [BLOCKCHAIN_NAME.BASE]: [
+                stargatePoolId[stargateBridgeToken.USDC],
+                stargatePoolId[stargateBridgeToken.ETH]
+            ]
         },
         [stargateBridgeToken.USDT]: {
             [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: [
@@ -418,6 +433,21 @@ export const stargatePoolMapping: StargatePoolMapping = {
             [BLOCKCHAIN_NAME.ETHEREUM]: [stargatePoolId[stargateBridgeToken.USDT]],
             [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: [stargatePoolId[stargateBridgeToken.USDT]],
             [BLOCKCHAIN_NAME.AVALANCHE]: [stargatePoolId[stargateBridgeToken.USDT]]
+        }
+    },
+    [BLOCKCHAIN_NAME.BASE]: {
+        [stargateBridgeToken.USDC]: {
+            [BLOCKCHAIN_NAME.ETHEREUM]: [stargatePoolId[stargateBridgeToken.USDC]],
+            [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: [stargatePoolId[stargateBridgeToken.USDC]],
+            [BLOCKCHAIN_NAME.AVALANCHE]: [stargatePoolId[stargateBridgeToken.USDC]],
+            [BLOCKCHAIN_NAME.POLYGON]: [stargatePoolId[stargateBridgeToken.USDC]],
+            [BLOCKCHAIN_NAME.ARBITRUM]: [stargatePoolId[stargateBridgeToken.USDC]],
+            [BLOCKCHAIN_NAME.OPTIMISM]: [stargatePoolId[stargateBridgeToken.USDC]]
+        },
+        [stargateBridgeToken.ETH]: {
+            [BLOCKCHAIN_NAME.ETHEREUM]: [stargatePoolId[stargateBridgeToken.ETH]],
+            [BLOCKCHAIN_NAME.ARBITRUM]: [stargatePoolId[stargateBridgeToken.ETH]],
+            [BLOCKCHAIN_NAME.OPTIMISM]: [stargatePoolId[stargateBridgeToken.ETH]]
         }
     }
 };
