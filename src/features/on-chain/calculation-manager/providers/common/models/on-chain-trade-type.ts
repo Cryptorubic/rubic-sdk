@@ -35,6 +35,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     ELK: 'ELK',
 
     HONEY_SWAP: 'HONEY_SWAP',
+    HORIZONDEX: 'HORIZONDEX',
 
     JET_SWAP: 'JET_SWAP',
     JOE: 'JOE',
