@@ -96,7 +96,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         return (await this.calculateExactOutput(fromToken, to, options)).from.tokenAmount;
     }
 
-    private async calculateDifficultTrade(
+    protected async calculateDifficultTrade(
         fromToken: PriceToken<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         exact: Exact,
@@ -181,7 +181,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         );
     }
 
-    private async getRoute(
+    protected async getRoute(
         from: PriceToken<EvmBlockchainName>,
         to: PriceToken<EvmBlockchainName>,
         exact: Exact,
