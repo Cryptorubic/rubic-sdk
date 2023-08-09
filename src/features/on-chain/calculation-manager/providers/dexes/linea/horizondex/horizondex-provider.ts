@@ -30,6 +30,7 @@ export class HorizondexProvider extends UniswapV3AbstractProvider<HorizondexTrad
         HORIZONDEX_QUOTER_CONTRACT_ABI
     );
 
+    // @TODO Remove when method's will be whitelisted
     protected async calculateDifficultTrade(
         fromToken: PriceToken<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,

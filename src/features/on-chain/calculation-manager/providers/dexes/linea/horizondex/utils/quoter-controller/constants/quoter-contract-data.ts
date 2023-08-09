@@ -4,18 +4,6 @@ export const HORIZONDEX_QUOTER_CONTRACT_ADDRESS = '0x07AceD5690e09935b1c0e6E88B7
 
 export const HORIZONDEX_QUOTER_CONTRACT_ABI = [
     {
-        inputs: [{ internalType: 'address', name: '_factory', type: 'address' }],
-        stateMutability: 'nonpayable',
-        type: 'constructor'
-    },
-    {
-        inputs: [],
-        name: 'factory',
-        outputs: [{ internalType: 'address', name: '', type: 'address' }],
-        stateMutability: 'view',
-        type: 'function'
-    },
-    {
         inputs: [
             { internalType: 'bytes', name: 'path', type: 'bytes' },
             { internalType: 'uint256', name: 'amountIn', type: 'uint256' }
@@ -109,17 +97,6 @@ export const HORIZONDEX_QUOTER_CONTRACT_ABI = [
             }
         ],
         stateMutability: 'nonpayable',
-        type: 'function'
-    },
-    {
-        inputs: [
-            { internalType: 'int256', name: 'amount0Delta', type: 'int256' },
-            { internalType: 'int256', name: 'amount1Delta', type: 'int256' },
-            { internalType: 'bytes', name: 'path', type: 'bytes' }
-        ],
-        name: 'swapCallback',
-        outputs: [],
-        stateMutability: 'view',
         type: 'function'
     }
 ] as AbiItem[];

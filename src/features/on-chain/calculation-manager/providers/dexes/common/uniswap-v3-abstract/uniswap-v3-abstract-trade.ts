@@ -15,6 +15,10 @@ import { UniswapV3QuoterController } from 'src/features/on-chain/calculation-man
 import { UniswapV3AlgebraAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 
 export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTrade {
+    public readonly dexContractAddress: string = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS;
+
+    protected readonly contractAbi = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
+
     protected readonly unwrapWethMethodName = 'unwrapWETH9';
 
     public readonly route: UniswapV3Route;
@@ -23,12 +27,7 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
         return ON_CHAIN_TRADE_TYPE.UNI_SWAP_V3;
     }
 
-    public constructor(
-        tradeStruct: UniswapV3TradeStruct,
-        providerAddress: string,
-        public readonly dexContractAddress = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS,
-        protected readonly contractAbi = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI
-    ) {
+    public constructor(tradeStruct: UniswapV3TradeStruct, providerAddress: string) {
         super(tradeStruct, providerAddress);
 
         this.route = tradeStruct.route;
