@@ -12,6 +12,7 @@ import {
 import { UniswapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
 import { UniswapV3TradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-struct';
 import { UniswapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
+import { UnwrapWethMethodName } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/unwrapWethMethodName';
 import { UniswapV3AlgebraAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 
 export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTrade {
@@ -19,7 +20,7 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
 
     protected readonly contractAbi = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
 
-    protected readonly unwrapWethMethodName = 'unwrapWETH9';
+    protected readonly unwrapWethMethodName: UnwrapWethMethodName = 'unwrapWETH9';
 
     public readonly route: UniswapV3Route;
 

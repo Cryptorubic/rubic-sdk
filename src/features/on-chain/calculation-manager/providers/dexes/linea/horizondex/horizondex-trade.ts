@@ -21,6 +21,8 @@ export class HorizondexTrade extends UniswapV3AbstractTrade {
 
     protected readonly contractAbi = HORIZONDEX_UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
 
+    protected readonly unwrapWethMethodName = 'unwrapWeth';
+
     /**
      * Returns swap `exactInput` method's name and arguments to use in Swap contract.
      */
