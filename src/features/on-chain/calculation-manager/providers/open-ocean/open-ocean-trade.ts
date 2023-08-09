@@ -73,6 +73,8 @@ export class OpenOceanTrade extends EvmOnChainTrade {
 
     private readonly _toTokenAmountMin: PriceTokenAmount;
 
+    public static readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+
     protected get spenderAddress(): string {
         const openOceanContractAddress =
             this.from.blockchain === BLOCKCHAIN_NAME.OKE_X_CHAIN
@@ -153,8 +155,12 @@ export class OpenOceanTrade extends EvmOnChainTrade {
                     chain: openOceanBlockchainName[
                         this.from.blockchain as OpenoceanOnChainSupportedBlockchain
                     ],
-                    inTokenAddress: this.from.address,
-                    outTokenAddress: this.to.address,
+                    inTokenAddress: this.from.isNative
+                        ? OpenOceanTrade.nativeAddress
+                        : this.from.address,
+                    outTokenAddress: this.to.isNative
+                        ? OpenOceanTrade.nativeAddress
+                        : this.to.address,
                     amount: this.fromWithoutFee.tokenAmount.toString(),
                     gasPrice: isArbitrum
                         ? ARBITRUM_GAS_PRICE
