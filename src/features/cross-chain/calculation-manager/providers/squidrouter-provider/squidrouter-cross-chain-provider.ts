@@ -3,7 +3,11 @@ import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -53,11 +57,15 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
         }
 
         try {
+            const useProxy =
+                fromBlockchain === BLOCKCHAIN_NAME.LINEA || toBlockchain === BLOCKCHAIN_NAME.LINEA
+                    ? false
+                    : options?.useProxy?.[this.type] ?? true;
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
                 from,
-                options?.useProxy?.[this.type] ?? true
+                useProxy
             );
             const fromWithoutFee = getFromWithoutFee(
                 from,
@@ -113,7 +121,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                 weiAmount: new BigNumber(feeAmount)
             });
 
-            const transitRoute = estimate.route.fromChain.at(-1)!;
+            const transitRoute = estimate.route.toChain.at(-1)!;
             const transitAmount = transitRoute.toAmount;
             const transitToken = transitRoute.toToken;
 
