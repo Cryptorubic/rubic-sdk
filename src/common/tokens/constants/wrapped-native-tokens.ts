@@ -2,6 +2,7 @@ import { Token } from 'src/common/tokens/token';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> = {
+    // @TODO REFACTOR
     [BLOCKCHAIN_NAME.ETHEREUM]: new Token({
         blockchain: BLOCKCHAIN_NAME.ETHEREUM,
         address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
