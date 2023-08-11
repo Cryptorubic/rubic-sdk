@@ -1,5 +1,6 @@
 export const LIFI_BRIDGE_TYPES = {
     ACROSS: 'across',
+    AMAROK: 'connext',
     ARBITRUM: 'arbitrum',
     AVALANCHE: 'avalanche',
     CBRIDGE: 'cbridge',

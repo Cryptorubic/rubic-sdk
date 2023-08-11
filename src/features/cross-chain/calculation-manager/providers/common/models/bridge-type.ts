@@ -4,6 +4,7 @@ export const BRIDGE_TYPE = {
     ...CROSS_CHAIN_TRADE_TYPE,
 
     ACROSS: 'across',
+    AMAROK: 'connext',
     ANY_SWAP: 'anyswap',
     ARBITRUM_BRIDGE: 'arbitrum',
     AVALANCHE_BRIDGE: 'avalanche',
