@@ -14,4 +14,8 @@ export class PancakeRouterPolygonZkEvmProvider extends PancakeRouterProvider {
 
     protected readonly v2subgraphAddress =
         'https://api.studio.thegraph.com/query/45376/exchange-v2-polygon-zkevm/version/latest';
+
+    protected readonly maxHops = 2;
+
+    protected readonly maxSplits = 2;
 }
