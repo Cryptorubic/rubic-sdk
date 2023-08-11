@@ -14,9 +14,14 @@ import { OnChainManagerCalculationOptions } from 'src/features/on-chain/calculat
 import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
 import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
 import { RequiredOnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/required-on-chain-manager-calculation-options';
-import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
+import { EvmWrapTrade } from 'src/features/on-chain/calculation-manager/providers/common/evm-wrap-trade/evm-wrap-trade';
+import {
+    OnChainCalculationOptions,
+    RequiredOnChainCalculationOptions
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
+import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
 import { LifiProvider } from 'src/features/on-chain/calculation-manager/providers/lifi/lifi-provider';
@@ -141,6 +146,10 @@ export class OnChainManager {
         to: PriceToken,
         options: RequiredOnChainManagerCalculationOptions
     ): Promise<Array<OnChainTrade | OnChainTradeError>> {
+        if ((from.isNative && to.isWrapped) || (from.isWrapped && to.isNative)) {
+            return OnChainManager.getWrapTrade(from, to, options);
+        }
+
         const dexesProviders = Object.entries(this.tradeProviders[from.blockchain]).filter(
             ([type]) => !options.disabledProviders.includes(type as OnChainTradeType)
         ) as [OnChainTradeType, OnChainProvider][];
@@ -227,5 +236,36 @@ export class OnChainManager {
             console.debug('[RUBIC_SDK] Trade calculation error occurred for lifi.', err);
             return [];
         }
+    }
+
+    public static getWrapTrade(
+        from: PriceTokenAmount,
+        to: PriceToken,
+        options: OnChainCalculationOptions
+    ): [EvmOnChainTrade] {
+        const fromToken = from as PriceTokenAmount<EvmBlockchainName>;
+        const toToken = to as PriceToken<EvmBlockchainName>;
+        const trade = new EvmWrapTrade(
+            {
+                from: fromToken,
+                to: new PriceTokenAmount<EvmBlockchainName>({
+                    ...toToken.asStruct,
+                    weiAmount: from.weiAmount
+                }),
+                slippageTolerance: 0,
+                path: [from, to],
+                gasFeeInfo: null,
+                useProxy: false,
+                proxyFeeInfo: undefined,
+                fromWithoutFee: fromToken,
+
+                withDeflation: {
+                    from: { isDeflation: false },
+                    to: { isDeflation: false }
+                }
+            },
+            options.providerAddress!
+        );
+        return [trade];
     }
 }
