@@ -9,12 +9,13 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { UniswapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
+import { UNISWAP_V3_QUOTER_CONTRACT_ABI } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/quoter-contract-data';
 import { UniswapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
 import { UniswapV3AlgebraTradeStructOmitPath } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
 import { UniswapV3AlgebraAbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
-import { SCROLL_UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-testnet/uni-swap-v3-scroll-testnet/constants/scroll-trade-abi';
 import { UNI_SWAP_V3_SCROLL_TESTNET_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-testnet/uni-swap-v3-scroll-testnet/constants/provider-configuration';
 import { UNI_SWAP_V3_SCROLL_TESTNET_ROUTER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-testnet/uni-swap-v3-scroll-testnet/constants/router-configuration';
+import { SCROLL_UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-testnet/uni-swap-v3-scroll-testnet/constants/scroll-trade-abi';
 import { UniSwapV3ScrollTestnetTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-testnet/uni-swap-v3-scroll-testnet/uni-swap-v3-scroll-testnet-trade';
 
 export class UniSwapV3ScrollTestnetProvider extends UniswapV3AlgebraAbstractProvider<UniSwapV3ScrollTestnetTrade> {
@@ -34,6 +35,7 @@ export class UniSwapV3ScrollTestnetProvider extends UniswapV3AlgebraAbstractProv
         this.blockchain,
         this.routerConfiguration,
         '0x6E7E0d996eF50E289af9BFd93f774C566F014660',
+        UNISWAP_V3_QUOTER_CONTRACT_ABI,
         '0xbf1c1FE1e9e900aFd5ba2Eb67480c44266D5eD84'
     );
 

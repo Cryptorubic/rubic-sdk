@@ -39,7 +39,7 @@ interface GetQuoterMethodsDataOptions {
 /**
  * Works with requests, related to Uniswap v3 liquidity pools.
  */
-export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterController {
+export class UniswapV3QuoterController extends UniswapV3AlgebraQuoterController {
     /**
      * Converts uni v3 route to encoded bytes string to pass it to contract.
      * Structure of encoded string: '0x${tokenAddress_0}${toHex(fee_0)}${tokenAddress_1}${toHex(fee_1)}...${tokenAddress_n}.
@@ -127,12 +127,14 @@ export class UniswapV3QuoterController implements UniswapV3AlgebraQuoterControll
     }
 
     constructor(
-        private readonly blockchain: EvmBlockchainName,
-        private readonly routerConfiguration: UniswapV3RouterConfiguration<string>,
-        private readonly quoterContractAddress: string = UNISWAP_V3_QUOTER_CONTRACT_ADDRESS,
-        private readonly quoterContractABI: AbiItem[] = UNISWAP_V3_QUOTER_CONTRACT_ABI,
-        private readonly factoryAddress = FACTORY_CONTRACT_ADDRESS,
-    ) {}
+        protected readonly blockchain: EvmBlockchainName,
+        protected readonly routerConfiguration: UniswapV3RouterConfiguration<string>,
+        protected readonly quoterContractAddress: string = UNISWAP_V3_QUOTER_CONTRACT_ADDRESS,
+        protected readonly quoterContractABI: AbiItem[] = UNISWAP_V3_QUOTER_CONTRACT_ABI,
+        protected readonly factoryAddress: string = FACTORY_CONTRACT_ADDRESS
+    ) {
+        super();
+    }
 
     private async getOrCreateRouterTokensAndLiquidityPools(): Promise<{
         routerTokens: Token[];
