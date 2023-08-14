@@ -23,6 +23,7 @@ import {
     UniswapV3AlgebraTradeStruct,
     UniswapV3AlgebraTradeStructOmitPath
 } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
+import { UnwrapWethMethodName } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/unwrapWethMethodName';
 import { getFromToTokensAmountsByExact } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
 import { AbiItem } from 'web3-utils';
 
@@ -161,7 +162,7 @@ export abstract class UniswapV3AlgebraAbstractTrade extends EvmOnChainTrade {
 
     protected abstract readonly contractAbi: AbiItem[];
 
-    protected abstract readonly unwrapWethMethodName: 'unwrapWETH9' | 'unwrapWNativeToken';
+    protected abstract readonly unwrapWethMethodName: UnwrapWethMethodName;
 
     protected readonly exact: Exact;
 

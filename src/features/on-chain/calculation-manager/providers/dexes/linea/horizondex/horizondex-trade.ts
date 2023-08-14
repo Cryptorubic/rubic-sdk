@@ -5,34 +5,23 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import {
-    UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI,
-    UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS
-} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/constants/swap-router-contract-abi';
-import { UniswapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
-import { UniswapV3TradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-struct';
+import { UniswapV3AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-trade';
 import { UniswapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
-import { UnwrapWethMethodName } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/unwrapWethMethodName';
-import { UniswapV3AlgebraAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
+import {
+    HORIZONDEX_UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI,
+    HORIZONDEX_UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS
+} from 'src/features/on-chain/calculation-manager/providers/dexes/linea/horizondex/constants/router-configuration';
 
-export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTrade {
-    public readonly dexContractAddress: string = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS;
-
-    protected readonly contractAbi = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
-
-    protected readonly unwrapWethMethodName: UnwrapWethMethodName = 'unwrapWETH9';
-
-    public readonly route: UniswapV3Route;
-
+export class HorizondexTrade extends UniswapV3AbstractTrade {
     public static get type(): OnChainTradeType {
-        return ON_CHAIN_TRADE_TYPE.UNI_SWAP_V3;
+        return ON_CHAIN_TRADE_TYPE.HORIZONDEX;
     }
 
-    public constructor(tradeStruct: UniswapV3TradeStruct, providerAddress: string) {
-        super(tradeStruct, providerAddress);
+    public readonly dexContractAddress = HORIZONDEX_UNISWAP_V3_SWAP_ROUTER_CONTRACT_ADDRESS;
 
-        this.route = tradeStruct.route;
-    }
+    protected readonly contractAbi = HORIZONDEX_UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
+
+    protected readonly unwrapWethMethodName = 'unwrapWeth';
 
     /**
      * Returns swap `exactInput` method's name and arguments to use in Swap contract.
@@ -41,7 +30,8 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
         const amountParams = this.getAmountParams();
 
         if (this.route.poolsPath.length === 1) {
-            const methodName = this.exact === 'input' ? 'exactInputSingle' : 'exactOutputSingle';
+            const methodName =
+                this.exact === 'input' ? 'swapExactInputSingle' : 'swapExactOutputSingle';
 
             const pool = this.route.poolsPath[0];
             if (!pool) {
@@ -74,7 +64,7 @@ export abstract class UniswapV3AbstractTrade extends UniswapV3AlgebraAbstractTra
             };
         }
 
-        const methodName = this.exact === 'input' ? 'exactInput' : 'exactOutput';
+        const methodName = this.exact === 'input' ? 'swapExactInput' : 'swapExactOutput';
 
         return {
             methodName,

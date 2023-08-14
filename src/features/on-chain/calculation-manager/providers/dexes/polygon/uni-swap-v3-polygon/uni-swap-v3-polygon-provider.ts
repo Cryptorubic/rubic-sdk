@@ -1,5 +1,6 @@
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { UniswapV3AbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/uniswap-v3-abstract-provider';
+import { UniswapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
 import { UNI_SWAP_V3_POLYGON_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/uni-swap-v3-polygon/constants/provider-configuration';
 import { UNI_SWAP_V3_POLYGON_ROUTER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/uni-swap-v3-polygon/constants/router-configuration';
 import { UniSwapV3PolygonTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/uni-swap-v3-polygon/uni-swap-v3-polygon-trade';
@@ -12,4 +13,9 @@ export class UniSwapV3PolygonProvider extends UniswapV3AbstractProvider<UniSwapV
     protected readonly providerConfiguration = UNI_SWAP_V3_POLYGON_PROVIDER_CONFIGURATION;
 
     protected readonly routerConfiguration = UNI_SWAP_V3_POLYGON_ROUTER_CONFIGURATION;
+
+    protected readonly quoterController = new UniswapV3QuoterController(
+        this.blockchain,
+        this.routerConfiguration
+    );
 }

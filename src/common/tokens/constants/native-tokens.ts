@@ -50,7 +50,7 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
 
 export const nativeTokensList: Record<BlockchainName, Token> = {
     ...Object.values(BLOCKCHAIN_NAME).reduce(
-        (acc, blockchain) => ({ ...acc, [blockchain]: null }),
+        (acc, blockchain) => ({ ...acc, [blockchain]: blockchain }),
         {} as Record<BlockchainName, Token>
     ),
     ...testnetNativeTokens,

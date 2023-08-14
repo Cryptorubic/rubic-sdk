@@ -13,4 +13,8 @@ export class PancakeRouterBscProvider extends PancakeRouterProvider {
         'https://api.thegraph.com/subgraphs/name/pancakeswap/exchange-v3-bsc';
 
     protected readonly v2subgraphAddress = 'https://proxy-worker-api.pancakeswap.com/bsc-exchange';
+
+    protected readonly maxHops = 2;
+
+    protected readonly maxSplits = 4;
 }
