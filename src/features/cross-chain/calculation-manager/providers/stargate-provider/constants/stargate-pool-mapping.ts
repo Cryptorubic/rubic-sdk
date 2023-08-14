@@ -250,8 +250,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
             [BLOCKCHAIN_NAME.AVALANCHE]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.ARBITRUM]: [stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.USDC],
-            [BLOCKCHAIN_NAME.BASE]: [stargateBridgeToken.USDC, stargateBridgeToken.ETH
-            ]
+            [BLOCKCHAIN_NAME.BASE]: [stargateBridgeToken.USDC, stargateBridgeToken.ETH]
         },
         [stargateBridgeToken.USDT]: {
             [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: [
