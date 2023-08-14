@@ -3,11 +3,7 @@ import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import {
-    BLOCKCHAIN_NAME,
-    BlockchainName,
-    EvmBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -57,15 +53,11 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            const useProxy =
-                fromBlockchain === BLOCKCHAIN_NAME.LINEA || toBlockchain === BLOCKCHAIN_NAME.LINEA
-                    ? false
-                    : options?.useProxy?.[this.type] ?? true;
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
                 options.providerAddress,
                 from,
-                useProxy
+                options?.useProxy?.[this.type] ?? true
             );
             const fromWithoutFee = getFromWithoutFee(
                 from,
