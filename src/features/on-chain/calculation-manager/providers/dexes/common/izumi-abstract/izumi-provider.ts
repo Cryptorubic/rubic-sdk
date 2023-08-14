@@ -1,8 +1,14 @@
-import { PriceToken, PriceTokenAmount, wrappedNativeTokensList } from 'src/common/tokens';
+import { getMulticallContracts } from 'iziswap-sdk/lib/base';
+import { searchPathQuery } from 'iziswap-sdk/lib/search/func';
+import { SearchPathQueryParams, SwapDirection } from 'iziswap-sdk/lib/search/types';
+import { PriceToken, PriceTokenAmount, Token, wrappedNativeTokensList } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { combineOptions } from 'src/common/utils/options';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { MULTICALL_ADDRESSES } from 'src/core/blockchain/web3-public-service/web3-public/constants/multicall-addresses';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Injector } from 'src/core/injector/injector';
 import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import {
@@ -11,7 +17,6 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
-import { IzumiQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/izumi-abstract/izumi-quoter-controller';
 import { IzumiTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/izumi-abstract/izumi-trade';
 import { IzumiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/izumi-abstract/models/izumi-trade-struct';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
@@ -33,14 +38,12 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
 
     protected abstract readonly dexAddress: string;
 
-    protected abstract readonly quoterAddress: string;
-
-    protected abstract readonly izumiConfig: {
+    protected abstract readonly config: {
         readonly maxTransitTokens: number;
         readonly routingTokenAddresses: string[];
+        readonly liquidityManagerAddress: string;
+        readonly quoterAddress: string;
     };
-
-    protected abstract readonly quoterController: IzumiQuoterController;
 
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -64,15 +67,61 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
             weiAmountWithoutFee = proxyContractInfo.fromWithoutFee.stringWeiAmount;
         }
 
-        // const fromChainId = blockchainId[from.blockchain];
-        // quoterSwapChainWithExactInput
+        const chainId = blockchainId[from.blockchain];
 
-        const route = await this.quoterController.getAllRoutes(
-            from,
-            to,
-            fullOptions,
-            weiAmountWithoutFee
+        const { web3 } = Injector.web3PrivateService.getWeb3Private('EVM');
+        const multicallContract = getMulticallContracts(MULTICALL_ADDRESSES[from.blockchain], web3);
+
+        const transitTokens = await Token.createTokens(
+            this.config.routingTokenAddresses,
+            this.blockchain
         );
+
+        const tokenIn = {
+            chainId,
+            symbol: from.symbol,
+            address: from.address,
+            decimal: from.decimals
+        };
+
+        const tokenOut = {
+            chainId,
+            symbol: to.symbol,
+            address: to.address,
+            decimal: to.decimals
+        };
+
+        const midTokenList = transitTokens.map(token => ({
+            chainId,
+            symbol: token.symbol,
+            address: token.address,
+            decimal: token.decimals
+        }));
+
+        const searchParams = {
+            chainId,
+            web3,
+            multicall: multicallContract,
+            tokenIn,
+            tokenOut,
+            liquidityManagerAddress: this.config.liquidityManagerAddress,
+            quoterAddress: this.config.quoterAddress,
+            poolBlackList: [],
+            midTokenList,
+            supportFeeContractNumbers: [2000, 400, 100],
+            support001Pools: [],
+            direction: SwapDirection.ExactIn,
+            amount: weiAmountWithoutFee
+        } as SearchPathQueryParams;
+
+        let pathQueryResult = null;
+        try {
+            const result = await searchPathQuery(searchParams);
+            pathQueryResult = result.pathQueryResult;
+        } catch (err) {
+            console.log(err);
+            throw err;
+        }
 
         const wrapAddress = wrappedNativeTokensList[from.blockchain]?.address;
 
@@ -114,13 +163,18 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
 
         const toToken = new PriceTokenAmount({
             ...to.asStruct,
-            tokenAmount: Web3Pure.fromWei(route.outputAbsoluteAmount, to.decimals)
+            tokenAmount: Web3Pure.fromWei(pathQueryResult.amount, to.decimals)
         });
+
+        const path = await Token.createTokens(
+            pathQueryResult.path.tokenChain.map(token => token.address),
+            from.blockchain
+        );
 
         const tradeStruct: IzumiTradeStruct = {
             from,
             to: toToken,
-            path: [from, to],
+            path,
             slippageTolerance: fullOptions.slippageTolerance,
             gasFeeInfo: null,
             useProxy: fullOptions.useProxy,
@@ -130,8 +184,8 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
             usedForCrossChain: fullOptions.usedForCrossChain,
             dexContractAddress: this.dexAddress,
             swapConfig: {
-                tokenChain: route.tokenChain,
-                feeChain: route.feeChain
+                tokenChain: [],
+                feeChain: []
             },
             strictERC20Token:
                 compareAddresses(wrapAddress!, from.address) ||

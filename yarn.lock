@@ -5088,10 +5088,10 @@ istanbul-reports@^3.1.3:
     html-escaper "^2.0.0"
     istanbul-lib-report "^3.0.0"
 
-iziswap-sdk@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/iziswap-sdk/-/iziswap-sdk-1.3.0.tgz#5e0705c47cf340327bef30ac06c6d45b72d8a15e"
-  integrity sha512-bO6SVtea6Omr+FrrTPDJ7X76zFHyrQnq8gnPvW3ypeORgTQFkvK4DP7wxQMJf1Dt6LF7Xg+3GeZafzv7HEdQEg==
+iziswap-sdk@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/iziswap-sdk/-/iziswap-sdk-1.4.0.tgz#5e6e3ce767d4689f074acec294b9f002c1bc1d8d"
+  integrity sha512-wo9Kx2woq0Vfi0gFDf6lieT0mPIsZ6PkxatwkY21z/XiNQHMB0lkWoU0heY5o1r539BfLahExZc98ncCjnFKyQ==
   dependencies:
     bignumber.js "^9.0.2"
     http "^0.0.1-security"
