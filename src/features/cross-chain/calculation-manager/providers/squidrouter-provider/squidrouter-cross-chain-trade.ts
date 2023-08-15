@@ -32,7 +32,7 @@ import { convertGasDataToBN } from '../../utils/convert-gas-price';
  */
 export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
-    public readonly transitAmount: BigNumber;
+    public readonly transitUSDAmount: BigNumber;
 
     private readonly cryptoFeeToken: PriceTokenAmount;
 
@@ -69,7 +69,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
                         allowanceTarget: '',
                         slippage: 0,
                         feeInfo: {},
-                        transitAmount: new BigNumber(NaN),
+                        transitUSDAmount: new BigNumber(NaN),
                         cryptoFeeToken: from,
                         onChainTrade: null,
                         onChainSubtype: { from: undefined, to: undefined }
@@ -155,7 +155,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
             allowanceTarget: string;
             slippage: number;
             feeInfo: FeeInfo;
-            transitAmount: BigNumber;
+            transitUSDAmount: BigNumber;
             cryptoFeeToken: PriceTokenAmount;
             onChainTrade: EvmOnChainTrade | null;
             onChainSubtype: OnChainSubtype;
@@ -177,7 +177,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.onChainSubtype = crossChainTrade.onChainSubtype;
 
-        this.transitAmount = crossChainTrade.transitAmount;
+        this.transitUSDAmount = crossChainTrade.transitUSDAmount;
     }
 
     protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -275,7 +275,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public getUsdPrice(): BigNumber {
-        return this.transitAmount;
+        return this.transitUSDAmount;
     }
 
     public getTradeInfo(): TradeInfo {
