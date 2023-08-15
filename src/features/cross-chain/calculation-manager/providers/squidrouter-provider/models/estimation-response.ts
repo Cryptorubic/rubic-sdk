@@ -30,6 +30,19 @@ interface RouteElement {
     readonly dynamicSlippage: number;
 }
 
+interface BridgeRouteElement {
+    readonly callData: string;
+    readonly callType: number;
+    readonly estimatedGas: string;
+    readonly payload: {
+        inputPos: number;
+        tokenAddress: string;
+    };
+    readonly target: string;
+    readonly type: string;
+    readonly value: string;
+}
+
 interface FeeCost {
     readonly name: string;
     readonly description: string;
@@ -59,9 +72,10 @@ export interface SquidrouterEstimation {
     readonly sendAmount: string;
     readonly toAmount: string;
     readonly toAmountMin: string;
+    readonly toAmountUSD: string;
     readonly route: {
         readonly fromChain: RouteElement[];
-        readonly toChain: RouteElement[];
+        readonly toChain: RouteElement[] | BridgeRouteElement[];
     };
     readonly feeCosts: FeeCost[];
     readonly gasCosts: GasCost[];
