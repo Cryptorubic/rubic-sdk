@@ -115,15 +115,10 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
 
             const transitRoute = estimate.route.toChain.at(-1)!;
 
-            let transitUSDAmount;
-            if ('toAmount' in transitRoute) {
-                transitUSDAmount = Web3Pure.fromWei(
-                    transitRoute.toAmount,
-                    transitRoute.toToken.decimals
-                );
-            } else {
-                transitUSDAmount = new BigNumber(estimate.toAmountUSD);
-            }
+            const transitUSDAmount =
+                'toAmount' in transitRoute
+                    ? Web3Pure.fromWei(transitRoute.toAmount, transitRoute.toToken.decimals)
+                    : new BigNumber(estimate.toAmountUSD);
 
             return {
                 trade: new SquidrouterCrossChainTrade(
