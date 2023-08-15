@@ -37,7 +37,7 @@ export class HorizondexUniswapV3QuoterController extends UniswapV3QuoterControll
             routerConfiguration,
             quoterContractAddress,
             quoterContractABI,
-            [300, 500, 1000, 3000, 10000]
+            [8, 40, 300, 1000]
         );
     }
 
