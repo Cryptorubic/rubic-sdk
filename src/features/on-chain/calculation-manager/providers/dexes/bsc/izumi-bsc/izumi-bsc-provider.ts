@@ -9,12 +9,13 @@ export class IzumiBscProvider extends IzumiProvider {
 
     protected readonly config = {
         maxTransitTokens: 2,
-        quoterAddress: '0x64b005eD986ed5D6aeD7125F49e61083c46b8e02',
+        quoterAddress: '0xDCe9a4ACC59E69ECcC0cdA2E82fe601fdB726542',
         liquidityManagerAddress: '0xBF55ef05412f1528DbD96ED9E7181f87d8C9F453',
         routingTokenAddresses: [
             '0x55d398326f99059ff775485246999027b3197955', // USDT
             wrappedNativeTokensList[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]!.address, // WBNB
             '0xe9e7cea3dedca5984780bafc599bd69add087d56' // BUSD
-        ]
+        ],
+        multicallAddress: '0xA1189a420662105bef5Be444B8b1E0a7D8279672'
     };
 }

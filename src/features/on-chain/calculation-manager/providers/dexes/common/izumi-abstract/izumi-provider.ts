@@ -6,7 +6,6 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 import { combineOptions } from 'src/common/utils/options';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { MULTICALL_ADDRESSES } from 'src/core/blockchain/web3-public-service/web3-public/constants/multicall-addresses';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
@@ -43,6 +42,7 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
         readonly routingTokenAddresses: string[];
         readonly liquidityManagerAddress: string;
         readonly quoterAddress: string;
+        readonly multicallAddress: string;
     };
 
     public async calculate(
@@ -70,7 +70,7 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
         const chainId = blockchainId[from.blockchain];
 
         const { web3 } = Injector.web3PrivateService.getWeb3Private('EVM');
-        const multicallContract = getMulticallContracts(MULTICALL_ADDRESSES[from.blockchain], web3);
+        const multicallContract = getMulticallContracts(this.config.multicallAddress, web3);
 
         const transitTokens = await Token.createTokens(
             this.config.routingTokenAddresses,
