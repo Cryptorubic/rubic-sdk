@@ -1,8 +1,13 @@
 import { RubicSdkError } from 'src/common/errors/rubic-sdk.error';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { wrappedAddress } from 'src/common/tokens/constants/wrapped-addresses';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { ChainType } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
@@ -123,6 +128,15 @@ export class Token<T extends BlockchainName = BlockchainName> {
         }
 
         return this.address === Web3Pure[chainType].nativeTokenAddress;
+    }
+
+    public get isWrapped(): boolean {
+        const address = wrappedAddress?.[this.blockchain as unknown as EvmBlockchainName];
+        if (!address) {
+            return false;
+        }
+
+        return compareAddresses(this.address, address);
     }
 
     constructor(tokenStruct: TokenStruct<T>) {
