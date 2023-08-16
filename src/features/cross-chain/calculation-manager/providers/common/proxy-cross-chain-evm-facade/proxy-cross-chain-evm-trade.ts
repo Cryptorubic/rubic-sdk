@@ -185,11 +185,10 @@ export class ProxyCrossChainEvmTrade {
                     price: from.price
                 });
 
-                const trades = OnChainManager.getWrapTrade(from, toWrap, {
+                const trade = OnChainManager.getWrapTrade(from, toWrap, {
                     slippageTolerance
                 });
 
-                const trade = trades[0];
                 if (trade) {
                     return trade;
                 }
