@@ -8,7 +8,10 @@ import {
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { createClient } from '@layerzerolabs/scan-client';
 import { RubicSdkError } from 'src/common/errors';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    TEST_EVM_BLOCKCHAIN_NAME
+} from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import {
@@ -195,6 +198,9 @@ export class CrossChainStatusManager {
      */
     private async getSymbiosisDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         const symbiosisTxIndexingTimeSpent = Date.now() > data.txTimestamp + 30000;
+        const symbiosisApi = Object.keys(TEST_EVM_BLOCKCHAIN_NAME).includes(data.fromBlockchain)
+            ? 'api.testnet'
+            : 'api-v2';
 
         if (symbiosisTxIndexingTimeSpent) {
             try {
@@ -204,8 +210,9 @@ export class CrossChainStatusManager {
                     status: { text: dstTxStatus },
                     tx
                 } = await Injector.httpClient.get<SymbiosisApiResponse>(
-                    `https://api-v2.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
+                    `https://${symbiosisApi}.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
                 );
+
                 let dstTxData: TxStatusData = {
                     status: TX_STATUS.PENDING,
                     hash: tx?.hash || null
