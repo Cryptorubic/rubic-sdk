@@ -16,6 +16,7 @@ export class IzumiBscProvider extends IzumiProvider {
             wrappedNativeTokensList[BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]!.address, // WBNB
             '0xe9e7cea3dedca5984780bafc599bd69add087d56' // BUSD
         ],
-        multicallAddress: '0xA1189a420662105bef5Be444B8b1E0a7D8279672'
+        multicallAddress: '0xA1189a420662105bef5Be444B8b1E0a7D8279672',
+        supportedFees: [2000, 400, 100]
     };
 }

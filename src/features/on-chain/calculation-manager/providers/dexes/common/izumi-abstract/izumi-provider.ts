@@ -43,6 +43,7 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
         readonly liquidityManagerAddress: string;
         readonly quoterAddress: string;
         readonly multicallAddress: string;
+        readonly supportedFees: number[];
     };
 
     public async calculate(
@@ -108,7 +109,7 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
             quoterAddress: this.config.quoterAddress,
             poolBlackList: [],
             midTokenList,
-            supportFeeContractNumbers: [2000, 400, 100],
+            supportFeeContractNumbers: this.config.supportedFees,
             support001Pools: [],
             direction: SwapDirection.ExactIn,
             amount: weiAmountWithoutFee
