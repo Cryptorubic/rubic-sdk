@@ -1,7 +1,7 @@
 import { Token } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 
-export type FeeAmount = 500 | 3000 | 10000;
+export type FeeAmount = 8 | 40 | 300 | 500 | 1000 | 3000 | 10000;
 
 /**
  * Represents liquidity pool in uni v3.

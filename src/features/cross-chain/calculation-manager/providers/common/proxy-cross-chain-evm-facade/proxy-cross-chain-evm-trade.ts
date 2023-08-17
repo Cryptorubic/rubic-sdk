@@ -1,7 +1,12 @@
 import BigNumber from 'bignumber.js';
 import { UnapprovedContractError } from 'src/common/errors/proxy/unapproved-contract-error';
 import { UnapprovedMethodError } from 'src/common/errors/proxy/unapproved-method-error';
-import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import {
+    nativeTokensList,
+    PriceToken,
+    PriceTokenAmount,
+    wrappedNativeTokensList
+} from 'src/common/tokens';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -18,6 +23,7 @@ import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-m
 import { ProxyBridgeParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/proxy-bridge-params';
 import { ProxySwapParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/proxy-swap-params';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
+import { OnChainManager } from 'src/features/on-chain/calculation-manager/on-chain-manager';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 import { AbiItem } from 'web3-utils';
@@ -157,17 +163,43 @@ export class ProxyCrossChainEvmTrade {
     public static async getOnChainTrade(
         from: PriceTokenAmount,
         transitToken: TokenBaseStruct,
-        slippageTolerance: number
+        slippageTolerance: number,
+        isCustomWeth = false
     ): Promise<EvmOnChainTrade | null> {
-        if (compareAddresses(from.address, transitToken.address)) {
+        const to = await PriceToken.createToken(transitToken);
+
+        if (compareAddresses(from.address, transitToken.address) && !from.isNative) {
             return null;
         }
 
         const fromBlockchain = from.blockchain as EvmBlockchainName;
+
+        if (from.isNative) {
+            try {
+                const wrapToken = isCustomWeth
+                    ? to.asStruct
+                    : wrappedNativeTokensList[fromBlockchain]!;
+
+                const toWrap = new PriceToken({
+                    ...wrapToken,
+                    price: from.price
+                });
+
+                const trades = OnChainManager.getWrapTrade(from, toWrap, {
+                    slippageTolerance
+                });
+
+                const trade = trades[0];
+                if (trade) {
+                    return trade;
+                }
+            } catch {}
+        }
+
         const availableDexes = await ProxyCrossChainEvmTrade.getWhitelistedDexes(fromBlockchain);
 
         const dexes = Object.values(typedTradeProviders[fromBlockchain]);
-        const to = await PriceToken.createToken(transitToken);
+
         const allOnChainTrades = await Promise.allSettled(
             dexes.map(dex =>
                 dex.calculate(from, to, {
