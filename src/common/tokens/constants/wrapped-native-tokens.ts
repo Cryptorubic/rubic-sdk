@@ -248,7 +248,7 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'WETH',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.BASE]: new Token({
+    [BLOCKCHAIN_NAME.MANTLE]: new Token({
         blockchain: BLOCKCHAIN_NAME.MANTLE,
         address: '0x78c1b0C915c4FAA5FffA6CAbf0219DA63d7f4cb8',
         name: 'Wrapped MNT',
