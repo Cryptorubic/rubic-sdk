@@ -10,5 +10,6 @@ export const stargateChainId: Record<StargateCrossChainSupportedBlockchain, numb
     [BLOCKCHAIN_NAME.FANTOM]: 112,
     [BLOCKCHAIN_NAME.ARBITRUM]: 110,
     [BLOCKCHAIN_NAME.OPTIMISM]: 111,
-    [BLOCKCHAIN_NAME.METIS]: 151
+    [BLOCKCHAIN_NAME.METIS]: 151,
+    [BLOCKCHAIN_NAME.BASE]: 184
 };

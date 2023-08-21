@@ -13,7 +13,8 @@ export const symbiosisCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.ARBITRUM,
     BLOCKCHAIN_NAME.OPTIMISM,
     BLOCKCHAIN_NAME.POLYGON_ZKEVM,
-    BLOCKCHAIN_NAME.LINEA
+    BLOCKCHAIN_NAME.LINEA,
+    BLOCKCHAIN_NAME.BASE
 ] as const;
 
 export type SymbiosisCrossChainSupportedBlockchain =

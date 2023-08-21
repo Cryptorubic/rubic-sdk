@@ -9,5 +9,6 @@ export const relayersAddresses: Record<StargateCrossChainSupportedBlockchain, st
     [BLOCKCHAIN_NAME.FANTOM]: '0x',
     [BLOCKCHAIN_NAME.ARBITRUM]: '0x',
     [BLOCKCHAIN_NAME.OPTIMISM]: '0x',
-    [BLOCKCHAIN_NAME.METIS]: '0x'
+    [BLOCKCHAIN_NAME.METIS]: '0x',
+    [BLOCKCHAIN_NAME.BASE]: '0x'
 };
