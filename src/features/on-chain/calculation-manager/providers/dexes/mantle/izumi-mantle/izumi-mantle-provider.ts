@@ -3,7 +3,7 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { IzumiProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/izumi-abstract/izumi-provider';
 
 export class IzumiMantleProvider extends IzumiProvider {
-    public readonly blockchain = BLOCKCHAIN_NAME.LINEA;
+    public readonly blockchain = BLOCKCHAIN_NAME.MANTLE;
 
     protected readonly dexAddress = '0x25C030116Feb2E7BbA054b9de0915E5F51b03e31';
 
