@@ -17,6 +17,6 @@ export class IzumiBaseProvider extends IzumiProvider {
             '0x60d01ec2d5e98ac51c8b4cf84dfcce98d527c747' // IZI
         ],
         multicallAddress: '0x7a524c7e82874226F0b51aade60A1BE4D430Cf0F',
-        supportedFees: [10000, 3000, 2000, 500, 400, 100]
+        supportedFees: [10000, 3000, 500]
     };
 }

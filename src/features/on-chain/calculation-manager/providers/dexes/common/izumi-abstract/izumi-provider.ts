@@ -1,7 +1,9 @@
 import { getMulticallContracts } from 'iziswap-sdk/lib/base';
 import { searchPathQuery } from 'iziswap-sdk/lib/search/func';
 import { SearchPathQueryParams, SwapDirection } from 'iziswap-sdk/lib/search/types';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token, wrappedNativeTokensList } from 'src/common/tokens';
+import { wrappedAddress } from 'src/common/tokens/constants/wrapped-addresses';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { combineOptions } from 'src/common/utils/options';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -80,15 +82,15 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
 
         const tokenIn = {
             chainId,
-            symbol: from.symbol,
-            address: from.address,
+            symbol: from.isNative ? wrappedNativeTokensList[this.blockchain]?.symbol : from.symbol,
+            address: from.isNative ? wrappedAddress[this.blockchain] : from.address,
             decimal: from.decimals
         };
 
         const tokenOut = {
             chainId,
-            symbol: to.symbol,
-            address: to.address,
+            symbol: to.isNative ? wrappedNativeTokensList[this.blockchain]?.symbol : to.symbol,
+            address: to.isNative ? wrappedAddress[this.blockchain] : to.address,
             decimal: to.decimals
         };
 
@@ -119,6 +121,9 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
         try {
             const result = await searchPathQuery(searchParams);
             pathQueryResult = result.pathQueryResult;
+            if (!pathQueryResult) {
+                throw new RubicSdkError('No result');
+            }
         } catch (err) {
             console.log(err);
             throw err;
@@ -126,56 +131,20 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
 
         const wrapAddress = wrappedNativeTokensList[from.blockchain]?.address;
 
-        // const fromAddress = from.isNative ? wrapAddress : from.address;
-        // const toAddress = to.isNative ? wrapAddress : to.address;
-        // if (!fromAddress || !toAddress) {
-        //     throw new RubicSdkError('Cant estimate trade');
-        // }
-        //
-        // const tokenA = {
-        //     address: fromAddress,
-        //     chainId: fromChainId,
-        //     symbol: from.symbol,
-        //     decimal: fromChainId,
-        //     name: from.name
-        // } as TokenInfoFormatted;
-        //
-        // const tokenB = {
-        //     address: toAddress,
-        //     chainId: fromChainId,
-        //     symbol: to.symbol,
-        //     decimal: to.decimals,
-        //     name: to.name
-        // } as TokenInfoFormatted;
-        // const fee = 400;
-        //
-        // const chainPath = getTokenChainPath([tokenA, tokenB], [fee]);
-        // const { acquire } = await this.web3Public.callContractMethod<{ acquire: string }>(
-        //     this.quoterAddress,
-        //     izumiQuoterContractAbi,
-        //     'swapAmount',
-        //     [weiAmountWithoutFee, chainPath]
-        // );
-        // const output = acquire.toString();
-        //
-        // if (!output) {
-        //     throw new RubicSdkError('Trade is not available');
-        // }
-
         const toToken = new PriceTokenAmount({
             ...to.asStruct,
             tokenAmount: Web3Pure.fromWei(pathQueryResult.amount, to.decimals)
         });
 
-        const path = await Token.createTokens(
-            pathQueryResult.path.tokenChain.map(token => token.address),
+        const transitPath = await Token.createTokens(
+            pathQueryResult.path.tokenChain.map(token => token.address).slice(1, -1),
             from.blockchain
         );
 
         const tradeStruct: IzumiTradeStruct = {
             from,
             to: toToken,
-            path,
+            path: [from, ...transitPath, to],
             slippageTolerance: fullOptions.slippageTolerance,
             gasFeeInfo: null,
             useProxy: fullOptions.useProxy,
@@ -185,8 +154,8 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
             usedForCrossChain: fullOptions.usedForCrossChain,
             dexContractAddress: this.dexAddress,
             swapConfig: {
-                tokenChain: [],
-                feeChain: []
+                tokenChain: pathQueryResult.path.tokenChain.map(el => el.address),
+                feeChain: pathQueryResult.path.feeContractNumber
             },
             strictERC20Token:
                 compareAddresses(wrapAddress!, from.address) ||

@@ -431,9 +431,13 @@ export class EvmWeb3Public extends Web3Public {
         let maxPriorityFeePerGas = null;
 
         if (block && block.baseFeePerGas) {
-            lastBaseFeePerGas = this.getBaseFee(block);
-            maxPriorityFeePerGas = await this.getMaxPriorityFeePerGas();
-            maxFeePerGas = block.baseFeePerGas * 2 + maxPriorityFeePerGas;
+            try {
+                lastBaseFeePerGas = this.getBaseFee(block);
+                maxPriorityFeePerGas = await this.getMaxPriorityFeePerGas();
+                maxFeePerGas = block.baseFeePerGas * 2 + maxPriorityFeePerGas;
+            } catch (err) {
+                console.debug(err);
+            }
         }
 
         return {

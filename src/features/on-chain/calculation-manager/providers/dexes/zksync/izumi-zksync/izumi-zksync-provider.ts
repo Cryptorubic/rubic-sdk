@@ -18,6 +18,6 @@ export class IzumiZksyncProvider extends IzumiProvider {
             '0x496d88d1efc3e145b7c12d53b78ce5e7eda7a42c' // SL USDT
         ],
         multicallAddress: '0x18d6b2F2A5F88380D42AdD6588F4484Cfb27EE07',
-        supportedFees: [10000, 3000, 2000, 400, 100]
+        supportedFees: [10000, 3000, 2000, 400]
     };
 }
