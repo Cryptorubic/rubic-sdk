@@ -27,7 +27,7 @@ import { getFromToTokensAmountsByExact } from 'src/features/on-chain/calculation
 import { AlgebraTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/algebra-trade';
 import { QuickSwapV3Trade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/quick-swap-v3-trade';
 import { QuickSwapV3PolygonZKEVMTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon-zkevm/quick-swap-v3/quick-swap-v3-trade';
-import { UniSwapV3ScrollTestnetTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-testnet/uni-swap-v3-scroll-testnet/uni-swap-v3-scroll-testnet-trade';
+import { UniSwapV3ScrollSepoliaTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-sepolia/uni-swap-v3-scroll-sepolia/uni-swap-v3-scroll-sepolia-trade';
 import { AbiItem } from 'web3-utils';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
@@ -42,7 +42,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         | typeof AlgebraTrade
         | typeof QuickSwapV3Trade
         | typeof QuickSwapV3PolygonZKEVMTrade
-        | typeof UniSwapV3ScrollTestnetTrade;
+        | typeof UniSwapV3ScrollSepoliaTrade;
 
     protected abstract readonly quoterController: UniswapV3AlgebraQuoterController;
 

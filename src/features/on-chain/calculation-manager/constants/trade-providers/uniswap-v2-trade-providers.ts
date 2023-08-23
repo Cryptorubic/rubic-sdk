@@ -43,7 +43,6 @@ import { PulseXV1Provider } from 'src/features/on-chain/calculation-manager/prov
 import { PulseXV2Provider } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/pulsex-v2/pulsex-v2-provider';
 import { SushiSwapPulsechainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/sushi-swap-pulsechain/sushi-swap-pulsechain-provider';
 import { UniSwapV2PulsechainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/uni-swap-v2-pulsechain/uni-swap-v2-pulsechain-provider';
-import { UniSwapV2ScrollTestnetProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-testnet/uni-swap-v2-scroll-testnet/uni-swap-v2-scroll-testnet-provider';
 import { PegasysProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/syscoin/pegasys/pegasys-provider';
 import { ApeSwapTelosProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/ape-swap/ape-swap-telos-provider';
 import { OmnidexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/omnidex/omnidex-provider';
@@ -132,7 +131,7 @@ export const UniswapV2TradeProviders = [
     QuickSwapMumbaiProvider,
     // Fuji
     JoeFujiProvider,
-    PangolinFujiProvider,
+    PangolinFujiProvider
     // Scroll
-    UniSwapV2ScrollTestnetProvider
+    // UniSwapV2ScrollSepoliaProvider
 ] as const;

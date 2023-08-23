@@ -6,9 +6,9 @@ export const scrollBridgeContractAddress: Record<
     ScrollBridgeSupportedBlockchain,
     UniversalContract
 > = {
-    [BLOCKCHAIN_NAME.SCROLL_TESTNET]: {
-        providerGateway: '0x6d79Aa2e4Fbf80CF8543Ad97e294861853fb0649',
-        providerRouter: '0x6d79Aa2e4Fbf80CF8543Ad97e294861853fb0649',
+    [BLOCKCHAIN_NAME.SCROLL_SEPOLIA]: {
+        providerGateway: '0xaDcA915971A336EA2f5b567e662F5bd74AEf9582',
+        providerRouter: '0xaDcA915971A336EA2f5b567e662F5bd74AEf9582',
         rubicRouter: '0x33798753ec66aEc00ed7E337B41F444f53A63333'
     },
     [BLOCKCHAIN_NAME.GOERLI]: {
