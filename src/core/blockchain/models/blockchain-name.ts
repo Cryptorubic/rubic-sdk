@@ -37,7 +37,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     BITCOIN_CASH: 'BITCOIN_CASH',
     ZK_SYNC: 'ZK_SYNC',
     PULSECHAIN: 'PULSECHAIN',
-    LINEA: 'LINEA'
+    LINEA: 'LINEA',
+    BASE: 'BASE'
 } as const;
 
 export const BLOCKCHAIN_NAME = {

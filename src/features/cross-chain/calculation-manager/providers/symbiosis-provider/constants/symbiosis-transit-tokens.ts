@@ -93,6 +93,13 @@ export const symbiosisTransitTokens: Record<SymbiosisCrossChainSupportedBlockcha
         name: 'Wrapped Ether',
         symbol: 'WETH',
         decimals: 18
+    },
+    [BLOCKCHAIN_NAME.BASE]: {
+        blockchain: BLOCKCHAIN_NAME.BASE,
+        address: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
+        name: 'USD Base Coin',
+        symbol: 'USDbC',
+        decimals: 6
     }
     // [BLOCKCHAIN_NAME.BITCOIN]: {
     //     blockchain: BLOCKCHAIN_NAME.BITCOIN,
