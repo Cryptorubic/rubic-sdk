@@ -17,7 +17,7 @@ export const rubicProxyContractAddress: Record<
             router = '0xa63c029612ddaD00A269383Ab016D1e7c14E851D';
             gateway = '0x8E70e517057e7380587Ea6990dAe81cB1Ba405ce';
         }
-        if (blockchain === BLOCKCHAIN_NAME.LINEA) {
+        if (blockchain === BLOCKCHAIN_NAME.LINEA || blockchain === BLOCKCHAIN_NAME.BASE) {
             router = '0xAf14797CcF963B1e3d028a9d51853acE16aedBA1';
         }
 
