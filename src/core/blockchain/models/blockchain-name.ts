@@ -38,7 +38,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     ZK_SYNC: 'ZK_SYNC',
     PULSECHAIN: 'PULSECHAIN',
     LINEA: 'LINEA',
-    BASE: 'BASE'
+    BASE: 'BASE',
+    MANTLE: 'MANTLE'
 } as const;
 
 export const BLOCKCHAIN_NAME = {

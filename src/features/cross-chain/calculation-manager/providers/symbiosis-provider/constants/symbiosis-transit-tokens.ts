@@ -100,6 +100,13 @@ export const symbiosisTransitTokens: Record<SymbiosisCrossChainSupportedBlockcha
         name: 'USD Base Coin',
         symbol: 'USDbC',
         decimals: 6
+    },
+    [BLOCKCHAIN_NAME.MANTLE]: {
+        blockchain: BLOCKCHAIN_NAME.MANTLE,
+        address: '0x09Bc4E0D864854c6aFB6eB9A9cdF58aC190D0dF9',
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6
     }
     // [BLOCKCHAIN_NAME.BITCOIN]: {
     //     blockchain: BLOCKCHAIN_NAME.BITCOIN,

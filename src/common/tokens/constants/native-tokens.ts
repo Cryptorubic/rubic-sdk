@@ -283,5 +283,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'ETH',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MANTLE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MANTLE,
+        address: '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000',
+        name: 'Mantle',
+        symbol: 'MNT',
+        decimals: 18
     })
 };
