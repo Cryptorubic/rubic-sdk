@@ -286,7 +286,7 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
     }),
     [BLOCKCHAIN_NAME.MANTLE]: new Token({
         blockchain: BLOCKCHAIN_NAME.MANTLE,
-        address: '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000',
+        address: EvmWeb3Pure.nativeTokenAddress,
         name: 'Mantle',
         symbol: 'MNT',
         decimals: 18
