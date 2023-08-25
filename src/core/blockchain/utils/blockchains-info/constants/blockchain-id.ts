@@ -52,6 +52,7 @@ export const blockchainId: Record<BlockchainName, number> = {
     [BLOCKCHAIN_NAME.PULSECHAIN]: 369,
     [BLOCKCHAIN_NAME.LINEA]: 59144,
     [BLOCKCHAIN_NAME.BASE]: 8453,
+    [BLOCKCHAIN_NAME.MANTLE]: 5000,
     // Non EVN blockchains
     [BLOCKCHAIN_NAME.BITCOIN]: 5555,
     [BLOCKCHAIN_NAME.FILECOIN]: 314
