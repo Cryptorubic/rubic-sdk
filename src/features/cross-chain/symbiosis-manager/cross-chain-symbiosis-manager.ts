@@ -7,6 +7,7 @@ import { RubicSdkError } from 'src/common/errors';
 import { Token } from 'src/common/tokens';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { Injector } from 'src/core/injector/injector';
@@ -15,7 +16,6 @@ import { SymbiosisRevertResponse } from 'src/features/cross-chain/symbiosis-mana
 import { SymbiosisStuckedResponse } from 'src/features/cross-chain/symbiosis-manager/models/symbiosis-stucked-api';
 import { ChainId, CHAINS_PRIORITY, Symbiosis, WaitForComplete } from 'symbiosis-js-sdk';
 import { TransactionReceipt } from 'web3-eth';
-import {BlockchainsInfo} from "src/core/blockchain/utils/blockchains-info/blockchains-info";
 
 export class CrossChainSymbiosisManager {
     private get web3Private(): EvmWeb3Private {

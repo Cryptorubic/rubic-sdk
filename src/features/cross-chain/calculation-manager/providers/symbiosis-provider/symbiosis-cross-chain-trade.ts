@@ -297,7 +297,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             '1inch': ON_CHAIN_TRADE_TYPE.ONE_INCH,
             'open-ocean': ON_CHAIN_TRADE_TYPE.OPEN_OCEAN,
             wrap: ON_CHAIN_TRADE_TYPE.WRAPPED,
-            izumi: undefined,
+            // izumi: undefined,
             default: undefined
         };
         return {

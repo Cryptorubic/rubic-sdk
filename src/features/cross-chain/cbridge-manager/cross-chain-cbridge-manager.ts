@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { TEST_EVM_BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Injector } from 'src/core/injector/injector';
 import { CbridgeCrossChainApiService } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-api-service';
 import { cbridgeContractAbi } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-abi';
@@ -13,7 +13,6 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
 import Web3 from 'web3';
 import { TransactionReceipt } from 'web3-eth';
-import {BlockchainsInfo} from "src/core/blockchain/utils/blockchains-info/blockchains-info";
 
 export class CrossChainCbridgeManager {
     public static async getTransferId(
