@@ -9,10 +9,10 @@ import { UniswapV3Route } from 'src/features/on-chain/calculation-manager/provid
 import { UniswapV3TradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-trade-struct';
 import { UniswapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
 import { UniswapV3AlgebraAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
-import { SCROLL_UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-testnet/uni-swap-v3-scroll-testnet/constants/scroll-trade-abi';
+import { SCROLL_UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-sepolia/uni-swap-v3-scroll-sepolia/constants/scroll-trade-abi';
 
-export class UniSwapV3ScrollTestnetTrade extends UniswapV3AlgebraAbstractTrade {
-    public readonly dexContractAddress = '0xD9880690bd717189cC3Fbe7B9020F27fae7Ac76F';
+export class UniSwapV3ScrollSepoliaTrade extends UniswapV3AlgebraAbstractTrade {
+    public readonly dexContractAddress = '0x17AFD0263D6909Ba1F9a8EAC697f76532365Fb95';
 
     protected readonly contractAbi = SCROLL_UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
 

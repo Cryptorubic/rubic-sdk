@@ -39,8 +39,8 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         symbol: 'tBNB',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.SCROLL_TESTNET]: new Token({
-        blockchain: BLOCKCHAIN_NAME.SCROLL_TESTNET,
+    [BLOCKCHAIN_NAME.SCROLL_SEPOLIA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SCROLL_SEPOLIA,
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'ETH',
         symbol: 'ETH',
