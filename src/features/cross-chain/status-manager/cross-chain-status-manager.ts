@@ -8,7 +8,11 @@ import {
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { createClient } from '@layerzerolabs/scan-client';
 import { RubicSdkError } from 'src/common/errors';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    TEST_EVM_BLOCKCHAIN_NAME
+} from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import {
     TX_STATUS,
@@ -47,6 +51,7 @@ import {
 import { CrossChainStatus } from 'src/features/cross-chain/status-manager/models/cross-chain-status';
 import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
+import { ScrollApiResponse } from 'src/features/cross-chain/status-manager/models/scroll-api-response';
 import { SquidrouterApiResponse } from 'src/features/cross-chain/status-manager/models/squidrouter-api-response';
 import { SQUIDROUTER_TRANSFER_STATUS } from 'src/features/cross-chain/status-manager/models/squidrouter-transfer-status.enum';
 import {
@@ -79,7 +84,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.CHANGENOW]: this.getChangenowDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getStargateDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER]: this.getSquidrouterDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER]: this.getSquidrouterDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.SCROLL_BRIDGE]: this.getScrollBridgeDstSwapStatus
     };
 
     /**
@@ -192,6 +198,9 @@ export class CrossChainStatusManager {
      */
     private async getSymbiosisDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         const symbiosisTxIndexingTimeSpent = Date.now() > data.txTimestamp + 30000;
+        const symbiosisApi = Object.keys(TEST_EVM_BLOCKCHAIN_NAME).includes(data.fromBlockchain)
+            ? 'api.testnet'
+            : 'api-v2';
 
         if (symbiosisTxIndexingTimeSpent) {
             try {
@@ -201,8 +210,9 @@ export class CrossChainStatusManager {
                     status: { text: dstTxStatus },
                     tx
                 } = await Injector.httpClient.get<SymbiosisApiResponse>(
-                    `https://api-v2.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
+                    `https://${symbiosisApi}.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
                 );
+
                 let dstTxData: TxStatusData = {
                     status: TX_STATUS.PENDING,
                     hash: tx?.hash || null
@@ -460,7 +470,10 @@ export class CrossChainStatusManager {
                 data.srcTxHash,
                 data.fromBlockchain as CbridgeCrossChainSupportedBlockchain
             );
-            const swapData = await CbridgeCrossChainApiService.fetchTradeStatus(transferId);
+            const useTestnet = BlockchainsInfo.isTestBlockchainName(data.fromBlockchain);
+            const swapData = await CbridgeCrossChainApiService.fetchTradeStatus(transferId, {
+                useTestnet
+            });
 
             switch (swapData.status) {
                 case TRANSFER_HISTORY_STATUS.TRANSFER_UNKNOWN:
@@ -612,5 +625,21 @@ export class CrossChainStatusManager {
         } catch {
             return { status: TX_STATUS.PENDING, hash: null };
         }
+    }
+
+    public async getScrollBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const response = await Injector.httpClient.post<ScrollApiResponse>(
+            'https://alpha-api.scroll.io/bridgehistory/api/txsbyhashes',
+            {
+                txs: [data.srcTxHash]
+            }
+        );
+        const sourceTx = response!.data!.result[0]!;
+        const targetHash = sourceTx?.finalizeTx?.hash;
+        if (targetHash) {
+            return { status: TX_STATUS.SUCCESS, hash: targetHash };
+        }
+
+        return { status: TX_STATUS.PENDING, hash: null };
     }
 }

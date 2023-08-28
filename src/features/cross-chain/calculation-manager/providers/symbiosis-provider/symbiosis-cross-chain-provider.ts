@@ -13,6 +13,7 @@ import {
     BlockchainName,
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -42,8 +43,6 @@ import {
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
 
-    private readonly symbiosis = new Symbiosis('mainnet', 'rubic');
-
     public isSupportedBlockchain(
         blockchain: BlockchainName
     ): blockchain is SymbiosisCrossChainSupportedBlockchain {
@@ -71,6 +70,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
+
+        const config = BlockchainsInfo.isTestBlockchainName(fromBlockchain) ? 'testnet' : 'mainnet';
+        const symbiosis = new Symbiosis(config, 'rubic');
+
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return {
                 trade: null,
@@ -119,15 +122,18 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
             const slippageTolerance = options.slippageTolerance * 10000;
 
-            const trade = await this.getTrade({
-                tokenAmountIn,
-                tokenOut,
-                fromAddress,
-                receiverAddress,
-                refundAddress: fromAddress,
-                slippage: slippageTolerance,
-                deadline
-            });
+            const trade = await this.getTrade(
+                {
+                    tokenAmountIn,
+                    tokenOut,
+                    fromAddress,
+                    receiverAddress,
+                    refundAddress: fromAddress,
+                    slippage: slippageTolerance,
+                    deadline
+                },
+                symbiosis
+            );
             const { tokenAmountOut, fee: transitTokenFee, inTradeType, outTradeType } = trade;
 
             const swapFunction = (fromUserAddress: string, receiver?: string) => {
@@ -140,15 +146,18 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                     Web3Pure.toWei(amountIn, from.decimals)
                 );
 
-                return this.getTrade({
-                    tokenAmountIn,
-                    tokenOut,
-                    fromAddress: fromUserAddress,
-                    receiverAddress,
-                    refundAddress,
-                    slippage: slippageTolerance,
-                    deadline
-                });
+                return this.getTrade(
+                    {
+                        tokenAmountIn,
+                        tokenOut,
+                        fromAddress: fromUserAddress,
+                        receiverAddress,
+                        refundAddress,
+                        slippage: slippageTolerance,
+                        deadline
+                    },
+                    symbiosis
+                );
             };
 
             const to = new PriceTokenAmount({
@@ -235,18 +244,21 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    private async getTrade(swapParams: {
-        tokenAmountIn: TokenAmount;
-        tokenOut: Token;
-        fromAddress: string;
-        receiverAddress: string;
-        refundAddress: string;
-        slippage: number;
-        deadline: number;
-    }): Promise<SymbiosisTradeData> {
+    private async getTrade(
+        swapParams: {
+            tokenAmountIn: TokenAmount;
+            tokenOut: Token | null;
+            fromAddress: string;
+            receiverAddress: string;
+            refundAddress: string;
+            slippage: number;
+            deadline: number;
+        },
+        symbiosis: Symbiosis
+    ): Promise<SymbiosisTradeData> {
         const swappingParams: SwappingParams = {
             tokenAmountIn: swapParams.tokenAmountIn,
-            tokenOut: swapParams.tokenOut,
+            tokenOut: swapParams.tokenOut!,
             from: swapParams.fromAddress,
             to: swapParams.receiverAddress || swapParams.fromAddress,
             revertableAddress: swapParams.fromAddress,
@@ -254,13 +266,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             deadline: swapParams.deadline
         };
 
-        return this.getBestSwappingSwapResult(swappingParams);
-    }
-
-    private async getBestSwappingSwapResult(
-        swappingParams: SwappingParams
-    ): Promise<SymbiosisTradeData> {
-        const swapping = this.symbiosis.bestPoolSwapping();
+        const swapping = symbiosis.bestPoolSwapping();
         return swapping.exactIn(swappingParams);
     }
 

@@ -29,10 +29,10 @@ export class QuickSwapV3PolygonZKEVMProvider extends UniswapV3AlgebraAbstractPro
     protected readonly OnChainTradeClass = QuickSwapV3PolygonZKEVMTrade;
 
     protected readonly quoterController = new QuickswapV3QuoterController(
-        QUICK_SWAP_V3_POLYGON_ZKEVM_QUOTER_CONTRACT_ABI,
-        QUICK_SWAP_V3_POLYGON_ZKEVM_QUOTER_CONTRACT_ADDRESS,
         this.blockchain,
-        defaultPolygonZKEVMProviderConfiguration.routingProvidersAddresses
+        defaultPolygonZKEVMProviderConfiguration.routingProvidersAddresses,
+        QUICK_SWAP_V3_POLYGON_ZKEVM_QUOTER_CONTRACT_ADDRESS,
+        QUICK_SWAP_V3_POLYGON_ZKEVM_QUOTER_CONTRACT_ABI
     );
 
     public readonly providerConfiguration = QUICK_SWAP_V3_POLYGON_ZKEVM_PROVIDER_CONFIGURATION;

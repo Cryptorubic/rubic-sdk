@@ -254,5 +254,75 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped Mantle',
         symbol: 'WMNT',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET,
+        address: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MUMBAI]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MUMBAI,
+        address: '0x9c3c9283d3e44854697cd22d3faa240cfb032889',
+        name: 'Wrapped Matic',
+        symbol: 'WMATIC',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.FUJI]: new Token({
+        blockchain: BLOCKCHAIN_NAME.FUJI,
+        address: '0x1d308089a2d1ced3f1ce36b1fcaf815b07217be3',
+        name: 'Wrapped Avax',
+        symbol: 'WAVAX',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.GOERLI]: new Token({
+        blockchain: BLOCKCHAIN_NAME.GOERLI,
+        address: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SCROLL_SEPOLIA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SCROLL_SEPOLIA,
+        address: '0x5300000000000000000000000000000000000004',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ETHEREUM_CLASSIC]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ETHEREUM_CLASSIC,
+        address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.FLARE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.FLARE,
+        address: '0x1D80c49BbBCd1C0911346656B529DF9E5c2F783d',
+        name: 'Wrapper Flare',
+        symbol: 'WFLR',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.IOTEX]: new Token({
+        blockchain: BLOCKCHAIN_NAME.IOTEX,
+        address: '0xa00744882684c3e4747faefd68d283ea44099d03',
+        name: 'Wrapped IoTeX',
+        symbol: 'WIOTX',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.THETA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.THETA,
+        address: '0xaf537fb7e4c77c97403de94ce141b7edb9f7fcf0',
+        name: 'Wrapped Theta',
+        symbol: 'wTHETA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BITCOIN_CASH]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BITCOIN_CASH,
+        address: '0x3743eC0673453E5009310C727Ba4eaF7b3a1cc04',
+        name: 'Wrapped BCH',
+        symbol: 'WBCH',
+        decimals: 18
     })
 };
