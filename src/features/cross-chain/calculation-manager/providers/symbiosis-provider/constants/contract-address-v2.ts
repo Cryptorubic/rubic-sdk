@@ -58,6 +58,14 @@ export const SYMBIOSIS_CONTRACT_ADDRESS_V2: Record<
         providerRouter: '0xcE8f24A58D85eD5c5A6824f7be1F8d4711A0eb4C',
         providerGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278'
     },
+    [BLOCKCHAIN_NAME.BASE]: {
+        providerRouter: '0x7057aB3fB2BeE9c18e0cDe4240DE4ff7f159E365',
+        providerGateway: '0xa0079829B9F1Edc5DD0DE3eC104f281745C4bD81'
+    },
+    [BLOCKCHAIN_NAME.MANTLE]: {
+        providerRouter: '0xcE8f24A58D85eD5c5A6824f7be1F8d4711A0eb4C',
+        providerGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278'
+    },
     [BLOCKCHAIN_NAME.GOERLI]: {
         providerRouter: '0x5302358dCFbF2881e5b5E537316786d8Ea242008',
         providerGateway: '0x438D14b1Fd3C20C33Fa7EF6331AA3fC36bc0347E'

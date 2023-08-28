@@ -10,7 +10,9 @@ export const squidrouterCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
     BLOCKCHAIN_NAME.FANTOM,
     BLOCKCHAIN_NAME.CELO,
-    BLOCKCHAIN_NAME.KAVA
+    BLOCKCHAIN_NAME.KAVA,
+    BLOCKCHAIN_NAME.LINEA,
+    BLOCKCHAIN_NAME.BASE
 ] as const;
 
 export type SquidrouterCrossChainSupportedBlockchain =

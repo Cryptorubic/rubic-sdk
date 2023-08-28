@@ -241,6 +241,20 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'WETH',
         decimals: 18
     }),
+    [BLOCKCHAIN_NAME.BASE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BASE,
+        address: '0x4200000000000000000000000000000000000006',
+        name: 'Wrapped ETH',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MANTLE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MANTLE,
+        address: '0x78c1b0C915c4FAA5FffA6CAbf0219DA63d7f4cb8',
+        name: 'Wrapped Mantle',
+        symbol: 'WMNT',
+        decimals: 18
+    }),
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: new Token({
         blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET,
         address: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6',

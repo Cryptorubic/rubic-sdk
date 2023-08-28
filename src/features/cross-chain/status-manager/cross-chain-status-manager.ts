@@ -610,7 +610,10 @@ export class CrossChainStatusManager {
                 { headers: { 'x-integrator-id': 'rubic-api' } }
             );
 
-            if (status === SQUIDROUTER_TRANSFER_STATUS.DEST_EXECUTED) {
+            if (
+                status === SQUIDROUTER_TRANSFER_STATUS.DEST_EXECUTED ||
+                status === SQUIDROUTER_TRANSFER_STATUS.EXPRESS_EXECUTED
+            ) {
                 return { status: TX_STATUS.SUCCESS, hash: toChain!.transactionId! };
             }
 

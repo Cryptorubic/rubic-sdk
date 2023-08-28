@@ -113,9 +113,12 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                 weiAmount: new BigNumber(feeAmount)
             });
 
-            const transitRoute = estimate.route.fromChain.at(-1)!;
-            const transitAmount = transitRoute.toAmount;
-            const transitToken = transitRoute.toToken;
+            const transitRoute = estimate.route.toChain.at(-1)!;
+
+            const transitUSDAmount =
+                'toAmount' in transitRoute
+                    ? Web3Pure.fromWei(transitRoute.toAmount, transitRoute.toToken.decimals)
+                    : new BigNumber(estimate.toAmountUSD);
 
             return {
                 trade: new SquidrouterCrossChainTrade(
@@ -136,7 +139,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                                 }
                             }
                         },
-                        transitAmount: Web3Pure.fromWei(transitAmount, transitToken.decimals),
+                        transitUSDAmount,
                         cryptoFeeToken,
                         onChainTrade: null,
                         onChainSubtype: { from: undefined, to: undefined }

@@ -28,7 +28,7 @@ interface GetQuoterMethodsDataOptions {
     maxTransitTokens: number;
 }
 export class HorizondexUniswapV3QuoterController extends UniswapV3QuoterController {
-    protected readonly feeAmounts: FeeAmount[] = [300, 500, 1000, 3000, 10000];
+    protected readonly feeAmounts: FeeAmount[] = [8, 40, 300, 1000];
 
     constructor(
         blockchain: EvmBlockchainName,
