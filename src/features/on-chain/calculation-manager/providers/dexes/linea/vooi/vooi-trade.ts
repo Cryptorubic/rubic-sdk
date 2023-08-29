@@ -1,3 +1,4 @@
+import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
@@ -14,7 +15,7 @@ export class VooiTrade extends EvmOnChainTrade {
 
     private toPoolId: number;
 
-    private deadline: number;
+    private deadlineInMinutes: number;
 
     public static get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.VOOI;
@@ -28,7 +29,7 @@ export class VooiTrade extends EvmOnChainTrade {
         super(tradeStruct, providerAddress);
         this.fromPoolId = tradeStruct.fromPoolId;
         this.toPoolId = tradeStruct.toPoolId;
-        this.deadline = tradeStruct.deadlineMinutes;
+        this.deadlineInMinutes = tradeStruct.deadlineMinutes;
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
@@ -48,7 +49,7 @@ export class VooiTrade extends EvmOnChainTrade {
                 this.from.stringWeiAmount,
                 this.toTokenAmountMin.stringWeiAmount,
                 receiver,
-                this.deadline
+                deadlineMinutesTimestamp(this.deadlineInMinutes)
             ],
             this.fromWithoutFee.isNative ? this.fromWithoutFee.stringWeiAmount : '0',
             gasParams
