@@ -4,10 +4,6 @@ import { HorizondexUniswapV3QuoterController } from 'src/features/on-chain/calcu
 import { HORIZONDEX_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/horizondex/constants/provider-configuration';
 import { HORIZONDEX_ROUTER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/horizondex/constants/router-configuration';
 import { HorizondexTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/horizondex/horizondex-trade';
-import {
-    HORIZONDEX_QUOTER_CONTRACT_ABI,
-    HORIZONDEX_QUOTER_CONTRACT_ADDRESS
-} from 'src/features/on-chain/calculation-manager/providers/dexes/linea/horizondex/utils/quoter-controller/constants/quoter-contract-data';
 
 export class HorizondexProvider extends UniswapV3AbstractProvider<HorizondexTrade> {
     public readonly blockchain = BLOCKCHAIN_NAME.LINEA;
@@ -20,8 +16,6 @@ export class HorizondexProvider extends UniswapV3AbstractProvider<HorizondexTrad
 
     protected readonly quoterController = new HorizondexUniswapV3QuoterController(
         this.blockchain,
-        this.routerConfiguration,
-        HORIZONDEX_QUOTER_CONTRACT_ADDRESS,
-        HORIZONDEX_QUOTER_CONTRACT_ABI
+        this.routerConfiguration
     );
 }

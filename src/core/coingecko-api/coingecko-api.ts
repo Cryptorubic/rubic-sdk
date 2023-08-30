@@ -50,7 +50,7 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.ZK_SYNC,
     BLOCKCHAIN_NAME.PULSECHAIN,
     BLOCKCHAIN_NAME.LINEA,
-    BLOCKCHAIN_NAME.BASE
+    BLOCKCHAIN_NAME.MANTLE
 ] as const;
 
 type SupportedBlockchain = (typeof supportedBlockchains)[number];
@@ -115,7 +115,7 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.ZK_SYNC]: 'ethereum',
             [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulsechain',
             [BLOCKCHAIN_NAME.LINEA]: 'linea',
-            [BLOCKCHAIN_NAME.BASE]: 'base'
+            [BLOCKCHAIN_NAME.MANTLE]: 'mantle'
         };
 
         this.tokenBlockchainId = {
@@ -161,7 +161,7 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.ZK_SYNC]: 'zksync',
             [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulsechain',
             [BLOCKCHAIN_NAME.LINEA]: 'linea',
-            [BLOCKCHAIN_NAME.BASE]: 'base'
+            [BLOCKCHAIN_NAME.MANTLE]: 'mantle'
         };
     }
 

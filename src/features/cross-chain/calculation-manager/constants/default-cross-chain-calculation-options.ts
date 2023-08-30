@@ -11,5 +11,6 @@ export const defaultCrossChainCalculationOptions: Omit<
     timeout: 25_000,
     slippageTolerance: 0.04,
     deadline: 20,
-    changenowFullyEnabled: false
+    changenowFullyEnabled: false,
+    enableTestnets: false
 };

@@ -31,10 +31,10 @@ export class AlgebraProvider extends UniswapV3AlgebraAbstractProvider<AlgebraTra
     protected readonly OnChainTradeClass = AlgebraTrade;
 
     protected readonly quoterController = new AlgebraQuoterController(
-        ALGEBRA_QUOTER_CONTRACT_ABI,
-        ALGEBRA_QUOTER_CONTRACT_ADDRESS,
         this.blockchain,
-        defaultPolygonProviderConfiguration.routingProvidersAddresses
+        defaultPolygonProviderConfiguration.routingProvidersAddresses,
+        ALGEBRA_QUOTER_CONTRACT_ADDRESS,
+        ALGEBRA_QUOTER_CONTRACT_ABI
     );
 
     public readonly providerConfiguration = ALGEBRA_V3_PROVIDER_CONFIGURATION;

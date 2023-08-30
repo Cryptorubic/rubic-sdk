@@ -8,6 +8,7 @@ import { pancakeRouterProviders } from 'src/features/on-chain/calculation-manage
 import { UniswapV2TradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/uniswap-v2-trade-providers';
 import { UniswapV3TradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/uniswap-v3-trade-providers';
 import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
+import { VooiProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/vooi/vooi-provider';
 import { SyncSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/sync-swap-provider';
 
 export const typedTradeProviders: OnChainTypedTradeProviders = [
@@ -19,7 +20,8 @@ export const typedTradeProviders: OnChainTypedTradeProviders = [
     // ...CurveTradeProviders, Removed because hack
     ...pancakeRouterProviders,
     ...izumiTradeProviders,
-    SyncSwapProvider
+    SyncSwapProvider,
+    VooiProvider
 ].reduce(
     (acc, ProviderClass) => {
         const provider = new ProviderClass();

@@ -2,11 +2,9 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, Token } from 'src/common/tokens';
 import { notNull } from 'src/common/utils/object';
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
 import { AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/algebra/algebra-quoter-controller';
 import { AlgebraRoute } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/models/algebra-route';
-import { AbiItem } from 'web3-utils';
 
 interface GetQuoterMethodsDataOptions {
     routesTokens: Token[];
@@ -20,15 +18,6 @@ interface GetQuoterMethodsDataOptions {
  * Works with requests, related to Uniswap v3 liquidity pools.
  */
 export class QuickswapV3QuoterController extends AlgebraQuoterController {
-    constructor(
-        quoterContractABI: AbiItem[],
-        quoterContractAddress: string,
-        blockchainName: BlockchainName,
-        routerTokens: string[]
-    ) {
-        super(quoterContractABI, quoterContractAddress, blockchainName, routerTokens);
-    }
-
     public async getAllRoutes(
         from: PriceToken,
         to: PriceToken,

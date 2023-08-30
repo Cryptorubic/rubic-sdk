@@ -7,6 +7,7 @@ import { RubicSdkError } from 'src/common/errors';
 import { Token } from 'src/common/tokens';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { Injector } from 'src/core/injector/injector';
@@ -17,8 +18,6 @@ import { ChainId, CHAINS_PRIORITY, Symbiosis, WaitForComplete } from 'symbiosis-
 import { TransactionReceipt } from 'web3-eth';
 
 export class CrossChainSymbiosisManager {
-    private readonly symbiosis = new Symbiosis('mainnet', 'rubic');
-
     private get web3Private(): EvmWeb3Private {
         return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM);
     }
@@ -111,10 +110,12 @@ export class CrossChainSymbiosisManager {
     ): Promise<EthersLog> {
         const fromChainId = blockchainId[fromBlockchain] as ChainId;
         const toChainId = blockchainId[toBlockchain] as ChainId;
+        const config = BlockchainsInfo.isTestBlockchainName(fromBlockchain) ? 'testnet' : 'mainnet';
+        const symbiosis = new Symbiosis(config, 'rubic');
 
         return await new WaitForComplete({
             direction: this.getDirection(fromChainId, toChainId),
-            symbiosis: this.symbiosis,
+            symbiosis,
             revertableAddress: this.walletAddress,
             chainIdOut: toChainId,
             chainIdIn: fromChainId

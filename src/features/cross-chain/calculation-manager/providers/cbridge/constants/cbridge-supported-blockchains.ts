@@ -9,7 +9,11 @@ export const cbridgeSupportedBlockchains = [
     BLOCKCHAIN_NAME.ARBITRUM,
     BLOCKCHAIN_NAME.AURORA,
     BLOCKCHAIN_NAME.OPTIMISM,
-    BLOCKCHAIN_NAME.ASTAR_EVM
+    BLOCKCHAIN_NAME.ASTAR_EVM,
+    BLOCKCHAIN_NAME.GOERLI,
+    BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET,
+    BLOCKCHAIN_NAME.MUMBAI,
+    BLOCKCHAIN_NAME.FUJI
 ] as const;
 
 export type CbridgeCrossChainSupportedBlockchain = (typeof cbridgeSupportedBlockchains)[number];
