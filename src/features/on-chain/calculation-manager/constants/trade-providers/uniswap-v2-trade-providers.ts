@@ -5,8 +5,11 @@ import { WannaSwapAuroraProvider } from 'src/features/on-chain/calculation-manag
 import { JoeProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/joe/joe-provider';
 import { PangolinProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/pangolin/pangolin-provider';
 import { SushiSwapAvalancheProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
+import { BaseSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/base/base-swap/base-swap-provider';
 import { OolongSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/boba/oolong-swap/oolong-swap-provider';
 import { SushiSwapBscProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
+import { PancakeSwapTestnetProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsct/pancake-swap-testnet/pancake-swap-testnet-provider';
+import { TraderJoeBsctProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsct/trader-joe-bsct/trader-joe-bsct-provider';
 import { CroSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/cronos/cro-swap/cro-swap-provider';
 import { CrodexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/cronos/crodex/crodex-provider';
 import { CronaSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/cronos/crona-swap/crona-swap-provider';
@@ -19,6 +22,9 @@ import { SoulSwapProvider } from 'src/features/on-chain/calculation-manager/prov
 import { SpiritSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/spirit-swap/spirit-swap-provider';
 import { SpookySwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/spooky-swap/spooky-swap-provider';
 import { SushiSwapFantomProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/sushi-swap-fantom/sushi-swap-fantom-provider';
+import { JoeFujiProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fuji/joe-fuji/joe-fuji-provider';
+import { PangolinFujiProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fuji/pangolin-fuji/pangolin-fuji-provider';
+import { UniSwapV2GoerliProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/goerli/uni-swap-v2-goerli/uni-swap-v2-goerli-provider';
 import { SushiSwapHarmonyProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-provider';
 import { TradeHarmonySwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/harmony/trader-harmony/trader-harmony-provider';
 import { ViperSwapHarmonyProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/harmony/viper-swap-harmony/viper-swap-harmony-provider';
@@ -30,6 +36,7 @@ import { ClaimSwapProvider } from 'src/features/on-chain/calculation-manager/pro
 import { NetSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/metis/net-swap/net-swap-provider';
 import { SolarbeamProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/solarbeam/solarbeam-provider';
 import { SushiSwapMoonriverProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/sushi-swap-moonriver/sushi-swap-moonriver-provider';
+import { QuickSwapMumbaiProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/mumbai/quick-swap-mumbai/quick-swap-mumbai-provider';
 import { YuzuSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/oasis/yuzu-swap/yuzu-swap-provider';
 import { QuickSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap/quick-swap-provider';
 import { SushiSwapPolygonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
@@ -115,5 +122,19 @@ export const UniswapV2TradeProviders = [
     PulseXV1Provider,
     PulseXV2Provider,
     UniSwapV2PulsechainProvider,
-    SushiSwapPulsechainProvider
+    SushiSwapPulsechainProvider,
+    // Base
+    BaseSwapProvider,
+    // BSC Testnet
+    PancakeSwapTestnetProvider,
+    TraderJoeBsctProvider,
+    // Goerli
+    UniSwapV2GoerliProvider,
+    // Mumbai
+    QuickSwapMumbaiProvider,
+    // Fuji
+    JoeFujiProvider,
+    PangolinFujiProvider
+    // Scroll
+    // UniSwapV2ScrollSepoliaProvider
 ] as const;

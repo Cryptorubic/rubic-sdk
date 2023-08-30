@@ -1,8 +1,7 @@
 import BigNumber from 'bignumber.js';
-// @ts-ignore
-import { getRequestOptions } from 'cbridge-revert-manager';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Injector } from 'src/core/injector/injector';
 import { CbridgeCrossChainApiService } from 'src/features/cross-chain/calculation-manager/providers/cbridge/cbridge-cross-chain-api-service';
 import { cbridgeContractAbi } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-abi';
@@ -16,17 +15,6 @@ import Web3 from 'web3';
 import { TransactionReceipt } from 'web3-eth';
 
 export class CrossChainCbridgeManager {
-    private static async withdrawLiquidity(
-        transferId: string,
-        estimatedReceivedAmt: string
-    ): Promise<void> {
-        const body: object = await getRequestOptions(transferId, estimatedReceivedAmt);
-        return Injector.httpClient.post(
-            `${CbridgeCrossChainApiService.apiEndpoint}withdrawLiquidity`,
-            body
-        );
-    }
-
     public static async getTransferId(
         sourceTransaction: string,
         fromBlockchain: CbridgeCrossChainSupportedBlockchain
@@ -59,13 +47,19 @@ export class CrossChainCbridgeManager {
         onTransactionHash: (hash: string) => void
     ): Promise<TransactionReceipt | null> {
         try {
+            const useTestnet = BlockchainsInfo.isTestBlockchainName(fromBlockchain);
+
             const transferId = await CrossChainCbridgeManager.getTransferId(
                 sourceTransaction,
                 fromBlockchain
             );
-            const statusResponse = await CbridgeCrossChainApiService.fetchTradeStatus(transferId);
+            const statusResponse = await CbridgeCrossChainApiService.fetchTradeStatus(transferId, {
+                useTestnet
+            });
             if (statusResponse.status === TRANSFER_HISTORY_STATUS.TRANSFER_TO_BE_REFUNDED) {
-                await CrossChainCbridgeManager.withdrawLiquidity(transferId, estimateAmount);
+                await CbridgeCrossChainApiService.withdrawLiquidity(transferId, estimateAmount, {
+                    useTestnet
+                });
                 await new Promise(resolve => setTimeout(resolve, 10_000));
                 return CrossChainCbridgeManager.transferRefund(
                     fromBlockchain,

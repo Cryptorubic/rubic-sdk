@@ -1,16 +1,59 @@
 import { Token } from 'src/common/tokens/token';
-import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    TestnetEvmBlockchain
+} from 'src/core/blockchain/models/blockchain-name';
 import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/bitcoin-web3-pure';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { IcpWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/icp-web3-pure';
 import { KavaCosmosWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/kava-cosmos-web3-pure';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 
+const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
+    [BLOCKCHAIN_NAME.FUJI]: new Token({
+        blockchain: BLOCKCHAIN_NAME.FUJI,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'AVAX',
+        symbol: 'AVAX',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MUMBAI]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MUMBAI,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Matic Network',
+        symbol: 'MATIC',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.GOERLI]: new Token({
+        blockchain: BLOCKCHAIN_NAME.GOERLI,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ethereum',
+        symbol: 'ETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Test Binance Coin',
+        symbol: 'tBNB',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SCROLL_SEPOLIA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SCROLL_SEPOLIA,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
+    })
+};
+
 export const nativeTokensList: Record<BlockchainName, Token> = {
     ...Object.values(BLOCKCHAIN_NAME).reduce(
         (acc, blockchain) => ({ ...acc, [blockchain]: blockchain }),
         {} as Record<BlockchainName, Token>
     ),
+    ...testnetNativeTokens,
     [BLOCKCHAIN_NAME.ETHEREUM]: new Token({
         blockchain: BLOCKCHAIN_NAME.ETHEREUM,
         address: EvmWeb3Pure.nativeTokenAddress,
@@ -275,6 +318,20 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'ETH',
         symbol: 'ETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BASE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BASE,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MANTLE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MANTLE,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Mantle',
+        symbol: 'MNT',
         decimals: 18
     })
 };

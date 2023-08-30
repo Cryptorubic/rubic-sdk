@@ -10,6 +10,7 @@ import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { PriceTokenAmountStruct } from 'src/common/tokens/price-token-amount';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -24,7 +25,6 @@ import {
     CbridgeCrossChainSupportedBlockchain,
     cbridgeSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
-import { celerTransitTokens } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/celer-transit-tokens';
 import { TokenInfo } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-chain-token-info';
 import { CbridgeEstimateAmountRequest } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-estimate-amount-request';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
@@ -210,6 +210,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         toTokenOrNative: PriceToken<EvmBlockchainName>
     ): Promise<CelerConfig> {
         let fromToken = fromTokenOrNative;
+        const useTestnet = BlockchainsInfo.isTestBlockchainName(fromToken.blockchain);
         if (fromToken.isNative) {
             const wrappedFrom = wrappedNativeTokensList[fromTokenOrNative.blockchain]!;
             const token = await PriceTokenAmount.createToken({
@@ -225,7 +226,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             toToken = token as PriceToken<EvmBlockchainName>;
         }
 
-        const config = await CbridgeCrossChainApiService.getTransferConfigs();
+        const config = await CbridgeCrossChainApiService.getTransferConfigs({ useTestnet });
         const fromChainId = blockchainId[fromToken.blockchain];
         const toChainId = blockchainId[toToken.blockchain];
         if (
@@ -263,6 +264,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         config: CelerConfig
     ): Promise<{ amount: string; maxSlippage: number; fee: string }> {
         let tokenSymbol = fromToken.symbol;
+        const useTestnet = BlockchainsInfo.isTestBlockchainName(fromToken.blockchain);
         if (config.isBridge) {
             tokenSymbol = config.supportedFromToken?.token.symbol || tokenSymbol;
         }
@@ -275,7 +277,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             amt: fromToken.stringWeiAmount
         };
         const { estimated_receive_amt, max_slippage, base_fee } =
-            await CbridgeCrossChainApiService.fetchEstimateAmount(requestParams);
+            await CbridgeCrossChainApiService.fetchEstimateAmount(requestParams, { useTestnet });
         return { amount: estimated_receive_amt, maxSlippage: max_slippage, fee: base_fee };
     }
 
@@ -308,64 +310,6 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             .filter(value => value.status === 'fulfilled')
             .map(value => (value as PromiseFulfilledResult<EvmOnChainTrade>).value)
             .sort((a, b) => b.to.tokenAmount.comparedTo(a.to.tokenAmount));
-
-        if (!onChainTrades.length) {
-            return null;
-        }
-        return onChainTrades[0]!;
-    }
-
-    private async getBestOnChainTrade(
-        from: PriceTokenAmount,
-        _availableDexes: string[],
-        slippageTolerance: number
-    ): Promise<EvmOnChainTrade | null> {
-        const fromBlockchain = from.blockchain as CbridgeCrossChainSupportedBlockchain;
-
-        const dexes = Object.values(typedTradeProviders[fromBlockchain]).filter(
-            dex => dex.supportReceiverAddress
-        );
-        const transitTokens = await Promise.all(
-            celerTransitTokens[fromBlockchain].map(token =>
-                PriceToken.createToken({
-                    address: token.address,
-                    blockchain: fromBlockchain
-                })
-            )
-        );
-
-        const onChainTrades = (
-            await Promise.all(
-                transitTokens.map(to =>
-                    Promise.allSettled(
-                        dexes.map(dex =>
-                            dex.calculate(from, to, {
-                                slippageTolerance,
-                                gasCalculation: 'disabled',
-                                useProxy: false
-                            })
-                        )
-                    ).then(settledTrades =>
-                        settledTrades
-                            .filter(value => value.status === 'fulfilled')
-                            .map(value => (value as PromiseFulfilledResult<EvmOnChainTrade>).value)
-                            .sort((a, b) => {
-                                const tradeAAmount = a.to.price.multipliedBy(
-                                    a.toTokenAmountMin.tokenAmount
-                                );
-                                const tradeBAmount = b.to.price.multipliedBy(
-                                    b.toTokenAmountMin.tokenAmount
-                                );
-                                return tradeBAmount.comparedTo(tradeAAmount);
-                            })
-                    )
-                )
-            )
-        )
-            .flat()
-            .sort((tradeA, tradeB) =>
-                tradeB.toTokenAmountMin.tokenAmount.comparedTo(tradeA.toTokenAmountMin.tokenAmount)
-            );
 
         if (!onChainTrades.length) {
             return null;

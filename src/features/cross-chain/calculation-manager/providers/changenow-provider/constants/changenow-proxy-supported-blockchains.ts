@@ -8,7 +8,8 @@ export const changenowProxySupportedBlockchains = [
     BLOCKCHAIN_NAME.AVALANCHE,
     BLOCKCHAIN_NAME.OPTIMISM,
     BLOCKCHAIN_NAME.FANTOM,
-    BLOCKCHAIN_NAME.PULSECHAIN
+    BLOCKCHAIN_NAME.PULSECHAIN,
+    BLOCKCHAIN_NAME.BASE
 ] as const;
 
 export type ChangenowProxySupportedBlockchain = (typeof changenowProxySupportedBlockchains)[number];

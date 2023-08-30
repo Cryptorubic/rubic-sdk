@@ -10,12 +10,14 @@ import { Exact } from 'src/features/on-chain/calculation-manager/providers/commo
 import { UniswapV3Route } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-route';
 import { UniswapV3RouterConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/models/uniswap-v3-router-configuration';
 import {
-    UNISWAP_V3_QUOTER_CONTRACT_ABI,
-    UNISWAP_V3_QUOTER_CONTRACT_ADDRESS
-} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/constants/quoter-contract-data';
-import { LiquidityPool } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
+    FeeAmount,
+    LiquidityPool
+} from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/models/liquidity-pool';
 import { UniswapV3QuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-abstract/utils/quoter-controller/uniswap-v3-quoter-controller';
-import { AbiItem } from 'web3-utils';
+import {
+    HORIZONDEX_QUOTER_CONTRACT_ABI,
+    HORIZONDEX_QUOTER_CONTRACT_ADDRESS
+} from 'src/features/on-chain/calculation-manager/providers/dexes/linea/horizondex/utils/quoter-controller/constants/quoter-contract-data';
 
 interface GetQuoterMethodsDataOptions {
     routesLiquidityPools: LiquidityPool[];
@@ -26,18 +28,17 @@ interface GetQuoterMethodsDataOptions {
     maxTransitTokens: number;
 }
 export class HorizondexUniswapV3QuoterController extends UniswapV3QuoterController {
+    protected readonly feeAmounts: FeeAmount[] = [8, 40, 300, 1000];
+
     constructor(
         blockchain: EvmBlockchainName,
-        routerConfiguration: UniswapV3RouterConfiguration<string>,
-        quoterContractAddress: string = UNISWAP_V3_QUOTER_CONTRACT_ADDRESS,
-        quoterContractABI: AbiItem[] = UNISWAP_V3_QUOTER_CONTRACT_ABI
+        routerConfiguration: UniswapV3RouterConfiguration<string>
     ) {
         super(
             blockchain,
             routerConfiguration,
-            quoterContractAddress,
-            quoterContractABI,
-            [300, 500, 1000, 3000, 10000]
+            HORIZONDEX_QUOTER_CONTRACT_ADDRESS,
+            HORIZONDEX_QUOTER_CONTRACT_ABI
         );
     }
 

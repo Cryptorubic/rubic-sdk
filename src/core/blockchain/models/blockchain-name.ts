@@ -1,4 +1,13 @@
+export const TEST_EVM_BLOCKCHAIN_NAME = {
+    MUMBAI: 'MUMBAI',
+    BINANCE_SMART_CHAIN_TESTNET: 'BSCT',
+    GOERLI: 'GOERLI',
+    FUJI: 'FUJI',
+    SCROLL_SEPOLIA: 'SCROLL_SEPOLIA'
+} as const;
+
 export const EVM_BLOCKCHAIN_NAME = {
+    ...TEST_EVM_BLOCKCHAIN_NAME,
     ETHEREUM: 'ETH',
     BINANCE_SMART_CHAIN: 'BSC',
     POLYGON: 'POLYGON',
@@ -37,7 +46,9 @@ export const EVM_BLOCKCHAIN_NAME = {
     BITCOIN_CASH: 'BITCOIN_CASH',
     ZK_SYNC: 'ZK_SYNC',
     PULSECHAIN: 'PULSECHAIN',
-    LINEA: 'LINEA'
+    LINEA: 'LINEA',
+    BASE: 'BASE',
+    MANTLE: 'MANTLE'
 } as const;
 
 export const BLOCKCHAIN_NAME = {
@@ -122,6 +133,8 @@ export const BLOCKCHAIN_NAME = {
 
 export type BlockchainName = (typeof BLOCKCHAIN_NAME)[keyof typeof BLOCKCHAIN_NAME];
 
+export type TestnetEvmBlockchain =
+    (typeof TEST_EVM_BLOCKCHAIN_NAME)[keyof typeof TEST_EVM_BLOCKCHAIN_NAME];
 export type EvmBlockchainName = (typeof EVM_BLOCKCHAIN_NAME)[keyof typeof EVM_BLOCKCHAIN_NAME];
 export type SolanaBlockchainName = typeof BLOCKCHAIN_NAME.SOLANA;
 export type NearBlockchainName = typeof BLOCKCHAIN_NAME.NEAR;

@@ -49,7 +49,8 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.BITCOIN_CASH,
     BLOCKCHAIN_NAME.ZK_SYNC,
     BLOCKCHAIN_NAME.PULSECHAIN,
-    BLOCKCHAIN_NAME.LINEA
+    BLOCKCHAIN_NAME.LINEA,
+    BLOCKCHAIN_NAME.MANTLE
 ] as const;
 
 type SupportedBlockchain = (typeof supportedBlockchains)[number];
@@ -113,7 +114,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.BITCOIN_CASH]: 'bitcoin-cash',
             [BLOCKCHAIN_NAME.ZK_SYNC]: 'ethereum',
             [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulsechain',
-            [BLOCKCHAIN_NAME.LINEA]: 'linea'
+            [BLOCKCHAIN_NAME.LINEA]: 'linea',
+            [BLOCKCHAIN_NAME.MANTLE]: 'mantle'
         };
 
         this.tokenBlockchainId = {
@@ -158,7 +160,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.BITCOIN_CASH]: 'bitcoin-cash',
             [BLOCKCHAIN_NAME.ZK_SYNC]: 'zksync',
             [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulsechain',
-            [BLOCKCHAIN_NAME.LINEA]: 'linea'
+            [BLOCKCHAIN_NAME.LINEA]: 'linea',
+            [BLOCKCHAIN_NAME.MANTLE]: 'mantle'
         };
     }
 
