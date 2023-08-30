@@ -72,7 +72,7 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
 
         const chainId = blockchainId[from.blockchain];
 
-        const { web3 } = Injector.web3PrivateService.getWeb3Private('EVM');
+        const web3 = Injector.web3PublicService.getWeb3Public(from.blockchain).web3Provider;
         const multicallContract = getMulticallContracts(this.config.multicallAddress, web3);
 
         const transitTokens = await Token.createTokens(

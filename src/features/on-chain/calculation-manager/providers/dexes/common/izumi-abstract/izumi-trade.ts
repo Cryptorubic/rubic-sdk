@@ -69,10 +69,12 @@ export class IzumiTrade extends EvmOnChainTrade {
     private readonly strictERC20Token: boolean = false;
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+        const tokenChain = blockchainId[this.from.blockchain];
         const swapParams = {
             feeChain: this.swapConfig.feeChain,
             tokenChain: this.swapConfig.tokenChain.map(token => ({
-                address: token
+                address: token,
+                chainId: tokenChain
             })) as unknown as TokenInfoFormatted[],
             inputAmount: this.from.stringWeiAmount,
             minOutputAmount: this.toTokenAmountMin.stringWeiAmount,
