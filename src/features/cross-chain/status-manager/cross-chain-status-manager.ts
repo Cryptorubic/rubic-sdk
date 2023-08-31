@@ -6,7 +6,6 @@ import {
     L2TransactionReceipt
 } from '@arbitrum/sdk';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { createClient } from '@layerzerolabs/scan-client';
 import { RubicSdkError } from 'src/common/errors';
 import {
     BLOCKCHAIN_NAME,
@@ -71,7 +70,7 @@ import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy
 export class CrossChainStatusManager {
     private readonly httpClient = Injector.httpClient;
 
-    private readonly LayzerZeroScanClient = createClient('mainnet');
+    // private readonly LayzerZeroScanClient = createClient('mainnet');
 
     private readonly getDstTxStatusFnMap: Record<CrossChainTradeType, GetDstTxDataFn | null> = {
         [CROSS_CHAIN_TRADE_TYPE.LIFI]: this.getLifiDstSwapStatus,
@@ -163,7 +162,8 @@ export class CrossChainStatusManager {
      * @returns Cross-chain transaction status and hash.
      */
     private async getStargateDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        const scanResponse = await this.LayzerZeroScanClient.getMessagesBySrcTxHash(data.srcTxHash);
+        const { createClient } = await import('@layerzerolabs/scan-client');
+        const scanResponse = await createClient('mainnet').getMessagesBySrcTxHash(data.srcTxHash);
         const targetTrade = scanResponse.messages.find(
             item => item.srcTxHash.toLocaleLowerCase() === data.srcTxHash.toLocaleLowerCase()
         );
