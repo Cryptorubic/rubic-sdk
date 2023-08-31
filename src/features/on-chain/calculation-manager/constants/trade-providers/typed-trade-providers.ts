@@ -2,6 +2,7 @@ import { Mutable } from 'src/common/utils/types';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { AlgebraTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/algebra-trade-providers';
 import { BridgersTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/bridgers-trade-providers';
+import { izumiTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/izumi-trade-providers';
 import { OneinchTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/oneinch-trade-providers';
 import { pancakeRouterProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/pancake-router-providers';
 import { UniswapV2TradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/uniswap-v2-trade-providers';
@@ -18,6 +19,7 @@ export const typedTradeProviders: OnChainTypedTradeProviders = [
     ...BridgersTradeProviders,
     // ...CurveTradeProviders, Removed because hack
     ...pancakeRouterProviders,
+    ...izumiTradeProviders,
     SyncSwapProvider,
     VooiProvider
 ].reduce(

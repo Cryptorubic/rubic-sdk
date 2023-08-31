@@ -39,6 +39,10 @@ import { GasPrice } from './models/gas-price';
 export class EvmWeb3Public extends Web3Public {
     protected readonly tokenContractAbi = ERC20_TOKEN_ABI;
 
+    public get web3Provider(): Web3 {
+        return this.web3;
+    }
+
     constructor(
         private readonly web3: Web3,
         blockchainName: EvmBlockchainName,
@@ -427,9 +431,13 @@ export class EvmWeb3Public extends Web3Public {
         let maxPriorityFeePerGas = null;
 
         if (block && block.baseFeePerGas) {
-            lastBaseFeePerGas = this.getBaseFee(block);
-            maxPriorityFeePerGas = await this.getMaxPriorityFeePerGas();
-            maxFeePerGas = block.baseFeePerGas * 2 + maxPriorityFeePerGas;
+            try {
+                lastBaseFeePerGas = this.getBaseFee(block);
+                maxPriorityFeePerGas = await this.getMaxPriorityFeePerGas();
+                maxFeePerGas = block.baseFeePerGas * 2 + maxPriorityFeePerGas;
+            } catch (err) {
+                console.debug(err);
+            }
         }
 
         return {
