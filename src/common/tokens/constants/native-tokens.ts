@@ -45,6 +45,13 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         name: 'ETH',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ARTHERA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ARTHERA,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Arthera',
+        symbol: 'AA',
+        decimals: 18
     })
 };
 
