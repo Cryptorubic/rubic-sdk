@@ -290,6 +290,13 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'WETH',
         decimals: 18
     }),
+    [BLOCKCHAIN_NAME.ARTHERA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ARTHERA,
+        address: '0xC7A183Ad373301d68f7E0Ee824c8c727C7D5B21d',
+        name: 'Wrapped Arthera',
+        symbol: 'WAA',
+        decimals: 18
+    }),
     [BLOCKCHAIN_NAME.ETHEREUM_CLASSIC]: new Token({
         blockchain: BLOCKCHAIN_NAME.ETHEREUM_CLASSIC,
         address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
