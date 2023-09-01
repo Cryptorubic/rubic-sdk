@@ -32,7 +32,7 @@ import { OpenOceanProvider } from 'src/features/on-chain/calculation-manager/pro
  * Contains methods to calculate on-chain trades.
  */
 export class OnChainManager {
-    public static readonly defaultCalculationTimeout = 10_000;
+    public static readonly defaultCalculationTimeout = 20_000;
 
     /**
      * List of all on-chain trade providers, combined by blockchains.
