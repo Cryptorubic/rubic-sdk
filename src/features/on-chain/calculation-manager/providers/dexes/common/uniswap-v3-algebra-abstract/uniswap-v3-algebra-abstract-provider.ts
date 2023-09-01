@@ -29,7 +29,8 @@ import { QuickSwapV3Trade } from 'src/features/on-chain/calculation-manager/prov
 import { QuickSwapV3PolygonZKEVMTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon-zkevm/quick-swap-v3/quick-swap-v3-trade';
 import { UniSwapV3ScrollSepoliaTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-sepolia/uni-swap-v3-scroll-sepolia/uni-swap-v3-scroll-sepolia-trade';
 import { AbiItem } from 'web3-utils';
-import { AlgebraIntegralTrade } from "../../arthera-testnet/algebra-integral/algebra-integral-trade";
+
+import { AlgebraIntegralTrade } from '../../arthera-testnet/algebra-integral/algebra-integral-trade';
 
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade

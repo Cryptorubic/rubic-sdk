@@ -6,9 +6,13 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/algebra/algebra-quoter-controller';
 import { UniswapV3AlgebraAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
-import { AlgebraIntegralRoute } from "./models/algebra-integral-route";
-import { AlgebraIntegralTradeStruct } from "./models/algebra-integral-trade-struct";
-import { ALGEBRA_INTEGRAL_ROUTER_CONTRACT_ABI, ALGEBRA_INTEGRAL_ROUTER_CONTRACT_ADDRESS } from "./constants/swap-router-contract-data";
+
+import {
+    ALGEBRA_INTEGRAL_ROUTER_CONTRACT_ABI,
+    ALGEBRA_INTEGRAL_ROUTER_CONTRACT_ADDRESS
+} from './constants/swap-router-contract-data';
+import { AlgebraIntegralRoute } from './models/algebra-integral-route';
+import { AlgebraIntegralTradeStruct } from './models/algebra-integral-trade-struct';
 
 export class AlgebraIntegralTrade extends UniswapV3AlgebraAbstractTrade {
     public static get type(): OnChainTradeType {

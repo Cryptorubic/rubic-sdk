@@ -5,7 +5,7 @@ import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculatio
 const defaultArtheraRoutingProvidersAddresses = [
     wrappedNativeTokensList[BLOCKCHAIN_NAME.ARTHERA]!.address, // WMATIC
     '0xEC250E6856e14A494cb1f0abC61d72348c79F418', // USDT
-    '0x83D4a9Ea77a4dbA073cD90b30410Ac9F95F93E7C', // USDC
+    '0x83D4a9Ea77a4dbA073cD90b30410Ac9F95F93E7C' // USDC
 ];
 
 const defaultArtheraWethAddress = wrappedNativeTokensList[BLOCKCHAIN_NAME.ARTHERA]!.address;

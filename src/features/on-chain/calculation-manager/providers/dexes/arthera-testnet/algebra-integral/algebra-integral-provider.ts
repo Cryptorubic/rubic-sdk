@@ -8,12 +8,19 @@ import {
 import { AlgebraQuoterController } from 'src/features/on-chain/calculation-manager/providers/dexes/common/algebra/algebra-quoter-controller';
 import { UniswapV3AlgebraTradeStructOmitPath } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
 import { UniswapV3AlgebraAbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
-import { AlgebraIntegralTrade } from "./algebra-integral-trade";
-import { ALGEBRA_INTEGRAL_PROVIDER_CONFIGURATION } from "./constants/provider-configuration";
-import { ALGEBRA_INTEGRAL_QUOTER_CONTRACT_ABI, ALGEBRA_INTEGRAL_QUOTER_CONTRACT_ADDRESS } from "./utils/quoter-controller/constants/quoter-contract-data";
-import { AlgebraIntegralRoute } from "./models/algebra-integral-route";
-import { ALGEBRA_INTEGRAL_ROUTER_CONTRACT_ABI, ALGEBRA_INTEGRAL_ROUTER_CONTRACT_ADDRESS } from "./constants/swap-router-contract-data";
-import { defaultArtheraProviderConfiguration } from "../default-constants";
+
+import { defaultArtheraProviderConfiguration } from '../default-constants';
+import { AlgebraIntegralTrade } from './algebra-integral-trade';
+import { ALGEBRA_INTEGRAL_PROVIDER_CONFIGURATION } from './constants/provider-configuration';
+import {
+    ALGEBRA_INTEGRAL_ROUTER_CONTRACT_ABI,
+    ALGEBRA_INTEGRAL_ROUTER_CONTRACT_ADDRESS
+} from './constants/swap-router-contract-data';
+import { AlgebraIntegralRoute } from './models/algebra-integral-route';
+import {
+    ALGEBRA_INTEGRAL_QUOTER_CONTRACT_ABI,
+    ALGEBRA_INTEGRAL_QUOTER_CONTRACT_ADDRESS
+} from './utils/quoter-controller/constants/quoter-contract-data';
 
 export class AlgebraIntegralProvider extends UniswapV3AlgebraAbstractProvider<AlgebraIntegralTrade> {
     protected readonly contractAddress = ALGEBRA_INTEGRAL_ROUTER_CONTRACT_ADDRESS;
