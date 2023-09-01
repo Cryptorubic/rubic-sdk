@@ -13,7 +13,9 @@ export const openoceanOnChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.GNOSIS,
     BLOCKCHAIN_NAME.OPTIMISM,
     BLOCKCHAIN_NAME.LINEA,
-    BLOCKCHAIN_NAME.POLYGON_ZKEVM
+    BLOCKCHAIN_NAME.POLYGON_ZKEVM,
+    BLOCKCHAIN_NAME.ZK_SYNC,
+    BLOCKCHAIN_NAME.BASE
 ] as const;
 
 export type OpenoceanOnChainSupportedBlockchain =
