@@ -15,13 +15,14 @@ import { UniswapV3AlgebraTradeStructOmitPath } from 'src/features/on-chain/calcu
 import { UniswapV3AlgebraAbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-provider';
 import { UNI_SWAP_V3_SCROLL_SEPOLIA_PROVIDER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-sepolia/uni-swap-v3-scroll-sepolia/constants/provider-configuration';
 import { UNI_SWAP_V3_SCROLL_SEPOLIA_ROUTER_CONFIGURATION } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-sepolia/uni-swap-v3-scroll-sepolia/constants/router-configuration';
-import { SCROLL_UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-sepolia/uni-swap-v3-scroll-sepolia/constants/scroll-trade-abi';
 import { UniSwapV3ScrollSepoliaTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-sepolia/uni-swap-v3-scroll-sepolia/uni-swap-v3-scroll-sepolia-trade';
 
-export class UniSwapV3ScrollSepoliaProvider extends UniswapV3AlgebraAbstractProvider<UniSwapV3ScrollSepoliaTrade> {
-    public readonly contractAddress = '0x17AFD0263D6909Ba1F9a8EAC697f76532365Fb95';
+import { UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI } from '../../common/uniswap-v3-abstract/constants/swap-router-contract-abi';
 
-    protected readonly contractAbi = SCROLL_UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
+export class UniSwapV3ScrollSepoliaProvider extends UniswapV3AlgebraAbstractProvider<UniSwapV3ScrollSepoliaTrade> {
+    public readonly contractAddress = '0x59a662Ed724F19AD019307126CbEBdcF4b57d6B1';
+
+    protected readonly contractAbi = UNISWAP_V3_SWAP_ROUTER_CONTRACT_ABI;
 
     public readonly blockchain = BLOCKCHAIN_NAME.SCROLL_SEPOLIA;
 
@@ -34,7 +35,7 @@ export class UniSwapV3ScrollSepoliaProvider extends UniswapV3AlgebraAbstractProv
     protected readonly quoterController = new UniswapV3QuoterController(
         this.blockchain,
         this.routerConfiguration,
-        '0xd5dd33650Ef1DC6D23069aEDC8EAE87b0D3619B2',
+        '0x805488DaA81c1b9e7C5cE3f1DCeA28F21448EC6A',
         UNISWAP_V3_QUOTER_CONTRACT_ABI,
         '0xB856587fe1cbA8600F75F1b1176E44250B11C788'
     );

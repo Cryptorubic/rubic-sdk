@@ -183,7 +183,7 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
                 this.from.stringWeiAmount,
                 '40000'
             ];
-            const fee = Web3Pure.toWei(0.00001);
+            const fee = Web3Pure.toWei(0.005);
 
             return {
                 contractAddress: scrollBridgeContractAddress[this.fromBlockchain]!.providerGateway,
