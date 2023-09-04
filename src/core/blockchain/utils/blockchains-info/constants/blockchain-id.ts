@@ -59,6 +59,7 @@ export const blockchainId: Record<BlockchainName, number> = {
     [BLOCKCHAIN_NAME.MUMBAI]: 80001,
     [BLOCKCHAIN_NAME.FUJI]: 43113,
     [BLOCKCHAIN_NAME.SCROLL_SEPOLIA]: 534351,
+    [BLOCKCHAIN_NAME.ARTHERA]: 10243,
     // Non EVN blockchains
     [BLOCKCHAIN_NAME.BITCOIN]: 5555,
     [BLOCKCHAIN_NAME.FILECOIN]: 314

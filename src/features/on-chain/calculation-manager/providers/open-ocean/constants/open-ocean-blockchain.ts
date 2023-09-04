@@ -15,5 +15,7 @@ export const openOceanBlockchainName: Record<OpenoceanOnChainSupportedBlockchain
     [BLOCKCHAIN_NAME.HARMONY]: 'harmony',
     [BLOCKCHAIN_NAME.OPTIMISM]: 'optimism',
     [BLOCKCHAIN_NAME.LINEA]: 'linea',
-    [BLOCKCHAIN_NAME.POLYGON_ZKEVM]: 'polygon_zkevm'
+    [BLOCKCHAIN_NAME.POLYGON_ZKEVM]: 'polygon_zkevm',
+    [BLOCKCHAIN_NAME.ZK_SYNC]: 'zksync',
+    [BLOCKCHAIN_NAME.BASE]: 'base'
 };

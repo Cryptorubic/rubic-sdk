@@ -30,6 +30,8 @@ import { QuickSwapV3PolygonZKEVMTrade } from 'src/features/on-chain/calculation-
 import { UniSwapV3ScrollSepoliaTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll-sepolia/uni-swap-v3-scroll-sepolia/uni-swap-v3-scroll-sepolia-trade';
 import { AbiItem } from 'web3-utils';
 
+import { AlgebraIntegralTrade } from '../../arthera-testnet/algebra-integral/algebra-integral-trade';
+
 export abstract class UniswapV3AlgebraAbstractProvider<
     T extends UniswapV3AlgebraAbstractTrade = UniswapV3AlgebraAbstractTrade
 > extends EvmOnChainProvider {
@@ -40,6 +42,7 @@ export abstract class UniswapV3AlgebraAbstractProvider<
     protected abstract readonly OnChainTradeClass:
         | UniswapV3TradeClass<T>
         | typeof AlgebraTrade
+        | typeof AlgebraIntegralTrade
         | typeof QuickSwapV3Trade
         | typeof QuickSwapV3PolygonZKEVMTrade
         | typeof UniSwapV3ScrollSepoliaTrade;
