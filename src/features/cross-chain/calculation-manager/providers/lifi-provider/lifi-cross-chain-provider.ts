@@ -35,7 +35,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
     private readonly lifi = new LiFi(getLifiConfig());
 
-    private readonly MIN_AMOUNT_USD = new BigNumber(30);
+    // @TODO set prod min amount 30$
+    private readonly MIN_AMOUNT_USD = new BigNumber(10);
 
     public isSupportedBlockchain(
         blockchain: BlockchainName

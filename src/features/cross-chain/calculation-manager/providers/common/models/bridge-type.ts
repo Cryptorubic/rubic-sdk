@@ -10,6 +10,7 @@ export const BRIDGE_TYPE = {
     AVALANCHE_BRIDGE: 'avalanche',
 
     CONNEXT: 'connext',
+    CELERIM: 'celerim',
 
     HOP: 'hop',
     HYPHEN: 'hyphen',

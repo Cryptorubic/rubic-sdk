@@ -17,7 +17,8 @@ export const LIFI_BRIDGE_TYPES = {
     CONNEXT_AMAROK: 'amarok',
     CIRCLE_CELER_BRIDGE: 'celercircle',
     LI_FUEL: 'lifuel',
-    WORMHOLE: 'portal'
+    WORMHOLE: 'portal',
+    CELERIM: 'celerim'
 } as const;
 
 export type LifiBridgeTypes = (typeof LIFI_BRIDGE_TYPES)[keyof typeof LIFI_BRIDGE_TYPES];
