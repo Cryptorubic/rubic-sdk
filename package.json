@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "4.22.3",
+    "version": "4.23.0-alpha-mantle-squid.0",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
