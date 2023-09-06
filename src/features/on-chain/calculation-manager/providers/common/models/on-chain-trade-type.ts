@@ -76,6 +76,9 @@ export const ON_CHAIN_TRADE_TYPE = {
     QUICK_SWAP: 'QUICK_SWAP',
     QUICK_SWAP_V3: 'QUICK_SWAP_V3',
 
+    PULSEX_V1: 'PULSEX_V1',
+    PULSEX_V2: 'PULSEX_V2',
+
     RAYDIUM: 'RAYDIUM',
     REF_FINANCE: 'REF_FINANCE',
     REN_BTC: 'REN_BTC',
@@ -118,14 +121,13 @@ export const ON_CHAIN_TRADE_TYPE = {
     WOO_FI: 'WOO_FI',
     WRAPPED: 'WRAPPED',
 
-    ZAPPY: 'ZAPPY',
-    ZIP_SWAP: 'ZIP_SWAP',
-    ZRX: 'ZRX',
-
     YUZU_SWAP: 'YUZU_SWAP',
 
-    PULSEX_V1: 'PULSEX_V1',
-    PULSEX_V2: 'PULSEX_V2'
+    XY_DEX: 'XY_DEX',
+
+    ZAPPY: 'ZAPPY',
+    ZIP_SWAP: 'ZIP_SWAP',
+    ZRX: 'ZRX'
 } as const;
 
 /**
