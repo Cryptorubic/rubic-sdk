@@ -2,6 +2,7 @@
  * List of on-chain trade types.
  */
 export const ON_CHAIN_TRADE_TYPE = {
+    AERODROME: 'AERODROME',
     ACRYPTOS: 'ACRYPTOS',
     ALDRIN_EXCHANGE: 'ALDRIN_EXCHANGE',
     ALGEBRA: 'ALGEBRA',

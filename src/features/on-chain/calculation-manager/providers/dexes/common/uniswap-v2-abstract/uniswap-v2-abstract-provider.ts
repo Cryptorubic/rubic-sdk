@@ -174,7 +174,7 @@ export abstract class UniswapV2AbstractProvider<
         );
     }
 
-    private async getAmountAndPath(
+    protected async getAmountAndPath(
         from: PriceToken<EvmBlockchainName>,
         to: PriceToken<EvmBlockchainName>,
         weiAmount: BigNumber,

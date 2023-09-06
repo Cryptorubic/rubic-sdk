@@ -40,30 +40,30 @@ export interface UniswapV2AbstractProviderStruct<T extends UniswapV2AbstractTrad
 export class PathFactory<T extends UniswapV2AbstractTrade> {
     private readonly web3Public: EvmWeb3Public;
 
-    private readonly from: PriceToken<EvmBlockchainName>;
+    protected readonly from: PriceToken<EvmBlockchainName>;
 
-    private readonly to: PriceToken<EvmBlockchainName>;
+    protected readonly to: PriceToken<EvmBlockchainName>;
 
     private readonly weiAmount: BigNumber;
 
-    private readonly exact: Exact;
+    protected readonly exact: Exact;
 
     private readonly options: UniswapV2CalculationOptions;
 
     private readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
 
-    private readonly UniswapV2TradeClass: UniswapV2TradeClass<T>;
+    protected readonly UniswapV2TradeClass: UniswapV2TradeClass<T>;
 
-    private readonly routingProvidersAddresses: ReadonlyArray<string>;
+    protected readonly routingProvidersAddresses: ReadonlyArray<string>;
 
-    private readonly maxTransitTokens: number;
+    protected readonly maxTransitTokens: number;
 
     private get walletAddress(): string | undefined {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain).address;
     }
 
     @Cache
-    private get stringWeiAmount(): string {
+    protected get stringWeiAmount(): string {
         return this.weiAmount.toFixed(0);
     }
 
@@ -235,7 +235,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         });
     }
 
-    private async getAllRoutes(): Promise<UniswapRoute[]> {
+    protected async getAllRoutes(): Promise<UniswapRoute[]> {
         const transitTokens = await Token.createTokens(
             this.routingProvidersAddresses,
             this.from.blockchain
