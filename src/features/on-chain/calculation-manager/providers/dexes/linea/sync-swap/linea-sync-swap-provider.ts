@@ -17,7 +17,12 @@ export class LineaSyncSwapProvider extends SyncSwapAbstractProvider {
 
     public readonly routeTokens = [
         '0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f', // WETH
-        '0x176211869cA2b568f2A7D4EE941E073a821EE1ff' // USDC
+        '0x176211869cA2b568f2A7D4EE941E073a821EE1ff', // USDC
+        '0x7d43aabc515c356145049227cee54b608342c0ad', // ceBUSD
+        '0xf5c6825015280cdfd0b56903f9f8b5a2233476f5', // ceBNB
+        '0x3aab2285ddcddad8edf438c1bab47e1a9d05a9b4', // WBTC
+        '0x5471ea8f739dd37e9b81be9c5c77754d8aa953e4', // ceAVAX
+        '0x265b25e22bcd7f10a5bd6e6410f10537cc7567e8' // ceMATIC
     ];
 
     public readonly masterAddress = '0x608Cb7C3168427091F5994A45Baf12083964B4A3';
