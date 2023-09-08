@@ -61,21 +61,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     ): boolean {
         const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = to.blockchain as StargateCrossChainSupportedBlockchain;
-        let fromSymbol = from.symbol;
-        if (fromBlockchain === BLOCKCHAIN_NAME.ARBITRUM && from.symbol === 'AETH') {
-            fromSymbol = 'ETH';
-        }
-        if (fromBlockchain === BLOCKCHAIN_NAME.FANTOM && from.symbol === 'USDC') {
-            fromSymbol = 'FUSDC';
-        }
-
-        let toSymbol = to.symbol;
-        if (toBlockchain === BLOCKCHAIN_NAME.ARBITRUM && to.symbol === 'AETH') {
-            toSymbol = 'ETH';
-        }
-        if (toBlockchain === BLOCKCHAIN_NAME.FANTOM && to.symbol === 'USDC') {
-            toSymbol = 'FUSDC';
-        }
+        const fromSymbol = StargateCrossChainProvider.getSymbol(from.symbol, fromBlockchain);
+        const toSymbol = StargateCrossChainProvider.getSymbol(to.symbol, toBlockchain);
 
         const srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
         const srcSupportedPools = stargateBlockchainSupportedPools[fromBlockchain];
@@ -279,8 +266,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = fromToken.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
 
-        const fromSymbol = fromToken.symbol;
-        const toSymbol = toToken.symbol;
+        const fromSymbol = StargateCrossChainProvider.getSymbol(fromToken.symbol, fromBlockchain);
+        const toSymbol = StargateCrossChainProvider.getSymbol(toToken.symbol, toBlockchain);
 
         let srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
         let dstPoolId = stargatePoolId[toSymbol as StargateBridgeToken];
@@ -381,13 +368,10 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             throw new RubicSdkError('Tokens are not supported.');
         }
 
-        let toSymbol = toToken.symbol as StargateBridgeToken;
-        if (toBlockchain === BLOCKCHAIN_NAME.ARBITRUM && toToken.symbol === 'AETH') {
-            toSymbol = 'ETH';
-        }
-        if (toBlockchain === BLOCKCHAIN_NAME.FANTOM && toToken.symbol === 'USDC') {
-            toSymbol = 'FUSDC';
-        }
+        const toSymbol = StargateCrossChainProvider.getSymbol(
+            toToken.symbol,
+            toBlockchain
+        ) as StargateBridgeToken;
 
         const toSymbolDirection = toBlockchainDirection[toSymbol];
         if (!toSymbolDirection) {
@@ -437,5 +421,15 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             },
             0.1
         );
+    }
+
+    private static getSymbol(symbol: string, blockchain: BlockchainName): string {
+        if (blockchain === BLOCKCHAIN_NAME.ARBITRUM && symbol === 'AETH') {
+            return 'ETH';
+        }
+        if (blockchain === BLOCKCHAIN_NAME.FANTOM && symbol === 'USDC') {
+            return 'FUSDC';
+        }
+        return symbol;
     }
 }
