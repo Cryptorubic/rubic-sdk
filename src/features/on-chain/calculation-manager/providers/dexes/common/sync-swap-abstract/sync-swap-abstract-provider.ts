@@ -85,7 +85,7 @@ export abstract class SyncSwapAbstractProvider extends EvmOnChainProvider {
             this.blockchain
         );
 
-        const sortedPaths = filteredPaths.filter(item => item.length === this.maxTransitTokens + 1);
+        const sortedPaths = filteredPaths.filter(item => item.length <= this.maxTransitTokens + 1);
 
         const bestRoute = await SyncSwapRouter.findBestAmountsForPathsExactIn(
             sortedPaths,
