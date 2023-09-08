@@ -7,6 +7,7 @@ import { OneinchTradeProviders } from 'src/features/on-chain/calculation-manager
 import { pancakeRouterProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/pancake-router-providers';
 import { UniswapV2TradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/uniswap-v2-trade-providers';
 import { UniswapV3TradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/uniswap-v3-trade-providers';
+import { xyDexTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/xy-dex-trade-providers';
 import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
 import { VooiProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/vooi/vooi-provider';
 import { SyncSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/sync-swap-provider';
@@ -20,6 +21,7 @@ export const typedTradeProviders: OnChainTypedTradeProviders = [
     // ...CurveTradeProviders, Removed because hack
     ...pancakeRouterProviders,
     ...izumiTradeProviders,
+    ...xyDexTradeProviders,
     SyncSwapProvider,
     VooiProvider
 ].reduce(

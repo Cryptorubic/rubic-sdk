@@ -85,5 +85,9 @@ export const SYMBIOSIS_CONTRACT_ADDRESS_V2: Record<
     [BLOCKCHAIN_NAME.SCROLL_SEPOLIA]: {
         providerRouter: '0xAED47A51AeFa6f95A388aDA3c459d94FF46fC4BB',
         providerGateway: '0x8Daf3F19dD8a27554BaE525075E90Df4E56a4c46'
+    },
+    [BLOCKCHAIN_NAME.ZETACHAIN]: {
+        providerRouter: '0xE52e3c838CC91C60a701E78B5043ba9eeEeb55db',
+        providerGateway: '0x13fF611B06bEb2A29a49cc3c825cD0eE74967bE3'
     }
 };
