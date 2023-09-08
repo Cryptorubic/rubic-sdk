@@ -1,9 +1,9 @@
 import { BigNumber } from 'ethers';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { Cache } from 'src/common/utils/decorators';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
-import { syncSwapStablePool } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/sync-swap-stable-pool';
+import { syncSwapStablePool } from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/sync-swap-stable-pool';
 import {
     ETHER,
     FOUR,
@@ -18,8 +18,8 @@ import {
     UINT128_MAX,
     UINT256_MAX,
     ZERO
-} from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/constants';
-import { SyncSwapPathFactory } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/sync-swap-path-factory';
+} from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/utils/constants';
+import { SyncSwapPathFactory } from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/utils/sync-swap-path-factory';
 import {
     BestPathsWithAmounts,
     GetAmountParams,
@@ -30,12 +30,13 @@ import {
     RoutePoolData,
     Step,
     StepWithAmount
-} from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/typings';
+} from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/utils/typings';
 
 export class SyncSwapRouter {
     public static async findBestAmountsForPathsExactIn(
         paths: Path[],
         amountInString: string,
+        blockchainName: EvmBlockchainName,
         _ts?: number
     ): Promise<BestPathsWithAmounts> {
         const amountIn = BigNumber.from(amountInString);
@@ -46,7 +47,7 @@ export class SyncSwapRouter {
 
         for (const amounts of pathAmounts) {
             const promise = new Promise<boolean>((resolve, reject) => {
-                SyncSwapRouter.calculateGroupAmounts(paths, amounts).then(group => {
+                SyncSwapRouter.calculateGroupAmounts(paths, amounts, blockchainName).then(group => {
                     if (group === null) {
                         reject(new Error('expired'));
                     } else {
@@ -426,7 +427,8 @@ export class SyncSwapRouter {
     private static async calculateAmountOutForStep(
         step: Step,
         amountIn: BigNumber,
-        quoteIn: BigNumber
+        quoteIn: BigNumber,
+        blockchainName: EvmBlockchainName
     ): Promise<[BigNumber, BigNumber, Step | null]> {
         const isTokenAIn = step.pool.tokenA === step.tokenIn;
         const [reserveIn, reserveOut] = isTokenAIn
@@ -444,7 +446,8 @@ export class SyncSwapRouter {
                 : [step.pool.tokenB, step.pool.tokenA];
             const { fromPrecisionMultiplier, toPrecisionMultiplier } = await this.getPoolPrecision(
                 step.pool.pool,
-                tokenInAddress
+                tokenInAddress,
+                blockchainName
             );
 
             tokenInPrecisionMultiplier = BigNumber.from(fromPrecisionMultiplier);
@@ -497,7 +500,8 @@ export class SyncSwapRouter {
     public static async calculatePathAmountsByInput(
         path: Path,
         amountIn: BigNumber,
-        _updateReserves: boolean
+        _updateReserves: boolean,
+        blockchainName: EvmBlockchainName
     ): Promise<PathWithAmounts | null> {
         const stepsWithAmount: StepWithAmount[] = [];
         let amountInNext: BigNumber = amountIn;
@@ -508,7 +512,12 @@ export class SyncSwapRouter {
 
             const [stepAmountOut, stepQuoteOut, updatedStep] =
                 // eslint-disable-next-line no-await-in-loop
-                await SyncSwapRouter.calculateAmountOutForStep(step, amountInNext, quoteInNext);
+                await SyncSwapRouter.calculateAmountOutForStep(
+                    step,
+                    amountInNext,
+                    quoteInNext,
+                    blockchainName
+                );
 
             if (stepAmountOut.isZero()) {
                 return null;
@@ -537,7 +546,8 @@ export class SyncSwapRouter {
 
     private static async calculateGroupAmounts(
         paths: Path[],
-        amounts: BigNumber[]
+        amounts: BigNumber[],
+        blockchainName: EvmBlockchainName
     ): Promise<GroupAmounts | null> {
         const pathsWithAmounts: PathWithAmounts[] = [];
         let amountOut: BigNumber = ZERO;
@@ -564,7 +574,12 @@ export class SyncSwapRouter {
 
             const pathWithAmounts: PathWithAmounts | null =
                 // eslint-disable-next-line no-await-in-loop
-                await SyncSwapRouter.calculatePathAmountsByInput(path, pathAmountIn, true);
+                await SyncSwapRouter.calculatePathAmountsByInput(
+                    path,
+                    pathAmountIn,
+                    true,
+                    blockchainName
+                );
 
             if (pathWithAmounts != null) {
                 for (const step of pathWithAmounts.stepsWithAmount) {
@@ -589,9 +604,10 @@ export class SyncSwapRouter {
     @Cache
     private static async getPoolPrecision(
         address: string,
-        fromAddress: string
+        fromAddress: string,
+        blockchainName: EvmBlockchainName
     ): Promise<{ fromPrecisionMultiplier: string; toPrecisionMultiplier: string }> {
-        const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ZK_SYNC);
+        const web3Public = Injector.web3PublicService.getWeb3Public(blockchainName);
 
         const token0 = await web3Public.callContractMethod(
             address,

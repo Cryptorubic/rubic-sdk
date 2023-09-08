@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token, wrappedNativeTokensList } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
@@ -13,14 +13,26 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
-import { SyncSwapTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/sync-swap-trade';
-import { SyncSwapFactory } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/sync-swap-factory';
-import { SyncSwapPathFactory } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/sync-swap-path-factory';
-import { SyncSwapRouter } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/sync-swap-router';
-import { RoutePools } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/typings';
+import { SyncSwapAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/sync-swap-abstract-trade';
+import { SyncSwapFactory } from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/utils/sync-swap-factory';
+import { SyncSwapPathFactory } from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/utils/sync-swap-path-factory';
+import { SyncSwapRouter } from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/utils/sync-swap-router';
+import { RoutePools } from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/utils/typings';
 
-export class SyncSwapProvider extends EvmOnChainProvider {
-    public readonly blockchain = BLOCKCHAIN_NAME.ZK_SYNC;
+export abstract class SyncSwapAbstractProvider extends EvmOnChainProvider {
+    public abstract blockchain: EvmBlockchainName;
+
+    protected abstract dexContractAddress: string;
+
+    protected abstract routerHelperContract: string;
+
+    protected abstract vault: string;
+
+    protected abstract factories: string[];
+
+    protected abstract routeTokens: string[];
+
+    protected abstract masterAddress: string;
 
     private readonly defaultOptions = evmProviderDefaultOptions;
 
@@ -32,7 +44,7 @@ export class SyncSwapProvider extends EvmOnChainProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options?: OnChainCalculationOptions
-    ): Promise<SyncSwapTrade> {
+    ): Promise<SyncSwapAbstractTrade> {
         const fromAddress =
             options?.useProxy || this.defaultOptions.useProxy
                 ? rubicProxyContractAddress[from.blockchain].gateway
@@ -67,12 +79,14 @@ export class SyncSwapProvider extends EvmOnChainProvider {
 
         const filteredPaths = await SyncSwapPathFactory.getBestPath(
             paths,
-            fromWithoutFee.stringWeiAmount
+            fromWithoutFee.stringWeiAmount,
+            this.blockchain
         );
 
         const bestRoute = await SyncSwapRouter.findBestAmountsForPathsExactIn(
             filteredPaths,
-            fromWithoutFee.stringWeiAmount
+            fromWithoutFee.stringWeiAmount,
+            this.blockchain
         );
 
         const to = new PriceTokenAmount({
@@ -99,7 +113,11 @@ export class SyncSwapProvider extends EvmOnChainProvider {
             bestPathWithAmounts: bestRoute
         };
 
-        return new SyncSwapTrade(tradeStruct, fullOptions.providerAddress);
+        return new SyncSwapAbstractTrade(
+            tradeStruct,
+            fullOptions.providerAddress,
+            this.dexContractAddress
+        );
     }
 
     private async getAvailablePools(
@@ -110,16 +128,12 @@ export class SyncSwapProvider extends EvmOnChainProvider {
             from.address,
             toToken.address,
             this.walletAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-            '0x621425a1Ef6abE91058E9712575dcc4258F8d091',
-            [
-                '0xf2dad89f2788a8cd54625c60b55cd3d2d0aca7cb', // Stable
-                '0x5b9f21d407f35b10cbfddca17d5d84b129356ea3' // Regular
-            ],
-            [
-                '0x5aea5775959fbc2557cc8789bc1bf90a239d9a91', // WETH
-                '0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4' // USDC
-            ].map(address => address.toLowerCase()),
-            '0xbb05918e9b4ba9fe2c8384d223f0844867909ffb'
+            this.vault,
+            this.factories.map(address => address.toLowerCase()),
+            this.routeTokens.map(address => address.toLowerCase()),
+            this.masterAddress,
+            this.routerHelperContract,
+            this.blockchain
         );
     }
 }
