@@ -106,7 +106,7 @@ export abstract class XyDexAbstractProvider extends EvmOnChainProvider {
             srcQuoteTokenAmount: from.stringWeiAmount,
             dstChainId: chainId,
             dstQuoteTokenAddress,
-            slippage: options.slippageTolerance
+            slippage: options.slippageTolerance * 100
         };
 
         const trade = await this.httpClient.get<XyQuoteResponse>(
