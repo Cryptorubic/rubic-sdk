@@ -59,7 +59,21 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         name: 'Zeta',
         symbol: 'ZETA',
         decimals: 18
-    })
+    }),
+    [BLOCKCHAIN_NAME.TAIKO]: new Token({
+        blockchain: BLOCKCHAIN_NAME.TAIKO,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ether',
+        symbol: 'ETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SEPOLIA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SEPOLIA,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ether',
+        symbol: 'ETH',
+        decimals: 18
+    }),
 };
 
 export const nativeTokensList: Record<BlockchainName, Token> = {
