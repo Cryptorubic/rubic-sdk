@@ -21,4 +21,6 @@ export class ZkSyncSyncSwapProvider extends SyncSwapAbstractProvider {
     ];
 
     public readonly masterAddress = '0xbb05918e9b4ba9fe2c8384d223f0844867909ffb';
+
+    public readonly maxTransitTokens = 1;
 }
