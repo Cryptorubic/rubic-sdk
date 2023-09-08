@@ -61,12 +61,21 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     ): boolean {
         const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = to.blockchain as StargateCrossChainSupportedBlockchain;
-        const fromSymbol =
-            fromBlockchain === BLOCKCHAIN_NAME.ARBITRUM && from.symbol === 'AETH'
-                ? 'ETH'
-                : from.symbol;
-        const toSymbol =
-            toBlockchain === BLOCKCHAIN_NAME.ARBITRUM && to.symbol === 'AETH' ? 'ETH' : to.symbol;
+        let fromSymbol = from.symbol;
+        if (fromBlockchain === BLOCKCHAIN_NAME.ARBITRUM && from.symbol === 'AETH') {
+            fromSymbol = 'ETH';
+        }
+        if (fromBlockchain === BLOCKCHAIN_NAME.FANTOM && from.symbol === 'USDC') {
+            fromSymbol = 'FUSDC';
+        }
+
+        let toSymbol = to.symbol;
+        if (toBlockchain === BLOCKCHAIN_NAME.ARBITRUM && to.symbol === 'AETH') {
+            toSymbol = 'ETH';
+        }
+        if (toBlockchain === BLOCKCHAIN_NAME.FANTOM && to.symbol === 'USDC') {
+            toSymbol = 'FUSDC';
+        }
 
         const srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
         const srcSupportedPools = stargateBlockchainSupportedPools[fromBlockchain];
@@ -372,11 +381,14 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             throw new RubicSdkError('Tokens are not supported.');
         }
 
-        const toSymbol = (
-            toBlockchain === BLOCKCHAIN_NAME.ARBITRUM && toToken.symbol === 'AETH'
-                ? 'ETH'
-                : toToken.symbol
-        ) as StargateBridgeToken;
+        let toSymbol = toToken.symbol as StargateBridgeToken;
+        if (toBlockchain === BLOCKCHAIN_NAME.ARBITRUM && toToken.symbol === 'AETH') {
+            toSymbol = 'ETH';
+        }
+        if (toBlockchain === BLOCKCHAIN_NAME.FANTOM && toToken.symbol === 'USDC') {
+            toSymbol = 'FUSDC';
+        }
+
         const toSymbolDirection = toBlockchainDirection[toSymbol];
         if (!toSymbolDirection) {
             throw new RubicSdkError('Tokens are not supported.');
