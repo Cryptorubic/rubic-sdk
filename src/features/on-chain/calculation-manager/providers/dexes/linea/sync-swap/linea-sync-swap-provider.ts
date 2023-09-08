@@ -26,4 +26,6 @@ export class LineaSyncSwapProvider extends SyncSwapAbstractProvider {
     ];
 
     public readonly masterAddress = '0x608Cb7C3168427091F5994A45Baf12083964B4A3';
+
+    public readonly maxTransitTokens = 1;
 }

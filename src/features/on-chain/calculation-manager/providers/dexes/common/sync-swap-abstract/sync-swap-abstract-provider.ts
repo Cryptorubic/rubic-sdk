@@ -34,6 +34,8 @@ export abstract class SyncSwapAbstractProvider extends EvmOnChainProvider {
 
     protected abstract masterAddress: string;
 
+    protected abstract maxTransitTokens: number;
+
     private readonly defaultOptions = evmProviderDefaultOptions;
 
     public get type(): OnChainTradeType {
@@ -83,8 +85,10 @@ export abstract class SyncSwapAbstractProvider extends EvmOnChainProvider {
             this.blockchain
         );
 
+        const sortedPaths = filteredPaths.filter(item => item.length <= this.maxTransitTokens + 1);
+
         const bestRoute = await SyncSwapRouter.findBestAmountsForPathsExactIn(
-            filteredPaths,
+            sortedPaths,
             fromWithoutFee.stringWeiAmount,
             this.blockchain
         );
