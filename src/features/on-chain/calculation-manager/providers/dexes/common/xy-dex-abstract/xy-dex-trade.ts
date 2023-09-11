@@ -111,7 +111,7 @@ export class XyDexTrade extends EvmOnChainTrade {
             srcQuoteTokenAmount: this.from.stringWeiAmount,
             dstChainId: chainId,
             dstQuoteTokenAddress,
-            slippage: this.slippageTolerance,
+            slippage: this.slippageTolerance * 100,
             receiver,
             srcSwapProvider: this.provider
         };

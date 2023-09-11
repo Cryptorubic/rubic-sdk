@@ -15,17 +15,19 @@ import {
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
-import { syncSwapAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/sync-swap-abi';
-import { BestPathsWithAmounts } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/typings';
+import { syncSwapAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/sync-swap-abi';
+import { BestPathsWithAmounts } from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/utils/typings';
 
-export class SyncSwapTrade extends EvmOnChainTrade {
-    public readonly dexContractAddress = '0x2da10A1e27bF85cEdD8FFb1AbBe97e53391C0295';
+export class SyncSwapAbstractTrade extends EvmOnChainTrade {
+    public readonly dexContractAddress: string;
 
     private readonly bestPathWithAmounts: BestPathsWithAmounts;
 
+    // @TODO need to start using this method.
     /** @internal */
     public static async getGasLimit(
-        tradeStruct: EvmOnChainTradeStruct & { bestPathWithAmounts: BestPathsWithAmounts }
+        tradeStruct: EvmOnChainTradeStruct & { bestPathWithAmounts: BestPathsWithAmounts },
+        dexContractAddress: string
     ): Promise<BigNumber | null> {
         const fromBlockchain = tradeStruct.from.blockchain;
         const walletAddress =
@@ -35,9 +37,10 @@ export class SyncSwapTrade extends EvmOnChainTrade {
         }
 
         try {
-            const transactionConfig = await new SyncSwapTrade(
+            const transactionConfig = await new SyncSwapAbstractTrade(
                 tradeStruct,
-                EvmWeb3Pure.EMPTY_ADDRESS
+                EvmWeb3Pure.EMPTY_ADDRESS,
+                dexContractAddress
             ).encode({ fromAddress: walletAddress });
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
@@ -64,7 +67,8 @@ export class SyncSwapTrade extends EvmOnChainTrade {
 
     constructor(
         tradeStruct: EvmOnChainTradeStruct & { bestPathWithAmounts: BestPathsWithAmounts },
-        providerAddress: string
+        providerAddress: string,
+        dexContractAddress: string
     ) {
         super(tradeStruct, providerAddress);
 
@@ -77,6 +81,7 @@ export class SyncSwapTrade extends EvmOnChainTrade {
             oneinchApiParams.nativeAddress
         );
         this.bestPathWithAmounts = tradeStruct.bestPathWithAmounts;
+        this.dexContractAddress = dexContractAddress;
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
