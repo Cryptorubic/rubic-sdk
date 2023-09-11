@@ -69,10 +69,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as SymbiosisCrossChainSupportedBlockchain;
-        const useProxy =
-            from.blockchain === BLOCKCHAIN_NAME.BASE
-                ? false
-                : options?.useProxy?.[this.type] ?? true;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
 
         const config = BlockchainsInfo.isTestBlockchainName(fromBlockchain) ? 'testnet' : 'mainnet';
         const symbiosis = new Symbiosis(config, 'rubic');
