@@ -65,7 +65,9 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
     public static callForRoutes(
         blockchain: EvmBlockchainName,
         exact: Exact,
-        routesMethodArguments: [string, string[]][] | [string, [string, string, boolean, string]][]
+        routesMethodArguments:
+            | [string, string[]][]
+            | [string, [[string, string, boolean, string]]][]
     ): Promise<ContractMulticallResponse<string[]>[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
         const methodName = exact === 'input' ? 'getAmountsOut' : 'getAmountsIn';

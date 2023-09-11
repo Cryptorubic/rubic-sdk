@@ -19,12 +19,12 @@ export class AerodromePathFactory extends PathFactory<AerodromeTrade> {
 
         const initialPath = [this.from];
         const routesPaths: Token[][] = [];
-        const routesMethodArguments: [string, [string, string, boolean, string]][] = [];
+        const routesMethodArguments: [string, [[string, string, boolean, string]]][] = [];
 
         const updRoutesMethodArguments = (tokenA: string, tokenB: string, isStable: boolean) => {
             routesMethodArguments.push([
                 this.stringWeiAmount,
-                [tokenA, tokenB, isStable, '0x420DD381b31aEf6683db6B902084cB0FFECe40Da']
+                [[tokenA, tokenB, isStable, '0x420DD381b31aEf6683db6B902084cB0FFECe40Da']]
             ]);
         };
 
@@ -66,7 +66,7 @@ export class AerodromePathFactory extends PathFactory<AerodromeTrade> {
         );
 
         const tokens = responses.map((response, index) => {
-            if (!response.success || !response.output) {
+            if (!response.success || !response.output || !(response.output[1] !== '0')) {
                 return null;
             }
             const amounts = response.output;
