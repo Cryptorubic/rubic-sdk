@@ -28,6 +28,7 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-bridge-token';
 import { stargatePoolId } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pool-id';
 import { stargatePoolsDecimals } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-pools-decimals';
+import { StargateCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/stargate-cross-chain-provider';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
@@ -251,8 +252,11 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             : stargateContractAddress[fromBlockchain];
         const dstChainId = stargateChainId[toBlockchain];
 
-        let srcPoolId = stargatePoolId[from.symbol as StargateBridgeToken];
-        let dstPoolId = stargatePoolId[to.symbol as StargateBridgeToken];
+        const fromSymbol = StargateCrossChainProvider.getSymbol(from.symbol, fromBlockchain);
+        const toSymbol = StargateCrossChainProvider.getSymbol(to.symbol, toBlockchain);
+
+        let srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
+        let dstPoolId = stargatePoolId[toSymbol as StargateBridgeToken];
 
         // @TODO FIX STARGATE MULTIPLE POOLS
         if (
@@ -424,7 +428,8 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         dstSwapData?: string,
         receiverAddress?: string
     ): unknown[] {
-        const pool = stargatePoolId[this.to.symbol as StargateBridgeToken];
+        const toSymbol = StargateCrossChainProvider.getSymbol(this.to.symbol, this.to.blockchain);
+        const pool = stargatePoolId[toSymbol as StargateBridgeToken];
         const targetPoolDecimals = stargatePoolsDecimals[this.to.symbol as StargateBridgeToken];
         const amount = Web3Pure.toWei(this.toTokenAmountMin, targetPoolDecimals);
         const fee = Web3Pure.toWei(

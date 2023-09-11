@@ -105,6 +105,11 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 };
             }
 
+            const wrongFantomUsdc = '0x04068DA6C83AFCFA0e13ba15A6696662335D5B75';
+            if (from.address === wrongFantomUsdc || toToken.address === wrongFantomUsdc) {
+                throw new RubicSdkError('Trade to this tokens is not allowed');
+            }
+
             const hasDirectRoute = StargateCrossChainProvider.hasDirectRoute(from, toToken);
 
             const feeInfo = await this.getFeeInfo(
@@ -423,7 +428,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    private static getSymbol(symbol: string, blockchain: BlockchainName): string {
+    public static getSymbol(symbol: string, blockchain: BlockchainName): string {
         if (blockchain === BLOCKCHAIN_NAME.ARBITRUM && symbol === 'AETH') {
             return 'ETH';
         }
