@@ -52,6 +52,13 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         name: 'Arthera',
         symbol: 'AA',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ZETACHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Zeta',
+        symbol: 'ZETA',
+        decimals: 18
     })
 };
 

@@ -1,12 +1,12 @@
 import { BigNumber } from 'ethers';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
-import { routerSupportAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/router-support-abi';
+import { routerSupportAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/router-support-abi';
 import {
     RoutePoolData,
     RoutePools,
     RoutePoolsBlockchain
-} from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/typings';
+} from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/utils/typings';
 
 type StringRoutePoolData = Omit<RoutePoolData, 'reserveA' | 'reserveB'> & {
     reserveA: string;
@@ -55,12 +55,14 @@ export class SyncSwapFactory {
         vault: string,
         factories: string[],
         routeTokens: string[],
-        masterAddress: string
+        masterAddress: string,
+        routerHelperAddress: string,
+        blockchain: EvmBlockchainName
     ): Promise<RoutePools | null> {
         try {
-            const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.ZK_SYNC);
+            const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
             const response = (await web3Public.callContractMethod(
-                '0x5c07e74cb541c3d1875aeee441d691ded6eba204',
+                routerHelperAddress,
                 routerSupportAbi,
                 'getRoutePools',
                 [tokenA, tokenB, factories, routeTokens, masterAddress, account]

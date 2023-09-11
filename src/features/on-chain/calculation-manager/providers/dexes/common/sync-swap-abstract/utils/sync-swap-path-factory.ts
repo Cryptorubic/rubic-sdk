@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers';
-import { SyncSwapRouter } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/utils/sync-swap-router';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { SyncSwapRouter } from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/utils/sync-swap-router';
 
 import { MAX_FEE, STABLE_POOL_A, ZERO } from './constants';
 import { GetAmountParams, Path, RoutePoolData, RoutePools, Step } from './typings';
@@ -219,14 +220,19 @@ export class SyncSwapPathFactory {
         return paths;
     }
 
-    public static async getBestPath(paths: Path[], amountIn: string): Promise<Path[]> {
+    public static async getBestPath(
+        paths: Path[],
+        amountIn: string,
+        blockchainName: EvmBlockchainName
+    ): Promise<Path[]> {
         const pathAmountIn = BigNumber.from(amountIn);
         const pathsWithAmount = await Promise.all(
             paths.map(async (path, index) => ({
                 pathWithAmounts: await SyncSwapRouter.calculatePathAmountsByInput(
                     path,
                     pathAmountIn,
-                    false
+                    false,
+                    blockchainName
                 ),
                 index
             }))
