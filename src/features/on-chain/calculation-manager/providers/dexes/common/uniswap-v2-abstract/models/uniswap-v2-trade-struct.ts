@@ -6,4 +6,5 @@ export interface UniswapV2TradeStruct extends EvmOnChainTradeStruct {
     exact: Exact;
     wrappedPath: ReadonlyArray<Token> | Token[];
     deadlineMinutes: number;
+    routPoolInfo: [string, string, boolean, string] | undefined;
 }

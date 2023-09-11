@@ -143,6 +143,7 @@ export abstract class UniswapV2AbstractProvider<
         );
 
         const wrappedPath = route.path;
+        const routPoolInfo = route?.routPoolInfo;
         const path = createTokenNativeAddressProxyInPathStartAndEnd(
             wrappedPath,
             EvmWeb3Pure.nativeTokenAddress
@@ -152,6 +153,7 @@ export abstract class UniswapV2AbstractProvider<
             to,
             exact,
             path,
+            routPoolInfo,
             wrappedPath,
             deadlineMinutes: fullOptions.deadlineMinutes,
             slippageTolerance: fullOptions.slippageTolerance,

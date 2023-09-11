@@ -14,4 +14,18 @@ export class AerodromeTrade extends UniswapV2AbstractTrade {
     public static readonly contractAbi = AERODROME_ABI;
 
     public readonly dexContractAddress = AERODROME_CONTRACT_ADDRESS;
+
+    protected getCallParameters(receiverAddress?: string): unknown[] {
+        const { amountIn, amountOut } = this.getAmountInAndAmountOut();
+        const amountParameters = this.from.isNative ? [amountOut] : [amountIn, amountOut];
+
+        const path = this.routPoolInfo;
+
+        return [
+            ...amountParameters,
+            [path],
+            receiverAddress || this.walletAddress,
+            this.deadlineMinutesTimestamp
+        ];
+    }
 }

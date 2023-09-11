@@ -6,6 +6,7 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
+import { DefaultRoutesMethodArguments } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/routes-method-arguments';
 import { UniswapV2AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import { MUTE_SWAP_CONTRACT_ADDRESS } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/mute-swap/constants';
 import { muteSwapAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/mute-swap/mute-swap-abi';
@@ -14,7 +15,7 @@ export class MuteSwapTrade extends UniswapV2AbstractTrade {
     public static callForRoutes(
         blockchain: EvmBlockchainName,
         exact: Exact,
-        routesMethodArguments: [string, string[]][]
+        routesMethodArguments: DefaultRoutesMethodArguments
     ): Promise<ContractMulticallResponse<string[]>[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
         const methodName = exact === 'input' ? 'getAmountsOut' : 'getAmountsIn';

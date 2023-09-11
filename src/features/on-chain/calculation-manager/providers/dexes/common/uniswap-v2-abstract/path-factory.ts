@@ -11,6 +11,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
+import { DefaultRoutesMethodArguments } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/routes-method-arguments';
 import {
     UniswapCalculatedInfo,
     UniswapCalculatedInfoWithProfit
@@ -220,6 +221,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
                     from,
                     to,
                     path: route.path,
+                    routPoolInfo: route?.routPoolInfo,
                     wrappedPath: route.path,
                     exact: this.exact,
                     deadlineMinutes: this.options.deadlineMinutes,
@@ -247,7 +249,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
         const initialPath = [this.from];
         const routesPaths: Token[][] = [];
-        const routesMethodArguments: [string, string[]][] = [];
+        const routesMethodArguments: DefaultRoutesMethodArguments = [];
 
         const recGraphVisitor = (path: Token[], transitTokensLimit: number): void => {
             if (path.length === transitTokensLimit + 1) {

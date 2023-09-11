@@ -1,6 +1,5 @@
 import { XyDexArbitrumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/arbitrum/xy-dex-arbitrum/xy-dex-arbitrum-provider';
 import { XyDexAvalancheProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/xy-dex-avalanche/xy-dex-avalanche-provider';
-import { XyDexBaseProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/base/xy-dex-base/xy-dex-base-provider';
 import { XyDexBscProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/xy-dex-bsc/xy-dex-bsc-provider';
 import { XyDexEthereumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/xy-dex-ethereum/xy-dex-ethereum-provider';
 import { XyDexFantomProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/xy-dex-fantom/xy-dex-fantom-provider';
@@ -22,6 +21,6 @@ export const xyDexTradeProviders = [
     XyDexMoonriverProvider,
     XyDexZksyncProvider,
     XyDexZkevmProvider,
-    XyDexLineaProvider,
-    XyDexBaseProvider
+    XyDexLineaProvider
+    // XyDexBaseProvider
 ];
