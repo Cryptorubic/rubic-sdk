@@ -19,8 +19,8 @@ export const SYMBIOSIS_CONTRACT_ADDRESS_V2: Record<
         providerGateway: '0x25bEE8C21D1d0ec2852302fd7E674196EA298eC6'
     },
     [BLOCKCHAIN_NAME.AVALANCHE]: {
-        providerRouter: '0xf1C374D065719Ce1Fdc63E2c5C13146813c0A83b',
-        providerGateway: '0x384157027B1CDEAc4e26e3709667BB28735379Bb'
+        providerRouter: '0x7bD0a0549e546f4e1C2D8eC53F705f8f60559bb1',
+        providerGateway: '0x3006Dd3B40f33598A0a219602998D8C3715e75E5'
     },
     [BLOCKCHAIN_NAME.BOBA]: {
         providerRouter: '0xcE8f24A58D85eD5c5A6824f7be1F8d4711A0eb4C',
@@ -39,7 +39,7 @@ export const SYMBIOSIS_CONTRACT_ADDRESS_V2: Record<
         providerGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278'
     },
     [BLOCKCHAIN_NAME.ZK_SYNC]: {
-        providerRouter: '0x8B791913eB07C32779a16750e3868aA8495F5964',
+        providerRouter: '0x4f30036b5858f77F98d8D35c3b21BEb18916Ba9a',
         providerGateway: '0x2F7c5901DeBFb7faD804Db800F226de3dd0cffd5'
     },
     [BLOCKCHAIN_NAME.ARBITRUM]: {
@@ -51,16 +51,16 @@ export const SYMBIOSIS_CONTRACT_ADDRESS_V2: Record<
         providerGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278'
     },
     [BLOCKCHAIN_NAME.POLYGON_ZKEVM]: {
-        providerRouter: '0xcE8f24A58D85eD5c5A6824f7be1F8d4711A0eb4C',
-        providerGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278'
+        providerRouter: '0xDF41Ce9d15e9b6773ef20cA682AFE56af6Bb3F94',
+        providerGateway: '0x3b561BdeDf4Ebaa708633B73D58B57EB7CD970d3'
     },
     [BLOCKCHAIN_NAME.LINEA]: {
         providerRouter: '0xcE8f24A58D85eD5c5A6824f7be1F8d4711A0eb4C',
         providerGateway: '0xAdB2d3b711Bb8d8Ea92ff70292c466140432c278'
     },
     [BLOCKCHAIN_NAME.BASE]: {
-        providerRouter: '0x7057aB3fB2BeE9c18e0cDe4240DE4ff7f159E365',
-        providerGateway: '0xa0079829B9F1Edc5DD0DE3eC104f281745C4bD81'
+        providerRouter: '0x6F0f6393e45fE0E7215906B6f9cfeFf53EA139cf',
+        providerGateway: '0x4cfA66497Fa84D739a0f785FBcEe9196f1C64e4a'
     },
     [BLOCKCHAIN_NAME.MANTLE]: {
         providerRouter: '0xcE8f24A58D85eD5c5A6824f7be1F8d4711A0eb4C',
