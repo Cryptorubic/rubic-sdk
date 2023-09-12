@@ -106,7 +106,10 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             }
 
             const wrongFantomUsdc = '0x04068DA6C83AFCFA0e13ba15A6696662335D5B75';
-            if (from.address === wrongFantomUsdc || toToken.address === wrongFantomUsdc) {
+            if (
+                compareAddresses(from.address, wrongFantomUsdc) ||
+                compareAddresses(toToken.address, wrongFantomUsdc)
+            ) {
                 throw new RubicSdkError('Trade to this tokens is not allowed');
             }
 
