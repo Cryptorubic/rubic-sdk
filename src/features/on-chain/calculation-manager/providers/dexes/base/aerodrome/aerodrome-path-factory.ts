@@ -7,20 +7,15 @@ import { AerodromeRoutesMethodArgument } from 'src/features/on-chain/calculation
 import { UniswapRoute } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-route';
 import { PathFactory } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/path-factory';
 
+interface Routes {
+    path: Token[];
+    methodArguments: AerodromeRoutesMethodArgument;
+}
+
 export class AerodromePathFactory extends PathFactory<AerodromeTrade> {
-    protected async getAllRoutes(): Promise<UniswapRoute[]> {
-        const transitTokens = await Token.createTokens(
-            this.routingProvidersAddresses,
-            this.from.blockchain
-        );
+    private routes: Routes[] = [];
 
-        const vertexes: Token[] = transitTokens.filter(
-            elem => !elem.isEqualTo(this.from) && !elem.isEqualTo(this.to)
-        );
-
-        const initialPath = [this.from];
-        const routes: { path: Token[]; methodArguments: AerodromeRoutesMethodArgument }[] = [];
-
+    private calculateRoutes(tokens: string[]): void {
         const updRoutesMethodArgumentsWithTransitToken = (
             finalPath: Token[],
             tokenA: string,
@@ -29,7 +24,7 @@ export class AerodromePathFactory extends PathFactory<AerodromeTrade> {
             isPairAStablePool: boolean,
             isPairBStablePool: boolean
         ) => {
-            routes.push({
+            this.routes.push({
                 path: finalPath,
                 methodArguments: [
                     this.stringWeiAmount,
@@ -57,7 +52,7 @@ export class AerodromePathFactory extends PathFactory<AerodromeTrade> {
             tokenB: string,
             isStable: boolean
         ) => {
-            routes.push({
+            this.routes.push({
                 path: finalPath,
                 methodArguments: [
                     this.stringWeiAmount,
@@ -66,64 +61,69 @@ export class AerodromePathFactory extends PathFactory<AerodromeTrade> {
             });
         };
 
+        if (tokens.length > 3) {
+            throw new RubicSdkError('Maximum number of transit tokens: 1');
+        }
+
+        if (tokens.length === 2) {
+            updRoutesMethodArgumentsWithoutTransitToken(finalPath, tokens[0]!, tokens[1]!, true);
+            updRoutesMethodArgumentsWithoutTransitToken(finalPath, tokens[0]!, tokens[1]!, false);
+        }
+
+        if (tokens.length === 3) {
+            updRoutesMethodArgumentsWithTransitToken(
+                finalPath,
+                tokens[0]!,
+                tokens[1]!,
+                tokens[2]!,
+                true,
+                true
+            );
+            updRoutesMethodArgumentsWithTransitToken(
+                finalPath,
+                tokens[0]!,
+                tokens[1]!,
+                tokens[2]!,
+                false,
+                false
+            );
+            updRoutesMethodArgumentsWithTransitToken(
+                finalPath,
+                tokens[0]!,
+                tokens[1]!,
+                tokens[2]!,
+                false,
+                true
+            );
+            updRoutesMethodArgumentsWithTransitToken(
+                finalPath,
+                tokens[0]!,
+                tokens[1]!,
+                tokens[2]!,
+                true,
+                false
+            );
+        }
+    }
+
+    protected async getAllRoutes(): Promise<UniswapRoute[]> {
+        const transitTokens = await Token.createTokens(
+            this.routingProvidersAddresses,
+            this.from.blockchain
+        );
+
+        const vertexes: Token[] = transitTokens.filter(
+            elem => !elem.isEqualTo(this.from) && !elem.isEqualTo(this.to)
+        );
+
+        const initialPath = [this.from];
+
         const recGraphVisitor = (path: Token[], transitTokensLimit: number): void => {
             if (path.length === transitTokensLimit + 1) {
                 const finalPath = path.concat(this.to);
-                const tokens = Token.tokensToAddresses(finalPath);
 
-                if (tokens.length > 3) {
-                    throw new RubicSdkError('Maximum number of transit tokens: 1');
-                }
+                this.calculateRoutes(Token.tokensToAddresses(finalPath));
 
-                if (tokens.length === 2) {
-                    updRoutesMethodArgumentsWithoutTransitToken(
-                        finalPath,
-                        tokens[0]!,
-                        tokens[1]!,
-                        true
-                    );
-                    updRoutesMethodArgumentsWithoutTransitToken(
-                        finalPath,
-                        tokens[0]!,
-                        tokens[1]!,
-                        false
-                    );
-                }
-
-                if (tokens.length === 3) {
-                    updRoutesMethodArgumentsWithTransitToken(
-                        finalPath,
-                        tokens[0]!,
-                        tokens[1]!,
-                        tokens[2]!,
-                        true,
-                        true
-                    );
-                    updRoutesMethodArgumentsWithTransitToken(
-                        finalPath,
-                        tokens[0]!,
-                        tokens[1]!,
-                        tokens[2]!,
-                        false,
-                        false
-                    );
-                    updRoutesMethodArgumentsWithTransitToken(
-                        finalPath,
-                        tokens[0]!,
-                        tokens[1]!,
-                        tokens[2]!,
-                        false,
-                        true
-                    );
-                    updRoutesMethodArgumentsWithTransitToken(
-                        finalPath,
-                        tokens[0]!,
-                        tokens[1]!,
-                        tokens[2]!,
-                        true,
-                        false
-                    );
-                }
                 return;
             }
 
@@ -142,7 +142,7 @@ export class AerodromePathFactory extends PathFactory<AerodromeTrade> {
         const responses = await this.UniswapV2TradeClass.callForRoutes(
             this.from.blockchain,
             this.exact,
-            routes.map(route => route.methodArguments)
+            this.routes.map(route => route.methodArguments)
         );
 
         const tokens = responses.map((response, index) => {
@@ -157,8 +157,8 @@ export class AerodromePathFactory extends PathFactory<AerodromeTrade> {
             }
             const outputAbsoluteAmount = new BigNumber(numberAmount);
 
-            const path = routes?.[index]?.path;
-            const routPoolInfo = routes?.[index]?.methodArguments[1][0];
+            const path = this.routes?.[index]?.path;
+            const routPoolInfo = this.routes?.[index]?.methodArguments[1][0];
 
             if (!path || !routPoolInfo) {
                 throw new RubicSdkError('Path has to be defined');
