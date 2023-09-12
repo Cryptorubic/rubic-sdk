@@ -6,7 +6,7 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
-import { DefaultRoutesMethodArguments } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/routes-method-arguments';
+import { DefaultRoutesMethodArgument } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/route-method-arguments';
 import { UniswapV2AbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/uniswap-v2-abstract-trade';
 import {
     SOLARBEAM_CONTRACT_ABI,
@@ -23,7 +23,7 @@ export class SolarbeamTrade extends UniswapV2AbstractTrade {
     public static callForRoutes(
         blockchain: EvmBlockchainName,
         exact: Exact,
-        routesMethodArguments: DefaultRoutesMethodArguments
+        routesMethodArguments: DefaultRoutesMethodArgument[]
     ): Promise<ContractMulticallResponse<string[]>[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
         return web3Public.multicallContractMethod<string[]>(
