@@ -21,7 +21,37 @@ export class AerodromePathFactory extends PathFactory<AerodromeTrade> {
         const initialPath = [this.from];
         const routes: { path: Token[]; methodArguments: AerodromeRoutesMethodArgument }[] = [];
 
-        const updRoutesMethodArguments = (
+        const updRoutesMethodArgumentsWithTransitToken = (
+            finalPath: Token[],
+            tokenA: string,
+            tokenB: string,
+            tokenC: string,
+            isPairAStablePool: boolean,
+            isPairBStablePool: boolean
+        ) => {
+            routes.push({
+                path: finalPath,
+                methodArguments: [
+                    this.stringWeiAmount,
+                    [
+                        [
+                            tokenA,
+                            tokenB,
+                            isPairAStablePool,
+                            '0x420DD381b31aEf6683db6B902084cB0FFECe40Da'
+                        ],
+                        [
+                            tokenB,
+                            tokenC,
+                            isPairBStablePool,
+                            '0x420DD381b31aEf6683db6B902084cB0FFECe40Da'
+                        ]
+                    ]
+                ]
+            });
+        };
+
+        const updRoutesMethodArgumentsWithoutTransitToken = (
             finalPath: Token[],
             tokenA: string,
             tokenB: string,
@@ -46,15 +76,53 @@ export class AerodromePathFactory extends PathFactory<AerodromeTrade> {
                 }
 
                 if (tokens.length === 2) {
-                    updRoutesMethodArguments(finalPath, tokens[0]!, tokens[1]!, true);
-                    updRoutesMethodArguments(finalPath, tokens[0]!, tokens[1]!, false);
+                    updRoutesMethodArgumentsWithoutTransitToken(
+                        finalPath,
+                        tokens[0]!,
+                        tokens[1]!,
+                        true
+                    );
+                    updRoutesMethodArgumentsWithoutTransitToken(
+                        finalPath,
+                        tokens[0]!,
+                        tokens[1]!,
+                        false
+                    );
                 }
 
                 if (tokens.length === 3) {
-                    updRoutesMethodArguments(finalPath, tokens[0]!, tokens[1]!, true);
-                    updRoutesMethodArguments(finalPath, tokens[0]!, tokens[1]!, false);
-                    updRoutesMethodArguments(finalPath, tokens[1]!, tokens[2]!, true);
-                    updRoutesMethodArguments(finalPath, tokens[1]!, tokens[2]!, false);
+                    updRoutesMethodArgumentsWithTransitToken(
+                        finalPath,
+                        tokens[0]!,
+                        tokens[1]!,
+                        tokens[2]!,
+                        true,
+                        true
+                    );
+                    updRoutesMethodArgumentsWithTransitToken(
+                        finalPath,
+                        tokens[0]!,
+                        tokens[1]!,
+                        tokens[2]!,
+                        false,
+                        false
+                    );
+                    updRoutesMethodArgumentsWithTransitToken(
+                        finalPath,
+                        tokens[0]!,
+                        tokens[1]!,
+                        tokens[2]!,
+                        false,
+                        true
+                    );
+                    updRoutesMethodArgumentsWithTransitToken(
+                        finalPath,
+                        tokens[0]!,
+                        tokens[1]!,
+                        tokens[2]!,
+                        true,
+                        false
+                    );
                 }
                 return;
             }

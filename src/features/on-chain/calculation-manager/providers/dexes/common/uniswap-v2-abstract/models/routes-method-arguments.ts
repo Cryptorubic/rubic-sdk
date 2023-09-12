@@ -1,6 +1,8 @@
 export type DefaultRoutesMethodArguments = [string, string[]][];
 
-export type AerodromeRoutesMethodArgument = [string, [[string, string, boolean, string]]];
+export type AerodromeRoutePoolArgument = [string, string, boolean, string];
+
+export type AerodromeRoutesMethodArgument = [string, AerodromeRoutePoolArgument[]];
 
 export type AerodromeRoutesMethodArguments = AerodromeRoutesMethodArgument[];
 
