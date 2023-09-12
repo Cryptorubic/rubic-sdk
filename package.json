@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "4.29.0-alpha-aerodrome-dex.2",
+    "version": "4.29.0-alpha-aerodrome-dex.3",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
