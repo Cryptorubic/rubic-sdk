@@ -14,7 +14,8 @@ export const stargateBridgeToken = {
     ETH: 'ETH',
     WETH: 'WETH',
     SGETH: 'SGETH',
-    AETH: 'AETH'
+    AETH: 'AETH',
+    FUSDC: 'FUSDC'
 } as const;
 
 export type StargateBridgeToken = (typeof stargateBridgeToken)[keyof typeof stargateBridgeToken];

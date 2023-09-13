@@ -99,7 +99,7 @@ export class OpenOceanProvider {
                 slippageTolerance: options.slippageTolerance!,
                 path: [from, to],
                 toTokenWeiAmountMin,
-                useProxy: blockchain === BLOCKCHAIN_NAME.LINEA ? false : options.useProxy,
+                useProxy: options.useProxy,
                 proxyFeeInfo,
                 fromWithoutFee,
                 withDeflation: options.withDeflation
@@ -133,7 +133,7 @@ export class OpenOceanProvider {
     }> {
         let fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
         let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-        if (fullOptions.useProxy && from.blockchain !== BLOCKCHAIN_NAME.LINEA) {
+        if (fullOptions.useProxy) {
             proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
                 from,
                 fullOptions.providerAddress

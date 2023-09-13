@@ -14,6 +14,7 @@ export const stargatePoolsDecimals: Record<StargateBridgeToken, number> = {
     [stargateBridgeToken.LUSD]: 6,
     [stargateBridgeToken.BUSD]: 6,
     [stargateBridgeToken.mUSD]: 6,
+    [stargateBridgeToken.FUSDC]: 6,
     [stargateBridgeToken.METIS]: 18,
     // ETHs
     [stargateBridgeToken.ETH]: 18,
