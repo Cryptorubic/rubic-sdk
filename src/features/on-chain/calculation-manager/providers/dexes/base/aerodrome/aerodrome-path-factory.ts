@@ -15,7 +15,7 @@ interface Routes {
 export class AerodromePathFactory extends PathFactory<AerodromeTrade> {
     private routes: Routes[] = [];
 
-    private calculateRoutes(tokens: string[]): void {
+    private calculateRoutes(tokens: string[], finalPath: Token[]): void {
         const updRoutesMethodArgumentsWithTransitToken = (
             finalPath: Token[],
             tokenA: string,
@@ -122,7 +122,7 @@ export class AerodromePathFactory extends PathFactory<AerodromeTrade> {
             if (path.length === transitTokensLimit + 1) {
                 const finalPath = path.concat(this.to);
 
-                this.calculateRoutes(Token.tokensToAddresses(finalPath));
+                this.calculateRoutes(Token.tokensToAddresses(finalPath), finalPath);
 
                 return;
             }
