@@ -158,7 +158,7 @@ export class AerodromePathFactory extends PathFactory<AerodromeTrade> {
             const outputAbsoluteAmount = new BigNumber(numberAmount);
 
             const path = this.routes?.[index]?.path;
-            const routPoolInfo = this.routes?.[index]?.methodArguments[1][0];
+            const routPoolInfo = this.routes?.[index]?.methodArguments[1];
 
             if (!path || !routPoolInfo) {
                 throw new RubicSdkError('Path has to be defined');

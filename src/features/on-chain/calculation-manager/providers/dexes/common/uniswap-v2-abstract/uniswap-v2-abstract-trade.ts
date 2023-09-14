@@ -26,6 +26,7 @@ import {
     SWAP_METHOD
 } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/constants/SWAP_METHOD';
 import { defaultUniswapV2Abi } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi';
+import { AerodromeRoutePoolArgument } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/aerodrome-route-method-arguments';
 import { DefaultEstimatedGas } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
 import { ExtendedRoutesMethodArguments } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/route-method-arguments';
 import { UniswapV2TradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-struct';
@@ -89,7 +90,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
      */
     public readonly wrappedPath: ReadonlyArray<Token>;
 
-    public readonly routPoolInfo: [string, string, boolean, string] | undefined;
+    public readonly routPoolInfo: AerodromeRoutePoolArgument[] | undefined;
 
     /**
      * Defines, whether to call 'exactInput' or 'exactOutput' method.

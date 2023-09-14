@@ -23,7 +23,7 @@ export class AerodromeTrade extends UniswapV2AbstractTrade {
 
         return [
             ...amountParameters,
-            [path],
+            path,
             receiverAddress || this.walletAddress,
             this.deadlineMinutesTimestamp
         ];
