@@ -20,6 +20,7 @@ import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/provid
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
+import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
@@ -55,7 +56,8 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
                         transitMinAmount: new BigNumber(0),
                         onChainTrade: onChainTrade!
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS
+                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    []
                 ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
@@ -142,9 +144,10 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             transitMinAmount: BigNumber;
             onChainTrade: EvmOnChainTrade | null;
         },
-        providerAddress: string
+        providerAddress: string,
+        routePath: Step[]
     ) {
-        super(providerAddress);
+        super(providerAddress, routePath);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -281,7 +284,8 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
-            slippage: this.maxSlippage / 10_000
+            slippage: this.maxSlippage / 10_000,
+            routePath: this.routePath
         };
     }
 

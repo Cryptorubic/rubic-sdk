@@ -6,7 +6,7 @@ import {
     RubicSdkError,
     TooLowAmountError
 } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount, TokenAmount as RubicTokenAmount } from 'src/common/tokens';
 import { TokenStruct } from 'src/common/tokens/token';
 import {
     BLOCKCHAIN_NAME,
@@ -23,6 +23,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
     SymbiosisCrossChainSupportedBlockchain,
@@ -31,6 +32,7 @@ import {
 import { SwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/swapping-params';
 import { SymbiosisTradeData } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-trade';
+import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 import {
     Error as SymbiosisError,
@@ -191,7 +193,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                         transitAmount: from.tokenAmount,
                         tradeType: { in: inTradeType, out: outTradeType }
                     },
-                    options.providerAddress
+                    options.providerAddress,
+                    await this.getRoutePath(from, to, trade.route)
                 ),
                 tradeType: this.type
             };
@@ -287,5 +290,58 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                   symbol: token.symbol!
               }
             : undefined;
+    }
+
+    protected async getRoutePath(
+        fromToken: PriceTokenAmount,
+        toToken: PriceTokenAmount,
+        route: Token[]
+    ): Promise<Step[]> {
+        const fromChainId = blockchainId[fromToken.blockchain];
+        const toChainId = blockchainId[toToken.blockchain];
+
+        const transitFrom = route.reverse().find(el => el.chainId === fromChainId);
+        const transitTo = route.find(el => el.chainId === toChainId);
+
+        const fromTokenAmount = transitFrom
+            ? await RubicTokenAmount.createToken({
+                  blockchain: fromToken.blockchain,
+                  address: transitFrom.address,
+                  weiAmount: new BigNumber(0)
+              })
+            : fromToken;
+
+        const toTokenAmount = transitTo
+            ? await RubicTokenAmount.createToken({
+                  blockchain: toToken.blockchain,
+                  address: transitTo.address,
+                  weiAmount: new BigNumber(0)
+              })
+            : toToken;
+
+        const routePath: Step[] = [];
+
+        if (transitFrom) {
+            routePath.push({
+                type: 'on-chain',
+                // @TODO provider: ON_CHAIN_TRADE_TYPE.SYMB,
+                provider: ON_CHAIN_TRADE_TYPE.ONE_INCH,
+                path: [fromToken, fromTokenAmount]
+            });
+        }
+        routePath.push({
+            type: 'cross-chain',
+            provider: CROSS_CHAIN_TRADE_TYPE.XY,
+            path: [fromTokenAmount, toTokenAmount]
+        });
+        if (transitTo) {
+            routePath.push({
+                type: 'on-chain',
+                // @TODO provider: ON_CHAIN_TRADE_TYPE.XY_DEX,
+                provider: ON_CHAIN_TRADE_TYPE.ONE_INCH,
+                path: [toTokenAmount, toToken]
+            });
+        }
+        return routePath;
     }
 }

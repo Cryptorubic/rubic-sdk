@@ -19,6 +19,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { feeLibraryAbi } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/fee-library-abi';
 import { relayersAddresses } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/relayers-addresses';
@@ -200,7 +201,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                         dstChainTrade,
                         cryptoFeeToken: nativeToken
                     },
-                    options.providerAddress
+                    options.providerAddress,
+                    await this.getRoutePath(from, to, srcChainTrade)
                 ),
                 tradeType: this.type
             };
@@ -425,5 +427,34 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             },
             0.1
         );
+    }
+
+    protected async getRoutePath(
+        from: PriceTokenAmount,
+        to: PriceTokenAmount,
+        srcOnChainTrade: EvmOnChainTrade | null
+    ): Promise<Step[]> {
+        if (srcOnChainTrade) {
+            return [
+                {
+                    type: 'on-chain',
+                    provider: srcOnChainTrade.type,
+                    path: [srcOnChainTrade.from, srcOnChainTrade.to]
+                },
+                {
+                    type: 'cross-chain',
+                    provider: CROSS_CHAIN_TRADE_TYPE.STARGATE,
+                    path: [srcOnChainTrade.to, to]
+                }
+            ];
+        }
+
+        return [
+            {
+                type: 'cross-chain',
+                provider: CROSS_CHAIN_TRADE_TYPE.STARGATE,
+                path: [from, to]
+            }
+        ];
     }
 }

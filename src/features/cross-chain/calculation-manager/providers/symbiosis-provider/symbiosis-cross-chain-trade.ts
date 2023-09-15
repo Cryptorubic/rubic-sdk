@@ -22,6 +22,7 @@ import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/provid
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
+import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { SYMBIOSIS_CONTRACT_ADDRESS_V2 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/contract-address-v2';
@@ -65,7 +66,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                         transitAmount: new BigNumber(NaN),
                         tradeType: { in: undefined, out: undefined }
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS
+                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    []
                 ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
@@ -154,9 +156,10 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             transitAmount: BigNumber;
             tradeType: { in?: SymbiosisTradeType; out?: SymbiosisTradeType };
         },
-        providerAddress: string
+        providerAddress: string,
+        routePath: Step[]
     ) {
-        super(providerAddress);
+        super(providerAddress, routePath);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -281,7 +284,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
-            slippage: this.slippage * 100
+            slippage: this.slippage * 100,
+            routePath: this.routePath
         };
     }
 

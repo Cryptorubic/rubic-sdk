@@ -34,6 +34,7 @@ import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
 import { tronCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';
 import { AbiItem } from 'web3-utils';
 
@@ -187,7 +188,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                             slippage: options.slippageTolerance,
                             contractAddress: transactionData.contractAddress
                         },
-                        options.providerAddress
+                        options.providerAddress,
+                        await this.getRoutePath(from, to)
                     ),
                     tradeType: this.type
                 };
@@ -202,7 +204,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                         slippage: options.slippageTolerance,
                         contractAddress: transactionData.contractAddress
                     },
-                    options.providerAddress
+                    options.providerAddress,
+                    await this.getRoutePath(from, to)
                 ),
                 tradeType: this.type
             };
@@ -240,5 +243,12 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 }
             }
         };
+    }
+
+    protected async getRoutePath(
+        fromToken: PriceTokenAmount,
+        toToken: PriceTokenAmount
+    ): Promise<Step[]> {
+        return [{ type: 'cross-chain', provider: this.type, path: [fromToken, toToken] }];
     }
 }

@@ -19,6 +19,7 @@ import { GasData } from 'src/features/cross-chain/calculation-manager/providers/
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { MarkRequired } from 'ts-essentials';
 import { TransactionConfig } from 'web3-core';
@@ -51,7 +52,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                         slippage: 0,
                         contractAddress: ''
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS
+                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    []
                 ).getContractParams({ receiverAddress });
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
@@ -125,9 +127,10 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             slippage: number;
             contractAddress: string;
         },
-        providerAddress: string
+        providerAddress: string,
+        routePath: Step[]
     ) {
-        super(providerAddress);
+        super(providerAddress, routePath);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -240,7 +243,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
-            slippage: this.slippage * 100
+            slippage: this.slippage * 100,
+            routePath: this.routePath
         };
     }
 }

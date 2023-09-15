@@ -5,7 +5,7 @@ import {
     NotSupportedTokensError,
     RubicSdkError
 } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -17,6 +17,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { XyStatusCode } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-status-code';
 import {
@@ -26,6 +27,7 @@ import {
 import { XyTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-request';
 import { XyTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-response';
 import { XyCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-trade';
+import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 export class XyCrossChainProvider extends CrossChainProvider {
     public static readonly apiEndpoint = 'https://open-api.xy.finance/v1';
@@ -90,7 +92,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 receiveAddress: receiverAddress || EvmWeb3Pure.EMPTY_ADDRESS
             };
 
-            const { toTokenAmount, statusCode, msg, xyFee } =
+            const { toTokenAmount, statusCode, msg, xyFee, quote } =
                 await Injector.httpClient.get<XyTransactionResponse>(
                     `${XyCrossChainProvider.apiEndpoint}/swap`,
                     {
@@ -131,7 +133,8 @@ export class XyCrossChainProvider extends CrossChainProvider {
                         feeInfo,
                         onChainTrade: null
                     },
-                    options.providerAddress
+                    options.providerAddress,
+                    await this.getRoutePath(fromToken, to, quote)
                 ),
                 tradeType: this.type
             };
@@ -177,5 +180,55 @@ export class XyCrossChainProvider extends CrossChainProvider {
             default:
                 throw new RubicSdkError('Unknown Error.');
         }
+    }
+
+    protected async getRoutePath(
+        fromToken: PriceTokenAmount,
+        toToken: PriceTokenAmount,
+        quote: XyTransactionResponse['quote']
+    ): Promise<Step[]> {
+        const transitFrom = quote.sourceChainSwaps?.toToken;
+        const transitTo = quote.destChainSwaps?.fromToken;
+
+        const fromTokenAmount = transitFrom
+            ? await TokenAmount.createToken({
+                  blockchain: fromToken.blockchain,
+                  address: transitFrom.tokenAddress,
+                  weiAmount: new BigNumber(0)
+              })
+            : fromToken;
+
+        const toTokenAmount = transitTo
+            ? await TokenAmount.createToken({
+                  blockchain: toToken.blockchain,
+                  address: transitTo.tokenAddress,
+                  weiAmount: new BigNumber(0)
+              })
+            : toToken;
+
+        const routePath: Step[] = [];
+
+        if (transitFrom) {
+            routePath.push({
+                type: 'on-chain',
+                // @TODO provider: ON_CHAIN_TRADE_TYPE.XY_DEX,
+                provider: ON_CHAIN_TRADE_TYPE.ONE_INCH,
+                path: [fromToken, fromTokenAmount]
+            });
+        }
+        routePath.push({
+            type: 'cross-chain',
+            provider: CROSS_CHAIN_TRADE_TYPE.XY,
+            path: [fromTokenAmount, toTokenAmount]
+        });
+        if (transitTo) {
+            routePath.push({
+                type: 'on-chain',
+                // @TODO provider: ON_CHAIN_TRADE_TYPE.XY_DEX,
+                provider: ON_CHAIN_TRADE_TYPE.ONE_INCH,
+                path: [toTokenAmount, toToken]
+            });
+        }
+        return routePath;
     }
 }

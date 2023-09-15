@@ -13,6 +13,7 @@ import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/c
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
 import { l1Erc20ScrollGatewayAbi } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/constants/l1-erc20-scroll-gateway-abi';
 import { l2Erc20ScrollGatewayAbi } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/constants/l2-erc20-scroll-gateway-abi';
 import {
@@ -98,7 +99,8 @@ export class ScrollBridgeProvider extends CrossChainProvider {
                         to,
                         gasData
                     },
-                    options.providerAddress
+                    options.providerAddress,
+                    await this.getRoutePath(fromToken, to)
                 ),
                 tradeType: this.type
             };
@@ -120,5 +122,12 @@ export class ScrollBridgeProvider extends CrossChainProvider {
         _useProxy: boolean
     ): Promise<FeeInfo> {
         return {};
+    }
+
+    protected async getRoutePath(
+        fromToken: PriceTokenAmount,
+        toToken: PriceTokenAmount
+    ): Promise<Step[]> {
+        return [{ type: 'cross-chain', provider: this.type, path: [fromToken, toToken] }];
     }
 }

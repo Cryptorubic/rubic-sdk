@@ -5,7 +5,7 @@ import {
     WrongFromAddressError,
     WrongReceiverAddressError
 } from 'src/common/errors';
-import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { PriceTokenAmount, Token, TokenAmount } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
@@ -16,6 +16,7 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { isAddressCorrect } from 'src/features/common/utils/check-address';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
@@ -211,12 +212,25 @@ export abstract class OnChainTrade {
         }
     }
 
+    protected getRoutePath(): Step[] {
+        return [
+            {
+                type: 'on-chain',
+                provider: this.type,
+                path: this.path.map(
+                    token => new TokenAmount({ ...token, tokenAmount: new BigNumber(0) })
+                )
+            }
+        ];
+    }
+
     public getTradeInfo(): TradeInfo {
         return {
             estimatedGas: null,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
-            slippage: this.slippageTolerance * 100
+            slippage: this.slippageTolerance * 100,
+            routePath: this.getRoutePath()
         };
     }
 }

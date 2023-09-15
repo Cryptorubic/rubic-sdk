@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { NotSupportedTokensError } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount, Token, TokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -13,14 +13,17 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
     SquidrouterCrossChainSupportedBlockchain,
     squidrouterCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/constants/squidrouter-cross-chain-supported-blockchain';
+import { SquidrouterEstimation } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/estimation-response';
 import { SquidrouterTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/transaction-request';
 import { SquidrouterTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/transaction-response';
 import { SquidrouterCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/squidrouter-cross-chain-trade';
+import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 export class SquidrouterCrossChainProvider extends CrossChainProvider {
     public static readonly apiEndpoint = 'https://api.0xsquid.com/v1/';
@@ -144,7 +147,8 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                         onChainTrade: null,
                         onChainSubtype: { from: undefined, to: undefined }
                     },
-                    options.providerAddress
+                    options.providerAddress,
+                    await this.getRoutePath(estimate, from, to)
                 ),
                 tradeType: this.type
             };
@@ -171,5 +175,69 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
             percentFeeToken,
             useProxy
         );
+    }
+
+    protected async getRoutePath(
+        estimation: SquidrouterEstimation,
+        from: PriceTokenAmount,
+        to: PriceTokenAmount
+    ): Promise<Step[]> {
+        const transitFrom = estimation.route.fromChain.map(el => ({
+            address: el.toToken.address,
+            amount: new BigNumber(el.toAmount)
+        }));
+
+        const transitTo = (
+            estimation.route.toChain
+                // @ts-ignore
+                .filter(el => 'dex' in el) as SquidrouterEstimation['route']['fromChain']
+        ).map(el => ({
+            amount: new BigNumber(el.fromAmount),
+            address: el.fromToken.address
+        }));
+
+        const fromTransitTokens = await Token.createTokens(
+            transitFrom.map(el => el.address),
+            from.blockchain
+        );
+
+        const toTransitTokens = await Token.createTokens(
+            transitTo.map(el => el.address),
+            to.blockchain
+        );
+
+        const fromTokenAmount = fromTransitTokens.map(
+            (token, index) => new TokenAmount({ ...token, weiAmount: transitFrom[index]!.amount })
+        );
+
+        const toTokenAmount = toTransitTokens.map(
+            (token, index) => new TokenAmount({ ...token, weiAmount: transitTo[index]!.amount })
+        );
+
+        const routePath: Step[] = [];
+        if (fromTokenAmount.length) {
+            routePath.push({
+                type: 'on-chain',
+                // @TODO Add generic provider
+                provider: ON_CHAIN_TRADE_TYPE.ONE_INCH,
+                path: [from, ...fromTokenAmount]
+            });
+        }
+        routePath.push({
+            type: 'cross-chain',
+            // @TODO Add generic provider
+            provider: CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER,
+            path: [fromTokenAmount.at(-1) || from, toTokenAmount.at(0) || to]
+        });
+        if (toTokenAmount.length) {
+            routePath.push({
+                type: 'on-chain',
+                // @TODO Add generic provider
+                provider: ON_CHAIN_TRADE_TYPE.ONE_INCH,
+                path: [...toTokenAmount, to]
+            });
+        }
+
+        return routePath;
     }
 }

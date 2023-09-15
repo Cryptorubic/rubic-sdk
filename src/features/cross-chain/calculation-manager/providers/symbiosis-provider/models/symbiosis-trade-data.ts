@@ -1,5 +1,5 @@
 import { TransactionRequest } from '@ethersproject/abstract-provider';
-import { Percent, SymbiosisTradeType, TokenAmount } from 'symbiosis-js-sdk';
+import { Percent, SymbiosisTradeType, Token, TokenAmount } from 'symbiosis-js-sdk';
 
 export interface SymbiosisTradeData {
     fee: TokenAmount;
@@ -8,4 +8,5 @@ export interface SymbiosisTradeData {
     transactionRequest: TransactionRequest;
     inTradeType?: SymbiosisTradeType;
     outTradeType?: SymbiosisTradeType;
+    route: Token[];
 }

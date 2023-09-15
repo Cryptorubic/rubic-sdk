@@ -14,6 +14,7 @@ import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/c
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
 
 export class ArbitrumRbcBridgeProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.ARBITRUM;
@@ -81,7 +82,8 @@ export class ArbitrumRbcBridgeProvider extends CrossChainProvider {
                         gasData,
                         l2network
                     },
-                    options.providerAddress
+                    options.providerAddress,
+                    await this.getRoutePath(fromToken, to)
                 ),
                 tradeType: this.type
             };
@@ -103,5 +105,12 @@ export class ArbitrumRbcBridgeProvider extends CrossChainProvider {
         _useProxy: boolean
     ): Promise<FeeInfo> {
         return {};
+    }
+
+    protected async getRoutePath(
+        fromToken: PriceTokenAmount,
+        toToken: PriceTokenAmount
+    ): Promise<Step[]> {
+        return [{ type: 'cross-chain', provider: this.type, path: [fromToken, toToken] }];
     }
 }

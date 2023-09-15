@@ -16,6 +16,7 @@ import { GasData } from 'src/features/cross-chain/calculation-manager/providers/
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { xyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-contract-address';
@@ -57,7 +58,8 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
                         feeInfo: {},
                         onChainTrade: null
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS
+                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    []
                 ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
@@ -143,9 +145,10 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             feeInfo: FeeInfo;
             onChainTrade: EvmOnChainTrade | null;
         },
-        providerAddress: string
+        providerAddress: string,
+        routePath: Step[]
     ) {
-        super(providerAddress);
+        super(providerAddress, routePath);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -269,7 +272,8 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
-            slippage: this.slippage * 100
+            slippage: this.slippage * 100,
+            routePath: this.routePath
         };
     }
 

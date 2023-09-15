@@ -30,6 +30,7 @@ import { CbridgeEstimateAmountRequest } from 'src/features/cross-chain/calculati
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
@@ -189,7 +190,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                         transitMinAmount,
                         onChainTrade
                     },
-                    options.providerAddress
+                    options.providerAddress,
+                    await this.getRoutePath(fromToken, transitToken, to, onChainTrade)
                 ),
                 error: amountsErrors,
                 tradeType: this.type
@@ -374,5 +376,27 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             percentFeeToken,
             useProxy
         );
+    }
+
+    protected async getRoutePath(
+        from: PriceTokenAmount,
+        transit: PriceTokenAmount,
+        to: PriceTokenAmount,
+        onChainTrade: EvmOnChainTrade | null
+    ): Promise<Step[]> {
+        const routePath: Step[] = [];
+        if (onChainTrade) {
+            routePath.push({
+                type: 'on-chain',
+                path: [from, transit],
+                provider: onChainTrade.type
+            });
+        }
+        routePath.push({
+            type: 'cross-chain',
+            path: [transit, to],
+            provider: CROSS_CHAIN_TRADE_TYPE.DEBRIDGE
+        });
+        return routePath;
     }
 }
