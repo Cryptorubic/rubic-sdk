@@ -11,6 +11,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
+import { DefaultRoutesMethodArgument } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/route-method-arguments';
 import {
     UniswapCalculatedInfo,
     UniswapCalculatedInfoWithProfit
@@ -40,30 +41,30 @@ export interface UniswapV2AbstractProviderStruct<T extends UniswapV2AbstractTrad
 export class PathFactory<T extends UniswapV2AbstractTrade> {
     private readonly web3Public: EvmWeb3Public;
 
-    private readonly from: PriceToken<EvmBlockchainName>;
+    protected readonly from: PriceToken<EvmBlockchainName>;
 
-    private readonly to: PriceToken<EvmBlockchainName>;
+    protected readonly to: PriceToken<EvmBlockchainName>;
 
     private readonly weiAmount: BigNumber;
 
-    private readonly exact: Exact;
+    protected readonly exact: Exact;
 
     private readonly options: UniswapV2CalculationOptions;
 
     private readonly proxyFeeInfo: OnChainProxyFeeInfo | undefined;
 
-    private readonly UniswapV2TradeClass: UniswapV2TradeClass<T>;
+    protected readonly UniswapV2TradeClass: UniswapV2TradeClass<T>;
 
-    private readonly routingProvidersAddresses: ReadonlyArray<string>;
+    protected readonly routingProvidersAddresses: ReadonlyArray<string>;
 
-    private readonly maxTransitTokens: number;
+    protected readonly maxTransitTokens: number;
 
     private get walletAddress(): string | undefined {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain).address;
     }
 
     @Cache
-    private get stringWeiAmount(): string {
+    protected get stringWeiAmount(): string {
         return this.weiAmount.toFixed(0);
     }
 
@@ -220,6 +221,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
                     from,
                     to,
                     path: route.path,
+                    routPoolInfo: route?.routPoolInfo,
                     wrappedPath: route.path,
                     exact: this.exact,
                     deadlineMinutes: this.options.deadlineMinutes,
@@ -235,7 +237,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
         });
     }
 
-    private async getAllRoutes(): Promise<UniswapRoute[]> {
+    protected async getAllRoutes(): Promise<UniswapRoute[]> {
         const transitTokens = await Token.createTokens(
             this.routingProvidersAddresses,
             this.from.blockchain
@@ -247,7 +249,7 @@ export class PathFactory<T extends UniswapV2AbstractTrade> {
 
         const initialPath = [this.from];
         const routesPaths: Token[][] = [];
-        const routesMethodArguments: [string, string[]][] = [];
+        const routesMethodArguments: DefaultRoutesMethodArgument[] = [];
 
         const recGraphVisitor = (path: Token[], transitTokensLimit: number): void => {
             if (path.length === transitTokensLimit + 1) {
