@@ -26,7 +26,9 @@ import {
     SWAP_METHOD
 } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/constants/SWAP_METHOD';
 import { defaultUniswapV2Abi } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/constants/uniswap-v2-abi';
+import { AerodromeRoutePoolArgument } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/aerodrome-route-method-arguments';
 import { DefaultEstimatedGas } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/default-estimated-gas';
+import { ExtendedRoutesMethodArguments } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/route-method-arguments';
 import { UniswapV2TradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v2-abstract/models/uniswap-v2-trade-struct';
 import { AbiItem } from 'web3-utils';
 
@@ -65,7 +67,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
     public static callForRoutes(
         blockchain: EvmBlockchainName,
         exact: Exact,
-        routesMethodArguments: [string, string[]][]
+        routesMethodArguments: ExtendedRoutesMethodArguments
     ): Promise<ContractMulticallResponse<string[]>[]> {
         const web3Public = Injector.web3PublicService.getWeb3Public(blockchain);
         const methodName = exact === 'input' ? 'getAmountsOut' : 'getAmountsIn';
@@ -88,6 +90,8 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
      */
     public readonly wrappedPath: ReadonlyArray<Token>;
 
+    public readonly routPoolInfo: AerodromeRoutePoolArgument[] | undefined;
+
     /**
      * Defines, whether to call 'exactInput' or 'exactOutput' method.
      */
@@ -101,7 +105,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         return deadlineMinutesTimestamp(this.deadlineMinutes);
     }
 
-    private get nativeValueToSend(): string | undefined {
+    protected get nativeValueToSend(): string | undefined {
         if (this.from.isNative) {
             return this.getAmountInAndAmountOut().amountIn;
         }
@@ -136,6 +140,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         this.deadlineMinutes = tradeStruct.deadlineMinutes;
         this.exact = tradeStruct.exact;
         this.wrappedPath = tradeStruct.wrappedPath;
+        this.routPoolInfo = tradeStruct.routPoolInfo;
     }
 
     protected getAmountInAndAmountOut(): { amountIn: string; amountOut: string } {
@@ -207,7 +212,7 @@ export abstract class UniswapV2AbstractTrade extends EvmOnChainTrade {
         ];
     }
 
-    private async getMethodName(
+    protected async getMethodName(
         options: SwapTransactionOptions,
         fromAddress?: string,
         supportFee?: boolean

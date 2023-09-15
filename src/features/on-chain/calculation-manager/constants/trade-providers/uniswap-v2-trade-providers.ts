@@ -5,6 +5,7 @@ import { WannaSwapAuroraProvider } from 'src/features/on-chain/calculation-manag
 import { JoeProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/joe/joe-provider';
 import { PangolinProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/pangolin/pangolin-provider';
 import { SushiSwapAvalancheProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/avalanche/sushi-swap-avalanche/sushi-swap-avalanche-provider';
+import { AerodromeProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/base/aerodrome/aerodrome-provider';
 import { BaseSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/base/base-swap/base-swap-provider';
 import { OolongSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/boba/oolong-swap/oolong-swap-provider';
 import { SushiSwapBscProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/bsc/sushi-swap-bsc/sushi-swap-bsc-provider';
@@ -125,6 +126,7 @@ export const UniswapV2TradeProviders = [
     SushiSwapPulsechainProvider,
     // Base
     BaseSwapProvider,
+    AerodromeProvider,
     // BSC Testnet
     PancakeSwapTestnetProvider,
     TraderJoeBsctProvider,
