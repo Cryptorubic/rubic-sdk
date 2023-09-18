@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { BytesLike } from 'ethers';
+import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -253,10 +254,13 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             ...(receiverAddress && { receiveAddress: receiverAddress })
         };
 
-        const { tx } = await Injector.httpClient.get<XyTransactionResponse>(
+        const { tx, toTokenAmount } = await Injector.httpClient.get<XyTransactionResponse>(
             `${XyCrossChainProvider.apiEndpoint}/swap`,
             { params: { ...params } }
         );
+
+        await this.checkOrderAmount(toTokenAmount);
+
         return tx!;
     }
 
@@ -279,5 +283,48 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals),
             this.slippage * 10_000
         ];
+    }
+
+    private async checkOrderAmount(toTokenAmount: string): Promise<never | void> {
+        const newAmount = Web3Pure.fromWei(toTokenAmount, this.to.decimals);
+
+        const acceptableExpensesChangePercent = 2;
+
+        const amountPlusPercent = this.to.tokenAmount.plus(
+            this.to.tokenAmount.multipliedBy(acceptableExpensesChangePercent).dividedBy(100)
+        );
+
+        const infoObject = {
+            newAmount: newAmount.toFixed(),
+            oldAmount: this.to.tokenAmount.toFixed(),
+            oldAmountPlusPercent: amountPlusPercent.toFixed(),
+            newAmountLessThenOld: newAmount.lt(this.to.tokenAmount),
+            newAmountGreatThenOldMore2Percent: newAmount.gt(amountPlusPercent)
+        };
+
+        console.log(infoObject);
+
+        if (newAmount.lt(this.to.tokenAmount) || newAmount.gt(amountPlusPercent)) {
+            const newTo = await PriceTokenAmount.createFromToken({
+                ...this.to,
+                tokenAmount: newAmount
+            });
+
+            throw new UpdatedRatesError(
+                new XyCrossChainTrade(
+                    {
+                        from: this.from,
+                        to: newTo,
+                        transactionRequest: this.transactionRequest,
+                        gasData: this.gasData,
+                        priceImpact: this.from.calculatePriceImpactPercent(newTo),
+                        slippage: this.slippage,
+                        feeInfo: this.feeInfo,
+                        onChainTrade: null
+                    },
+                    this.providerAddress
+                )
+            );
+        }
     }
 }
