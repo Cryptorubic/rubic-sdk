@@ -289,22 +289,17 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         const newAmount = Web3Pure.fromWei(toTokenAmount, this.to.decimals);
 
         const acceptableExpensesChangePercent = 2;
+        const acceptableReductionChangePercent = 0.3;
 
         const amountPlusPercent = this.to.tokenAmount.plus(
             this.to.tokenAmount.multipliedBy(acceptableExpensesChangePercent).dividedBy(100)
         );
 
-        const infoObject = {
-            newAmount: newAmount.toFixed(),
-            oldAmount: this.to.tokenAmount.toFixed(),
-            oldAmountPlusPercent: amountPlusPercent.toFixed(),
-            newAmountLessThenOld: newAmount.lt(this.to.tokenAmount),
-            newAmountGreatThenOldMore2Percent: newAmount.gt(amountPlusPercent)
-        };
+        const amountMinusPercent = this.to.tokenAmount.minus(
+            this.to.tokenAmount.multipliedBy(acceptableReductionChangePercent).dividedBy(100)
+        );
 
-        console.log(infoObject);
-
-        if (newAmount.lt(this.to.tokenAmount) || newAmount.gt(amountPlusPercent)) {
+        if (newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent)) {
             const newTo = await PriceTokenAmount.createFromToken({
                 ...this.to,
                 tokenAmount: newAmount
