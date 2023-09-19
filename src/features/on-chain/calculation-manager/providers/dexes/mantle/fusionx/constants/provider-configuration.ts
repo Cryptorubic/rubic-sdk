@@ -4,5 +4,5 @@ import { UniswapV3AlgebraProviderConfiguration } from 'src/features/on-chain/cal
 
 export const FUSIONX_PROVIDER_CONFIGURATION: UniswapV3AlgebraProviderConfiguration = {
     wethAddress: wrappedNativeTokensList[BLOCKCHAIN_NAME.MANTLE]!.address,
-    maxTransitTokens: 2
+    maxTransitTokens: 1
 };
