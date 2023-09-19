@@ -3,43 +3,6 @@ import { AbiItem } from 'web3-utils';
 export const stargateRouterEthAbi = [
     {
         inputs: [
-            { internalType: 'address', name: '_stargateEthVault', type: 'address' },
-            { internalType: 'address', name: '_stargateRouter', type: 'address' },
-            { internalType: 'uint16', name: '_poolId', type: 'uint16' }
-        ],
-        stateMutability: 'nonpayable',
-        type: 'constructor'
-    },
-    {
-        inputs: [],
-        name: 'addLiquidityETH',
-        outputs: [],
-        stateMutability: 'payable',
-        type: 'function'
-    },
-    {
-        inputs: [],
-        name: 'poolId',
-        outputs: [{ internalType: 'uint16', name: '', type: 'uint16' }],
-        stateMutability: 'view',
-        type: 'function'
-    },
-    {
-        inputs: [],
-        name: 'stargateEthVault',
-        outputs: [{ internalType: 'address', name: '', type: 'address' }],
-        stateMutability: 'view',
-        type: 'function'
-    },
-    {
-        inputs: [],
-        name: 'stargateRouter',
-        outputs: [{ internalType: 'contract IStargateRouter', name: '', type: 'address' }],
-        stateMutability: 'view',
-        type: 'function'
-    },
-    {
-        inputs: [
             { internalType: 'uint16', name: '_dstChainId', type: 'uint16' },
             { internalType: 'address payable', name: '_refundAddress', type: 'address' },
             { internalType: 'bytes', name: '_toAddress', type: 'bytes' },
@@ -50,6 +13,5 @@ export const stargateRouterEthAbi = [
         outputs: [],
         stateMutability: 'payable',
         type: 'function'
-    },
-    { stateMutability: 'payable', type: 'receive' }
+    }
 ] as AbiItem[];

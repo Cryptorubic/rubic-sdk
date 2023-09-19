@@ -24,7 +24,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
             ],
             [BLOCKCHAIN_NAME.POLYGON]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.AVALANCHE]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
-            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.USDC],
+            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.FUSDC],
             [BLOCKCHAIN_NAME.ARBITRUM]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.OPTIMISM]: [stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.BASE]: [stargateBridgeToken.USDC, stargateBridgeToken.ETH]
@@ -38,7 +38,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
             [BLOCKCHAIN_NAME.POLYGON]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.ARBITRUM]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.OPTIMISM]: [stargateBridgeToken.USDC],
-            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.USDC],
+            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.FUSDC],
             [BLOCKCHAIN_NAME.METIS]: [stargateBridgeToken.USDT]
         },
         [stargateBridgeToken.DAI]: {
@@ -84,7 +84,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
             [BLOCKCHAIN_NAME.POLYGON]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.ARBITRUM]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.OPTIMISM]: [stargateBridgeToken.USDC],
-            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.USDC],
+            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.FUSDC],
             [BLOCKCHAIN_NAME.METIS]: [stargateBridgeToken.mUSD],
             [BLOCKCHAIN_NAME.BASE]: [stargateBridgeToken.USDC]
         },
@@ -94,7 +94,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
             [BLOCKCHAIN_NAME.POLYGON]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.ARBITRUM]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.OPTIMISM]: [stargateBridgeToken.USDC],
-            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.USDC]
+            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.FUSDC]
         },
         [stargateBridgeToken.USDD]: {
             [BLOCKCHAIN_NAME.ETHEREUM]: [stargateBridgeToken.USDD]
@@ -119,7 +119,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
                 stargateBridgeToken.USDT
             ],
             [BLOCKCHAIN_NAME.AVALANCHE]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
-            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.USDC],
+            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.FUSDC],
             [BLOCKCHAIN_NAME.ARBITRUM]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.OPTIMISM]: [stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.BASE]: [stargateBridgeToken.USDC]
@@ -133,7 +133,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
             [BLOCKCHAIN_NAME.ETHEREUM]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.ARBITRUM]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.OPTIMISM]: [stargateBridgeToken.USDC],
-            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.USDC],
+            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.FUSDC],
             [BLOCKCHAIN_NAME.METIS]: [stargateBridgeToken.mUSD],
             [BLOCKCHAIN_NAME.BASE]: [stargateBridgeToken.USDC]
         },
@@ -157,7 +157,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
             ],
             [BLOCKCHAIN_NAME.POLYGON]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.ETHEREUM]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
-            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.USDC],
+            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.FUSDC],
             [BLOCKCHAIN_NAME.ARBITRUM]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.OPTIMISM]: [stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.BASE]: [stargateBridgeToken.USDC]
@@ -171,7 +171,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
             [BLOCKCHAIN_NAME.POLYGON]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.ARBITRUM]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.OPTIMISM]: [stargateBridgeToken.USDC],
-            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.USDC],
+            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.FUSDC],
             [BLOCKCHAIN_NAME.METIS]: [stargateBridgeToken.mUSD]
         },
         [stargateBridgeToken.MAI]: {
@@ -183,7 +183,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
         }
     },
     [BLOCKCHAIN_NAME.FANTOM]: {
-        [stargateBridgeToken.USDC]: {
+        [stargateBridgeToken.FUSDC]: {
             [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: [
                 stargateBridgeToken.BUSD,
                 stargateBridgeToken.USDT
@@ -205,7 +205,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
             [BLOCKCHAIN_NAME.POLYGON]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.AVALANCHE]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.OPTIMISM]: [stargateBridgeToken.USDC],
-            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.USDC],
+            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.FUSDC],
             [BLOCKCHAIN_NAME.BASE]: [stargateBridgeToken.USDC, stargateBridgeToken.ETH]
         },
         [stargateBridgeToken.USDT]: {
@@ -217,7 +217,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
             [BLOCKCHAIN_NAME.POLYGON]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.AVALANCHE]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.OPTIMISM]: [stargateBridgeToken.USDC],
-            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.USDC],
+            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.FUSDC],
             [BLOCKCHAIN_NAME.METIS]: [stargateBridgeToken.mUSD]
         },
         [stargateBridgeToken.ETH]: {
@@ -252,7 +252,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
             [BLOCKCHAIN_NAME.POLYGON]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.AVALANCHE]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.ARBITRUM]: [stargateBridgeToken.USDC],
-            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.USDC],
+            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.FUSDC],
             [BLOCKCHAIN_NAME.BASE]: [stargateBridgeToken.USDC, stargateBridgeToken.ETH]
         },
         [stargateBridgeToken.USDT]: {
@@ -264,7 +264,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
             [BLOCKCHAIN_NAME.POLYGON]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.AVALANCHE]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.ARBITRUM]: [stargateBridgeToken.USDC],
-            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.USDC],
+            [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.FUSDC],
             [BLOCKCHAIN_NAME.METIS]: [stargateBridgeToken.mUSD]
         },
         [stargateBridgeToken.FRAX]: {

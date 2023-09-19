@@ -5,11 +5,11 @@ import { BridgersTradeProviders } from 'src/features/on-chain/calculation-manage
 import { izumiTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/izumi-trade-providers';
 import { OneinchTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/oneinch-trade-providers';
 import { pancakeRouterProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/pancake-router-providers';
+import { syncSwapTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/sync-swap-trade-providers';
 import { UniswapV2TradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/uniswap-v2-trade-providers';
 import { UniswapV3TradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/uniswap-v3-trade-providers';
 import { xyDexTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/xy-dex-trade-providers';
 import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
-import { SyncSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/sync-swap/sync-swap-provider';
 import { vooiTradeProviders } from "./vooi-trade-providers";
 
 export const typedTradeProviders: OnChainTypedTradeProviders = [
@@ -23,7 +23,7 @@ export const typedTradeProviders: OnChainTypedTradeProviders = [
     ...izumiTradeProviders,
     ...xyDexTradeProviders,
     ...vooiTradeProviders,
-    SyncSwapProvider,
+    ...syncSwapTradeProviders,
 ].reduce(
     (acc, ProviderClass) => {
         const provider = new ProviderClass();

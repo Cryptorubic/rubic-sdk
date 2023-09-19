@@ -19,7 +19,8 @@ const pools = {
     [stargateBridgeToken.ETH]: 13,
     [stargateBridgeToken.WETH]: 13,
     [stargateBridgeToken.AETH]: 13,
-    [stargateBridgeToken.SGETH]: 13
+    [stargateBridgeToken.SGETH]: 13,
+    [stargateBridgeToken.FUSDC]: 21
 } as const;
 
 export const stargatePoolId: Record<StargateBridgeToken, number> = pools;
