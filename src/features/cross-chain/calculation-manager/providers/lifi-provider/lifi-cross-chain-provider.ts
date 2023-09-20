@@ -222,7 +222,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             ?.find(provider => provider.action.fromChainId === provider.action.toChainId)
             ?.toolDetails.name.toLowerCase();
 
-        const subType = typedSteps
+        const subType = (steps as LifiStep[])
             ?.find(provider => provider.action.fromChainId !== provider.action.toChainId)
             ?.tool.toLowerCase();
 
