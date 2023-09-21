@@ -19,7 +19,8 @@ export const changeNowEvmSupportedBlockchain = {
     [BLOCKCHAIN_NAME.SYSCOIN]: 'sys',
     [BLOCKCHAIN_NAME.XDC]: 'xdc',
     [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulse',
-    [BLOCKCHAIN_NAME.BASE]: 'base'
+    [BLOCKCHAIN_NAME.BASE]: 'base',
+    [BLOCKCHAIN_NAME.ZK_SYNC]: 'zksync'
 };
 
 export type ChangenowEvmCrossChainSupportedBlockchain =
