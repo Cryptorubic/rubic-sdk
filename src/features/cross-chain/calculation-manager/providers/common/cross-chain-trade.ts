@@ -19,7 +19,7 @@ import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manage
 import { BridgeType } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
-import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 /**
@@ -108,7 +108,7 @@ export abstract class CrossChainTrade {
 
     protected constructor(
         protected readonly providerAddress: string,
-        protected readonly routePath: Step[]
+        protected readonly routePath: RubicStep[]
     ) {}
 
     /**

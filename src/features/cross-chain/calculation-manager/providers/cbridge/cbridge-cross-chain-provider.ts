@@ -30,7 +30,7 @@ import { CbridgeEstimateAmountRequest } from 'src/features/cross-chain/calculati
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
@@ -246,6 +246,10 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             compareAddresses(el.token.address, toToken.address)
         );
 
+        if (!supportedToToken) {
+            throw new RubicSdkError('Not supported tokens');
+        }
+
         const possibleTransitToken = config.chain_token?.[fromChainId]?.token.find(
             el => el.token.symbol === supportedToToken!.token.symbol
         );
@@ -383,8 +387,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         transit: PriceTokenAmount,
         to: PriceTokenAmount,
         onChainTrade: EvmOnChainTrade | null
-    ): Promise<Step[]> {
-        const routePath: Step[] = [];
+    ): Promise<RubicStep[]> {
+        const routePath: RubicStep[] = [];
         if (onChainTrade) {
             routePath.push({
                 type: 'on-chain',

@@ -23,7 +23,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
     SymbiosisCrossChainSupportedBlockchain,
@@ -296,11 +296,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         fromToken: PriceTokenAmount,
         toToken: PriceTokenAmount,
         route: Token[]
-    ): Promise<Step[]> {
+    ): Promise<RubicStep[]> {
         const fromChainId = blockchainId[fromToken.blockchain];
         const toChainId = blockchainId[toToken.blockchain];
 
-        const transitFrom = route.reverse().find(el => el.chainId === fromChainId);
+        const transitFrom = [...route].reverse().find(el => el.chainId === fromChainId);
         const transitTo = route.find(el => el.chainId === toChainId);
 
         const fromTokenAmount = transitFrom
@@ -319,7 +319,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
               })
             : toToken;
 
-        const routePath: Step[] = [];
+        const routePath: RubicStep[] = [];
 
         if (transitFrom) {
             routePath.push({

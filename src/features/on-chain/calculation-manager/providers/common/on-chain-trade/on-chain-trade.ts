@@ -16,7 +16,7 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { isAddressCorrect } from 'src/features/common/utils/check-address';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
@@ -212,7 +212,7 @@ export abstract class OnChainTrade {
         }
     }
 
-    protected getRoutePath(): Step[] {
+    protected getRoutePath(): RubicStep[] {
         return [
             {
                 type: 'on-chain',

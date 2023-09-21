@@ -19,7 +19,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { feeLibraryAbi } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/fee-library-abi';
 import { relayersAddresses } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/relayers-addresses';
@@ -433,7 +433,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         from: PriceTokenAmount,
         to: PriceTokenAmount,
         srcOnChainTrade: EvmOnChainTrade | null
-    ): Promise<Step[]> {
+    ): Promise<RubicStep[]> {
         if (srcOnChainTrade) {
             return [
                 {

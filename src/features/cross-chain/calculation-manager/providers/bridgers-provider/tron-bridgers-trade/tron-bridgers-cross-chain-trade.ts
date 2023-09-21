@@ -10,7 +10,7 @@ import { TronBridgersTransactionData } from 'src/features/cross-chain/calculatio
 import { getMethodArgumentsAndTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/utils/get-method-arguments-and-transaction-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { tronCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';
 import { tronNativeSwapAbi } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/constants/tron-native-swap-abi';
@@ -61,7 +61,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
             contractAddress: string;
         },
         providerAddress: string,
-        routePath: Step[]
+        routePath: RubicStep[]
     ) {
         super(providerAddress, routePath);
 

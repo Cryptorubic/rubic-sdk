@@ -17,7 +17,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { XyStatusCode } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-status-code';
 import {
@@ -186,7 +186,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
         fromToken: PriceTokenAmount,
         toToken: PriceTokenAmount,
         quote: XyTransactionResponse['quote']
-    ): Promise<Step[]> {
+    ): Promise<RubicStep[]> {
         const transitFrom = quote.sourceChainSwaps?.toToken;
         const transitTo = quote.destChainSwaps?.fromToken;
 
@@ -206,7 +206,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
               })
             : toToken;
 
-        const routePath: Step[] = [];
+        const routePath: RubicStep[] = [];
 
         if (transitFrom) {
             routePath.push({

@@ -17,7 +17,7 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
     LifiCrossChainSupportedBlockchain,
@@ -250,12 +250,13 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         from: PriceTokenAmount,
         to: PriceTokenAmount,
         route: Route
-    ): Promise<Step[]> {
+    ): Promise<RubicStep[]> {
         const lifiSteps = (route.steps[0] as LifiStep).includedSteps;
         const crossChainStep = lifiSteps.find(el => el.type === 'cross')!;
 
-        const fromTransit = crossChainStep.action.fromAddress!;
-        const toTransit = crossChainStep.action.toAddress!;
+        const fromTransit =
+            crossChainStep.action?.fromAddress || crossChainStep.action.fromToken.address;
+        const toTransit = crossChainStep.action?.toAddress || crossChainStep.action.toToken.address;
 
         const fromTokenAmount = await TokenAmount.createToken({
             address: fromTransit,
@@ -270,7 +271,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         });
 
         // @TODO Add dex true provider and path
-        const routePath: Step[] = [];
+        const routePath: RubicStep[] = [];
 
         if (lifiSteps?.[0]?.type === 'swap') {
             routePath.push({

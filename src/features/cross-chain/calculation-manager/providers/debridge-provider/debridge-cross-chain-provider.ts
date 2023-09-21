@@ -13,7 +13,7 @@ import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { DE_BRIDGE_CONTRACT_ABI } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/contract-abi';
 import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/contract-address';
 import {
@@ -222,24 +222,30 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         estimation: Estimation,
         from: PriceTokenAmount,
         to: PriceTokenAmount
-    ): Promise<Step[]> {
-        const fromChainId = blockchainId[from.blockchain];
-        const toChainId = blockchainId[to.blockchain];
+    ): Promise<RubicStep[]> {
+        const fromChainId = String(blockchainId[from.blockchain]);
+        const toChainId = String(blockchainId[to.blockchain]);
 
-        const transitFrom = estimation.costsDetails.reverse().find(el => el.chain === fromChainId);
+        const transitFrom = [...estimation.costsDetails]
+            .reverse()
+            .find(el => el.chain === fromChainId);
         const transitTo = estimation.costsDetails.find(el => el.chain === toChainId);
 
-        const fromTokenAmount = await TokenAmount.createToken({
-            blockchain: from.blockchain,
-            address: transitFrom!.tokenOut,
-            weiAmount: new BigNumber(transitFrom!.amountOut)
-        });
+        const fromTokenAmount = transitFrom
+            ? await TokenAmount.createToken({
+                  blockchain: from.blockchain,
+                  address: transitFrom!.tokenOut,
+                  weiAmount: new BigNumber(transitFrom!.amountOut)
+              })
+            : from;
 
-        const toTokenAmount = await TokenAmount.createToken({
-            blockchain: to.blockchain,
-            address: transitTo!.tokenIn,
-            weiAmount: new BigNumber(transitTo!.amountIn)
-        });
+        const toTokenAmount = transitTo
+            ? await TokenAmount.createToken({
+                  blockchain: to.blockchain,
+                  address: transitTo!.tokenIn,
+                  weiAmount: new BigNumber(transitTo!.amountIn)
+              })
+            : to;
 
         // @TODO Add dex true provider and path
         return [

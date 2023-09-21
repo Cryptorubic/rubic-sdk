@@ -13,7 +13,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { Step } from 'src/features/cross-chain/calculation-manager/providers/common/models/step';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
     SquidrouterCrossChainSupportedBlockchain,
@@ -181,7 +181,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
         estimation: SquidrouterEstimation,
         from: PriceTokenAmount,
         to: PriceTokenAmount
-    ): Promise<Step[]> {
+    ): Promise<RubicStep[]> {
         const transitFrom = estimation.route.fromChain.map(el => ({
             address: el.toToken.address,
             amount: new BigNumber(el.toAmount)
@@ -214,7 +214,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
             (token, index) => new TokenAmount({ ...token, weiAmount: transitTo[index]!.amount })
         );
 
-        const routePath: Step[] = [];
+        const routePath: RubicStep[] = [];
         if (fromTokenAmount.length) {
             routePath.push({
                 type: 'on-chain',

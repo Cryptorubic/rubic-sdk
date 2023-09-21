@@ -26,7 +26,7 @@ export interface Estimation {
         amountOut: string;
         tokenIn: string;
         tokenOut: string;
-        chain: number;
+        chain: string;
     }[];
     /**
      * Source chain token in.
