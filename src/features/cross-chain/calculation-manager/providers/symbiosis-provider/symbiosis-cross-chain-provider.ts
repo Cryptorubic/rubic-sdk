@@ -277,7 +277,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         };
 
         return await Injector.httpClient.post<SymbiosisTradeData>(
-            `${this.symbiosisApi}/swapping/exact_in?`,
+            `${this.symbiosisApi}/swapping/exact_in`,
             swappingParams
         );
     }
