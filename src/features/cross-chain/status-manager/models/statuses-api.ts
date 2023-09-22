@@ -1,4 +1,5 @@
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
+import { SymbiosisToken } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import { CelerTransferStatus } from 'src/features/cross-chain/status-manager/models/celer-transfer-status.enum';
 import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 
@@ -41,6 +42,7 @@ export interface SymbiosisApiResponse {
         hash: string;
         chainId: number;
     } | null;
+    transitTokenSent: SymbiosisToken | null;
 }
 
 export interface BtcStatusResponse {
