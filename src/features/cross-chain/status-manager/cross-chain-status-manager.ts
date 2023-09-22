@@ -232,7 +232,7 @@ export class CrossChainStatusManager {
                     return { ...dstTxData, status: TX_STATUS.REVERT };
                 }
 
-                if (dstTxStatus === SYMBIOSIS_SWAP_STATUS.REVERTED || !transitTokenSent) {
+                if (dstTxStatus === SYMBIOSIS_SWAP_STATUS.REVERTED || transitTokenSent) {
                     return { ...dstTxData, status: TX_STATUS.FALLBACK };
                 }
 
