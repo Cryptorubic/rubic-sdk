@@ -272,11 +272,12 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             from: swapParams.fromAddress,
             revertableAddress: swapParams.fromAddress,
             slippage: swapParams.slippage,
-            deadline: swapParams.deadline
+            deadline: swapParams.deadline,
+            partnerId: 'rubic'
         };
 
         return await Injector.httpClient.post<SymbiosisTradeData>(
-            `${this.symbiosisApi}/swapping/exact_in`,
+            `${this.symbiosisApi}/swapping/exact_in?`,
             swappingParams
         );
     }
