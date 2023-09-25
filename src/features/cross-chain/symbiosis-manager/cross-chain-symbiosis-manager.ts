@@ -1,20 +1,13 @@
-import {
-    Log as EthersLog,
-    TransactionReceipt as EthersReceipt,
-    TransactionRequest
-} from '@ethersproject/providers';
+import { TransactionRequest } from '@ethersproject/providers';
 import { RubicSdkError } from 'src/common/errors';
-import { Token } from 'src/common/tokens';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { Injector } from 'src/core/injector/injector';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { SymbiosisRevertResponse } from 'src/features/cross-chain/symbiosis-manager/models/symbiosis-revert-api';
 import { SymbiosisStuckedResponse } from 'src/features/cross-chain/symbiosis-manager/models/symbiosis-stucked-api';
-import { ChainId, CHAINS_PRIORITY, Symbiosis, WaitForComplete } from 'symbiosis-js-sdk';
 import { TransactionReceipt } from 'web3-eth';
 
 export class CrossChainSymbiosisManager {
@@ -92,40 +85,5 @@ export class CrossChainSymbiosisManager {
                 }
             )
         ).tx;
-    }
-
-    /**
-     * Waiting for symbiosis trade to complete.
-     * @param fromBlockchain Trade from blockchain.
-     * @param toBlockchain Trade to blockchain.
-     * @param _toToken Trade to toke.
-     * @param receipt Transaction receipt.
-     * @returns Promise<EthersLog>
-     */
-    public async waitForComplete(
-        fromBlockchain: BlockchainName,
-        toBlockchain: BlockchainName,
-        _toToken: Token,
-        receipt: TransactionReceipt
-    ): Promise<EthersLog> {
-        const fromChainId = blockchainId[fromBlockchain] as ChainId;
-        const toChainId = blockchainId[toBlockchain] as ChainId;
-        const config = BlockchainsInfo.isTestBlockchainName(fromBlockchain) ? 'testnet' : 'mainnet';
-        const symbiosis = new Symbiosis(config, 'rubic');
-
-        return await new WaitForComplete({
-            direction: this.getDirection(fromChainId, toChainId),
-            symbiosis,
-            revertableAddress: this.walletAddress,
-            chainIdOut: toChainId,
-            chainIdIn: fromChainId
-        }).waitForComplete(receipt as unknown as EthersReceipt);
-    }
-
-    private getDirection(chainIdIn: ChainId, chainIdOut: ChainId): 'burn' | 'mint' {
-        const indexIn = CHAINS_PRIORITY.indexOf(chainIdIn);
-        const indexOut = CHAINS_PRIORITY.indexOf(chainIdOut);
-
-        return indexIn > indexOut ? 'burn' : 'mint';
     }
 }

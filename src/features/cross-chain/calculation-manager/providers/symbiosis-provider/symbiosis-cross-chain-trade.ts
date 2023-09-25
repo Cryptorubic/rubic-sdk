@@ -24,14 +24,15 @@ import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-m
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { SYMBIOSIS_CONTRACT_ADDRESS_V2 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/contract-address-v2';
 import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { SymbiosisTradeData } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
+import {
+    SymbiosisTradeData,
+    SymbiosisTradeType
+} from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { SymbiosisTradeType } from 'symbiosis-js-sdk';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
 
@@ -63,7 +64,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                         slippage: 0,
                         feeInfo: {},
                         transitAmount: new BigNumber(NaN),
-                        tradeType: { in: undefined, out: undefined }
+                        tradeType: { in: undefined, out: undefined },
+                        contractAddresses: { providerRouter: '', providerGateway: '' }
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
                 ).getContractParams({});
@@ -123,6 +125,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly slippage: number;
 
+    private readonly contractAddresses: { providerRouter: string; providerGateway: string };
+
     private readonly getTransactionRequest: (
         fromAddress: string,
         receiver?: string
@@ -135,7 +139,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
     protected get fromContractAddress(): string {
         return this.isProxyTrade
             ? rubicProxyContractAddress[this.fromBlockchain].gateway
-            : SYMBIOSIS_CONTRACT_ADDRESS_V2[this.fromBlockchain].providerGateway;
+            : this.contractAddresses.providerGateway;
     }
 
     protected get methodName(): string {
@@ -153,6 +157,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             feeInfo: FeeInfo;
             transitAmount: BigNumber;
             tradeType: { in?: SymbiosisTradeType; out?: SymbiosisTradeType };
+            contractAddresses: { providerRouter: string; providerGateway: string };
         },
         providerAddress: string
     ) {
@@ -167,18 +172,19 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         this.feeInfo = crossChainTrade.feeInfo;
         this.slippage = crossChainTrade.slippage;
         this.transitAmount = crossChainTrade.transitAmount;
-        this.onChainSubtype = this.getSubtype(
+        this.onChainSubtype = SymbiosisCrossChainTrade.getSubtype(
             crossChainTrade.tradeType,
             crossChainTrade.to.blockchain
         );
+        this.contractAddresses = crossChainTrade.contractAddresses;
     }
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        const exactIn = await this.getTransactionRequest(
+        const { tx: transactionRequest } = await this.getTransactionRequest(
             this.walletAddress,
             options?.receiverAddress
         );
-        const { data, value: providerValue, to } = exactIn.transactionRequest;
+        const { data, value: providerValue, to } = transactionRequest;
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: this.walletAddress,
@@ -193,7 +199,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             to!,
             data! as string,
             this.fromBlockchain,
-            SYMBIOSIS_CONTRACT_ADDRESS_V2[this.fromBlockchain].providerGateway,
+            this.contractAddresses.providerGateway,
             '0'
         );
 
@@ -245,7 +251,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         };
 
         try {
-            const { transactionRequest } = await this.getTransactionRequest(
+            const { tx: transactionRequest } = await this.getTransactionRequest(
                 this.walletAddress,
                 options?.receiverAddress
             );
@@ -285,7 +291,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    private getSubtype(
+    private static getSubtype(
         tradeType: {
             in?: SymbiosisTradeType;
             out?: SymbiosisTradeType;
@@ -297,7 +303,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             '1inch': ON_CHAIN_TRADE_TYPE.ONE_INCH,
             'open-ocean': ON_CHAIN_TRADE_TYPE.OPEN_OCEAN,
             wrap: ON_CHAIN_TRADE_TYPE.WRAPPED,
-            izumi: undefined,
+            izumi: ON_CHAIN_TRADE_TYPE.IZUMI,
             default: undefined
         };
         return {
