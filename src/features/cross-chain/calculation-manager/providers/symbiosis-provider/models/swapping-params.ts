@@ -11,5 +11,4 @@ export type SwappingParams = {
     revertableAddress: string;
     slippage: number;
     deadline: number;
-    partnerId: string;
 };
