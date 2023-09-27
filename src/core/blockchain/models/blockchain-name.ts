@@ -4,7 +4,8 @@ export const TEST_EVM_BLOCKCHAIN_NAME = {
     GOERLI: 'GOERLI',
     FUJI: 'FUJI',
     SCROLL_SEPOLIA: 'SCROLL_SEPOLIA',
-    ARTHERA: 'ARTHERA'
+    ARTHERA: 'ARTHERA',
+    ZETACHAIN: 'ZETACHAIN'
 } as const;
 
 export const EVM_BLOCKCHAIN_NAME = {

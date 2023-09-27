@@ -1,9 +1,11 @@
-import { TokenAmount } from 'symbiosis-js-sdk';
-import { Token } from 'symbiosis-js-sdk/dist';
+import {
+    SymbiosisToken,
+    SymbiosisTokenAmount
+} from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 
 export type SwappingParams = {
-    tokenAmountIn: TokenAmount;
-    tokenOut: Token;
+    tokenAmountIn: SymbiosisTokenAmount;
+    tokenOut: SymbiosisToken;
     from: string;
     to: string;
     revertableAddress: string;

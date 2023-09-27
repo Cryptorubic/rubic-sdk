@@ -1,12 +1,28 @@
 import { TransactionRequest } from '@ethersproject/abstract-provider';
-import { Percent, SymbiosisTradeType, Token, TokenAmount } from 'symbiosis-js-sdk';
+
+export type SymbiosisTradeType = 'dex' | '1inch' | 'open-ocean' | 'wrap' | 'izumi';
+
+export interface SymbiosisToken {
+    chainId: number;
+    decimals: number;
+    address: string;
+    isNative: boolean;
+    symbol?: string;
+    name?: string;
+}
+
+export interface SymbiosisTokenAmount extends SymbiosisToken {
+    amount: string;
+}
 
 export interface SymbiosisTradeData {
-    fee: TokenAmount;
-    tokenAmountOut: TokenAmount;
-    priceImpact: Percent;
-    transactionRequest: TransactionRequest;
-    inTradeType?: SymbiosisTradeType;
-    outTradeType?: SymbiosisTradeType;
-    route: Token[];
+    fee: SymbiosisTokenAmount;
+    priceImpact: string;
+    tokenAmountOut: SymbiosisTokenAmount;
+    tx: TransactionRequest;
+    amountInUsd: SymbiosisTokenAmount;
+    approveTo: string;
+    route: SymbiosisToken[];
+    inTradeType: SymbiosisTradeType;
+    outTradeType: SymbiosisTradeType;
 }

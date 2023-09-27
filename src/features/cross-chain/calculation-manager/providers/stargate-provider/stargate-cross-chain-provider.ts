@@ -62,12 +62,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     ): boolean {
         const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = to.blockchain as StargateCrossChainSupportedBlockchain;
-        const fromSymbol =
-            fromBlockchain === BLOCKCHAIN_NAME.ARBITRUM && from.symbol === 'AETH'
-                ? 'ETH'
-                : from.symbol;
-        const toSymbol =
-            toBlockchain === BLOCKCHAIN_NAME.ARBITRUM && to.symbol === 'AETH' ? 'ETH' : to.symbol;
+        const fromSymbol = StargateCrossChainProvider.getSymbol(from.symbol, fromBlockchain);
+        const toSymbol = StargateCrossChainProvider.getSymbol(to.symbol, toBlockchain);
 
         const srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
         const srcSupportedPools = stargateBlockchainSupportedPools[fromBlockchain];
@@ -108,6 +104,14 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                     error: new NotSupportedTokensError(),
                     tradeType: this.type
                 };
+            }
+
+            const wrongFantomUsdc = '0x04068DA6C83AFCFA0e13ba15A6696662335D5B75';
+            if (
+                compareAddresses(from.address, wrongFantomUsdc) ||
+                compareAddresses(toToken.address, wrongFantomUsdc)
+            ) {
+                throw new RubicSdkError('Trade to this tokens is not allowed');
             }
 
             const hasDirectRoute = StargateCrossChainProvider.hasDirectRoute(from, toToken);
@@ -272,8 +276,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = fromToken.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
 
-        const fromSymbol = fromToken.symbol;
-        const toSymbol = toToken.symbol;
+        const fromSymbol = StargateCrossChainProvider.getSymbol(fromToken.symbol, fromBlockchain);
+        const toSymbol = StargateCrossChainProvider.getSymbol(toToken.symbol, toBlockchain);
 
         let srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
         let dstPoolId = stargatePoolId[toSymbol as StargateBridgeToken];
@@ -374,11 +378,11 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             throw new RubicSdkError('Tokens are not supported.');
         }
 
-        const toSymbol = (
-            toBlockchain === BLOCKCHAIN_NAME.ARBITRUM && toToken.symbol === 'AETH'
-                ? 'ETH'
-                : toToken.symbol
+        const toSymbol = StargateCrossChainProvider.getSymbol(
+            toToken.symbol,
+            toBlockchain
         ) as StargateBridgeToken;
+
         const toSymbolDirection = toBlockchainDirection[toSymbol];
         if (!toSymbolDirection) {
             throw new RubicSdkError('Tokens are not supported.');
@@ -427,6 +431,16 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             },
             0.1
         );
+    }
+
+    public static getSymbol(symbol: string, blockchain: BlockchainName): string {
+        if (blockchain === BLOCKCHAIN_NAME.ARBITRUM && symbol === 'AETH') {
+            return 'ETH';
+        }
+        if (blockchain === BLOCKCHAIN_NAME.FANTOM && symbol === 'USDC') {
+            return 'FUSDC';
+        }
+        return symbol;
     }
 
     protected async getRoutePath(
