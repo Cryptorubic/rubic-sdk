@@ -1,4 +1,4 @@
-import { FeeCost, LiFi, LifiStep, RouteOptions, RoutesRequest } from '@lifi/sdk';
+import { FeeCost, LiFi, LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';

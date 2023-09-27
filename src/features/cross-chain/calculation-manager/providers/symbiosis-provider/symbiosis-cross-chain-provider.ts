@@ -306,7 +306,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     protected async getRoutePath(
         fromToken: PriceTokenAmount,
         toToken: PriceTokenAmount,
-        route: Token[]
+        route: SymbiosisToken[]
     ): Promise<RubicStep[]> {
         const fromChainId = blockchainId[fromToken.blockchain];
         const toChainId = blockchainId[toToken.blockchain];

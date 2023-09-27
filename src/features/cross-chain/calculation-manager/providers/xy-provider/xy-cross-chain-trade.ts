@@ -321,7 +321,8 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
                         feeInfo: this.feeInfo,
                         onChainTrade: null
                     },
-                    this.providerAddress
+                    this.providerAddress,
+                    []
                 )
             );
         }
