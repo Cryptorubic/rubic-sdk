@@ -145,7 +145,12 @@ export class Web3PublicService {
                                 e instanceof HealthcheckError ||
                                 e.message?.toLowerCase().includes(rpcString.toLowerCase()) ||
                                 e?.message?.toLowerCase()?.includes('not authorized') ||
-                                e?.message?.toLowerCase()?.includes('daily request count exceeded')
+                                e?.message
+                                    ?.toLowerCase()
+                                    ?.includes('daily request count exceeded') ||
+                                e?.message
+                                    ?.toLowerCase()
+                                    ?.includes('upstream connect error or disconnect')
                             ) {
                                 if (curRpc === rpcProvider.rpcList[0]) {
                                     rpcProvider.rpcList.shift();
