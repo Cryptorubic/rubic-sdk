@@ -148,9 +148,7 @@ export class Web3PublicService {
                                 e?.message
                                     ?.toLowerCase()
                                     ?.includes('daily request count exceeded') ||
-                                e?.message
-                                    ?.toLowerCase()
-                                    ?.includes('upstream connect error or disconnect')
+                                e?.message?.toLowerCase()?.includes('invalid json rpc response')
                             ) {
                                 if (curRpc === rpcProvider.rpcList[0]) {
                                     rpcProvider.rpcList.shift();
