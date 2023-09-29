@@ -38,7 +38,7 @@ import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation
 import {
     LIFI_SWAP_STATUS,
     LifiSwapStatus
-} from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/l-i-f-i_-s-w-a-p_-s-t-a-t-u-s';
+} from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
 import { SquidrouterCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/squidrouter-cross-chain-provider';
 import { SYMBIOSIS_SWAP_STATUS } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
@@ -210,7 +210,8 @@ export class CrossChainStatusManager {
                 const toBlockchainId = blockchainId[data.toBlockchain];
                 const {
                     status: { text: dstTxStatus },
-                    tx
+                    tx,
+                    transitTokenSent
                 } = await Injector.httpClient.get<SymbiosisApiResponse>(
                     `https://${symbiosisApi}.symbiosis.finance/crosschain/v1/tx/${srcChainId}/${data.srcTxHash}`
                 );
@@ -233,7 +234,7 @@ export class CrossChainStatusManager {
                     return { ...dstTxData, status: TX_STATUS.REVERT };
                 }
 
-                if (dstTxStatus === SYMBIOSIS_SWAP_STATUS.REVERTED) {
+                if (dstTxStatus === SYMBIOSIS_SWAP_STATUS.REVERTED || transitTokenSent) {
                     return { ...dstTxData, status: TX_STATUS.FALLBACK };
                 }
 

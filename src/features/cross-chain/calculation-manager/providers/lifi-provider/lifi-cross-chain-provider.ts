@@ -1,4 +1,4 @@
-import LIFI, { FeeCost, LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
+import { FeeCost, LiFi, LifiStep, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
@@ -33,7 +33,7 @@ import { lifiProviders } from 'src/features/on-chain/calculation-manager/provide
 export class LifiCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
 
-    private readonly lifi = new LIFI(getLifiConfig());
+    private readonly lifi = new LiFi(getLifiConfig());
 
     private readonly MIN_AMOUNT_USD = new BigNumber(30);
 
@@ -141,7 +141,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                 ? await LifiCrossChainTrade.getGasData(from, to, bestRoute)
                 : null;
 
-        const { onChainType, bridgeType } = this.parseTradeTypes(bestRoute);
+        const { onChainType, bridgeType } = this.parseTradeTypes(bestRoute.steps);
 
         const trade = new LifiCrossChainTrade(
             {
@@ -202,16 +202,28 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    private parseTradeTypes(route: Route): {
+    private parseTradeTypes(bestRouteSteps: LifiStep[]): {
         onChainType: { from: OnChainTradeType | undefined; to: OnChainTradeType | undefined };
         bridgeType: BridgeType | undefined;
     } {
-        const steps =
-            route.steps.length === 1 && (route.steps[0] as LifiStep).includedSteps
-                ? (route.steps[0] as LifiStep).includedSteps
-                : route.steps;
+        if (!bestRouteSteps[0]) {
+            return {
+                onChainType: { from: undefined, to: undefined },
+                bridgeType: undefined
+            };
+        }
+
+        const steps = bestRouteSteps[0].includedSteps;
+
+        if (!steps[0]) {
+            return {
+                onChainType: { from: undefined, to: undefined },
+                bridgeType: undefined
+            };
+        }
+
         const sourceDex =
-            steps?.[0] && steps[0].action.fromChainId === steps[0].action.toChainId
+            steps[0].action.fromChainId === steps[0].action.toChainId
                 ? steps?.[0].toolDetails.name.toLowerCase()
                 : undefined;
 
@@ -220,9 +232,11 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             ?.find(provider => provider.action.fromChainId === provider.action.toChainId)
             ?.toolDetails.name.toLowerCase();
 
-        const subType = steps
+        let subType = bestRouteSteps
             ?.find(provider => provider.action.fromChainId !== provider.action.toChainId)
             ?.tool.toLowerCase();
+
+        subType = subType === 'amarok' ? BRIDGE_TYPE.AMAROK : subType;
 
         const onChainType = {
             from: sourceDex ? lifiProviders[sourceDex] : undefined,
