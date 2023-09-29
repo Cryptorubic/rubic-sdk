@@ -64,7 +64,8 @@ import {
     SymbiosisApiResponse
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
-import { TAIKO_API_STATUS, TaikoApiResponse } from "./models/taiko-api-response";
+
+import { TAIKO_API_STATUS, TaikoApiResponse } from './models/taiko-api-response';
 
 /**
  * Contains methods for getting cross-chain trade statuses.
@@ -449,7 +450,8 @@ export class CrossChainStatusManager {
     private async getXyDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
             const { isSuccess, status, txHash } = await this.httpClient.get<XyApiResponse>(
-                `${XyCrossChainProvider.apiEndpoint}/crossChainStatus?srcChainId=${blockchainId[data.fromBlockchain]
+                `${XyCrossChainProvider.apiEndpoint}/crossChainStatus?srcChainId=${
+                    blockchainId[data.fromBlockchain]
                 }&transactionHash=${data.srcTxHash}`
             );
 
@@ -500,13 +502,13 @@ export class CrossChainStatusManager {
                 case TRANSFER_HISTORY_STATUS.TRANSFER_TO_BE_REFUNDED:
                     return swapData.refund_reason === XFER_STATUS.OK_TO_RELAY
                         ? {
-                            status: TX_STATUS.PENDING,
-                            hash: null
-                        }
+                              status: TX_STATUS.PENDING,
+                              hash: null
+                          }
                         : {
-                            status: TX_STATUS.REVERT,
-                            hash: null
-                        };
+                              status: TX_STATUS.REVERT,
+                              hash: null
+                          };
             }
         } catch {
             return { status: TX_STATUS.PENDING, hash: null };
@@ -660,13 +662,12 @@ export class CrossChainStatusManager {
             throw new RubicSdkError('Taiko Relayer did not find transaction with such ID');
         }
 
-        const { status, data: taikoData } = items[0]
+        const { status, data: taikoData } = items[0];
 
         if (status === TAIKO_API_STATUS.DONE) {
-            return { status: TX_STATUS.SUCCESS, hash: taikoData.Raw.transactionHash }
+            return { status: TX_STATUS.SUCCESS, hash: taikoData.Raw.transactionHash };
         }
 
-        return { status: TX_STATUS.PENDING, hash: null }
-
+        return { status: TX_STATUS.PENDING, hash: null };
     }
 }

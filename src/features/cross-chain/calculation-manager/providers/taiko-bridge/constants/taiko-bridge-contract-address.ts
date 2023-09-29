@@ -9,4 +9,4 @@ export const taikoBridgeContractAddress = {
         nativeProvider: '0x1000777700000000000000000000000000000004',
         erc20Provider: '0x1000777700000000000000000000000000000002'
     }
-}
+};

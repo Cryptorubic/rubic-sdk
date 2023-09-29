@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -14,10 +15,9 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
-import { TaikoBridgeSupportedBlockchain } from "./models/taiko-bridge-supported-blockchains";
-import { taikoBridgeContractAddress } from "./constants/taiko-bridge-contract-address";
-import { blockchainId } from "src/core/blockchain/utils/blockchains-info/constants/blockchain-id";
-import { taikoERC20BridgeABI, taikoNativeBridgeABI } from "./constants/taiko-gateway-abi";
+import { taikoBridgeContractAddress } from './constants/taiko-bridge-contract-address';
+import { taikoERC20BridgeABI, taikoNativeBridgeABI } from './constants/taiko-gateway-abi';
+import { TaikoBridgeSupportedBlockchain } from './models/taiko-bridge-supported-blockchains';
 
 export class TaikoBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -88,7 +88,7 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
 
     /**
      * id of taiko bridge tx, used to get trade status.
-    */
+     */
     public id: string | undefined;
 
     private get fromBlockchain(): TaikoBridgeSupportedBlockchain {
@@ -96,7 +96,9 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return this.from.isNative ? taikoBridgeContractAddress[this.fromBlockchain]!.nativeProvider : taikoBridgeContractAddress[this.fromBlockchain]!.erc20Provider;
+        return this.from.isNative
+            ? taikoBridgeContractAddress[this.fromBlockchain]!.nativeProvider
+            : taikoBridgeContractAddress[this.fromBlockchain]!.erc20Provider;
     }
 
     public readonly feeInfo: FeeInfo = {};
@@ -140,7 +142,6 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
 
         // eslint-disable-next-line no-useless-catch
         try {
-
             const params = await this.getContractParams();
 
             const { data, to, value } = EvmWeb3Pure.encodeMethodCall(
@@ -151,16 +152,18 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
                 params.value
             );
 
-            await this.web3Private.trySendTransaction(to, {
-                data,
-                value,
-                gas: gasLimit,
-                gasPrice,
-                gasPriceOptions
-            }).then(tx => {
-                this.id = tx?.logs[this.from.isNative ? 0 : 2]?.topics[1]
-                onTransactionHash(tx.transactionHash)
-            });
+            await this.web3Private
+                .trySendTransaction(to, {
+                    data,
+                    value,
+                    gas: gasLimit,
+                    gasPrice,
+                    gasPriceOptions
+                })
+                .then(tx => {
+                    this.id = tx?.logs[this.from.isNative ? 0 : 2]?.topics[1];
+                    onTransactionHash(tx.transactionHash);
+                });
 
             return transactionHash!;
         } catch (err) {
@@ -169,15 +172,13 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
     }
 
     public async getContractParams(): Promise<ContractParams> {
-        let methodArguments
-        let fee
+        let methodArguments;
+        let fee;
 
-        const account = this.web3Private.address
+        const account = this.web3Private.address;
 
         if (this.fromBlockchain === BLOCKCHAIN_NAME.SEPOLIA) {
-
             if (this.from.isNative) {
-
                 methodArguments = [
                     {
                         id: 0,
@@ -193,12 +194,10 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
                         data: '0x',
                         memo: ''
                     }
-                ]
+                ];
 
-                fee = '1350000000900000'
-
+                fee = '1350000000900000';
             } else {
-
                 methodArguments = [
                     {
                         destChainId: blockchainId[BLOCKCHAIN_NAME.TAIKO],
@@ -210,16 +209,12 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
                         refundTo: account,
                         memo: ''
                     }
-                ]
+                ];
 
-                fee = '11459820715200000'
-
+                fee = '11459820715200000';
             }
-
         } else {
-
             if (this.from.isNative) {
-
                 methodArguments = [
                     {
                         id: 0,
@@ -235,12 +230,10 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
                         data: '0x',
                         memo: ''
                     }
-                ]
+                ];
 
-                fee = '34774829357400000'
-
+                fee = '34774829357400000';
             } else {
-
                 methodArguments = [
                     {
                         destChainId: blockchainId[BLOCKCHAIN_NAME.SEPOLIA],
@@ -252,23 +245,21 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
                         refundTo: account,
                         memo: ''
                     }
-                ]
+                ];
 
-                fee = '88242155100000'
+                fee = '88242155100000';
             }
-
         }
 
         return {
-            contractAddress: this.from.isNative ? taikoBridgeContractAddress[this.fromBlockchain].nativeProvider : taikoBridgeContractAddress[this.fromBlockchain].erc20Provider,
+            contractAddress: this.from.isNative
+                ? taikoBridgeContractAddress[this.fromBlockchain].nativeProvider
+                : taikoBridgeContractAddress[this.fromBlockchain].erc20Provider,
             contractAbi: this.from.isNative ? taikoNativeBridgeABI : taikoERC20BridgeABI,
             methodName: this.from.isNative ? 'sendMessage' : 'sendToken',
             methodArguments,
-            value: this.from.isNative
-                ? this.from.weiAmount.plus(fee).toFixed()
-                : fee
+            value: this.from.isNative ? this.from.weiAmount.plus(fee).toFixed() : fee
         };
-
     }
 
     public getTradeAmountRatio(_fromUsd: BigNumber): BigNumber {
@@ -287,5 +278,4 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
             slippage: 0
         };
     }
-
 }

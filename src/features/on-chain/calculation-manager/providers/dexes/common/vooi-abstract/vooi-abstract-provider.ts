@@ -6,18 +6,21 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
 import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
-import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import {
+    ON_CHAIN_TRADE_TYPE,
+    OnChainTradeType
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { getFromToTokensAmountsByExact } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
-import { VooiTradeStruct } from "./models/vooi-trade-struct";
-import { omniPoolAbi } from "./constants/omni-pool-abi";
-import { VooiAbstractTrade } from "./vooi-abstract-trade";
+
+import { omniPoolAbi } from './constants/omni-pool-abi';
+import { VooiTradeStruct } from './models/vooi-trade-struct';
+import { VooiAbstractTrade } from './vooi-abstract-trade';
 
 export abstract class VooiAbstractProvider<
     T extends VooiAbstractTrade = VooiAbstractTrade
 > extends EvmOnChainProvider {
-
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.VOOI;
     }

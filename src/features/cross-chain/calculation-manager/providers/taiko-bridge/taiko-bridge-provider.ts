@@ -1,17 +1,18 @@
 import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import {
-    BlockchainName,
-    EvmBlockchainName
-} from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { TaikoBridgeSupportedBlockchain, taikoBridgeSupportedBlockchains } from "./models/taiko-bridge-supported-blockchains";
-import { TaikoBridgeTrade } from "./taiko-bridge-trade";
+
+import {
+    TaikoBridgeSupportedBlockchain,
+    taikoBridgeSupportedBlockchains
+} from './models/taiko-bridge-supported-blockchains';
+import { TaikoBridgeTrade } from './taiko-bridge-trade';
 
 export class TaikoBridgeProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.TAIKO_BRIDGE;
@@ -41,7 +42,6 @@ export class TaikoBridgeProvider extends CrossChainProvider {
         }
 
         try {
-
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: fromToken.tokenAmount

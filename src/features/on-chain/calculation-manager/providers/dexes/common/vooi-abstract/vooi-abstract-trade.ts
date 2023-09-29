@@ -7,9 +7,9 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { VooiTradeStruct } from "./models/vooi-trade-struct";
-import { vooiAbi } from "./constants/vooi-abi";
-import { VooiLineaTrade } from "../../linea/vooi/vooi-trade";
+
+import { vooiAbi } from './constants/vooi-abi';
+import { VooiTradeStruct } from './models/vooi-trade-struct';
 
 export abstract class VooiAbstractTrade extends EvmOnChainTrade {
     private fromPoolId: number;

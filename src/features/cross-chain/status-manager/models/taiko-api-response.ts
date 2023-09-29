@@ -9,8 +9,8 @@ export const TAIKO_API_STATUS = {
     NEW: 0,
     RETRIABLE: 1,
     DONE: 2,
-    FAILED: 3,
-}
+    FAILED: 3
+};
 
 export type TaikoApiStatus = (typeof TAIKO_API_STATUS)[keyof typeof TAIKO_API_STATUS];
 
@@ -20,17 +20,15 @@ interface TaikoTransaction {
     readonly status: TaikoApiStatus;
     readonly eventType: TaikoApiEventType;
     readonly msgHash: string;
-    readonly data: TaikoData
+    readonly data: TaikoData;
 }
 
 interface TaikoData {
     readonly Raw: {
         readonly transactionHash: string;
-    }
+    };
 }
 
 export interface TaikoApiResponse {
-    readonly items: TaikoTransaction[]
+    readonly items: TaikoTransaction[];
 }
-
-

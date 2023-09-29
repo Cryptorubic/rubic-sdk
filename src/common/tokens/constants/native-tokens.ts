@@ -73,7 +73,7 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         name: 'Ether',
         symbol: 'ETH',
         decimals: 18
-    }),
+    })
 };
 
 export const nativeTokensList: Record<BlockchainName, Token> = {

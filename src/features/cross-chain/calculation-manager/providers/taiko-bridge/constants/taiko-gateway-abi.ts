@@ -21,14 +21,14 @@ export const taikoNativeBridgeABI: AbiItem[] = [
                     { name: 'fee', internalType: 'uint256', type: 'uint256' },
                     { name: 'gasLimit', internalType: 'uint256', type: 'uint256' },
                     { name: 'data', internalType: 'bytes', type: 'bytes' },
-                    { name: 'memo', internalType: 'string', type: 'string' },
-                ],
-            },
+                    { name: 'memo', internalType: 'string', type: 'string' }
+                ]
+            }
         ],
         name: 'sendMessage',
-        outputs: [{ name: 'msgHash', internalType: 'bytes32', type: 'bytes32' }],
-    },
-]
+        outputs: [{ name: 'msgHash', internalType: 'bytes32', type: 'bytes32' }]
+    }
+];
 
 export const taikoERC20BridgeABI: AbiItem[] = [
     {
@@ -47,11 +47,11 @@ export const taikoERC20BridgeABI: AbiItem[] = [
                     { name: 'gasLimit', internalType: 'uint256', type: 'uint256' },
                     { name: 'fee', internalType: 'uint256', type: 'uint256' },
                     { name: 'refundTo', internalType: 'address', type: 'address' },
-                    { name: 'memo', internalType: 'string', type: 'string' },
-                ],
-            },
+                    { name: 'memo', internalType: 'string', type: 'string' }
+                ]
+            }
         ],
         name: 'sendToken',
-        outputs: [],
-    },
-]
+        outputs: []
+    }
+];
