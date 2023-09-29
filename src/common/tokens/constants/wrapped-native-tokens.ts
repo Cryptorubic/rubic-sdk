@@ -306,7 +306,7 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
     }),
     [BLOCKCHAIN_NAME.TAIKO]: new Token({
         blockchain: BLOCKCHAIN_NAME.TAIKO,
-        address: '0x1017F42D1D3E7D490eA3CC4C95591c339ba71AC5',
+        address: '0x7be7937A395FD3B527F428124f6a33E10D1C0638',
         name: 'Wrapped Ether',
         symbol: 'WETH',
         decimals: 18

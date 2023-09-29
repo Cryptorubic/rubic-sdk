@@ -10,6 +10,7 @@ import { SymbiosisCrossChainProvider } from 'src/features/cross-chain/calculatio
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 
 import { StargateCrossChainProvider } from '../providers/stargate-provider/stargate-cross-chain-provider';
+import { TaikoBridgeProvider } from "../providers/taiko-bridge/taiko-bridge-provider";
 
 const proxyProviders = [
     SymbiosisCrossChainProvider,
@@ -24,7 +25,8 @@ const nonProxyProviders = [
     DebridgeCrossChainProvider,
     BridgersCrossChainProvider,
     ChangenowCrossChainProvider,
-    ArbitrumRbcBridgeProvider
+    ArbitrumRbcBridgeProvider,
+    TaikoBridgeProvider
     // ScrollBridgeProvider
 ] as const;
 

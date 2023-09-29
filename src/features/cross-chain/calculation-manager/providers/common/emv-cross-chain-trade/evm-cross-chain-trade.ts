@@ -76,7 +76,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
 
         const approveAmount =
             this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ||
-            this.from.blockchain === BLOCKCHAIN_NAME.CRONOS
+                this.from.blockchain === BLOCKCHAIN_NAME.CRONOS
                 ? this.from.weiAmount
                 : 'infinity';
 

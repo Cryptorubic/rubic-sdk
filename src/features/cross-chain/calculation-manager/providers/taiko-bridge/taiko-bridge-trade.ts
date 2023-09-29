@@ -11,15 +11,13 @@ import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
-import { l1Erc20ScrollGatewayAbi } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/constants/l1-erc20-scroll-gateway-abi';
-import { l2Erc20ScrollGatewayAbi } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/constants/l2-erc20-scroll-gateway-abi';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
 import { TaikoBridgeSupportedBlockchain } from "./models/taiko-bridge-supported-blockchains";
 import { taikoBridgeContractAddress } from "./constants/taiko-bridge-contract-address";
 import { blockchainId } from "src/core/blockchain/utils/blockchains-info/constants/blockchain-id";
+import { taikoERC20BridgeABI, taikoNativeBridgeABI } from "./constants/taiko-gateway-abi";
 
 export class TaikoBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -43,7 +41,7 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
                         gasData: null
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS
-                ).getContractParams({});
+                ).getContractParams();
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasDetails] = await Promise.all([
@@ -88,12 +86,17 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
 
     public readonly gasData: GasData | null;
 
+    /**
+     * id of taiko bridge tx, used to get trade status.
+    */
+    public id: string | undefined;
+
     private get fromBlockchain(): TaikoBridgeSupportedBlockchain {
         return this.from.blockchain as TaikoBridgeSupportedBlockchain;
     }
 
     protected get fromContractAddress(): string {
-        return taikoBridgeContractAddress[this.fromBlockchain]!.providerGateway;
+        return this.from.isNative ? taikoBridgeContractAddress[this.fromBlockchain]!.nativeProvider : taikoBridgeContractAddress[this.fromBlockchain]!.erc20Provider;
     }
 
     public readonly feeInfo: FeeInfo = {};
@@ -137,7 +140,8 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
 
         // eslint-disable-next-line no-useless-catch
         try {
-            const params = await this.getContractParams(options);
+
+            const params = await this.getContractParams();
 
             const { data, to, value } = EvmWeb3Pure.encodeMethodCall(
                 params.contractAddress,
@@ -150,10 +154,12 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
             await this.web3Private.trySendTransaction(to, {
                 data,
                 value,
-                onTransactionHash,
                 gas: gasLimit,
                 gasPrice,
                 gasPriceOptions
+            }).then(tx => {
+                this.id = tx?.logs[this.from.isNative ? 0 : 2]?.topics[1]
+                onTransactionHash(tx.transactionHash)
             });
 
             return transactionHash!;
@@ -162,104 +168,107 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
         }
     }
 
-    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        console.log(this.from.weiAmount.toFixed());
+    public async getContractParams(): Promise<ContractParams> {
         let methodArguments
+        let fee
+
+        const account = this.web3Private.address
+
         if (this.fromBlockchain === BLOCKCHAIN_NAME.SEPOLIA) {
 
             if (this.from.isNative) {
 
-                // https://sepolia.etherscan.io//tx/0xfec576107718305cc6d6de3261575219607eb9182e57c068c5a0fbd7b456e788
-
                 methodArguments = [
-                    0,
-                    options.receiverAddress,
-                    blockchainId[BLOCKCHAIN_NAME.SEPOLIA],
-                    blockchainId[BLOCKCHAIN_NAME.TAIKO],
-                    options.receiverAddress,
-                    options.receiverAddress,
-                    this.from.stringWeiAmount,
-                    '0',
-                    '1350000000900000',
-                    '140000',
-                    '0',
-                    ''
+                    {
+                        id: 0,
+                        from: account,
+                        srcChainId: blockchainId[BLOCKCHAIN_NAME.SEPOLIA],
+                        destChainId: blockchainId[BLOCKCHAIN_NAME.TAIKO],
+                        user: account,
+                        to: account,
+                        refundTo: account,
+                        value: this.from.stringWeiAmount,
+                        fee: '1350000000900000',
+                        gasLimit: '140000',
+                        data: '0x',
+                        memo: ''
+                    }
                 ]
+
+                fee = '1350000000900000'
 
             } else {
 
-                // https://sepolia.etherscan.io//tx/0xd6a77fdc72170094e8b30fb476b3d6414ae725515c5fab81061da8f13f232f8f
-
                 methodArguments = [
-                    blockchainId[BLOCKCHAIN_NAME.TAIKO],
-                    options.receiverAddress,
-                    this.from.address,
-                    this.from.stringWeiAmount,
-                    '140000',
-                    '4650000003100000',
-                    options.receiverAddress,
-                    ''
+                    {
+                        destChainId: blockchainId[BLOCKCHAIN_NAME.TAIKO],
+                        to: account,
+                        token: this.from.address,
+                        amount: this.from.stringWeiAmount,
+                        gasLimit: '140000',
+                        fee: '11459820715200000',
+                        refundTo: account,
+                        memo: ''
+                    }
                 ]
+
+                fee = '11459820715200000'
 
             }
 
-            return {
-                contractAddress: taikoBridgeContractAddress[this.fromBlockchain]!.providerGateway,
-                contractAbi: l1Erc20ScrollGatewayAbi,
-                methodName: this.from.isNative ? 'sendMessage' : 'sendERC20',
-                methodArguments,
-                value: this.from.isNative
-                    ? this.from.weiAmount.toFixed()
-                    : this.from.stringWeiAmount
-            };
         } else {
 
             if (this.from.isNative) {
 
-                // https://test.taikoscan.io//tx/0x96180f9c0350e75877b9ba69e107d7ee207b0386ab53dad8d2fed48362db8c32
-
                 methodArguments = [
-                    0,
-                    options.receiverAddress,
-                    blockchainId[BLOCKCHAIN_NAME.SEPOLIA],
-                    blockchainId[BLOCKCHAIN_NAME.TAIKO],
-                    options.receiverAddress,
-                    options.receiverAddress,
-                    this.from.stringWeiAmount,
-                    '0',
-                    '1350000000900000',
-                    '140000',
-                    '0',
-                    ''
+                    {
+                        id: 0,
+                        from: account,
+                        srcChainId: blockchainId[BLOCKCHAIN_NAME.TAIKO],
+                        destChainId: blockchainId[BLOCKCHAIN_NAME.SEPOLIA],
+                        user: account,
+                        to: account,
+                        refundTo: account,
+                        value: this.from.stringWeiAmount,
+                        fee: '34774829357400000',
+                        gasLimit: '140000',
+                        data: '0x',
+                        memo: ''
+                    }
                 ]
+
+                fee = '34774829357400000'
 
             } else {
 
-                // https://test.taikoscan.io//tx/0x92f61e86be828dec175167796fc89de056f649abe7d0c2436daf2bf8372715b4
-
                 methodArguments = [
-                    blockchainId[BLOCKCHAIN_NAME.TAIKO],
-                    options.receiverAddress,
-                    this.from.address,
-                    this.from.stringWeiAmount,
-                    '140000',
-                    '4650000003100000',
-                    options.receiverAddress,
-                    ''
+                    {
+                        destChainId: blockchainId[BLOCKCHAIN_NAME.SEPOLIA],
+                        to: account,
+                        token: this.from.address,
+                        amount: this.from.stringWeiAmount,
+                        gasLimit: '140000',
+                        fee: '88242155100000',
+                        refundTo: account,
+                        memo: ''
+                    }
                 ]
+
+                fee = '88242155100000'
             }
 
         }
 
         return {
-            contractAddress: taikoBridgeContractAddress[this.fromBlockchain]!.providerGateway,
-            contractAbi: l2Erc20ScrollGatewayAbi,
-            methodName: this.from.isNative ? 'sendMessage' : 'sendERC20',
+            contractAddress: this.from.isNative ? taikoBridgeContractAddress[this.fromBlockchain].nativeProvider : taikoBridgeContractAddress[this.fromBlockchain].erc20Provider,
+            contractAbi: this.from.isNative ? taikoNativeBridgeABI : taikoERC20BridgeABI,
+            methodName: this.from.isNative ? 'sendMessage' : 'sendToken',
             methodArguments,
             value: this.from.isNative
-                ? this.from.weiAmount.toFixed()
-                : this.from.stringWeiAmount
+                ? this.from.weiAmount.plus(fee).toFixed()
+                : fee
         };
+
     }
 
     public getTradeAmountRatio(_fromUsd: BigNumber): BigNumber {

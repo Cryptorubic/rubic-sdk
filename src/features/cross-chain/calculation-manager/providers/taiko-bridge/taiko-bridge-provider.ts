@@ -1,25 +1,16 @@
-import { NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
+import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { compareAddresses } from 'src/common/utils/blockchain';
 import {
-    BLOCKCHAIN_NAME,
     BlockchainName,
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
-import { Injector } from 'src/core/injector/injector';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
-import { l1Erc20ScrollGatewayAbi } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/constants/l1-erc20-scroll-gateway-abi';
-import { l2Erc20ScrollGatewayAbi } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/constants/l2-erc20-scroll-gateway-abi';
-import {
-    scrollBridgeSupportedBlockchains
-} from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/models/scroll-bridge-supported-blockchain';
-import { TaikoBridgeSupportedBlockchain } from "./models/taiko-bridge-supported-blockchains";
-import { taikoBridgeContractAddress } from "./constants/taiko-bridge-contract-address";
+import { TaikoBridgeSupportedBlockchain, taikoBridgeSupportedBlockchains } from "./models/taiko-bridge-supported-blockchains";
 import { TaikoBridgeTrade } from "./taiko-bridge-trade";
 
 export class TaikoBridgeProvider extends CrossChainProvider {
@@ -28,7 +19,7 @@ export class TaikoBridgeProvider extends CrossChainProvider {
     public isSupportedBlockchain(
         blockchain: BlockchainName
     ): blockchain is TaikoBridgeSupportedBlockchain {
-        return scrollBridgeSupportedBlockchains.some(
+        return taikoBridgeSupportedBlockchains.some(
             supportedBlockchain => supportedBlockchain === blockchain
         );
     }
@@ -50,35 +41,6 @@ export class TaikoBridgeProvider extends CrossChainProvider {
         }
 
         try {
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-
-            if (!fromToken.isNative) {
-                if (fromBlockchain === BLOCKCHAIN_NAME.SEPOLIA) {
-                    const l2Address = await web3Public.callContractMethod(
-                        taikoBridgeContractAddress[fromBlockchain]!.providerGateway,
-                        l1Erc20ScrollGatewayAbi,
-                        'getL2ERC20Address',
-                        [fromToken.address]
-                    );
-                    if (!compareAddresses(toToken.address, l2Address)) {
-                        throw new RubicSdkError('Swap is not allowed.');
-                    }
-                } else {
-                    const l1Address = await web3Public.callContractMethod(
-                        taikoBridgeContractAddress[fromBlockchain]!.providerGateway,
-                        l2Erc20ScrollGatewayAbi,
-                        'getL1ERC20Address',
-                        [fromToken.address]
-                    );
-                    if (!compareAddresses(toToken.address, l1Address)) {
-                        throw new RubicSdkError('Swap is not allowed.');
-                    }
-                }
-            } else {
-                if (!toToken.isNative) {
-                    throw new RubicSdkError('Swap is not allowed.');
-                }
-            }
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
