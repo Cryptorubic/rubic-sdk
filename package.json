@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "4.30.1",
+    "version": "4.30.2-alpha-dln-poxy.0",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
