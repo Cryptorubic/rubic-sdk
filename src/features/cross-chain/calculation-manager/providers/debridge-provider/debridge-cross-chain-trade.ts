@@ -16,13 +16,16 @@ import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-cross-chain-supported-blockchain';
 import { portalAddresses } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/portal-address';
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
@@ -147,7 +150,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     public readonly feeInfo: FeeInfo;
 
     protected get methodName(): string {
-        return '';
+        return 'startBridgeTokensViaGenericCrossChain';
     }
 
     constructor(
@@ -219,28 +222,59 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        const { data, value: providerValue } = await this.getTransactionRequest(
-            options?.receiverAddress
-        );
+        const {
+            data,
+            value: providerValue,
+            to
+        } = await this.getTransactionRequest(options?.receiverAddress);
 
-        const bridgeData = this.getBridgeData(options);
-        const swapData = this.onChainTrade && (await this.getSwapData(options));
-        const providerData = this.getProviderData(data!);
+        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
+            walletAddress: this.walletAddress,
+            fromTokenAmount: this.from,
+            toTokenAmount: this.to,
+            srcChainTrade: null,
+            providerAddress: this.providerAddress,
+            type: `native:${this.type}`,
+            fromAddress: this.walletAddress
+        });
+        const swapData =
+            this.onChainTrade &&
+            (await ProxyCrossChainEvmTrade.getSwapData(options, {
+                walletAddress: this.walletAddress,
+                contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
+                fromTokenAmount: this.from,
+                toTokenAmount: this.onChainTrade.to,
+                onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
+            }));
+        const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
+            to,
+            data! as string,
+            this.fromBlockchain,
+            this.fromContractAddress,
+            providerValue
+        );
 
         const methodArguments = swapData
             ? [bridgeData, swapData, providerData]
             : [bridgeData, providerData];
-        const methodName = swapData
-            ? 'swapAndStartBridgeTokensViaDeBridge'
-            : 'startBridgeTokensViaDeBridge';
 
         const value = this.getSwapValue(providerValue);
 
-        return {
-            contractAddress: this.fromContractAddress,
-            contractAbi: evmCommonCrossChainAbi,
-            methodName,
+        const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
+            rubicProxyContractAddress[this.from.blockchain].router,
+            evmCommonCrossChainAbi,
+            this.methodName,
             methodArguments,
+            value
+        );
+        const sendingToken = this.from.isNative ? [] : [this.from.address];
+        const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
+
+        return {
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
+            contractAbi: gatewayRubicCrossChainAbi,
+            methodName: 'startViaRubic',
+            methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
             value
         };
     }
