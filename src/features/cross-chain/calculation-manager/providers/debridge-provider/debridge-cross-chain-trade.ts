@@ -192,7 +192,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         let transactionHash: string;
 
         try {
-            const { data, value, to } = await this.getTransactionRequest(options?.receiverAddress);
+            const { tx } = await this.getTransactionRequest(options?.receiverAddress);
+            const { data, value, to } = tx;
             const { onConfirm } = options;
             const onTransactionHash = (hash: string) => {
                 if (onConfirm) {
@@ -222,11 +223,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        const {
-            data,
-            value: providerValue,
-            to
-        } = await this.getTransactionRequest(options?.receiverAddress);
+        const { fixFee, tx } = await this.getTransactionRequest(options?.receiverAddress);
+        const { data, value: providerValue, to } = tx;
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: this.walletAddress,
@@ -251,7 +249,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             data! as string,
             this.fromBlockchain,
             this.fromContractAddress,
-            providerValue
+            fixFee
         );
 
         const methodArguments = swapData
@@ -287,9 +285,12 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     }
 
     private async getTransactionRequest(receiverAddress?: string): Promise<{
-        data: string;
-        value: string;
-        to: string;
+        fixFee: string;
+        tx: {
+            data: string;
+            value: string;
+            to: string;
+        };
     }> {
         const walletAddress = this.web3Private.address;
         const params = {
@@ -303,14 +304,14 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             referralCode: '4350'
         };
 
-        const { tx, estimation } = await Injector.httpClient.get<TransactionResponse>(
+        const { tx, estimation, fixFee } = await Injector.httpClient.get<TransactionResponse>(
             `${DebridgeCrossChainProvider.apiEndpoint}/order/create-tx`,
             { params }
         );
 
         await this.checkOrderAmount(estimation);
 
-        return tx;
+        return { fixFee, tx };
     }
 
     public getUsdPrice(): BigNumber {

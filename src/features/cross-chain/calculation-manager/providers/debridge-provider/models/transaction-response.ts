@@ -26,6 +26,11 @@ export interface TransactionResponse {
      * Transaction data.
      */
     tx: DlnTransaction;
+
+    /**
+     * Provider fee.
+     */
+    fixFee: string;
 }
 
 /**
