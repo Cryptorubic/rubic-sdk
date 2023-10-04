@@ -10,7 +10,8 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     STARGATE: 'stargate',
     ARBITRUM: 'arbitrum',
     SQUIDROUTER: 'squidrouter',
-    SCROLL_BRIDGE: 'scroll_bridge'
+    SCROLL_BRIDGE: 'scroll_bridge',
+    TAIKO_BRIDGE: 'taiko_bridge'
 } as const;
 
 export type CrossChainTradeType =

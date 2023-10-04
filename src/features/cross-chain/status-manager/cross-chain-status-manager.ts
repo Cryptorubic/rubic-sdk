@@ -65,6 +65,8 @@ import {
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
+import { TAIKO_API_STATUS, TaikoApiResponse } from './models/taiko-api-response';
+
 /**
  * Contains methods for getting cross-chain trade statuses.
  */
@@ -85,7 +87,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getStargateDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER]: this.getSquidrouterDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.SCROLL_BRIDGE]: this.getScrollBridgeDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.SCROLL_BRIDGE]: this.getScrollBridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.TAIKO_BRIDGE]: this.getTaikoBridgeDstSwapStatus
     };
 
     /**
@@ -639,6 +642,30 @@ export class CrossChainStatusManager {
         const targetHash = sourceTx?.finalizeTx?.hash;
         if (targetHash) {
             return { status: TX_STATUS.SUCCESS, hash: targetHash };
+        }
+
+        return { status: TX_STATUS.PENDING, hash: null };
+    }
+
+    public async getTaikoBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        if (!data.taikoTransactionId) {
+            throw new RubicSdkError('Must provide Taiko transaction ID');
+        }
+        if (!data.sender) {
+            throw new RubicSdkError('Must specify sender account');
+        }
+        const { items } = await Injector.httpClient.get<TaikoApiResponse>(
+            `https://relayer.jolnir.taiko.xyz/events?address=${data.sender}&msgHash=${data.taikoTransactionId}&event=MessageSent`
+        );
+
+        if (!items[0]) {
+            throw new RubicSdkError('Taiko Relayer did not find transaction with such ID');
+        }
+
+        const { status, data: taikoData } = items[0];
+
+        if (status === TAIKO_API_STATUS.DONE) {
+            return { status: TX_STATUS.SUCCESS, hash: taikoData.Raw.transactionHash };
         }
 
         return { status: TX_STATUS.PENDING, hash: null };
