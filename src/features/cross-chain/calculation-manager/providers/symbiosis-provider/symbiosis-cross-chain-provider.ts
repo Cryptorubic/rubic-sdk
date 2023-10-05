@@ -29,11 +29,11 @@ import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { SwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/swapping-params';
 import {
     errorCode,
     SymbiosisError
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-error';
+import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
 import {
     SymbiosisToken,
     SymbiosisTokenAmount,
@@ -45,8 +45,6 @@ import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/prov
 
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
-
-    public readonly symbiosisApi = 'https://api-v2.symbiosis.finance/crosschain/v1';
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
@@ -117,7 +115,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 symbol: toToken.symbol
             };
 
-            const tokenAmountIn: SymbiosisTokenAmount = {
+            const symbiosisTokenAmountIn: SymbiosisTokenAmount = {
                 ...tokenIn,
                 amount: fromWithoutFee.stringWeiAmount
             };
@@ -127,44 +125,28 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
             const slippageTolerance = options.slippageTolerance * 10000;
 
-            const trade = await this.getTrade({
-                tokenAmountIn,
+            const swapParams: SymbiosisSwappingParams = {
+                tokenAmountIn: symbiosisTokenAmountIn,
                 tokenOut,
-                fromAddress,
-                receiverAddress,
-                refundAddress: fromAddress,
+                from: fromAddress,
+                to: receiverAddress || fromAddress,
+                revertableAddress: fromAddress,
                 slippage: slippageTolerance,
                 deadline
-            });
+            };
+
             const {
                 tokenAmountOut,
                 fee: transitTokenFee,
                 inTradeType,
                 outTradeType,
                 tx,
-                approveTo
-            } = trade;
-
-            const swapFunction = (fromUserAddress: string, receiver?: string) => {
-                const refundAddress = receiver || fromAddress;
-                const receiverAddress = receiver || fromUserAddress;
-
-                const amountIn = fromWithoutFee.tokenAmount;
-                const tokenAmountIn: SymbiosisTokenAmount = {
-                    ...tokenIn,
-                    amount: Web3Pure.toWei(amountIn, from.decimals)
-                };
-
-                return this.getTrade({
-                    tokenAmountIn,
-                    tokenOut,
-                    fromAddress: fromUserAddress,
-                    receiverAddress,
-                    refundAddress,
-                    slippage: slippageTolerance,
-                    deadline
-                });
-            };
+                approveTo,
+                route
+            } = await Injector.httpClient.post<SymbiosisTradeData>(
+                `${SymbiosisCrossChainTrade.symbiosisApi}/swapping/exact_in?partnerId=rubic`,
+                swapParams
+            );
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -175,7 +157,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await SymbiosisCrossChainTrade.getGasData(from, to)
+                    ? await SymbiosisCrossChainTrade.getGasData(from, to, swapParams)
                     : null;
 
             return {
@@ -183,10 +165,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                     {
                         from,
                         to,
-                        swapFunction,
                         gasData,
                         priceImpact: from.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
+                        swapParams,
                         feeInfo: {
                             ...feeInfo,
                             provider: {
@@ -206,7 +188,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                         contractAddresses: { providerRouter: tx.to!, providerGateway: approveTo }
                     },
                     options.providerAddress,
-                    await this.getRoutePath(from, to, trade.route)
+                    await this.getRoutePath(from, to, route)
                 ),
                 tradeType: this.type
             };
@@ -256,31 +238,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             providerAddress,
             percentFeeToken,
             useProxy
-        );
-    }
-
-    private async getTrade(swapParams: {
-        tokenAmountIn: SymbiosisTokenAmount;
-        tokenOut: SymbiosisToken | null;
-        fromAddress: string;
-        receiverAddress: string;
-        refundAddress: string;
-        slippage: number;
-        deadline: number;
-    }): Promise<SymbiosisTradeData> {
-        const swappingParams: SwappingParams = {
-            tokenAmountIn: swapParams.tokenAmountIn,
-            tokenOut: swapParams.tokenOut!,
-            to: swapParams.receiverAddress || swapParams.fromAddress,
-            from: swapParams.fromAddress,
-            revertableAddress: swapParams.fromAddress,
-            slippage: swapParams.slippage,
-            deadline: swapParams.deadline
-        };
-
-        return await Injector.httpClient.post<SymbiosisTradeData>(
-            `${this.symbiosisApi}/swapping/exact_in?partnerId=rubic`,
-            swappingParams
         );
     }
 

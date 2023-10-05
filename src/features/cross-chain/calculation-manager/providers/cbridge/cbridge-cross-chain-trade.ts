@@ -3,6 +3,7 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -293,11 +294,7 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         receiverAddress: string,
         maxSlippage: number,
         transitToken: PriceTokenAmount
-    ): {
-        data: string;
-        value: string;
-        to: string;
-    } {
+    ): EvmEncodeConfig {
         const params: (string | number)[] = [receiverAddress];
         if (!transitToken.isNative) {
             params.push(transitToken.address);

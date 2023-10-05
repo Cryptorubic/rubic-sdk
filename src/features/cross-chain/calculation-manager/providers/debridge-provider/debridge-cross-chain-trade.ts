@@ -5,12 +5,12 @@ import {
     RubicSdkError,
     TooLowAmountError
 } from 'src/common/errors';
-import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -27,7 +27,6 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-cross-chain-supported-blockchain';
 import { portalAddresses } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/portal-address';
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
-import { Estimation } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/estimation-response';
 import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
 import { TransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
 import { meteRouterAbi } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/mete-router-abi';
@@ -192,7 +191,10 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         let transactionHash: string;
 
         try {
-            const { data, value, to } = await this.getTransactionRequest(options?.receiverAddress);
+            const { data, value, to } = await this.getTransactionRequest(
+                options?.receiverAddress,
+                options?.directTransaction
+            );
             const { onConfirm } = options;
             const onTransactionHash = (hash: string) => {
                 if (onConfirm) {
@@ -255,11 +257,17 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         return fromUsd.plus(usdCryptoFee.isNaN() ? 0 : usdCryptoFee).dividedBy(this.to.tokenAmount);
     }
 
-    private async getTransactionRequest(receiverAddress?: string): Promise<{
-        data: string;
-        value: string;
-        to: string;
-    }> {
+    private async getTransactionRequest(
+        receiverAddress?: string,
+        transactionConfig?: EvmEncodeConfig
+    ): Promise<EvmEncodeConfig> {
+        if (transactionConfig) {
+            return {
+                data: transactionConfig.data,
+                value: transactionConfig.value,
+                to: transactionConfig.to
+            };
+        }
         const walletAddress = this.web3Private.address;
         const params = {
             ...this.transactionRequest,
@@ -277,7 +285,11 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             { params }
         );
 
-        await this.checkOrderAmount(estimation);
+        EvmCrossChainTrade.checkAmountChange(
+            tx,
+            estimation.dstChainTokenOut.amount,
+            this.to.stringWeiAmount
+        );
 
         return tx;
     }
@@ -362,59 +374,5 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             return decodeData.otherSideCalldata;
         }
         throw new RubicSdkError('Wrong call data');
-    }
-
-    private async checkOrderAmount(estimation: Estimation): Promise<never | void> {
-        const newAmount = Web3Pure.fromWei(estimation.dstChainTokenOut.amount, this.to.decimals);
-
-        const acceptableExpensesChangePercent = 3;
-        const acceptablePriceChangeFromAmount = 0.05;
-
-        const feeAmount = Web3Pure.fromWei(
-            estimation.costsDetails.find(fee => fee.type === 'EstimatedOperatingExpenses')?.payload
-                .feeAmount || '0',
-            this.to.decimals
-        );
-
-        const acceptablePriceChangeFromExpenses = feeAmount
-            .dividedBy(newAmount)
-            .multipliedBy(acceptableExpensesChangePercent);
-
-        const acceptablePriceChange = acceptablePriceChangeFromExpenses.plus(
-            acceptablePriceChangeFromAmount
-        );
-
-        const amountPlusPercent = this.to.tokenAmount.multipliedBy(
-            acceptablePriceChange.dividedBy(100).plus(1)
-        );
-        const amountMinusPercent = this.to.tokenAmount.multipliedBy(
-            new BigNumber(1).minus(acceptablePriceChange.dividedBy(100))
-        );
-
-        if (amountPlusPercent.lt(newAmount) || amountMinusPercent.gt(newAmount)) {
-            const newTo = await PriceTokenAmount.createFromToken({
-                ...this.to,
-                tokenAmount: newAmount
-            });
-            throw new UpdatedRatesError(
-                new DebridgeCrossChainTrade(
-                    {
-                        from: this.from,
-                        to: newTo,
-                        transactionRequest: this.transactionRequest,
-                        gasData: this.gasData,
-                        priceImpact: this.from.calculatePriceImpactPercent(newTo),
-                        allowanceTarget: this.allowanceTarget,
-                        slippage: 0,
-                        feeInfo: this.feeInfo,
-                        transitAmount: this.transitAmount,
-                        cryptoFeeToken: this.cryptoFeeToken,
-                        onChainTrade: null
-                    },
-                    this.providerAddress,
-                    []
-                )
-            );
-        }
     }
 }

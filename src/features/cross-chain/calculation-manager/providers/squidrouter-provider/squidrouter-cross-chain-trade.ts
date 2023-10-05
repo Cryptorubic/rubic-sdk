@@ -4,6 +4,7 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -23,7 +24,9 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { SquidrouterContractAddress } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/constants/squidrouter-contract-address';
 import { SquidrouterCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/constants/squidrouter-cross-chain-supported-blockchain';
+import { SquidrouterTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/transaction-request';
 import { SquidrouterTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/transaction-response';
+import { SquidrouterCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/squidrouter-cross-chain-provider';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
@@ -37,19 +40,17 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly cryptoFeeToken: PriceTokenAmount;
 
-    private readonly transactionRequest: (
-        receiverAddress: string
-    ) => Promise<SquidrouterTransactionResponse>;
-
     private readonly slippage: number;
 
     private readonly onChainTrade: EvmOnChainTrade | null;
+
+    private readonly transactionRequest: SquidrouterTransactionRequest;
 
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
-        transactionRequest: (receiverAddress: string) => Promise<SquidrouterTransactionResponse>
+        transactionRequest: SquidrouterTransactionRequest
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as SquidrouterCrossChainSupportedBlockchain;
         const walletAddress =
@@ -64,7 +65,6 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
                     {
                         from,
                         to,
-                        transactionRequest,
                         gasData: null,
                         priceImpact: 0,
                         allowanceTarget: '',
@@ -73,7 +73,8 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
                         transitUSDAmount: new BigNumber(NaN),
                         cryptoFeeToken: from,
                         onChainTrade: null,
-                        onChainSubtype: { from: undefined, to: undefined }
+                        onChainSubtype: { from: undefined, to: undefined },
+                        transactionRequest
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS,
                     []
@@ -149,9 +150,6 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
             to: PriceTokenAmount<EvmBlockchainName>;
-            transactionRequest: (
-                receiverAddress: string
-            ) => Promise<SquidrouterTransactionResponse>;
             gasData: GasData | null;
             priceImpact: number | null;
             allowanceTarget: string;
@@ -161,6 +159,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
             cryptoFeeToken: PriceTokenAmount;
             onChainTrade: EvmOnChainTrade | null;
             onChainSubtype: OnChainSubtype;
+            transactionRequest: SquidrouterTransactionRequest;
         },
         providerAddress: string,
         routePath: RubicStep[]
@@ -169,7 +168,6 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
-        this.transactionRequest = crossChainTrade.transactionRequest;
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
         this.allowanceTarget = crossChainTrade.allowanceTarget;
@@ -179,7 +177,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         this.feeInfo = crossChainTrade.feeInfo;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
         this.onChainSubtype = crossChainTrade.onChainSubtype;
-
+        this.transactionRequest = crossChainTrade.transactionRequest;
         this.transitUSDAmount = crossChainTrade.transitUSDAmount;
     }
 
@@ -189,11 +187,11 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         let transactionHash: string;
 
         try {
-            const {
-                route: {
-                    transactionRequest: { data, value, targetAddress }
-                }
-            } = await this.transactionRequest(options?.receiverAddress || this.walletAddress);
+            const { data, value, to } = await this.getTransactionRequest(
+                options?.receiverAddress || this.walletAddress,
+                options?.directTransaction
+            );
+
             const { onConfirm } = options;
             const onTransactionHash = (hash: string) => {
                 if (onConfirm) {
@@ -201,7 +199,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
                 }
                 transactionHash = hash;
             };
-            await this.web3Private.trySendTransaction(targetAddress, {
+            await this.web3Private.trySendTransaction(to, {
                 onTransactionHash,
                 data,
                 value,
@@ -221,10 +219,10 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const {
-            route: {
-                transactionRequest: { data, value: providerValue, targetAddress }
-            }
-        } = await this.transactionRequest(options?.receiverAddress || this.walletAddress);
+            data,
+            value: providerValue,
+            to
+        } = await this.getTransactionRequest(options?.receiverAddress || this.walletAddress);
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: this.walletAddress,
@@ -240,10 +238,10 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
             ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
             : new BigNumber(providerValue).toFixed();
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
-            targetAddress,
+            to,
             data!,
             this.fromBlockchain,
-            targetAddress,
+            to,
             extraNativeFee
         );
 
@@ -288,6 +286,51 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
             priceImpact: this.priceImpact ?? null,
             slippage: this.slippage * 100,
             routePath: this.routePath
+        };
+    }
+
+    private async getTransactionRequest(
+        receiverAddress: string,
+        transactionConfig?: EvmEncodeConfig
+    ): Promise<EvmEncodeConfig> {
+        if (transactionConfig) {
+            return {
+                data: transactionConfig.data,
+                value: transactionConfig.value,
+                to: transactionConfig.to
+            };
+        }
+        const requestParams: SquidrouterTransactionRequest = {
+            ...this.transactionRequest,
+            toAddress: receiverAddress
+        };
+
+        const {
+            route: { transactionRequest, estimate: routeEstimate }
+        } = await Injector.httpClient.get<SquidrouterTransactionResponse>(
+            `${SquidrouterCrossChainProvider.apiEndpoint}route`,
+            {
+                params: requestParams as unknown as {},
+                headers: {
+                    'x-integrator-id': 'rubic-api'
+                }
+            }
+        );
+
+        EvmCrossChainTrade.checkAmountChange(
+            {
+                data: transactionRequest.data,
+                value: transactionRequest.value,
+                to: transactionRequest.targetAddress
+            },
+            routeEstimate.toAmount,
+            this.to.stringWeiAmount
+        );
+
+        return {
+            data: transactionRequest.data,
+            value: transactionRequest.value,
+            to: transactionRequest.targetAddress
         };
     }
 }

@@ -68,33 +68,27 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
             );
 
             const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
-
-            const transactionRequest = async (receiverAddress: string) => {
-                const requestParams: SquidrouterTransactionRequest = {
-                    fromChain: blockchainId[fromBlockchain],
-                    fromToken: from.isNative ? this.nativeAddress : from.address,
-                    fromAmount: fromWithoutFee.stringWeiAmount,
-                    toChain: blockchainId[toBlockchain],
-                    toToken: toToken.isNative ? this.nativeAddress : toToken.address,
-                    toAddress: receiverAddress,
-                    slippage: Number(options.slippageTolerance * 100)
-                };
-
-                return Injector.httpClient.get<SquidrouterTransactionResponse>(
-                    `${SquidrouterCrossChainProvider.apiEndpoint}route`,
-                    {
-                        params: requestParams as unknown as {},
-                        headers: {
-                            'x-integrator-id': 'rubic-api'
-                        }
-                    }
-                );
+            const receiver =
+                options?.receiverAddress || this.getWalletAddress(fromBlockchain) || fakeAddress;
+            const requestParams: SquidrouterTransactionRequest = {
+                fromChain: blockchainId[fromBlockchain],
+                fromToken: from.isNative ? this.nativeAddress : from.address,
+                fromAmount: fromWithoutFee.stringWeiAmount,
+                toChain: blockchainId[toBlockchain],
+                toToken: toToken.isNative ? this.nativeAddress : toToken.address,
+                toAddress: receiver,
+                slippage: Number(options.slippageTolerance * 100)
             };
-
             const {
-                route: { estimate, transactionRequest: tx }
-            } = await transactionRequest(
-                options?.receiverAddress || this.getWalletAddress(fromBlockchain) || fakeAddress
+                route: { transactionRequest, estimate }
+            } = await Injector.httpClient.get<SquidrouterTransactionResponse>(
+                `${SquidrouterCrossChainProvider.apiEndpoint}route`,
+                {
+                    params: requestParams as unknown as {},
+                    headers: {
+                        'x-integrator-id': 'rubic-api'
+                    }
+                }
             );
 
             const to = new PriceTokenAmount({
@@ -104,7 +98,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await SquidrouterCrossChainTrade.getGasData(from, to, transactionRequest)
+                    ? await SquidrouterCrossChainTrade.getGasData(from, to, requestParams)
                     : null;
 
             const feeAmount = estimate.feeCosts
@@ -128,10 +122,9 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                     {
                         from,
                         to,
-                        transactionRequest,
                         gasData,
                         priceImpact: from.calculatePriceImpactPercent(to),
-                        allowanceTarget: tx.targetAddress,
+                        allowanceTarget: transactionRequest.targetAddress,
                         slippage: options.slippageTolerance,
                         feeInfo: {
                             ...feeInfo,
@@ -145,7 +138,8 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                         transitUSDAmount,
                         cryptoFeeToken,
                         onChainTrade: null,
-                        onChainSubtype: { from: undefined, to: undefined }
+                        onChainSubtype: { from: undefined, to: undefined },
+                        transactionRequest: requestParams
                     },
                     options.providerAddress,
                     await this.getRoutePath(estimate, from, to)

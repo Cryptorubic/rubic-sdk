@@ -1,4 +1,5 @@
 import { Route } from '@lifi/sdk';
+import { Estimate } from '@lifi/types/dist/step';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
@@ -282,10 +283,15 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             }
         };
 
-        const swapResponse: { transactionRequest: LifiTransactionRequest } =
+        const swapResponse: { transactionRequest: LifiTransactionRequest; estimate: Estimate } =
             await this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
                 ...step
             });
+        EvmCrossChainTrade.checkAmountChange(
+            swapResponse.transactionRequest,
+            swapResponse.estimate.toAmount,
+            this.to.stringWeiAmount
+        );
 
         return swapResponse.transactionRequest;
     }
