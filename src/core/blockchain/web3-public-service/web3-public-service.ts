@@ -148,7 +148,8 @@ export class Web3PublicService {
                                 e?.message
                                     ?.toLowerCase()
                                     ?.includes('daily request count exceeded') ||
-                                e?.message?.toLowerCase()?.includes('invalid json rpc response')
+                                e?.message?.toLowerCase()?.includes('invalid json rpc response') ||
+                                e?.message?.toLowerCase()?.includes('account suspended')
                             ) {
                                 if (curRpc === rpcProvider.rpcList[0]) {
                                     rpcProvider.rpcList.shift();
