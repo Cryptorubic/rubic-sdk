@@ -294,10 +294,6 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         return tx;
     }
 
-    public getUsdPrice(): BigNumber {
-        return this.transitAmount;
-    }
-
     public getTradeInfo(): TradeInfo {
         return {
             estimatedGas: this.estimatedGas,

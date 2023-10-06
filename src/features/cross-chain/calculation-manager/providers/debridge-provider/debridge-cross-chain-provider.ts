@@ -148,7 +148,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                             provider: {
                                 cryptoFee: {
                                     amount: Web3Pure.fromWei(new BigNumber(cryptoFeeAmount)),
-                                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                                    token: cryptoFeeToken
                                 }
                             }
                         },
@@ -175,8 +175,10 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
 
     protected async getFeeInfo(
         fromBlockchain: DeBridgeCrossChainSupportedBlockchain,
-        providerAddress: string
+        providerAddress: string,
+        percentFeeToken: PriceToken
     ): Promise<FeeInfo> {
+        const nativeToken = await PriceToken.createFromToken(nativeTokensList[fromBlockchain]);
         return {
             rubicProxy: {
                 fixedFee: {
@@ -186,7 +188,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
                         evmCommonCrossChainAbi
                     ),
-                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                    token: nativeToken
                 },
                 platformFee: {
                     percent: await this.getFeePercent(
@@ -195,7 +197,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
                         evmCommonCrossChainAbi
                     ),
-                    tokenSymbol: 'USDC'
+                    token: percentFeeToken
                 }
             }
         };

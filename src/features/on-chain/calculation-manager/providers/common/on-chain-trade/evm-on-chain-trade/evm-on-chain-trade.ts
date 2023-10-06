@@ -102,18 +102,20 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
         this.feeInfo = {
             rubicProxy: {
-                fixedFee: {
-                    amount:
-                        evmOnChainTradeStruct.proxyFeeInfo?.fixedFeeToken.tokenAmount ||
-                        new BigNumber(0),
-                    tokenSymbol:
-                        evmOnChainTradeStruct.proxyFeeInfo?.fixedFeeToken.symbol || 'Unknown'
-                },
-                platformFee: {
-                    percent: evmOnChainTradeStruct.proxyFeeInfo?.platformFee.percent || 0,
-                    tokenSymbol:
-                        evmOnChainTradeStruct.proxyFeeInfo?.platformFee.token.symbol || 'Unknown'
-                }
+                ...(evmOnChainTradeStruct.proxyFeeInfo?.fixedFeeToken && {
+                    fixedFee: {
+                        amount:
+                            evmOnChainTradeStruct.proxyFeeInfo?.fixedFeeToken.tokenAmount ||
+                            new BigNumber(0),
+                        token: evmOnChainTradeStruct.proxyFeeInfo?.fixedFeeToken
+                    }
+                }),
+                ...(evmOnChainTradeStruct.proxyFeeInfo?.platformFee && {
+                    platformFee: {
+                        percent: evmOnChainTradeStruct.proxyFeeInfo?.platformFee.percent || 0,
+                        token: evmOnChainTradeStruct.proxyFeeInfo?.platformFee.token
+                    }
+                })
             }
         };
         this.withDeflation = evmOnChainTradeStruct.withDeflation;

@@ -153,20 +153,6 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 toToken.decimals
             );
 
-            feeInfo = {
-                ...feeInfo,
-                provider: {
-                    platformFee: {
-                        percent: transactionData.fee * 100,
-                        tokenSymbol: from.symbol
-                    },
-                    cryptoFee: {
-                        amount: new BigNumber(transactionData.chainFee),
-                        tokenSymbol: toToken.symbol
-                    }
-                }
-            };
-
             if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
                 const gasData =
                     options.gasCalculation === 'enabled' && options.receiverAddress
@@ -221,25 +207,16 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
     protected override async getFeeInfo(
         fromBlockchain: BridgersCrossChainSupportedBlockchain,
         _providerAddress: string,
-        percentFeeToken: PriceTokenAmount,
+        _percentFeeToken: PriceTokenAmount,
         _useProxy: boolean,
         _contractAbi: AbiItem[]
     ): Promise<FeeInfo> {
+        const nativeToken = await PriceToken.createFromToken(nativeTokensList[fromBlockchain]);
         return {
             rubicProxy: {
                 fixedFee: {
                     amount: new BigNumber(0),
-                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
-                },
-                platformFee: {
-                    // percent: await this.getFeePercent(
-                    //     fromBlockchain,
-                    //     providerAddress,
-                    //     rubicProxyContractAddress[fromBlockchain],
-                    //     contractAbi
-                    // ),
-                    percent: 0,
-                    tokenSymbol: percentFeeToken.symbol
+                    token: nativeToken
                 }
             }
         };

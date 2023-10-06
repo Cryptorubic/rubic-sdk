@@ -131,7 +131,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                             provider: {
                                 cryptoFee: {
                                     amount: Web3Pure.fromWei(feeAmount, nativeToken.decimals),
-                                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                                    token: cryptoFeeToken
                                 }
                             }
                         },

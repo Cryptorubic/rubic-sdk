@@ -266,10 +266,6 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         return tx!;
     }
 
-    public getUsdPrice(): BigNumber {
-        return this.from.price.multipliedBy(this.from.tokenAmount);
-    }
-
     public getTradeInfo(): TradeInfo {
         return {
             estimatedGas: this.estimatedGas,

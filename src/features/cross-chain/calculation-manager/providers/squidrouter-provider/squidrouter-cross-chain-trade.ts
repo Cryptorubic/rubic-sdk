@@ -275,10 +275,6 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         return fromUsd.plus(usdCryptoFee.isNaN() ? 0 : usdCryptoFee).dividedBy(this.to.tokenAmount);
     }
 
-    public getUsdPrice(): BigNumber {
-        return this.transitUSDAmount;
-    }
-
     public getTradeInfo(): TradeInfo {
         return {
             estimatedGas: this.estimatedGas,

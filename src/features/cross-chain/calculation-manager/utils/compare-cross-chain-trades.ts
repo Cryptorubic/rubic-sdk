@@ -39,16 +39,14 @@ export function compareCrossChainTrades(
         return 1;
     }
 
-    const fromUsd = prevWrappedTrade.trade.getUsdPrice();
+    const fromUsd = prevWrappedTrade?.trade.getUsdPrice();
+    const toUsd = nextWrappedTrade?.trade?.getUsdPrice();
 
-    const prevTradeRatio = prevWrappedTrade?.trade?.getTradeAmountRatio(fromUsd);
-    const nextTradeRatio = nextWrappedTrade?.trade?.getTradeAmountRatio(fromUsd);
-
-    if (!nextTradeRatio) {
+    if (!toUsd) {
         return 1;
     }
-    if (!prevTradeRatio) {
+    if (!fromUsd) {
         return -1;
     }
-    return prevTradeRatio.lte(nextTradeRatio) ? 1 : -1;
+    return fromUsd.lte(toUsd) ? 1 : -1;
 }

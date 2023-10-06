@@ -1,7 +1,7 @@
 import { FeeCost, LiFi, LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import { nativeTokensList, PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -117,6 +117,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const providerFee = bestRoute.steps[0]!.estimate.feeCosts?.find(
             (el: FeeCost & { included?: boolean }) => el?.included === false
         );
+        const nativeToken = await PriceToken.createFromToken(nativeTokensList[from.blockchain]);
         if (providerFee) {
             feeInfo.provider = {
                 cryptoFee: {
@@ -124,7 +125,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                         new BigNumber(providerFee.amount),
                         providerFee.token.decimals
                     ),
-                    tokenSymbol: providerFee.token.symbol
+                    token: nativeToken
                 }
             };
         }

@@ -183,14 +183,13 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 layerZeroFeeWei,
                 nativeTokensList[fromBlockchain].decimals
             );
+            const nativeToken = await PriceToken.createFromToken(nativeTokensList[from.blockchain]);
             feeInfo.provider = {
                 cryptoFee: {
                     amount: layerZeroFeeAmount,
-                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                    token: nativeToken
                 }
             };
-
-            const nativeToken = await PriceToken.createFromToken(nativeTokensList[fromBlockchain]);
 
             return {
                 trade: new StargateCrossChainTrade(

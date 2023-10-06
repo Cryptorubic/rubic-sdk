@@ -67,16 +67,17 @@ export class ProxyCrossChainEvmTrade {
                   evmCommonCrossChainAbi
               )
             : 0;
+        const nativeToken = await PriceToken.createFromToken(nativeTokensList[fromBlockchain]);
 
         return {
             rubicProxy: {
                 fixedFee: {
                     amount: fixedFeeAmount,
-                    tokenSymbol: nativeTokensList?.[fromBlockchain]?.symbol || 'Unknown'
+                    token: nativeToken
                 },
                 platformFee: {
                     percent: feePercent,
-                    tokenSymbol: percentFeeToken.symbol
+                    token: percentFeeToken
                 }
             }
         };

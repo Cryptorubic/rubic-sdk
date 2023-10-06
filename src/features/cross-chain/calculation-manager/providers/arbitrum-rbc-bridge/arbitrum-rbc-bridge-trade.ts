@@ -243,10 +243,6 @@ export class ArbitrumRbcBridgeTrade extends EvmCrossChainTrade {
         return new BigNumber(1);
     }
 
-    public getUsdPrice(): BigNumber {
-        return this.from.price.multipliedBy(this.from.tokenAmount);
-    }
-
     public getTradeInfo(): TradeInfo {
         return {
             estimatedGas: this.estimatedGas,
