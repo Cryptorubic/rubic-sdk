@@ -48,5 +48,5 @@ export function compareCrossChainTrades(
     if (!fromUsd) {
         return -1;
     }
-    return fromUsd.lte(toUsd) ? 1 : -1;
+    return fromUsd.lte(toUsd) ? -1 : 1;
 }
