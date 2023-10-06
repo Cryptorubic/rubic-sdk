@@ -49,6 +49,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public readonly transitAmount: BigNumber;
 
+    public readonly maxTheoreticalAmount: BigNumber;
+
     private readonly cryptoFeeToken: PriceTokenAmount;
 
     private readonly transactionRequest: TransactionRequest;
@@ -83,6 +85,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                         slippage: 0,
                         feeInfo: {},
                         transitAmount: new BigNumber(NaN),
+                        maxTheoreticalAmount: new BigNumber(NaN),
                         cryptoFeeToken: from,
                         onChainTrade: null
                     },
@@ -164,6 +167,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             slippage: number;
             feeInfo: FeeInfo;
             transitAmount: BigNumber;
+            maxTheoreticalAmount: BigNumber;
             cryptoFeeToken: PriceTokenAmount;
             onChainTrade: EvmOnChainTrade | null;
         },
@@ -184,6 +188,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
 
         this.transitAmount = crossChainTrade.transitAmount;
+        this.maxTheoreticalAmount = crossChainTrade.maxTheoreticalAmount;
     }
 
     protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -281,7 +286,9 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         const usdCryptoFee = this.cryptoFeeToken.price.multipliedBy(
             this.cryptoFeeToken.tokenAmount
         );
-        return fromUsd.plus(usdCryptoFee.isNaN() ? 0 : usdCryptoFee).dividedBy(this.to.tokenAmount);
+        return fromUsd
+            .plus(usdCryptoFee.isNaN() ? 0 : usdCryptoFee)
+            .dividedBy(this.maxTheoreticalAmount);
     }
 
     private async getTransactionRequest(receiverAddress?: string): Promise<{
@@ -439,6 +446,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                         slippage: 0,
                         feeInfo: this.feeInfo,
                         transitAmount: this.transitAmount,
+                        maxTheoreticalAmount: this.maxTheoreticalAmount,
                         cryptoFeeToken: this.cryptoFeeToken,
                         onChainTrade: null
                     },

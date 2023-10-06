@@ -165,6 +165,9 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                             }
                         },
                         transitAmount: Web3Pure.fromWei(transitToken.amount, transitToken.decimals),
+                        maxTheoreticalAmount: Web3Pure.fromWei(
+                            estimation.dstChainTokenOut.maxTheoreticalAmount
+                        ),
                         cryptoFeeToken,
                         onChainTrade: null
                     },
@@ -196,28 +199,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             percentFeeToken,
             useProxy
         );
-        // return {
-        //     rubicProxy: {
-        //         fixedFee: {
-        //             amount: await this.getFixedFee(
-        //                 fromBlockchain,
-        //                 providerAddress,
-        //                 DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-        //                 evmCommonCrossChainAbi
-        //             ),
-        //             tokenSymbol: nativeTokensList[fromBlockchain].symbol
-        //         },
-        //         platformFee: {
-        //             percent: await this.getFeePercent(
-        //                 fromBlockchain,
-        //                 providerAddress,
-        //                 DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].rubicRouter,
-        //                 evmCommonCrossChainAbi
-        //             ),
-        //             tokenSymbol: 'USDC'
-        //         }
-        //     }
-        // };
     }
 
     private parseDebridgeApiError(httpErrorResponse: {
