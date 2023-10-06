@@ -304,6 +304,20 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'WZETA',
         decimals: 18
     }),
+    [BLOCKCHAIN_NAME.TAIKO]: new Token({
+        blockchain: BLOCKCHAIN_NAME.TAIKO,
+        address: '0x7be7937A395FD3B527F428124f6a33E10D1C0638',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SEPOLIA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SEPOLIA,
+        address: '0xfff9976782d46cc05630d1f6ebab18b2324d6b14',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
     [BLOCKCHAIN_NAME.ETHEREUM_CLASSIC]: new Token({
         blockchain: BLOCKCHAIN_NAME.ETHEREUM_CLASSIC,
         address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
