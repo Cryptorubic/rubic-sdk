@@ -92,7 +92,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 receiveAddress: receiverAddress || EvmWeb3Pure.EMPTY_ADDRESS
             };
 
-            const { toTokenAmount, statusCode, msg, xyFee, quote } =
+            const { toTokenAmount, statusCode, msg, quote } =
                 await Injector.httpClient.get<XyTransactionResponse>(
                     `${XyCrossChainProvider.apiEndpoint}/swap`,
                     {
@@ -100,13 +100,6 @@ export class XyCrossChainProvider extends CrossChainProvider {
                     }
                 );
             this.analyzeStatusCode(statusCode, msg);
-
-            feeInfo.provider = {
-                cryptoFee: {
-                    amount: new BigNumber(xyFee!.amount),
-                    tokenSymbol: xyFee!.symbol
-                }
-            };
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,

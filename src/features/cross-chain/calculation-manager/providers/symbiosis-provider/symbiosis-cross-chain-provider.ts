@@ -135,18 +135,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 deadline
             };
 
-            const {
-                tokenAmountOut,
-                fee: transitTokenFee,
-                inTradeType,
-                outTradeType,
-                tx,
-                approveTo,
-                route
-            } = await Injector.httpClient.post<SymbiosisTradeData>(
-                `${SymbiosisCrossChainTrade.symbiosisApi}/swapping/exact_in?partnerId=rubic`,
-                swapParams
-            );
+            const { tokenAmountOut, inTradeType, outTradeType, tx, approveTo, route } =
+                await Injector.httpClient.post<SymbiosisTradeData>(
+                    `${SymbiosisCrossChainTrade.symbiosisApi}/swapping/exact_in?partnerId=rubic`,
+                    swapParams
+                );
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -169,20 +162,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                         priceImpact: from.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
                         swapParams,
-                        feeInfo: {
-                            ...feeInfo,
-                            provider: {
-                                cryptoFee: {
-                                    amount: new BigNumber(
-                                        Web3Pure.fromWei(
-                                            transitTokenFee.amount,
-                                            transitTokenFee.decimals
-                                        )
-                                    ),
-                                    tokenSymbol: transitTokenFee.symbol || ''
-                                }
-                            }
-                        },
+                        feeInfo,
                         transitAmount: from.tokenAmount,
                         tradeType: { in: inTradeType, out: outTradeType },
                         contractAddresses: { providerRouter: tx.to!, providerGateway: approveTo }
