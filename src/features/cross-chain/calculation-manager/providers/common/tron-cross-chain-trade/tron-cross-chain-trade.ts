@@ -150,10 +150,6 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
         if (providerFee) {
             feeSum = feeSum.plus(providerFee.amount.multipliedBy(providerFee.token.price));
         }
-        const platformFee = this.feeInfo.rubicProxy?.fixedFee;
-        if (platformFee) {
-            feeSum = feeSum.plus(platformFee.amount.multipliedBy(platformFee.token.price));
-        }
 
         return this.to.price.multipliedBy(this.to.tokenAmount).minus(feeSum);
     }
