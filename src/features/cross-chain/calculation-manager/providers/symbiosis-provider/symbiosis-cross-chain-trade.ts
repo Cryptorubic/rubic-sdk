@@ -64,6 +64,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                         slippage: 0,
                         feeInfo: {},
                         transitAmount: new BigNumber(NaN),
+                        amountInUsd: new BigNumber(NaN),
                         tradeType: { in: undefined, out: undefined },
                         contractAddresses: { providerRouter: '', providerGateway: '' }
                     },
@@ -114,6 +115,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public readonly transitAmount: BigNumber;
 
+    public readonly amountInUsd: BigNumber | null;
+
     public readonly feeInfo: FeeInfo;
 
     /**
@@ -156,6 +159,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             slippage: number;
             feeInfo: FeeInfo;
             transitAmount: BigNumber;
+            amountInUsd: BigNumber | null;
             tradeType: { in?: SymbiosisTradeType; out?: SymbiosisTradeType };
             contractAddresses: { providerRouter: string; providerGateway: string };
         },
@@ -172,6 +176,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         this.feeInfo = crossChainTrade.feeInfo;
         this.slippage = crossChainTrade.slippage;
         this.transitAmount = crossChainTrade.transitAmount;
+        this.amountInUsd = crossChainTrade.amountInUsd;
         this.onChainSubtype = SymbiosisCrossChainTrade.getSubtype(
             crossChainTrade.tradeType,
             crossChainTrade.to.blockchain
@@ -279,7 +284,9 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
     }
 
     public getUsdPrice(): BigNumber {
-        return this.transitAmount;
+        return this.amountInUsd
+            ? this.amountInUsd
+            : this.to.price.multipliedBy(this.to.tokenAmount);
     }
 
     public getTradeInfo(): TradeInfo {
