@@ -140,8 +140,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 inTradeType,
                 outTradeType,
                 tx,
-                approveTo,
-                amountInUsd
+                approveTo
             } = trade;
 
             const swapFunction = (fromUserAddress: string, receiver?: string) => {
@@ -201,9 +200,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                             }
                         },
                         transitAmount: from.tokenAmount,
-                        amountInUsd: amountInUsd
-                            ? Web3Pure.fromWei(amountInUsd?.amount, amountInUsd?.decimals)
-                            : null,
                         tradeType: { in: inTradeType, out: outTradeType },
                         contractAddresses: { providerRouter: tx.to!, providerGateway: approveTo }
                     },
