@@ -13,7 +13,8 @@ export const cbridgeSupportedBlockchains = [
     BLOCKCHAIN_NAME.GOERLI,
     BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET,
     BLOCKCHAIN_NAME.MUMBAI,
-    BLOCKCHAIN_NAME.FUJI
+    BLOCKCHAIN_NAME.FUJI,
+    BLOCKCHAIN_NAME.MANTA_PACIFIC
 ] as const;
 
 export type CbridgeCrossChainSupportedBlockchain = (typeof cbridgeSupportedBlockchains)[number];
