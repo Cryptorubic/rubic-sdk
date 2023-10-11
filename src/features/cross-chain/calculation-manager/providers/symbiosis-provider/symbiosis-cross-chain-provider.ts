@@ -100,7 +100,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             );
 
             const tokenIn: SymbiosisToken = {
-                chainId: blockchainId[fromBlockchain],
+                chainId:
+                    fromBlockchain !== BLOCKCHAIN_NAME.TRON
+                        ? blockchainId[fromBlockchain]
+                        : 728126428,
                 address: from.isNative ? '' : from.address,
                 decimals: from.decimals,
                 isNative: from.isNative,
@@ -108,7 +111,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             };
 
             const tokenOut: SymbiosisToken = {
-                chainId: blockchainId[toBlockchain],
+                chainId:
+                    toBlockchain !== BLOCKCHAIN_NAME.TRON ? blockchainId[toBlockchain] : 728126428,
                 address: toToken.isNative ? '' : toToken.address,
                 decimals: toToken.decimals,
                 isNative: toToken.isNative,
