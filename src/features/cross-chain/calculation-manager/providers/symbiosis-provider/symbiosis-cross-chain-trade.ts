@@ -7,6 +7,7 @@ import {
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -149,6 +150,10 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         return 'startBridgeTokensViaGenericCrossChain';
     }
 
+    private get web3Public(): TronWeb3Public {
+        return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.TRON);
+    }
+
     constructor(
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
@@ -191,10 +196,24 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         );
         const { data, value: providerValue, to } = transactionRequest;
 
+        let receiverAddress = '';
+        let toAddress = '';
+
+        if (this.to.blockchain === BLOCKCHAIN_NAME.TRON) {
+            receiverAddress = await this.web3Public.convertTronAddressToHex(
+                options.receiverAddress!
+            );
+            receiverAddress = `0x${receiverAddress.slice(2)}`;
+            toAddress = await this.web3Public.convertTronAddressToHex(this.to.address);
+            toAddress = `0x${toAddress.slice(2)}`;
+        }
+
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: this.walletAddress,
             fromTokenAmount: this.from,
             toTokenAmount: this.to,
+            toAddress,
+            receiverAddress,
             srcChainTrade: null,
             providerAddress: this.providerAddress,
             type: `native:${this.type}`,
