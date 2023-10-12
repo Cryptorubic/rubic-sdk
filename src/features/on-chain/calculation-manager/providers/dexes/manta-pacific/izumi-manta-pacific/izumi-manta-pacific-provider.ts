@@ -16,7 +16,7 @@ export class IzumiMantaPacificProvider extends IzumiProvider {
             wrappedNativeTokensList[BLOCKCHAIN_NAME.MANTA_PACIFIC]!.address, // WETH
             '0xf417F5A458eC102B90352F697D6e2Ac3A3d2851f' // USDT
         ],
-        multicallAddress: '',
+        multicallAddress: '0x7a524c7e82874226F0b51aade60A1BE4D430Cf0F',
         supportedFees: [10000, 3000, 500]
     };
 }
