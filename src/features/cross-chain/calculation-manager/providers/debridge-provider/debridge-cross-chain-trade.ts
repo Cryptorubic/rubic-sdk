@@ -147,7 +147,9 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return this.allowanceTarget;
+        return this.isProxyTrade
+            ? rubicProxyContractAddress[this.fromBlockchain].gateway
+            : this.allowanceTarget;
     }
 
     public readonly feeInfo: FeeInfo;
