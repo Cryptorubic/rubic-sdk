@@ -361,5 +361,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Mantle',
         symbol: 'MNT',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MANTA_PACIFIC]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MANTA_PACIFIC,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'MNT',
+        decimals: 18
     })
 };

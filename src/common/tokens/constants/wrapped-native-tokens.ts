@@ -352,5 +352,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped BCH',
         symbol: 'WBCH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MANTA_PACIFIC]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MANTA_PACIFIC,
+        address: '0x0Dc808adcE2099A9F62AA87D9670745AbA741746',
+        name: 'Wrapped ETH',
+        symbol: 'WETH',
+        decimals: 18
     })
 };
