@@ -9,7 +9,8 @@ import { cbridgeContractAddress } from 'src/features/cross-chain/calculation-man
 import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
 import {
     CbridgeStatusResponse,
-    TRANSFER_HISTORY_STATUS
+    TRANSFER_HISTORY_STATUS,
+    TRANSFER_HISTORY_STATUS_CODE
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
 import Web3 from 'web3';
 import { TransactionReceipt } from 'web3-eth';
@@ -56,7 +57,10 @@ export class CrossChainCbridgeManager {
             const statusResponse = await CbridgeCrossChainApiService.fetchTradeStatus(transferId, {
                 useTestnet
             });
-            if (statusResponse.status === TRANSFER_HISTORY_STATUS.TRANSFER_TO_BE_REFUNDED) {
+            if (
+                TRANSFER_HISTORY_STATUS_CODE[statusResponse.status] ===
+                TRANSFER_HISTORY_STATUS.TRANSFER_TO_BE_REFUNDED
+            ) {
                 await CbridgeCrossChainApiService.withdrawLiquidity(transferId, estimateAmount, {
                     useTestnet
                 });
@@ -67,7 +71,10 @@ export class CrossChainCbridgeManager {
                     onTransactionHash
                 );
             }
-            if (statusResponse.status === TRANSFER_HISTORY_STATUS.TRANSFER_REFUND_TO_BE_CONFIRMED) {
+            if (
+                TRANSFER_HISTORY_STATUS_CODE[statusResponse.status] ===
+                TRANSFER_HISTORY_STATUS.TRANSFER_REFUND_TO_BE_CONFIRMED
+            ) {
                 return CrossChainCbridgeManager.transferRefund(
                     fromBlockchain,
                     statusResponse,
