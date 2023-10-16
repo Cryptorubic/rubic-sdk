@@ -52,7 +52,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     PULSECHAIN: 'PULSECHAIN',
     LINEA: 'LINEA',
     BASE: 'BASE',
-    MANTLE: 'MANTLE'
+    MANTLE: 'MANTLE',
+    MANTA_PACIFIC: 'MANTA_PACIFIC'
 } as const;
 
 export const BLOCKCHAIN_NAME = {
