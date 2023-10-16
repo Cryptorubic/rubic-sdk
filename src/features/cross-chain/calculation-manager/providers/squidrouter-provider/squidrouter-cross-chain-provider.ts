@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { NotSupportedTokensError } from 'src/common/errors';
+import { NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
@@ -149,15 +149,11 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                 tradeType: this.type
             };
         } catch (err) {
-            const rubicSdkError = CrossChainProvider.parseError(err);
-
-            // if (symbiosisMessage?.includes('$') || symbiosisMessage?.includes('Min amount')) {
-            //     const symbiosisError = err as SymbiosisError;
-            //     rubicSdkError =
-            //         symbiosisError.code === errorCode.AMOUNT_LESS_THAN_FEE
-            //             ? new TooLowAmountError()
-            //             : await this.checkMinMaxErrors(symbiosisError);
-            // }
+            let rubicSdkError = CrossChainProvider.parseError(err);
+            const httpError = err?.error?.errors?.[0];
+            if (httpError?.message) {
+                rubicSdkError = new RubicSdkError(httpError.message);
+            }
 
             return {
                 trade: null,
