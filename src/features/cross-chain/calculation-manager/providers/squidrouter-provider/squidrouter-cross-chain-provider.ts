@@ -151,6 +151,14 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
         } catch (err) {
             const rubicSdkError = CrossChainProvider.parseError(err);
 
+            // if (symbiosisMessage?.includes('$') || symbiosisMessage?.includes('Min amount')) {
+            //     const symbiosisError = err as SymbiosisError;
+            //     rubicSdkError =
+            //         symbiosisError.code === errorCode.AMOUNT_LESS_THAN_FEE
+            //             ? new TooLowAmountError()
+            //             : await this.checkMinMaxErrors(symbiosisError);
+            // }
+
             return {
                 trade: null,
                 error: rubicSdkError,
