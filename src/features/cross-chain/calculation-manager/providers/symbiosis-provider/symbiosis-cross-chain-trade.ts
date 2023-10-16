@@ -7,6 +7,7 @@ import {
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -150,8 +151,12 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         return 'startBridgeTokensViaGenericCrossChain';
     }
 
-    private get web3Public(): TronWeb3Public {
+    private get tronWeb3Public(): TronWeb3Public {
         return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.TRON);
+    }
+
+    protected get evmWeb3Private(): EvmWeb3Private {
+        return Injector.web3PrivateService.getWeb3Private('EVM');
     }
 
     constructor(
@@ -200,11 +205,11 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         let toAddress = '';
 
         if (this.to.blockchain === BLOCKCHAIN_NAME.TRON) {
-            receiverAddress = await this.web3Public.convertTronAddressToHex(
+            receiverAddress = await this.tronWeb3Public.convertTronAddressToHex(
                 options.receiverAddress!
             );
             receiverAddress = `0x${receiverAddress.slice(2)}`;
-            toAddress = await this.web3Public.convertTronAddressToHex(this.to.address);
+            toAddress = await this.tronWeb3Public.convertTronAddressToHex(this.to.address);
             toAddress = `0x${toAddress.slice(2)}`;
         }
 
@@ -280,7 +285,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                 options?.receiverAddress
             );
 
-            await this.web3Private.trySendTransaction(transactionRequest.to!, {
+            await this.evmWeb3Private.trySendTransaction(transactionRequest.to!, {
                 data: transactionRequest.data!.toString(),
                 value: transactionRequest.value?.toString() || '0',
                 onTransactionHash,

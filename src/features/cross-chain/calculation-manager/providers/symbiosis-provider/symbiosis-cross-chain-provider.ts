@@ -11,10 +11,8 @@ import { TokenStruct } from 'src/common/tokens/token';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
-    EvmBlockchainName,
-    TronBlockchainName
+    EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -22,7 +20,6 @@ import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { BridgersEvmCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
@@ -42,7 +39,6 @@ import {
     SymbiosisTradeData
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-trade';
-import { TronSymbiosisCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/tron-symbiosis-trade/tron-symbiosis-cross-chain-trade';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
@@ -70,7 +66,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     }
 
     public async calculate(
-        from: PriceTokenAmount,
+        from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
@@ -180,62 +176,43 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 )
             });
 
-            if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
-                const gasData =
-                    options.gasCalculation === 'enabled'
-                        ? await SymbiosisCrossChainTrade.getGasData(
-                              from as PriceTokenAmount<EvmBlockchainName>,
-                              to
-                          )
-                        : null;
+            const gasData =
+                options.gasCalculation === 'enabled'
+                    ? await SymbiosisCrossChainTrade.getGasData(from, to)
+                    : null;
 
-                return {
-                    trade: new SymbiosisCrossChainTrade(
-                        {
-                            from: from as PriceTokenAmount<EvmBlockchainName>,
-                            to,
-                            swapFunction,
-                            gasData,
-                            priceImpact: from.calculatePriceImpactPercent(to),
-                            slippage: options.slippageTolerance,
-                            feeInfo: {
-                                ...feeInfo,
-                                provider: {
-                                    cryptoFee: {
-                                        amount: new BigNumber(
-                                            Web3Pure.fromWei(
-                                                transitTokenFee.amount,
-                                                transitTokenFee.decimals
-                                            )
-                                        ),
-                                        tokenSymbol: transitTokenFee.symbol || ''
-                                    }
+            return {
+                trade: new SymbiosisCrossChainTrade(
+                    {
+                        from: from,
+                        to,
+                        swapFunction,
+                        gasData,
+                        priceImpact: from.calculatePriceImpactPercent(to),
+                        slippage: options.slippageTolerance,
+                        feeInfo: {
+                            ...feeInfo,
+                            provider: {
+                                cryptoFee: {
+                                    amount: new BigNumber(
+                                        Web3Pure.fromWei(
+                                            transitTokenFee.amount,
+                                            transitTokenFee.decimals
+                                        )
+                                    ),
+                                    tokenSymbol: transitTokenFee.symbol || ''
                                 }
-                            },
-                            transitAmount: from.tokenAmount,
-                            amountInUsd: amountInUsd
-                                ? Web3Pure.fromWei(amountInUsd?.amount, amountInUsd?.decimals)
-                                : null,
-                            tradeType: { in: inTradeType, out: outTradeType },
-                            contractAddresses: {
-                                providerRouter: tx.to!,
-                                providerGateway: approveTo
                             }
                         },
-                        options.providerAddress
-                    ),
-                    tradeType: this.type
-                };
-            }
-            return {
-                trade: new TronSymbiosisCrossChainTrade(
-                    {
-                        from: from as PriceTokenAmount<TronBlockchainName>,
-                        to: to as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
-                        toTokenAmountMin: to.tokenAmount,
-                        feeInfo,
-                        slippage: options.slippageTolerance,
-                        contractAddress: tx.to!
+                        transitAmount: from.tokenAmount,
+                        amountInUsd: amountInUsd
+                            ? Web3Pure.fromWei(amountInUsd?.amount, amountInUsd?.decimals)
+                            : null,
+                        tradeType: { in: inTradeType, out: outTradeType },
+                        contractAddresses: {
+                            providerRouter: tx.to!,
+                            providerGateway: approveTo
+                        }
                     },
                     options.providerAddress
                 ),

@@ -16,6 +16,7 @@ import { tronNativeSwapAbi } from 'src/features/cross-chain/calculation-manager/
 import { TronContractParams } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/models/tron-contract-params';
 import { TronGetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/models/tron-get-contract-params-options';
 import { TronCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/tron-cross-chain-trade';
+import { SymbiosisTradeData } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import { MarkRequired } from 'ts-essentials';
 
 export class TronSymbiosisCrossChainTrade extends TronCrossChainTrade {
@@ -41,6 +42,12 @@ export class TronSymbiosisCrossChainTrade extends TronCrossChainTrade {
 
     private readonly contractAddress: string;
 
+    private readonly getTransactionRequest: (
+        fromAddress: string,
+        receiver?: string,
+        tokenInAddress?: string
+    ) => Promise<SymbiosisTradeData>;
+
     protected get fromContractAddress(): string {
         // return rubicProxyContractAddress[this.from.blockchain];
         return this.contractAddress;
@@ -58,6 +65,7 @@ export class TronSymbiosisCrossChainTrade extends TronCrossChainTrade {
             feeInfo: FeeInfo;
             slippage: number;
             contractAddress: string;
+            swapFunction: (fromAddress: string, receiver?: string) => Promise<SymbiosisTradeData>;
         },
         providerAddress: string
     ) {
@@ -70,6 +78,7 @@ export class TronSymbiosisCrossChainTrade extends TronCrossChainTrade {
         this.priceImpact = this.from.calculatePriceImpactPercent(this.to);
         this.slippage = crossChainTrade.slippage;
         this.contractAddress = crossChainTrade.contractAddress;
+        this.getTransactionRequest = crossChainTrade.swapFunction;
     }
 
     public async swap(
@@ -101,26 +110,24 @@ export class TronSymbiosisCrossChainTrade extends TronCrossChainTrade {
                 this.feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            const { transactionData } =
-                await getMethodArgumentsAndTransactionData<TronBridgersTransactionData>(
-                    this.from,
-                    fromWithoutFee,
-                    this.to,
-                    this.toTokenAmountMin,
-                    this.walletAddress,
-                    this.providerAddress,
-                    options
-                );
+            console.log('fromWithoutFee: ', fromWithoutFee);
+
+            const { tx: transactionData } = await this.getTransactionRequest(
+                this.walletAddress,
+                options?.receiverAddress
+            );
+
+            console.log(transactionData);
 
             await this.web3Private.executeContractMethod(
-                transactionData.to,
+                transactionData.to!,
                 tronNativeSwapAbi,
                 this.from.isNative ? 'swapEth' : 'swap',
-                transactionData.parameter.map(el => el.value),
+                [],
                 {
                     onTransactionHash,
-                    callValue: transactionData.options.callValue,
-                    feeLimit: transactionData.options.feeLimit
+                    callValue: 0,
+                    feeLimit: 0
                 }
             );
 

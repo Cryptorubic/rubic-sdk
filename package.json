@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "4.32.0-alpha-symbiosis-tron.3qq",
+    "version": "4.32.0-alpha-symbiosis-tron.4qqq",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
