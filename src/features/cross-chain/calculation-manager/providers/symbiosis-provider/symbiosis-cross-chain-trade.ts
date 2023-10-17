@@ -201,7 +201,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         );
         const { data, value: providerValue, to } = transactionRequest;
 
-        let receiverAddress = '';
+        let receiverAddress = options.receiverAddress;
         let toAddress = '';
 
         if (this.to.blockchain === BLOCKCHAIN_NAME.TRON) {
@@ -213,17 +213,19 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             toAddress = `0x${toAddress.slice(2)}`;
         }
 
-        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
-            walletAddress: this.walletAddress,
-            fromTokenAmount: this.from,
-            toTokenAmount: this.to,
-            toAddress,
-            receiverAddress,
-            srcChainTrade: null,
-            providerAddress: this.providerAddress,
-            type: `native:${this.type}`,
-            fromAddress: this.walletAddress
-        });
+        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(
+            { ...options, receiverAddress },
+            {
+                walletAddress: this.walletAddress,
+                fromTokenAmount: this.from,
+                toTokenAmount: this.to,
+                toAddress,
+                srcChainTrade: null,
+                providerAddress: this.providerAddress,
+                type: `native:${this.type}`,
+                fromAddress: this.walletAddress
+            }
+        );
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             to!,
             data! as string,

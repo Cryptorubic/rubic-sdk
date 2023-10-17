@@ -184,7 +184,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             return {
                 trade: new SymbiosisCrossChainTrade(
                     {
-                        from: from,
+                        from,
                         to,
                         swapFunction,
                         gasData,
