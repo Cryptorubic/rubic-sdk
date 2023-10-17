@@ -220,8 +220,9 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             };
         } catch (err: unknown) {
             let rubicSdkError = CrossChainProvider.parseError(err);
+            const symbiosisMessage = (err as SymbiosisError)?.message;
 
-            if ((err as SymbiosisError)?.message?.includes('$')) {
+            if (symbiosisMessage?.includes('$') || symbiosisMessage?.includes('Min amount')) {
                 const symbiosisError = err as SymbiosisError;
                 rubicSdkError =
                     symbiosisError.code === errorCode.AMOUNT_LESS_THAN_FEE

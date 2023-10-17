@@ -32,7 +32,9 @@ import { CbridgeCrossChainApiService } from 'src/features/cross-chain/calculatio
 import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
 import {
     TRANSFER_HISTORY_STATUS,
-    XFER_STATUS
+    TRANSFER_HISTORY_STATUS_CODE,
+    XFER_STATUS,
+    XFER_STATUS_CODE
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
 import {
@@ -479,7 +481,9 @@ export class CrossChainStatusManager {
                 useTestnet
             });
 
-            switch (swapData.status) {
+            const transformedStatus = TRANSFER_HISTORY_STATUS_CODE[swapData.status as number];
+
+            switch (transformedStatus) {
                 case TRANSFER_HISTORY_STATUS.TRANSFER_UNKNOWN:
                 case TRANSFER_HISTORY_STATUS.TRANSFER_SUBMITTING:
                 case TRANSFER_HISTORY_STATUS.TRANSFER_WAITING_FOR_SGN_CONFIRMATION:
@@ -500,7 +504,7 @@ export class CrossChainStatusManager {
                     };
                 case TRANSFER_HISTORY_STATUS.TRANSFER_WAITING_FOR_FUND_RELEASE:
                 case TRANSFER_HISTORY_STATUS.TRANSFER_TO_BE_REFUNDED:
-                    return swapData.refund_reason === XFER_STATUS.OK_TO_RELAY
+                    return XFER_STATUS_CODE[swapData.refund_reason] === XFER_STATUS.OK_TO_RELAY
                         ? {
                               status: TX_STATUS.PENDING,
                               hash: null
