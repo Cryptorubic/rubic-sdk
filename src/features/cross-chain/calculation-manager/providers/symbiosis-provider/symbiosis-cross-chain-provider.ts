@@ -216,9 +216,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const symbiosisMessage = (err as { error: SymbiosisError })?.error?.message;
 
             if (symbiosisMessage?.includes('$') || symbiosisMessage?.includes('Min amount')) {
-                const symbiosisError = err as SymbiosisError;
+                const symbiosisError = (err as { error: SymbiosisError }).error;
                 rubicSdkError =
-                    symbiosisError.code === errorCode.AMOUNT_LESS_THAN_FEE
+                    symbiosisError.code === errorCode.AMOUNT_LESS_THAN_FEE ||
+                    symbiosisError.code === 400
                         ? new TooLowAmountError()
                         : await this.checkMinMaxErrors(symbiosisError);
             }
