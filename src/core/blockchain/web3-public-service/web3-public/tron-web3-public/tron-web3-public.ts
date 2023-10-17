@@ -37,6 +37,10 @@ export class TronWeb3Public extends Web3Public {
         this.tronWeb.setProvider(provider);
     }
 
+    public async convertTronAddressToHex(address: string): Promise<string> {
+        return this.tronWeb.address.toHex(address);
+    }
+
     public async healthCheck(timeoutMs: number = 4000): Promise<boolean> {
         if (!isBlockchainHealthcheckAvailable(this.blockchainName)) {
             return true;

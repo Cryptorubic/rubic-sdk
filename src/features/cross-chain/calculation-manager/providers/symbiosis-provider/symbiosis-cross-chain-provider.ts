@@ -73,8 +73,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
-
-        if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
+        // @TODO remove Tron check
+        if (
+            !this.areSupportedBlockchains(fromBlockchain, toBlockchain) ||
+            fromBlockchain === BLOCKCHAIN_NAME.TRON
+        ) {
             return {
                 trade: null,
                 error: new NotSupportedTokensError(),
@@ -108,7 +111,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             };
 
             const tokenOut: SymbiosisToken = {
-                chainId: blockchainId[toBlockchain],
+                chainId:
+                    toBlockchain !== BLOCKCHAIN_NAME.TRON ? blockchainId[toBlockchain] : 728126428,
                 address: toToken.isNative ? '' : toToken.address,
                 decimals: toToken.decimals,
                 isNative: toToken.isNative,
@@ -205,7 +209,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                             ? Web3Pure.fromWei(amountInUsd?.amount, amountInUsd?.decimals)
                             : null,
                         tradeType: { in: inTradeType, out: outTradeType },
-                        contractAddresses: { providerRouter: tx.to!, providerGateway: approveTo }
+                        contractAddresses: {
+                            providerRouter: tx.to!,
+                            providerGateway: approveTo
+                        }
                     },
                     options.providerAddress
                 ),
