@@ -229,6 +229,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                     symbiosisError.code === 400
                         ? new TooLowAmountError()
                         : await this.checkMinMaxErrors(symbiosisError);
+            } else if (symbiosisMessage) {
+                rubicSdkError = new RubicSdkError(symbiosisMessage);
             }
 
             return {
