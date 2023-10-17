@@ -213,7 +213,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             };
         } catch (err: unknown) {
             let rubicSdkError = CrossChainProvider.parseError(err);
-            const symbiosisMessage = (err as SymbiosisError)?.message;
+            const symbiosisMessage = (err as { error: SymbiosisError })?.error?.message;
 
             if (symbiosisMessage?.includes('$') || symbiosisMessage?.includes('Min amount')) {
                 const symbiosisError = err as SymbiosisError;
