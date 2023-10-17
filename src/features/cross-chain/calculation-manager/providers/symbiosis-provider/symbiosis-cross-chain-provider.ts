@@ -73,8 +73,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
-
-        if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
+        // @TODO remove Tron check
+        if (
+            !this.areSupportedBlockchains(fromBlockchain, toBlockchain) ||
+            fromBlockchain === BLOCKCHAIN_NAME.TRON
+        ) {
             return {
                 trade: null,
                 error: new NotSupportedTokensError(),
