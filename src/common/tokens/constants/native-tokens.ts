@@ -368,5 +368,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'ETH',
         symbol: 'MNT',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SCROLL]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SCROLL,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
     })
 };
