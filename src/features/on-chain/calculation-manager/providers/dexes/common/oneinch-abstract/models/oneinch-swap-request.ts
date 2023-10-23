@@ -1,18 +1,18 @@
 export interface OneinchSwapRequest {
     params: {
-        fromTokenAddress: string;
-        toTokenAddress: string;
+        src: string;
+        dst: string;
         amount: string;
+        from: string;
         slippage: string;
-        fromAddress: string;
-        disableEstimate: boolean;
-        connectorTokens?: string;
-        destReceiver?: string;
         protocols?: string;
-        referrerAddress?: string;
         fee?: string;
+        connectorTokens?: string;
         permit?: string;
-        compatibilityMode?: boolean;
+        receiver?: string;
+        referrer?: string;
+        disableEstimate: boolean;
+        compatibility?: boolean;
         burnChi?: boolean;
     };
 }
