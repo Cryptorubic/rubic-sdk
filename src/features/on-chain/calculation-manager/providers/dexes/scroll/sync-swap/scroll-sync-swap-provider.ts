@@ -6,7 +6,7 @@ export class ScrollSyncSwapProvider extends SyncSwapAbstractProvider {
 
     public readonly dexContractAddress = '0x80e38291e06339d10AAB483C65695D004dBD5C69';
 
-    public readonly routerHelperContract = '0xeE589e91401066068AF129B0005aC3EF69E3fdB4';
+    public readonly routerHelperContract = '0x39D2E9dBD697e135E3D111F7176dBc123D6807ca';
 
     public readonly vault = '0x7160570BB153Edd0Ea1775EC2b2Ac9b65F1aB61B';
 
