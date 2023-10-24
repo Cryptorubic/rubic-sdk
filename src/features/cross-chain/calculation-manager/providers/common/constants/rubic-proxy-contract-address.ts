@@ -20,7 +20,8 @@ export const rubicProxyContractAddress: Record<
         if (
             blockchain === BLOCKCHAIN_NAME.LINEA ||
             blockchain === BLOCKCHAIN_NAME.BASE ||
-            blockchain === BLOCKCHAIN_NAME.MANTLE
+            blockchain === BLOCKCHAIN_NAME.MANTLE ||
+            blockchain === BLOCKCHAIN_NAME.SCROLL
         ) {
             router = '0xAf14797CcF963B1e3d028a9d51853acE16aedBA1';
         }

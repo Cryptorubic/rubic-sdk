@@ -53,7 +53,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     LINEA: 'LINEA',
     BASE: 'BASE',
     MANTLE: 'MANTLE',
-    MANTA_PACIFIC: 'MANTA_PACIFIC'
+    MANTA_PACIFIC: 'MANTA_PACIFIC',
+    SCROLL: 'SCROLL'
 } as const;
 
 export const BLOCKCHAIN_NAME = {
