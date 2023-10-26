@@ -61,13 +61,18 @@ export class OneinchTrade extends EvmOnChainTrade {
     /** @internal */
     public static async checkIfNeedApproveAndThrowError(
         from: PriceTokenAmount,
+        toToken: Token,
+        fromWithoutFee: PriceTokenAmount,
         fromAddress: string,
         useProxy: boolean
     ): Promise<void | never> {
         const needApprove = await new OneinchTrade(
             {
                 from,
-                useProxy
+                to: toToken,
+                fromWithoutFee,
+                useProxy,
+                path: [from, toToken] as ReadonlyArray<Token>
             } as OneinchTradeStruct,
             EvmWeb3Pure.EMPTY_ADDRESS
         ).needApprove(fromAddress);

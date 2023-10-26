@@ -81,7 +81,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         const [dexContractAddress, { toTokenAmountInWei, estimatedGas, path, data }] =
             await Promise.all([
                 this.loadContractAddress(),
-                this.getTradeInfo(fromTokenClone, toTokenClone, fullOptions)
+                this.getTradeInfo(fromTokenClone, toTokenClone, fromWithoutFee, fullOptions)
             ]);
         path[0] = from;
         path[path.length - 1] = toToken;
@@ -128,6 +128,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
     private async getTradeInfo(
         from: PriceTokenAmount,
         toToken: Token,
+        fromWithoutFee: PriceTokenAmount,
         options: OneinchCalculationOptions
     ): Promise<{
         toTokenAmountInWei: BigNumber;
@@ -157,6 +158,8 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         let estimatedGas: BigNumber;
         let toTokenAmount: string;
         let data: string | null = null;
+        let path = [] as Token[];
+
         try {
             if (!options.fromAddress) {
                 throw new Error('Address is not set');
@@ -165,6 +168,8 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             if (options.gasCalculation !== 'disabled') {
                 await OneinchTrade.checkIfNeedApproveAndThrowError(
                     from,
+                    toToken,
+                    fromWithoutFee,
                     options.fromAddress,
                     options.useProxy
                 );
@@ -174,7 +179,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
                 params: {
                     ...quoteTradeParams.params,
                     slippage: (options.slippageTolerance * 100).toString(),
-                    from: options.fromAddress,
+                    from: this.walletAddress,
                     disableEstimate: options.gasCalculation === 'disabled'
                 }
             };
@@ -201,7 +206,9 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             toTokenAmount = oneInchTrade.toAmount;
         }
 
-        const path = await this.extractPath(from, toToken, oneInchTrade);
+        if (oneInchTrade?.protocols?.length) {
+            path = await this.extractPath(from, toToken, oneInchTrade);
+        }
 
         return { toTokenAmountInWei: new BigNumber(toTokenAmount), estimatedGas, path, data };
     }
