@@ -8,7 +8,7 @@ export function oneInchHttpGetRequest<T>(
     options?: {}
 ): Promise<T> {
     return Injector.httpClient.get(
-        `https://dev-x-api.rubic.exchange/proxy/swap/v5.2/${blockchainId[blockchain]}/${path}`,
+        `https://x-api.rubic.exchange/api/swap/v5.2/${blockchainId[blockchain]}/${path}`,
         {
             ...options
         }
