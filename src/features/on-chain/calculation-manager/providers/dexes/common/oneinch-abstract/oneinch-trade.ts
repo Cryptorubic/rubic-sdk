@@ -8,7 +8,6 @@ import {
 } from 'src/common/errors';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { Cache } from 'src/common/utils/decorators';
 import { parseError } from 'src/common/utils/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -27,7 +26,7 @@ import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/prov
 import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-request';
 import { OneinchSwapResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-response';
 import { OneinchTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-trade-struct';
-import { getOneinchApiBaseUrl } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/utils';
+import { oneInchHttpGetRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/utils';
 
 export class OneinchTrade extends EvmOnChainTrade {
     /** @internal */
@@ -62,13 +61,18 @@ export class OneinchTrade extends EvmOnChainTrade {
     /** @internal */
     public static async checkIfNeedApproveAndThrowError(
         from: PriceTokenAmount,
+        toToken: Token,
+        fromWithoutFee: PriceTokenAmount,
         fromAddress: string,
         useProxy: boolean
     ): Promise<void | never> {
         const needApprove = await new OneinchTrade(
             {
                 from,
-                useProxy
+                to: toToken,
+                fromWithoutFee,
+                useProxy,
+                path: [from, toToken] as ReadonlyArray<Token>
             } as OneinchTradeStruct,
             EvmWeb3Pure.EMPTY_ADDRESS
         ).needApprove(fromAddress);
@@ -98,11 +102,6 @@ export class OneinchTrade extends EvmOnChainTrade {
 
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.ONE_INCH;
-    }
-
-    @Cache
-    private get apiBaseUrl(): string {
-        return getOneinchApiBaseUrl(this.from.blockchain);
     }
 
     constructor(tradeStruct: OneinchTradeStruct, providerAddress: string) {
@@ -171,21 +170,25 @@ export class OneinchTrade extends EvmOnChainTrade {
         const toTokenAddress = this.nativeSupportedTo.address;
         const swapRequest: OneinchSwapRequest = {
             params: {
-                fromTokenAddress,
-                toTokenAddress,
+                src: fromTokenAddress,
+                dst: toTokenAddress,
                 amount: this.nativeSupportedFromWithoutFee.stringWeiAmount,
                 slippage: (this.slippageTolerance * 100).toString(),
-                fromAddress: fromAddress || this.walletAddress,
+                from: fromAddress || this.walletAddress,
                 disableEstimate,
                 ...(this.disableMultihops && {
                     connectorTokens: `${fromTokenAddress},${toTokenAddress}`
                 }),
-                ...(receiverAddress && { destReceiver: receiverAddress }),
+                ...(receiverAddress && { receiver: receiverAddress }),
                 ...(this.availableProtocols && { protocols: this.availableProtocols })
             }
         };
 
-        return this.httpClient.get<OneinchSwapResponse>(`${this.apiBaseUrl}/swap`, swapRequest);
+        return oneInchHttpGetRequest<OneinchSwapResponse>(
+            'swap',
+            this.from.blockchain,
+            swapRequest
+        );
     }
 
     private specifyError(err: {

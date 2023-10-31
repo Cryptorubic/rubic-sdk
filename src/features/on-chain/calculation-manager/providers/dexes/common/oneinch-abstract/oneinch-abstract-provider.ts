@@ -2,7 +2,6 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { Cache } from 'src/common/utils/decorators';
 import { combineOptions } from 'src/common/utils/options';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
@@ -23,7 +22,7 @@ import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/pr
 import { OneinchSwapResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-response';
 import { OneinchTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-trade-struct';
 import { OneinchTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/oneinch-trade';
-import { getOneinchApiBaseUrl } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/utils';
+import { oneInchHttpGetRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/utils';
 
 export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
     private readonly defaultOptions: Omit<OneinchCalculationOptions, 'fromAddress'> = {
@@ -36,15 +35,10 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         return ON_CHAIN_TRADE_TYPE.ONE_INCH;
     }
 
-    @Cache
-    private get apiBaseUrl(): string {
-        return getOneinchApiBaseUrl(this.blockchain);
-    }
-
     private async loadContractAddress(): Promise<string> {
-        const response = await this.httpClient.get<{
+        const response = await oneInchHttpGetRequest<{
             address: string;
-        }>(`${this.apiBaseUrl}/approve/spender`);
+        }>('approve/spender', this.blockchain);
         return response.address;
     }
 
@@ -87,7 +81,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         const [dexContractAddress, { toTokenAmountInWei, estimatedGas, path, data }] =
             await Promise.all([
                 this.loadContractAddress(),
-                this.getTradeInfo(fromTokenClone, toTokenClone, fullOptions)
+                this.getTradeInfo(fromTokenClone, toTokenClone, fromWithoutFee, fullOptions)
             ]);
         path[0] = from;
         path[path.length - 1] = toToken;
@@ -134,6 +128,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
     private async getTradeInfo(
         from: PriceTokenAmount,
         toToken: Token,
+        fromWithoutFee: PriceTokenAmount,
         options: OneinchCalculationOptions
     ): Promise<{
         toTokenAmountInWei: BigNumber;
@@ -149,8 +144,8 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         const availableProtocols = this.getAvailableProtocols();
         const quoteTradeParams: OneinchQuoteRequest = {
             params: {
-                fromTokenAddress,
-                toTokenAddress,
+                src: fromTokenAddress,
+                dst: toTokenAddress,
                 amount: from.stringWeiAmount,
                 ...(options.disableMultihops && {
                     connectorTokens: `${fromTokenAddress},${toTokenAddress}`
@@ -163,6 +158,8 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         let estimatedGas: BigNumber;
         let toTokenAmount: string;
         let data: string | null = null;
+        let path = [] as Token[];
+
         try {
             if (!options.fromAddress) {
                 throw new Error('Address is not set');
@@ -171,6 +168,8 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             if (options.gasCalculation !== 'disabled') {
                 await OneinchTrade.checkIfNeedApproveAndThrowError(
                     from,
+                    toToken,
+                    fromWithoutFee,
                     options.fromAddress,
                     options.useProxy
                 );
@@ -180,32 +179,36 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
                 params: {
                     ...quoteTradeParams.params,
                     slippage: (options.slippageTolerance * 100).toString(),
-                    fromAddress: options.fromAddress,
+                    from: this.walletAddress,
                     disableEstimate: options.gasCalculation === 'disabled'
                 }
             };
-            oneInchTrade = await this.httpClient.get<OneinchSwapResponse>(
-                `${this.apiBaseUrl}/swap`,
+            oneInchTrade = await oneInchHttpGetRequest<OneinchSwapResponse>(
+                'swap',
+                this.blockchain,
                 swapTradeParams
             );
 
             estimatedGas = new BigNumber(oneInchTrade.tx.gas);
-            toTokenAmount = oneInchTrade.toTokenAmount;
+            toTokenAmount = oneInchTrade.toAmount;
             data = oneInchTrade.tx.data;
         } catch (_err) {
-            oneInchTrade = await this.httpClient.get<OneinchQuoteResponse>(
-                `${this.apiBaseUrl}/quote`,
+            oneInchTrade = await oneInchHttpGetRequest<OneinchQuoteResponse>(
+                'quote',
+                this.blockchain,
                 quoteTradeParams
             );
-            if (oneInchTrade.hasOwnProperty('errors') || !oneInchTrade.toTokenAmount) {
+            if (oneInchTrade.hasOwnProperty('errors') || !oneInchTrade.toAmount) {
                 throw new RubicSdkError('1inch quote error');
             }
 
-            estimatedGas = new BigNumber(oneInchTrade.estimatedGas);
-            toTokenAmount = oneInchTrade.toTokenAmount;
+            estimatedGas = new BigNumber(oneInchTrade.gas);
+            toTokenAmount = oneInchTrade.toAmount;
         }
 
-        const path = await this.extractPath(from, toToken, oneInchTrade);
+        if (oneInchTrade?.protocols?.length) {
+            path = await this.extractPath(from, toToken, oneInchTrade);
+        }
 
         return { toTokenAmountInWei: new BigNumber(toTokenAmount), estimatedGas, path, data };
     }
