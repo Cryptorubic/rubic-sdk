@@ -272,21 +272,19 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         if (transitFrom) {
             routePath.push({
                 type: 'on-chain',
-                // @TODO provider: ON_CHAIN_TRADE_TYPE.SYMB,
-                provider: ON_CHAIN_TRADE_TYPE.ONE_INCH,
+                provider: ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP,
                 path: [fromToken, fromTokenAmount]
             });
         }
         routePath.push({
             type: 'cross-chain',
-            provider: CROSS_CHAIN_TRADE_TYPE.XY,
+            provider: CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS,
             path: [fromTokenAmount, toTokenAmount]
         });
         if (transitTo) {
             routePath.push({
                 type: 'on-chain',
-                // @TODO provider: ON_CHAIN_TRADE_TYPE.XY_DEX,
-                provider: ON_CHAIN_TRADE_TYPE.ONE_INCH,
+                provider: ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP,
                 path: [toTokenAmount, toToken]
             });
         }
