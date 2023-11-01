@@ -9,6 +9,6 @@ export const errorCode = {
 } as const;
 
 export interface SymbiosisError {
-    code: keyof typeof errorCode;
+    code: keyof typeof errorCode | number;
     message?: string;
 }

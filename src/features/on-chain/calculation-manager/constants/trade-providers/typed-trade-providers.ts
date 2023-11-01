@@ -10,7 +10,8 @@ import { UniswapV2TradeProviders } from 'src/features/on-chain/calculation-manag
 import { UniswapV3TradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/uniswap-v3-trade-providers';
 import { xyDexTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/xy-dex-trade-providers';
 import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
-import { VooiProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/vooi/vooi-provider';
+
+import { vooiTradeProviders } from './vooi-trade-providers';
 
 export const typedTradeProviders: OnChainTypedTradeProviders = [
     ...UniswapV2TradeProviders,
@@ -22,8 +23,8 @@ export const typedTradeProviders: OnChainTypedTradeProviders = [
     ...pancakeRouterProviders,
     ...izumiTradeProviders,
     ...xyDexTradeProviders,
-    ...syncSwapTradeProviders,
-    VooiProvider
+    ...vooiTradeProviders,
+    ...syncSwapTradeProviders
 ].reduce(
     (acc, ProviderClass) => {
         const provider = new ProviderClass();

@@ -246,13 +246,15 @@ export class ProxyCrossChainEvmTrade {
             : tradeParams.fromTokenAmount;
         const hasSwapBeforeBridge = tradeParams.srcChainTrade !== null;
 
+        const toAddress = tradeParams.toAddress || tradeParams.toTokenAmount.address;
+
         return [
             EvmWeb3Pure.randomHex(32),
             tradeParams.type.toLowerCase(),
             tradeParams.providerAddress,
             EvmWeb3Pure.randomHex(20),
             fromToken.address,
-            tradeParams.toTokenAmount.address,
+            toAddress,
             receiverAddress,
             tradeParams.fromAddress,
             fromToken.stringWeiAmount,

@@ -59,6 +59,20 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         name: 'Zeta',
         symbol: 'ZETA',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.TAIKO]: new Token({
+        blockchain: BLOCKCHAIN_NAME.TAIKO,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ether',
+        symbol: 'ETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SEPOLIA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SEPOLIA,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ether',
+        symbol: 'ETH',
+        decimals: 18
     })
 };
 
@@ -346,6 +360,20 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'Mantle',
         symbol: 'MNT',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MANTA_PACIFIC]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MANTA_PACIFIC,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'MNT',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SCROLL]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SCROLL,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'ETH',
         decimals: 18
     })
 };

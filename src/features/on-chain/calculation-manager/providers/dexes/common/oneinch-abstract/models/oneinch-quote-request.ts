@@ -1,7 +1,7 @@
 export interface OneinchQuoteRequest {
     params: {
-        fromTokenAddress: string;
-        toTokenAddress: string;
+        src: string;
+        dst: string;
         amount: string;
         connectorTokens?: string;
     };

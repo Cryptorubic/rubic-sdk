@@ -73,8 +73,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
-
-        if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
+        // @TODO remove Tron check
+        if (
+            !this.areSupportedBlockchains(fromBlockchain, toBlockchain) ||
+            fromBlockchain === BLOCKCHAIN_NAME.TRON
+        ) {
             return {
                 trade: null,
                 error: new NotSupportedTokensError(),
@@ -108,7 +111,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             };
 
             const tokenOut: SymbiosisToken = {
-                chainId: blockchainId[toBlockchain],
+                chainId:
+                    toBlockchain !== BLOCKCHAIN_NAME.TRON ? blockchainId[toBlockchain] : 728126428,
                 address: toToken.isNative ? '' : toToken.address,
                 decimals: toToken.decimals,
                 isNative: toToken.isNative,
@@ -165,7 +169,10 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                         feeInfo,
                         transitAmount: from.tokenAmount,
                         tradeType: { in: inTradeType, out: outTradeType },
-                        contractAddresses: { providerRouter: tx.to!, providerGateway: approveTo }
+                        contractAddresses: {
+                            providerRouter: tx.to!,
+                            providerGateway: approveTo
+                        }
                     },
                     options.providerAddress,
                     await this.getRoutePath(from, to, route)
@@ -174,13 +181,17 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             };
         } catch (err: unknown) {
             let rubicSdkError = CrossChainProvider.parseError(err);
+            const symbiosisMessage = (err as { error: SymbiosisError })?.error?.message;
 
-            if ((err as SymbiosisError)?.message?.includes('$')) {
-                const symbiosisError = err as SymbiosisError;
+            if (symbiosisMessage?.includes('$') || symbiosisMessage?.includes('Min amount')) {
+                const symbiosisError = (err as { error: SymbiosisError }).error;
                 rubicSdkError =
-                    symbiosisError.code === errorCode.AMOUNT_LESS_THAN_FEE
+                    symbiosisError.code === errorCode.AMOUNT_LESS_THAN_FEE ||
+                    symbiosisError.code === 400
                         ? new TooLowAmountError()
                         : await this.checkMinMaxErrors(symbiosisError);
+            } else if (symbiosisMessage) {
+                rubicSdkError = new RubicSdkError(symbiosisMessage);
             }
 
             return {

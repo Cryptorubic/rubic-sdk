@@ -155,7 +155,7 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
         this.slippage = crossChainTrade.slippage;
-        this.toTokenAmountMin = crossChainTrade.transitMinAmount.multipliedBy(
+        this.toTokenAmountMin = crossChainTrade.to.tokenAmount.multipliedBy(
             1 - crossChainTrade.maxSlippage / 10_000_000
         );
         this.feeInfo = crossChainTrade.feeInfo;

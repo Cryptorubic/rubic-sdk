@@ -26,6 +26,11 @@ export interface CrossChainTradeData {
     srcTxHash: string;
 
     /**
+     * Sender address.
+     */
+    sender?: string;
+
+    /**
      * Li-fi bridge type.
      */
     lifiBridgeType?: string;
@@ -54,4 +59,9 @@ export interface CrossChainTradeData {
      * Changenow trade id.
      */
     changenowId?: string;
+
+    /**
+     * Taiko bridge transaction ID.
+     */
+    taikoTransactionId?: string;
 }

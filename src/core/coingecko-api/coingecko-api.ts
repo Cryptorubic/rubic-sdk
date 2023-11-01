@@ -115,7 +115,7 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.BITCOIN_CASH]: 'bitcoin-cash',
             [BLOCKCHAIN_NAME.ZK_SYNC]: 'ethereum',
             [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulsechain',
-            [BLOCKCHAIN_NAME.LINEA]: 'linea',
+            [BLOCKCHAIN_NAME.LINEA]: 'ethereum',
             [BLOCKCHAIN_NAME.MANTLE]: 'mantle',
             [BLOCKCHAIN_NAME.BASE]: 'ethereum'
         };
