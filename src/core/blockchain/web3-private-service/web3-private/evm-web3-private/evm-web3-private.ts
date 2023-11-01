@@ -37,7 +37,10 @@ export class EvmWeb3Private extends Web3Private {
         if (err.message.includes('execution reverted: UNIV3R: min return')) {
             return new LowSlippageError();
         }
-        if (err.message.includes('execution reverted: Address: low-level call with value failed')) {
+        if (
+            err.message.includes('execution reverted: Address: low-level call with value failed') ||
+            err.message.includes('Low native value')
+        ) {
             return new InsufficientFundsGasPriceValueError();
         }
         if (err.message.includes('Failed to check for transaction receipt')) {
@@ -152,16 +155,20 @@ export class EvmWeb3Private extends Web3Private {
             };
             const gas = await this.web3.eth.estimateGas(gaslessParams);
 
-            const gasfullParams = {
+            const gasfulParams = {
                 ...gaslessParams,
                 ...getGasOptions(options),
                 gas: Web3Private.stringifyAmount(gas, 1.05)
             };
-            await this.web3.eth.estimateGas(gasfullParams);
+            try {
+                await this.web3.eth.estimateGas(gasfulParams);
+            } catch {
+                throw new RubicSdkError('Low native value');
+            }
 
             const sendParams = {
                 ...options,
-                ...gasfullParams
+                ...gasfulParams
             };
 
             return this.sendTransaction(toAddress, sendParams);
@@ -243,17 +250,21 @@ export class EvmWeb3Private extends Web3Private {
                 gaslessParams
             );
 
-            const gasfullParams = {
+            const gasfulParams = {
                 ...gaslessParams,
                 ...getGasOptions(options),
                 gas: Web3Private.stringifyAmount(gas, 1.05)
             };
 
-            await contract.methods[methodName](...methodArguments).estimateGas(gasfullParams);
+            try {
+                await contract.methods[methodName](...methodArguments).estimateGas(gasfulParams);
+            } catch {
+                throw new RubicSdkError('Low native value');
+            }
 
             const sendParams = {
                 ...options,
-                ...gasfullParams
+                ...gasfulParams
             };
 
             return this.executeContractMethod(
