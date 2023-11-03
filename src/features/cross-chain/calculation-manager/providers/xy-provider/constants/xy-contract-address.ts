@@ -5,8 +5,8 @@ import { XyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calcul
 
 export const xyContractAddress: Record<XyCrossChainSupportedBlockchain, UniversalContract> = {
     [BLOCKCHAIN_NAME.SCROLL]: {
-        providerGateway: '0x5300000000000000000000000000000000000004',
-        providerRouter: '0x5300000000000000000000000000000000000004',
+        providerGateway: '0x778C974568e376146dbC64fF12aD55B2d1c4133f',
+        providerRouter: '0x778C974568e376146dbC64fF12aD55B2d1c4133f',
         rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.SCROLL].router
     },
     [BLOCKCHAIN_NAME.ETHEREUM]: {
