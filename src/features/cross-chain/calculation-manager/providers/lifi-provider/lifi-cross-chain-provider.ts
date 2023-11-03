@@ -345,7 +345,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         index: number
     ): CrossChainTradeType | LifiBridgeTypes {
         return lifiSteps?.[index]?.tool
-            ? lifiBridge[lifiSteps[0]!.tool as keyof typeof LIFI_BRIDGE_TYPES]!
+            ? lifiBridge[lifiSteps[index]!.tool as keyof typeof LIFI_BRIDGE_TYPES]!
             : CROSS_CHAIN_TRADE_TYPE.LIFI;
     }
 }
