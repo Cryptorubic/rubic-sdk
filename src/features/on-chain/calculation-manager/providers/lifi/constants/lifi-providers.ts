@@ -15,5 +15,6 @@ export const lifiProviders: Record<string, OnChainTradeType> = {
     beamswap: ON_CHAIN_TRADE_TYPE.BEAM_SWAP,
     ubeswap: ON_CHAIN_TRADE_TYPE.UBE_SWAP,
     jswap: ON_CHAIN_TRADE_TYPE.J_SWAP,
-    cronaswap: ON_CHAIN_TRADE_TYPE.CRONA_SWAP
+    cronaswap: ON_CHAIN_TRADE_TYPE.CRONA_SWAP,
+    'uniswap-eth': ON_CHAIN_TRADE_TYPE.UNISWAP_V2
 };

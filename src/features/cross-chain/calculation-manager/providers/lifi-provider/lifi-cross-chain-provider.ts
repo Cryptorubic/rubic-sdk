@@ -8,7 +8,10 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
-import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import {
+    CROSS_CHAIN_TRADE_TYPE,
+    CrossChainTradeType
+} from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import {
     BRIDGE_TYPE,
@@ -32,6 +35,7 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { lifiBridge } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-bridge';
 import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-providers';
 
 export class LifiCrossChainProvider extends CrossChainProvider {
@@ -287,26 +291,42 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
         // @TODO Add dex true provider and path
         const routePath: RubicStep[] = [];
+        let lifiSrcProvider: OnChainTradeType = ON_CHAIN_TRADE_TYPE.LIFI_DEFAULT;
+        let lifiDstProvider: OnChainTradeType = ON_CHAIN_TRADE_TYPE.LIFI_DEFAULT;
+        let lifiCrossChainBridge: CrossChainTradeType | LifiBridgeTypes =
+            CROSS_CHAIN_TRADE_TYPE.LIFI;
+
+        if (lifiSteps?.[0]?.tool) {
+            lifiSrcProvider = lifiProviders[lifiSteps[0].tool] as OnChainTradeType;
+        }
+
+        if (lifiSteps?.[1]?.tool) {
+            lifiCrossChainBridge = lifiBridge[lifiSteps[1].tool as keyof typeof LIFI_BRIDGE_TYPES]!;
+        }
+
+        if (lifiSteps?.[2]?.tool) {
+            lifiDstProvider = lifiProviders[lifiSteps[2].tool] as OnChainTradeType;
+        }
 
         if (lifiSteps?.[0]?.type === 'swap') {
             routePath.push({
                 type: 'on-chain',
                 path: [from, fromTokenAmount],
-                provider: ON_CHAIN_TRADE_TYPE.LIFI_DEFAULT
+                provider: lifiSrcProvider
             });
         }
 
         routePath.push({
             type: 'cross-chain',
             path: [fromTokenAmount, toTokenAmount],
-            provider: CROSS_CHAIN_TRADE_TYPE.LIFI
+            provider: lifiCrossChainBridge
         });
 
         if (lifiSteps?.[2]?.type === 'swap') {
             routePath.push({
                 type: 'on-chain',
                 path: [toTokenAmount, to],
-                provider: ON_CHAIN_TRADE_TYPE.LIFI_DEFAULT
+                provider: lifiDstProvider
             });
         }
 
