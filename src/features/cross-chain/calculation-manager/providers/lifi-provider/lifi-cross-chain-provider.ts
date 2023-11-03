@@ -1,4 +1,4 @@
-import { FeeCost, LiFi, LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
+import { FeeCost, LiFi, LifiStep, Route, RouteOptions, RoutesRequest, Step } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { nativeTokensList, PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
@@ -296,16 +296,17 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         let lifiCrossChainBridge: CrossChainTradeType | LifiBridgeTypes =
             CROSS_CHAIN_TRADE_TYPE.LIFI;
 
-        if (lifiSteps?.[0]?.tool) {
-            lifiSrcProvider = lifiProviders[lifiSteps[0].tool] as OnChainTradeType;
+        if (lifiSteps?.length === 1) {
+            lifiCrossChainBridge = this.getCrossChainRoutePathProvider(lifiSteps, 0);
         }
-
-        if (lifiSteps?.[1]?.tool) {
-            lifiCrossChainBridge = lifiBridge[lifiSteps[1].tool as keyof typeof LIFI_BRIDGE_TYPES]!;
+        if (lifiSteps?.length === 2) {
+            lifiSrcProvider = this.getOnChainRoutePathProvider(lifiSteps, 0);
+            lifiCrossChainBridge = this.getCrossChainRoutePathProvider(lifiSteps, 1);
         }
-
-        if (lifiSteps?.[2]?.tool) {
-            lifiDstProvider = lifiProviders[lifiSteps[2].tool] as OnChainTradeType;
+        if (lifiSteps?.length === 3) {
+            lifiSrcProvider = this.getOnChainRoutePathProvider(lifiSteps, 0);
+            lifiCrossChainBridge = this.getCrossChainRoutePathProvider(lifiSteps, 1);
+            lifiSrcProvider = this.getOnChainRoutePathProvider(lifiSteps, 2);
         }
 
         if (lifiSteps?.[0]?.type === 'swap') {
@@ -331,5 +332,20 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         }
 
         return routePath;
+    }
+
+    private getOnChainRoutePathProvider(lifiSteps: Step[], index: number): OnChainTradeType {
+        return lifiSteps?.[index]?.tool
+            ? lifiProviders[lifiSteps[index]!.tool]!
+            : ON_CHAIN_TRADE_TYPE.LIFI_DEFAULT;
+    }
+
+    private getCrossChainRoutePathProvider(
+        lifiSteps: Step[],
+        index: number
+    ): CrossChainTradeType | LifiBridgeTypes {
+        return lifiSteps?.[index]?.tool
+            ? lifiBridge[lifiSteps[0]!.tool as keyof typeof LIFI_BRIDGE_TYPES]!
+            : CROSS_CHAIN_TRADE_TYPE.LIFI;
     }
 }

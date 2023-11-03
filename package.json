@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "4.30.0-alpha-design.16-lifi",
+    "version": "4.30.0-alpha-design.16-lifi.1",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
