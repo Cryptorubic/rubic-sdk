@@ -4,6 +4,11 @@ import { UniversalContract } from 'src/features/cross-chain/calculation-manager/
 import { XyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
 
 export const xyContractAddress: Record<XyCrossChainSupportedBlockchain, UniversalContract> = {
+    [BLOCKCHAIN_NAME.SCROLL]: {
+        providerGateway: '0x778C974568e376146dbC64fF12aD55B2d1c4133f',
+        providerRouter: '0x778C974568e376146dbC64fF12aD55B2d1c4133f',
+        rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.SCROLL].router
+    },
     [BLOCKCHAIN_NAME.ETHEREUM]: {
         providerGateway: '0x4315f344a905dC21a08189A117eFd6E1fcA37D57',
         providerRouter: '0x4315f344a905dC21a08189A117eFd6E1fcA37D57',
