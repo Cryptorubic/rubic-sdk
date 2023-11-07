@@ -24,7 +24,8 @@ export const symbiosisCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.FUJI,
     BLOCKCHAIN_NAME.MUMBAI,
     BLOCKCHAIN_NAME.SCROLL_SEPOLIA,
-    BLOCKCHAIN_NAME.ZETACHAIN
+    BLOCKCHAIN_NAME.ZETACHAIN,
+    BLOCKCHAIN_NAME.MANTA_PACIFIC
 ] as const;
 
 export type SymbiosisCrossChainSupportedBlockchain =
