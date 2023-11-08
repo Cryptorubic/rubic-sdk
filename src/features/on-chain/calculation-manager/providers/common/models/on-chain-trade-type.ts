@@ -51,6 +51,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     KYBER_SWAP: 'KYBER_SWAP',
 
     LUA_SWAP: 'LUA_SWAP',
+    LIFI: 'LIFI',
 
     MAVERICK: 'MAVERICK',
     MDEX: 'MDEX',

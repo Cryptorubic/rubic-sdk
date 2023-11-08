@@ -24,7 +24,10 @@ import {
     LifiForbiddenBlockchains,
     lifiForbiddenBlockchains
 } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-forbidden-blockchains';
-import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-providers';
+import {
+    LIFI_AGGREGATOR,
+    lifiProviders
+} from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-providers';
 import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/lifi/lifi-trade';
 import {
     LifiCalculationOptions,
@@ -97,7 +100,6 @@ export class LifiProvider {
 
         const result = await this.lifi.getRoutes(routesRequest);
         const { routes } = result;
-
         return (
             await Promise.all(
                 routes.map(async route => {
@@ -105,10 +107,7 @@ export class LifiProvider {
                     if (!step) {
                         return null;
                     }
-                    const type = lifiProviders[step.toolDetails.name.toLowerCase()];
-                    if (!type) {
-                        return null;
-                    }
+                    const type = LIFI_AGGREGATOR;
 
                     const to = new PriceTokenAmount({
                         ...toToken.asStruct,

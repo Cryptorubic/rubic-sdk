@@ -17,3 +17,5 @@ export const lifiProviders: Record<string, OnChainTradeType> = {
     jswap: ON_CHAIN_TRADE_TYPE.J_SWAP,
     cronaswap: ON_CHAIN_TRADE_TYPE.CRONA_SWAP
 };
+
+export const LIFI_AGGREGATOR = 'LIFI';
