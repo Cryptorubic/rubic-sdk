@@ -51,7 +51,10 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.PULSECHAIN,
     BLOCKCHAIN_NAME.LINEA,
     BLOCKCHAIN_NAME.MANTLE,
-    BLOCKCHAIN_NAME.BASE
+    BLOCKCHAIN_NAME.BASE,
+    BLOCKCHAIN_NAME.MUMBAI,
+    BLOCKCHAIN_NAME.GOERLI,
+    BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET
 ] as const;
 
 type SupportedBlockchain = (typeof supportedBlockchains)[number];
@@ -117,7 +120,10 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulsechain',
             [BLOCKCHAIN_NAME.LINEA]: 'ethereum',
             [BLOCKCHAIN_NAME.MANTLE]: 'mantle',
-            [BLOCKCHAIN_NAME.BASE]: 'ethereum'
+            [BLOCKCHAIN_NAME.BASE]: 'ethereum',
+            [BLOCKCHAIN_NAME.GOERLI]: 'goerli-eth',
+            [BLOCKCHAIN_NAME.MUMBAI]: 'matic-network',
+            [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: 'binancecoin'
         };
 
         this.tokenBlockchainId = {
@@ -164,7 +170,10 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulsechain',
             [BLOCKCHAIN_NAME.LINEA]: 'linea',
             [BLOCKCHAIN_NAME.MANTLE]: 'mantle',
-            [BLOCKCHAIN_NAME.BASE]: 'base'
+            [BLOCKCHAIN_NAME.BASE]: 'base',
+            [BLOCKCHAIN_NAME.GOERLI]: '',
+            [BLOCKCHAIN_NAME.MUMBAI]: 'polygon-pos',
+            [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]:'binance-smart-chain'
         };
     }
 

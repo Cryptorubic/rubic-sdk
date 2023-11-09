@@ -17,5 +17,8 @@ export const openOceanBlockchainName: Record<OpenoceanOnChainSupportedBlockchain
     [BLOCKCHAIN_NAME.LINEA]: 'linea',
     [BLOCKCHAIN_NAME.POLYGON_ZKEVM]: 'polygon_zkevm',
     [BLOCKCHAIN_NAME.ZK_SYNC]: 'zksync',
-    [BLOCKCHAIN_NAME.BASE]: 'base'
+    [BLOCKCHAIN_NAME.BASE]: 'base',
+    [BLOCKCHAIN_NAME.MUMBAI]: 'mumbai',
+    [BLOCKCHAIN_NAME.GOERLI]: 'goerli',
+    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: 'bsct'
 };
