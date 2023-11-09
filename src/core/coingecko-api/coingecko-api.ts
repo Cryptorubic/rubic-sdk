@@ -171,7 +171,7 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.LINEA]: 'linea',
             [BLOCKCHAIN_NAME.MANTLE]: 'mantle',
             [BLOCKCHAIN_NAME.BASE]: 'base',
-            [BLOCKCHAIN_NAME.GOERLI]: '',
+            [BLOCKCHAIN_NAME.GOERLI]: 'ethereum',
             [BLOCKCHAIN_NAME.MUMBAI]: 'polygon-pos',
             [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]:'binance-smart-chain'
         };
