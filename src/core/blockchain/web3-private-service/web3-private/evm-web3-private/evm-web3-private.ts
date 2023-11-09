@@ -298,18 +298,18 @@ export class EvmWeb3Private extends Web3Private {
      * Executes approve method in ERC-20 token contract.
      * @param tokenAddress Address of the smart-contract corresponding to the token.
      * @param spenderAddress Wallet or contract address to approve.
-     * @param amount Token amount to approve in wei.
+     * @param value Token amount to approve in wei.
      * @param [options] Additional options.
      * @returns Approval transaction receipt.
      */
     public async approveTokens(
         tokenAddress: string,
         spenderAddress: string,
-        amount: BigNumber | 'infinity' = 'infinity',
+        value: BigNumber | 'infinity',
         options: EvmTransactionOptions = {}
     ): Promise<TransactionReceipt> {
         const contract = new this.web3.eth.Contract(ERC20_TOKEN_ABI, tokenAddress);
-        const rawValue = amount === 'infinity' ? new BigNumber(2).pow(256).minus(1) : amount;
+        const rawValue = value === 'infinity' ? new BigNumber(2).pow(256).minus(1) : value;
         const gaslessParams = { from: this.address };
 
         const gas = await contract.methods
@@ -343,7 +343,7 @@ export class EvmWeb3Private extends Web3Private {
      * Build encoded approve transaction config.
      * @param tokenAddress Address of the smart-contract corresponding to the token.
      * @param spenderAddress Wallet or contract address to approve.
-     * @param value Amount of tokens in approval window in spending cap field
+     * @param value Token amount to approve in wei.
      * @param [options] Additional options.
      * @returns Encoded approve transaction config.
      */

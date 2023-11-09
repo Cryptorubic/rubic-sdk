@@ -54,13 +54,13 @@ export class TronWeb3Private extends Web3Private {
     public async approveTokens(
         tokenAddress: string,
         spenderAddress: string,
-        amount: BigNumber | 'infinity' = 'infinity',
+        value: BigNumber | 'infinity',
         options: TronTransactionOptions = {}
     ): Promise<string> {
         try {
             const contract = await this.tronWeb.contract(TRC20_CONTRACT_ABI, tokenAddress);
 
-            const rawValue = amount === 'infinity' ? new BigNumber(2).pow(256).minus(1) : amount;
+            const rawValue = value === 'infinity' ? new BigNumber(2).pow(256).minus(1) : value;
 
             const transactionHash = await contract
                 .approve(spenderAddress, rawValue.toFixed(0))

@@ -26,8 +26,7 @@ export abstract class TronOnChainTrade extends OnChainTrade {
 
     public async approve(
         options: TronTransactionOptions,
-        checkNeedApprove = true,
-        amount: BigNumber | 'infinity' = 'infinity'
+        checkNeedApprove = true
     ): Promise<string> {
         if (checkNeedApprove) {
             const needApprove = await this.needApprove();
@@ -42,7 +41,7 @@ export abstract class TronOnChainTrade extends OnChainTrade {
         return this.web3Private.approveTokens(
             this.from.address,
             this.spenderAddress,
-            amount,
+            'infinity',
             options
         );
     }

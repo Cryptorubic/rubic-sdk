@@ -31,8 +31,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
 
     public async approve(
         options: TronTransactionOptions,
-        checkNeedApprove = true,
-        amount: BigNumber | 'infinity' = 'infinity'
+        checkNeedApprove = true
     ): Promise<string> {
         if (checkNeedApprove) {
             const needApprove = await this.needApprove();
@@ -47,7 +46,7 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
         return this.web3Private.approveTokens(
             this.from.address,
             this.fromContractAddress,
-            amount,
+            'infinity',
             options
         );
     }

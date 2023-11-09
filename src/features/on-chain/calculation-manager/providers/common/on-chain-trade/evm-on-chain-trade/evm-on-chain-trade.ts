@@ -121,8 +121,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
     public async approve(
         options: EvmBasicTransactionOptions,
-        checkNeedApprove = true,
-        amount: BigNumber | 'infinity' = 'infinity'
+        checkNeedApprove = true
     ): Promise<TransactionReceipt> {
         if (checkNeedApprove) {
             const needApprove = await this.needApprove();
@@ -138,7 +137,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ||
             this.from.blockchain === BLOCKCHAIN_NAME.CRONOS
                 ? this.from.weiAmount
-                : amount;
+                : 'infinity';
 
         return this.web3Private.approveTokens(
             this.from.address,

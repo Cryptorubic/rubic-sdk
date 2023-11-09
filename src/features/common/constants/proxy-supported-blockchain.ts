@@ -18,7 +18,7 @@ export const proxySupportedBlockchains = [
     BLOCKCHAIN_NAME.LINEA,
     BLOCKCHAIN_NAME.BASE,
     BLOCKCHAIN_NAME.MANTLE,
-    BLOCKCHAIN_NAME.SCROLL
+    BLOCKCHAIN_NAME.SCROLL,
     // BLOCKCHAIN_NAME.OKE_X_CHAIN,
     // BLOCKCHAIN_NAME.GNOSIS,
     // BLOCKCHAIN_NAME.FUSE,
@@ -32,6 +32,9 @@ export const proxySupportedBlockchains = [
     // BLOCKCHAIN_NAME.SYSCOIN,
     // BLOCKCHAIN_NAME.VELAS,
     // BLOCKCHAIN_NAME.OASIS
+    BLOCKCHAIN_NAME.GOERLI,
+    BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET,
+    BLOCKCHAIN_NAME.MUMBAI
 ] as const;
 
 export type ProxySupportedBlockchain = (typeof proxySupportedBlockchains)[number];
