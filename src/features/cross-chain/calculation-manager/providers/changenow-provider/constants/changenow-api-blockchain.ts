@@ -1,6 +1,15 @@
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
+export const changeNowEvmSupportedTestBlockchain = {
+    [BLOCKCHAIN_NAME.GOERLI]: 'goerli',
+    [BLOCKCHAIN_NAME.MUMBAI]: 'matic',
+    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: 'bsct'
+};
+
 export const changeNowEvmSupportedBlockchain = {
+    //Testnet
+    ...changeNowEvmSupportedTestBlockchain,
+    //Mainnet
     [BLOCKCHAIN_NAME.ETHEREUM]: 'eth',
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: 'bsc',
     [BLOCKCHAIN_NAME.POLYGON]: 'matic',
@@ -20,7 +29,7 @@ export const changeNowEvmSupportedBlockchain = {
     [BLOCKCHAIN_NAME.XDC]: 'xdc',
     [BLOCKCHAIN_NAME.PULSECHAIN]: 'pulse',
     [BLOCKCHAIN_NAME.BASE]: 'base',
-    [BLOCKCHAIN_NAME.ZK_SYNC]: 'zksync'
+    [BLOCKCHAIN_NAME.ZK_SYNC]: 'zksync',
 };
 
 export type ChangenowEvmCrossChainSupportedBlockchain =
