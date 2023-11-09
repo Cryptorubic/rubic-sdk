@@ -8,7 +8,9 @@ export const rubicProxyContractAddress: Record<
     }
 > = Object.values(BLOCKCHAIN_NAME).reduce(
     (acc, blockchain) => {
+        // ERC20Proxy
         let gateway = '0x3335733c454805df6a77f825f266e136FB4a3333';
+        // RubicMultiProxy
         let router = '0x6AA981bFF95eDfea36Bdae98C26B274FfcafE8d3';
         if (blockchain === BLOCKCHAIN_NAME.TELOS) {
             router = '0xA2d8CF32C16f070702c45a5686Fdb0a1d7171AAD';
@@ -21,7 +23,8 @@ export const rubicProxyContractAddress: Record<
             blockchain === BLOCKCHAIN_NAME.LINEA ||
             blockchain === BLOCKCHAIN_NAME.BASE ||
             blockchain === BLOCKCHAIN_NAME.MANTLE ||
-            blockchain === BLOCKCHAIN_NAME.SCROLL
+            blockchain === BLOCKCHAIN_NAME.SCROLL ||
+            blockchain === BLOCKCHAIN_NAME.MANTA_PACIFIC
         ) {
             router = '0xAf14797CcF963B1e3d028a9d51853acE16aedBA1';
         }
