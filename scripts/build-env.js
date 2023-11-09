@@ -5,6 +5,9 @@ const program = new commander.Command();
 program
     .option('--eth <eth-prc>')
     .option('--polygon <polygon-rpc>')
+    .option('--goerli <goerli-rpc')
+    .option('--mumbai <mumbai-rpc>')
+    .option('--bsct <bsct-rpc>')
     .parse();
 
 const options = program.opts();
@@ -23,7 +26,19 @@ global.sdkEnv = {
         POLYGON: {
             jsonRpcUrl: '${options.polygon}',
             blockNumber: 23571568
+        },
+        GOERLI: {
+            jsonRpcUrl: '${options.goerli}',
+            blockNumber: 9008945
+        },
+        MUMBAI: {
+            jsonRpcUrl: '${options.mumbai}',
+            blockNumber: 42000000
         }
+        BSCT: {
+            jsonRpcUrl: '${options.bsct}',
+            blockNumber: 34836626
+        }        
     }
 }
 `;

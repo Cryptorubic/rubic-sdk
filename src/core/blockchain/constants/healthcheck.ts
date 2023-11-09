@@ -68,7 +68,25 @@ export const HEALTHCHECK = {
         contractAbi: TRC20_CONTRACT_ABI,
         method: 'symbol',
         expected: 'USDC'
-    }
+    },
+    [BLOCKCHAIN_NAME.GOERLI]: {
+        contractAddress: '0x509ee0d083ddf8ac028f2a56731412edd63223b9',
+        contractAbi: ERC20_TOKEN_ABI,
+        method: 'symbol',
+        expected: 'USDT'
+    },
+    [BLOCKCHAIN_NAME.MUMBAI]: {
+        contractAddress: '0xa02f6adc7926efebbd59fd43a84f4e0c0c91e832',
+        contractAbi: ERC20_TOKEN_ABI,
+        method: 'symbol',
+        expected: 'USDT'
+    },
+    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET]: {
+        contractAddress: '0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee ',
+        contractAbi: ERC20_TOKEN_ABI,
+        method: 'symbol',
+        expected: 'BUSD'
+    },
 };
 
 export type HealthcheckAvailableBlockchain = keyof typeof HEALTHCHECK;

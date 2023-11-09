@@ -1,0 +1,17 @@
+## Updated files.
+src/core/blockchain/web3-public-service/web3-public/constants/multicall-addresses.ts
+src/core/blockchain/constants/healthcheck.ts
+src/common/tokens/constants/wrapped-addresses.ts
+
+src/features/cross-chain/calulation-manager/providers/common/contrants/rubic-proxy-contract-address.ts
+src/features/common/constants/proxy-surpported-blockchain.ts
+src/features/on-chain/calulcation-manager/providers/open-ocean/constants/open-ocean-blockchain.ts
+src/features/on-chain/calulcation-manager/providers/open-ocean/constants/open-ocean-on-chain-supported-blockchain.ts
+
+
+## TODO
+src/features/deflation-token-manager/constants/simulator-contract-address.ts
+src/features/deflation-token-manager/models/deflation-manager-supported-blockchain.ts
+src/core/gas-price-api/constants/eip1559-compatible-blockchains.ts
+src/core/coingecko-api/coingecko-api.ts		didn;t get tokenBlockchainId of goerliEth
+src/core/blockchain/web3-private-service/models/web-private-supported-blockchain.ts

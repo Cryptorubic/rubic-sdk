@@ -25,6 +25,13 @@ export const rubicProxyContractAddress: Record<
         ) {
             router = '0xAf14797CcF963B1e3d028a9d51853acE16aedBA1';
         }
+        if(
+            blockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN_TESTNET ||
+            blockchain === BLOCKCHAIN_NAME.GOERLI||
+            blockchain === BLOCKCHAIN_NAME.MUMBAI
+        ) {
+            router = '0x093510EB0652E07024ec700C3CD1Fb1D79BA7fE9';
+        }
 
         return { ...acc, [blockchain]: { gateway, router } };
     },
