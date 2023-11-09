@@ -104,6 +104,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                 ...gasDetails
             };
         } catch (_err) {
+            console.log('Provider: Symbiosis');
+            console.log('Provider Error: ', _err);
             return null;
         }
     }

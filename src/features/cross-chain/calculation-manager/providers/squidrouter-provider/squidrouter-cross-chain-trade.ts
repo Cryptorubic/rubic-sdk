@@ -103,6 +103,8 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
                 ...gasDetails
             };
         } catch (_err) {
+            console.log('Provider: Squid');
+            console.log('Provider Error: ', _err);
             return null;
         }
     }

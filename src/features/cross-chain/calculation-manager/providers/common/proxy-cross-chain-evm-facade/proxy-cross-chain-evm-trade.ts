@@ -320,14 +320,18 @@ export class ProxyCrossChainEvmTrade {
         offset: string
     ): Promise<void | never> {
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-        const result = await web3Public.callContractMethod<{ isAvailable: boolean }>(
-            rubicProxyContractAddress[fromBlockchain].router,
-            evmCommonCrossChainAbi,
-            'getSelectorInfo',
-            [routerAddress, offset]
-        );
-        if (!result.isAvailable) {
-            throw new UnapprovedContractError(offset, routerAddress);
+        try {
+            const result = await web3Public.callContractMethod<{ isAvailable: boolean }>(
+                rubicProxyContractAddress[fromBlockchain].router,
+                evmCommonCrossChainAbi,
+                'getSelectorInfo',
+                [routerAddress, offset]
+            );
+            if (!result.isAvailable) {
+                throw new UnapprovedContractError(offset, routerAddress);
+            }
+        } catch (error) {
+            console.log('checkCrossChainWhiteList error: ', error);
         }
     }
 

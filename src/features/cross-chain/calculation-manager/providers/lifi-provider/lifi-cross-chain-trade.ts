@@ -92,6 +92,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                 ...gasDetails
             };
         } catch (_err) {
+            console.log('Provider: LiFi');
+            console.log('Provider Error: ', _err);
             return null;
         }
     }

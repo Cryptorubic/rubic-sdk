@@ -110,6 +110,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                 ...gasDetails
             };
         } catch (_err) {
+            console.log('Provider: DLN');
+            console.log('Provider Error: ', _err);
             return null;
         }
     }
