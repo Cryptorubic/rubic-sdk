@@ -84,17 +84,25 @@ export class OnChainManager {
                     ([type]) => !fullOptions.disabledProviders.includes(type as OnChainTradeType)
                 ) as [OnChainTradeType, OnChainProvider][];
 
-                const lifiTrades = [
-                    this.getLifiCalculationPromise(
-                        from,
-                        to,
-                        fullOptions,
-                        nativeProviders.map(dexProvider => dexProvider[0])
-                    )
-                ];
-                const openOceanTrades = [
-                    this.getOpenOceanCalculationPromise(from, to, fullOptions)
-                ];
+                const lifiTrades = fullOptions.disabledProviders
+                    .map(provider => provider.toUpperCase())
+                    .includes(ON_CHAIN_TRADE_TYPE.LIFI_DEFAULT)
+                    ? []
+                    : [
+                          this.getLifiCalculationPromise(
+                              from,
+                              to,
+                              fullOptions,
+                              nativeProviders.map(dexProvider => dexProvider[0])
+                          )
+                      ];
+
+                const openOceanTrades = fullOptions.disabledProviders
+                    .map(provider => provider.toUpperCase())
+                    .includes(ON_CHAIN_TRADE_TYPE.OPEN_OCEAN)
+                    ? []
+                    : [this.getOpenOceanCalculationPromise(from, to, fullOptions)];
+
                 const totalTrades = [...nativeProviders, ...lifiTrades, ...openOceanTrades].length;
 
                 return merge(
