@@ -24,10 +24,7 @@ import {
     LifiForbiddenBlockchains,
     lifiForbiddenBlockchains
 } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-forbidden-blockchains';
-import {
-    LIFI_AGGREGATOR,
-    lifiProviders
-} from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-providers';
+import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-providers';
 import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/lifi/lifi-trade';
 import {
     LifiCalculationOptions,
@@ -107,7 +104,7 @@ export class LifiProvider {
                     if (!step) {
                         return null;
                     }
-                    const type = LIFI_AGGREGATOR;
+                    const type = ON_CHAIN_TRADE_TYPE.LIFI;
 
                     const to = new PriceTokenAmount({
                         ...toToken.asStruct,
