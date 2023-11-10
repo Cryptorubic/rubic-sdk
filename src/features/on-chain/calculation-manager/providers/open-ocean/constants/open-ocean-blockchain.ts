@@ -17,5 +17,6 @@ export const openOceanBlockchainName: Record<OpenoceanOnChainSupportedBlockchain
     [BLOCKCHAIN_NAME.LINEA]: 'linea',
     [BLOCKCHAIN_NAME.POLYGON_ZKEVM]: 'polygon_zkevm',
     [BLOCKCHAIN_NAME.ZK_SYNC]: 'zksync',
-    [BLOCKCHAIN_NAME.BASE]: 'base'
+    [BLOCKCHAIN_NAME.BASE]: 'base',
+    [BLOCKCHAIN_NAME.MANTA_PACIFIC]: 'manta'
 };
