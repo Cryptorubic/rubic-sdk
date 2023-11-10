@@ -166,11 +166,13 @@ export class OnChainManager {
             options as RequiredOnChainCalculationOptions
         );
 
-        const trades = (
+        const allTrades = (
             await Promise.all([dexesTradesPromise, lifiTradesPromise, openOceanTradePromise])
         ).flat();
 
-        return trades.sort((tradeA, tradeB) => {
+        const filteredTrades = this.filterTradesWithBestLifiTrade(allTrades);
+
+        return filteredTrades.sort((tradeA, tradeB) => {
             if (tradeA instanceof OnChainTrade || tradeB instanceof OnChainTrade) {
                 if (tradeA instanceof OnChainTrade && tradeB instanceof OnChainTrade) {
                     return tradeA.to.tokenAmount.comparedTo(tradeB.to.tokenAmount);
@@ -236,6 +238,35 @@ export class OnChainManager {
             console.debug('[RUBIC_SDK] Trade calculation error occurred for lifi.', err);
             return [];
         }
+    }
+    /**
+     * @description Lifi-aggregator provides several providers at the same time, this method chooses the most profitable trade
+     * @param trades OnChainTrade[]
+     * @returns trades with only one most profitable trade by any lifi-supported provider
+     */
+    private filterTradesWithBestLifiTrade(
+        trades: (OnChainTrade | OnChainTradeError)[]
+    ): (OnChainTrade | OnChainTradeError)[] {
+        const hasAvailableLifiTrades = trades.some(
+            trade => trade.type === 'LIFI' && trade instanceof OnChainTrade
+        );
+        if (!hasAvailableLifiTrades) return trades;
+        let availableLifiTrades: OnChainTrade[] = [];
+        let otherTrades: (OnChainTrade | OnChainTradeError)[] = [];
+        for (let i = 0; i < trades.length; i++) {
+            const trade = trades[i] as OnChainTrade | OnChainTradeError;
+            if (trade.type === 'LIFI' && trade instanceof OnChainTrade) {
+                availableLifiTrades.push(trade);
+            } else if (trade.type !== 'LIFI') {
+                otherTrades.push(trade);
+            }
+        }
+        const bestLifiTrade = availableLifiTrades.reduce((bestTrade, trade) => {
+            const bestTradeAmount = bestTrade.to.tokenAmount;
+            const currentTradeAmount = trade.to.tokenAmount;
+            return bestTradeAmount.comparedTo(currentTradeAmount) > 0 ? bestTrade : trade;
+        }, availableLifiTrades[0] as OnChainTrade);
+        return [...otherTrades, bestLifiTrade];
     }
 
     public static getWrapTrade(
