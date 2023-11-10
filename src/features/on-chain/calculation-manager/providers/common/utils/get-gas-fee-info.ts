@@ -19,6 +19,7 @@ export function getGasFeeInfo(
         gasLimit,
         gasPrice: gasPriceInfo?.gasPrice,
         gasFeeInEth,
-        gasFeeInUsd
+        gasFeeInUsd,
+        maxFeePerGas: gasPriceInfo?.maxFeePerGas
     };
 }
