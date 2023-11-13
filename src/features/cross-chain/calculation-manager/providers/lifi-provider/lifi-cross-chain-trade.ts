@@ -38,7 +38,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
-        route: Route
+        route: Route,
+        feeInfo: FeeInfo
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain;
         const walletAddress =
@@ -56,7 +57,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                         route,
                         gasData: null,
                         toTokenAmountMin: new BigNumber(0),
-                        feeInfo: {},
+                        feeInfo,
                         priceImpact: from.calculatePriceImpactPercent(to) || 0,
                         onChainSubtype: {
                             from: undefined,
