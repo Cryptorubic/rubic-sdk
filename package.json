@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "4.37.3",
+    "version": "4.37.5-alpha.linea-promo.1",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
