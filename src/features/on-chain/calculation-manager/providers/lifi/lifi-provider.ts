@@ -147,7 +147,7 @@ export class LifiProvider {
     /**
      * @description Lifi-aggregator provides several providers at the same time, this method chooses the most profitable trade
      * @param trades OnChainTrade[]
-     * @returns trades with only one most profitable trade by any lifi-supported provider
+     * @returns best trade
      */
     private filterTradesWithBestLifiTrade(trades: LifiTrade[]): LifiTrade {
         const bestLifiTrade = trades.reduce((bestTrade, trade) => {
