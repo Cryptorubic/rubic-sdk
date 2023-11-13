@@ -6,7 +6,7 @@ import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manage
 import { LifiBridgeTypes } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
 import { MarkRequired } from 'ts-essentials';
 
-export type CrossChainManagerCalculationOptions = Omit<CrossChainOptions, 'providerAddress'> & {
+export type CrossChainManagerCalculationOptions = CrossChainOptions & {
     /**
      * An array of disabled cross-chain providers.
      */
