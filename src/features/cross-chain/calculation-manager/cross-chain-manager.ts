@@ -237,7 +237,9 @@ export class CrossChainManager {
         fromBlockchain: BlockchainName,
         options?: CrossChainManagerCalculationOptions
     ): RequiredCrossChainManagerCalculationOptions {
-        const providerAddress = this.getProviderAddress(fromBlockchain);
+        const providerAddress = options?.providerAddress
+            ? options.providerAddress
+            : this.getProviderAddress(fromBlockchain);
         const useProxy = this.getProxyConfig(fromBlockchain, options);
 
         return combineOptions(

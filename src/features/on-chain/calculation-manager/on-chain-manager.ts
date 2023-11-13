@@ -131,7 +131,9 @@ export class OnChainManager {
                 timeout: OnChainManager.defaultCalculationTimeout,
                 disabledProviders: [],
                 providerAddress:
-                    this.providerAddress?.[chainType]?.onChain || defaultProviderAddresses.onChain,
+                    options?.providerAddress ||
+                    this.providerAddress?.[chainType]?.onChain ||
+                    defaultProviderAddresses.onChain,
                 useProxy,
                 withDeflation: {
                     from: isDeflationFrom,

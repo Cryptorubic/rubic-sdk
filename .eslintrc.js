@@ -91,7 +91,13 @@ module.exports = {
                 '@typescript-eslint/no-shadow': 'off',
                 '@typescript-eslint/return-await': 'off',
                 'prefer-destructuring': 'off',
-                'no-bitwise': 'off'
+                'no-bitwise': 'off',
+                "prettier/prettier": [
+                    "error",
+                    {
+                      "endOfLine": "auto"
+                    }
+                  ]
             }
         },
         {
