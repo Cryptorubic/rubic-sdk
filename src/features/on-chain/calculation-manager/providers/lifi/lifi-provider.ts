@@ -56,7 +56,7 @@ export class LifiProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: LifiCalculationOptions
-    ): Promise<OnChainTrade[]> {
+    ): Promise<OnChainTrade> {
         if (this.isForbiddenBlockchain(from.blockchain)) {
             throw new RubicSdkError('Blockchain is not supported');
         }
@@ -97,7 +97,7 @@ export class LifiProvider {
 
         const result = await this.lifi.getRoutes(routesRequest);
         const { routes } = result;
-        return (
+        const allTrades = (
             await Promise.all(
                 routes.map(async route => {
                     const step = route.steps[0];
@@ -116,15 +116,15 @@ export class LifiProvider {
                         from,
                         to,
                         gasFeeInfo: null,
-                        slippageTolerance: fullOptions.slippageTolerance,
+                        slippageTolerance: fullOptions.slippageTolerance!,
                         type,
                         path,
                         route,
                         toTokenWeiAmountMin: new BigNumber(route.toAmountMin),
-                        useProxy: fullOptions.useProxy,
+                        useProxy: fullOptions.useProxy!,
                         proxyFeeInfo,
                         fromWithoutFee,
-                        withDeflation: fullOptions.withDeflation
+                        withDeflation: fullOptions.withDeflation!
                     };
 
                     const gasFeeInfo =
@@ -140,6 +140,22 @@ export class LifiProvider {
                 })
             )
         ).filter(notNull);
+        const filteredTrades = this.filterTradesWithBestLifiTrade(allTrades);
+        return filteredTrades;
+    }
+
+    /**
+     * @description Lifi-aggregator provides several providers at the same time, this method chooses the most profitable trade
+     * @param trades OnChainTrade[]
+     * @returns trades with only one most profitable trade by any lifi-supported provider
+     */
+    private filterTradesWithBestLifiTrade(trades: LifiTrade[]): LifiTrade {
+        const bestLifiTrade = trades.reduce((bestTrade, trade) => {
+            const bestTradeAmount = bestTrade.to.tokenAmount;
+            const currentTradeAmount = trade.to.tokenAmount;
+            return bestTradeAmount.comparedTo(currentTradeAmount) > 0 ? bestTrade : trade;
+        }, trades[0] as LifiTrade);
+        return bestLifiTrade;
     }
 
     protected async handleProxyContract(

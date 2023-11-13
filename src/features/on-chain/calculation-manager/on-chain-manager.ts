@@ -1,5 +1,6 @@
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { notNull } from 'src/common/utils/object';
 import { combineOptions } from 'src/common/utils/options';
 import pTimeout from 'src/common/utils/p-timeout';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -154,7 +155,7 @@ export class OnChainManager {
             ([type]) => !options.disabledProviders.includes(type as OnChainTradeType)
         ) as [OnChainTradeType, OnChainProvider][];
         const dexesTradesPromise = this.calculateDexes(from, to, dexesProviders, options);
-        const lifiTradesPromise = this.calculateLifiTrades(
+        const lifiTradePromise = this.calculateLifiTrades(
             from,
             to,
             dexesProviders.map(dexProvider => dexProvider[0]),
@@ -167,12 +168,10 @@ export class OnChainManager {
         );
 
         const allTrades = (
-            await Promise.all([dexesTradesPromise, lifiTradesPromise, openOceanTradePromise])
+            await Promise.all([dexesTradesPromise, lifiTradePromise, openOceanTradePromise])
         ).flat();
 
-        const filteredTrades = this.filterTradesWithBestLifiTrade(allTrades);
-
-        return filteredTrades.sort((tradeA, tradeB) => {
+        return allTrades.filter(notNull).sort((tradeA, tradeB) => {
             if (tradeA instanceof OnChainTrade || tradeB instanceof OnChainTrade) {
                 if (tradeA instanceof OnChainTrade && tradeB instanceof OnChainTrade) {
                     return tradeA.to.tokenAmount.comparedTo(tradeB.to.tokenAmount);
@@ -180,7 +179,7 @@ export class OnChainManager {
                 return tradeA instanceof OnChainTrade ? 1 : -1;
             }
             return 0;
-        });
+        }) as (OnChainTrade | OnChainTradeError)[];
     }
 
     private isDeflationToken(token: Token): Promise<IsDeflationToken> {
@@ -213,13 +212,13 @@ export class OnChainManager {
         to: PriceToken,
         dexesProvidersTypes: OnChainTradeType[],
         options: RequiredOnChainManagerCalculationOptions
-    ): Promise<OnChainTrade[]> {
+    ): Promise<OnChainTrade | null> {
         if (!BlockchainsInfo.isEvmBlockchainName(from.blockchain)) {
-            return [];
+            return null;
         }
         if (options.withDeflation.from.isDeflation) {
             console.debug('[RUBIC_SDK] Lifi does not work if source token is deflation.');
-            return [];
+            return null;
         }
 
         try {
@@ -236,38 +235,8 @@ export class OnChainManager {
             );
         } catch (err) {
             console.debug('[RUBIC_SDK] Trade calculation error occurred for lifi.', err);
-            return [];
+            return null;
         }
-    }
-
-    /**
-     * @description Lifi-aggregator provides several providers at the same time, this method chooses the most profitable trade
-     * @param trades OnChainTrade[]
-     * @returns trades with only one most profitable trade by any lifi-supported provider
-     */
-    private filterTradesWithBestLifiTrade(
-        trades: (OnChainTrade | OnChainTradeError)[]
-    ): (OnChainTrade | OnChainTradeError)[] {
-        const hasAvailableLifiTrades = trades.some(
-            trade => trade.type === 'LIFI' && trade instanceof OnChainTrade
-        );
-        if (!hasAvailableLifiTrades) return trades;
-        let availableLifiTrades: OnChainTrade[] = [];
-        let otherTrades: (OnChainTrade | OnChainTradeError)[] = [];
-        for (let i = 0; i < trades.length; i++) {
-            const trade = trades[i] as OnChainTrade | OnChainTradeError;
-            if (trade.type === 'LIFI' && trade instanceof OnChainTrade) {
-                availableLifiTrades.push(trade);
-            } else if (trade.type !== 'LIFI') {
-                otherTrades.push(trade);
-            }
-        }
-        const bestLifiTrade = availableLifiTrades.reduce((bestTrade, trade) => {
-            const bestTradeAmount = bestTrade.to.tokenAmount;
-            const currentTradeAmount = trade.to.tokenAmount;
-            return bestTradeAmount.comparedTo(currentTradeAmount) > 0 ? bestTrade : trade;
-        }, availableLifiTrades[0] as OnChainTrade);
-        return [...otherTrades, bestLifiTrade];
     }
 
     public static getWrapTrade(
