@@ -50,7 +50,8 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
-        transactionRequest: SquidrouterTransactionRequest
+        transactionRequest: SquidrouterTransactionRequest,
+        feeInfo: FeeInfo
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as SquidrouterCrossChainSupportedBlockchain;
         const walletAddress =
@@ -69,7 +70,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
                         priceImpact: 0,
                         allowanceTarget: '',
                         slippage: 0,
-                        feeInfo: {},
+                        feeInfo,
                         transitUSDAmount: new BigNumber(NaN),
                         cryptoFeeToken: from,
                         onChainTrade: null,
@@ -78,7 +79,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getContractParams({});
+                ).getContractParams({}, true);
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasDetails] = await Promise.all([
@@ -103,8 +104,6 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
                 ...gasDetails
             };
         } catch (_err) {
-            console.log('Provider: Squid');
-            console.log('Provider Error: ', _err);
             return null;
         }
     }
@@ -219,12 +218,19 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
+    public async getContractParams(
+        options: GetContractParamsOptions,
+        skipAmountChangeCheck: boolean = false
+    ): Promise<ContractParams> {
         const {
             data,
             value: providerValue,
             to
-        } = await this.getTransactionRequest(options?.receiverAddress || this.walletAddress);
+        } = await this.getTransactionRequest(
+            options?.receiverAddress || this.walletAddress,
+            null,
+            skipAmountChangeCheck
+        );
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: this.walletAddress,
@@ -289,7 +295,8 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
 
     private async getTransactionRequest(
         receiverAddress: string,
-        transactionConfig?: EvmEncodeConfig
+        transactionConfig?: EvmEncodeConfig | null,
+        skipAmountChangeCheck: boolean = false
     ): Promise<EvmEncodeConfig> {
         if (transactionConfig) {
             return {
@@ -315,15 +322,17 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
             }
         );
 
-        EvmCrossChainTrade.checkAmountChange(
-            {
-                data: transactionRequest.data,
-                value: transactionRequest.value,
-                to: transactionRequest.targetAddress
-            },
-            routeEstimate.toAmount,
-            this.to.stringWeiAmount
-        );
+        if (!skipAmountChangeCheck) {
+            EvmCrossChainTrade.checkAmountChange(
+                {
+                    data: transactionRequest.data,
+                    value: transactionRequest.value,
+                    to: transactionRequest.targetAddress
+                },
+                routeEstimate.toAmount,
+                this.to.stringWeiAmount
+            );
+        }
 
         return {
             data: transactionRequest.data,

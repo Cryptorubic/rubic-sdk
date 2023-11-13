@@ -53,7 +53,9 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount,
-        swapParams: SymbiosisSwappingParams
+        swapParams: SymbiosisSwappingParams,
+        feeInfo: FeeInfo,
+        providerGateway: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain;
         const walletAddress =
@@ -71,15 +73,18 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                         gasData: null,
                         priceImpact: 0,
                         slippage: 0,
-                        feeInfo: {},
+                        feeInfo,
                         transitAmount: new BigNumber(NaN),
                         tradeType: { in: undefined, out: undefined },
-                        contractAddresses: { providerRouter: '', providerGateway: '' },
+                        contractAddresses: {
+                            providerRouter: '',
+                            providerGateway: providerGateway
+                        },
                         swapParams
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getContractParams({});
+                ).getContractParams({}, true);
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasDetails] = await Promise.all([
@@ -104,8 +109,6 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                 ...gasDetails
             };
         } catch (_err) {
-            console.log('Provider: Symbiosis');
-            console.log('Provider Error: ', _err);
             return null;
         }
     }
@@ -196,12 +199,20 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         this.contractAddresses = crossChainTrade.contractAddresses;
     }
 
-    protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
+    protected async getContractParams(
+        options: GetContractParamsOptions,
+        skipAmountChangeCheck: boolean = false
+    ): Promise<ContractParams> {
         const {
             data,
             value: providerValue,
             to
-        } = await this.getTransactionRequest(this.walletAddress, options?.receiverAddress);
+        } = await this.getTransactionRequest(
+            this.walletAddress,
+            options?.receiverAddress,
+            null,
+            skipAmountChangeCheck
+        );
 
         let receiverAddress = options.receiverAddress;
         let toAddress = '';
@@ -348,7 +359,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
     private async getTransactionRequest(
         walletAddress: string,
         receiverAddress?: string,
-        transactionConfig?: EvmEncodeConfig
+        transactionConfig?: EvmEncodeConfig | null,
+        skipAmountChangeCheck: boolean = false
     ): Promise<EvmEncodeConfig> {
         if (transactionConfig) {
             return {
@@ -371,11 +383,13 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             value: tradeData.tx.value?.toString() || '0',
             to: tradeData.tx.to!
         };
-        EvmCrossChainTrade.checkAmountChange(
-            config,
-            tradeData.tokenAmountOut.amount,
-            this.to.stringWeiAmount
-        );
+        if (!skipAmountChangeCheck) {
+            EvmCrossChainTrade.checkAmountChange(
+                config,
+                tradeData.tokenAmountOut.amount,
+                this.to.stringWeiAmount
+            );
+        }
         return config;
     }
 }

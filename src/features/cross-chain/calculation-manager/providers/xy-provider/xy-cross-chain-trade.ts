@@ -36,7 +36,8 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
-        transactionRequest: XyTransactionRequest
+        transactionRequest: XyTransactionRequest,
+        feeInfo: FeeInfo
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as XyCrossChainSupportedBlockchain;
         const walletAddress =
@@ -55,12 +56,12 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
                         gasData: null,
                         priceImpact: 0,
                         slippage: 0,
-                        feeInfo: {},
+                        feeInfo,
                         onChainTrade: null
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getContractParams({});
+                ).getContractParams({}, true);
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasDetails] = await Promise.all([
@@ -193,13 +194,16 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
+    public async getContractParams(
+        options: GetContractParamsOptions,
+        skipAmountChangeCheck: boolean = false
+    ): Promise<ContractParams> {
         const receiverAddress = options?.receiverAddress || this.walletAddress;
         const {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.getTransactionRequest(receiverAddress);
+        } = await this.getTransactionRequest(receiverAddress, skipAmountChangeCheck);
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
@@ -246,7 +250,10 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         return fromUsd.dividedBy(this.to.tokenAmount);
     }
 
-    private async getTransactionRequest(receiverAddress?: string): Promise<{
+    private async getTransactionRequest(
+        receiverAddress?: string,
+        skipAmountChangeCheck: boolean = false
+    ): Promise<{
         data: string;
         value: string;
         to: string;
@@ -261,7 +268,9 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             { params: { ...params } }
         );
 
-        await EvmCrossChainTrade.checkAmountChange(tx!, toTokenAmount, this.to.stringWeiAmount);
+        if (!skipAmountChangeCheck) {
+            await EvmCrossChainTrade.checkAmountChange(tx!, toTokenAmount, this.to.stringWeiAmount);
+        }
 
         return tx!;
     }

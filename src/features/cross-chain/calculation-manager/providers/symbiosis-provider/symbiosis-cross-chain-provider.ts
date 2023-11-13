@@ -154,7 +154,13 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await SymbiosisCrossChainTrade.getGasData(from, to, swapParams)
+                    ? await SymbiosisCrossChainTrade.getGasData(
+                          from,
+                          to,
+                          swapParams,
+                          feeInfo,
+                          approveTo
+                      )
                     : null;
 
             return {

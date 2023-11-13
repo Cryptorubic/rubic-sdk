@@ -85,7 +85,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getContractParams({});
+                ).getContractParams({}, true);
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasDetails] = await Promise.all([
@@ -110,8 +110,6 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                 ...gasDetails
             };
         } catch (_err) {
-            console.log('Provider: DLN');
-            console.log('Provider Error: ', _err);
             return null;
         }
     }
@@ -225,9 +223,14 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
+    public async getContractParams(
+        options: GetContractParamsOptions,
+        skipAmountChangeCheck: boolean = false
+    ): Promise<ContractParams> {
         const { data, value: providerValue } = await this.getTransactionRequest(
-            options?.receiverAddress
+            options?.receiverAddress,
+            null,
+            skipAmountChangeCheck
         );
 
         const bridgeData = this.getBridgeData(options);
@@ -261,7 +264,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
 
     private async getTransactionRequest(
         receiverAddress?: string,
-        transactionConfig?: EvmEncodeConfig
+        transactionConfig?: EvmEncodeConfig | null,
+        skipAmountChangeCheck: boolean = false
     ): Promise<EvmEncodeConfig> {
         if (transactionConfig) {
             return {
@@ -287,11 +291,13 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             { params }
         );
 
-        EvmCrossChainTrade.checkAmountChange(
-            tx,
-            estimation.dstChainTokenOut.amount,
-            this.to.stringWeiAmount
-        );
+        if (!skipAmountChangeCheck) {
+            EvmCrossChainTrade.checkAmountChange(
+                tx,
+                estimation.dstChainTokenOut.amount,
+                this.to.stringWeiAmount
+            );
+        }
 
         return tx;
     }

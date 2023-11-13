@@ -98,7 +98,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await SquidrouterCrossChainTrade.getGasData(from, to, requestParams)
+                    ? await SquidrouterCrossChainTrade.getGasData(from, to, requestParams, feeInfo)
                     : null;
 
             const feeAmount = estimate.feeCosts

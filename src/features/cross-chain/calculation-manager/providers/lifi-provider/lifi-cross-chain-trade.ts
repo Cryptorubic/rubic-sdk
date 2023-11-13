@@ -67,7 +67,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getContractParams({});
+                ).getContractParams({}, true);
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasDetails] = await Promise.all([
@@ -92,8 +92,6 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                 ...gasDetails
             };
         } catch (_err) {
-            console.log('Provider: LiFi');
-            console.log('Provider Error: ', _err);
             return null;
         }
     }
@@ -213,12 +211,15 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
+    public async getContractParams(
+        options: GetContractParamsOptions,
+        skipAmountChangeCheck: boolean = false
+    ): Promise<ContractParams> {
         const {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.fetchSwapData(options?.receiverAddress);
+        } = await this.fetchSwapData(options?.receiverAddress, skipAmountChangeCheck);
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: this.walletAddress,
@@ -263,7 +264,10 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    private async fetchSwapData(receiverAddress?: string): Promise<LifiTransactionRequest> {
+    private async fetchSwapData(
+        receiverAddress?: string,
+        skipAmountChangeCheck: boolean = false
+    ): Promise<LifiTransactionRequest> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
@@ -289,11 +293,14 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             await this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
                 ...step
             });
-        EvmCrossChainTrade.checkAmountChange(
-            swapResponse.transactionRequest,
-            swapResponse.estimate.toAmount,
-            this.to.stringWeiAmount
-        );
+
+        if (!skipAmountChangeCheck) {
+            EvmCrossChainTrade.checkAmountChange(
+                swapResponse.transactionRequest,
+                swapResponse.estimate.toAmount,
+                this.to.stringWeiAmount
+            );
+        }
 
         return swapResponse.transactionRequest;
     }
