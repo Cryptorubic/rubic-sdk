@@ -11,6 +11,7 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { SyncSwapAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/sync-swap-abstract-trade';
@@ -117,11 +118,26 @@ export abstract class SyncSwapAbstractProvider extends EvmOnChainProvider {
             bestPathWithAmounts: bestRoute
         };
 
-        return new SyncSwapAbstractTrade(
-            tradeStruct,
-            fullOptions.providerAddress,
-            this.dexContractAddress
-        );
+        try {
+            const gasPriceInfo = await this.getGasPriceInfo();
+            const gasLimit = await SyncSwapAbstractTrade.getGasLimit(
+                tradeStruct,
+                this.dexContractAddress
+            );
+            const gasFeeInfo = getGasFeeInfo(gasLimit, gasPriceInfo);
+
+            return new SyncSwapAbstractTrade(
+                { ...tradeStruct, gasFeeInfo },
+                fullOptions.providerAddress,
+                this.dexContractAddress
+            );
+        } catch {
+            return new SyncSwapAbstractTrade(
+                tradeStruct,
+                fullOptions.providerAddress,
+                this.dexContractAddress
+            );
+        }
     }
 
     private async getAvailablePools(

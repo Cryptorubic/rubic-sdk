@@ -23,7 +23,6 @@ export class SyncSwapAbstractTrade extends EvmOnChainTrade {
 
     private readonly bestPathWithAmounts: BestPathsWithAmounts;
 
-    // @TODO need to start using this method.
     /** @internal */
     public static async getGasLimit(
         tradeStruct: EvmOnChainTradeStruct & { bestPathWithAmounts: BestPathsWithAmounts },
