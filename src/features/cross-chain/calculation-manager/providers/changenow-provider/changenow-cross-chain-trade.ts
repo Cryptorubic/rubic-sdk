@@ -81,8 +81,6 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
                 ...gasDetails
             };
         } catch (_err) {
-            console.log('Provider: Changenow');
-            console.log('Provider Error: ', _err);
             return null;
         }
     }

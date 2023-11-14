@@ -53,7 +53,11 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
     /**  @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>
+        to: PriceTokenAmount<EvmBlockchainName>,
+        feeInfo: FeeInfo,
+        srcChainTrade: EvmOnChainTrade | null,
+        dstChainTrade: EvmOnChainTrade | null,
+        slippageTolerance: number
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
@@ -70,15 +74,15 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                     {
                         from,
                         to,
-                        slippageTolerance: 4,
+                        slippageTolerance,
                         priceImpact: null,
                         gasData: {
                             gasLimit: new BigNumber(0),
                             gasPrice: new BigNumber(0)
                         },
-                        feeInfo: {},
-                        srcChainTrade: null,
-                        dstChainTrade: null,
+                        feeInfo,
+                        srcChainTrade,
+                        dstChainTrade,
                         cryptoFeeToken: null
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS,

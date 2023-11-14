@@ -33,7 +33,8 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<EvmBlockchainName>,
-        onChainTrade?: EvmOnChainTrade | null
+        onChainTrade?: EvmOnChainTrade | null,
+        feeInfo?: FeeInfo
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as CbridgeCrossChainSupportedBlockchain;
         const walletAddress =
@@ -51,7 +52,7 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
                         gasData: null,
                         priceImpact: 0,
                         slippage: 0,
-                        feeInfo: {},
+                        feeInfo: feeInfo!,
                         maxSlippage: 0,
                         contractAddress: EvmWeb3Pure.EMPTY_ADDRESS,
                         transitMinAmount: new BigNumber(0),

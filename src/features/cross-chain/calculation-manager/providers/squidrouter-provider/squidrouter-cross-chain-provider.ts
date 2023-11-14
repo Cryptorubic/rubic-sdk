@@ -11,6 +11,7 @@ import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fe
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
+import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
@@ -91,6 +92,13 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                 }
             );
 
+            const squidGasData: GasData = {
+                gasLimit: new BigNumber(transactionRequest.gasLimit).plus(120000),
+                gasPrice: new BigNumber(transactionRequest.gasPrice),
+                maxFeePerGas: new BigNumber(transactionRequest.maxFeePerGas),
+                maxPriorityFeePerGas: new BigNumber(transactionRequest.maxPriorityFeePerGas)
+            };
+
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(estimate.toAmount, toToken.decimals)
@@ -122,7 +130,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                     {
                         from,
                         to,
-                        gasData,
+                        gasData: gasData || squidGasData,
                         priceImpact: from.calculatePriceImpactPercent(to),
                         allowanceTarget: transactionRequest.targetAddress,
                         slippage: options.slippageTolerance,
