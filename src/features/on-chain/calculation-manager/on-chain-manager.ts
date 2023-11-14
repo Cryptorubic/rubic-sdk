@@ -214,7 +214,7 @@ export class OnChainManager {
         to: PriceToken,
         dexesProvidersTypes: OnChainTradeType[],
         options: RequiredOnChainManagerCalculationOptions
-    ): Promise<OnChainTrade | null> {
+    ): Promise<OnChainTrade | OnChainTradeError | null> {
         if (!BlockchainsInfo.isEvmBlockchainName(from.blockchain)) {
             return null;
         }

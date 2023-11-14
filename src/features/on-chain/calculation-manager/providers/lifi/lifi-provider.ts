@@ -32,6 +32,8 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-trade-struct';
 
+import { OnChainTradeError } from '../../models/on-chain-trade-error';
+
 export class LifiProvider {
     private readonly lifi = new LiFi(getLifiConfig());
 
@@ -56,7 +58,7 @@ export class LifiProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: LifiCalculationOptions
-    ): Promise<OnChainTrade> {
+    ): Promise<OnChainTrade | OnChainTradeError> {
         if (this.isForbiddenBlockchain(from.blockchain)) {
             throw new RubicSdkError('Blockchain is not supported');
         }
@@ -140,22 +142,20 @@ export class LifiProvider {
                 })
             )
         ).filter(notNull);
-        const filteredTrades = this.filterTradesWithBestLifiTrade(allTrades);
-        return filteredTrades;
+        const bestTrade = this.getBestTrade(allTrades);
+        return bestTrade;
     }
 
     /**
      * @description Lifi-aggregator provides several providers at the same time, this method chooses the most profitable trade
-     * @param trades OnChainTrade[]
+     * @param trades all available lifiTrades
      * @returns best trade
      */
-    private filterTradesWithBestLifiTrade(trades: LifiTrade[]): LifiTrade {
-        const bestLifiTrade = trades.reduce((bestTrade, trade) => {
-            const bestTradeAmount = bestTrade.to.tokenAmount;
-            const currentTradeAmount = trade.to.tokenAmount;
-            return bestTradeAmount.comparedTo(currentTradeAmount) > 0 ? bestTrade : trade;
-        }, trades[0] as LifiTrade);
-        return bestLifiTrade;
+    private getBestTrade(trades: LifiTrade[]): LifiTrade {
+        const best = trades.sort((prev, next) =>
+            next.to.tokenAmount.comparedTo(prev.to.tokenAmount)
+        )[0] as LifiTrade;
+        return best;
     }
 
     protected async handleProxyContract(
