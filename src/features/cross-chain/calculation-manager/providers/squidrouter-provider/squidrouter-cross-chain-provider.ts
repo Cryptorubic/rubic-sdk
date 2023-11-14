@@ -94,7 +94,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
 
             const squidGasData: GasData = {
                 gasLimit: new BigNumber(transactionRequest.gasLimit).plus(120000),
-                gasPrice: new BigNumber(transactionRequest.gasPrice),
+                gasPrice: Web3Pure.fromWei(transactionRequest.gasPrice),
                 maxFeePerGas: new BigNumber(transactionRequest.maxFeePerGas),
                 maxPriorityFeePerGas: new BigNumber(transactionRequest.maxPriorityFeePerGas)
             };
