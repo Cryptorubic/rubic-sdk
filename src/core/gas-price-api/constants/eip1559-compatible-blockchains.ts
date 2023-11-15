@@ -6,6 +6,7 @@ export const EIP1559CompatibleBlockchains: Record<BlockchainName, boolean> = {
         {} as Record<BlockchainName, boolean>
     ),
     [BLOCKCHAIN_NAME.ETHEREUM]: true,
+    [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: true,
     [BLOCKCHAIN_NAME.POLYGON]: true,
     [BLOCKCHAIN_NAME.AVALANCHE]: true,
     [BLOCKCHAIN_NAME.FANTOM]: true,

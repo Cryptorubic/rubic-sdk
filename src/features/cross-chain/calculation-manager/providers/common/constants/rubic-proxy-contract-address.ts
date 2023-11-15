@@ -10,6 +10,10 @@ export const rubicProxyContractAddress: Record<
     (acc, blockchain) => {
         let gateway = '0x3335733c454805df6a77f825f266e136FB4a3333';
         let router = '0x6AA981bFF95eDfea36Bdae98C26B274FfcafE8d3';
+        if (blockchain === BLOCKCHAIN_NAME.POLYGON || blockchain == BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN) {
+            gateway = '0x03EbC1d2d0e496CaF0232681069a3c5125894CbC';
+            router = '0x9C57699576725ce531C4878DBe0E053B2f4A3619';
+        }
         if (blockchain === BLOCKCHAIN_NAME.TELOS) {
             router = '0xA2d8CF32C16f070702c45a5686Fdb0a1d7171AAD';
         }
