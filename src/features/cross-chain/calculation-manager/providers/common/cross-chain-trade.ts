@@ -133,10 +133,12 @@ export abstract class CrossChainTrade {
      * Sends approve transaction with connected wallet.
      * @param options Transaction options.
      * @param checkNeedApprove If true, first allowance is checked.
+     * @param amount Amount of tokens in approval window in spending cap field
      */
     public abstract approve(
         options: BasicTransactionOptions,
-        checkNeedApprove?: boolean
+        checkNeedApprove?: boolean,
+        amount?: BigNumber | 'infinity'
     ): Promise<unknown>;
 
     /**

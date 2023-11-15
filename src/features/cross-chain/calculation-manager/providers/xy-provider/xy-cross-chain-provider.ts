@@ -6,6 +6,7 @@ import {
     RubicSdkError
 } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -186,7 +187,12 @@ export class XyCrossChainProvider extends CrossChainProvider {
         const fromTokenAmount = transitFrom
             ? await TokenAmount.createToken({
                   blockchain: fromToken.blockchain,
-                  address: transitFrom.tokenAddress,
+                  address: compareAddresses(
+                      transitFrom.tokenAddress,
+                      XyCrossChainTrade.nativeAddress
+                  )
+                      ? EvmWeb3Pure.EMPTY_ADDRESS
+                      : transitFrom.tokenAddress,
                   weiAmount: new BigNumber(0)
               })
             : fromToken;
@@ -194,7 +200,9 @@ export class XyCrossChainProvider extends CrossChainProvider {
         const toTokenAmount = transitTo
             ? await TokenAmount.createToken({
                   blockchain: toToken.blockchain,
-                  address: transitTo.tokenAddress,
+                  address: compareAddresses(transitTo.tokenAddress, XyCrossChainTrade.nativeAddress)
+                      ? EvmWeb3Pure.EMPTY_ADDRESS
+                      : transitTo.tokenAddress,
                   weiAmount: new BigNumber(0)
               })
             : toToken;
