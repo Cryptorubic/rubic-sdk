@@ -30,12 +30,11 @@ import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation
 import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
 import { TransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
 import { meteRouterAbi } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/mete-router-abi';
+import { convertGasDataToBN } from 'src/features/cross-chain/calculation-manager/utils/convert-gas-price';
 import { MethodDecoder } from 'src/features/cross-chain/calculation-manager/utils/decode-method';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
-
-import { convertGasDataToBN } from '../../utils/convert-gas-price';
 
 /**
  * Calculated DeBridge cross-chain trade.
@@ -57,8 +56,9 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        transactionRequest: TransactionRequest
+        toToken: PriceTokenAmount<EvmBlockchainName>,
+        transactionRequest: TransactionRequest,
+        receiverAddress?: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as DeBridgeCrossChainSupportedBlockchain;
         const walletAddress =
@@ -68,37 +68,32 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         }
 
         try {
-            const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                await new DebridgeCrossChainTrade(
-                    {
-                        from,
-                        to,
-                        transactionRequest,
-                        gasData: null,
-                        priceImpact: 0,
-                        allowanceTarget: '',
-                        slippage: 0,
-                        feeInfo: {},
-                        transitAmount: new BigNumber(NaN),
-                        cryptoFeeToken: from,
-                        onChainTrade: null
-                    },
-                    EvmWeb3Pure.EMPTY_ADDRESS,
-                    []
-                ).getContractParams({}, true);
+            const { data, value, to } = await new DebridgeCrossChainTrade(
+                {
+                    from,
+                    to: toToken,
+                    transactionRequest,
+                    gasData: null,
+                    priceImpact: 0,
+                    allowanceTarget: '',
+                    slippage: 0,
+                    feeInfo: {},
+                    transitAmount: new BigNumber(NaN),
+                    cryptoFeeToken: from,
+                    onChainTrade: null
+                },
+                EvmWeb3Pure.EMPTY_ADDRESS,
+                []
+            ).getTransactionRequest(receiverAddress);
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasDetails] = await Promise.all([
-                web3Public.getEstimatedGas(
-                    contractAbi,
-                    contractAddress,
-                    methodName,
-                    methodArguments,
-                    walletAddress,
-                    value
-                ),
-                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
-            ]);
+            const gasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
+                data,
+                value
+            });
+            const gasDetails = convertGasDataToBN(
+                await Injector.gasPriceApi.getGasPrice(from.blockchain)
+            );
 
             if (!gasLimit?.isFinite()) {
                 return null;

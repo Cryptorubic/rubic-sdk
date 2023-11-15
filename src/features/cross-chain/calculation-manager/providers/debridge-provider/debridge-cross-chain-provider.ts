@@ -140,7 +140,12 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await DebridgeCrossChainTrade.getGasData(from, to, requestParams)
+                    ? await DebridgeCrossChainTrade.getGasData(
+                          from,
+                          to,
+                          requestParams,
+                          options.receiverAddress
+                      )
                     : null;
 
             return {
