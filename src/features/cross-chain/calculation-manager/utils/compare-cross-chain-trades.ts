@@ -4,6 +4,7 @@ import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculati
 /**
  * Compares two cross chain trades for sorting algorithm.
  */
+// eslint-disable-next-line complexity
 export function compareCrossChainTrades(
     nextWrappedTrade: WrappedCrossChainTradeOrNull,
     prevWrappedTrade: WrappedCrossChainTradeOrNull
@@ -42,10 +43,10 @@ export function compareCrossChainTrades(
     const fromUsd = prevWrappedTrade?.trade.getUsdPrice();
     const toUsd = nextWrappedTrade?.trade?.getUsdPrice();
 
-    if (!toUsd) {
+    if (!toUsd || !toUsd.isFinite()) {
         return 1;
     }
-    if (!fromUsd) {
+    if (!fromUsd || !fromUsd.isFinite()) {
         return -1;
     }
     return fromUsd.lte(toUsd) ? -1 : 1;
