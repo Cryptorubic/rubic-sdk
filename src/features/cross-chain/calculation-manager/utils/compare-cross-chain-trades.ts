@@ -40,8 +40,12 @@ export function compareCrossChainTrades(
         return 1;
     }
 
-    const fromUsd = prevWrappedTrade?.trade.getUsdPrice();
-    const toUsd = nextWrappedTrade?.trade?.getUsdPrice();
+    const fromUsd = prevWrappedTrade?.trade.getUsdPrice(
+        prevWrappedTrade?.trade?.feeInfo?.provider?.cryptoFee?.token?.price
+    );
+    const toUsd = nextWrappedTrade?.trade?.getUsdPrice(
+        nextWrappedTrade?.trade?.feeInfo?.provider?.cryptoFee?.token?.price
+    );
 
     if (!toUsd || !toUsd.isFinite()) {
         return 1;
