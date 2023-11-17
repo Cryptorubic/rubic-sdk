@@ -243,12 +243,12 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    public getUsdPrice(providerFeeTokenPrice?: BigNumber): BigNumber {
+    public getUsdPrice(providerFeeToken?: BigNumber): BigNumber {
         let feeSum = new BigNumber(0);
         const providerFee = this.feeInfo.provider?.cryptoFee;
         if (providerFee) {
             feeSum = feeSum.plus(
-                providerFee.amount.multipliedBy(providerFeeTokenPrice || providerFee.token.price)
+                providerFee.amount.multipliedBy(providerFeeToken || providerFee.token.price)
             );
         }
 
