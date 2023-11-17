@@ -109,7 +109,13 @@ export class XyCrossChainProvider extends CrossChainProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await XyCrossChainTrade.getGasData(fromToken, to, requestParams, feeInfo)
+                    ? await XyCrossChainTrade.getGasData(
+                          fromToken,
+                          to,
+                          requestParams,
+                          feeInfo,
+                          options.receiverAddress
+                      )
                     : null;
 
             return {

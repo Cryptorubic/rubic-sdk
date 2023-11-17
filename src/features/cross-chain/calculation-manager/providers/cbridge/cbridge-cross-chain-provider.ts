@@ -163,7 +163,14 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await CbridgeCrossChainTrade.getGasData(fromToken, to, onChainTrade, feeInfo)
+                    ? await CbridgeCrossChainTrade.getGasData(
+                          fromToken,
+                          to,
+                          onChainTrade,
+                          feeInfo,
+                          maxSlippage,
+                          options.receiverAddress || this.getWalletAddress(fromToken.blockchain)
+                      )
                     : null;
 
             const amountsErrors = await this.getMinMaxAmountsErrors(transitToken, feeInfo);

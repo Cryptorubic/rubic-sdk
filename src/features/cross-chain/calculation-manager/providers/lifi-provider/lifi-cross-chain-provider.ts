@@ -143,7 +143,13 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
         const gasData =
             options.gasCalculation === 'enabled'
-                ? await LifiCrossChainTrade.getGasData(from, to, bestRoute, feeInfo)
+                ? await LifiCrossChainTrade.getGasData(
+                      from,
+                      to,
+                      bestRoute,
+                      feeInfo,
+                      options.receiverAddress
+                  )
                 : null;
 
         const { onChainType, bridgeType } = this.parseTradeTypes(bestRoute.steps);

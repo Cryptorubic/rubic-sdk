@@ -84,7 +84,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                 },
                 EvmWeb3Pure.EMPTY_ADDRESS,
                 []
-            ).getTransactionRequest(receiverAddress);
+            ).getTransactionRequest(receiverAddress, null, true);
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const gasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {

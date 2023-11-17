@@ -159,7 +159,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                           to,
                           swapParams,
                           feeInfo,
-                          approveTo
+                          approveTo,
+                          options.receiverAddress
                       )
                     : null;
 
