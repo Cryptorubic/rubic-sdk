@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -31,7 +32,10 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     public static async getGasData(
         from: PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
         to: PriceTokenAmount<TronBlockchainName>,
-        receiverAddress: string
+        receiverAddress: string,
+        providerAddress: string,
+        feeInfo: FeeInfo,
+        toTokenAmountMin: BigNumber
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain;
         const walletAddress =
@@ -41,33 +45,72 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         }
 
         try {
-            const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                await new EvmBridgersCrossChainTrade(
-                    {
-                        from,
-                        to,
-                        toTokenAmountMin: new BigNumber(0),
-                        feeInfo: {},
-                        gasData: null,
-                        slippage: 0,
-                        contractAddress: ''
-                    },
-                    EvmWeb3Pure.EMPTY_ADDRESS,
-                    []
-                ).getContractParams({ receiverAddress });
-
+            let gasLimit: BigNumber | null;
+            let gasDetails: GasPriceBN | BigNumber | null;
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasDetails] = await Promise.all([
-                web3Public.getEstimatedGas(
-                    contractAbi,
-                    contractAddress,
-                    methodName,
-                    methodArguments,
+
+            if (feeInfo.rubicProxy?.fixedFee?.amount.gt(0)) {
+                const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                    await new EvmBridgersCrossChainTrade(
+                        {
+                            from,
+                            to,
+                            toTokenAmountMin: new BigNumber(0),
+                            feeInfo,
+                            gasData: null,
+                            slippage: 0,
+                            contractAddress: ''
+                        },
+                        EvmWeb3Pure.EMPTY_ADDRESS,
+                        []
+                    ).getContractParams({ receiverAddress });
+
+                const [proxyGasLimit, proxyGasDetails] = await Promise.all([
+                    web3Public.getEstimatedGas(
+                        contractAbi,
+                        contractAddress,
+                        methodName,
+                        methodArguments,
+                        walletAddress,
+                        value
+                    ),
+                    convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+                ]);
+
+                gasLimit = proxyGasLimit;
+                gasDetails = proxyGasDetails;
+            } else {
+                const fromWithoutFee = getFromWithoutFee(
+                    from,
+                    feeInfo.rubicProxy?.platformFee?.percent
+                );
+
+                const { transactionData } =
+                    await getMethodArgumentsAndTransactionData<EvmBridgersTransactionData>(
+                        from,
+                        fromWithoutFee,
+                        to,
+                        toTokenAmountMin,
+                        walletAddress,
+                        providerAddress,
+                        { receiverAddress, fromAddress: walletAddress }
+                    );
+
+                const defaultGasLimit = await web3Public.getEstimatedGasByData(
                     walletAddress,
-                    value
-                ),
-                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
-            ]);
+                    transactionData.to,
+                    {
+                        data: transactionData.data,
+                        value: transactionData.value
+                    }
+                );
+                const defaultGasDetails = convertGasDataToBN(
+                    await Injector.gasPriceApi.getGasPrice(from.blockchain)
+                );
+
+                gasLimit = defaultGasLimit;
+                gasDetails = defaultGasDetails;
+            }
 
             if (!gasLimit?.isFinite()) {
                 return null;

@@ -199,7 +199,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                           feeInfo,
                           srcChainTrade,
                           dstChainTrade,
-                          options.slippageTolerance
+                          options.slippageTolerance,
+                          options.receiverAddress
                       )
                     : null;
 
