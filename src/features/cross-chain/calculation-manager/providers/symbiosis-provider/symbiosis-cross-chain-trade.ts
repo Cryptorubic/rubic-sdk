@@ -57,6 +57,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         swapParams: SymbiosisSwappingParams,
         feeInfo: FeeInfo,
         providerGateway: string,
+        providerAddress: string,
         receiverAddress?: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain;
@@ -89,7 +90,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                             },
                             swapParams
                         },
-                        EvmWeb3Pure.EMPTY_ADDRESS,
+                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                         []
                     ).getContractParams({}, true);
 
@@ -124,7 +125,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                         },
                         swapParams
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                     []
                 ).getTransactionRequest(walletAddress, receiverAddress, null, true);
 

@@ -39,6 +39,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         toToken: PriceTokenAmount<EvmBlockchainName>,
         transactionRequest: XyTransactionRequest,
         feeInfo: FeeInfo,
+        providerAddress: string,
         receiverAddress?: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as XyCrossChainSupportedBlockchain;
@@ -66,7 +67,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
                             feeInfo,
                             onChainTrade: null
                         },
-                        EvmWeb3Pure.EMPTY_ADDRESS,
+                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                         []
                     ).getContractParams({}, true);
 
@@ -96,7 +97,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
                         feeInfo,
                         onChainTrade: null
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                     []
                 ).getTransactionRequest(receiverAddress, true);
 

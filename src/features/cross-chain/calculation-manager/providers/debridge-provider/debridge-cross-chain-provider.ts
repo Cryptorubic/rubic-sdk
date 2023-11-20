@@ -144,6 +144,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                           from,
                           to,
                           requestParams,
+                          options.providerAddress,
                           options.receiverAddress
                       )
                     : null;

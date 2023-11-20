@@ -41,7 +41,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         toToken: PriceTokenAmount<EvmBlockchainName>,
         route: Route,
         feeInfo: FeeInfo,
-        reveiver?: string
+        providerAddress: string,
+        receiverAddress?: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain;
         const walletAddress =
@@ -73,7 +74,7 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                             bridgeType: BRIDGE_TYPE.LIFI,
                             slippage: 0
                         },
-                        EvmWeb3Pure.EMPTY_ADDRESS,
+                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                         []
                     ).getContractParams({}, true);
 
@@ -108,9 +109,9 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                         bridgeType: BRIDGE_TYPE.LIFI,
                         slippage: 0
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).fetchSwapData(reveiver, true);
+                ).fetchSwapData(receiverAddress, true);
 
                 const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
                     data,

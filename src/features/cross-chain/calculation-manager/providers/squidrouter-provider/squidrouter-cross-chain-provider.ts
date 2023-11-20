@@ -111,7 +111,8 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                           to,
                           requestParams,
                           feeInfo,
-                          receiver
+                          receiver,
+                          options.providerAddress
                       )
                     : null;
 

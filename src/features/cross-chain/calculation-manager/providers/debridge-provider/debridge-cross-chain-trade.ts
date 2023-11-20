@@ -58,6 +58,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceTokenAmount<EvmBlockchainName>,
         transactionRequest: TransactionRequest,
+        providerAddress: string,
         receiverAddress?: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as DeBridgeCrossChainSupportedBlockchain;
@@ -82,7 +83,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                     cryptoFeeToken: from,
                     onChainTrade: null
                 },
-                EvmWeb3Pure.EMPTY_ADDRESS,
+                providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                 []
             ).getTransactionRequest(receiverAddress, null, true);
 

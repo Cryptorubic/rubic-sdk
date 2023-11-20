@@ -53,7 +53,8 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         toToken: PriceTokenAmount<EvmBlockchainName>,
         transactionRequest: SquidrouterTransactionRequest,
         feeInfo: FeeInfo,
-        receiver: string
+        receiverAddress: string,
+        providerAddress: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as SquidrouterCrossChainSupportedBlockchain;
         const walletAddress =
@@ -84,7 +85,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
                             onChainSubtype: { from: undefined, to: undefined },
                             transactionRequest
                         },
-                        EvmWeb3Pure.EMPTY_ADDRESS,
+                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                         []
                     ).getContractParams({}, true);
 
@@ -118,9 +119,9 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
                         onChainSubtype: { from: undefined, to: undefined },
                         transactionRequest
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getTransactionRequest(receiver, null, true);
+                ).getTransactionRequest(receiverAddress, null, true);
 
                 const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
                     data,

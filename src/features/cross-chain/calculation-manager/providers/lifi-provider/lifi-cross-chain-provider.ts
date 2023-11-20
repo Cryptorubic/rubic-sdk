@@ -148,6 +148,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                       to,
                       bestRoute,
                       feeInfo,
+                      options.providerAddress,
                       options.receiverAddress
                   )
                 : null;

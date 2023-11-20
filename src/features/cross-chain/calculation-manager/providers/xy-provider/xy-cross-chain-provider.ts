@@ -114,6 +114,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                           to,
                           requestParams,
                           feeInfo,
+                          options.providerAddress,
                           options.receiverAddress
                       )
                     : null;

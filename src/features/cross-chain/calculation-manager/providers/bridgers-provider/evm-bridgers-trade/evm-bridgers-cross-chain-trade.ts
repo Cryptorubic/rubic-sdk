@@ -61,7 +61,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                             slippage: 0,
                             contractAddress: ''
                         },
-                        EvmWeb3Pure.EMPTY_ADDRESS,
+                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                         []
                     ).getContractParams({ receiverAddress });
 

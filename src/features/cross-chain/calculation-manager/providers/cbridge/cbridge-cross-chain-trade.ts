@@ -37,6 +37,8 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         onChainTrade: EvmOnChainTrade | null,
         feeInfo: FeeInfo,
         maxSlippage: number,
+        celerContractAddress: string,
+        providerAddress: string,
         receiverAddress: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as CbridgeCrossChainSupportedBlockchain;
@@ -62,11 +64,11 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
                             slippage: 0,
                             feeInfo: feeInfo!,
                             maxSlippage,
-                            contractAddress: EvmWeb3Pure.EMPTY_ADDRESS,
+                            contractAddress: celerContractAddress,
                             transitMinAmount: new BigNumber(0),
                             onChainTrade: onChainTrade
                         },
-                        EvmWeb3Pure.EMPTY_ADDRESS,
+                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                         []
                     ).getContractParams({});
 
@@ -94,11 +96,11 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
                         slippage: 0,
                         feeInfo: feeInfo,
                         maxSlippage,
-                        contractAddress: EvmWeb3Pure.EMPTY_ADDRESS,
+                        contractAddress: celerContractAddress,
                         transitMinAmount: new BigNumber(0),
                         onChainTrade: onChainTrade
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                     []
                 ).getTransactionRequest(
                     receiverAddress,

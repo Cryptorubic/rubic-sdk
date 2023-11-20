@@ -59,6 +59,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         srcChainTrade: EvmOnChainTrade | null,
         dstChainTrade: EvmOnChainTrade | null,
         slippageTolerance: number,
+        providerAddress: string,
         receiverAddress?: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
@@ -91,7 +92,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
                             dstChainTrade,
                             cryptoFeeToken: null
                         },
-                        EvmWeb3Pure.EMPTY_ADDRESS,
+                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                         []
                     ).getContractParams({});
 

@@ -169,6 +169,8 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                           onChainTrade,
                           feeInfo,
                           maxSlippage,
+                          config.address,
+                          options.providerAddress,
                           options.receiverAddress || this.getWalletAddress(fromToken.blockchain)
                       )
                     : null;
