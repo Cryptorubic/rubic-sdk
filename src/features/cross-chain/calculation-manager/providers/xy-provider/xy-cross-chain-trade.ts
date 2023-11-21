@@ -4,6 +4,7 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -214,7 +215,10 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
         // eslint-disable-next-line no-useless-catch
         try {
-            const { data, value, to } = await this.getTransactionRequest(options?.receiverAddress);
+            const { data, value, to } = await this.getTransactionRequest(
+                options?.receiverAddress,
+                options?.directTransaction
+            );
 
             await this.web3Private.trySendTransaction(to, {
                 data,
@@ -240,7 +244,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.getTransactionRequest(receiverAddress, skipAmountChangeCheck);
+        } = await this.getTransactionRequest(receiverAddress, options?.directTransaction, skipAmountChangeCheck);
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
@@ -289,12 +293,20 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
     private async getTransactionRequest(
         receiverAddress?: string,
+        transactionConfig?: EvmEncodeConfig,
         skipAmountChangeCheck: boolean = false
     ): Promise<{
         data: string;
         value: string;
         to: string;
     }> {
+        if (transactionConfig) {
+            return {
+                data: transactionConfig.data,
+                to: transactionConfig.to,
+                value: transactionConfig.value
+            };
+        }
         const params: XyTransactionRequest = {
             ...this.transactionRequest,
             ...(receiverAddress && { receiveAddress: receiverAddress })

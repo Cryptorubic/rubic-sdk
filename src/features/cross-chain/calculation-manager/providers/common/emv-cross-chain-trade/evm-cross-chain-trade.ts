@@ -226,15 +226,24 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         oldWeiAmount: string
     ): void {
         const oldAmount = new BigNumber(oldWeiAmount);
+        console.log('oldAmount ', oldAmount);
         const newAmount = new BigNumber(newWeiAmount);
+        console.log('newAmount ', newAmount);
         const acceptablePercentPriceChange = new BigNumber(0.5).dividedBy(100);
 
         const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
+        console.log('amountPlusPercent ', amountPlusPercent);
         const amountMinusPercent = oldAmount.multipliedBy(
             new BigNumber(1).minus(acceptablePercentPriceChange)
         );
+        console.log('amountMinusPercent ', amountMinusPercent);
 
-        if (newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent)) {
+        const shouldThrowError =
+            newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
+        console.log('shouldThrowError ', shouldThrowError);
+
+        if (shouldThrowError || true) {
+            console.log();
             throw new UpdatedRatesError({
                 ...transactionRequest,
                 newAmount: newWeiAmount,

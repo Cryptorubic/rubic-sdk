@@ -252,7 +252,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         } = await this.getTransactionRequest(
             this.walletAddress,
             options?.receiverAddress,
-            null,
+            options?.directTransaction,
             skipAmountChangeCheck
         );
 
@@ -339,7 +339,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         try {
             const { data, value, to } = await this.getTransactionRequest(
                 this.walletAddress,
-                options?.receiverAddress
+                options?.receiverAddress,
+                options?.directTransaction
             );
 
             await this.evmWeb3Private.trySendTransaction(to, {
