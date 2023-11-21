@@ -48,6 +48,8 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as SquidrouterCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as SquidrouterCrossChainSupportedBlockchain;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
+
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return {
                 trade: null,
@@ -61,7 +63,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
                 fromBlockchain,
                 options.providerAddress,
                 from,
-                options?.useProxy?.[this.type] ?? true
+                useProxy
             );
             const fromWithoutFee = getFromWithoutFee(
                 from,
@@ -93,7 +95,7 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
             );
 
             const squidGasData: GasData = {
-                gasLimit: new BigNumber(transactionRequest.gasLimit).plus(120000),
+                gasLimit: new BigNumber(transactionRequest.gasLimit).plus(useProxy ? 120000 : 0),
                 gasPrice: Web3Pure.fromWei(transactionRequest.gasPrice),
                 maxFeePerGas: new BigNumber(transactionRequest.maxFeePerGas),
                 maxPriorityFeePerGas: new BigNumber(transactionRequest.maxPriorityFeePerGas)
