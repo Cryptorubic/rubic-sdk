@@ -262,7 +262,6 @@ export class EvmWeb3Public extends Web3Public {
         try {
             const gasLimit = await contract.methods[methodName](...methodArguments).estimateGas({
                 from: fromAddress,
-                gas: 10000000,
                 ...(value && { value })
             });
             return new BigNumber(gasLimit);

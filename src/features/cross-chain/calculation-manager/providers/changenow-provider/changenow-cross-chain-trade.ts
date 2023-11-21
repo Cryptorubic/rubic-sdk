@@ -40,6 +40,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
         changenowTrade: ChangenowTrade,
+        providerAddress: string,
         receiverAddress: string
     ): Promise<GasData | null> {
         const fromBlockchain = changenowTrade.from.blockchain;
@@ -54,7 +55,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
             const { contractAddress, contractAbi, methodName, methodArguments, value } =
                 await new ChangenowCrossChainTrade(
                     changenowTrade,
-                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                     []
                 ).getContractParams({ receiverAddress });
 

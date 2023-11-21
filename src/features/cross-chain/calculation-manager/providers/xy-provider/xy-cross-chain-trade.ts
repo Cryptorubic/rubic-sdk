@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { BytesLike } from 'ethers';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -35,8 +36,11 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        transactionRequest: XyTransactionRequest
+        toToken: PriceTokenAmount<EvmBlockchainName>,
+        transactionRequest: XyTransactionRequest,
+        feeInfo: FeeInfo,
+        providerAddress: string,
+        receiverAddress?: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as XyCrossChainSupportedBlockchain;
         const walletAddress =
@@ -46,34 +50,68 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         }
 
         try {
-            const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                await new XyCrossChainTrade(
+            let gasLimit: BigNumber | null;
+            let gasDetails: GasPriceBN | BigNumber | null;
+            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+
+            if (feeInfo.rubicProxy?.fixedFee?.amount.gt(0)) {
+                const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                    await new XyCrossChainTrade(
+                        {
+                            from,
+                            to: toToken,
+                            transactionRequest,
+                            gasData: null,
+                            priceImpact: 0,
+                            slippage: 0,
+                            feeInfo,
+                            onChainTrade: null
+                        },
+                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
+                        []
+                    ).getContractParams({}, true);
+
+                const [proxyGasLimit, proxyGasDetails] = await Promise.all([
+                    web3Public.getEstimatedGas(
+                        contractAbi,
+                        contractAddress,
+                        methodName,
+                        methodArguments,
+                        walletAddress,
+                        value
+                    ),
+                    convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+                ]);
+
+                gasLimit = proxyGasLimit;
+                gasDetails = proxyGasDetails;
+            } else {
+                const { data, value, to } = await new XyCrossChainTrade(
                     {
                         from,
-                        to,
+                        to: toToken,
                         transactionRequest,
                         gasData: null,
                         priceImpact: 0,
                         slippage: 0,
-                        feeInfo: {},
+                        feeInfo,
                         onChainTrade: null
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getContractParams({});
+                ).getTransactionRequest(receiverAddress, true);
 
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasDetails] = await Promise.all([
-                web3Public.getEstimatedGas(
-                    contractAbi,
-                    contractAddress,
-                    methodName,
-                    methodArguments,
-                    walletAddress,
+                const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
+                    data,
                     value
-                ),
-                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
-            ]);
+                });
+                const defaultGasDetails = convertGasDataToBN(
+                    await Injector.gasPriceApi.getGasPrice(from.blockchain)
+                );
+
+                gasLimit = defaultGasLimit;
+                gasDetails = defaultGasDetails;
+            }
 
             if (!gasLimit?.isFinite()) {
                 return null;
@@ -193,13 +231,16 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
+    public async getContractParams(
+        options: GetContractParamsOptions,
+        skipAmountChangeCheck: boolean = false
+    ): Promise<ContractParams> {
         const receiverAddress = options?.receiverAddress || this.walletAddress;
         const {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.getTransactionRequest(receiverAddress);
+        } = await this.getTransactionRequest(receiverAddress, skipAmountChangeCheck);
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
@@ -246,7 +287,10 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         return fromUsd.dividedBy(this.to.tokenAmount);
     }
 
-    private async getTransactionRequest(receiverAddress?: string): Promise<{
+    private async getTransactionRequest(
+        receiverAddress?: string,
+        skipAmountChangeCheck: boolean = false
+    ): Promise<{
         data: string;
         value: string;
         to: string;
@@ -261,7 +305,9 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             { params: { ...params } }
         );
 
-        await EvmCrossChainTrade.checkAmountChange(tx!, toTokenAmount, this.to.stringWeiAmount);
+        if (!skipAmountChangeCheck) {
+            await EvmCrossChainTrade.checkAmountChange(tx!, toTokenAmount, this.to.stringWeiAmount);
+        }
 
         return tx!;
     }

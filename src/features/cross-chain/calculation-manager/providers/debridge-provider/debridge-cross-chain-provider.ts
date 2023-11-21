@@ -115,11 +115,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 )
             });
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await DebridgeCrossChainTrade.getGasData(from, to, requestParams)
-                    : null;
-
             const transitToken = estimation.srcChainTokenOut || estimation.srcChainTokenIn;
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
@@ -134,6 +129,26 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 weiAmount: new BigNumber(cryptoFeeAmount)
             });
 
+            const feeInfo = {
+                provider: {
+                    cryptoFee: {
+                        amount: Web3Pure.fromWei(new BigNumber(cryptoFeeAmount)),
+                        token: cryptoFeeToken
+                    }
+                }
+            };
+
+            const gasData =
+                options.gasCalculation === 'enabled'
+                    ? await DebridgeCrossChainTrade.getGasData(
+                          from,
+                          to,
+                          requestParams,
+                          options.providerAddress,
+                          options.receiverAddress
+                      )
+                    : null;
+
             return {
                 trade: new DebridgeCrossChainTrade(
                     {
@@ -144,14 +159,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         priceImpact: from.calculatePriceImpactPercent(to),
                         allowanceTarget: tx.allowanceTarget,
                         slippage: 0,
-                        feeInfo: {
-                            provider: {
-                                cryptoFee: {
-                                    amount: Web3Pure.fromWei(new BigNumber(cryptoFeeAmount)),
-                                    token: cryptoFeeToken
-                                }
-                            }
-                        },
+                        feeInfo,
                         transitAmount: Web3Pure.fromWei(transitToken.amount, transitToken.decimals),
                         cryptoFeeToken,
                         onChainTrade: null
