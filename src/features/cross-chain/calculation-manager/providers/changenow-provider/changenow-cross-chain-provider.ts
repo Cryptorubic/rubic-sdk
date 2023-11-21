@@ -167,6 +167,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 options.gasCalculation === 'enabled' && options.receiverAddress
                     ? await ChangenowCrossChainTrade.getGasData(
                           changenowTrade,
+                          options.providerAddress,
                           options.receiverAddress
                       )
                     : null;

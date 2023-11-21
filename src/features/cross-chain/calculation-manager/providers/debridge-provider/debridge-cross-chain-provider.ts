@@ -129,11 +129,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 )
             });
 
-            const gasData =
-                options.gasCalculation === 'enabled'
-                    ? await DebridgeCrossChainTrade.getGasData(from, to, requestParams)
-                    : null;
-
             const transitToken = estimation.srcChainTokenOut || estimation.srcChainTokenIn;
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
@@ -147,6 +142,17 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 ...nativeToken,
                 weiAmount: new BigNumber(cryptoFeeAmount)
             });
+
+            const gasData =
+                options.gasCalculation === 'enabled'
+                    ? await DebridgeCrossChainTrade.getGasData(
+                          from,
+                          to,
+                          requestParams,
+                          options.providerAddress,
+                          options.receiverAddress
+                      )
+                    : null;
 
             return {
                 trade: new DebridgeCrossChainTrade(

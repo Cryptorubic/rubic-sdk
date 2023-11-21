@@ -1,13 +1,19 @@
+import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError } from 'src/common/errors';
 import { WrappedCrossChainTradeOrNull } from 'src/features/cross-chain/calculation-manager/models/wrapped-cross-chain-trade-or-null';
 
 /**
  * Compares two cross chain trades for sorting algorithm.
  */
+
+// eslint-disable-next-line complexity
 export function compareCrossChainTrades(
     nextWrappedTrade: WrappedCrossChainTradeOrNull,
-    prevWrappedTrade: WrappedCrossChainTradeOrNull
-): -1 | 1 {
+    prevWrappedTrade: WrappedCrossChainTradeOrNull,
+    nativePriceForNextTrade?: BigNumber,
+    nativePriceForPrevTrade?: BigNumber,
+    compareWithoutTokenPrice?: boolean
+): number {
     if (
         prevWrappedTrade?.error instanceof MinAmountError &&
         nextWrappedTrade?.error instanceof MinAmountError
@@ -31,6 +37,7 @@ export function compareCrossChainTrades(
         }
         return 1;
     }
+
     if (
         !nextWrappedTrade ||
         nextWrappedTrade.error ||
@@ -39,14 +46,28 @@ export function compareCrossChainTrades(
         return 1;
     }
 
-    const fromUsd = prevWrappedTrade?.trade.getUsdPrice();
-    const toUsd = nextWrappedTrade?.trade?.getUsdPrice();
+    if (compareWithoutTokenPrice) {
+        const prevTradeToTokenAmount = prevWrappedTrade?.trade.to.tokenAmount;
+        const nextTradeToTokenAmount = nextWrappedTrade?.trade?.to.tokenAmount;
 
-    if (!toUsd) {
-        return 1;
+        if (!nextTradeToTokenAmount) {
+            return 1;
+        }
+        if (!prevTradeToTokenAmount) {
+            return -1;
+        }
+        return prevTradeToTokenAmount.lte(nextTradeToTokenAmount) ? -1 : 1;
+    } else {
+        const fromUsd = prevWrappedTrade?.trade.getUsdPrice(nativePriceForPrevTrade);
+
+        const toUsd = nextWrappedTrade?.trade?.getUsdPrice(nativePriceForNextTrade);
+
+        if (!toUsd || !toUsd.isFinite()) {
+            return 1;
+        }
+        if (!fromUsd || !fromUsd.isFinite()) {
+            return -1;
+        }
+        return fromUsd.lte(toUsd) ? -1 : 1;
     }
-    if (!fromUsd) {
-        return -1;
-    }
-    return fromUsd.lte(toUsd) ? -1 : 1;
 }
