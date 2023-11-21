@@ -122,7 +122,8 @@ export abstract class SyncSwapAbstractProvider extends EvmOnChainProvider {
             const gasPriceInfo = await this.getGasPriceInfo();
             const gasLimit = await SyncSwapAbstractTrade.getGasLimit(
                 tradeStruct,
-                this.dexContractAddress
+                this.dexContractAddress,
+                fullOptions.providerAddress
             );
             const gasFeeInfo = getGasFeeInfo(gasLimit, gasPriceInfo);
 
