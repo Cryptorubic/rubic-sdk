@@ -22,7 +22,10 @@ import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/pr
 import { OneinchSwapResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-response';
 import { OneinchTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-trade-struct';
 import { OneinchTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/oneinch-trade';
-import { oneInchHttpGetRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/utils';
+import {
+    oneInchHttpGetApproveRequest,
+    oneInchHttpGetRequest
+} from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/utils';
 
 export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
     private readonly defaultOptions: Omit<OneinchCalculationOptions, 'fromAddress'> = {
@@ -36,7 +39,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
     }
 
     private async loadContractAddress(): Promise<string> {
-        const response = await oneInchHttpGetRequest<{
+        const response = await oneInchHttpGetApproveRequest<{
             address: string;
         }>('approve/spender', this.blockchain);
         return response.address;
