@@ -157,12 +157,7 @@ export class OnChainManager {
             ([type]) => !options.disabledProviders.includes(type as OnChainTradeType)
         ) as [OnChainTradeType, OnChainProvider][];
         const dexesTradesPromise = this.calculateDexes(from, to, dexesProviders, options);
-        const lifiTradePromise = this.calculateLifiTrades(
-            from,
-            to,
-            dexesProviders.map(dexProvider => dexProvider[0]),
-            options
-        );
+        const lifiTradePromise = this.calculateLifiTrades(from, to, [], options);
         const openOceanTradePromise = this.openOceanProvider.calculate(
             from as PriceTokenAmount<EvmBlockchainName>,
             to as PriceTokenAmount<EvmBlockchainName>,
