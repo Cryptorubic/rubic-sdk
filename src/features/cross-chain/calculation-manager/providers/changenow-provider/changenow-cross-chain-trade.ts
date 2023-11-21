@@ -41,7 +41,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
     public static async getGasData(
         changenowTrade: ChangenowTrade,
         providerAddress: string,
-        receiverAddress: string
+        receiverAddress?: string
     ): Promise<GasData | null> {
         const fromBlockchain = changenowTrade.from.blockchain;
         const walletAddress =
@@ -57,7 +57,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
                     changenowTrade,
                     providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getContractParams({ receiverAddress });
+                ).getContractParams({ receiverAddress: receiverAddress || walletAddress });
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasDetails] = await Promise.all([

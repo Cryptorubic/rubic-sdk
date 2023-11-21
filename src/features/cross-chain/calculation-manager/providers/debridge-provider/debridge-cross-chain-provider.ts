@@ -124,10 +124,16 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(
-                    estimation.dstChainTokenOut.amount,
+                    estimation.dstChainTokenOut.maxTheoreticalAmount,
                     estimation.dstChainTokenOut.decimals
                 )
             });
+
+            const slippage = 0;
+            const toTokenAmountMin = Web3Pure.fromWei(
+                estimation.dstChainTokenOut.amount,
+                estimation.dstChainTokenOut.decimals
+            ).multipliedBy(1 - slippage);
 
             const transitToken = estimation.srcChainTokenOut || estimation.srcChainTokenIn;
 
@@ -149,6 +155,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                           from,
                           to,
                           requestParams,
+                          feeInfo,
                           options.providerAddress,
                           options.receiverAddress
                       )
@@ -163,7 +170,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         gasData,
                         priceImpact: from.calculatePriceImpactPercent(to),
                         allowanceTarget: tx.allowanceTarget,
-                        slippage: 0,
+                        slippage,
                         feeInfo: {
                             ...feeInfo,
                             provider: {
@@ -174,6 +181,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                             }
                         },
                         transitAmount: Web3Pure.fromWei(transitToken.amount, transitToken.decimals),
+                        toTokenAmountMin,
                         maxTheoreticalAmount: Web3Pure.fromWei(
                             estimation.dstChainTokenOut.maxTheoreticalAmount
                         ),
