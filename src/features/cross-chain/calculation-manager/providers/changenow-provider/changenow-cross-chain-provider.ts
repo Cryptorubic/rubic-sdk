@@ -164,7 +164,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 onChainTrade
             };
             const gasData =
-                options.gasCalculation === 'enabled' && options.receiverAddress
+                options.gasCalculation === 'enabled'
                     ? await ChangenowCrossChainTrade.getGasData(
                           changenowTrade,
                           options.providerAddress,
