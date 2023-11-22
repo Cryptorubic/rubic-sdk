@@ -50,7 +50,7 @@ export class IzumiTrade extends EvmOnChainTrade {
             }
             return gasLimit;
         } catch (err) {
-            console.log(err);
+            console.debug(err);
             return null;
         }
     }
