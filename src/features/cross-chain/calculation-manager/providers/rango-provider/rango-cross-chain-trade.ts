@@ -135,13 +135,14 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    public swapDirect(options?: SwapTransactionOptions | undefined): Promise<string> {}
+    public async swapDirect(options?: SwapTransactionOptions | undefined): Promise<string> {
+        console.log(options);
+        return '';
+    }
 
-    /**
-     * @deprecated
-     */
-    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
-        return fromUsd;
+    private async getTransactionRequest(receiverAddress: string): Promise<EvmEncodeConfig> {
+        console.log(receiverAddress);
+        return { data: '', to: '', value: '' };
     }
 
     public getTradeInfo(): TradeInfo {
@@ -154,5 +155,10 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    private async getTransactionRequest(receiverAddress: string): Promise<EvmEncodeConfig> {}
+    /**
+     * @deprecated
+     */
+    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
+        return fromUsd;
+    }
 }
