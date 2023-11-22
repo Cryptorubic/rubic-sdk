@@ -100,7 +100,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
                     },
                     providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getTransactionRequest(receiverAddress, true);
+                ).getTransactionRequest(receiverAddress, undefined, true);
 
                 const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
                     data,
@@ -244,7 +244,11 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.getTransactionRequest(receiverAddress, options?.directTransaction, skipAmountChangeCheck);
+        } = await this.getTransactionRequest(
+            receiverAddress,
+            options?.directTransaction,
+            skipAmountChangeCheck
+        );
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
