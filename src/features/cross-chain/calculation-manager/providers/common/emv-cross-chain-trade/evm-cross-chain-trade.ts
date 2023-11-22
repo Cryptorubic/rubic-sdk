@@ -237,7 +237,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         const shouldThrowError =
             newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
 
-        if (shouldThrowError || true) {
+        if (shouldThrowError) {
             throw new UpdatedRatesError({
                 ...transactionRequest,
                 newAmount: newWeiAmount,
