@@ -13,7 +13,7 @@ import {
     RangoCrossChainSupportedBlockchain,
     rangoCrossChainSupportedBlockchains
 } from './model/rango-cross-chain-supported-blockchains';
-import { RangoCrossChainOptions, RangoSwapQueryParams } from './model/rango-types';
+import { RangoCrossChainOptions } from './model/rango-types';
 import { RangoCrossChainTrade } from './rango-cross-chain-trade';
 import { RangoCrossChainApiService } from './services/rango-cross-chain-api-service';
 import { RangoParamsParser } from './services/rango-params-parser';
@@ -26,10 +26,6 @@ export class RangoCrossChainProvider extends CrossChainProvider {
     public static readonly apiEndpoint = 'https://api.rango.exchange/basic';
 
     private rangoSupportedBlockchains = rangoCrossChainSupportedBlockchains;
-
-    constructor() {
-        super();
-    }
 
     public isSupportedBlockchain(blockchain: EvmBlockchainName): boolean {
         return this.rangoSupportedBlockchains.some(
@@ -50,42 +46,61 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             };
         }
 
-        const { fee, outputAmount, outputAmountMin, outputAmountUsd, swapper } =
-            await RangoCrossChainApiService.getBestRoute(from, toToken, options);
+        try {
+            const { outputAmount, outputAmountMin } = await RangoCrossChainApiService.getBestRoute(
+                from,
+                toToken,
+                options
+            );
 
-        console.log(fee, outputAmountMin, outputAmountUsd, swapper); //DELETE
+            const toTokenExtended = new PriceTokenAmount({
+                ...toToken.asStruct,
+                tokenAmount: Web3Pure.fromWei(outputAmount, toToken.decimals)
+            });
 
-        const toTokenExtended = new PriceTokenAmount({
-            ...toToken.asStruct,
-            tokenAmount: Web3Pure.fromWei(outputAmount, toToken.decimals)
-        });
+            const fromBlockchain = from.blockchain as RangoCrossChainSupportedBlockchain;
+            const useProxy = options?.useProxy?.[this.type] ?? true;
 
-        const fromBlockchain = from.blockchain as RangoCrossChainSupportedBlockchain;
-        const useProxy = options?.useProxy?.[this.type] ?? true;
+            const feeInfo = await this.getFeeInfo(
+                fromBlockchain,
+                options.providerAddress,
+                from,
+                useProxy
+            );
 
-        const feeInfo = await this.getFeeInfo(
-            fromBlockchain,
-            options.providerAddress,
-            from,
-            useProxy
-        );
+            const routePath = await this.getRoutePath(from, toTokenExtended);
 
-        const routePath = await this.getRoutePath(from, toTokenExtended);
+            const swapQueryParams = RangoParamsParser.getSwapQueryParams(
+                from,
+                toTokenExtended,
+                options
+            );
 
-        const swapQueryParams = RangoParamsParser.getSwapQueryParams();
+            const toTokenAmountMin = Web3Pure.fromWei(outputAmountMin, toToken.decimals);
 
-        const tradeParams = await RangoParamsParser.getTradeConstructorParams(
-            from,
-            toTokenExtended,
-            options,
-            routePath,
-            feeInfo,
-            Web3Pure.fromWei(outputAmountMin, toToken.decimals),
-            swapQueryParams
-        );
-        const trade = new RangoCrossChainTrade(tradeParams);
-        const tradeType = this.type;
-        return { trade, tradeType };
+            const tradeParams = await RangoParamsParser.getTradeConstructorParams({
+                fromToken: from,
+                toToken: toTokenExtended,
+                options,
+                routePath,
+                feeInfo,
+                toTokenAmountMin,
+                swapQueryParams
+            });
+
+            const trade = new RangoCrossChainTrade(tradeParams);
+            const tradeType = this.type;
+
+            return { trade, tradeType };
+        } catch (err) {
+            const rubicSdkError = CrossChainProvider.parseError(err);
+
+            return {
+                trade: null,
+                error: rubicSdkError,
+                tradeType: this.type
+            };
+        }
     }
 
     protected async getRoutePath(

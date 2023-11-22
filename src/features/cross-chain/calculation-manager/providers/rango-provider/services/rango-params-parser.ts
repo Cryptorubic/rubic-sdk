@@ -1,10 +1,9 @@
-import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { Injector } from 'src/core/injector/injector';
 
-import { FeeInfo } from '../../common/models/fee-info';
-import { RubicStep } from '../../common/models/rubicStep';
+import { GetTradeConstructorParamsType } from '../model/rango-parser-types';
 import {
     RangoBestRouteQueryParams,
     RangoCrossChainOptions,
@@ -13,7 +12,6 @@ import {
 } from '../model/rango-types';
 import { RangoCrossChainTrade } from '../rango-cross-chain-trade';
 import { RangoUtils } from '../utils/rango-utils';
-import { Injector } from 'src/core/injector/injector';
 
 export class RangoParamsParser {
     /**
@@ -36,6 +34,7 @@ export class RangoParamsParser {
             toToken.address
         );
         const amountParam = Web3Pure.toWei(from.tokenAmount);
+
         return {
             from: fromParam,
             to: toParam,
@@ -46,20 +45,21 @@ export class RangoParamsParser {
         };
     }
 
-    public static async getTradeConstructorParams(
-        fromToken: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceTokenAmount<EvmBlockchainName>,
-        options: RangoCrossChainOptions,
-        routePath: RubicStep[],
-        feeInfo: FeeInfo,
-        toTokenAmountMin: BigNumber,
-        swapQueryParams: RangoSwapQueryParams
-    ): Promise<RangoCrossChainTradeConstructorParams> {
+    public static async getTradeConstructorParams({
+        feeInfo,
+        fromToken,
+        options,
+        routePath,
+        swapQueryParams,
+        toToken,
+        toTokenAmountMin
+    }: GetTradeConstructorParamsType): Promise<RangoCrossChainTradeConstructorParams> {
         const gasData =
             options.gasCalculation === 'enabled'
                 ? await RangoCrossChainTrade.getGasData(fromToken, toToken, swapQueryParams)
                 : null;
         const priceImpact = fromToken.calculatePriceImpactPercent(toToken);
+        const slippage = options.slippageTolerance * 100;
 
         const crossChainTrade = {
             from: fromToken,
@@ -67,7 +67,7 @@ export class RangoParamsParser {
             gasData,
             toTokenAmountMin,
             priceImpact,
-            slippage: options.slippageTolerance,
+            slippage,
             feeInfo,
             swapQueryParams
         };
@@ -87,6 +87,7 @@ export class RangoParamsParser {
         options: RangoCrossChainOptions
     ): RangoSwapQueryParams {
         const amount = Web3Pure.toWei(fromToken.tokenAmount);
+
         const from = RangoUtils.getFromToQueryParam(
             fromToken.blockchain,
             fromToken.symbol,
@@ -97,9 +98,22 @@ export class RangoParamsParser {
             toToken.symbol,
             toToken.address
         );
-        const fromAddress = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
+
+        const walletAddress = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
             fromToken.blockchain
         ).address;
-        return { amount, from, to, fromAddress, slippage: options.slippageTolerance };
+        const fromAddress = options.fromAddress || walletAddress;
+        const toAddress = options.receiverAddress || walletAddress;
+
+        const slippage = options.slippageTolerance * 100;
+
+        return {
+            amount,
+            from,
+            to,
+            fromAddress,
+            slippage,
+            toAddress
+        };
     }
 }
