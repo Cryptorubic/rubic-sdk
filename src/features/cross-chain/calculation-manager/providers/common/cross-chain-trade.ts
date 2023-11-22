@@ -275,7 +275,7 @@ export abstract class CrossChainTrade {
         return new BigNumber(fromValue).plus(fixedFeeValue).toFixed(0, 0);
     }
 
-    public abstract getUsdPrice(): BigNumber;
+    public abstract getUsdPrice(providerFeeTokenPrice?: BigNumber): BigNumber;
 
     public abstract getTradeInfo(): TradeInfo;
 }

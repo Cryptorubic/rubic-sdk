@@ -159,7 +159,10 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                         ? await EvmBridgersCrossChainTrade.getGasData(
                               from as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
                               to as PriceTokenAmount<TronBlockchainName>,
-                              options.receiverAddress
+                              options.receiverAddress,
+                              options.providerAddress,
+                              feeInfo,
+                              toTokenAmountMin
                           )
                         : null;
 

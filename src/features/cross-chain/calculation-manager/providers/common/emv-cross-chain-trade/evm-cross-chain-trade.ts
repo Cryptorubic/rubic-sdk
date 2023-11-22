@@ -234,7 +234,10 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
             new BigNumber(1).minus(acceptablePercentPriceChange)
         );
 
-        if (newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent)) {
+        const shouldThrowError =
+            newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
+
+        if (shouldThrowError) {
             throw new UpdatedRatesError({
                 ...transactionRequest,
                 newAmount: newWeiAmount,
@@ -243,11 +246,13 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    public getUsdPrice(): BigNumber {
+    public getUsdPrice(providerFeeToken?: BigNumber): BigNumber {
         let feeSum = new BigNumber(0);
         const providerFee = this.feeInfo.provider?.cryptoFee;
         if (providerFee) {
-            feeSum = feeSum.plus(providerFee.amount.multipliedBy(providerFee.token.price));
+            feeSum = feeSum.plus(
+                providerFee.amount.multipliedBy(providerFeeToken || providerFee.token.price)
+            );
         }
 
         return this.to.price.multipliedBy(this.to.tokenAmount).minus(feeSum);

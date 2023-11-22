@@ -163,7 +163,16 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await CbridgeCrossChainTrade.getGasData(fromToken, to, onChainTrade)
+                    ? await CbridgeCrossChainTrade.getGasData(
+                          fromToken,
+                          to,
+                          onChainTrade,
+                          feeInfo,
+                          maxSlippage,
+                          config.address,
+                          options.providerAddress,
+                          options.receiverAddress || this.getWalletAddress(fromToken.blockchain)
+                      )
                     : null;
 
             const amountsErrors = await this.getMinMaxAmountsErrors(transitToken, feeInfo);
@@ -391,7 +400,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         routePath.push({
             type: 'cross-chain',
             path: [transit, to],
-            provider: CROSS_CHAIN_TRADE_TYPE.DEBRIDGE
+            provider: CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE
         });
         return routePath;
     }

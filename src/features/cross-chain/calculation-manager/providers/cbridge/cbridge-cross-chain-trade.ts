@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -32,8 +33,13 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        onChainTrade?: EvmOnChainTrade | null
+        toToken: PriceTokenAmount<EvmBlockchainName>,
+        onChainTrade: EvmOnChainTrade | null,
+        feeInfo: FeeInfo,
+        maxSlippage: number,
+        celerContractAddress: string,
+        providerAddress: string,
+        receiverAddress: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as CbridgeCrossChainSupportedBlockchain;
         const walletAddress =
@@ -43,36 +49,76 @@ export class CbridgeCrossChainTrade extends EvmCrossChainTrade {
         }
 
         try {
-            const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                await new CbridgeCrossChainTrade(
+            let gasLimit: BigNumber | null;
+            let gasDetails: GasPriceBN | BigNumber | null;
+            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+
+            if (feeInfo.rubicProxy?.fixedFee?.amount.gt(0)) {
+                const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                    await new CbridgeCrossChainTrade(
+                        {
+                            from,
+                            to: toToken,
+                            gasData: null,
+                            priceImpact: 0,
+                            slippage: 0,
+                            feeInfo: feeInfo!,
+                            maxSlippage,
+                            contractAddress: celerContractAddress,
+                            transitMinAmount: new BigNumber(0),
+                            onChainTrade: onChainTrade
+                        },
+                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
+                        []
+                    ).getContractParams({});
+
+                const [proxyGasLimit, proxyGasDetails] = await Promise.all([
+                    web3Public.getEstimatedGas(
+                        contractAbi,
+                        contractAddress,
+                        methodName,
+                        methodArguments,
+                        walletAddress,
+                        value
+                    ),
+                    convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+                ]);
+
+                gasLimit = proxyGasLimit;
+                gasDetails = proxyGasDetails;
+            } else {
+                const { data, to, value } = new CbridgeCrossChainTrade(
                     {
                         from,
-                        to,
+                        to: toToken,
                         gasData: null,
                         priceImpact: 0,
                         slippage: 0,
-                        feeInfo: {},
-                        maxSlippage: 0,
-                        contractAddress: EvmWeb3Pure.EMPTY_ADDRESS,
+                        feeInfo: feeInfo,
+                        maxSlippage,
+                        contractAddress: celerContractAddress,
                         transitMinAmount: new BigNumber(0),
-                        onChainTrade: onChainTrade!
+                        onChainTrade: onChainTrade
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getContractParams({});
+                ).getTransactionRequest(
+                    receiverAddress,
+                    maxSlippage,
+                    onChainTrade ? onChainTrade.to : from
+                );
 
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasDetails] = await Promise.all([
-                web3Public.getEstimatedGas(
-                    contractAbi,
-                    contractAddress,
-                    methodName,
-                    methodArguments,
-                    walletAddress,
+                const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
+                    data,
                     value
-                ),
-                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
-            ]);
+                });
+                const defaultGasDetails = convertGasDataToBN(
+                    await Injector.gasPriceApi.getGasPrice(from.blockchain)
+                );
+
+                gasLimit = defaultGasLimit;
+                gasDetails = defaultGasDetails;
+            }
 
             if (!gasLimit?.isFinite()) {
                 return null;

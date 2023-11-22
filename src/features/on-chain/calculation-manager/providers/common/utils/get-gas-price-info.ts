@@ -14,8 +14,9 @@ export async function getGasPriceInfo(blockchain: EvmBlockchainName): Promise<Ga
 
     const gasPriceInUsd = gasPriceInEth.multipliedBy(nativeCoinPrice);
     return {
-        gasPrice: new BigNumber(gasPrice || 0),
+        gasPrice: Web3Pure.fromWei(gasPrice || 0),
         gasPriceInEth,
-        gasPriceInUsd
+        gasPriceInUsd,
+        maxFeePerGas: Web3Pure.fromWei(maxFeePerGas || 0)
     };
 }

@@ -8,6 +8,7 @@ import {
 } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
+import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -52,8 +53,12 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount,
-        swapParams: SymbiosisSwappingParams
+        toToken: PriceTokenAmount,
+        swapParams: SymbiosisSwappingParams,
+        feeInfo: FeeInfo,
+        providerGateway: string,
+        providerAddress: string,
+        receiverAddress?: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain;
         const walletAddress =
@@ -63,36 +68,78 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         }
 
         try {
-            const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                await new SymbiosisCrossChainTrade(
+            let gasLimit: BigNumber | null;
+            let gasDetails: GasPriceBN | BigNumber | null;
+            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+
+            if (feeInfo.rubicProxy?.fixedFee?.amount.gt(0)) {
+                const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                    await new SymbiosisCrossChainTrade(
+                        {
+                            from,
+                            to: toToken,
+                            gasData: null,
+                            priceImpact: 0,
+                            slippage: 0,
+                            feeInfo,
+                            transitAmount: new BigNumber(NaN),
+                            tradeType: { in: undefined, out: undefined },
+                            contractAddresses: {
+                                providerRouter: '',
+                                providerGateway: providerGateway
+                            },
+                            swapParams
+                        },
+                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
+                        []
+                    ).getContractParams({}, true);
+
+                const [proxyGasLimit, proxyGasDetails] = await Promise.all([
+                    web3Public.getEstimatedGas(
+                        contractAbi,
+                        contractAddress,
+                        methodName,
+                        methodArguments,
+                        walletAddress,
+                        value
+                    ),
+                    convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+                ]);
+
+                gasLimit = proxyGasLimit;
+                gasDetails = proxyGasDetails;
+            } else {
+                const { data, value, to } = await new SymbiosisCrossChainTrade(
                     {
                         from,
-                        to,
+                        to: toToken,
                         gasData: null,
                         priceImpact: 0,
                         slippage: 0,
-                        feeInfo: {},
+                        feeInfo,
                         transitAmount: new BigNumber(NaN),
                         tradeType: { in: undefined, out: undefined },
-                        contractAddresses: { providerRouter: '', providerGateway: '' },
+                        contractAddresses: {
+                            providerRouter: '',
+                            providerGateway: providerGateway
+                        },
                         swapParams
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getContractParams({});
+                ).getTransactionRequest(walletAddress, receiverAddress, null, true);
 
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasDetails] = await Promise.all([
-                web3Public.getEstimatedGas(
-                    contractAbi,
-                    contractAddress,
-                    methodName,
-                    methodArguments,
-                    walletAddress,
+                const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
+                    data,
                     value
-                ),
-                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
-            ]);
+                });
+                const defaultGasDetails = convertGasDataToBN(
+                    await Injector.gasPriceApi.getGasPrice(from.blockchain)
+                );
+
+                gasLimit = defaultGasLimit;
+                gasDetails = defaultGasDetails;
+            }
 
             if (!gasLimit?.isFinite()) {
                 return null;
@@ -194,12 +241,20 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         this.contractAddresses = crossChainTrade.contractAddresses;
     }
 
-    protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
+    protected async getContractParams(
+        options: GetContractParamsOptions,
+        skipAmountChangeCheck: boolean = false
+    ): Promise<ContractParams> {
         const {
             data,
             value: providerValue,
             to
-        } = await this.getTransactionRequest(this.walletAddress, options?.receiverAddress);
+        } = await this.getTransactionRequest(
+            this.walletAddress,
+            options?.receiverAddress,
+            options?.directTransaction,
+            skipAmountChangeCheck
+        );
 
         let receiverAddress = options.receiverAddress;
         let toAddress = '';
@@ -284,7 +339,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         try {
             const { data, value, to } = await this.getTransactionRequest(
                 this.walletAddress,
-                options?.receiverAddress
+                options?.receiverAddress,
+                options?.directTransaction
             );
 
             await this.evmWeb3Private.trySendTransaction(to, {
@@ -346,7 +402,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
     private async getTransactionRequest(
         walletAddress: string,
         receiverAddress?: string,
-        transactionConfig?: EvmEncodeConfig
+        transactionConfig?: EvmEncodeConfig | null,
+        skipAmountChangeCheck: boolean = false
     ): Promise<EvmEncodeConfig> {
         if (transactionConfig) {
             return {
@@ -369,11 +426,13 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             value: tradeData.tx.value?.toString() || '0',
             to: tradeData.tx.to!
         };
-        EvmCrossChainTrade.checkAmountChange(
-            config,
-            tradeData.tokenAmountOut.amount,
-            this.to.stringWeiAmount
-        );
+        if (!skipAmountChangeCheck) {
+            EvmCrossChainTrade.checkAmountChange(
+                config,
+                tradeData.tokenAmountOut.amount,
+                this.to.stringWeiAmount
+            );
+        }
         return config;
     }
 }

@@ -1,14 +1,9 @@
 import BigNumber from 'bignumber.js';
-import { BytesLike } from 'ethers';
-import {
-    FailedToCheckForTransactionReceiptError,
-    RubicSdkError,
-    TooLowAmountError
-} from 'src/common/errors';
+import { FailedToCheckForTransactionReceiptError, TooLowAmountError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -16,7 +11,9 @@ import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
@@ -24,18 +21,14 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
+import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-cross-chain-supported-blockchain';
-import { portalAddresses } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/portal-address';
 import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
 import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
 import { TransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
-import { meteRouterAbi } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/mete-router-abi';
-import { MethodDecoder } from 'src/features/cross-chain/calculation-manager/utils/decode-method';
+import { convertGasDataToBN } from 'src/features/cross-chain/calculation-manager/utils/convert-gas-price';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
-
-import { convertGasDataToBN } from '../../utils/convert-gas-price';
 
 /**
  * Calculated DeBridge cross-chain trade.
@@ -45,6 +38,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
 
     /** @internal */
     public readonly transitAmount: BigNumber;
+
+    public readonly maxTheoreticalAmount: BigNumber;
 
     private readonly cryptoFeeToken: PriceTokenAmount;
 
@@ -57,8 +52,11 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        transactionRequest: TransactionRequest
+        toToken: PriceTokenAmount<EvmBlockchainName>,
+        transactionRequest: TransactionRequest,
+        feeInfo: FeeInfo,
+        providerAddress: string,
+        receiverAddress?: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as DeBridgeCrossChainSupportedBlockchain;
         const walletAddress =
@@ -68,37 +66,82 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         }
 
         try {
-            const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                await new DebridgeCrossChainTrade(
+            let gasLimit: BigNumber | null;
+            let gasDetails: GasPriceBN | BigNumber | null;
+            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+
+            if (feeInfo.rubicProxy?.fixedFee?.amount.gt(0)) {
+                const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                    await new DebridgeCrossChainTrade(
+                        {
+                            from,
+                            to: toToken,
+                            transactionRequest,
+                            gasData: null,
+                            priceImpact: 0,
+                            allowanceTarget: '',
+                            slippage: 0,
+                            feeInfo,
+                            transitAmount: new BigNumber(NaN),
+                            toTokenAmountMin: new BigNumber(NaN),
+                            maxTheoreticalAmount: new BigNumber(NaN),
+                            cryptoFeeToken: from,
+                            onChainTrade: null
+                        },
+                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
+                        []
+                    ).getContractParams({}, true);
+
+                const [proxyGasLimit, proxyGasDetails] = await Promise.all([
+                    web3Public.getEstimatedGas(
+                        contractAbi,
+                        contractAddress,
+                        methodName,
+                        methodArguments,
+                        walletAddress,
+                        value
+                    ),
+                    convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+                ]);
+
+                gasLimit = proxyGasLimit;
+                gasDetails = proxyGasDetails;
+            } else {
+                const { tx } = await new DebridgeCrossChainTrade(
                     {
                         from,
-                        to,
+                        to: toToken,
                         transactionRequest,
                         gasData: null,
                         priceImpact: 0,
                         allowanceTarget: '',
                         slippage: 0,
-                        feeInfo: {},
+                        feeInfo,
                         transitAmount: new BigNumber(NaN),
+                        toTokenAmountMin: new BigNumber(NaN),
+                        maxTheoreticalAmount: new BigNumber(NaN),
                         cryptoFeeToken: from,
                         onChainTrade: null
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getContractParams({});
+                ).getTransactionRequest(receiverAddress, null, true);
 
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasDetails] = await Promise.all([
-                web3Public.getEstimatedGas(
-                    contractAbi,
-                    contractAddress,
-                    methodName,
-                    methodArguments,
+                const defaultGasLimit = await web3Public.getEstimatedGasByData(
                     walletAddress,
-                    value
-                ),
-                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
-            ]);
+                    tx.to,
+                    {
+                        data: tx.data,
+                        value: tx.value
+                    }
+                );
+                const defaultGasDetails = convertGasDataToBN(
+                    await Injector.gasPriceApi.getGasPrice(from.blockchain)
+                );
+
+                gasLimit = defaultGasLimit;
+                gasDetails = defaultGasDetails;
+            }
 
             if (!gasLimit?.isFinite()) {
                 return null;
@@ -142,13 +185,15 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return this.allowanceTarget;
+        return this.isProxyTrade
+            ? rubicProxyContractAddress[this.fromBlockchain].gateway
+            : this.allowanceTarget;
     }
 
     public readonly feeInfo: FeeInfo;
 
     protected get methodName(): string {
-        return '';
+        return 'startBridgeTokensViaGenericCrossChain';
     }
 
     constructor(
@@ -162,6 +207,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             slippage: number;
             feeInfo: FeeInfo;
             transitAmount: BigNumber;
+            toTokenAmountMin: BigNumber;
+            maxTheoreticalAmount: BigNumber;
             cryptoFeeToken: PriceTokenAmount;
             onChainTrade: EvmOnChainTrade | null;
         },
@@ -178,11 +225,12 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         this.allowanceTarget = crossChainTrade.allowanceTarget;
         this.slippage = crossChainTrade.slippage;
         this.onChainTrade = crossChainTrade.onChainTrade;
-        this.toTokenAmountMin = this.to.tokenAmount.multipliedBy(1 - crossChainTrade.slippage);
+        this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.feeInfo = crossChainTrade.feeInfo;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
 
         this.transitAmount = crossChainTrade.transitAmount;
+        this.maxTheoreticalAmount = crossChainTrade.maxTheoreticalAmount;
     }
 
     protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -191,10 +239,11 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         let transactionHash: string;
 
         try {
-            const { data, value, to } = await this.getTransactionRequest(
+            const { tx } = await this.getTransactionRequest(
                 options?.receiverAddress,
                 options?.directTransaction
             );
+            const { data, value, to } = tx;
             const { onConfirm } = options;
             const onTransactionHash = (hash: string) => {
                 if (onConfirm) {
@@ -223,49 +272,88 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        const { data, value: providerValue } = await this.getTransactionRequest(
-            options?.receiverAddress
+    public async getContractParams(
+        options: GetContractParamsOptions,
+        skipAmountChangeCheck: boolean = false
+    ): Promise<ContractParams> {
+        const { tx, fixFee } = await this.getTransactionRequest(
+            options?.receiverAddress,
+            options?.directTransaction,
+            skipAmountChangeCheck
         );
+        const { data, value: providerValue, to } = tx;
 
-        const bridgeData = this.getBridgeData(options);
-        const swapData = this.onChainTrade && (await this.getSwapData(options));
-        const providerData = this.getProviderData(data!);
+        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
+            walletAddress: this.walletAddress,
+            fromTokenAmount: this.from,
+            toTokenAmount: this.to,
+            srcChainTrade: null,
+            providerAddress: this.providerAddress,
+            type: `native:${this.type}`,
+            fromAddress: this.walletAddress
+        });
+        const swapData =
+            this.onChainTrade &&
+            (await ProxyCrossChainEvmTrade.getSwapData(options, {
+                walletAddress: this.walletAddress,
+                contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
+                fromTokenAmount: this.from,
+                toTokenAmount: this.onChainTrade.to,
+                onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
+            }));
+        const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
+            to,
+            data! as string,
+            this.fromBlockchain,
+            this.fromContractAddress,
+            fixFee
+        );
 
         const methodArguments = swapData
             ? [bridgeData, swapData, providerData]
             : [bridgeData, providerData];
-        const methodName = swapData
-            ? 'swapAndStartBridgeTokensViaDeBridge'
-            : 'startBridgeTokensViaDeBridge';
 
         const value = this.getSwapValue(providerValue);
 
-        return {
-            contractAddress: this.fromContractAddress,
-            contractAbi: evmCommonCrossChainAbi,
-            methodName,
+        const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
+            rubicProxyContractAddress[this.from.blockchain].router,
+            evmCommonCrossChainAbi,
+            this.methodName,
             methodArguments,
+            value
+        );
+        const sendingToken = this.from.isNative ? [] : [this.from.address];
+        const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
+
+        return {
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
+            contractAbi: gatewayRubicCrossChainAbi,
+            methodName: 'startViaRubic',
+            methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
             value
         };
     }
 
-    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
-        const usdCryptoFee = this.cryptoFeeToken.price.multipliedBy(
-            this.cryptoFeeToken.tokenAmount
-        );
-        return fromUsd.plus(usdCryptoFee.isNaN() ? 0 : usdCryptoFee).dividedBy(this.to.tokenAmount);
-    }
-
     private async getTransactionRequest(
         receiverAddress?: string,
-        transactionConfig?: EvmEncodeConfig
-    ): Promise<EvmEncodeConfig> {
+        transactionConfig?: EvmEncodeConfig | null,
+        skipAmountChangeCheck: boolean = false
+    ): Promise<{
+        tx: {
+            data: string;
+            value: string;
+            to: string;
+        };
+        fixFee: string;
+    }> {
         if (transactionConfig) {
             return {
-                data: transactionConfig.data,
-                value: transactionConfig.value,
-                to: transactionConfig.to
+                tx: {
+                    data: transactionConfig.data,
+                    value: transactionConfig.value,
+                    to: transactionConfig.to
+                },
+                fixFee: ''
             };
         }
         const walletAddress = this.web3Private.address;
@@ -280,18 +368,20 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             referralCode: '4350'
         };
 
-        const { tx, estimation } = await Injector.httpClient.get<TransactionResponse>(
+        const { tx, estimation, fixFee } = await Injector.httpClient.get<TransactionResponse>(
             `${DebridgeCrossChainProvider.apiEndpoint}/order/create-tx`,
             { params }
         );
 
-        EvmCrossChainTrade.checkAmountChange(
-            tx,
-            estimation.dstChainTokenOut.amount,
-            this.to.stringWeiAmount
-        );
+        if (!skipAmountChangeCheck) {
+            EvmCrossChainTrade.checkAmountChange(
+                tx,
+                estimation.dstChainTokenOut.amount,
+                this.to.stringWeiAmount
+            );
+        }
 
-        return tx;
+        return { tx, fixFee };
     }
 
     public getTradeInfo(): TradeInfo {
@@ -304,71 +394,26 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    protected getBridgeData(options: GetContractParamsOptions): unknown[] {
-        const receiverAddress = options?.receiverAddress || this.walletAddress;
-        const toChainId = blockchainId[this.to.blockchain];
-        const fromToken = this.onChainTrade ? this.onChainTrade.to : this.from;
-        const hasSwapBeforeBridge = this.onChainTrade !== null;
+    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
+        const usdCryptoFee = this.cryptoFeeToken.price.multipliedBy(
+            this.cryptoFeeToken.tokenAmount
+        );
 
-        return [
-            EvmWeb3Pure.randomHex(32),
-            `native:${this.type.toLowerCase()}`,
-            this.providerAddress,
-            EvmWeb3Pure.randomHex(20),
-            fromToken.address,
-            receiverAddress,
-            fromToken.stringWeiAmount,
-            toChainId,
-            hasSwapBeforeBridge,
-            false
-        ];
+        return fromUsd
+            .plus(usdCryptoFee.isNaN() ? 0 : usdCryptoFee)
+            .dividedBy(this.maxTheoreticalAmount);
     }
 
-    protected async getSwapData(options: GetContractParamsOptions): Promise<unknown[]> {
-        const fromAddress =
-            options.fromAddress || this.walletAddress || oneinchApiParams.nativeAddress;
-        const swapData = await this.onChainTrade!.encode({
-            fromAddress,
-            receiverAddress: this.fromContractAddress
-        });
+    public getUsdPrice(providerFeeToken?: BigNumber): BigNumber {
+        let feeSum = new BigNumber(0);
+        const providerFee = this.feeInfo.provider?.cryptoFee;
 
-        return [
-            [
-                swapData.to,
-                swapData.to,
-                this.from.address,
-                this.onChainTrade!.to.address,
-                this.from.stringWeiAmount,
-                swapData.data,
-                true
-            ]
-        ];
-    }
-
-    protected getProviderData(sourceData: BytesLike): unknown[] {
-        const targetCallData = this.decodeCallData(sourceData);
-        const portalAddress = portalAddresses[this.fromBlockchain];
-
-        return [
-            '0x',
-            '0x',
-            EvmWeb3Pure.EMPTY_ADDRESS,
-            this.from.address,
-            EvmWeb3Pure.EMPTY_ADDRESS,
-            EvmWeb3Pure.EMPTY_ADDRESS,
-            portalAddress,
-            targetCallData
-        ];
-    }
-
-    private decodeCallData(data: ArrayLike<number> | string | undefined): string {
-        if (typeof data === 'string') {
-            const decodeData = MethodDecoder.decodeMethod(
-                meteRouterAbi.find(method => method.name === 'metaRoute')!,
-                data
-            )!.params[0]!.value as unknown as { otherSideCalldata: string };
-            return decodeData.otherSideCalldata;
+        if (providerFee) {
+            feeSum = feeSum.plus(
+                providerFee.amount.multipliedBy(providerFeeToken || providerFee.token.price)
+            );
         }
-        throw new RubicSdkError('Wrong call data');
+
+        return this.to.price.multipliedBy(this.maxTheoreticalAmount).minus(feeSum);
     }
 }
