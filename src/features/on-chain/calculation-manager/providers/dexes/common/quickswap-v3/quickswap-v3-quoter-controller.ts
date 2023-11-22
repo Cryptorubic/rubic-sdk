@@ -75,7 +75,7 @@ export class QuickswapV3QuoterController extends AlgebraQuoterController {
                 })
                 .filter(notNull);
         } catch (error) {
-            console.log(error);
+            console.debug(error);
             return [];
         }
     }
