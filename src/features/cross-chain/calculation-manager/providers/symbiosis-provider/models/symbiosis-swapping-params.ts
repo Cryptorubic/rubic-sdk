@@ -3,7 +3,7 @@ import {
     SymbiosisTokenAmount
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 
-export type SwappingParams = {
+export type SymbiosisSwappingParams = {
     tokenAmountIn: SymbiosisTokenAmount;
     tokenOut: SymbiosisToken;
     from: string;

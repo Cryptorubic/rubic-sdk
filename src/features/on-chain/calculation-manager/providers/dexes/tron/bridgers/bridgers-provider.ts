@@ -83,7 +83,7 @@ export class BridgersProvider extends TronOnChainProvider {
         const platformFeePercent = transactionData.fee * 100;
         const platformFee: OnChainPlatformFee = {
             percent: platformFeePercent,
-            token: new TokenAmount({
+            token: await PriceTokenAmount.createToken({
                 ...from,
                 tokenAmount: from.tokenAmount.multipliedBy(platformFeePercent / 100)
             })

@@ -8,4 +8,5 @@ export interface GasFeeInfo {
     readonly gasPrice?: BigNumber;
     readonly gasFeeInEth?: BigNumber;
     readonly gasFeeInUsd?: BigNumber;
+    readonly maxFeePerGas?: BigNumber;
 }

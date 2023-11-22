@@ -13,6 +13,7 @@ import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-
 import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { AbiItem } from 'web3-utils';
 
 export abstract class CrossChainProvider {
@@ -46,6 +47,8 @@ export abstract class CrossChainProvider {
     protected getWalletAddress(blockchain: Web3PrivateSupportedBlockchain): string {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(blockchain).address;
     }
+
+    protected abstract getRoutePath(...options: unknown[]): Promise<RubicStep[]>;
 
     /**
      * Gets fee information.

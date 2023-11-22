@@ -4,4 +4,5 @@ export interface GasPriceInfo {
     readonly gasPrice: BigNumber;
     readonly gasPriceInEth: BigNumber;
     readonly gasPriceInUsd: BigNumber;
+    readonly maxFeePerGas?: BigNumber;
 }

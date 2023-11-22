@@ -27,6 +27,7 @@ import { GasData } from 'src/features/cross-chain/calculation-manager/providers/
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
@@ -39,7 +40,8 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
         changenowTrade: ChangenowTrade,
-        receiverAddress: string
+        providerAddress: string,
+        receiverAddress?: string
     ): Promise<GasData | null> {
         const fromBlockchain = changenowTrade.from.blockchain;
         const walletAddress =
@@ -53,8 +55,9 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
             const { contractAddress, contractAbi, methodName, methodArguments, value } =
                 await new ChangenowCrossChainTrade(
                     changenowTrade,
-                    EvmWeb3Pure.EMPTY_ADDRESS
-                ).getContractParams({ receiverAddress });
+                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
+                    []
+                ).getContractParams({ receiverAddress: receiverAddress || walletAddress });
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasDetails] = await Promise.all([
@@ -156,8 +159,8 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         return null;
     }
 
-    constructor(crossChainTrade: ChangenowTrade, providerAddress: string) {
-        super(providerAddress);
+    constructor(crossChainTrade: ChangenowTrade, providerAddress: string, routePath: RubicStep[]) {
+        super(providerAddress, routePath);
 
         this.from = crossChainTrade.from as PriceTokenAmount<EvmBlockchainName>;
         this.to = crossChainTrade.to;
@@ -342,10 +345,6 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         return fromUsd.dividedBy(this.to.tokenAmount);
     }
 
-    public getUsdPrice(): BigNumber {
-        return this.from.price.multipliedBy(this.from.tokenAmount);
-    }
-
     public getTradeInfo(): TradeInfo {
         return {
             estimatedGas: this.estimatedGas,
@@ -353,7 +352,8 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
             priceImpact: this.priceImpact ?? null,
             slippage: this.onChainTrade?.slippageTolerance
                 ? this.onChainTrade.slippageTolerance * 100
-                : 0
+                : 0,
+            routePath: this.routePath
         };
     }
 

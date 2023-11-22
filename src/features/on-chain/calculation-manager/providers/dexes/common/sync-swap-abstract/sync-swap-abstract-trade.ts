@@ -23,11 +23,11 @@ export class SyncSwapAbstractTrade extends EvmOnChainTrade {
 
     private readonly bestPathWithAmounts: BestPathsWithAmounts;
 
-    // @TODO need to start using this method.
     /** @internal */
     public static async getGasLimit(
         tradeStruct: EvmOnChainTradeStruct & { bestPathWithAmounts: BestPathsWithAmounts },
-        dexContractAddress: string
+        dexContractAddress: string,
+        providerAddress: string
     ): Promise<BigNumber | null> {
         const fromBlockchain = tradeStruct.from.blockchain;
         const walletAddress =
@@ -39,7 +39,7 @@ export class SyncSwapAbstractTrade extends EvmOnChainTrade {
         try {
             const transactionConfig = await new SyncSwapAbstractTrade(
                 tradeStruct,
-                EvmWeb3Pure.EMPTY_ADDRESS,
+                providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                 dexContractAddress
             ).encode({ fromAddress: walletAddress });
 

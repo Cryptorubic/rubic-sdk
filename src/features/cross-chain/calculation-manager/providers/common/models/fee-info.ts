@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { PriceToken } from 'src/common/tokens';
 
 /**
  * Transaction fee information.
@@ -14,7 +15,7 @@ export interface FeeInfo {
          */
         fixedFee?: {
             amount: BigNumber;
-            tokenSymbol: string;
+            token: PriceToken;
         };
 
         /**
@@ -22,7 +23,7 @@ export interface FeeInfo {
          */
         platformFee?: {
             percent: number;
-            tokenSymbol: string;
+            token: PriceToken;
         };
     };
 
@@ -36,7 +37,7 @@ export interface FeeInfo {
          */
         cryptoFee?: {
             amount: BigNumber;
-            tokenSymbol: string;
+            token: PriceToken;
         };
 
         /**
@@ -44,7 +45,7 @@ export interface FeeInfo {
          */
         platformFee?: {
             percent: number;
-            tokenSymbol: string;
+            token: PriceToken;
         };
     };
 }

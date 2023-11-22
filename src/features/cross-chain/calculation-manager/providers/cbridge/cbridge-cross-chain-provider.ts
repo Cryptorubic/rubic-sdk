@@ -30,6 +30,7 @@ import { CbridgeEstimateAmountRequest } from 'src/features/cross-chain/calculati
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
@@ -145,7 +146,7 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                     : defaultTransit;
             }
 
-            const { amount, maxSlippage, fee } = await this.getEstimates(
+            const { amount, maxSlippage } = await this.getEstimates(
                 transitToken,
                 toToken,
                 options,
@@ -162,7 +163,16 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await CbridgeCrossChainTrade.getGasData(fromToken, to, onChainTrade)
+                    ? await CbridgeCrossChainTrade.getGasData(
+                          fromToken,
+                          to,
+                          onChainTrade,
+                          feeInfo,
+                          maxSlippage,
+                          config.address,
+                          options.providerAddress,
+                          options.receiverAddress || this.getWalletAddress(fromToken.blockchain)
+                      )
                     : null;
 
             const amountsErrors = await this.getMinMaxAmountsErrors(transitToken, feeInfo);
@@ -175,21 +185,14 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
                         gasData,
                         priceImpact: fromToken.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
-                        feeInfo: {
-                            ...feeInfo,
-                            provider: {
-                                cryptoFee: {
-                                    amount: Web3Pure.fromWei(fee, toToken.decimals),
-                                    tokenSymbol: toToken.symbol
-                                }
-                            }
-                        },
+                        feeInfo: feeInfo,
                         maxSlippage,
                         contractAddress: config.address,
                         transitMinAmount,
                         onChainTrade
                     },
-                    options.providerAddress
+                    options.providerAddress,
+                    await this.getRoutePath(fromToken, transitToken, to, onChainTrade)
                 ),
                 error: amountsErrors,
                 tradeType: this.type
@@ -243,6 +246,10 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
         const supportedToToken = config.chain_token?.[toChainId]?.token.find(el =>
             compareAddresses(el.token.address, toToken.address)
         );
+
+        if (!supportedToToken) {
+            throw new RubicSdkError('Not supported tokens');
+        }
 
         const possibleTransitToken = config.chain_token?.[fromChainId]?.token.find(
             el => el.token.symbol === supportedToToken!.token.symbol
@@ -374,5 +381,27 @@ export class CbridgeCrossChainProvider extends CrossChainProvider {
             percentFeeToken,
             useProxy
         );
+    }
+
+    protected async getRoutePath(
+        from: PriceTokenAmount,
+        transit: PriceTokenAmount,
+        to: PriceTokenAmount,
+        onChainTrade: EvmOnChainTrade | null
+    ): Promise<RubicStep[]> {
+        const routePath: RubicStep[] = [];
+        if (onChainTrade) {
+            routePath.push({
+                type: 'on-chain',
+                path: [from, transit],
+                provider: onChainTrade.type
+            });
+        }
+        routePath.push({
+            type: 'cross-chain',
+            path: [transit, to],
+            provider: CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE
+        });
+        return routePath;
     }
 }

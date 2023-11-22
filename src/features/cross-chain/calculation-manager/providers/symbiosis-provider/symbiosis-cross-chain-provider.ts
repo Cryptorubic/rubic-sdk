@@ -6,7 +6,7 @@ import {
     RubicSdkError,
     TooLowAmountError
 } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount, TokenAmount as RubicTokenAmount } from 'src/common/tokens';
 import { TokenStruct } from 'src/common/tokens/token';
 import {
     BLOCKCHAIN_NAME,
@@ -23,28 +23,28 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
     SymbiosisCrossChainSupportedBlockchain,
     symbiosisCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
-import { SwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/swapping-params';
 import {
     errorCode,
     SymbiosisError
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-error';
+import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
 import {
     SymbiosisToken,
     SymbiosisTokenAmount,
     SymbiosisTradeData
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-trade';
+import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
 
 export class SymbiosisCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS;
-
-    public readonly symbiosisApi = 'https://api-v2.symbiosis.finance/crosschain/v1';
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
@@ -119,7 +119,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 symbol: toToken.symbol
             };
 
-            const tokenAmountIn: SymbiosisTokenAmount = {
+            const symbiosisTokenAmountIn: SymbiosisTokenAmount = {
                 ...tokenIn,
                 amount: fromWithoutFee.stringWeiAmount
             };
@@ -129,45 +129,21 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
             const slippageTolerance = options.slippageTolerance * 10000;
 
-            const trade = await this.getTrade({
-                tokenAmountIn,
+            const swapParams: SymbiosisSwappingParams = {
+                tokenAmountIn: symbiosisTokenAmountIn,
                 tokenOut,
-                fromAddress,
-                receiverAddress,
-                refundAddress: fromAddress,
+                from: fromAddress,
+                to: receiverAddress || fromAddress,
+                revertableAddress: fromAddress,
                 slippage: slippageTolerance,
                 deadline
-            });
-            const {
-                tokenAmountOut,
-                fee: transitTokenFee,
-                inTradeType,
-                outTradeType,
-                tx,
-                approveTo,
-                amountInUsd
-            } = trade;
-
-            const swapFunction = (fromUserAddress: string, receiver?: string) => {
-                const refundAddress = receiver || fromAddress;
-                const receiverAddress = receiver || fromUserAddress;
-
-                const amountIn = fromWithoutFee.tokenAmount;
-                const tokenAmountIn: SymbiosisTokenAmount = {
-                    ...tokenIn,
-                    amount: Web3Pure.toWei(amountIn, from.decimals)
-                };
-
-                return this.getTrade({
-                    tokenAmountIn,
-                    tokenOut,
-                    fromAddress: fromUserAddress,
-                    receiverAddress,
-                    refundAddress,
-                    slippage: slippageTolerance,
-                    deadline
-                });
             };
+
+            const { tokenAmountOut, inTradeType, outTradeType, tx, approveTo, route } =
+                await Injector.httpClient.post<SymbiosisTradeData>(
+                    `${SymbiosisCrossChainTrade.symbiosisApi}/swapping/exact_in?partnerId=rubic`,
+                    swapParams
+                );
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -178,7 +154,15 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await SymbiosisCrossChainTrade.getGasData(from, to)
+                    ? await SymbiosisCrossChainTrade.getGasData(
+                          from,
+                          to,
+                          swapParams,
+                          feeInfo,
+                          approveTo,
+                          options.providerAddress,
+                          options.receiverAddress
+                      )
                     : null;
 
             return {
@@ -186,35 +170,20 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                     {
                         from,
                         to,
-                        swapFunction,
                         gasData,
                         priceImpact: from.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
-                        feeInfo: {
-                            ...feeInfo,
-                            provider: {
-                                cryptoFee: {
-                                    amount: new BigNumber(
-                                        Web3Pure.fromWei(
-                                            transitTokenFee.amount,
-                                            transitTokenFee.decimals
-                                        )
-                                    ),
-                                    tokenSymbol: transitTokenFee.symbol || ''
-                                }
-                            }
-                        },
+                        swapParams,
+                        feeInfo,
                         transitAmount: from.tokenAmount,
-                        amountInUsd: amountInUsd
-                            ? Web3Pure.fromWei(amountInUsd?.amount, amountInUsd?.decimals)
-                            : null,
                         tradeType: { in: inTradeType, out: outTradeType },
                         contractAddresses: {
                             providerRouter: tx.to!,
                             providerGateway: approveTo
                         }
                     },
-                    options.providerAddress
+                    options.providerAddress,
+                    await this.getRoutePath(from, to, route)
                 ),
                 tradeType: this.type
             };
@@ -271,31 +240,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    private async getTrade(swapParams: {
-        tokenAmountIn: SymbiosisTokenAmount;
-        tokenOut: SymbiosisToken | null;
-        fromAddress: string;
-        receiverAddress: string;
-        refundAddress: string;
-        slippage: number;
-        deadline: number;
-    }): Promise<SymbiosisTradeData> {
-        const swappingParams: SwappingParams = {
-            tokenAmountIn: swapParams.tokenAmountIn,
-            tokenOut: swapParams.tokenOut!,
-            to: swapParams.receiverAddress || swapParams.fromAddress,
-            from: swapParams.fromAddress,
-            revertableAddress: swapParams.fromAddress,
-            slippage: swapParams.slippage,
-            deadline: swapParams.deadline
-        };
-
-        return await Injector.httpClient.post<SymbiosisTradeData>(
-            `${this.symbiosisApi}/swapping/exact_in?partnerId=rubic`,
-            swappingParams
-        );
-    }
-
     private getTransferToken(
         route: SymbiosisToken[],
         from: PriceTokenAmount<EvmBlockchainName>
@@ -313,5 +257,56 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                   symbol: token.symbol!
               }
             : undefined;
+    }
+
+    protected async getRoutePath(
+        fromToken: PriceTokenAmount,
+        toToken: PriceTokenAmount,
+        route: SymbiosisToken[]
+    ): Promise<RubicStep[]> {
+        const fromChainId = blockchainId[fromToken.blockchain];
+        const toChainId = blockchainId[toToken.blockchain];
+
+        const transitFrom = [...route].reverse().find(el => el.chainId === fromChainId);
+        const transitTo = route.find(el => el.chainId === toChainId);
+
+        const fromTokenAmount = transitFrom
+            ? await RubicTokenAmount.createToken({
+                  blockchain: fromToken.blockchain,
+                  address: transitFrom.address,
+                  weiAmount: new BigNumber(0)
+              })
+            : fromToken;
+
+        const toTokenAmount = transitTo
+            ? await RubicTokenAmount.createToken({
+                  blockchain: toToken.blockchain,
+                  address: transitTo.address,
+                  weiAmount: new BigNumber(0)
+              })
+            : toToken;
+
+        const routePath: RubicStep[] = [];
+
+        if (transitFrom) {
+            routePath.push({
+                type: 'on-chain',
+                provider: ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP,
+                path: [fromToken, fromTokenAmount]
+            });
+        }
+        routePath.push({
+            type: 'cross-chain',
+            provider: CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS,
+            path: [fromTokenAmount, toTokenAmount]
+        });
+        if (transitTo) {
+            routePath.push({
+                type: 'on-chain',
+                provider: ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP,
+                path: [toTokenAmount, toToken]
+            });
+        }
+        return routePath;
     }
 }

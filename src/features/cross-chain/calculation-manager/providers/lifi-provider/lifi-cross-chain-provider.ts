@@ -1,7 +1,7 @@
-import { FeeCost, LiFi, LifiStep, RouteOptions, RoutesRequest } from '@lifi/sdk';
+import { FeeCost, LiFi, LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList, PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -17,6 +17,7 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import {
     LifiCrossChainSupportedBlockchain,
@@ -27,7 +28,10 @@ import {
     LIFI_BRIDGE_TYPES,
     LifiBridgeTypes
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
-import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import {
+    ON_CHAIN_TRADE_TYPE,
+    OnChainTradeType
+} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-providers';
 
 export class LifiCrossChainProvider extends CrossChainProvider {
@@ -113,6 +117,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
         const providerFee = bestRoute.steps[0]!.estimate.feeCosts?.find(
             (el: FeeCost & { included?: boolean }) => el?.included === false
         );
+        const nativeToken = await PriceToken.createFromToken(nativeTokensList[from.blockchain]);
         if (providerFee) {
             feeInfo.provider = {
                 cryptoFee: {
@@ -120,7 +125,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                         new BigNumber(providerFee.amount),
                         providerFee.token.decimals
                     ),
-                    tokenSymbol: providerFee.token.symbol
+                    token: nativeToken
                 }
             };
         }
@@ -138,7 +143,14 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
         const gasData =
             options.gasCalculation === 'enabled'
-                ? await LifiCrossChainTrade.getGasData(from, to, bestRoute)
+                ? await LifiCrossChainTrade.getGasData(
+                      from,
+                      to,
+                      bestRoute,
+                      feeInfo,
+                      options.providerAddress,
+                      options.receiverAddress
+                  )
                 : null;
 
         const { onChainType, bridgeType } = this.parseTradeTypes(bestRoute.steps);
@@ -156,7 +168,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
                 bridgeType: bridgeType || BRIDGE_TYPE.LIFI,
                 slippage: options.slippageTolerance
             },
-            options.providerAddress
+            options.providerAddress,
+            await this.getRoutePath(from, to, bestRoute)
         );
 
         try {
@@ -253,5 +266,57 @@ export class LifiCrossChainProvider extends CrossChainProvider {
     private checkBridgeTypes(notAllowedBridgeTypes: LifiBridgeTypes[]): boolean {
         const lifiBridgeTypesArray = Object.values(LIFI_BRIDGE_TYPES);
         return notAllowedBridgeTypes.every(bridgeType => lifiBridgeTypesArray.includes(bridgeType));
+    }
+
+    protected async getRoutePath(
+        from: PriceTokenAmount,
+        to: PriceTokenAmount,
+        route: Route
+    ): Promise<RubicStep[]> {
+        const lifiSteps = (route.steps[0] as LifiStep).includedSteps;
+        const crossChainStep = lifiSteps.find(el => el.type === 'cross')!;
+
+        const fromTransit =
+            crossChainStep.action?.fromAddress || crossChainStep.action.fromToken.address;
+        const toTransit = crossChainStep.action?.toAddress || crossChainStep.action.toToken.address;
+
+        const fromTokenAmount = await TokenAmount.createToken({
+            address: fromTransit,
+            blockchain: from.blockchain,
+            weiAmount: new BigNumber(crossChainStep.action.fromAmount)
+        });
+
+        const toTokenAmount = await TokenAmount.createToken({
+            address: toTransit,
+            blockchain: to.blockchain,
+            weiAmount: new BigNumber(crossChainStep.estimate.toAmount)
+        });
+
+        // @TODO Add dex true provider and path
+        const routePath: RubicStep[] = [];
+
+        if (lifiSteps?.[0]?.type === 'swap') {
+            routePath.push({
+                type: 'on-chain',
+                path: [from, fromTokenAmount],
+                provider: ON_CHAIN_TRADE_TYPE.LIFI_DEFAULT
+            });
+        }
+
+        routePath.push({
+            type: 'cross-chain',
+            path: [fromTokenAmount, toTokenAmount],
+            provider: CROSS_CHAIN_TRADE_TYPE.LIFI
+        });
+
+        if (lifiSteps?.[2]?.type === 'swap') {
+            routePath.push({
+                type: 'on-chain',
+                path: [toTokenAmount, to],
+                provider: ON_CHAIN_TRADE_TYPE.LIFI_DEFAULT
+            });
+        }
+
+        return routePath;
     }
 }

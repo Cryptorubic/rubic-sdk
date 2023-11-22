@@ -19,6 +19,7 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { feeLibraryAbi } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/fee-library-abi';
 import { relayersAddresses } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/relayers-addresses';
@@ -182,14 +183,27 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 layerZeroFeeWei,
                 nativeTokensList[fromBlockchain].decimals
             );
+            const nativeToken = await PriceToken.createFromToken(nativeTokensList[from.blockchain]);
             feeInfo.provider = {
                 cryptoFee: {
                     amount: layerZeroFeeAmount,
-                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
+                    token: nativeToken
                 }
             };
 
-            const nativeToken = await PriceToken.createFromToken(nativeTokensList[fromBlockchain]);
+            const gasData =
+                options.gasCalculation === 'enabled'
+                    ? await StargateCrossChainTrade.getGasData(
+                          from,
+                          to,
+                          feeInfo,
+                          srcChainTrade,
+                          dstChainTrade,
+                          options.slippageTolerance,
+                          options.providerAddress,
+                          options.receiverAddress
+                      )
+                    : null;
 
             return {
                 trade: new StargateCrossChainTrade(
@@ -198,13 +212,14 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                         to,
                         slippageTolerance: options.slippageTolerance,
                         priceImpact: transitTokenAmount.calculatePriceImpactPercent(to),
-                        gasData: null,
+                        gasData,
                         feeInfo,
                         srcChainTrade,
                         dstChainTrade,
                         cryptoFeeToken: nativeToken
                     },
-                    options.providerAddress
+                    options.providerAddress,
+                    await this.getRoutePath(from, to, srcChainTrade)
                 ),
                 tradeType: this.type
             };
@@ -439,5 +454,34 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             return 'FUSDC';
         }
         return symbol;
+    }
+
+    protected async getRoutePath(
+        from: PriceTokenAmount,
+        to: PriceTokenAmount,
+        srcOnChainTrade: EvmOnChainTrade | null
+    ): Promise<RubicStep[]> {
+        if (srcOnChainTrade) {
+            return [
+                {
+                    type: 'on-chain',
+                    provider: srcOnChainTrade.type,
+                    path: [srcOnChainTrade.from, srcOnChainTrade.to]
+                },
+                {
+                    type: 'cross-chain',
+                    provider: CROSS_CHAIN_TRADE_TYPE.STARGATE,
+                    path: [srcOnChainTrade.to, to]
+                }
+            ];
+        }
+
+        return [
+            {
+                type: 'cross-chain',
+                provider: CROSS_CHAIN_TRADE_TYPE.STARGATE,
+                path: [from, to]
+            }
+        ];
     }
 }

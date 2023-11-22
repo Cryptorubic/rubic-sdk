@@ -24,6 +24,7 @@ import { GasData } from 'src/features/cross-chain/calculation-manager/providers/
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { l1Erc20ScrollGatewayAbi } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/constants/l1-erc20-scroll-gateway-abi';
 import { l2Erc20ScrollGatewayAbi } from 'src/features/cross-chain/calculation-manager/providers/scroll-bridge/constants/l2-erc20-scroll-gateway-abi';
@@ -54,7 +55,8 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
                         to,
                         gasData: null
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS
+                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    []
                 ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
@@ -124,9 +126,10 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
             to: PriceTokenAmount<EvmBlockchainName>;
             gasData: GasData | null;
         },
-        providerAddress: string
+        providerAddress: string,
+        routePath: RubicStep[]
     ) {
-        super(providerAddress);
+        super(providerAddress, routePath);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -175,7 +178,6 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        console.log(this.from.weiAmount.toFixed());
         if (this.fromBlockchain === BLOCKCHAIN_NAME.GOERLI) {
             const methodArguments = [
                 ...(this.from.isNative ? [] : [this.from.address]),
@@ -219,16 +221,13 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
         return new BigNumber(1);
     }
 
-    public getUsdPrice(): BigNumber {
-        return this.from.price.multipliedBy(this.from.tokenAmount);
-    }
-
     public getTradeInfo(): TradeInfo {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: null,
-            slippage: 0
+            slippage: 0,
+            routePath: this.routePath
         };
     }
 

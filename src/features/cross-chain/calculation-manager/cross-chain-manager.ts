@@ -130,7 +130,9 @@ export class CrossChainManager {
             throw new RubicSdkError('No success providers calculation for the trade');
         }
 
-        return wrappedTrades.sort(compareCrossChainTrades);
+        return wrappedTrades.sort((nextTrade, prevTrade) =>
+            compareCrossChainTrades(nextTrade, prevTrade)
+        );
     }
 
     /**

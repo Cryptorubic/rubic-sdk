@@ -14,3 +14,16 @@ export function oneInchHttpGetRequest<T>(
         }
     );
 }
+
+export function oneInchHttpGetApproveRequest<T>(
+    path: string,
+    blockchain: BlockchainName,
+    options?: {}
+): Promise<T> {
+    return Injector.httpClient.get(
+        `https://x-api.rubic.exchange/api/${path}/${blockchainId[blockchain]}`,
+        {
+            ...options
+        }
+    );
+}

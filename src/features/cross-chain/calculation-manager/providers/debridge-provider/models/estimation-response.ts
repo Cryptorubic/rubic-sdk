@@ -13,6 +13,10 @@ interface TokenMinAmount extends TokenAmount {
     minAmount: string;
 }
 
+interface MaxTheoreticalAmount extends TokenMinAmount {
+    maxTheoreticalAmount: string;
+}
+
 /**
  * Estimation object.
  */
@@ -22,6 +26,11 @@ export interface Estimation {
             feeAmount: string;
         };
         type: string;
+        amountIn: string;
+        amountOut: string;
+        tokenIn: string;
+        tokenOut: string;
+        chain: string;
     }[];
     /**
      * Source chain token in.
@@ -36,7 +45,7 @@ export interface Estimation {
     /**
      * Destination chain token out.
      */
-    readonly dstChainTokenOut: TokenMinAmount;
+    readonly dstChainTokenOut: MaxTheoreticalAmount;
 
     /**
      *  Details of the token representing execution fee currency, a recommended amount
