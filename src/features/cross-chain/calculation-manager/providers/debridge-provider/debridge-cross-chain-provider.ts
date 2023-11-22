@@ -110,7 +110,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 dstChainTokenOut: toToken.address,
                 dstChainTokenOutRecipient: this.getWalletAddress(fromBlockchain) || fakeAddress,
                 prependOperatingExpenses: false,
-                affiliateFeePercent: 0.1,
                 affiliateFeeRecipient: '0x0D582aC954E954419F3c2F27fD54323Ca488258A'
             };
 
