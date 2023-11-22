@@ -144,4 +144,14 @@ export abstract class TronCrossChainTrade extends CrossChainTrade {
     protected abstract getContractParams(
         options: TronGetContractParamsOptions
     ): Promise<TronContractParams>;
+
+    public getUsdPrice(): BigNumber {
+        let feeSum = new BigNumber(0);
+        const providerFee = this.feeInfo.provider?.cryptoFee;
+        if (providerFee) {
+            feeSum = feeSum.plus(providerFee.amount.multipliedBy(providerFee.token.price));
+        }
+
+        return this.to.price.multipliedBy(this.to.tokenAmount).minus(feeSum);
+    }
 }

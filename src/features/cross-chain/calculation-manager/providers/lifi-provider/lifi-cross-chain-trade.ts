@@ -1,9 +1,12 @@
 import { Route } from '@lifi/sdk';
+import { Estimate } from '@lifi/types/dist/step';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -21,6 +24,7 @@ import {
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
@@ -35,8 +39,11 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        route: Route
+        toToken: PriceTokenAmount<EvmBlockchainName>,
+        route: Route,
+        feeInfo: FeeInfo,
+        providerAddress: string,
+        receiverAddress?: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain;
         const walletAddress =
@@ -46,16 +53,56 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         }
 
         try {
-            const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                await new LifiCrossChainTrade(
+            let gasLimit: BigNumber | null;
+            let gasDetails: GasPriceBN | BigNumber | null;
+            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+
+            if (feeInfo.rubicProxy?.fixedFee?.amount.gt(0)) {
+                const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                    await new LifiCrossChainTrade(
+                        {
+                            from,
+                            to: toToken,
+                            route,
+                            gasData: null,
+                            toTokenAmountMin: new BigNumber(0),
+                            feeInfo,
+                            priceImpact: from.calculatePriceImpactPercent(toToken) || 0,
+                            onChainSubtype: {
+                                from: undefined,
+                                to: undefined
+                            },
+                            bridgeType: BRIDGE_TYPE.LIFI,
+                            slippage: 0
+                        },
+                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
+                        []
+                    ).getContractParams({}, true);
+
+                const [proxyGasLimit, proxyGasDetails] = await Promise.all([
+                    web3Public.getEstimatedGas(
+                        contractAbi,
+                        contractAddress,
+                        methodName,
+                        methodArguments,
+                        walletAddress,
+                        value
+                    ),
+                    convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
+                ]);
+
+                gasLimit = proxyGasLimit;
+                gasDetails = proxyGasDetails;
+            } else {
+                const { data, value, to } = await new LifiCrossChainTrade(
                     {
                         from,
-                        to,
+                        to: toToken,
                         route,
                         gasData: null,
                         toTokenAmountMin: new BigNumber(0),
-                        feeInfo: {},
-                        priceImpact: from.calculatePriceImpactPercent(to) || 0,
+                        feeInfo,
+                        priceImpact: from.calculatePriceImpactPercent(toToken) || 0,
                         onChainSubtype: {
                             from: undefined,
                             to: undefined
@@ -63,21 +110,21 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
                         bridgeType: BRIDGE_TYPE.LIFI,
                         slippage: 0
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS
-                ).getContractParams({});
+                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
+                    []
+                ).fetchSwapData(receiverAddress, true);
 
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const [gasLimit, gasDetails] = await Promise.all([
-                web3Public.getEstimatedGas(
-                    contractAbi,
-                    contractAddress,
-                    methodName,
-                    methodArguments,
-                    walletAddress,
+                const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
+                    data,
                     value
-                ),
-                convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
-            ]);
+                });
+                const defaultGasDetails = convertGasDataToBN(
+                    await Injector.gasPriceApi.getGasPrice(from.blockchain)
+                );
+
+                gasLimit = defaultGasLimit;
+                gasDetails = defaultGasDetails;
+            }
 
             if (!gasLimit?.isFinite()) {
                 return null;
@@ -146,9 +193,10 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             bridgeType: BridgeType;
             slippage: number;
         },
-        providerAddress: string
+        providerAddress: string,
+        routePath: RubicStep[]
     ) {
-        super(providerAddress);
+        super(providerAddress, routePath);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -184,7 +232,11 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
             // eslint-disable-next-line no-useless-catch
             try {
-                const { data, value, to } = await this.fetchSwapData(options?.receiverAddress);
+                const { data, value, to } = await this.fetchSwapData(
+                    options?.receiverAddress,
+                    false,
+                    options?.directTransaction
+                );
 
                 await this.web3Private.trySendTransaction(to, {
                     data,
@@ -207,12 +259,15 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
+    public async getContractParams(
+        options: GetContractParamsOptions,
+        skipAmountChangeCheck: boolean = false
+    ): Promise<ContractParams> {
         const {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.fetchSwapData(options?.receiverAddress);
+        } = await this.fetchSwapData(options?.receiverAddress, skipAmountChangeCheck);
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: this.walletAddress,
@@ -257,7 +312,18 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    private async fetchSwapData(receiverAddress?: string): Promise<LifiTransactionRequest> {
+    private async fetchSwapData(
+        receiverAddress?: string,
+        skipAmountChangeCheck: boolean = false,
+        directTransaction?: EvmEncodeConfig
+    ): Promise<EvmEncodeConfig> {
+        if (directTransaction) {
+            return {
+                data: directTransaction.data,
+                to: directTransaction.to,
+                value: directTransaction.value
+            };
+        }
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
@@ -279,10 +345,18 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             }
         };
 
-        const swapResponse: { transactionRequest: LifiTransactionRequest } =
+        const swapResponse: { transactionRequest: LifiTransactionRequest; estimate: Estimate } =
             await this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
                 ...step
             });
+
+        if (!skipAmountChangeCheck) {
+            EvmCrossChainTrade.checkAmountChange(
+                swapResponse.transactionRequest,
+                swapResponse.estimate.toAmount,
+                this.to.stringWeiAmount
+            );
+        }
 
         return swapResponse.transactionRequest;
     }
@@ -291,16 +365,13 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         return fromUsd.dividedBy(this.to.tokenAmount);
     }
 
-    public getUsdPrice(): BigNumber {
-        return this.from.price.multipliedBy(this.from.tokenAmount);
-    }
-
     public getTradeInfo(): TradeInfo {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact || null,
-            slippage: this.slippage * 100
+            slippage: this.slippage * 100,
+            routePath: this.routePath
         };
     }
 }

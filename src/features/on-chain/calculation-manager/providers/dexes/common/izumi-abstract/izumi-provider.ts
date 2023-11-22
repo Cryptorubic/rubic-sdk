@@ -125,7 +125,7 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
                 throw new RubicSdkError('No result');
             }
         } catch (err) {
-            console.log(err);
+            console.debug(err);
             throw err;
         }
 

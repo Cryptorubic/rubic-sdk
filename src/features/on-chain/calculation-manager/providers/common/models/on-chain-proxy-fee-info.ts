@@ -1,15 +1,15 @@
-import { TokenAmount } from 'src/common/tokens';
+import { PriceTokenAmount } from 'src/common/tokens';
 
 export interface OnChainPlatformFee {
     percent: number;
-    token: TokenAmount;
+    token: PriceTokenAmount;
 }
 
 export interface OnChainProxyFeeInfo {
     /**
      * Fee in native token, attached as additional value.
      */
-    fixedFeeToken: TokenAmount;
+    fixedFeeToken: PriceTokenAmount;
 
     /**
      * Fee in percents of source token.

@@ -10,6 +10,7 @@ import { TronBridgersTransactionData } from 'src/features/cross-chain/calculatio
 import { getMethodArgumentsAndTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/utils/get-method-arguments-and-transaction-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { tronCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';
 import { tronNativeSwapAbi } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/constants/tron-native-swap-abi';
@@ -59,9 +60,10 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
             slippage: number;
             contractAddress: string;
         },
-        providerAddress: string
+        providerAddress: string,
+        routePath: RubicStep[]
     ) {
-        super(providerAddress);
+        super(providerAddress, routePath);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -171,16 +173,13 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
         return fromUsd.dividedBy(this.to.tokenAmount);
     }
 
-    public getUsdPrice(): BigNumber {
-        return this.from.price.multipliedBy(this.from.tokenAmount);
-    }
-
     public getTradeInfo(): TradeInfo {
         return {
             estimatedGas: null,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
-            slippage: this.slippage * 100
+            slippage: this.slippage * 100,
+            routePath: this.routePath
         };
     }
 }

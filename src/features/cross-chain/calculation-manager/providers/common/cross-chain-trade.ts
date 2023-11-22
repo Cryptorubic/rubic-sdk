@@ -19,6 +19,7 @@ import { CrossChainTradeType } from 'src/features/cross-chain/calculation-manage
 import { BridgeType } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/providers/common/models/on-chain-subtype';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 
 /**
@@ -105,7 +106,10 @@ export abstract class CrossChainTrade {
         return hasFixedFee || hasPlatformFee;
     }
 
-    protected constructor(protected readonly providerAddress: string) {}
+    protected constructor(
+        protected readonly providerAddress: string,
+        protected readonly routePath: RubicStep[]
+    ) {}
 
     /**
      * Returns true, if allowance is not enough.
@@ -270,7 +274,7 @@ export abstract class CrossChainTrade {
         return new BigNumber(fromValue).plus(fixedFeeValue).toFixed(0, 0);
     }
 
-    public abstract getUsdPrice(): BigNumber;
+    public abstract getUsdPrice(providerFeeTokenPrice?: BigNumber): BigNumber;
 
     public abstract getTradeInfo(): TradeInfo;
 }

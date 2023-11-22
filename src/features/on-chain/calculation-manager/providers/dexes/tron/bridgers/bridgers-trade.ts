@@ -74,7 +74,7 @@ export class BridgersTrade extends TronOnChainTrade {
             rubicProxy: {
                 platformFee: {
                     percent: tradeStruct.platformFee.percent,
-                    tokenSymbol: tradeStruct.platformFee.token.symbol
+                    token: tradeStruct.platformFee.token
                 }
             }
         };

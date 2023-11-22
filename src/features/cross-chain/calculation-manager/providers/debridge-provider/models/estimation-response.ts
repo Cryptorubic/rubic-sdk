@@ -22,6 +22,11 @@ export interface Estimation {
             feeAmount: string;
         };
         type: string;
+        amountIn: string;
+        amountOut: string;
+        tokenIn: string;
+        tokenOut: string;
+        chain: string;
     }[];
     /**
      * Source chain token in.

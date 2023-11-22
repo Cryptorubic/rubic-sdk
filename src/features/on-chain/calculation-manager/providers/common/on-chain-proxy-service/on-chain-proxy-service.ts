@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { nativeTokensList, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import { nativeTokensList, PriceTokenAmount } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
@@ -57,13 +57,14 @@ export class OnChainProxyService {
             platformFeePercent = fee.platformFeePercent;
         }
 
-        const fixedFeeToken = new TokenAmount({
+        const fixedFeeToken = await PriceTokenAmount.createFromToken({
             ...nativeTokensList[fromBlockchain],
             weiAmount: new BigNumber(fixedCryptoFeeWei)
         });
+
         const platformFee: OnChainPlatformFee = {
             percent: platformFeePercent!,
-            token: new TokenAmount({
+            token: await PriceTokenAmount.createFromToken({
                 ...from,
                 tokenAmount: from.tokenAmount.multipliedBy(platformFeePercent! / 100)
             })

@@ -34,6 +34,7 @@ import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { tronCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/tron-cross-chain-trade/constants/tron-common-cross-chain-abi';
 import { AbiItem } from 'web3-utils';
 
@@ -152,27 +153,16 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                 toToken.decimals
             );
 
-            feeInfo = {
-                ...feeInfo,
-                provider: {
-                    platformFee: {
-                        percent: transactionData.fee * 100,
-                        tokenSymbol: from.symbol
-                    },
-                    cryptoFee: {
-                        amount: new BigNumber(transactionData.chainFee),
-                        tokenSymbol: toToken.symbol
-                    }
-                }
-            };
-
             if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {
                 const gasData =
                     options.gasCalculation === 'enabled' && options.receiverAddress
                         ? await EvmBridgersCrossChainTrade.getGasData(
                               from as PriceTokenAmount<BridgersEvmCrossChainSupportedBlockchain>,
                               to as PriceTokenAmount<TronBlockchainName>,
-                              options.receiverAddress
+                              options.receiverAddress,
+                              options.providerAddress,
+                              feeInfo,
+                              toTokenAmountMin
                           )
                         : null;
 
@@ -187,7 +177,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                             slippage: options.slippageTolerance,
                             contractAddress: transactionData.contractAddress
                         },
-                        options.providerAddress
+                        options.providerAddress,
+                        await this.getRoutePath(from, to)
                     ),
                     tradeType: this.type
                 };
@@ -202,7 +193,8 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                         slippage: options.slippageTolerance,
                         contractAddress: transactionData.contractAddress
                     },
-                    options.providerAddress
+                    options.providerAddress,
+                    await this.getRoutePath(from, to)
                 ),
                 tradeType: this.type
             };
@@ -218,27 +210,25 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
     protected override async getFeeInfo(
         fromBlockchain: BridgersCrossChainSupportedBlockchain,
         _providerAddress: string,
-        percentFeeToken: PriceTokenAmount,
+        _percentFeeToken: PriceTokenAmount,
         _useProxy: boolean,
         _contractAbi: AbiItem[]
     ): Promise<FeeInfo> {
+        const nativeToken = await PriceToken.createFromToken(nativeTokensList[fromBlockchain]);
         return {
             rubicProxy: {
                 fixedFee: {
                     amount: new BigNumber(0),
-                    tokenSymbol: nativeTokensList[fromBlockchain].symbol
-                },
-                platformFee: {
-                    // percent: await this.getFeePercent(
-                    //     fromBlockchain,
-                    //     providerAddress,
-                    //     rubicProxyContractAddress[fromBlockchain],
-                    //     contractAbi
-                    // ),
-                    percent: 0,
-                    tokenSymbol: percentFeeToken.symbol
+                    token: nativeToken
                 }
             }
         };
+    }
+
+    protected async getRoutePath(
+        fromToken: PriceTokenAmount,
+        toToken: PriceTokenAmount
+    ): Promise<RubicStep[]> {
+        return [{ type: 'cross-chain', provider: this.type, path: [fromToken, toToken] }];
     }
 }

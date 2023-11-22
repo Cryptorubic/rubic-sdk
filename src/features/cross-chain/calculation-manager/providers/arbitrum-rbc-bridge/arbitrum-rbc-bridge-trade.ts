@@ -30,6 +30,7 @@ import { GasData } from 'src/features/cross-chain/calculation-manager/providers/
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { MethodDecoder } from 'src/features/cross-chain/calculation-manager/utils/decode-method';
 import { TransactionReceipt } from 'web3-eth';
@@ -59,7 +60,8 @@ export class ArbitrumRbcBridgeTrade extends EvmCrossChainTrade {
                         gasData: null,
                         l2network
                     },
-                    EvmWeb3Pure.EMPTY_ADDRESS
+                    EvmWeb3Pure.EMPTY_ADDRESS,
+                    []
                 ).getContractParams({});
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
@@ -132,9 +134,10 @@ export class ArbitrumRbcBridgeTrade extends EvmCrossChainTrade {
             gasData: GasData | null;
             l2network: L2Network;
         },
-        providerAddress: string
+        providerAddress: string,
+        routePath: RubicStep[]
     ) {
-        super(providerAddress);
+        super(providerAddress, routePath);
 
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
@@ -240,16 +243,13 @@ export class ArbitrumRbcBridgeTrade extends EvmCrossChainTrade {
         return fromUsd.dividedBy(this.to.tokenAmount);
     }
 
-    public getUsdPrice(): BigNumber {
-        return this.from.price.multipliedBy(this.from.tokenAmount);
-    }
-
     public getTradeInfo(): TradeInfo {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: null,
-            slippage: 0
+            slippage: 0,
+            routePath: this.routePath
         };
     }
 

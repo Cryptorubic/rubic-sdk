@@ -38,6 +38,7 @@ import { ChangenowTrade } from 'src/features/cross-chain/calculation-manager/pro
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
+import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
@@ -166,12 +167,14 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
                 options.gasCalculation === 'enabled' && options.receiverAddress
                     ? await ChangenowCrossChainTrade.getGasData(
                           changenowTrade,
+                          options.providerAddress,
                           options.receiverAddress
                       )
                     : null;
             const trade = new ChangenowCrossChainTrade(
                 { ...changenowTrade, gasData },
-                options.providerAddress
+                options.providerAddress,
+                await this.getRoutePath(from, to)
             );
 
             const error = await this.checkMinMaxAmounts(transitFromToken, transit, toCurrency);
@@ -383,5 +386,18 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         return currencies.find(
             currency => currency.network === apiBlockchain && currency.tokenContract !== null
         );
+    }
+
+    protected async getRoutePath(
+        from: PriceTokenAmount,
+        to: PriceTokenAmount
+    ): Promise<RubicStep[]> {
+        return [
+            {
+                type: 'cross-chain',
+                provider: CROSS_CHAIN_TRADE_TYPE.CHANGENOW,
+                path: [from, to]
+            }
+        ];
     }
 }
