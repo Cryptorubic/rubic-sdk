@@ -269,7 +269,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
             to
         } = await this.getTransactionRequest(
             options?.receiverAddress || this.walletAddress,
-            null,
+            options?.directTransaction,
             skipAmountChangeCheck
         );
 

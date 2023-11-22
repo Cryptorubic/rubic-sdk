@@ -278,7 +278,7 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
     ): Promise<ContractParams> {
         const { tx, fixFee } = await this.getTransactionRequest(
             options?.receiverAddress,
-            null,
+            options?.directTransaction,
             skipAmountChangeCheck
         );
         const { data, value: providerValue, to } = tx;

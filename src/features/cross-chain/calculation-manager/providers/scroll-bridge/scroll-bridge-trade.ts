@@ -178,7 +178,6 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
     }
 
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
-        console.log(this.from.weiAmount.toFixed());
         if (this.fromBlockchain === BLOCKCHAIN_NAME.GOERLI) {
             const methodArguments = [
                 ...(this.from.isNative ? [] : [this.from.address]),
