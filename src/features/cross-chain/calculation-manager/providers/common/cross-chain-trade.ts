@@ -244,6 +244,7 @@ export abstract class CrossChainTrade {
     /**
      * @internal
      * Gets ratio between transit usd amount and to token amount.
+     * @deprecated
      */
     public abstract getTradeAmountRatio(fromUsd: BigNumber): BigNumber;
 

@@ -5,10 +5,9 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
 import { RequiredCrossChainOptions } from '../../../models/cross-chain-options';
 import { GasData } from '../../common/emv-cross-chain-trade/models/gas-data';
-import { BridgeType } from '../../common/models/bridge-type';
 import { FeeInfo } from '../../common/models/fee-info';
-import { OnChainSubtype } from '../../common/models/on-chain-subtype';
 import { RubicStep } from '../../common/models/rubicStep';
+import { RangoCrossChainSupportedBlockchain } from './rango-cross-chain-supported-blockchains';
 
 export interface TransformedCalculationRequiredParams {
     fromAsset: Asset;
@@ -17,32 +16,53 @@ export interface TransformedCalculationRequiredParams {
 }
 
 /**
- * @property {BlockchainName[]} swappers List of all accepted swappers (e.g. providers), an empty list means no filter is required
+ * @property {RangoCrossChainSupportedBlockchain[]} swappers List of all accepted swappers (e.g. providers), an empty list means no filter is required
  * @property {boolean} [swappersExclude] - Indicates include/exclude mode for the swappers param
  */
 export type RangoCrossChainOptions = RequiredCrossChainOptions & {
-    swappers?: EvmBlockchainName[];
+    swappers?: RangoCrossChainSupportedBlockchain[];
     swappersExclude?: boolean;
 };
 
+/**
+ * @property {string} from 
+ *Combine fromBlockchainName(!!!!!!!!!several chain-names in rango-api are different with Rubic: Avalanche in rango - `AVAX_CCHAIN`, in rubic - `AVALANCHE`),
+fromTokenSymbol(e.g. ETH, BNB etc.) and fromTokenContractAddress
+ *and should look like  `blockchainName.tokenSymbol--tokenAddress` without spaces
+ * @property {string} to same as `from` but with data of target token
+ * @property {string} amount amount of `from` token to exchange - use Web3Pure.toWei(tokenAmount) to get in string type
+ * @property {string} slippage Amount of user's preferred slippage in percent
+ * @property {string} fromAddress User wallet address
+ * @property {string} toAddress Destination wallet address
+ * @property {RangoCrossChainSupportedBlockchain[]} swappers List of all accepted swappers (e.g. providers), an empty list means no filter is required
+ * @property {boolean} [swappersExclude] - Indicates include/exclude mode for the swappers param
+ */
+export interface RangoSwapQueryParams {
+    from: string;
+    to: string;
+    amount: string;
+    slippage: number;
+    fromAddress: string;
+    toAddress: string;
+    swappers?: RangoCrossChainSupportedBlockchain[];
+    swappersExclude?: boolean;
+}
 export interface RangoCrossChainTradeConstructorParams {
     crossChainTrade: {
         from: PriceTokenAmount<EvmBlockchainName>;
         to: PriceTokenAmount<EvmBlockchainName>;
-        route: Route;
         gasData: GasData | null;
         toTokenAmountMin: BigNumber;
         feeInfo: FeeInfo;
         priceImpact: number | null;
-        onChainSubtype: OnChainSubtype;
-        bridgeType: BridgeType;
         slippage: number;
+        swapQueryParams: RangoSwapQueryParams;
     };
     providerAddress: string;
     routePath: RubicStep[];
 }
 
-export interface RangoBestTradeQueryParams {
+export interface RangoBestRouteQueryParams {
     from: string;
     to: string;
     amount: string;
@@ -50,14 +70,14 @@ export interface RangoBestTradeQueryParams {
     swappersExclude?: boolean;
 }
 
-export interface RangoBestTradeResponse {
+export interface RangoBestRouteResponse {
     requestId: string;
     resultType: RoutingResultType;
-    route: RangoBestTradeSimulationResult | null;
+    route: RangoBestRouteSimulationResult | null;
     error: string | null;
 }
 
-interface RangoBestTradeSimulationResult {
+export interface RangoBestRouteSimulationResult {
     from: RangoResponseToken;
     to: RangoResponseToken;
     outputAmount: string;

@@ -147,9 +147,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
-                tokenAmount: new BigNumber(
-                    Web3Pure.fromWei(tokenAmountOut.amount, tokenAmountOut.decimals)
-                )
+                tokenAmount: Web3Pure.fromWei(tokenAmountOut.amount, tokenAmountOut.decimals)
             });
 
             const gasData =

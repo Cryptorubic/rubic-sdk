@@ -1,6 +1,7 @@
-import { NotSupportedBlockchain, RubicSdkError } from 'src/common/errors';
+import { NotSupportedBlockchain } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { CrossChainProvider } from '../common/cross-chain-provider';
@@ -12,20 +13,17 @@ import {
     RangoCrossChainSupportedBlockchain,
     rangoCrossChainSupportedBlockchains
 } from './model/rango-cross-chain-supported-blockchains';
-import {
-    RangoBestTradeQueryParams,
-    RangoBestTradeResponse,
-    RangoCrossChainOptions,
-    RangoCrossChainTradeConstructorParams
-} from './model/rango-types';
+import { RangoCrossChainOptions, RangoSwapQueryParams } from './model/rango-types';
 import { RangoCrossChainTrade } from './rango-cross-chain-trade';
+import { RangoCrossChainApiService } from './services/rango-cross-chain-api-service';
+import { RangoParamsParser } from './services/rango-params-parser';
 
 export class RangoCrossChainProvider extends CrossChainProvider {
     public type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.RANGO;
 
-    private readonly API_KEY = 'a24ca428-a18e-4e84-b57f-edb3e2a5bf13';
+    public static readonly apiKey = 'a24ca428-a18e-4e84-b57f-edb3e2a5bf13';
 
-    private readonly API_BASE_URL = 'https://api.rango.exchange/basic';
+    public static readonly apiEndpoint = 'https://api.rango.exchange/basic';
 
     private rangoSupportedBlockchains = rangoCrossChainSupportedBlockchains;
 
@@ -52,62 +50,49 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             };
         }
 
-        const bestRoute = await this.getBestRoute(from, toToken, options);
-        console.log(bestRoute);
-        const tradeConstructorParams = this.getTradeConstructorParams();
-        const trade = new RangoCrossChainTrade(tradeConstructorParams);
+        const { fee, outputAmount, outputAmountMin, outputAmountUsd, swapper } =
+            await RangoCrossChainApiService.getBestRoute(from, toToken, options);
+
+        console.log(fee, outputAmountMin, outputAmountUsd, swapper); //DELETE
+
+        const toTokenExtended = new PriceTokenAmount({
+            ...toToken.asStruct,
+            tokenAmount: Web3Pure.fromWei(outputAmount, toToken.decimals)
+        });
+
+        const fromBlockchain = from.blockchain as RangoCrossChainSupportedBlockchain;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
+
+        const feeInfo = await this.getFeeInfo(
+            fromBlockchain,
+            options.providerAddress,
+            from,
+            useProxy
+        );
+
+        const routePath = await this.getRoutePath(from, toTokenExtended);
+
+        const swapQueryParams = RangoParamsParser.getSwapQueryParams();
+
+        const tradeParams = await RangoParamsParser.getTradeConstructorParams(
+            from,
+            toTokenExtended,
+            options,
+            routePath,
+            feeInfo,
+            Web3Pure.fromWei(outputAmountMin, toToken.decimals),
+            swapQueryParams
+        );
+        const trade = new RangoCrossChainTrade(tradeParams);
         const tradeType = this.type;
         return { trade, tradeType };
     }
 
-    private async getBestRoute(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceToken<EvmBlockchainName>,
-        options: RangoCrossChainOptions
-    ): Promise<unknown> {
-        const params = this.getBestRouteQueryParams(from, toToken, options) as any;
-        try {
-            const { route } = await this.httpClient.get<RangoBestTradeResponse>(
-                `${this.API_BASE_URL}/quote`,
-                {
-                    params
-                }
-            );
-            if (!route) throw new RubicSdkError('No available routes in rango.');
-        } catch (err) {
-            throw new RubicSdkError(err);
-        }
-    }
-
-    /**
-     *@description Transform parameters to required view for rango-api
-     *@returns Return object with params for `quote` method in rango-sdk to get best route in `calculate` method
-     */
-    private getBestRouteQueryParams(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceToken<EvmBlockchainName>,
-        options: RangoCrossChainOptions
-    ): RangoBestTradeQueryParams {
-        const fromParam = `${from.blockchain}.${from.symbol}--${from.address}`;
-        const toParam = `${toToken.blockchain}.${toToken.symbol}--${toToken.address}`;
-        const amountParam = from.tokenAmount.toString();
-        return {
-            from: fromParam,
-            to: toParam,
-            amount: amountParam,
-            ...(options.slippageTolerance && { slippage: options.slippageTolerance }),
-            ...(options.swappers && { swappers: options.swappers }),
-            ...(options.swappersExclude && { swappersExclude: options.swappersExclude })
-        };
-    }
-
-    private getTradeConstructorParams(): RangoCrossChainTradeConstructorParams {
-        return {} as RangoCrossChainTradeConstructorParams;
-    }
-
-    protected getRoutePath(...options: unknown[]): Promise<RubicStep[]> {
-        console.log(options);
-        return [] as unknown as Promise<RubicStep[]>;
+    protected async getRoutePath(
+        fromToken: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceTokenAmount<EvmBlockchainName>
+    ): Promise<RubicStep[]> {
+        return [{ type: 'cross-chain', provider: this.type, path: [fromToken, toToken] }];
     }
 
     protected async getFeeInfo(
