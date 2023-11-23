@@ -51,9 +51,12 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     public isSupportedBlockchain(
         blockchain: BlockchainName
     ): blockchain is StargateCrossChainSupportedBlockchain {
-        return stargateCrossChainSupportedBlockchains.some(
+        const bool = stargateCrossChainSupportedBlockchains.some(
             supportedBlockchain => supportedBlockchain === blockchain
         );
+        console.log('Stargate chain: ', blockchain);
+        console.log('Stargate check: ', bool);
+        return bool;
     }
 
     private static hasDirectRoute(
@@ -452,6 +455,9 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         }
         if (blockchain === BLOCKCHAIN_NAME.FANTOM && symbol === 'USDC') {
             return 'FUSDC';
+        }
+        if (symbol.toUpperCase() === 'METIS') {
+            return symbol.toUpperCase();
         }
         return symbol;
     }
