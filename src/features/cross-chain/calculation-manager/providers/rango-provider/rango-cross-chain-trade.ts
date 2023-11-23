@@ -20,16 +20,51 @@ import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { RangoContractAddresses } from './constants/rango-contract-address';
 import { RangoCrossChainSupportedBlockchain } from './model/rango-cross-chain-supported-blockchains';
-import { RangoCrossChainTradeConstructorParams, RangoSwapQueryParams } from './model/rango-types';
+import {
+    RangoCrossChainTradeConstructorParams,
+    RangoGetGasDataParams,
+    RangoSwapQueryParams
+} from './model/rango-parser-types';
 
 export class RangoCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
-    public static async getGasData(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        swapQueryParams: RangoSwapQueryParams
-    ): Promise<GasData | null> {
-        console.log(from, to, swapQueryParams);
+    public static async getGasData({
+        fromToken,
+        toToken,
+        options,
+        feeInfo,
+        routePath,
+        swapQueryParams
+    }: RangoGetGasDataParams): Promise<GasData | null> {
+        const fromBlockchain = fromToken.blockchain;
+        const walletAddress = swapQueryParams.fromAddress;
+
+        if (!walletAddress) {
+            return null;
+        }
+        try {
+            const tradeParams = {
+                crossChainTrade: {
+                    from: fromToken,
+                    to: toToken,
+                    toTokenAmountMin: new BigNumber(0),
+                    feeInfo,
+                    gasData: null,
+                    priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
+                    slippage: swapQueryParams.slippage,
+                    swapQueryParams
+                },
+                routePath,
+                providerAddress: swapQueryParams.toAddress
+            } as RangoCrossChainTradeConstructorParams;
+
+            const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                await new RangoCrossChainTrade(tradeParams).getContractParams({
+                    receiverAddress: swapQueryParams.toAddress
+                });
+        } catch (err) {
+            return null;
+        }
         return null;
     }
 

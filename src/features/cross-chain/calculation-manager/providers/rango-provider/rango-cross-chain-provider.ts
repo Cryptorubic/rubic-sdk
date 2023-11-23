@@ -9,13 +9,13 @@ import { CalculationResult } from '../common/models/calculation-result';
 import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { RangoCrossChainOptions } from './model/rango-api-common-types';
 import {
     RangoCrossChainSupportedBlockchain,
     rangoCrossChainSupportedBlockchains
 } from './model/rango-cross-chain-supported-blockchains';
-import { RangoCrossChainOptions } from './model/rango-types';
 import { RangoCrossChainTrade } from './rango-cross-chain-trade';
-import { RangoCrossChainApiService } from './services/rango-cross-chain-api-service';
+import { RangoApiService } from './services/rango-cross-chain-api-service';
 import { RangoParamsParser } from './services/rango-params-parser';
 
 export class RangoCrossChainProvider extends CrossChainProvider {
@@ -47,7 +47,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            const { outputAmount, outputAmountMin } = await RangoCrossChainApiService.getBestRoute(
+            const { outputAmount, outputAmountMin } = await RangoApiService.getBestRoute(
                 from,
                 toToken,
                 options

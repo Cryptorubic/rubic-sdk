@@ -3,13 +3,14 @@ import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 
-import { GetTradeConstructorParamsType } from '../model/rango-parser-types';
+import { RangoCrossChainOptions } from '../model/rango-api-common-types';
 import {
+    GetTradeConstructorParamsType,
     RangoBestRouteQueryParams,
-    RangoCrossChainOptions,
     RangoCrossChainTradeConstructorParams,
     RangoSwapQueryParams
-} from '../model/rango-types';
+} from '../model/rango-parser-types';
+import { RangoCrossChainProvider } from '../rango-cross-chain-provider';
 import { RangoCrossChainTrade } from '../rango-cross-chain-trade';
 import { RangoUtils } from '../utils/rango-utils';
 
@@ -34,12 +35,14 @@ export class RangoParamsParser {
             toToken.address
         );
         const amountParam = Web3Pure.toWei(from.tokenAmount);
+        const apiKey = RangoCrossChainProvider.apiKey;
 
         return {
+            apiKey,
             from: fromParam,
             to: toParam,
             amount: amountParam,
-            ...(options.slippageTolerance && { slippage: options.slippageTolerance }),
+            ...(options.slippageTolerance && { slippage: options.slippageTolerance * 100 }),
             ...(options.swappers && { swappers: options.swappers }),
             ...(options.swappersExclude && { swappersExclude: options.swappersExclude })
         };
@@ -56,7 +59,14 @@ export class RangoParamsParser {
     }: GetTradeConstructorParamsType): Promise<RangoCrossChainTradeConstructorParams> {
         const gasData =
             options.gasCalculation === 'enabled'
-                ? await RangoCrossChainTrade.getGasData(fromToken, toToken, swapQueryParams)
+                ? await RangoCrossChainTrade.getGasData({
+                      fromToken,
+                      toToken,
+                      swapQueryParams,
+                      feeInfo,
+                      options,
+                      routePath
+                  })
                 : null;
         const priceImpact = fromToken.calculatePriceImpactPercent(toToken);
         const slippage = options.slippageTolerance * 100;
@@ -113,7 +123,9 @@ export class RangoParamsParser {
             to,
             fromAddress,
             slippage,
-            toAddress
+            toAddress,
+            ...(options.swappers && { swappers: options.swappers }),
+            ...(options.swappersExclude && { swappersExclude: options.swappersExclude })
         };
     }
 }
