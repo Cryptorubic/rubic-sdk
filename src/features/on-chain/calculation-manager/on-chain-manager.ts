@@ -89,14 +89,7 @@ export class OnChainManager {
                     .map(provider => provider.toUpperCase())
                     .includes(ON_CHAIN_TRADE_TYPE.LIFI)
                     ? []
-                    : [
-                          this.getLifiCalculationPromise(
-                              from,
-                              to,
-                              fullOptions,
-                              nativeProviders.map(dexProvider => dexProvider[0])
-                          )
-                      ];
+                    : [this.getLifiCalculationPromise(from, to, fullOptions, [])];
 
                 const openOceanTrades = fullOptions.disabledProviders
                     .map(provider => provider.toUpperCase())
