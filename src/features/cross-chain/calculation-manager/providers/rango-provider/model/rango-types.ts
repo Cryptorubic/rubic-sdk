@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { Asset } from 'rango-sdk-basic';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
@@ -8,12 +7,6 @@ import { GasData } from '../../common/emv-cross-chain-trade/models/gas-data';
 import { FeeInfo } from '../../common/models/fee-info';
 import { RubicStep } from '../../common/models/rubicStep';
 import { RangoCrossChainSupportedBlockchain } from './rango-cross-chain-supported-blockchains';
-
-export interface TransformedCalculationRequiredParams {
-    fromAsset: Asset;
-    toAsset: Asset;
-    amount: string;
-}
 
 /**
  * @property {RangoCrossChainSupportedBlockchain[]} swappers List of all accepted swappers (e.g. providers), an empty list means no filter is required
