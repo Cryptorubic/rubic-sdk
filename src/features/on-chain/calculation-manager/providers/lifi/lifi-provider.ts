@@ -32,8 +32,6 @@ import {
 } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-trade-struct';
 
-import { OnChainTradeError } from '../../models/on-chain-trade-error';
-
 export class LifiProvider {
     private readonly lifi = new LiFi(getLifiConfig());
 
@@ -58,7 +56,7 @@ export class LifiProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: LifiCalculationOptions
-    ): Promise<OnChainTrade | OnChainTradeError> {
+    ): Promise<OnChainTrade> {
         if (this.isForbiddenBlockchain(from.blockchain)) {
             throw new RubicSdkError('Blockchain is not supported');
         }

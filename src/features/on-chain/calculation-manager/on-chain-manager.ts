@@ -87,7 +87,7 @@ export class OnChainManager {
 
                 const lifiTrades = fullOptions.disabledProviders
                     .map(provider => provider.toUpperCase())
-                    .includes(ON_CHAIN_TRADE_TYPE.LIFI_DEFAULT)
+                    .includes(ON_CHAIN_TRADE_TYPE.LIFI)
                     ? []
                     : [
                           this.getLifiCalculationPromise(
@@ -291,7 +291,7 @@ export class OnChainManager {
         to: PriceToken,
         dexesProvidersTypes: OnChainTradeType[],
         options: RequiredOnChainManagerCalculationOptions
-    ): Promise<OnChainTrade | OnChainTradeError | null> {
+    ): Promise<OnChainTrade | null> {
         if (!BlockchainsInfo.isEvmBlockchainName(from.blockchain)) {
             return null;
         }
@@ -388,7 +388,7 @@ export class OnChainManager {
     ): Promise<WrappedOnChainTradeOrNull> {
         try {
             const wrappedTrade = await pTimeout(
-                this.calculateLifiTrades(from, to, disabledProviders, options).then(el => el[0]),
+                this.calculateLifiTrades(from, to, disabledProviders, options).then(el => el),
                 options.timeout
             );
 
@@ -398,16 +398,16 @@ export class OnChainManager {
 
             return {
                 trade: wrappedTrade,
-                tradeType: ON_CHAIN_TRADE_TYPE.LIFI_DEFAULT
+                tradeType: ON_CHAIN_TRADE_TYPE.LIFI
             };
         } catch (err: unknown) {
             console.debug(
-                `[RUBIC_SDK] Trade calculation error occurred for ${ON_CHAIN_TRADE_TYPE.LIFI_DEFAULT} trade provider.`,
+                `[RUBIC_SDK] Trade calculation error occurred for ${ON_CHAIN_TRADE_TYPE.LIFI} trade provider.`,
                 err
             );
             return {
                 trade: null,
-                tradeType: ON_CHAIN_TRADE_TYPE.LIFI_DEFAULT,
+                tradeType: ON_CHAIN_TRADE_TYPE.LIFI,
                 error: CrossChainProvider.parseError(err)
             };
         }

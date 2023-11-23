@@ -299,7 +299,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             routePath.push({
                 type: 'on-chain',
                 path: [from, fromTokenAmount],
-                provider: ON_CHAIN_TRADE_TYPE.LIFI_DEFAULT
+                provider: ON_CHAIN_TRADE_TYPE.LIFI
             });
         }
 
@@ -313,7 +313,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             routePath.push({
                 type: 'on-chain',
                 path: [toTokenAmount, to],
-                provider: ON_CHAIN_TRADE_TYPE.LIFI_DEFAULT
+                provider: ON_CHAIN_TRADE_TYPE.LIFI
             });
         }
 
