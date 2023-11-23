@@ -56,7 +56,7 @@ export class LifiProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: LifiCalculationOptions
-    ): Promise<OnChainTrade[]> {
+    ): Promise<OnChainTrade> {
         if (this.isForbiddenBlockchain(from.blockchain)) {
             throw new RubicSdkError('Blockchain is not supported');
         }
@@ -97,18 +97,14 @@ export class LifiProvider {
 
         const result = await this.lifi.getRoutes(routesRequest);
         const { routes } = result;
-
-        return (
+        const allTrades = (
             await Promise.all(
                 routes.map(async route => {
                     const step = route.steps[0];
                     if (!step) {
                         return null;
                     }
-                    const type = lifiProviders[step.toolDetails.name.toLowerCase()];
-                    if (!type) {
-                        return null;
-                    }
+                    const type = ON_CHAIN_TRADE_TYPE.LIFI;
 
                     const to = new PriceTokenAmount({
                         ...toToken.asStruct,
@@ -120,15 +116,15 @@ export class LifiProvider {
                         from,
                         to,
                         gasFeeInfo: null,
-                        slippageTolerance: fullOptions.slippageTolerance,
+                        slippageTolerance: fullOptions.slippageTolerance!,
                         type,
                         path,
                         route,
                         toTokenWeiAmountMin: new BigNumber(route.toAmountMin),
-                        useProxy: fullOptions.useProxy,
+                        useProxy: fullOptions.useProxy!,
                         proxyFeeInfo,
                         fromWithoutFee,
-                        withDeflation: fullOptions.withDeflation
+                        withDeflation: fullOptions.withDeflation!
                     };
 
                     const gasFeeInfo =
@@ -144,6 +140,20 @@ export class LifiProvider {
                 })
             )
         ).filter(notNull);
+        const bestTrade = this.getBestTrade(allTrades);
+        return bestTrade;
+    }
+
+    /**
+     * @description Lifi-aggregator provides several providers at the same time, this method chooses the most profitable trade
+     * @param trades all available lifiTrades
+     * @returns best trade
+     */
+    private getBestTrade(trades: LifiTrade[]): LifiTrade {
+        const best = trades.sort((prev, next) =>
+            next.to.tokenAmount.comparedTo(prev.to.tokenAmount)
+        )[0] as LifiTrade;
+        return best;
     }
 
     protected async handleProxyContract(
