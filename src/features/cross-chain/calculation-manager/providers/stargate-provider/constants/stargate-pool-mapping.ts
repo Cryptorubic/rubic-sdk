@@ -39,7 +39,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
             [BLOCKCHAIN_NAME.ARBITRUM]: [stargateBridgeToken.USDT, stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.OPTIMISM]: [stargateBridgeToken.USDC],
             [BLOCKCHAIN_NAME.FANTOM]: [stargateBridgeToken.FUSDC],
-            [BLOCKCHAIN_NAME.METIS]: [stargateBridgeToken.USDT]
+            [BLOCKCHAIN_NAME.METIS]: [stargateBridgeToken.mUSD]
         },
         [stargateBridgeToken.DAI]: {
             [BLOCKCHAIN_NAME.POLYGON]: [stargateBridgeToken.DAI],
