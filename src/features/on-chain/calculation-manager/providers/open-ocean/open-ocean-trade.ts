@@ -4,7 +4,7 @@ import {
     RubicSdkError,
     SwapRequestError
 } from 'src/common/errors';
-import { nativeTokensList } from 'src/common/tokens';
+import { nativeTokensList, PriceToken } from 'src/common/tokens';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { parseError } from 'src/common/utils/errors';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
@@ -155,12 +155,8 @@ export class OpenOceanTrade extends EvmOnChainTrade {
                     chain: openOceanBlockchainName[
                         this.from.blockchain as OpenoceanOnChainSupportedBlockchain
                     ],
-                    inTokenAddress: this.from.isNative
-                        ? OpenOceanTrade.nativeAddress
-                        : this.from.address,
-                    outTokenAddress: this.to.isNative
-                        ? OpenOceanTrade.nativeAddress
-                        : this.to.address,
+                    inTokenAddress: this.getTokenAddress(this.from),
+                    outTokenAddress: this.getTokenAddress(this.to),
                     amount: this.fromWithoutFee.tokenAmount.toString(),
                     gasPrice: isArbitrum
                         ? ARBITRUM_GAS_PRICE
@@ -182,5 +178,16 @@ export class OpenOceanTrade extends EvmOnChainTrade {
             data,
             to
         };
+    }
+
+    private getTokenAddress(token: PriceToken): string {
+        if (token.isNative) {
+            if (token.blockchain === BLOCKCHAIN_NAME.METIS) {
+                return '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
+            }
+
+            return OpenOceanTrade.nativeAddress;
+        }
+        return token.address;
     }
 }
