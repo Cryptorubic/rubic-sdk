@@ -8,7 +8,8 @@ import {
     GetTradeConstructorParamsType,
     RangoBestRouteQueryParams,
     RangoCrossChainTradeConstructorParams,
-    RangoSwapQueryParams
+    RangoSwapQueryParams,
+    RangoTxStatusQueryParams
 } from '../model/rango-parser-types';
 import { RangoCrossChainProvider } from '../rango-cross-chain-provider';
 import { RangoCrossChainTrade } from '../rango-cross-chain-trade';
@@ -55,7 +56,8 @@ export class RangoParamsParser {
         routePath,
         swapQueryParams,
         toToken,
-        toTokenAmountMin
+        toTokenAmountMin,
+        rangoRequestId
     }: GetTradeConstructorParamsType): Promise<RangoCrossChainTradeConstructorParams> {
         const gasData =
             options.gasCalculation === 'enabled'
@@ -64,8 +66,8 @@ export class RangoParamsParser {
                       toToken,
                       swapQueryParams,
                       feeInfo,
-                      options,
-                      routePath
+                      routePath,
+                      rangoRequestId
                   })
                 : null;
         const priceImpact = fromToken.calculatePriceImpactPercent(toToken);
@@ -79,7 +81,8 @@ export class RangoParamsParser {
             priceImpact,
             slippage,
             feeInfo,
-            swapQueryParams
+            swapQueryParams,
+            rangoRequestId
         };
 
         const providerAddress = options.providerAddress;
@@ -116,8 +119,10 @@ export class RangoParamsParser {
         const toAddress = options.receiverAddress || walletAddress;
 
         const slippage = options.slippageTolerance * 100;
+        const apiKey = RangoCrossChainProvider.apiKey;
 
         return {
+            apiKey,
             amount,
             from,
             to,
@@ -127,5 +132,14 @@ export class RangoParamsParser {
             ...(options.swappers && { swappers: options.swappers }),
             ...(options.swappersExclude && { swappersExclude: options.swappersExclude })
         };
+    }
+
+    public static getTxStatusQueryParams(
+        srcTxHash: string,
+        requestId: string
+    ): RangoTxStatusQueryParams {
+        const apiKey = RangoCrossChainProvider.apiKey;
+
+        return { apiKey, requestId, srcTxHash };
     }
 }

@@ -22,6 +22,7 @@ fromTokenSymbol(e.g. ETH, BNB etc.) and fromTokenContractAddress
  * @property {boolean} [swappersExclude] - Indicates include/exclude mode for the swappers param
  */
 export interface RangoSwapQueryParams {
+    apiKey: string;
     from: string;
     to: string;
     amount: string;
@@ -41,6 +42,7 @@ export interface RangoCrossChainTradeConstructorParams {
         priceImpact: number | null;
         slippage: number;
         swapQueryParams: RangoSwapQueryParams;
+        rangoRequestId: string;
     };
     providerAddress: string;
     routePath: RubicStep[];
@@ -55,6 +57,17 @@ export interface RangoBestRouteQueryParams {
     swappers?: EvmBlockchainName[];
     swappersExclude?: boolean;
 }
+
+/**
+ * @property {string} apiKey
+ * @property {string} requestId Random UUID returned in swap/quote methodes in response
+ * @property {string} srcTxHash In Rango-api used as `txId` queryParam in getTxStatus request
+ */
+export interface RangoTxStatusQueryParams {
+    apiKey: string;
+    requestId: string;
+    srcTxHash: string;
+}
 export interface GetTradeConstructorParamsType {
     fromToken: PriceTokenAmount<EvmBlockchainName>;
     toToken: PriceTokenAmount<EvmBlockchainName>;
@@ -63,6 +76,10 @@ export interface GetTradeConstructorParamsType {
     feeInfo: FeeInfo;
     toTokenAmountMin: BigNumber;
     swapQueryParams: RangoSwapQueryParams;
+    rangoRequestId: string;
 }
 
-export type RangoGetGasDataParams = Omit<GetTradeConstructorParamsType, 'toTokenAmountMin'>;
+export type RangoGetGasDataParams = Omit<
+    GetTradeConstructorParamsType,
+    'toTokenAmountMin' | 'options'
+>;

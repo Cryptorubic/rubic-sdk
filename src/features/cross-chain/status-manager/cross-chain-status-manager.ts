@@ -66,6 +66,9 @@ import {
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
+import { RangoApiService } from '../calculation-manager/providers/rango-provider/services/rango-cross-chain-api-service';
+import { RangoParamsParser } from '../calculation-manager/providers/rango-provider/services/rango-params-parser';
+import { RangoUtils } from '../calculation-manager/providers/rango-provider/utils/rango-utils';
 import { TAIKO_API_STATUS, TaikoApiResponse } from './models/taiko-api-response';
 
 /**
@@ -87,7 +90,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER]: this.getSquidrouterDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SCROLL_BRIDGE]: this.getScrollBridgeDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.TAIKO_BRIDGE]: this.getTaikoBridgeDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.TAIKO_BRIDGE]: this.getTaikoBridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus
     };
 
     /**
@@ -546,7 +550,7 @@ export class CrossChainStatusManager {
         }
     }
 
-    public async getArbitrumBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+    private async getArbitrumBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         const rpcProviders = Injector.web3PublicService.rpcProvider;
         const l1Provider = new JsonRpcProvider(
             rpcProviders[BLOCKCHAIN_NAME.ETHEREUM]!.rpcList[0]!,
@@ -634,7 +638,7 @@ export class CrossChainStatusManager {
         }
     }
 
-    public async getScrollBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+    private async getScrollBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         const response = await Injector.httpClient.post<ScrollApiResponse>(
             'https://alpha-api.scroll.io/bridgehistory/api/txsbyhashes',
             {
@@ -650,7 +654,7 @@ export class CrossChainStatusManager {
         return { status: TX_STATUS.PENDING, hash: null };
     }
 
-    public async getTaikoBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+    private async getTaikoBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         if (!data.taikoTransactionId) {
             throw new RubicSdkError('Must provide Taiko transaction ID');
         }
@@ -672,5 +676,20 @@ export class CrossChainStatusManager {
         }
 
         return { status: TX_STATUS.PENDING, hash: null };
+    }
+
+    private async getRangoDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        if (!data.rangoRequestId) {
+            throw new RubicSdkError('Must provide rangoRequestId');
+        }
+        const { srcTxHash, rangoRequestId } = data;
+        const params = RangoParamsParser.getTxStatusQueryParams(srcTxHash, rangoRequestId!);
+
+        const { bridgeData, status: txStatus } = await RangoApiService.getTxStatus(params);
+
+        const status = RangoUtils.convertStatusForRubic(txStatus!);
+        const hash = bridgeData!.destTxHash;
+
+        return { hash, status };
     }
 }

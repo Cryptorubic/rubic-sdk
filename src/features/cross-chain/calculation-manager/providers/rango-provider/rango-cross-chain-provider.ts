@@ -9,6 +9,7 @@ import { CalculationResult } from '../common/models/calculation-result';
 import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { RangoBestRouteSimulationResult } from './model/rango-api-best-route-types';
 import { RangoCrossChainOptions } from './model/rango-api-common-types';
 import {
     RangoCrossChainSupportedBlockchain,
@@ -47,11 +48,16 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            const { outputAmount, outputAmountMin } = await RangoApiService.getBestRoute(
+            const bestRouteParams = RangoParamsParser.getBestRouteQueryParams(
                 from,
                 toToken,
                 options
             );
+
+            const { route, requestId: rangoRequestId } = await RangoApiService.getBestRoute(
+                bestRouteParams
+            );
+            const { outputAmountMin, outputAmount } = route as RangoBestRouteSimulationResult;
 
             const toTokenExtended = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -85,7 +91,8 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 routePath,
                 feeInfo,
                 toTokenAmountMin,
-                swapQueryParams
+                swapQueryParams,
+                rangoRequestId
             });
 
             const trade = new RangoCrossChainTrade(tradeParams);

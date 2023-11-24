@@ -1,6 +1,7 @@
 import {
     AmountRestrictionType,
     ExpenseType,
+    RangoResponseToken,
     RoutingResultType,
     SwapperType
 } from './rango-api-common-types';
@@ -32,19 +33,6 @@ interface RangoSwapperMeta {
     logo: string;
     swapperGroup: string;
     types: SwapperType[];
-}
-
-interface RangoResponseToken {
-    blockchain: string;
-    chainId: string | null;
-    address: string | null;
-    symbol: string;
-    name: string;
-    decimals: number;
-    image: string;
-    blockchainImage: string;
-    usdPrice: number | null;
-    isPopular: boolean;
 }
 
 interface RangoQuotePath {

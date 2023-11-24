@@ -10,6 +10,19 @@ export type RangoCrossChainOptions = RequiredCrossChainOptions & {
     swappersExclude?: boolean;
 };
 
+export interface RangoResponseToken {
+    blockchain: string;
+    chainId: string | null;
+    address: string | null;
+    symbol: string;
+    name: string;
+    decimals: number;
+    image: string;
+    blockchainImage: string;
+    usdPrice: number | null;
+    isPopular: boolean;
+}
+
 export const RangoRoutingResult = {
     OK: 'OK',
     HIGH_IMPACT: 'HIGH_IMPACT',

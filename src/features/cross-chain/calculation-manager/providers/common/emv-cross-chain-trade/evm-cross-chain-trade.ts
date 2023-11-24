@@ -111,6 +111,10 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
 
     protected abstract swapDirect(options?: SwapTransactionOptions): Promise<string | never>;
 
+    /**
+     *
+     * @returns txHash(srcTxHash) | never
+     */
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         if (!this.isProxyTrade) {
             return this.swapDirect(options);
