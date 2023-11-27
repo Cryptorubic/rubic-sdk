@@ -25,16 +25,8 @@ export class RangoParamsParser {
         toToken: PriceToken<EvmBlockchainName>,
         options: RangoCrossChainOptions
     ): RangoBestRouteQueryParams {
-        const fromParam = RangoUtils.getFromToQueryParam(
-            from.blockchain,
-            from.symbol,
-            from.address
-        );
-        const toParam = RangoUtils.getFromToQueryParam(
-            toToken.blockchain,
-            toToken.symbol,
-            toToken.address
-        );
+        const fromParam = RangoUtils.getFromToQueryParam(from);
+        const toParam = RangoUtils.getFromToQueryParam(toToken);
         const amountParam = Web3Pure.toWei(from.tokenAmount);
         const apiKey = RangoCrossChainProvider.apiKey;
 
@@ -101,16 +93,8 @@ export class RangoParamsParser {
     ): RangoSwapQueryParams {
         const amount = Web3Pure.toWei(fromToken.tokenAmount);
 
-        const from = RangoUtils.getFromToQueryParam(
-            fromToken.blockchain,
-            fromToken.symbol,
-            fromToken.address
-        );
-        const to = RangoUtils.getFromToQueryParam(
-            toToken.blockchain,
-            toToken.symbol,
-            toToken.address
-        );
+        const from = RangoUtils.getFromToQueryParam(fromToken);
+        const to = RangoUtils.getFromToQueryParam(toToken);
 
         const walletAddress = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
             fromToken.blockchain

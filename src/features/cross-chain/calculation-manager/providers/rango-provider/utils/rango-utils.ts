@@ -1,3 +1,4 @@
+import { PriceToken } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import {
     TX_STATUS,
@@ -12,14 +13,16 @@ export class RangoUtils {
     /**
      * @returns Query-param string in format `chainName.symbol--address`, chainName's compatible with rango-api
      */
-    public static getFromToQueryParam(
-        blockchainName: EvmBlockchainName,
-        tokenSymbol: string,
-        tokenAddress: string
-    ): string {
+    public static getFromToQueryParam(token: PriceToken<EvmBlockchainName>): string {
+        const { blockchain, symbol, address, isNative } = token;
+
         const rangoBlockchainName =
-            rangoApiBlockchainNames[blockchainName as RangoCrossChainSupportedBlockchain];
-        const param = `${rangoBlockchainName}.${tokenSymbol}--${tokenAddress}`;
+            rangoApiBlockchainNames[blockchain as RangoCrossChainSupportedBlockchain];
+
+        const param = isNative
+            ? `${rangoBlockchainName}.${symbol}`
+            : `${rangoBlockchainName}.${symbol}--${address}`;
+
         return param;
     }
 
