@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { BytesLike } from 'ethers';
 import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -455,7 +455,8 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
-            slippage: this.slippageTolerance * 100,
+            slippage:
+                this.fromBlockchain === BLOCKCHAIN_NAME.METIS ? 1 : this.slippageTolerance * 100,
             routePath: this.routePath
         };
     }
