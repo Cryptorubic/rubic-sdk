@@ -104,6 +104,14 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 dstQuoteTokenAmount
             } = routes[0]!;
 
+            console.log('============================');
+            console.log('Src swap provider: ', srcSwapDescription?.provider);
+            console.log('Src swap dexNames: ', srcSwapDescription?.dexNames);
+            console.log('Bridge swap provider: ', bridgeDescription?.provider);
+            console.log('Dst swap provider: ', dstSwapDescription?.provider);
+            console.log('Dst swap dexNames: ', dstSwapDescription?.dexNames);
+            console.log('============================');
+
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(dstQuoteTokenAmount, toToken.decimals)
