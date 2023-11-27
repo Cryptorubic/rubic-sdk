@@ -97,6 +97,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
             const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
             const useProxy = options?.useProxy?.[this.type] ?? true;
+            const slippageTolerance =
+                from.blockchain === BLOCKCHAIN_NAME.METIS ? 0.01 : options.slippageTolerance;
 
             if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
                 return {
@@ -143,7 +145,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 const trade = await ProxyCrossChainEvmTrade.getOnChainTrade(
                     fromWithoutFee,
                     transitToken,
-                    options.slippageTolerance / 2,
+                    slippageTolerance / 2,
                     true
                 );
                 if (!trade) {
@@ -199,7 +201,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                           feeInfo,
                           srcChainTrade,
                           dstChainTrade,
-                          options.slippageTolerance,
+                          slippageTolerance,
                           options.providerAddress,
                           options.receiverAddress
                       )
@@ -210,7 +212,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                     {
                         from,
                         to,
-                        slippageTolerance: options.slippageTolerance,
+                        slippageTolerance,
                         priceImpact: transitTokenAmount.calculatePriceImpactPercent(to),
                         gasData,
                         feeInfo,
