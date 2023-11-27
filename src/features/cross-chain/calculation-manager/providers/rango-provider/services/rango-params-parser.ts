@@ -27,7 +27,7 @@ export class RangoParamsParser {
     ): RangoBestRouteQueryParams {
         const fromParam = RangoUtils.getFromToQueryParam(from);
         const toParam = RangoUtils.getFromToQueryParam(toToken);
-        const amountParam = Web3Pure.toWei(from.tokenAmount);
+        const amountParam = Web3Pure.toWei(from.tokenAmount, from.decimals);
         const apiKey = RangoCrossChainProvider.apiKey;
 
         return {
@@ -88,10 +88,10 @@ export class RangoParamsParser {
 
     public static getSwapQueryParams(
         fromToken: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         options: RangoCrossChainOptions
     ): RangoSwapQueryParams {
-        const amount = Web3Pure.toWei(fromToken.tokenAmount);
+        const amount = Web3Pure.toWei(fromToken.tokenAmount, fromToken.decimals);
 
         const from = RangoUtils.getFromToQueryParam(fromToken);
         const to = RangoUtils.getFromToQueryParam(toToken);

@@ -2,6 +2,7 @@ import { NotSupportedBlockchain } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { CrossChainProvider } from '../common/cross-chain-provider';
@@ -39,7 +40,11 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RangoCrossChainOptions
     ): Promise<CalculationResult> {
-        if (!this.areSupportedBlockchains(from.blockchain, toToken.blockchain)) {
+        const fromBlockchain = from.blockchain as RangoCrossChainSupportedBlockchain;
+        const toBlockchain = toToken.blockchain as RangoCrossChainSupportedBlockchain;
+        const useProxy = options?.useProxy?.[this.type] ?? true;
+
+        if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return {
                 error: new NotSupportedBlockchain(),
                 trade: null,
@@ -48,8 +53,20 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            const bestRouteParams = RangoParamsParser.getBestRouteQueryParams(
+            const feeInfo = await this.getFeeInfo(
+                fromBlockchain,
+                options.providerAddress,
                 from,
+                useProxy
+            );
+
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
+
+            const bestRouteParams = RangoParamsParser.getBestRouteQueryParams(
+                fromWithoutFee,
                 toToken,
                 options
             );
@@ -59,34 +76,22 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             );
             const { outputAmountMin, outputAmount } = route as RangoBestRouteSimulationResult;
 
-            const toTokenExtended = new PriceTokenAmount({
+            const swapQueryParams = RangoParamsParser.getSwapQueryParams(
+                fromWithoutFee,
+                toToken,
+                options
+            );
+            ////////// CHECK WHERE THIS PARAM IS TAKEN IN OTHERS
+            const toTokenAmountMin = Web3Pure.fromWei(outputAmountMin, toToken.decimals);
+            const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(outputAmount, toToken.decimals)
             });
-
-            const fromBlockchain = from.blockchain as RangoCrossChainSupportedBlockchain;
-            const useProxy = options?.useProxy?.[this.type] ?? true;
-
-            const feeInfo = await this.getFeeInfo(
-                fromBlockchain,
-                options.providerAddress,
-                from,
-                useProxy
-            );
-
-            const routePath = await this.getRoutePath(from, toTokenExtended);
-
-            const swapQueryParams = RangoParamsParser.getSwapQueryParams(
-                from,
-                toTokenExtended,
-                options
-            );
-
-            const toTokenAmountMin = Web3Pure.fromWei(outputAmountMin, toToken.decimals);
+            const routePath = await this.getRoutePath(from, to);
 
             const tradeParams = await RangoParamsParser.getTradeConstructorParams({
                 fromToken: from,
-                toToken: toTokenExtended,
+                toToken: to,
                 options,
                 routePath,
                 feeInfo,
