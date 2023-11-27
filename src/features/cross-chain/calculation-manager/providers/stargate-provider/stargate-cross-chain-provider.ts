@@ -51,12 +51,9 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     public isSupportedBlockchain(
         blockchain: BlockchainName
     ): blockchain is StargateCrossChainSupportedBlockchain {
-        const bool = stargateCrossChainSupportedBlockchains.some(
+        return stargateCrossChainSupportedBlockchains.some(
             supportedBlockchain => supportedBlockchain === blockchain
         );
-        console.log('Stargate chain: ', blockchain);
-        console.log('Stargate check: ', bool);
-        return bool;
     }
 
     private static hasDirectRoute(
@@ -452,6 +449,9 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     public static getSymbol(symbol: string, blockchain: BlockchainName): string {
         if (blockchain === BLOCKCHAIN_NAME.ARBITRUM && symbol === 'AETH') {
             return 'ETH';
+        }
+        if (blockchain === BLOCKCHAIN_NAME.AVALANCHE && symbol === 'USDt') {
+            return 'USDT';
         }
         if (blockchain === BLOCKCHAIN_NAME.FANTOM && symbol === 'USDC') {
             return 'FUSDC';
