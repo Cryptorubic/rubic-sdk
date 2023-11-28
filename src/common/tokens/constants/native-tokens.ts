@@ -375,5 +375,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'ETH',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.METER]: new Token({
+        blockchain: BLOCKCHAIN_NAME.METER,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Meter Stable',
+        symbol: 'MTR',
+        decimals: 18
     })
 };

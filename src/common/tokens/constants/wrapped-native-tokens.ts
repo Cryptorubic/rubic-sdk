@@ -366,5 +366,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped ETH',
         symbol: 'WETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.METER]: new Token({
+        blockchain: BLOCKCHAIN_NAME.METER,
+        address: '0x160361ce13ec33c993b5cca8f62b6864943eb083',
+        name: 'WMTR',
+        symbol: 'WMTR',
+        decimals: 18
     })
 };
