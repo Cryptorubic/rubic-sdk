@@ -98,7 +98,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
             const useProxy = options?.useProxy?.[this.type] ?? true;
             const slippageTolerance =
-                from.blockchain === BLOCKCHAIN_NAME.METIS ? 0.005 : options.slippageTolerance;
+                from.blockchain === BLOCKCHAIN_NAME.METIS ? 0.01 : options.slippageTolerance;
 
             if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
                 return {
