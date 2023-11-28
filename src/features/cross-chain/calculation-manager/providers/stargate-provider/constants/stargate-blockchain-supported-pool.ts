@@ -37,7 +37,8 @@ export const stargateBlockchainSupportedPools: Record<
         stargatePoolId[stargateBridgeToken.USDC],
         stargatePoolId[stargateBridgeToken.USDT],
         stargatePoolId[stargateBridgeToken.MAI],
-        stargatePoolId[stargateBridgeToken.FRAX]
+        stargatePoolId[stargateBridgeToken.FRAX],
+        stargatePoolId[stargateBridgeToken.METIS]
     ],
     [BLOCKCHAIN_NAME.FANTOM]: [stargatePoolId[stargateBridgeToken.FUSDC]],
     [BLOCKCHAIN_NAME.ARBITRUM]: [
