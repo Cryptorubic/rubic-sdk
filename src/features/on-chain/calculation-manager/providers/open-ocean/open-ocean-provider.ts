@@ -40,15 +40,18 @@ export class OpenOceanProvider {
     constructor() {}
 
     public async calculate(
-        from: PriceTokenAmount<EvmBlockchainName>,
+        fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
         try {
-            this.checkIsSupportedBlockchain(from.blockchain);
-            await this.checkIsSupportedTokens(from, toToken);
-            const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
-            const blockchain = from.blockchain as OpenoceanOnChainSupportedBlockchain;
+            this.checkIsSupportedBlockchain(fromToken.blockchain);
+            await this.checkIsSupportedTokens(fromToken, toToken);
+            const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(
+                fromToken,
+                options
+            );
+            const blockchain = fromToken.blockchain as OpenoceanOnChainSupportedBlockchain;
             const gasPrice = await Injector.web3PublicService
                 .getWeb3Public(blockchain)
                 .getGasPrice();
@@ -64,7 +67,10 @@ export class OpenOceanProvider {
                         slippage: options.slippageTolerance! * 100,
                         gasPrice: isArbitrum
                             ? ARBITRUM_GAS_PRICE
-                            : Web3Pure.fromWei(gasPrice, nativeTokensList[from.blockchain].decimals)
+                            : Web3Pure.fromWei(
+                                  gasPrice,
+                                  nativeTokensList[fromToken.blockchain].decimals
+                              )
                                   .multipliedBy(10 ** 9)
                                   .toString()
                     }
@@ -79,6 +85,11 @@ export class OpenOceanProvider {
                 };
             }
 
+            const from = new PriceTokenAmount({
+                ...fromToken.asStruct,
+                tokenAmount: fromToken.tokenAmount,
+                address: this.getTokenAddress(fromToken)
+            });
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 weiAmount: new BigNumber(quoteResponse.data.outAmount)
@@ -93,7 +104,7 @@ export class OpenOceanProvider {
                     gasLimit: new BigNumber(quoteResponse.data.estimatedGas)
                 },
                 slippageTolerance: options.slippageTolerance!,
-                path: [from, to],
+                path: [fromToken, to],
                 toTokenWeiAmountMin,
                 useProxy: options.useProxy,
                 proxyFeeInfo,

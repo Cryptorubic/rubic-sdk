@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "4.40.0-alpha-metis-promo.7",
+    "version": "4.40.0-alpha-metis-promo.9",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
