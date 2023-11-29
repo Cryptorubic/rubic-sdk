@@ -1,15 +1,4 @@
-import { RequiredCrossChainOptions } from '../../../models/cross-chain-options';
 import { RangoBlockchainName } from '../constants/rango-api-blockchain-names';
-import { RangoCrossChainSupportedBlockchain } from './rango-cross-chain-supported-blockchains';
-
-/**
- * @property {RangoCrossChainSupportedBlockchain[]} swappers List of all accepted swappers (e.g. providers), an empty list means no filter is required
- * @property {boolean} [swappersExclude] - Indicates include/exclude mode for the swappers param
- */
-export type RangoCrossChainOptions = RequiredCrossChainOptions & {
-    swappers?: RangoCrossChainSupportedBlockchain[];
-    swappersExclude?: boolean;
-};
 
 export interface RangoResponseToken {
     blockchain: RangoBlockchainName;

@@ -9,8 +9,8 @@ import {
     rangoApiBlockchainNames,
     RangoBlockchainName
 } from '../constants/rango-api-blockchain-names';
-import { RANGO_SWAP_STATUS, RangoSwapStatus } from '../model/rango-api-status-types';
-import { RangoCrossChainSupportedBlockchain } from '../model/rango-cross-chain-supported-blockchains';
+import { RANGO_SWAP_STATUS, RangoSwapStatus } from '../models/rango-api-status-types';
+import { RangoSupportedBlockchain } from '../models/rango-supported-blockchains';
 
 export class RangoUtils {
     /**
@@ -19,8 +19,7 @@ export class RangoUtils {
     public static getFromToQueryParam(token: PriceToken<EvmBlockchainName>): string {
         const { blockchain, symbol, address, isNative } = token;
 
-        const rangoBlockchainName =
-            rangoApiBlockchainNames[blockchain as RangoCrossChainSupportedBlockchain];
+        const rangoBlockchainName = rangoApiBlockchainNames[blockchain as RangoSupportedBlockchain];
 
         const param = isNative
             ? `${rangoBlockchainName}.${symbol}`

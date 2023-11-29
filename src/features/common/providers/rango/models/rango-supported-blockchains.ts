@@ -1,6 +1,6 @@
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
-export const rangoCrossChainSupportedBlockchains = [
+export const rangoSupportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,
     BLOCKCHAIN_NAME.POLYGON,
     BLOCKCHAIN_NAME.OPTIMISM,
@@ -19,5 +19,4 @@ export const rangoCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.BOBA_AVALANCHE
 ] as const;
 
-export type RangoCrossChainSupportedBlockchain =
-    (typeof rangoCrossChainSupportedBlockchains)[number];
+export type RangoSupportedBlockchain = (typeof rangoSupportedBlockchains)[number];

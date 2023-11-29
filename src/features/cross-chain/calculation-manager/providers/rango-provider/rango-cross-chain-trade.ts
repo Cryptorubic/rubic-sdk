@@ -10,6 +10,10 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { RangoContractAddresses } from 'src/features/common/providers/rango/constants/rango-contract-address';
+import { RangoSwapQueryParams } from 'src/features/common/providers/rango/models/rango-parser-types';
+import { RangoSupportedBlockchain } from 'src/features/common/providers/rango/models/rango-supported-blockchains';
+import { RangoApiService } from 'src/features/common/providers/rango/services/rango-api-service';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
@@ -24,14 +28,10 @@ import { GetContractParamsOptions } from '../common/models/get-contract-params-o
 import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { RangoContractAddresses } from './constants/rango-contract-address';
-import { RangoCrossChainSupportedBlockchain } from './model/rango-cross-chain-supported-blockchains';
 import {
     RangoCrossChainTradeConstructorParams,
-    RangoGetGasDataParams,
-    RangoSwapQueryParams
-} from './model/rango-parser-types';
-import { RangoApiService } from './services/rango-cross-chain-api-service';
+    RangoGetGasDataParams
+} from './model/rango-cross-chain-parser-types';
 
 export class RangoCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -154,8 +154,8 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly swapQueryParams: RangoSwapQueryParams;
 
-    private get fromBlockchain(): RangoCrossChainSupportedBlockchain {
-        return this.from.blockchain as RangoCrossChainSupportedBlockchain;
+    private get fromBlockchain(): RangoSupportedBlockchain {
+        return this.from.blockchain as RangoSupportedBlockchain;
     }
 
     protected get fromContractAddress(): string {

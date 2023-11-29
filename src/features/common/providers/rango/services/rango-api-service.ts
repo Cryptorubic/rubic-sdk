@@ -1,23 +1,24 @@
 import { RubicSdkError } from 'src/common/errors';
 import { Injector } from 'src/core/injector/injector';
 
-import { RangoBestRouteResponse } from '../model/rango-api-best-route-types';
-import { HttpClientParams } from '../model/rango-api-common-types';
-import { RangoTxStatusResponse } from '../model/rango-api-status-types';
-import { RangoSwapTransactionResponse } from '../model/rango-api-swap-types';
+import { RANGO_API_ENDPOINT } from '../constants/rango-api-common';
+import { RangoBestRouteResponse } from '../models/rango-api-best-route-types';
+import { HttpClientParams } from '../models/rango-api-common-types';
+import { RangoTxStatusResponse } from '../models/rango-api-status-types';
+import { RangoSwapTransactionResponse } from '../models/rango-api-swap-types';
 import {
     RangoBestRouteQueryParams,
     RangoSwapQueryParams,
     RangoTxStatusQueryParams
-} from '../model/rango-parser-types';
-import { RangoCrossChainProvider } from '../rango-cross-chain-provider';
+} from '../models/rango-parser-types';
+
 export class RangoApiService {
     public static async getBestRoute(
         params: RangoBestRouteQueryParams
     ): Promise<RangoBestRouteResponse> {
         try {
             const res = await Injector.httpClient.get<RangoBestRouteResponse>(
-                `${RangoCrossChainProvider.apiEndpoint}/quote`,
+                `${RANGO_API_ENDPOINT}/quote`,
                 {
                     params: params as unknown as HttpClientParams
                 }
@@ -36,7 +37,7 @@ export class RangoApiService {
     ): Promise<RangoSwapTransactionResponse> {
         try {
             const res = await Injector.httpClient.get<RangoSwapTransactionResponse>(
-                `${RangoCrossChainProvider.apiEndpoint}/swap`,
+                `${RANGO_API_ENDPOINT}/swap`,
                 { params: params as unknown as HttpClientParams }
             );
 
@@ -57,7 +58,7 @@ export class RangoApiService {
     ): Promise<RangoTxStatusResponse> {
         try {
             const res = await Injector.httpClient.get<RangoTxStatusResponse>(
-                `${RangoCrossChainProvider.apiEndpoint}/status`,
+                `${RANGO_API_ENDPOINT}/status`,
                 { params: params as unknown as HttpClientParams }
             );
 

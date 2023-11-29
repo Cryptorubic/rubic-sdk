@@ -1,12 +1,6 @@
-import BigNumber from 'bignumber.js';
-import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
-import { GasData } from '../../common/emv-cross-chain-trade/models/gas-data';
-import { FeeInfo } from '../../common/models/fee-info';
-import { RubicStep } from '../../common/models/rubicStep';
-import { RangoCrossChainOptions } from './rango-api-common-types';
-import { RangoCrossChainSupportedBlockchain } from './rango-cross-chain-supported-blockchains';
+import { RangoSupportedBlockchain } from './rango-supported-blockchains';
 
 /**
  * @property {string} from 
@@ -18,7 +12,7 @@ fromTokenSymbol(e.g. ETH, BNB etc.) and fromTokenContractAddress
  * @property {string} slippage Amount of user's preferred slippage in percent
  * @property {string} fromAddress User wallet address
  * @property {string} toAddress Destination wallet address
- * @property {RangoCrossChainSupportedBlockchain[]} swappers List of all accepted swappers (e.g. providers), an empty list means no filter is required
+ * @property {RangoSupportedBlockchain[]} swappers List of all accepted swappers (e.g. providers), an empty list means no filter is required
  * @property {boolean} [swappersExclude] - Indicates include/exclude mode for the swappers param
  */
 export interface RangoSwapQueryParams {
@@ -29,23 +23,8 @@ export interface RangoSwapQueryParams {
     slippage: number;
     fromAddress: string;
     toAddress: string;
-    swappers?: RangoCrossChainSupportedBlockchain[];
+    swappers?: RangoSupportedBlockchain[];
     swappersExclude?: boolean;
-}
-export interface RangoCrossChainTradeConstructorParams {
-    crossChainTrade: {
-        from: PriceTokenAmount<EvmBlockchainName>;
-        to: PriceTokenAmount<EvmBlockchainName>;
-        gasData: GasData | null;
-        toTokenAmountMin: BigNumber;
-        feeInfo: FeeInfo;
-        priceImpact: number | null;
-        slippage: number;
-        swapQueryParams: RangoSwapQueryParams;
-        rangoRequestId: string;
-    };
-    providerAddress: string;
-    routePath: RubicStep[];
 }
 
 export interface RangoBestRouteQueryParams {
@@ -68,18 +47,3 @@ export interface RangoTxStatusQueryParams {
     requestId: string;
     srcTxHash: string;
 }
-export interface GetTradeConstructorParamsType {
-    fromToken: PriceTokenAmount<EvmBlockchainName>;
-    toToken: PriceTokenAmount<EvmBlockchainName>;
-    options: RangoCrossChainOptions;
-    routePath: RubicStep[];
-    feeInfo: FeeInfo;
-    toTokenAmountMin: BigNumber;
-    swapQueryParams: RangoSwapQueryParams;
-    rangoRequestId: string;
-}
-
-export type RangoGetGasDataParams = Omit<
-    GetTradeConstructorParamsType,
-    'toTokenAmountMin' | 'options'
->;
