@@ -89,10 +89,19 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     }
 
     public async calculate(
-        from: PriceTokenAmount<EvmBlockchainName>,
+        fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
+        const from = new PriceTokenAmount({
+            ...fromToken.asStruct,
+            tokenAmount: fromToken.tokenAmount,
+            address:
+                fromToken.isNative && fromToken.blockchain === BLOCKCHAIN_NAME.METIS
+                    ? '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
+                    : fromToken.address
+        });
+
         try {
             const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
             const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
