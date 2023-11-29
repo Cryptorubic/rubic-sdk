@@ -63,7 +63,11 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = to.blockchain as StargateCrossChainSupportedBlockchain;
         const fromSymbol = StargateCrossChainProvider.getSymbol(from.symbol, fromBlockchain);
-        const toSymbol = StargateCrossChainProvider.getSymbol(to.symbol, toBlockchain);
+        const toSymbol = StargateCrossChainProvider.getSymbol(
+            to.symbol,
+            toBlockchain,
+            fromBlockchain === BLOCKCHAIN_NAME.METIS
+        );
 
         const srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
         const srcSupportedPools = stargateBlockchainSupportedPools[fromBlockchain];
@@ -301,7 +305,11 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
 
         const fromSymbol = StargateCrossChainProvider.getSymbol(fromToken.symbol, fromBlockchain);
-        const toSymbol = StargateCrossChainProvider.getSymbol(toToken.symbol, toBlockchain);
+        const toSymbol = StargateCrossChainProvider.getSymbol(
+            toToken.symbol,
+            toBlockchain,
+            fromBlockchain === BLOCKCHAIN_NAME.METIS
+        );
 
         let srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
         let dstPoolId = stargatePoolId[toSymbol as StargateBridgeToken];
@@ -457,9 +465,27 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    public static getSymbol(symbol: string, blockchain: BlockchainName): string {
+    public static getSymbol(
+        symbol: string,
+        blockchain: BlockchainName,
+        swapFromMetis?: boolean
+    ): string {
         if (blockchain === BLOCKCHAIN_NAME.ARBITRUM && symbol === 'AETH') {
             return 'ETH';
+        }
+
+        if (
+            swapFromMetis &&
+            (blockchain === BLOCKCHAIN_NAME.AVALANCHE ||
+                blockchain === BLOCKCHAIN_NAME.ETHEREUM ||
+                blockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN) &&
+            symbol.toLowerCase() === 'usdt'
+        ) {
+            return 'm.USDT';
+        }
+
+        if (blockchain === BLOCKCHAIN_NAME.AVALANCHE && symbol === 'USDt') {
+            return 'USDT';
         }
         if (blockchain === BLOCKCHAIN_NAME.AVALANCHE && symbol === 'USDt') {
             return 'USDT';

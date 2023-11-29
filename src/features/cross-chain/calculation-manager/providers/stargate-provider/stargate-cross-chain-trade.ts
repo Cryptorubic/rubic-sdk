@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { BytesLike } from 'ethers';
 import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -300,7 +300,11 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         const dstChainId = stargateChainId[toBlockchain];
 
         const fromSymbol = StargateCrossChainProvider.getSymbol(from.symbol, fromBlockchain);
-        const toSymbol = StargateCrossChainProvider.getSymbol(to.symbol, toBlockchain);
+        const toSymbol = StargateCrossChainProvider.getSymbol(
+            to.symbol,
+            toBlockchain,
+            fromBlockchain === BLOCKCHAIN_NAME.METIS
+        );
 
         let srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
         let dstPoolId = stargatePoolId[toSymbol as StargateBridgeToken];
@@ -472,7 +476,11 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         dstSwapData?: string,
         receiverAddress?: string
     ): unknown[] {
-        const toSymbol = StargateCrossChainProvider.getSymbol(this.to.symbol, this.to.blockchain);
+        const toSymbol = StargateCrossChainProvider.getSymbol(
+            this.to.symbol,
+            this.to.blockchain,
+            this.fromBlockchain === BLOCKCHAIN_NAME.METIS
+        );
         const pool = stargatePoolId[toSymbol as StargateBridgeToken];
         const targetPoolDecimals = stargatePoolsDecimals[this.to.symbol as StargateBridgeToken];
         const amount = Web3Pure.toWei(this.toTokenAmountMin, targetPoolDecimals);

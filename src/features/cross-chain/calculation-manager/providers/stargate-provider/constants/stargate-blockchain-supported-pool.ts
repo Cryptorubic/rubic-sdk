@@ -18,14 +18,16 @@ export const stargateBlockchainSupportedPools: Record<
         stargatePoolId[stargateBridgeToken.sUSD],
         stargatePoolId[stargateBridgeToken.LUSD],
         stargatePoolId[stargateBridgeToken.MAI],
-        stargatePoolId[stargateBridgeToken.METIS]
+        stargatePoolId[stargateBridgeToken.METIS],
+        stargatePoolId[stargateBridgeToken.mUSD]
     ],
     [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: [
         stargatePoolId[stargateBridgeToken.USDT],
         stargatePoolId[stargateBridgeToken.BUSD],
         stargatePoolId[stargateBridgeToken.USDD],
         stargatePoolId[stargateBridgeToken.MAI],
-        stargatePoolId[stargateBridgeToken.METIS]
+        stargatePoolId[stargateBridgeToken.METIS],
+        stargatePoolId[stargateBridgeToken.mUSD]
     ],
     [BLOCKCHAIN_NAME.POLYGON]: [
         stargatePoolId[stargateBridgeToken.USDC],
@@ -38,7 +40,8 @@ export const stargateBlockchainSupportedPools: Record<
         stargatePoolId[stargateBridgeToken.USDT],
         stargatePoolId[stargateBridgeToken.MAI],
         stargatePoolId[stargateBridgeToken.FRAX],
-        stargatePoolId[stargateBridgeToken.METIS]
+        stargatePoolId[stargateBridgeToken.METIS],
+        stargatePoolId[stargateBridgeToken.mUSD]
     ],
     [BLOCKCHAIN_NAME.FANTOM]: [stargatePoolId[stargateBridgeToken.FUSDC]],
     [BLOCKCHAIN_NAME.ARBITRUM]: [
