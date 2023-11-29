@@ -18,7 +18,7 @@ export class IzumiMeterProvider extends IzumiProvider {
             '0x55137322647150d4ff0de22967589690c57a24d3', // IZI
             '0x46b40202da16761633e757674661683fd733b845' // iUSD
         ],
-        multicallAddress: '',
-        supportedFees: [10000, 3000, 500]
+        multicallAddress: '0x98d10345627450233Bac4C52079Bd7d1F32b576F',
+        supportedFees: [10000, 2000, 400]
     };
 }
