@@ -1,4 +1,5 @@
 import { RequiredCrossChainOptions } from '../../../models/cross-chain-options';
+import { RangoBlockchainName } from '../constants/rango-api-blockchain-names';
 import { RangoCrossChainSupportedBlockchain } from './rango-cross-chain-supported-blockchains';
 
 /**
@@ -11,7 +12,7 @@ export type RangoCrossChainOptions = RequiredCrossChainOptions & {
 };
 
 export interface RangoResponseToken {
-    blockchain: string;
+    blockchain: RangoBlockchainName;
     chainId: string | null;
     address: string | null;
     symbol: string;
@@ -34,10 +35,13 @@ export interface HttpClientParams {
     [param: string]: string | number | boolean | readonly (string | number | boolean)[];
 }
 
-export type SwapperType = 'BRIDGE' | 'DEX' | 'AGGREGATOR';
+export type RangoSwapperType = 'BRIDGE' | 'DEX' | 'AGGREGATOR';
 
-export type ExpenseType = 'FROM_SOURCE_WALLET' | 'DECREASE_FROM_OUTPUT' | 'FROM_DESTINATION_WALLET';
+export type RangoExpenseType =
+    | 'FROM_SOURCE_WALLET'
+    | 'DECREASE_FROM_OUTPUT'
+    | 'FROM_DESTINATION_WALLET';
 
-export type AmountRestrictionType = 'INCLUSIVE' | 'EXCLUSIVE';
+export type RangoAmountRestrictionType = 'INCLUSIVE' | 'EXCLUSIVE';
 
-export type RoutingResultType = (typeof RangoRoutingResult)[keyof typeof RangoRoutingResult];
+export type RangoRoutingResultType = (typeof RangoRoutingResult)[keyof typeof RangoRoutingResult];

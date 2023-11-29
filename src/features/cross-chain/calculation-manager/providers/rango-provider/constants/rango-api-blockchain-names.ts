@@ -20,3 +20,5 @@ export const rangoApiBlockchainNames: Record<RangoCrossChainSupportedBlockchain,
     [BLOCKCHAIN_NAME.BOBA_BSC]: 'BOBA_BNB',
     [BLOCKCHAIN_NAME.BOBA_AVALANCHE]: 'BOBA_AVALANCHE'
 };
+
+export type RangoBlockchainName = keyof typeof rangoApiBlockchainNames;

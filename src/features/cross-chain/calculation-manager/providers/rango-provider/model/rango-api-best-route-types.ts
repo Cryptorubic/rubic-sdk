@@ -1,14 +1,14 @@
 import {
-    AmountRestrictionType,
-    ExpenseType,
+    RangoAmountRestrictionType,
+    RangoExpenseType,
     RangoResponseToken,
-    RoutingResultType,
-    SwapperType
+    RangoRoutingResultType,
+    RangoSwapperType
 } from './rango-api-common-types';
 
 export interface RangoBestRouteResponse {
     requestId: string;
-    resultType: RoutingResultType;
+    resultType: RangoRoutingResultType;
     route: RangoBestRouteSimulationResult | null;
     error: string | null;
 }
@@ -32,27 +32,28 @@ interface RangoSwapperMeta {
     title: string;
     logo: string;
     swapperGroup: string;
-    types: SwapperType[];
+    types: RangoSwapperType[];
 }
 
-interface RangoQuotePath {
+export interface RangoQuotePath {
     from: RangoResponseToken;
     to: RangoResponseToken;
     swapper: RangoSwapperMeta;
-    swapperType: SwapperType;
+    swapperType: RangoSwapperType;
     expectedOutput: string;
+    inputAmount: string;
     estimatedTimeInSeconds: number;
 }
 
 interface RangoSwapFee {
     name: string;
     token: RangoResponseToken;
-    expenseType: ExpenseType;
+    expenseType: RangoExpenseType;
     amount: string;
 }
 
 interface RangoAmountRestriction {
     min: string | null;
     max: string | null;
-    type: AmountRestrictionType;
+    type: RangoAmountRestrictionType;
 }

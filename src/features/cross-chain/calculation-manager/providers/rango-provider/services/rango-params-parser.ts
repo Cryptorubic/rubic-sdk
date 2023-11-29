@@ -1,4 +1,4 @@
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -27,7 +27,10 @@ export class RangoParamsParser {
     ): RangoBestRouteQueryParams {
         const fromParam = RangoUtils.getFromToQueryParam(from);
         const toParam = RangoUtils.getFromToQueryParam(toToken);
-        const amountParam = Web3Pure.toWei(from.tokenAmount, from.decimals);
+
+        const nativeToken = nativeTokensList[from.blockchain];
+        const amountParam = Web3Pure.toWei(from.tokenAmount, nativeToken.decimals);
+
         const apiKey = RangoCrossChainProvider.apiKey;
 
         return {

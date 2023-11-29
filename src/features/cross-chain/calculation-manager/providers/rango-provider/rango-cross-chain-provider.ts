@@ -1,5 +1,7 @@
+import BigNumber from 'bignumber.js';
 import { NotSupportedBlockchain } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import { Any } from 'src/common/utils/types';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -10,7 +12,7 @@ import { CalculationResult } from '../common/models/calculation-result';
 import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { RangoBestRouteSimulationResult } from './model/rango-api-best-route-types';
+import { RangoBestRouteSimulationResult, RangoQuotePath } from './model/rango-api-best-route-types';
 import { RangoCrossChainOptions } from './model/rango-api-common-types';
 import {
     RangoCrossChainSupportedBlockchain,
@@ -19,6 +21,7 @@ import {
 import { RangoCrossChainTrade } from './rango-cross-chain-trade';
 import { RangoApiService } from './services/rango-cross-chain-api-service';
 import { RangoParamsParser } from './services/rango-params-parser';
+import { RangoUtils } from './utils/rango-utils';
 
 export class RangoCrossChainProvider extends CrossChainProvider {
     public type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.RANGO;
@@ -74,20 +77,20 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             const { route, requestId: rangoRequestId } = await RangoApiService.getBestRoute(
                 bestRouteParams
             );
-            const { outputAmountMin, outputAmount } = route as RangoBestRouteSimulationResult;
+            const { outputAmountMin, outputAmount, path } = route as RangoBestRouteSimulationResult;
 
             const swapQueryParams = RangoParamsParser.getSwapQueryParams(
                 fromWithoutFee,
                 toToken,
                 options
             );
-            ////////// CHECK WHERE THIS PARAM IS TAKEN IN OTHERS
+
             const toTokenAmountMin = Web3Pure.fromWei(outputAmountMin, toToken.decimals);
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(outputAmount, toToken.decimals)
             });
-            const routePath = await this.getRoutePath(from, to);
+            const routePath = await this.getRoutePath(from, to, path);
 
             const tradeParams = await RangoParamsParser.getTradeConstructorParams({
                 fromToken: from,
@@ -117,9 +120,42 @@ export class RangoCrossChainProvider extends CrossChainProvider {
 
     protected async getRoutePath(
         fromToken: PriceTokenAmount<EvmBlockchainName>,
-        toToken: PriceTokenAmount<EvmBlockchainName>
+        toToken: PriceTokenAmount<EvmBlockchainName>,
+        path: RangoQuotePath[] | null
     ): Promise<RubicStep[]> {
-        return [{ type: 'cross-chain', provider: this.type, path: [fromToken, toToken] }];
+        if (!path) {
+            return [{ type: 'cross-chain', provider: this.type, path: [fromToken, toToken] }];
+        }
+
+        const routePath: RubicStep[] = [];
+
+        path.forEach(async step => {
+            const type = step.swapperType === 'DEX' ? 'on-chain' : 'cross-chain';
+            const fromBlockchain = RangoUtils.getRubicBlockchainByRangoBlockchain(
+                step.from.blockchain
+            );
+            const toBlockchain = RangoUtils.getRubicBlockchainByRangoBlockchain(step.to.blockchain);
+
+            const fromTokenAmount = await TokenAmount.createToken({
+                address: step.from.address!,
+                blockchain: fromBlockchain,
+                weiAmount: new BigNumber(step.inputAmount)
+            });
+
+            const toTokenAmount = await TokenAmount.createToken({
+                address: step.to.address!,
+                blockchain: toBlockchain,
+                weiAmount: new BigNumber(step.expectedOutput)
+            });
+
+            routePath.push({
+                provider: this.type,
+                type: type as Any,
+                path: [fromTokenAmount, toTokenAmount]
+            });
+        });
+
+        return routePath;
     }
 
     protected async getFeeInfo(

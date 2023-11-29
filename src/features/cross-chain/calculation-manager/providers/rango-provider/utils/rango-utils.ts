@@ -1,11 +1,14 @@
 import { PriceToken } from 'src/common/tokens';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import {
     TX_STATUS,
     TxStatus
 } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 
-import { rangoApiBlockchainNames } from '../constants/rango-api-blockchain-names';
+import {
+    rangoApiBlockchainNames,
+    RangoBlockchainName
+} from '../constants/rango-api-blockchain-names';
 import { RANGO_SWAP_STATUS, RangoSwapStatus } from '../model/rango-api-status-types';
 import { RangoCrossChainSupportedBlockchain } from '../model/rango-cross-chain-supported-blockchains';
 
@@ -34,5 +37,15 @@ export class RangoUtils {
             return TX_STATUS.PENDING;
         }
         return TX_STATUS.FAIL;
+    }
+
+    public static getRubicBlockchainByRangoBlockchain(
+        rangoBlockchainName: RangoBlockchainName
+    ): BlockchainName {
+        const blockchainName = Object.entries(rangoApiBlockchainNames).find(
+            ([_, value]) => value === rangoBlockchainName
+        )![0] as BlockchainName;
+
+        return blockchainName;
     }
 }
