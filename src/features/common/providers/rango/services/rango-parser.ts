@@ -4,7 +4,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { RangoCrossChainOptions } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/model/rango-cross-chain-api-types';
 
-import { RANGO_API_ENDPOINT } from '../constants/rango-api-common';
+import { RANGO_API_KEY } from '../constants/rango-api-common';
 import {
     RangoBestRouteQueryParams,
     RangoSwapQueryParams,
@@ -28,7 +28,7 @@ export class RangoCommonParser {
         const nativeToken = nativeTokensList[from.blockchain];
         const amountParam = Web3Pure.toWei(from.tokenAmount, nativeToken.decimals);
 
-        const apiKey = RANGO_API_ENDPOINT;
+        const apiKey = RANGO_API_KEY;
 
         return {
             apiKey,
@@ -58,7 +58,7 @@ export class RangoCommonParser {
         const toAddress = options.receiverAddress || walletAddress;
 
         const slippage = options.slippageTolerance * 100;
-        const apiKey = RANGO_API_ENDPOINT;
+        const apiKey = RANGO_API_KEY;
 
         return {
             apiKey,
@@ -77,7 +77,7 @@ export class RangoCommonParser {
         srcTxHash: string,
         requestId: string
     ): RangoTxStatusQueryParams {
-        const apiKey = RANGO_API_ENDPOINT;
+        const apiKey = RANGO_API_KEY;
 
         return { apiKey, requestId, srcTxHash };
     }
