@@ -111,6 +111,14 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
             const useProxy = options?.useProxy?.[this.type] ?? true;
 
+            if (this.shouldWeStopCalculatingWithMetisToken(fromToken, toToken)) {
+                return {
+                    trade: null,
+                    error: new NotSupportedTokensError(),
+                    tradeType: this.type
+                };
+            }
+
             if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
                 return {
                     trade: null,
@@ -524,5 +532,24 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 path: [from, to]
             }
         ];
+    }
+
+    // Не считаем трейды из Metis (metis) в Avalanche (metis) и в BNB chain (metis) и обратно
+    private shouldWeStopCalculatingWithMetisToken(
+        fromToken: PriceTokenAmount,
+        toToken: PriceToken
+    ): boolean {
+        return (
+            (fromToken.blockchain === BLOCKCHAIN_NAME.METIS &&
+                fromToken.isNative &&
+                (toToken.blockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN ||
+                    toToken.blockchain === BLOCKCHAIN_NAME.AVALANCHE) &&
+                toToken.symbol.toLowerCase() === 'metis') ||
+            (toToken.blockchain === BLOCKCHAIN_NAME.METIS &&
+                toToken.isNative &&
+                (fromToken.blockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN ||
+                    fromToken.blockchain === BLOCKCHAIN_NAME.AVALANCHE) &&
+                fromToken.symbol.toLowerCase() === 'metis')
+        );
     }
 }
