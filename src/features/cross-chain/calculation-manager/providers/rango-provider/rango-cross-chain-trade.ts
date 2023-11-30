@@ -13,7 +13,6 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { RangoContractAddresses } from 'src/features/common/providers/rango/constants/rango-contract-address';
 import { RangoSwapQueryParams } from 'src/features/common/providers/rango/models/rango-parser-types';
 import { RangoSupportedBlockchain } from 'src/features/common/providers/rango/models/rango-supported-blockchains';
-import { RangoApiService } from 'src/features/common/providers/rango/services/rango-api-service';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
@@ -32,6 +31,7 @@ import {
     RangoCrossChainTradeConstructorParams,
     RangoGetGasDataParams
 } from './model/rango-cross-chain-parser-types';
+import { RangoCrossChainApiService } from './services/rango-cross-chain-api-service';
 
 export class RangoCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -283,7 +283,9 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             };
         }
 
-        const { route, tx, error } = await RangoApiService.getSwapTransaction(this.swapQueryParams);
+        const { route, tx, error } = await RangoCrossChainApiService.getSwapTransaction(
+            this.swapQueryParams
+        );
 
         if (!route || !tx) {
             throw new RubicSdkError('Invalid data after sending swap request. Error text:' + error);

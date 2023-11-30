@@ -1,4 +1,4 @@
-import { RangoBlockchainName } from '../constants/rango-api-blockchain-names';
+import { RangoBlockchainName } from './rango-api-blockchain-names';
 
 export interface RangoResponseToken {
     blockchain: RangoBlockchainName;

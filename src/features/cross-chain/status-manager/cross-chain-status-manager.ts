@@ -67,8 +67,8 @@ import {
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
-import { RangoApiService } from '../../common/providers/rango/services/rango-api-service';
 import { RangoUtils } from '../../common/providers/rango/utils/rango-utils';
+import { RangoCrossChainApiService } from '../calculation-manager/providers/rango-provider/services/rango-cross-chain-api-service';
 import { TAIKO_API_STATUS, TaikoApiResponse } from './models/taiko-api-response';
 
 /**
@@ -685,7 +685,9 @@ export class CrossChainStatusManager {
         const { srcTxHash, rangoRequestId } = data;
         const params = RangoCommonParser.getTxStatusQueryParams(srcTxHash, rangoRequestId!);
 
-        const { bridgeData, status: txStatus } = await RangoApiService.getTxStatus(params);
+        const { bridgeData, status: txStatus } = await RangoCrossChainApiService.getTxStatus(
+            params
+        );
 
         const status = RangoUtils.convertStatusForRubic(txStatus!);
         const hash = bridgeData!.destTxHash;

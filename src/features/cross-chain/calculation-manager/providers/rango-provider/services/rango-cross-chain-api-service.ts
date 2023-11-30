@@ -1,18 +1,17 @@
 import { RubicSdkError } from 'src/common/errors';
 import { Injector } from 'src/core/injector/injector';
-
-import { RANGO_API_ENDPOINT } from '../constants/rango-api-common';
-import { RangoBestRouteResponse } from '../models/rango-api-best-route-types';
-import { HttpClientParams } from '../models/rango-api-common-types';
-import { RangoTxStatusResponse } from '../models/rango-api-status-types';
-import { RangoSwapTransactionResponse } from '../models/rango-api-swap-types';
+import { RANGO_API_ENDPOINT } from 'src/features/common/providers/rango/constants/rango-api-common';
+import { RangoBestRouteResponse } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
+import { HttpClientParams } from 'src/features/common/providers/rango/models/rango-api-common-types';
+import { RangoTxStatusResponse } from 'src/features/common/providers/rango/models/rango-api-status-types';
+import { RangoSwapTransactionResponse } from 'src/features/common/providers/rango/models/rango-api-swap-types';
 import {
     RangoBestRouteQueryParams,
     RangoSwapQueryParams,
     RangoTxStatusQueryParams
-} from '../models/rango-parser-types';
+} from 'src/features/common/providers/rango/models/rango-parser-types';
 
-export class RangoApiService {
+export class RangoCrossChainApiService {
     public static async getBestRoute(
         params: RangoBestRouteQueryParams
     ): Promise<RangoBestRouteResponse> {

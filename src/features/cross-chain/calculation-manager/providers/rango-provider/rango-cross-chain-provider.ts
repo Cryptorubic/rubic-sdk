@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { NotSupportedBlockchain } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import { nativeTokensList, PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { Any } from 'src/common/utils/types';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -12,11 +12,11 @@ import {
     RangoBestRouteSimulationResult,
     RangoQuotePath
 } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
+import { RangoTradeType } from 'src/features/common/providers/rango/models/rango-api-trade-types';
 import {
     RangoSupportedBlockchain,
     rangoSupportedBlockchains
 } from 'src/features/common/providers/rango/models/rango-supported-blockchains';
-import { RangoApiService } from 'src/features/common/providers/rango/services/rango-api-service';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { RangoUtils } from 'src/features/common/providers/rango/utils/rango-utils';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -29,7 +29,8 @@ import { RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { RangoCrossChainOptions } from './model/rango-cross-chain-api-types';
 import { RangoCrossChainTrade } from './rango-cross-chain-trade';
-import { RangoCrossChainParser } from './services/rango-params-parser';
+import { RangoCrossChainApiService } from './services/rango-cross-chain-api-service';
+import { RangoCrossChainParser } from './services/rango-cross-chain-params-parser';
 
 export class RangoCrossChainProvider extends CrossChainProvider {
     public type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.RANGO;
@@ -82,9 +83,8 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 options
             );
 
-            const { route, requestId: rangoRequestId } = await RangoApiService.getBestRoute(
-                bestRouteParams
-            );
+            const { route, requestId: rangoRequestId } =
+                await RangoCrossChainApiService.getBestRoute(bestRouteParams);
             const { outputAmountMin, outputAmount, path } = route as RangoBestRouteSimulationResult;
 
             const swapQueryParams = RangoCommonParser.getSwapQueryParams(
@@ -137,33 +137,48 @@ export class RangoCrossChainProvider extends CrossChainProvider {
 
         const routePath: RubicStep[] = [];
 
-        path.forEach(async step => {
-            const type = step.swapperType === 'DEX' ? 'on-chain' : 'cross-chain';
-            const fromBlockchain = RangoUtils.getRubicBlockchainByRangoBlockchain(
-                step.from.blockchain
-            );
-            const toBlockchain = RangoUtils.getRubicBlockchainByRangoBlockchain(step.to.blockchain);
-
-            const fromTokenAmount = await TokenAmount.createToken({
-                address: step.from.address!,
-                blockchain: fromBlockchain,
-                weiAmount: new BigNumber(step.inputAmount)
-            });
-
-            const toTokenAmount = await TokenAmount.createToken({
-                address: step.to.address!,
-                blockchain: toBlockchain,
-                weiAmount: new BigNumber(step.expectedOutput)
-            });
-
-            routePath.push({
-                provider: this.type,
-                type: type as Any,
-                path: [fromTokenAmount, toTokenAmount]
-            });
-        });
+        await this.pushStep(0, path, routePath);
 
         return routePath;
+    }
+
+    private async pushStep(
+        stepCount: number,
+        rangoPath: RangoQuotePath[],
+        rubicPath: RubicStep[]
+    ): Promise<void> {
+        const step = rangoPath[stepCount];
+
+        if (!step || !!!rangoPath.find(st => st === step)) return;
+
+        stepCount++;
+
+        const type = step.swapperType === 'DEX' ? 'on-chain' : 'cross-chain';
+
+        const provider = RangoUtils.getTradeType(type, step.swapper.title as RangoTradeType);
+
+        const fromBlockchain = RangoUtils.getRubicBlockchainByRangoBlockchain(step.from.blockchain);
+        const toBlockchain = RangoUtils.getRubicBlockchainByRangoBlockchain(step.to.blockchain);
+
+        const fromTokenAmount = await TokenAmount.createToken({
+            address: step.from.address || nativeTokensList[fromBlockchain].address,
+            blockchain: fromBlockchain,
+            weiAmount: new BigNumber(step.inputAmount)
+        });
+
+        const toTokenAmount = await TokenAmount.createToken({
+            address: step.to.address || nativeTokensList[toBlockchain].address,
+            blockchain: toBlockchain,
+            weiAmount: new BigNumber(step.expectedOutput)
+        });
+
+        rubicPath.push({
+            provider: provider as Any,
+            type: type,
+            path: [fromTokenAmount, toTokenAmount]
+        });
+
+        await this.pushStep(stepCount, rangoPath, rubicPath);
     }
 
     protected async getFeeInfo(

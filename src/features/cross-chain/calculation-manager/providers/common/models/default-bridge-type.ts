@@ -3,6 +3,8 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 export const DEFAULT_BRIDGE_TYPE = {
     ...CROSS_CHAIN_TRADE_TYPE,
 
+    '10K_SWAP': '10k_swap',
+
     ACROSS: 'across',
     AMAROK: 'connext',
     ANY_SWAP: 'anyswap',
@@ -14,16 +16,21 @@ export const DEFAULT_BRIDGE_TYPE = {
 
     HOP: 'hop',
     HYPHEN: 'hyphen',
-    OPEN_OCEAN: 'openocean',
+
+    IBC: 'ibc',
 
     MAKERS_WORMHOLE: 'maker',
+    MAYA_PROTOCOL: 'mayaprotocol',
     MULTICHAIN: 'multichain',
 
+    OPEN_OCEAN: 'openocean',
     OPTIMISM_GATEWAY: 'optimism',
+    ORBITER_BRIDGE: 'orbiter',
     OSMOSIS_BRIDGE: 'osmosis',
 
     POLYGON: 'polygon',
 
+    RAINBOW: 'rainbow',
     REFUEL: 'refuel',
 
     SATELLITE: 'satellite',
@@ -32,6 +39,9 @@ export const DEFAULT_BRIDGE_TYPE = {
     SYNAPSE: 'synapse',
 
     THORCHAIN: 'thorchain',
+    THORCHAIN_STREAMING: 'thorchain_streaming',
+
+    VOYAGER: 'voyager',
 
     WORMHOLE: 'wormhole',
 

@@ -1,6 +1,6 @@
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
-import { RangoSupportedBlockchain } from '../models/rango-supported-blockchains';
+import { RangoSupportedBlockchain } from './rango-supported-blockchains';
 
 export const rangoApiBlockchainNames: Record<RangoSupportedBlockchain, string> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: 'ETH',
