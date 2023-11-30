@@ -62,7 +62,11 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     ): boolean {
         const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = to.blockchain as StargateCrossChainSupportedBlockchain;
-        const fromSymbol = StargateCrossChainProvider.getSymbol(from.symbol, fromBlockchain);
+        const fromSymbol = StargateCrossChainProvider.getSymbol(
+            from.symbol,
+            fromBlockchain,
+            toBlockchain === BLOCKCHAIN_NAME.METIS
+        );
         const toSymbol = StargateCrossChainProvider.getSymbol(
             to.symbol,
             toBlockchain,
@@ -310,7 +314,11 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = fromToken.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
 
-        const fromSymbol = StargateCrossChainProvider.getSymbol(fromToken.symbol, fromBlockchain);
+        const fromSymbol = StargateCrossChainProvider.getSymbol(
+            fromToken.symbol,
+            fromBlockchain,
+            toBlockchain === BLOCKCHAIN_NAME.METIS
+        );
         const toSymbol = StargateCrossChainProvider.getSymbol(
             toToken.symbol,
             toBlockchain,
@@ -418,7 +426,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
 
         const toSymbol = StargateCrossChainProvider.getSymbol(
             toToken.symbol,
-            toBlockchain
+            toBlockchain,
+            fromToken.blockchain === BLOCKCHAIN_NAME.METIS
         ) as StargateBridgeToken;
 
         const toSymbolDirection = toBlockchainDirection[toSymbol];
@@ -534,19 +543,17 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         ];
     }
 
-    // Не считаем трейды из Metis (metis) в Avalanche (metis) и в BNB chain (metis) и обратно
+    // Не считаем трейды из Metis (metis/m.usdt) в Avalanche (metis) и в BNB chain (metis) и обратно
     private shouldWeStopCalculatingWithMetisToken(
         fromToken: PriceTokenAmount,
         toToken: PriceToken
     ): boolean {
         return (
             (fromToken.blockchain === BLOCKCHAIN_NAME.METIS &&
-                fromToken.isNative &&
                 (toToken.blockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN ||
                     toToken.blockchain === BLOCKCHAIN_NAME.AVALANCHE) &&
                 toToken.symbol.toLowerCase() === 'metis') ||
             (toToken.blockchain === BLOCKCHAIN_NAME.METIS &&
-                toToken.isNative &&
                 (fromToken.blockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN ||
                     fromToken.blockchain === BLOCKCHAIN_NAME.AVALANCHE) &&
                 fromToken.symbol.toLowerCase() === 'metis')

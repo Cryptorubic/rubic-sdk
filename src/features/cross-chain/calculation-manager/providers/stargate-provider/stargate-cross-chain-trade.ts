@@ -299,7 +299,11 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             : stargateContractAddress[fromBlockchain];
         const dstChainId = stargateChainId[toBlockchain];
 
-        const fromSymbol = StargateCrossChainProvider.getSymbol(from.symbol, fromBlockchain);
+        const fromSymbol = StargateCrossChainProvider.getSymbol(
+            from.symbol,
+            fromBlockchain,
+            toBlockchain === BLOCKCHAIN_NAME.METIS
+        );
         const toSymbol = StargateCrossChainProvider.getSymbol(
             to.symbol,
             toBlockchain,
