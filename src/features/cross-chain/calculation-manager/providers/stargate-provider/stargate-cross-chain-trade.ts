@@ -482,7 +482,9 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             this.fromBlockchain === BLOCKCHAIN_NAME.METIS
         );
         const pool = stargatePoolId[toSymbol as StargateBridgeToken];
-        const targetPoolDecimals = stargatePoolsDecimals[this.to.symbol as StargateBridgeToken];
+        const targetPoolDecimals =
+            stargatePoolsDecimals[this.to.symbol as StargateBridgeToken] ||
+            stargatePoolsDecimals[toSymbol as StargateBridgeToken];
         const amount = Web3Pure.toWei(this.toTokenAmountMin, targetPoolDecimals);
         const fee = Web3Pure.toWei(
             this.feeInfo.provider!.cryptoFee!.amount,
