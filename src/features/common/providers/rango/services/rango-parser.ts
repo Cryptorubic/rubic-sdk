@@ -2,9 +2,10 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
-import { RangoCrossChainOptions } from 'src/features/cross-chain/calculation-manager/providers/rango-provider/model/rango-cross-chain-api-types';
 
 import { RANGO_API_KEY } from '../constants/rango-api-common';
+import { RangoBestRouteRequestOptions } from '../models/rango-api-best-route-types';
+import { RangoSwapRequestOptions } from '../models/rango-api-swap-types';
 import {
     RangoBestRouteQueryParams,
     RangoSwapQueryParams,
@@ -20,7 +21,7 @@ export class RangoCommonParser {
     public static getBestRouteQueryParams(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
-        options: RangoCrossChainOptions
+        options: RangoBestRouteRequestOptions
     ): RangoBestRouteQueryParams {
         const fromParam = RangoUtils.getFromToQueryParam(from);
         const toParam = RangoUtils.getFromToQueryParam(toToken);
@@ -43,7 +44,7 @@ export class RangoCommonParser {
     public static getSwapQueryParams(
         fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
-        options: RangoCrossChainOptions
+        options: RangoSwapRequestOptions
     ): RangoSwapQueryParams {
         const amount = Web3Pure.toWei(fromToken.tokenAmount, fromToken.decimals);
 

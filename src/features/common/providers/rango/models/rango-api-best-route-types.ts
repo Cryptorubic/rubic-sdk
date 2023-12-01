@@ -5,6 +5,13 @@ import {
     RangoRoutingResultType,
     RangoSwapperType
 } from './rango-api-common-types';
+import { RangoSupportedBlockchain } from './rango-supported-blockchains';
+
+export interface RangoBestRouteRequestOptions {
+    slippageTolerance: number;
+    swappers?: RangoSupportedBlockchain[];
+    swappersExclude?: boolean;
+}
 
 export interface RangoBestRouteResponse {
     requestId: string;

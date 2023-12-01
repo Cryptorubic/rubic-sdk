@@ -16,7 +16,8 @@ export const rangoSupportedBlockchains = [
     BLOCKCHAIN_NAME.GNOSIS,
     BLOCKCHAIN_NAME.BOBA,
     BLOCKCHAIN_NAME.BOBA_BSC,
-    BLOCKCHAIN_NAME.BOBA_AVALANCHE
+    BLOCKCHAIN_NAME.BOBA_AVALANCHE,
+    BLOCKCHAIN_NAME.STARKNET
 ] as const;
 
 export type RangoSupportedBlockchain = (typeof rangoSupportedBlockchains)[number];

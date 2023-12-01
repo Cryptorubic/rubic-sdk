@@ -12,6 +12,7 @@ import {
     RangoBestRouteSimulationResult,
     RangoQuotePath
 } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
+import { RangoSwapRequestOptions } from 'src/features/common/providers/rango/models/rango-api-swap-types';
 import { RangoTradeType } from 'src/features/common/providers/rango/models/rango-api-trade-types';
 import {
     RangoSupportedBlockchain,
@@ -52,6 +53,11 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RangoCrossChainOptions
     ): Promise<CalculationResult> {
+        // options = {
+        //     ...options,
+        //     ...(this.getAdditionalRangoParams() && this.getAdditionalRangoParams())
+        // } as RangoCrossChainOptions;
+
         const fromBlockchain = from.blockchain as RangoSupportedBlockchain;
         const toBlockchain = toToken.blockchain as RangoSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
@@ -90,7 +96,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             const swapQueryParams = RangoCommonParser.getSwapQueryParams(
                 fromWithoutFee,
                 toToken,
-                options
+                options as Required<RangoSwapRequestOptions>
             );
 
             const toTokenAmountMin = Web3Pure.fromWei(outputAmountMin, toToken.decimals);

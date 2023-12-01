@@ -1,5 +1,3 @@
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-
 import { RangoSupportedBlockchain } from './rango-supported-blockchains';
 
 /**
@@ -33,7 +31,7 @@ export interface RangoBestRouteQueryParams {
     to: string;
     amount: string;
     slippage?: number;
-    swappers?: EvmBlockchainName[];
+    swappers?: RangoSupportedBlockchain[];
     swappersExclude?: boolean;
 }
 
