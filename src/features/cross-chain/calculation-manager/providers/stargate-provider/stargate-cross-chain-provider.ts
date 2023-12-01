@@ -550,6 +550,9 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     ): boolean {
         return (
             (fromToken.blockchain === BLOCKCHAIN_NAME.METIS &&
+                fromToken.symbol.toLowerCase() !== 'metis' &&
+                toToken.symbol.toLowerCase() === 'metis') ||
+            (fromToken.blockchain === BLOCKCHAIN_NAME.METIS &&
                 (toToken.blockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN ||
                     toToken.blockchain === BLOCKCHAIN_NAME.AVALANCHE) &&
                 toToken.symbol.toLowerCase() === 'metis') ||
