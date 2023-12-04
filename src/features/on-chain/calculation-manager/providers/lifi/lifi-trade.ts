@@ -6,6 +6,7 @@ import {
     RubicSdkError,
     SwapRequestError
 } from 'src/common/errors';
+import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -118,6 +119,9 @@ export class LifiTrade extends EvmOnChainTrade {
             }
             if (this.isDeflationError()) {
                 throw new LowSlippageDeflationaryTokenError();
+            }
+            if (err instanceof UpdatedRatesError) {
+                throw err;
             }
             throw new LifiPairIsUnavailableError();
         }
