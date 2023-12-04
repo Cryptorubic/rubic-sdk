@@ -134,7 +134,7 @@ export class XyDexTrade extends EvmOnChainTrade {
 
         await EvmOnChainTrade.checkAmountChange(
             tradeData.tx!,
-            tradeData.routes[0]!.dstQuoteTokenAmount,
+            tradeData.route.dstQuoteTokenAmount,
             this.to.stringWeiAmount
         );
 
