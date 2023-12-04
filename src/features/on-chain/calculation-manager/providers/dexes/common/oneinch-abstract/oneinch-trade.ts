@@ -131,18 +131,19 @@ export class OneinchTrade extends EvmOnChainTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            const apiTradeData = await this.getTradeData(
+            const txData = await this.getTradeData(
                 true,
                 options.fromAddress,
-                options.receiverAddress
+                options.receiverAddress,
+                options?.directTransaction
             );
             const { gas, gasPrice } = this.getGasParams(options, {
-                gasLimit: apiTradeData.tx.gas.toString(),
-                gasPrice: apiTradeData.tx.gasPrice
+                gasLimit: txData.gas,
+                gasPrice: txData.gasPrice
             });
 
             return {
-                ...apiTradeData.tx,
+                ...txData,
                 gas,
                 gasPrice
             };
@@ -161,11 +162,21 @@ export class OneinchTrade extends EvmOnChainTrade {
         }
     }
 
-    private getTradeData(
+    private async getTradeData(
         disableEstimate = false,
         fromAddress?: string,
-        receiverAddress?: string
-    ): Promise<OneinchSwapResponse> {
+        receiverAddress?: string,
+        directTransactionConfig?: EvmEncodeConfig
+    ): Promise<EvmEncodeConfig> {
+        if (directTransactionConfig) {
+            return {
+                data: directTransactionConfig.data,
+                value: directTransactionConfig.value,
+                to: directTransactionConfig.to,
+                gasPrice: directTransactionConfig.gasPrice,
+                gas: String(directTransactionConfig.gas)
+            };
+        }
         const fromTokenAddress = this.nativeSupportedFromWithoutFee.address;
         const toTokenAddress = this.nativeSupportedTo.address;
         const swapRequest: OneinchSwapRequest = {
@@ -184,11 +195,27 @@ export class OneinchTrade extends EvmOnChainTrade {
             }
         };
 
-        return oneInchHttpGetRequest<OneinchSwapResponse>(
+        const { tx, toAmount } = await oneInchHttpGetRequest<OneinchSwapResponse>(
             'swap',
             this.from.blockchain,
             swapRequest
         );
+        await EvmOnChainTrade.checkAmountChange(
+            {
+                data: tx.data,
+                value: tx.value,
+                to: tx.to
+            },
+            toAmount,
+            this.to.stringWeiAmount
+        );
+        return {
+            data: tx.data,
+            value: tx.value,
+            to: tx.to,
+            gasPrice: tx.gasPrice,
+            gas: String(tx.gas)
+        };
     }
 
     private specifyError(err: {

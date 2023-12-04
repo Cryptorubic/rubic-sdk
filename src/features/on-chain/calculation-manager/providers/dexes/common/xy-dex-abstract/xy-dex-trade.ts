@@ -80,8 +80,7 @@ export class XyDexTrade extends EvmOnChainTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            const apiTradeData = await this.getTradeData(options.receiverAddress);
-            return apiTradeData.tx;
+            return await this.getTradeData(options.receiverAddress, options.directTransaction);
             // const gasPriceInfo = await getGasPriceInfo(this.from.blockchain);
             //
             // const { gas, gasPrice } = getGasFeeInfo(apiTradeData.routers[0]!.estimatedGas, gasPriceInfo);
@@ -96,7 +95,17 @@ export class XyDexTrade extends EvmOnChainTrade {
         }
     }
 
-    private async getTradeData(receiverAddress?: string): Promise<XySwapResponse> {
+    private async getTradeData(
+        receiverAddress?: string,
+        directTransaction?: EvmEncodeConfig
+    ): Promise<EvmEncodeConfig> {
+        if (directTransaction) {
+            return {
+                data: directTransaction.data,
+                to: directTransaction.to,
+                value: directTransaction.value
+            };
+        }
         const receiver = receiverAddress || this.walletAddress;
 
         const chainId = blockchainId[this.from.blockchain];
@@ -116,8 +125,19 @@ export class XyDexTrade extends EvmOnChainTrade {
             srcSwapProvider: this.provider
         };
 
-        return this.httpClient.get<XySwapResponse>(`${XyDexAbstractProvider.apiUrl}buildTx`, {
-            params: { ...quoteTradeParams }
-        });
+        const tradeData = await this.httpClient.get<XySwapResponse>(
+            `${XyDexAbstractProvider.apiUrl}buildTx`,
+            {
+                params: { ...quoteTradeParams }
+            }
+        );
+
+        await EvmOnChainTrade.checkAmountChange(
+            tradeData.tx!,
+            tradeData.routes[0]!.dstQuoteTokenAmount,
+            this.to.stringWeiAmount
+        );
+
+        return tradeData.tx;
     }
 }

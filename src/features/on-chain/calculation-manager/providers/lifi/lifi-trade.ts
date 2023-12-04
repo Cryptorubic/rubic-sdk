@@ -21,6 +21,7 @@ interface LifiTransactionRequest {
     data: string;
     gasLimit?: string;
     gasPrice?: string;
+    value: string;
 }
 
 export class LifiTrade extends EvmOnChainTrade {
@@ -49,8 +50,8 @@ export class LifiTrade extends EvmOnChainTrade {
         try {
             const transactionData = await lifiTrade.getTransactionData(walletAddress);
 
-            if (transactionData.gasLimit) {
-                return new BigNumber(transactionData.gasLimit);
+            if (transactionData.gas) {
+                return new BigNumber(transactionData.gas);
             }
         } catch {}
         return null;
@@ -100,7 +101,7 @@ export class LifiTrade extends EvmOnChainTrade {
                 options.receiverAddress
             );
             const { gas, gasPrice } = this.getGasParams(options, {
-                gasLimit: transactionData.gasLimit,
+                gasLimit: transactionData.gas,
                 gasPrice: transactionData.gasPrice
             });
 
@@ -124,8 +125,12 @@ export class LifiTrade extends EvmOnChainTrade {
 
     private async getTransactionData(
         fromAddress?: string,
-        receiverAddress?: string
-    ): Promise<LifiTransactionRequest> {
+        receiverAddress?: string,
+        directTransaction?: EvmEncodeConfig
+    ): Promise<EvmEncodeConfig> {
+        if (directTransaction) {
+            return directTransaction;
+        }
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
@@ -149,21 +154,34 @@ export class LifiTrade extends EvmOnChainTrade {
 
         const swapResponse: {
             transactionRequest: LifiTransactionRequest;
+            estimate: Route;
         } = await this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
             ...step
         });
 
-        const { transactionRequest } = swapResponse;
+        const { transactionRequest, estimate } = swapResponse;
         const gasLimit =
             transactionRequest.gasLimit && parseInt(transactionRequest.gasLimit, 16).toString();
         const gasPrice =
             transactionRequest.gasPrice && parseInt(transactionRequest.gasPrice, 16).toString();
+        const value = transactionRequest.value && parseInt(transactionRequest.value, 16).toString();
+
+        await EvmOnChainTrade.checkAmountChange(
+            {
+                data: transactionRequest.data,
+                value: value,
+                to: transactionRequest.to
+            },
+            estimate.toAmount,
+            this.to.stringWeiAmount
+        );
 
         return {
             to: transactionRequest.to,
             data: transactionRequest.data,
-            gasLimit,
-            gasPrice
+            gas: gasLimit,
+            gasPrice,
+            value
         };
     }
 }
