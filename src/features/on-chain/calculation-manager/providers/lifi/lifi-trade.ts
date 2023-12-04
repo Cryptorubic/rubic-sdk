@@ -99,7 +99,8 @@ export class LifiTrade extends EvmOnChainTrade {
         try {
             const transactionData = await this.getTransactionData(
                 options.fromAddress,
-                options.receiverAddress
+                options.receiverAddress,
+                options.directTransaction
             );
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,
