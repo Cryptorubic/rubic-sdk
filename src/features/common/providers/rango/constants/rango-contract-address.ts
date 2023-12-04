@@ -70,6 +70,11 @@ export const RangoContractAddresses: Record<RangoSupportedBlockchain, UniversalC
         providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
         rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ETHEREUM].router
     },
+    [BLOCKCHAIN_NAME.STARKNET]: {
+        providerGateway: '',
+        providerRouter: '',
+        rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ETHEREUM].router
+    },
     // ANOTHER ADDRESS FOR BOBA
     [BLOCKCHAIN_NAME.BOBA]: {
         providerGateway: '0xd9BdD77E9017C4727D3CdB87D91b7a0Fc7d63da4',

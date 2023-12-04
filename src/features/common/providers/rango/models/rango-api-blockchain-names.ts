@@ -18,7 +18,8 @@ export const rangoApiBlockchainNames: Record<RangoSupportedBlockchain, string> =
     [BLOCKCHAIN_NAME.GNOSIS]: 'GNOSIS',
     [BLOCKCHAIN_NAME.BOBA]: 'BOBA',
     [BLOCKCHAIN_NAME.BOBA_BSC]: 'BOBA_BNB',
-    [BLOCKCHAIN_NAME.BOBA_AVALANCHE]: 'BOBA_AVALANCHE'
+    [BLOCKCHAIN_NAME.BOBA_AVALANCHE]: 'BOBA_AVALANCHE',
+    [BLOCKCHAIN_NAME.STARKNET]: 'STARKNET'
 };
 
 export type RangoBlockchainName = keyof typeof rangoApiBlockchainNames;
