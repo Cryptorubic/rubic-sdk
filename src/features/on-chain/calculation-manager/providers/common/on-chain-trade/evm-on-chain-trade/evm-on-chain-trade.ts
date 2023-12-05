@@ -377,7 +377,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         const shouldThrowError =
             newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
 
-        if (shouldThrowError || true) {
+        if (shouldThrowError) {
             throw new UpdatedRatesError({
                 ...transactionRequest,
                 newAmount: newWeiAmount,
