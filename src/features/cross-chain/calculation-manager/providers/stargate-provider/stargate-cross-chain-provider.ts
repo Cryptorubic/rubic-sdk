@@ -512,9 +512,6 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         if (blockchain === BLOCKCHAIN_NAME.AVALANCHE && symbol === 'USDt') {
             return 'USDT';
         }
-        if (blockchain === BLOCKCHAIN_NAME.AVALANCHE && symbol === 'USDt') {
-            return 'USDT';
-        }
         if (blockchain === BLOCKCHAIN_NAME.FANTOM && symbol === 'USDC') {
             return 'FUSDC';
         }
