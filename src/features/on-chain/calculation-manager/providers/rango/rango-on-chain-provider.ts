@@ -18,10 +18,9 @@ import { OnChainTrade } from '../common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from '../common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from '../common/utils/get-gas-price-info';
 import { RangoOnChainOptions } from './models/rango-on-chain-api-types';
-import { RangoOnChainTradeStruct } from './models/rango-on-chain-parser-types';
+import { RangoOnChainTradeStruct } from './models/rango-on-chain-trade-types';
 import { RangoOnChainTrade } from './rango-on-chain-trade';
 import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
-import { RangoOnChainParser } from './services/rango-on-chain-parser';
 
 export class RangoOnChainProvider {
     private readonly onChainProxyService = new OnChainProxyService();
@@ -59,7 +58,7 @@ export class RangoOnChainProvider {
 
             const toTokenWeiAmountMin = Web3Pure.fromWei(outputAmountMin, to.decimals);
 
-            const tradeStruct = RangoOnChainParser.getTradeStruct({
+            const tradeStruct: RangoOnChainTradeStruct = {
                 from,
                 to,
                 fromWithoutFee,
@@ -68,9 +67,11 @@ export class RangoOnChainProvider {
                 gasFeeInfo: {
                     gasLimit: undefined
                 },
-                path,
-                options
-            });
+                slippageTolerance: options.slippageTolerance * 100,
+                useProxy: options.useProxy,
+                withDeflation: options.withDeflation,
+                path
+            };
 
             const gasFeeInfo =
                 options.gasCalculation === 'calculate'

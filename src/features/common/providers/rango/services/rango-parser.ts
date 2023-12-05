@@ -16,7 +16,6 @@ import { RangoUtils } from '../utils/rango-utils';
 export class RangoCommonParser {
     /**
      *@description Transform parameters to required view for rango-api
-     *@returns Return object with params for `quote` method in rango-sdk to get best route in `calculate` method
      */
     public static getBestRouteQueryParams(
         from: PriceTokenAmount<EvmBlockchainName>,

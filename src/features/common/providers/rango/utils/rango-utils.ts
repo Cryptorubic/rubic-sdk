@@ -62,7 +62,9 @@ export class RangoUtils {
                 ([_, value]) => value === rangoTradeType
             );
 
-            if (found) return found[0] as BridgeType;
+            if (found) {
+                return found[0] as BridgeType;
+            }
         }
 
         if (swapType === 'on-chain') {
@@ -70,7 +72,9 @@ export class RangoUtils {
                 ([_, value]) => value === rangoTradeType
             );
 
-            if (found) return found[0] as OnChainTradeType;
+            if (found) {
+                return found[0] as OnChainTradeType;
+            }
         }
 
         return CROSS_CHAIN_TRADE_TYPE.RANGO;

@@ -550,7 +550,7 @@ export class CrossChainStatusManager {
         }
     }
 
-    private async getArbitrumBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+    public async getArbitrumBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         const rpcProviders = Injector.web3PublicService.rpcProvider;
         const l1Provider = new JsonRpcProvider(
             rpcProviders[BLOCKCHAIN_NAME.ETHEREUM]!.rpcList[0]!,
@@ -638,7 +638,7 @@ export class CrossChainStatusManager {
         }
     }
 
-    private async getScrollBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+    public async getScrollBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         const response = await Injector.httpClient.post<ScrollApiResponse>(
             'https://alpha-api.scroll.io/bridgehistory/api/txsbyhashes',
             {
@@ -654,7 +654,7 @@ export class CrossChainStatusManager {
         return { status: TX_STATUS.PENDING, hash: null };
     }
 
-    private async getTaikoBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+    public async getTaikoBridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         if (!data.taikoTransactionId) {
             throw new RubicSdkError('Must provide Taiko transaction ID');
         }

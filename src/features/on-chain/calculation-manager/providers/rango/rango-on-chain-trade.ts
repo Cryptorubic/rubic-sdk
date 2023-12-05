@@ -1,11 +1,11 @@
 import BigNumber from 'bignumber.js';
 import {
-    LifiPairIsUnavailableError,
     LowSlippageDeflationaryTokenError,
     RubicSdkError,
     SwapRequestError
 } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { parseError } from 'src/common/utils/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
@@ -14,15 +14,8 @@ import { RangoCommonParser } from 'src/features/common/providers/rango/services/
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from '../common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { RangoOnChainTradeStruct } from './models/rango-on-chain-parser-types';
+import { RangoOnChainTradeStruct } from './models/rango-on-chain-trade-types';
 import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
-
-interface RangoTransactionRequest {
-    to: string;
-    data: string;
-    gasLimit?: string;
-    gasPrice?: string;
-}
 
 export class RangoOnChainTrade extends EvmOnChainTrade {
     /* @internal */
@@ -53,8 +46,8 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
         try {
             const transactionData = await rangoTrade.getTransactionData(walletAddress);
 
-            if (transactionData.gasLimit) {
-                return new BigNumber(transactionData.gasLimit);
+            if (transactionData.gas) {
+                return new BigNumber(transactionData.gas);
             }
         } catch {}
         return null;
@@ -91,7 +84,7 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
                 options.receiverAddress
             );
             const { gas, gasPrice } = this.getGasParams(options, {
-                gasLimit: transactionData.gasLimit,
+                gasLimit: transactionData.gas,
                 gasPrice: transactionData.gasPrice
             });
 
@@ -109,14 +102,14 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
             if (this.isDeflationError()) {
                 throw new LowSlippageDeflationaryTokenError();
             }
-            throw new LifiPairIsUnavailableError();
+            throw parseError(err);
         }
     }
 
     private async getTransactionData(
         fromAddress?: string,
         receiverAddress?: string
-    ): Promise<RangoTransactionRequest> {
+    ): Promise<EvmEncodeConfig> {
         const params = RangoCommonParser.getSwapQueryParams(this.from, this.to, {
             fromAddress: fromAddress ?? this.walletAddress,
             receiverAddress: receiverAddress ?? this.walletAddress,
@@ -130,6 +123,12 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
         const gasLimit = tx.gasLimit && parseInt(tx.gasLimit, 16).toString();
         const gasPrice = tx.gasPrice && parseInt(tx.gasPrice, 16).toString();
 
-        return { data: tx.txData!, to: tx.txTo, gasLimit: gasLimit!, gasPrice: gasPrice! };
+        return {
+            data: tx.txData!,
+            to: tx.txTo,
+            value: tx.value!,
+            gas: gasLimit!,
+            gasPrice: gasPrice!
+        };
     }
 }

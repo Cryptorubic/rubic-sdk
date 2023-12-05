@@ -10,8 +10,7 @@ import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/
 
 export const web3PublicSupportedBlockchains = [
     ...Object.values(EVM_BLOCKCHAIN_NAME),
-    BLOCKCHAIN_NAME.TRON,
-    BLOCKCHAIN_NAME.STARKNET
+    BLOCKCHAIN_NAME.TRON
 ] as const;
 
 export type Web3PublicSupportedBlockchain = (typeof web3PublicSupportedBlockchains)[number];
