@@ -1,6 +1,6 @@
 import { XyQuoteRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/xy-dex-abstract/models/xy-quote-request';
 
-interface XyRoute extends XyQuoteRequest {
+export interface XyRoute extends XyQuoteRequest {
     srcSwapDescription: {
         provider: string;
     };
