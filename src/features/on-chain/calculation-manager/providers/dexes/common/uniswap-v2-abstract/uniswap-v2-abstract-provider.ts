@@ -81,22 +81,20 @@ export abstract class UniswapV2AbstractProvider<
 
     /**
      * Calculates on-chain trade.
-     * @param fromT Token to sell.
-     * @param toT Token to get.
+     * @param fromToken Token to sell.
+     * @param toToken Token to get.
      * @param weiAmount Amount to sell or to get in wei.
      * @param exact Defines, whether to call 'exactInput' or 'exactOutput' method.
      * @param options Additional options.
      */
     public async calculateDifficultTrade(
-        fromT: PriceToken<EvmBlockchainName>,
-        toT: PriceToken<EvmBlockchainName>,
+        fromToken: PriceToken<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         weiAmount: BigNumber,
         exact: Exact,
         options?: OnChainCalculationOptions
     ): Promise<UniswapV2AbstractTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
-        let fromToken = fromT;
-        let toToken = toT;
 
         if (fromToken.blockchain === BLOCKCHAIN_NAME.METIS && fromToken.isNative) {
             fromToken = new PriceToken({

@@ -298,16 +298,18 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
             ? stargateEthContractAddress[fromBlockchain]!
             : stargateContractAddress[fromBlockchain];
         const dstChainId = stargateChainId[toBlockchain];
+        const swapToMetisBlockchain = toBlockchain === BLOCKCHAIN_NAME.METIS;
+        const swapFromMetisBlockchain = fromBlockchain === BLOCKCHAIN_NAME.METIS;
 
         const fromSymbol = StargateCrossChainProvider.getSymbol(
             from.symbol,
             fromBlockchain,
-            toBlockchain === BLOCKCHAIN_NAME.METIS
+            swapToMetisBlockchain
         );
         const toSymbol = StargateCrossChainProvider.getSymbol(
             to.symbol,
             toBlockchain,
-            fromBlockchain === BLOCKCHAIN_NAME.METIS
+            swapFromMetisBlockchain
         );
 
         let srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
@@ -480,10 +482,12 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         dstSwapData?: string,
         receiverAddress?: string
     ): unknown[] {
+        const swapFromMetisBlockchain = this.fromBlockchain === BLOCKCHAIN_NAME.METIS;
+
         const toSymbol = StargateCrossChainProvider.getSymbol(
             this.to.symbol,
             this.to.blockchain,
-            this.fromBlockchain === BLOCKCHAIN_NAME.METIS
+            swapFromMetisBlockchain
         );
         const pool = stargatePoolId[toSymbol as StargateBridgeToken];
         const targetPoolDecimals =

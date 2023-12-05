@@ -62,15 +62,17 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     ): boolean {
         const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = to.blockchain as StargateCrossChainSupportedBlockchain;
+        const swapToMetisBlockchain = toBlockchain === BLOCKCHAIN_NAME.METIS;
+        const swapFromMetisBlockchain = fromBlockchain === BLOCKCHAIN_NAME.METIS;
         const fromSymbol = StargateCrossChainProvider.getSymbol(
             from.symbol,
             fromBlockchain,
-            toBlockchain === BLOCKCHAIN_NAME.METIS
+            swapToMetisBlockchain
         );
         const toSymbol = StargateCrossChainProvider.getSymbol(
             to.symbol,
             toBlockchain,
-            fromBlockchain === BLOCKCHAIN_NAME.METIS
+            swapFromMetisBlockchain
         );
 
         const srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
@@ -323,16 +325,18 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     ): Promise<BigNumber> {
         const fromBlockchain = fromToken.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
+        const swapToMetisBlockchain = toBlockchain === BLOCKCHAIN_NAME.METIS;
+        const swapFromMetisBlockchain = fromBlockchain === BLOCKCHAIN_NAME.METIS;
 
         const fromSymbol = StargateCrossChainProvider.getSymbol(
             fromToken.symbol,
             fromBlockchain,
-            toBlockchain === BLOCKCHAIN_NAME.METIS
+            swapToMetisBlockchain
         );
         const toSymbol = StargateCrossChainProvider.getSymbol(
             toToken.symbol,
             toBlockchain,
-            fromBlockchain === BLOCKCHAIN_NAME.METIS
+            swapFromMetisBlockchain
         );
 
         let srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
@@ -430,6 +434,8 @@ export class StargateCrossChainProvider extends CrossChainProvider {
 
         const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchainDirection = stargatePoolMapping[toBlockchain];
+        const swapFromMetisBlockchain = fromToken.blockchain === BLOCKCHAIN_NAME.METIS;
+
         if (!toBlockchainDirection) {
             throw new RubicSdkError('Tokens are not supported.');
         }
@@ -437,7 +443,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         const toSymbol = StargateCrossChainProvider.getSymbol(
             toToken.symbol,
             toBlockchain,
-            fromToken.blockchain === BLOCKCHAIN_NAME.METIS
+            swapFromMetisBlockchain
         ) as StargateBridgeToken;
 
         const toSymbolDirection = toBlockchainDirection[toSymbol];
@@ -493,14 +499,14 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     public static getSymbol(
         symbol: string,
         blockchain: BlockchainName,
-        swapFromMetis?: boolean
+        swapWithMetisBlockchain?: boolean
     ): string {
         if (blockchain === BLOCKCHAIN_NAME.ARBITRUM && symbol === 'AETH') {
             return 'ETH';
         }
 
         if (
-            swapFromMetis &&
+            swapWithMetisBlockchain &&
             (blockchain === BLOCKCHAIN_NAME.AVALANCHE ||
                 blockchain === BLOCKCHAIN_NAME.ETHEREUM ||
                 blockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN) &&
