@@ -58,12 +58,8 @@ export class OpenOceanProvider {
                 Injector.httpClient.get<OpenOceanQuoteResponse>(apiUrl, {
                     params: {
                         chain: openOceanBlockchainName[blockchain],
-                        inTokenAddress: fromWithoutFee.isNative
-                            ? OpenOceanProvider.nativeAddress
-                            : fromWithoutFee.address,
-                        outTokenAddress: toToken.isNative
-                            ? OpenOceanProvider.nativeAddress
-                            : toToken.address,
+                        inTokenAddress: this.getTokenAddress(fromWithoutFee),
+                        outTokenAddress: this.getTokenAddress(toToken),
                         amount: fromWithoutFee.tokenAmount.toString(),
                         slippage: options.slippageTolerance! * 100,
                         gasPrice: isArbitrum
@@ -122,6 +118,17 @@ export class OpenOceanProvider {
                 error
             };
         }
+    }
+
+    private getTokenAddress(token: PriceToken): string {
+        if (token.isNative) {
+            if (token.blockchain === BLOCKCHAIN_NAME.METIS) {
+                return '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
+            }
+
+            return OpenOceanProvider.nativeAddress;
+        }
+        return token.address;
     }
 
     protected async handleProxyContract(
