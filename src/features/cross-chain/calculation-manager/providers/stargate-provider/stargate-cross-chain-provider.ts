@@ -153,7 +153,6 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            const transitToken = await this.getTransitToken(hasDirectRoute, from, toToken);
             let transitTokenAmount = fromWithoutFee;
             let srcChainTrade: EvmOnChainTrade | null = null;
             let transitAmount: BigNumber = fromWithoutFee.tokenAmount;
@@ -166,6 +165,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                         tradeType: this.type
                     };
                 }
+                const transitToken = await this.getTransitToken(hasDirectRoute, from, toToken);
                 const trade = await ProxyCrossChainEvmTrade.getOnChainTrade(
                     fromWithoutFee,
                     transitToken,
