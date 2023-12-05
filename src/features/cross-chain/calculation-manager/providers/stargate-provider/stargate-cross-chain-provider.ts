@@ -158,7 +158,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             let transitAmount: BigNumber = fromWithoutFee.tokenAmount;
 
             if (!hasDirectRoute || (useProxy && hasDirectRoute && from.isNative)) {
-                if (!useProxy || !(transitToken.isWrapped && fromToken.isNative)) {
+                if (!useProxy) {
                     return {
                         trade: null,
                         error: new NotSupportedTokensError(),
@@ -166,6 +166,15 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                     };
                 }
                 const transitToken = await this.getTransitToken(hasDirectRoute, from, toToken);
+
+                if (fromToken.isNative && !transitToken.isWrapped) {
+                    return {
+                        trade: null,
+                        error: new NotSupportedTokensError(),
+                        tradeType: this.type
+                    };
+                }
+
                 const trade = await ProxyCrossChainEvmTrade.getOnChainTrade(
                     fromWithoutFee,
                     transitToken,
