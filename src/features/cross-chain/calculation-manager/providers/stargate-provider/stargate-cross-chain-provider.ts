@@ -96,6 +96,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         return Boolean(poolPathExists);
     }
 
+    // eslint-disable-next-line complexity
     public async calculate(
         fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
@@ -158,7 +159,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             let transitAmount: BigNumber = fromWithoutFee.tokenAmount;
 
             if (!hasDirectRoute || (useProxy && hasDirectRoute && from.isNative)) {
-                if (!useProxy || !transitToken.isWrapped) {
+                if (!useProxy || !(transitToken.isWrapped && fromToken.isNative)) {
                     return {
                         trade: null,
                         error: new NotSupportedTokensError(),
