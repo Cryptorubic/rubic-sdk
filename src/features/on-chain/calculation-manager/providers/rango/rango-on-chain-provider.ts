@@ -67,7 +67,7 @@ export class RangoOnChainProvider {
                 gasFeeInfo: {
                     gasLimit: undefined
                 },
-                slippageTolerance: options.slippageTolerance * 100,
+                slippageTolerance: options.slippageTolerance,
                 useProxy: options.useProxy,
                 withDeflation: options.withDeflation,
                 path

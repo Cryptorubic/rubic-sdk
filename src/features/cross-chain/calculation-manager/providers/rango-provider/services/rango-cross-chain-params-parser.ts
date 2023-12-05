@@ -27,7 +27,7 @@ export class RangoCrossChainParser {
                   })
                 : null;
         const priceImpact = fromToken.calculatePriceImpactPercent(toToken);
-        const slippage = options.slippageTolerance * 100;
+        const slippage = options.slippageTolerance;
 
         const crossChainTrade = {
             from: fromToken,
