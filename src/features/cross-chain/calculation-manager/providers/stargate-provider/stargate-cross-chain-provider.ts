@@ -169,7 +169,11 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 }
                 const transitToken = await this.getTransitToken(hasDirectRoute, from, toToken);
 
-                if (fromToken.isNative && !transitToken.isWrapped) {
+                if (
+                    fromToken.isNative &&
+                    !transitToken.isWrapped &&
+                    fromBlockchain !== BLOCKCHAIN_NAME.METIS
+                ) {
                     return {
                         trade: null,
                         error: new NotSupportedTokensError(),
