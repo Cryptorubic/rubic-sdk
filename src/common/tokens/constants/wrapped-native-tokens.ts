@@ -187,7 +187,7 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
     }),
     [BLOCKCHAIN_NAME.METIS]: new Token({
         blockchain: BLOCKCHAIN_NAME.METIS,
-        address: '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000',
+        address: '0x75cb093E4D61d2A2e65D8e0BBb01DE8d89b53481',
         name: 'Wrapped METIS',
         symbol: 'WMETIS',
         decimals: 18
