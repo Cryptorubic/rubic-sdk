@@ -158,7 +158,7 @@ export class StargateCrossChainProvider extends CrossChainProvider {
             let transitAmount: BigNumber = fromWithoutFee.tokenAmount;
 
             if (!hasDirectRoute || (useProxy && hasDirectRoute && from.isNative)) {
-                if (!useProxy) {
+                if (!useProxy || !transitToken.isWrapped) {
                     return {
                         trade: null,
                         error: new NotSupportedTokensError(),
