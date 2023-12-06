@@ -1,4 +1,4 @@
-import { PriceToken } from 'src/common/tokens';
+import { PriceToken, Token } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import {
     TX_STATUS,
@@ -10,6 +10,7 @@ import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/prov
 
 import { rangoApiBlockchainNames, RangoBlockchainName } from '../models/rango-api-blockchain-names';
 import { RANGO_SWAP_STATUS, RangoSwapStatus } from '../models/rango-api-status-types';
+import { rangoApiSymbols } from '../models/rango-api-symbol-names';
 import {
     rangoCrossChainTradeTypes,
     rangoOnChainTradeTypes,
@@ -21,14 +22,18 @@ export class RangoUtils {
     /**
      * @returns Query-param string in format `chainName.symbol--address`, chainName's compatible with rango-api
      */
-    public static getFromToQueryParam(token: PriceToken<EvmBlockchainName>): string {
-        const { blockchain, symbol, address, isNative } = token;
+    public static async getFromToQueryParam(token: PriceToken<EvmBlockchainName>): Promise<string> {
+        const rangoBlockchainName =
+            rangoApiBlockchainNames[token.blockchain as RangoSupportedBlockchain];
 
-        const rangoBlockchainName = rangoApiBlockchainNames[blockchain as RangoSupportedBlockchain];
+        const symbol = token.isNative
+            ? rangoApiSymbols[token.blockchain as RangoSupportedBlockchain]
+            : (await Token.createToken({ address: token.address, blockchain: token.blockchain }))
+                  .symbol;
 
-        const param = isNative
+        const param = token.isNative
             ? `${rangoBlockchainName}.${symbol}`
-            : `${rangoBlockchainName}.${symbol}--${address}`;
+            : `${rangoBlockchainName}.${symbol}--${token.address}`;
 
         return param;
     }

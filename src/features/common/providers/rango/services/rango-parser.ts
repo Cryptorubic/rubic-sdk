@@ -17,13 +17,13 @@ export class RangoCommonParser {
     /**
      *@description Transform parameters to required view for rango-api
      */
-    public static getBestRouteQueryParams(
+    public static async getBestRouteQueryParams(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RangoBestRouteRequestOptions
-    ): RangoBestRouteQueryParams {
-        const fromParam = RangoUtils.getFromToQueryParam(from);
-        const toParam = RangoUtils.getFromToQueryParam(toToken);
+    ): Promise<RangoBestRouteQueryParams> {
+        const fromParam = await RangoUtils.getFromToQueryParam(from);
+        const toParam = await RangoUtils.getFromToQueryParam(toToken);
 
         const amountParam = Web3Pure.toWei(from.tokenAmount, from.decimals);
 
@@ -40,15 +40,15 @@ export class RangoCommonParser {
         };
     }
 
-    public static getSwapQueryParams(
+    public static async getSwapQueryParams(
         fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RangoSwapRequestOptions
-    ): RangoSwapQueryParams {
+    ): Promise<RangoSwapQueryParams> {
         const amount = Web3Pure.toWei(fromToken.tokenAmount, fromToken.decimals);
 
-        const from = RangoUtils.getFromToQueryParam(fromToken);
-        const to = RangoUtils.getFromToQueryParam(toToken);
+        const from = await RangoUtils.getFromToQueryParam(fromToken);
+        const to = await RangoUtils.getFromToQueryParam(toToken);
 
         const walletAddress = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
             fromToken.blockchain

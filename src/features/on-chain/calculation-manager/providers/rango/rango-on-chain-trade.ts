@@ -110,7 +110,7 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
         fromAddress?: string,
         receiverAddress?: string
     ): Promise<EvmEncodeConfig> {
-        const params = RangoCommonParser.getSwapQueryParams(this.from, this.to, {
+        const params = await RangoCommonParser.getSwapQueryParams(this.from, this.to, {
             fromAddress: fromAddress ?? this.walletAddress,
             receiverAddress: receiverAddress ?? this.walletAddress,
             slippageTolerance: this.slippageTolerance

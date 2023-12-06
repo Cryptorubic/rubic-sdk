@@ -120,7 +120,6 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         } catch (err) {
             return null;
         }
-        return null;
     }
 
     /**ABSTRACT PROPS */
@@ -208,7 +207,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             data!,
             this.from.blockchain,
             providerRouter,
-            '0'
+            providerValue
         );
 
         const methodArguments = [bridgeData, providerData];

@@ -83,7 +83,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            const bestRouteParams = RangoCommonParser.getBestRouteQueryParams(
+            const bestRouteParams = await RangoCommonParser.getBestRouteQueryParams(
                 fromWithoutFee,
                 toToken,
                 options
@@ -93,7 +93,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 await RangoCrossChainApiService.getBestRoute(bestRouteParams);
             const { outputAmountMin, outputAmount, path } = route as RangoBestRouteSimulationResult;
 
-            const swapQueryParams = RangoCommonParser.getSwapQueryParams(
+            const swapQueryParams = await RangoCommonParser.getSwapQueryParams(
                 fromWithoutFee,
                 toToken,
                 options as Required<RangoSwapRequestOptions>

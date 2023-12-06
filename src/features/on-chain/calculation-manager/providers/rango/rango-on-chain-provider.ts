@@ -41,7 +41,7 @@ export class RangoOnChainProvider {
         try {
             const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
 
-            const bestRouteParams = RangoCommonParser.getBestRouteQueryParams(
+            const bestRouteParams = await RangoCommonParser.getBestRouteQueryParams(
                 fromWithoutFee,
                 toToken,
                 options
