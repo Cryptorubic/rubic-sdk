@@ -4,7 +4,10 @@ export interface XyQuoteRequest {
     srcQuoteTokenAmount: string;
     dstChainId: number;
     dstQuoteTokenAddress: string;
-    slippage: number; // Percent
-    affiliate?: string; // Affiliate address
+    slippage: number;
+    affiliate?: string;
     commissionRate?: number;
+    srcSwapProvider?: string;
+    bridgeProvider?: string;
+    dstSwapProvider?: string;
 }

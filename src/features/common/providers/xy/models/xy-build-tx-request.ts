@@ -1,6 +1,6 @@
-import { XyCrossChainQuoteRequest } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-cross-chain-quote-request';
+import { XyQuoteRequest } from 'src/features/common/providers/xy/models/xy-quote-request';
 
-export interface XyBuildTxRequest extends XyCrossChainQuoteRequest {
+export interface XyBuildTxRequest extends XyQuoteRequest {
     /**
      * Destination chain quote token receiver.
      */

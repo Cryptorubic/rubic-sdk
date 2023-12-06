@@ -1,9 +1,15 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import {
+    XY_API_ENDPOINT,
+    XY_NATIVE_ADDRESS
+} from 'src/features/common/providers/xy/constants/xy-api-params';
+import { XyQuoteRequest } from 'src/features/common/providers/xy/models/xy-quote-request';
+import { XyQuoteResponse } from 'src/features/common/providers/xy/models/xy-quote-response';
+import { xyAnalyzeStatusCode } from 'src/features/common/providers/xy/utils/xy-utils';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import {
     OnChainCalculationOptions,
@@ -16,15 +22,10 @@ import {
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
-import { xyApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/xy-dex-abstract/constants';
 import { XyDexTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/xy-dex-abstract/models/xy-dex-trade-struct';
-import { XyQuoteRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/xy-dex-abstract/models/xy-quote-request';
-import { XyQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/xy-dex-abstract/models/xy-quote-response';
 import { XyDexTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/xy-dex-abstract/xy-dex-trade';
 
 export abstract class XyDexAbstractProvider extends EvmOnChainProvider {
-    public static readonly apiUrl = 'https://aggregator-api.xy.finance/v1/';
-
     private readonly defaultOptions = evmProviderDefaultOptions;
 
     public get type(): OnChainTradeType {
@@ -97,8 +98,8 @@ export abstract class XyDexAbstractProvider extends EvmOnChainProvider {
         provider: string;
     }> {
         const chainId = blockchainId[from.blockchain];
-        const srcQuoteTokenAddress = from.isNative ? xyApiParams.nativeAddress : from.address;
-        const dstQuoteTokenAddress = toToken.isNative ? xyApiParams.nativeAddress : toToken.address;
+        const srcQuoteTokenAddress = from.isNative ? XY_NATIVE_ADDRESS : from.address;
+        const dstQuoteTokenAddress = toToken.isNative ? XY_NATIVE_ADDRESS : toToken.address;
 
         const quoteTradeParams: XyQuoteRequest = {
             srcChainId: chainId,
@@ -109,17 +110,15 @@ export abstract class XyDexAbstractProvider extends EvmOnChainProvider {
             slippage: options.slippageTolerance * 100
         };
 
-        const trade = await this.httpClient.get<XyQuoteResponse>(
-            `${XyDexAbstractProvider.apiUrl}quote`,
-            {
-                params: { ...quoteTradeParams }
-            }
-        );
-        if (!trade.success || !trade.routes?.[0]) {
-            throw new RubicSdkError('Cant estimate trade');
+        const trade = await this.httpClient.get<XyQuoteResponse>(`${XY_API_ENDPOINT}/quote`, {
+            params: { ...quoteTradeParams }
+        });
+
+        if (!trade.success) {
+            xyAnalyzeStatusCode(trade.errorCode, trade.errorMsg);
         }
 
-        const bestRoute = trade.routes[0];
+        const bestRoute = trade.routes[0]!;
 
         return {
             toTokenAmountInWei: new BigNumber(bestRoute.dstQuoteTokenAmount),

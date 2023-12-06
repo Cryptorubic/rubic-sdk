@@ -7,6 +7,15 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import {
+    XY_API_ENDPOINT,
+    XY_NATIVE_ADDRESS
+} from 'src/features/common/providers/xy/constants/xy-api-params';
+import { XyBuildTxRequest } from 'src/features/common/providers/xy/models/xy-build-tx-request';
+import { XyQuoteRequest } from 'src/features/common/providers/xy/models/xy-quote-request';
+import { XyQuoteResponse } from 'src/features/common/providers/xy/models/xy-quote-response';
+import { XyQuote } from 'src/features/common/providers/xy/models/xy-quote-success-response';
+import { xyAnalyzeStatusCode } from 'src/features/common/providers/xy/utils/xy-utils';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -19,17 +28,10 @@ import {
     XyCrossChainSupportedBlockchain,
     xySupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
-import { XyBuildTxRequest } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-build-tx-request';
-import { XyCrossChainQuoteRequest } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-cross-chain-quote-request';
-import { XyCrossChainQuoteResponse } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-cross-chain-quote-response';
-import { XyQuoteErrorCode } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-quote-error-response';
-import { XyQuote } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-quote-success-response';
 import { XyCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-trade';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 export class XyCrossChainProvider extends CrossChainProvider {
-    public static readonly apiEndpoint = 'https://aggregator-api.xy.finance/v1';
-
     public readonly type = CROSS_CHAIN_TRADE_TYPE.XY;
 
     public isSupportedBlockchain(
@@ -75,27 +77,23 @@ export class XyCrossChainProvider extends CrossChainProvider {
 
             const slippageTolerance = options.slippageTolerance * 100;
 
-            const requestParams: XyCrossChainQuoteRequest = {
+            const requestParams: XyQuoteRequest = {
                 srcChainId: blockchainId[fromBlockchain],
-                srcQuoteTokenAddress: fromToken.isNative
-                    ? XyCrossChainTrade.nativeAddress
-                    : fromToken.address,
+                srcQuoteTokenAddress: fromToken.isNative ? XY_NATIVE_ADDRESS : fromToken.address,
                 srcQuoteTokenAmount: fromWithoutFee.stringWeiAmount,
                 dstChainId: blockchainId[toBlockchain],
-                dstQuoteTokenAddress: toToken.isNative
-                    ? XyCrossChainTrade.nativeAddress
-                    : toToken.address,
+                dstQuoteTokenAddress: toToken.isNative ? XY_NATIVE_ADDRESS : toToken.address,
                 slippage: slippageTolerance
             };
 
-            const { routes, errorCode, errorMsg } =
-                await Injector.httpClient.get<XyCrossChainQuoteResponse>(
-                    `${XyCrossChainProvider.apiEndpoint}/quote`,
-                    {
-                        params: { ...requestParams }
-                    }
-                );
-            this.analyzeStatusCode(errorCode, errorMsg);
+            const { success, routes, errorCode, errorMsg } =
+                await Injector.httpClient.get<XyQuoteResponse>(`${XY_API_ENDPOINT}/quote`, {
+                    params: { ...requestParams }
+                });
+
+            if (!success) {
+                xyAnalyzeStatusCode(errorCode, errorMsg);
+            }
 
             const {
                 srcSwapDescription,
@@ -103,14 +101,6 @@ export class XyCrossChainProvider extends CrossChainProvider {
                 dstSwapDescription,
                 dstQuoteTokenAmount
             } = routes[0]!;
-
-            console.log('============================');
-            console.log('Src swap provider: ', srcSwapDescription?.provider);
-            console.log('Src swap dexNames: ', srcSwapDescription?.dexNames);
-            console.log('Bridge swap provider: ', bridgeDescription?.provider);
-            console.log('Dst swap provider: ', dstSwapDescription?.provider);
-            console.log('Dst swap dexNames: ', dstSwapDescription?.dexNames);
-            console.log('============================');
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -191,28 +181,6 @@ export class XyCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    private analyzeStatusCode(code: XyQuoteErrorCode, message: string): void {
-        console.log('========CALCULATE========');
-        console.log('Error Code: ', code);
-        console.log('Error msg: ', message);
-        // switch (code) {
-        //     case '0':
-        //         break;
-        //     case '3':
-        //     case '4':
-        //         throw new InsufficientLiquidityError();
-        //     case '6': {
-        //         const [minAmount, tokenSymbol] = message.split('to ')[1]!.slice(0, -1).split(' ');
-        //         throw new MinAmountError(new BigNumber(minAmount!), tokenSymbol!);
-        //     }
-        //     case '5':
-        //     case '10':
-        //     case '99':
-        //     default:
-        //         throw new RubicSdkError('Unknown Error.');
-        // }
-    }
-
     protected async getRoutePath(
         fromToken: PriceTokenAmount,
         toToken: PriceTokenAmount,
@@ -224,7 +192,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
         const fromTokenAmount = transitFromAddress
             ? await TokenAmount.createToken({
                   blockchain: fromToken.blockchain,
-                  address: compareAddresses(transitFromAddress, XyCrossChainTrade.nativeAddress)
+                  address: compareAddresses(transitFromAddress, XY_NATIVE_ADDRESS)
                       ? EvmWeb3Pure.EMPTY_ADDRESS
                       : transitFromAddress,
                   weiAmount: new BigNumber(0)
@@ -234,7 +202,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
         const toTokenAmount = transitToAddress
             ? await TokenAmount.createToken({
                   blockchain: toToken.blockchain,
-                  address: compareAddresses(transitToAddress, XyCrossChainTrade.nativeAddress)
+                  address: compareAddresses(transitToAddress, XY_NATIVE_ADDRESS)
                       ? EvmWeb3Pure.EMPTY_ADDRESS
                       : transitToAddress,
                   weiAmount: new BigNumber(0)
