@@ -1,10 +1,5 @@
 import BigNumber from 'bignumber.js';
-import {
-    InsufficientLiquidityError,
-    MinAmountError,
-    NotSupportedTokensError,
-    RubicSdkError
-} from 'src/common/errors';
+import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -12,6 +7,15 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import {
+    XY_API_ENDPOINT,
+    XY_NATIVE_ADDRESS
+} from 'src/features/common/providers/xy/constants/xy-api-params';
+import { XyBuildTxRequest } from 'src/features/common/providers/xy/models/xy-build-tx-request';
+import { XyQuoteRequest } from 'src/features/common/providers/xy/models/xy-quote-request';
+import { XyQuoteResponse } from 'src/features/common/providers/xy/models/xy-quote-response';
+import { XyQuote } from 'src/features/common/providers/xy/models/xy-quote-success-response';
+import { xyAnalyzeStatusCode } from 'src/features/common/providers/xy/utils/xy-utils';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -20,19 +24,14 @@ import { CalculationResult } from 'src/features/cross-chain/calculation-manager/
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { XyStatusCode } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-status-code';
 import {
     XyCrossChainSupportedBlockchain,
     xySupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
-import { XyTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-request';
-import { XyTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-response';
 import { XyCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-trade';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 export class XyCrossChainProvider extends CrossChainProvider {
-    public static readonly apiEndpoint = 'https://open-api.xy.finance/v1';
-
     public readonly type = CROSS_CHAIN_TRADE_TYPE.XY;
 
     public isSupportedBlockchain(
@@ -78,44 +77,60 @@ export class XyCrossChainProvider extends CrossChainProvider {
 
             const slippageTolerance = options.slippageTolerance * 100;
 
-            const requestParams: XyTransactionRequest = {
-                srcChainId: String(blockchainId[fromBlockchain]),
-                fromTokenAddress: fromToken.isNative
-                    ? XyCrossChainTrade.nativeAddress
-                    : fromToken.address,
-                amount: fromWithoutFee.stringWeiAmount,
-                slippage: String(slippageTolerance),
-                destChainId: blockchainId[toBlockchain],
-                toTokenAddress: toToken.isNative
-                    ? XyCrossChainTrade.nativeAddress
-                    : toToken.address,
-                referrer: '0xCb022eBa97B53f74E0901618252682F0728cd192',
-                receiveAddress: receiverAddress || EvmWeb3Pure.EMPTY_ADDRESS
+            const requestParams: XyQuoteRequest = {
+                srcChainId: blockchainId[fromBlockchain],
+                srcQuoteTokenAddress: fromToken.isNative ? XY_NATIVE_ADDRESS : fromToken.address,
+                srcQuoteTokenAmount: fromWithoutFee.stringWeiAmount,
+                dstChainId: blockchainId[toBlockchain],
+                dstQuoteTokenAddress: toToken.isNative ? XY_NATIVE_ADDRESS : toToken.address,
+                slippage: slippageTolerance
             };
 
-            const { toTokenAmount, statusCode, msg, quote } =
-                await Injector.httpClient.get<XyTransactionResponse>(
-                    `${XyCrossChainProvider.apiEndpoint}/swap`,
-                    {
-                        params: { ...requestParams }
-                    }
-                );
-            this.analyzeStatusCode(statusCode, msg);
+            const { success, routes, errorCode, errorMsg } =
+                await Injector.httpClient.get<XyQuoteResponse>(`${XY_API_ENDPOINT}/quote`, {
+                    params: { ...requestParams }
+                });
+
+            if (!success) {
+                xyAnalyzeStatusCode(errorCode, errorMsg);
+            }
+
+            const {
+                srcSwapDescription,
+                bridgeDescription,
+                dstSwapDescription,
+                dstQuoteTokenAmount
+            } = routes[0]!;
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
-                tokenAmount: Web3Pure.fromWei(toTokenAmount, toToken.decimals)
+                tokenAmount: Web3Pure.fromWei(dstQuoteTokenAmount, toToken.decimals)
             });
+
+            const buildTxTransactionRequest: XyBuildTxRequest = {
+                ...requestParams,
+                ...(srcSwapDescription?.provider && {
+                    srcSwapProvider: srcSwapDescription?.provider
+                }),
+                ...(bridgeDescription?.provider && {
+                    srcBridgeTokenAddress: bridgeDescription.srcBridgeTokenAddress,
+                    bridgeProvider: bridgeDescription.provider,
+                    dstBridgeTokenAddress: bridgeDescription.dstBridgeTokenAddress
+                }),
+                ...(dstSwapDescription?.provider && {
+                    dstSwapProvider: dstSwapDescription?.provider
+                }),
+                receiver: receiverAddress
+            };
 
             const gasData =
                 options.gasCalculation === 'enabled'
                     ? await XyCrossChainTrade.getGasData(
                           fromToken,
                           to,
-                          requestParams,
+                          buildTxTransactionRequest,
                           feeInfo,
-                          options.providerAddress,
-                          options.receiverAddress
+                          options.providerAddress
                       )
                     : null;
 
@@ -124,10 +139,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
                     {
                         from: fromToken,
                         to,
-                        transactionRequest: {
-                            ...requestParams,
-                            receiveAddress: receiverAddress
-                        },
+                        transactionRequest: buildTxTransactionRequest,
                         gasData,
                         priceImpact: fromToken.calculatePriceImpactPercent(to),
                         slippage: options.slippageTolerance,
@@ -135,7 +147,12 @@ export class XyCrossChainProvider extends CrossChainProvider {
                         onChainTrade: null
                     },
                     options.providerAddress,
-                    await this.getRoutePath(fromToken, to, quote)
+                    await this.getRoutePath(fromToken, to, {
+                        srcSwapDescription,
+                        bridgeDescription,
+                        dstSwapDescription,
+                        dstQuoteTokenAmount
+                    })
                 ),
                 tradeType: this.type
             };
@@ -164,59 +181,37 @@ export class XyCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    private analyzeStatusCode(code: XyStatusCode, message: string): void {
-        switch (code) {
-            case '0':
-                break;
-            case '3':
-            case '4':
-                throw new InsufficientLiquidityError();
-            case '6': {
-                const [minAmount, tokenSymbol] = message.split('to ')[1]!.slice(0, -1).split(' ');
-                throw new MinAmountError(new BigNumber(minAmount!), tokenSymbol!);
-            }
-            case '5':
-            case '10':
-            case '99':
-            default:
-                throw new RubicSdkError('Unknown Error.');
-        }
-    }
-
     protected async getRoutePath(
         fromToken: PriceTokenAmount,
         toToken: PriceTokenAmount,
-        quote: XyTransactionResponse['quote']
+        quote: XyQuote
     ): Promise<RubicStep[]> {
-        const transitFrom = quote.sourceChainSwaps?.toToken;
-        const transitTo = quote.destChainSwaps?.fromToken;
+        const transitFromAddress = quote.srcSwapDescription?.dstTokenAddress;
+        const transitToAddress = quote.dstSwapDescription?.srcTokenAddress;
 
-        const fromTokenAmount = transitFrom
+        const fromTokenAmount = transitFromAddress
             ? await TokenAmount.createToken({
                   blockchain: fromToken.blockchain,
-                  address: compareAddresses(
-                      transitFrom.tokenAddress,
-                      XyCrossChainTrade.nativeAddress
-                  )
+                  address: compareAddresses(transitFromAddress, XY_NATIVE_ADDRESS)
                       ? EvmWeb3Pure.EMPTY_ADDRESS
-                      : transitFrom.tokenAddress,
+                      : transitFromAddress,
                   weiAmount: new BigNumber(0)
               })
             : fromToken;
 
-        const toTokenAmount = transitTo
+        const toTokenAmount = transitToAddress
             ? await TokenAmount.createToken({
                   blockchain: toToken.blockchain,
-                  address: compareAddresses(transitTo.tokenAddress, XyCrossChainTrade.nativeAddress)
+                  address: compareAddresses(transitToAddress, XY_NATIVE_ADDRESS)
                       ? EvmWeb3Pure.EMPTY_ADDRESS
-                      : transitTo.tokenAddress,
+                      : transitToAddress,
                   weiAmount: new BigNumber(0)
               })
             : toToken;
 
         const routePath: RubicStep[] = [];
 
-        if (transitFrom) {
+        if (transitFromAddress) {
             routePath.push({
                 type: 'on-chain',
                 // @TODO provider: ON_CHAIN_TRADE_TYPE.XY_DEX,
@@ -229,7 +224,7 @@ export class XyCrossChainProvider extends CrossChainProvider {
             provider: CROSS_CHAIN_TRADE_TYPE.XY,
             path: [fromTokenAmount, toTokenAmount]
         });
-        if (transitTo) {
+        if (transitToAddress) {
             routePath.push({
                 type: 'on-chain',
                 // @TODO provider: ON_CHAIN_TRADE_TYPE.XY_DEX,

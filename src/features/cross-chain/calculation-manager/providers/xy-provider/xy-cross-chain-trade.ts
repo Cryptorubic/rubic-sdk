@@ -9,6 +9,10 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { XY_API_ENDPOINT } from 'src/features/common/providers/xy/constants/xy-api-params';
+import { XyBuildTxRequest } from 'src/features/common/providers/xy/models/xy-build-tx-request';
+import { XyBuildTxResponse } from 'src/features/common/providers/xy/models/xy-build-tx-response';
+import { xyAnalyzeStatusCode } from 'src/features/common/providers/xy/utils/xy-utils';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
@@ -23,9 +27,6 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { xyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-contract-address';
 import { XyCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
-import { XyTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-request';
-import { XyTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/models/xy-transaction-response';
-import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
@@ -38,10 +39,9 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceTokenAmount<EvmBlockchainName>,
-        transactionRequest: XyTransactionRequest,
+        transactionRequest: XyBuildTxRequest,
         feeInfo: FeeInfo,
-        providerAddress: string,
-        receiverAddress?: string
+        providerAddress: string
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as XyCrossChainSupportedBlockchain;
         const walletAddress =
@@ -100,7 +100,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
                     },
                     providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getTransactionRequest(receiverAddress, undefined, true);
+                ).getTransactionRequest(transactionRequest?.receiver, undefined, true);
 
                 const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
                     data,
@@ -128,8 +128,6 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    public static readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-
     public readonly type = CROSS_CHAIN_TRADE_TYPE.XY;
 
     public readonly isAggregator = false;
@@ -151,7 +149,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly gasData: GasData | null;
 
-    private readonly transactionRequest: XyTransactionRequest;
+    private readonly transactionRequest: XyBuildTxRequest;
 
     private get fromBlockchain(): XyCrossChainSupportedBlockchain {
         return this.from.blockchain as XyCrossChainSupportedBlockchain;
@@ -177,7 +175,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         crossChainTrade: {
             from: PriceTokenAmount<EvmBlockchainName>;
             to: PriceTokenAmount<EvmBlockchainName>;
-            transactionRequest: XyTransactionRequest;
+            transactionRequest: XyBuildTxRequest;
             gasData: GasData | null;
             priceImpact: number | null;
             slippage: number;
@@ -311,18 +309,27 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
                 value: transactionConfig.value
             };
         }
-        const params: XyTransactionRequest = {
+
+        const params: XyBuildTxRequest = {
             ...this.transactionRequest,
-            ...(receiverAddress && { receiveAddress: receiverAddress })
+            ...(receiverAddress && { receiver: receiverAddress })
         };
 
-        const { tx, toTokenAmount } = await Injector.httpClient.get<XyTransactionResponse>(
-            `${XyCrossChainProvider.apiEndpoint}/swap`,
-            { params: { ...params } }
-        );
+        const { success, tx, route, errorCode, errorMsg } =
+            await Injector.httpClient.get<XyBuildTxResponse>(`${XY_API_ENDPOINT}/buildTx`, {
+                params: { ...params }
+            });
+
+        if (!success) {
+            xyAnalyzeStatusCode(errorCode, errorMsg);
+        }
 
         if (!skipAmountChangeCheck) {
-            await EvmCrossChainTrade.checkAmountChange(tx!, toTokenAmount, this.to.stringWeiAmount);
+            EvmCrossChainTrade.checkAmountChange(
+                tx!,
+                route!.dstQuoteTokenAmount,
+                this.to.stringWeiAmount
+            );
         }
 
         return tx!;
