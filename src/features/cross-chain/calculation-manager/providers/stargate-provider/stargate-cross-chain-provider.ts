@@ -62,8 +62,18 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     ): boolean {
         const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = to.blockchain as StargateCrossChainSupportedBlockchain;
-        const fromSymbol = StargateCrossChainProvider.getSymbol(from.symbol, fromBlockchain);
-        const toSymbol = StargateCrossChainProvider.getSymbol(to.symbol, toBlockchain);
+        const swapToMetisBlockchain = toBlockchain === BLOCKCHAIN_NAME.METIS;
+        const swapFromMetisBlockchain = fromBlockchain === BLOCKCHAIN_NAME.METIS;
+        const fromSymbol = StargateCrossChainProvider.getSymbol(
+            from.symbol,
+            fromBlockchain,
+            swapToMetisBlockchain
+        );
+        const toSymbol = StargateCrossChainProvider.getSymbol(
+            to.symbol,
+            toBlockchain,
+            swapFromMetisBlockchain
+        );
 
         const srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
         const srcSupportedPools = stargateBlockchainSupportedPools[fromBlockchain];
@@ -88,15 +98,33 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         return Boolean(poolPathExists);
     }
 
+    // eslint-disable-next-line complexity
     public async calculate(
-        from: PriceTokenAmount<EvmBlockchainName>,
+        fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
+        const from = new PriceTokenAmount({
+            ...fromToken.asStruct,
+            tokenAmount: fromToken.tokenAmount,
+            address:
+                fromToken.isNative && fromToken.blockchain === BLOCKCHAIN_NAME.METIS
+                    ? '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
+                    : fromToken.address
+        });
+
         try {
             const fromBlockchain = from.blockchain as StargateCrossChainSupportedBlockchain;
             const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
             const useProxy = options?.useProxy?.[this.type] ?? true;
+
+            if (this.shouldWeStopCalculatingWithMetisToken(fromToken, toToken)) {
+                return {
+                    trade: null,
+                    error: new NotSupportedTokensError(),
+                    tradeType: this.type
+                };
+            }
 
             if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
                 return {
@@ -140,6 +168,19 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                     };
                 }
                 const transitToken = await this.getTransitToken(hasDirectRoute, from, toToken);
+
+                if (
+                    fromToken.isNative &&
+                    !transitToken.isWrapped &&
+                    fromBlockchain !== BLOCKCHAIN_NAME.METIS
+                ) {
+                    return {
+                        trade: null,
+                        error: new NotSupportedTokensError(),
+                        tradeType: this.type
+                    };
+                }
+
                 const trade = await ProxyCrossChainEvmTrade.getOnChainTrade(
                     fromWithoutFee,
                     transitToken,
@@ -288,9 +329,19 @@ export class StargateCrossChainProvider extends CrossChainProvider {
     ): Promise<BigNumber> {
         const fromBlockchain = fromToken.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
+        const swapToMetisBlockchain = toBlockchain === BLOCKCHAIN_NAME.METIS;
+        const swapFromMetisBlockchain = fromBlockchain === BLOCKCHAIN_NAME.METIS;
 
-        const fromSymbol = StargateCrossChainProvider.getSymbol(fromToken.symbol, fromBlockchain);
-        const toSymbol = StargateCrossChainProvider.getSymbol(toToken.symbol, toBlockchain);
+        const fromSymbol = StargateCrossChainProvider.getSymbol(
+            fromToken.symbol,
+            fromBlockchain,
+            swapToMetisBlockchain
+        );
+        const toSymbol = StargateCrossChainProvider.getSymbol(
+            toToken.symbol,
+            toBlockchain,
+            swapFromMetisBlockchain
+        );
 
         let srcPoolId = stargatePoolId[fromSymbol as StargateBridgeToken];
         let dstPoolId = stargatePoolId[toSymbol as StargateBridgeToken];
@@ -387,13 +438,16 @@ export class StargateCrossChainProvider extends CrossChainProvider {
 
         const toBlockchain = toToken.blockchain as StargateCrossChainSupportedBlockchain;
         const toBlockchainDirection = stargatePoolMapping[toBlockchain];
+        const swapFromMetisBlockchain = fromToken.blockchain === BLOCKCHAIN_NAME.METIS;
+
         if (!toBlockchainDirection) {
             throw new RubicSdkError('Tokens are not supported.');
         }
 
         const toSymbol = StargateCrossChainProvider.getSymbol(
             toToken.symbol,
-            toBlockchain
+            toBlockchain,
+            swapFromMetisBlockchain
         ) as StargateBridgeToken;
 
         const toSymbolDirection = toBlockchainDirection[toSymbol];
@@ -446,12 +500,33 @@ export class StargateCrossChainProvider extends CrossChainProvider {
         );
     }
 
-    public static getSymbol(symbol: string, blockchain: BlockchainName): string {
+    public static getSymbol(
+        symbol: string,
+        blockchain: BlockchainName,
+        swapWithMetisBlockchain?: boolean
+    ): string {
         if (blockchain === BLOCKCHAIN_NAME.ARBITRUM && symbol === 'AETH') {
             return 'ETH';
         }
+
+        if (
+            swapWithMetisBlockchain &&
+            (blockchain === BLOCKCHAIN_NAME.AVALANCHE ||
+                blockchain === BLOCKCHAIN_NAME.ETHEREUM ||
+                blockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN) &&
+            symbol.toLowerCase() === 'usdt'
+        ) {
+            return 'm.USDT';
+        }
+
+        if (blockchain === BLOCKCHAIN_NAME.AVALANCHE && symbol === 'USDt') {
+            return 'USDT';
+        }
         if (blockchain === BLOCKCHAIN_NAME.FANTOM && symbol === 'USDC') {
             return 'FUSDC';
+        }
+        if (symbol.toUpperCase() === 'METIS') {
+            return symbol.toUpperCase();
         }
         return symbol;
     }
@@ -483,5 +558,25 @@ export class StargateCrossChainProvider extends CrossChainProvider {
                 path: [from, to]
             }
         ];
+    }
+
+    // Не считаем трейды из Metis (metis/m.usdt) в Avalanche (metis) и в BNB chain (metis) и обратно
+    private shouldWeStopCalculatingWithMetisToken(
+        fromToken: PriceTokenAmount,
+        toToken: PriceToken
+    ): boolean {
+        return (
+            (fromToken.blockchain === BLOCKCHAIN_NAME.METIS &&
+                fromToken.symbol.toLowerCase() !== 'metis' &&
+                toToken.symbol.toLowerCase() === 'metis') ||
+            (fromToken.blockchain === BLOCKCHAIN_NAME.METIS &&
+                (toToken.blockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN ||
+                    toToken.blockchain === BLOCKCHAIN_NAME.AVALANCHE) &&
+                toToken.symbol.toLowerCase() === 'metis') ||
+            (toToken.blockchain === BLOCKCHAIN_NAME.METIS &&
+                (fromToken.blockchain === BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN ||
+                    fromToken.blockchain === BLOCKCHAIN_NAME.AVALANCHE) &&
+                fromToken.symbol.toLowerCase() === 'metis')
+        );
     }
 }

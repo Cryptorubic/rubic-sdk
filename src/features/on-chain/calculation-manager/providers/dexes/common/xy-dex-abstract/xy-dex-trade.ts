@@ -7,13 +7,16 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import {
+    XY_API_ENDPOINT,
+    XY_NATIVE_ADDRESS
+} from 'src/features/common/providers/xy/constants/xy-api-params';
+import { XyBuildTxRequest } from 'src/features/common/providers/xy/models/xy-build-tx-request';
+import { XyBuildTxResponse } from 'src/features/common/providers/xy/models/xy-build-tx-response';
+import { xyAnalyzeStatusCode } from 'src/features/common/providers/xy/utils/xy-utils';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { xyApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/xy-dex-abstract/constants';
 import { XyDexTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/xy-dex-abstract/models/xy-dex-trade-struct';
-import { XySwapRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/xy-dex-abstract/models/xy-swap-request';
-import { XySwapResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/xy-dex-abstract/models/xy-swap-response';
-import { XyDexAbstractProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/xy-dex-abstract/xy-dex-abstract-provider';
 
 export class XyDexTrade extends EvmOnChainTrade {
     /** @internal */
@@ -109,12 +112,10 @@ export class XyDexTrade extends EvmOnChainTrade {
         const receiver = receiverAddress || this.walletAddress;
 
         const chainId = blockchainId[this.from.blockchain];
-        const srcQuoteTokenAddress = this.from.isNative
-            ? xyApiParams.nativeAddress
-            : this.from.address;
-        const dstQuoteTokenAddress = this.to.isNative ? xyApiParams.nativeAddress : this.to.address;
+        const srcQuoteTokenAddress = this.from.isNative ? XY_NATIVE_ADDRESS : this.from.address;
+        const dstQuoteTokenAddress = this.to.isNative ? XY_NATIVE_ADDRESS : this.to.address;
 
-        const quoteTradeParams: XySwapRequest = {
+        const quoteTradeParams: XyBuildTxRequest = {
             srcChainId: chainId,
             srcQuoteTokenAddress,
             srcQuoteTokenAmount: this.from.stringWeiAmount,
@@ -125,14 +126,18 @@ export class XyDexTrade extends EvmOnChainTrade {
             srcSwapProvider: this.provider
         };
 
-        const tradeData = await this.httpClient.get<XySwapResponse>(
-            `${XyDexAbstractProvider.apiUrl}buildTx`,
+        const tradeData = await this.httpClient.get<XyBuildTxResponse>(
+            `${XY_API_ENDPOINT}/buildTx`,
             {
                 params: { ...quoteTradeParams }
             }
         );
 
-        await EvmOnChainTrade.checkAmountChange(
+        if (!tradeData.success) {
+            xyAnalyzeStatusCode(tradeData.errorCode, tradeData.errorMsg);
+        }
+
+        EvmOnChainTrade.checkAmountChange(
             tradeData.tx!,
             tradeData.route.dstQuoteTokenAmount,
             this.to.stringWeiAmount
