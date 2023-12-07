@@ -44,7 +44,7 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
             }
         } catch {}
         try {
-            const transactionData = await rangoTrade.getTransactionData(walletAddress);
+            const transactionData = await rangoTrade.getTransactionData();
 
             if (transactionData.gas) {
                 return new BigNumber(transactionData.gas);
@@ -79,10 +79,7 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            const transactionData = await this.getTransactionData(
-                options.fromAddress,
-                options.receiverAddress
-            );
+            const transactionData = await this.getTransactionData();
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,
                 gasPrice: transactionData.gasPrice
@@ -106,19 +103,17 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
         }
     }
 
-    private async getTransactionData(
-        fromAddress?: string,
-        receiverAddress?: string
-    ): Promise<EvmEncodeConfig> {
+    private async getTransactionData(): Promise<EvmEncodeConfig> {
+        // @QUESTION mb here needs add params fromAddress: options.fromAddress and receiverAddress: options.receiverAddress
         const params = await RangoCommonParser.getSwapQueryParams(this.from, this.to, {
-            fromAddress: fromAddress ?? this.walletAddress,
-            receiverAddress: receiverAddress ?? this.walletAddress,
             slippageTolerance: this.slippageTolerance
         });
 
         const { tx } = await RangoOnChainApiService.getSwapTransaction(params);
 
-        if (!tx) throw new RubicSdkError(`Transaction status is undedined!`);
+        if (!tx) {
+            throw new RubicSdkError(`Transaction status is undefined!`);
+        }
 
         const gasLimit = tx.gasLimit && parseInt(tx.gasLimit, 16).toString();
         const gasPrice = tx.gasPrice && parseInt(tx.gasPrice, 16).toString();
