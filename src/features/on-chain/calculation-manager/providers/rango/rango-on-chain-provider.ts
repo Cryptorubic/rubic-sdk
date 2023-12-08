@@ -2,7 +2,6 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { RangoBestRouteSimulationResult } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
 import { rangoSupportedBlockchains } from 'src/features/common/providers/rango/models/rango-supported-blockchains';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
@@ -56,7 +55,7 @@ export class RangoOnChainProvider {
                 weiAmount: new BigNumber(outputAmount)
             });
 
-            const toTokenWeiAmountMin = Web3Pure.fromWei(outputAmountMin, to.decimals);
+            const toTokenWeiAmountMin = new BigNumber(outputAmountMin);
 
             const tradeStruct: RangoOnChainTradeStruct = {
                 from,

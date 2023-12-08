@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "4.39.3-alpha.rango.7",
+    "version": "4.39.3-alpha.rango.8",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
