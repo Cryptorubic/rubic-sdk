@@ -268,6 +268,10 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             toAddress = `0x${toAddress.slice(2)}`;
         }
 
+        if (this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS) {
+            toAddress = '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
+        }
+
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(
             { ...options, receiverAddress },
             {
