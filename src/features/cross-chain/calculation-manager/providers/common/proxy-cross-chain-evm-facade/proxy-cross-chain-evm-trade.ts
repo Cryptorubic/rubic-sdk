@@ -245,8 +245,8 @@ export class ProxyCrossChainEvmTrade {
             ? tradeParams.srcChainTrade.toTokenAmountMin
             : tradeParams.fromTokenAmount;
         const hasSwapBeforeBridge = tradeParams.srcChainTrade !== null;
-
         const toAddress = tradeParams.toAddress || tradeParams.toTokenAmount.address;
+        // const referrer = swapOptions?.referrer;
 
         return [
             EvmWeb3Pure.randomHex(32),
