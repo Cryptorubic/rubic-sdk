@@ -27,7 +27,7 @@ export class RangoOnChainApiService {
                 throw new RubicSdkError(res.error ?? 'No available routes in rango.');
             }
 
-            console.info('[CHOOSED_PROVIDER_IN_CALCULATION]', res.route.swapper);
+            console.info('[CHOOSED_RANGO_PROVIDER]', res.route.swapper);
             return res;
         } catch (err) {
             throw new RubicSdkError(err);
