@@ -143,8 +143,13 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 ? this.from.weiAmount
                 : amount;
 
+        const fromTokenAddress =
+            this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS
+                ? '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
+                : this.from.address;
+
         return this.web3Private.approveTokens(
-            this.from.address,
+            fromTokenAddress,
             this.spenderAddress,
             approveAmount,
             options

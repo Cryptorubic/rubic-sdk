@@ -9,7 +9,7 @@ import {
 } from 'src/common/tokens';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
@@ -253,7 +253,9 @@ export class ProxyCrossChainEvmTrade {
             tradeParams.type.toLowerCase(),
             tradeParams.providerAddress,
             EvmWeb3Pure.randomHex(20),
-            fromToken.address,
+            fromToken.isNative && fromToken.blockchain === BLOCKCHAIN_NAME.METIS
+                ? toAddress
+                : fromToken.address,
             toAddress,
             receiverAddress,
             tradeParams.fromAddress,
