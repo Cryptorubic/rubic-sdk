@@ -42,4 +42,6 @@ export interface EncodeTransactionOptions {
     feeLimit?: number;
 
     directTransaction?: EvmEncodeConfig;
+
+    referrer?: string;
 }
