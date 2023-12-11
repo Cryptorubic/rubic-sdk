@@ -26,7 +26,7 @@ import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/c
 import { OnChainManager } from 'src/features/on-chain/calculation-manager/on-chain-manager';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
-import { AbiItem } from 'web3-utils';
+import { AbiItem, utf8ToHex } from 'web3-utils';
 
 type BridgeParams = [
     string,
@@ -245,14 +245,13 @@ export class ProxyCrossChainEvmTrade {
             ? tradeParams.srcChainTrade.toTokenAmountMin
             : tradeParams.fromTokenAmount;
         const hasSwapBeforeBridge = tradeParams.srcChainTrade !== null;
-
         const toAddress = tradeParams.toAddress || tradeParams.toTokenAmount.address;
 
         return [
             EvmWeb3Pure.randomHex(32),
             tradeParams.type.toLowerCase(),
             tradeParams.providerAddress,
-            EvmWeb3Pure.randomHex(20),
+            ProxyCrossChainEvmTrade.getReferrerAddress(swapOptions?.referrer),
             fromToken.isNative && fromToken.blockchain === BLOCKCHAIN_NAME.METIS
                 ? toAddress
                 : fromToken.address,
@@ -264,6 +263,14 @@ export class ProxyCrossChainEvmTrade {
             hasSwapBeforeBridge,
             Boolean(tradeParams?.dstChainTrade)
         ];
+    }
+
+    private static getReferrerAddress(referrer: string | undefined): string {
+        if (referrer) {
+            return '0x' + utf8ToHex(referrer).slice(2, 42).padStart(40, '0');
+        }
+
+        return '0x0000000000000000000000000000000000000000';
     }
 
     public static async getSwapData(

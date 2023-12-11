@@ -60,4 +60,6 @@ export interface SwapTransactionOptions {
     testMode?: boolean;
 
     directTransaction?: EvmEncodeConfig;
+
+    referrer?: string;
 }
