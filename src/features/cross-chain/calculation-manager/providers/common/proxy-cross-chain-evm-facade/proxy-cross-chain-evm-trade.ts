@@ -267,7 +267,7 @@ export class ProxyCrossChainEvmTrade {
 
     private static getReferrerAddress(referrer: string | undefined): string {
         if (referrer) {
-            return '0x' + utf8ToHex(referrer.toLowerCase().slice(0, 20)).padStart(40, '0');
+            return '0x' + utf8ToHex(referrer).slice(2, 42).padStart(40, '0');
         }
 
         return '0x0000000000000000000000000000000000000000';
