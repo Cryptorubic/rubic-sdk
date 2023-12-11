@@ -9,6 +9,7 @@ import { XyDexMoonriverProvider } from 'src/features/on-chain/calculation-manage
 import { XyDexOptimismProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/optimism/xy-dex-optimism/xy-dex-optimism-provider';
 import { XyDexPolygonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/xy-dex-polygon/xy-dex-polygon-provider';
 import { XyDexZkevmProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon-zkevm/xy-dex-zkevm/xy-dex-zkevm-provider';
+import { XyDexScrollProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll/xy-dex-scroll/xy-dex-scroll-provider';
 import { XyDexZksyncProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/xy-dex-zksync/xy-dex-zksync-provider';
 
 export const xyDexTradeProviders = [
@@ -23,5 +24,6 @@ export const xyDexTradeProviders = [
     XyDexZksyncProvider,
     XyDexZkevmProvider,
     XyDexLineaProvider,
-    XyDexBaseProvider
+    XyDexBaseProvider,
+    XyDexScrollProvider
 ];
