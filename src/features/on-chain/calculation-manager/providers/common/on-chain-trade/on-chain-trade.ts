@@ -7,6 +7,7 @@ import {
 } from 'src/common/errors';
 import { PriceTokenAmount, Token, TokenAmount } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
@@ -89,12 +90,17 @@ export abstract class OnChainTrade {
             this.checkWalletConnected();
         }
 
-        if (this.from.isNative) {
+        if (this.from.isNative && this.from.blockchain !== BLOCKCHAIN_NAME.METIS) {
             return false;
         }
 
+        const fromTokenAddress =
+            this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS
+                ? '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
+                : this.from.address;
+
         const allowance = await this.web3Public.getAllowance(
-            this.from.address,
+            fromTokenAddress,
             fromAddress || this.walletAddress,
             this.spenderAddress
         );
