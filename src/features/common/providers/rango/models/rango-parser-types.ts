@@ -1,4 +1,4 @@
-import { RangoSupportedBlockchain } from './rango-supported-blockchains';
+import { RangoTradeType } from './rango-api-trade-types';
 
 export interface RangoSwapQueryParams {
     apiKey: string;
@@ -11,7 +11,7 @@ export interface RangoSwapQueryParams {
     /**
      * List of all accepted swappers (e.g. providers), an empty list means no filter is required
      */
-    swappers?: RangoSupportedBlockchain[];
+    swappers?: RangoTradeType[];
     /**
      * Indicates include/exclude mode for the swappers param
      */
@@ -24,7 +24,7 @@ export interface RangoBestRouteQueryParams {
     to: string;
     amount: string;
     slippage?: number;
-    swappers?: RangoSupportedBlockchain[];
+    swappers?: RangoTradeType[];
     swappersExclude?: boolean;
 }
 

@@ -202,12 +202,16 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             fromAddress: this.walletAddress
         });
 
+        const extraNativeFee = this.from.isNative
+            ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
+            : new BigNumber(providerValue).toFixed();
+
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             providerRouter,
             data!,
             this.from.blockchain,
             providerRouter,
-            providerValue
+            extraNativeFee
         );
 
         const methodArguments = [bridgeData, providerData];

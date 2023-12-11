@@ -66,6 +66,6 @@ export const rangoCrossChainTradeTypes = {
     [BRIDGE_TYPE.OSMOSIS_BRIDGE]: 'Osmosis'
 } as const;
 
-const rangoTradeTypes = { ...rangoOnChainTradeTypes, ...rangoCrossChainTradeTypes } as const;
+export const rangoTradeTypes = { ...rangoOnChainTradeTypes, ...rangoCrossChainTradeTypes } as const;
 
 export type RangoTradeType = (typeof rangoTradeTypes)[keyof typeof rangoTradeTypes];

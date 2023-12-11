@@ -35,8 +35,8 @@ export class RangoCommonParser {
             to: toParam,
             amount: amountParam,
             ...(options.slippageTolerance && { slippage: options.slippageTolerance * 100 }),
-            ...(options.swappers && { swappers: options.swappers }),
-            ...(options.swappersExclude && { swappersExclude: options.swappersExclude })
+            ...(options.swappers?.length && { swappers: options.swappers }),
+            swappersExclude: options?.swappersExclude ?? true
         };
     }
 
@@ -67,8 +67,8 @@ export class RangoCommonParser {
             fromAddress,
             slippage,
             toAddress,
-            ...(options.swappers && { swappers: options.swappers }),
-            ...(options.swappersExclude && { swappersExclude: options.swappersExclude })
+            ...(options.swappers?.length && { swappers: options.swappers }),
+            swappersExclude: options?.swappersExclude ?? true
         };
     }
 

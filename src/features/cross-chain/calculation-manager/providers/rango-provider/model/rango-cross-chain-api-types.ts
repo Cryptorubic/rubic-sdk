@@ -1,5 +1,3 @@
-import { RangoSupportedBlockchain } from 'src/features/common/providers/rango/models/rango-supported-blockchains';
-
 import { RequiredCrossChainOptions } from '../../../models/cross-chain-options';
 
 /**
@@ -7,6 +5,5 @@ import { RequiredCrossChainOptions } from '../../../models/cross-chain-options';
  * @property {boolean} [swappersExclude] - Indicates include/exclude mode for the swappers param
  */
 export type RangoCrossChainOptions = RequiredCrossChainOptions & {
-    swappers?: RangoSupportedBlockchain[];
     swappersExclude?: boolean;
 };
