@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "4.43.0-alpha-scroll-promo.1",
+    "version": "4.44.0",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
