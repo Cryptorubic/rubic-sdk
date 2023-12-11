@@ -205,7 +205,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 fromAddress,
                 receiverAddress,
                 ...(directTransaction && { directTransaction }),
-                ...(options.referrer && { referrer: options.referrer })
+                ...(options?.referrer && { referrer: options?.referrer })
             });
 
             let method: 'trySendTransaction' | 'sendTransaction' = 'trySendTransaction';
