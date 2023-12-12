@@ -15,41 +15,33 @@ export class RangoCrossChainApiService {
     public static async getBestRoute(
         params: RangoBestRouteQueryParams
     ): Promise<RangoBestRouteResponse> {
-        try {
-            const res = await Injector.httpClient.get<RangoBestRouteResponse>(
-                `${RANGO_API_ENDPOINT}/quote`,
-                {
-                    params: params as unknown as HttpClientParams
-                }
-            );
-
-            if (!res.route || res.error) {
-                throw new RubicSdkError(res.error ?? 'No available routes in rango.');
+        const res = await Injector.httpClient.get<RangoBestRouteResponse>(
+            `${RANGO_API_ENDPOINT}/quote`,
+            {
+                params: params as unknown as HttpClientParams
             }
+        );
 
-            console.info('[CHOOSED_RANGO_PROVIDER]', res.route.swapper);
-            return res;
-        } catch (err) {
-            throw new RubicSdkError(err);
+        if (!res.route || res.error) {
+            throw new RubicSdkError(res.error ?? 'No available routes in rango.');
         }
+
+        console.info('[CHOOSED_RANGO_PROVIDER]', res.route.swapper);
+        return res;
     }
 
     public static async getSwapTransaction(
         params: RangoSwapQueryParams
     ): Promise<RangoSwapTransactionResponse> {
-        try {
-            const res = await Injector.httpClient.get<RangoSwapTransactionResponse>(
-                `${RANGO_API_ENDPOINT}/swap`,
-                { params: params as unknown as HttpClientParams }
-            );
+        const res = await Injector.httpClient.get<RangoSwapTransactionResponse>(
+            `${RANGO_API_ENDPOINT}/swap`,
+            { params: params as unknown as HttpClientParams }
+        );
 
-            if (!res.route || res.error) {
-                throw new RubicSdkError(res.error ?? 'No available routes in rango.');
-            }
-            return res;
-        } catch (err) {
-            throw new RubicSdkError(err);
+        if (!res.route || res.error) {
+            throw new RubicSdkError(res.error ?? 'No available routes in rango.');
         }
+        return res;
     }
 
     /**
@@ -58,21 +50,17 @@ export class RangoCrossChainApiService {
     public static async getTxStatus(
         params: RangoTxStatusQueryParams
     ): Promise<RangoTxStatusResponse> {
-        try {
-            const res = await Injector.httpClient.get<RangoTxStatusResponse>(
-                `${RANGO_API_ENDPOINT}/status`,
-                { params: params as unknown as HttpClientParams }
+        const res = await Injector.httpClient.get<RangoTxStatusResponse>(
+            `${RANGO_API_ENDPOINT}/status`,
+            { params: params as unknown as HttpClientParams }
+        );
+
+        if (res.error || !res.bridgeData || !res.status) {
+            throw new RubicSdkError(
+                "Can't get status, res has error or null data in getTxStatus method"
             );
-
-            if (res.error || !res.bridgeData || !res.status) {
-                throw new RubicSdkError(
-                    "Can't get status, res has error or null data in getTxStatus method"
-                );
-            }
-
-            return res;
-        } catch (err) {
-            throw new RubicSdkError(err);
         }
+
+        return res;
     }
 }

@@ -477,14 +477,17 @@ export class OnChainManager {
             );
 
             if ('error' in wrappedTrade) {
-                throw wrappedTrade.error;
+                return {
+                    trade: wrappedTrade.trade!,
+                    tradeType: ON_CHAIN_TRADE_TYPE.RANGO,
+                    error: wrappedTrade.error
+                };
             }
 
-            if (!wrappedTrade) {
-                return null;
-            }
-
-            return { trade: wrappedTrade, tradeType: ON_CHAIN_TRADE_TYPE.RANGO };
+            return {
+                trade: wrappedTrade,
+                tradeType: ON_CHAIN_TRADE_TYPE.RANGO
+            };
         } catch (err) {
             console.debug(
                 `[RUBIC_SDK] Trade calculation error occurred for ${ON_CHAIN_TRADE_TYPE.RANGO} trade provider.`,
