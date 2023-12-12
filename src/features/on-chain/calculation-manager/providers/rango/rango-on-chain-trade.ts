@@ -79,7 +79,11 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            const transactionData = await this.getTransactionData();
+            const transactionData = await this.getTransactionData(
+                options.fromAddress,
+                options.receiverAddress
+            );
+
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,
                 gasPrice: transactionData.gasPrice
@@ -103,10 +107,14 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
         }
     }
 
-    private async getTransactionData(): Promise<EvmEncodeConfig> {
-        // @QUESTION mb here needs add params fromAddress: options.fromAddress and receiverAddress: options.receiverAddress
+    private async getTransactionData(
+        fromAddress?: string,
+        receiverAddress?: string
+    ): Promise<EvmEncodeConfig> {
         const params = await RangoCommonParser.getSwapQueryParams(this.from, this.to, {
-            slippageTolerance: this.slippageTolerance
+            slippageTolerance: this.slippageTolerance,
+            fromAddress,
+            receiverAddress
         });
 
         const { tx } = await RangoOnChainApiService.getSwapTransaction(params);
