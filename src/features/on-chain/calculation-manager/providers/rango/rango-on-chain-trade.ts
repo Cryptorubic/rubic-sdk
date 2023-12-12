@@ -80,7 +80,7 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
 
         try {
             const transactionData = await this.getTransactionData(
-                options.fromAddress,
+                this.walletAddress,
                 options.receiverAddress
             );
 
@@ -113,8 +113,8 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
     ): Promise<EvmEncodeConfig> {
         const params = await RangoCommonParser.getSwapQueryParams(this.from, this.to, {
             slippageTolerance: this.slippageTolerance,
-            fromAddress,
-            receiverAddress
+            fromAddress: fromAddress || this.walletAddress,
+            receiverAddress: receiverAddress || fromAddress || this.walletAddress
         });
 
         const { tx } = await RangoOnChainApiService.getSwapTransaction(params);
