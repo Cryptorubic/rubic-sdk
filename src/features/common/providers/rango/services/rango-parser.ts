@@ -78,6 +78,6 @@ export class RangoCommonParser {
     ): RangoTxStatusQueryParams {
         const apiKey = RANGO_API_KEY;
 
-        return { apiKey, requestId, srcTxHash };
+        return { apiKey, requestId, txId: srcTxHash };
     }
 }

@@ -11,6 +11,7 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from '../common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
@@ -20,7 +21,8 @@ import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
 export class RangoOnChainTrade extends EvmOnChainTrade {
     /* @internal */
     public static async getGasLimit(
-        tradeStruct: RangoOnChainTradeStruct
+        tradeStruct: RangoOnChainTradeStruct,
+        providerGateway: string
     ): Promise<BigNumber | null> {
         const fromBlockchain = tradeStruct.from.blockchain;
         const walletAddress =
@@ -30,7 +32,11 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
             return null;
         }
 
-        const rangoTrade = new RangoOnChainTrade(tradeStruct, EvmWeb3Pure.EMPTY_ADDRESS);
+        const rangoTrade = new RangoOnChainTrade(
+            tradeStruct,
+            EvmWeb3Pure.EMPTY_ADDRESS,
+            providerGateway
+        );
         try {
             const transactionConfig = await rangoTrade.encode({ fromAddress: walletAddress });
 
@@ -53,6 +59,11 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
         return null;
     }
 
+    /**
+     * approveTo address - used in this.web3Public.getAllowance() method
+     */
+    public readonly providerGateway: string;
+
     public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.RANGO;
 
     public readonly _toTokenAmountMin: PriceTokenAmount;
@@ -61,17 +72,29 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
         return this._toTokenAmountMin;
     }
 
+    protected get spenderAddress(): string {
+        return this.useProxy
+            ? rubicProxyContractAddress[this.from.blockchain].gateway
+            : this.providerGateway;
+    }
+
     public get dexContractAddress(): string {
         throw new RubicSdkError('Dex address is unknown before swap is started');
     }
 
-    constructor(tradeStruct: RangoOnChainTradeStruct, providerAddress: string) {
+    constructor(
+        tradeStruct: RangoOnChainTradeStruct,
+        providerAddress: string,
+        providerGateway: string
+    ) {
         super(tradeStruct, providerAddress);
 
         this._toTokenAmountMin = new PriceTokenAmount({
             ...this.to.asStruct,
             weiAmount: tradeStruct.toTokenWeiAmountMin
         });
+
+        this.providerGateway = providerGateway;
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {

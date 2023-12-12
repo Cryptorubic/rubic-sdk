@@ -36,5 +36,5 @@ export interface RangoBestRouteQueryParams {
 export interface RangoTxStatusQueryParams {
     apiKey: string;
     requestId: string;
-    srcTxHash: string;
+    txId: string;
 }
