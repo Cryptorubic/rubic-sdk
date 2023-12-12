@@ -37,11 +37,11 @@ export class RangoOnChainProvider {
             throw new RubicSdkError(`Rango doesn't support ${from.blockchain} chain!`);
         }
 
-        const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
-
-        const path = this.getRoutePath(from, toToken);
-
         try {
+            const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
+
+            const path = this.getRoutePath(from, toToken);
+
             const bestRouteParams = await RangoCommonParser.getBestRouteQueryParams(
                 fromWithoutFee,
                 toToken,
@@ -86,30 +86,9 @@ export class RangoOnChainProvider {
                 options.providerAddress
             );
         } catch (err) {
-            const mockTo = new PriceTokenAmount({
-                ...toToken.asStruct,
-                weiAmount: new BigNumber(0)
-            });
-
-            const mockToTokenWeiAmountMin = new BigNumber(0);
-
-            const mockTradeStruct: RangoOnChainTradeStruct = {
-                from,
-                to: mockTo,
-                fromWithoutFee,
-                proxyFeeInfo,
-                toTokenWeiAmountMin: mockToTokenWeiAmountMin,
-                gasFeeInfo: null,
-                slippageTolerance: options.slippageTolerance,
-                useProxy: options.useProxy,
-                withDeflation: options.withDeflation,
-                path
-            };
-
             return {
                 type: ON_CHAIN_TRADE_TYPE.RANGO,
-                error: err,
-                trade: new RangoOnChainTrade(mockTradeStruct, options.providerAddress)
+                error: err
             };
         }
     }
