@@ -102,13 +102,14 @@ export class ForeignBridge extends OmniBridge {
     protected async getOutputAmount(
         toAddress: string,
         feeManagerAddress: string,
-        feeType: string
+        feeType: string,
+        fromAmount: string
     ): Promise<BigNumber> {
         const amount = await this.sourceWeb3Public.callContractMethod<string>(
             feeManagerAddress,
             [],
             'calculateFee',
-            [feeType, toAddress]
+            [feeType, toAddress, fromAmount]
         );
         return new BigNumber(amount);
     }

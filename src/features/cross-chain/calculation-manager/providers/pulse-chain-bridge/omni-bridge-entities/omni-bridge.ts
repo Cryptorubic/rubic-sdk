@@ -117,20 +117,23 @@ export abstract class OmniBridge {
      * @param toAddress Token address in target network.
      * @param feeManagerAddress Fee manager contract address.
      * @param feeType Type of fee.
+     * @param fromAmount Amount of tokens to send.
      */
     protected abstract getOutputAmount(
         toAddress: string,
         feeManagerAddress: string,
-        feeType: string
+        feeType: string,
+        fromAmount: string
     ): Promise<BigNumber>;
 
     /**
      * Calculate output amount for trade.
      * @param toAddress Token address in target network.
+     * @param fromAmount Amount of tokens to send.
      */
-    public async calculateAmount(toAddress: string): Promise<BigNumber> {
+    public async calculateAmount(toAddress: string, fromAmount: string): Promise<BigNumber> {
         const feeManagerAddress = await this.getFeeManager();
         const feeType = await this.getFeeType();
-        return this.getOutputAmount(toAddress, feeManagerAddress, feeType);
+        return this.getOutputAmount(toAddress, feeManagerAddress, feeType, fromAmount);
     }
 }

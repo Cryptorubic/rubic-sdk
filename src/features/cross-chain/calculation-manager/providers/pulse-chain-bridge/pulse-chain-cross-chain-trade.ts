@@ -11,7 +11,6 @@ import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { cbridgeContractAbi } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-abi';
-import { cbridgeContractAddress } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-contract-address';
 import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
@@ -25,6 +24,8 @@ import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/pro
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { pulseChainContractAddress } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/constants/pulse-chain-contract-address';
+import { PulseChainCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/constants/pulse-chain-supported-blockchains';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
@@ -36,8 +37,7 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
         toToken: PriceTokenAmount<EvmBlockchainName>,
         onChainTrade: EvmOnChainTrade | null,
         feeInfo: FeeInfo,
-        maxSlippage: number,
-        celerContractAddress: string,
+        toTokenAmountMin: BigNumber,
         providerAddress: string,
         receiverAddress: string
     ): Promise<GasData | null> {
@@ -63,9 +63,7 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
                             priceImpact: 0,
                             slippage: 0,
                             feeInfo: feeInfo!,
-                            maxSlippage,
-                            contractAddress: celerContractAddress,
-                            transitMinAmount: new BigNumber(0),
+                            toTokenAmountMin,
                             onChainTrade: onChainTrade
                         },
                         providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
@@ -95,18 +93,12 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
                         priceImpact: 0,
                         slippage: 0,
                         feeInfo: feeInfo,
-                        maxSlippage,
-                        contractAddress: celerContractAddress,
-                        transitMinAmount: new BigNumber(0),
+                        toTokenAmountMin,
                         onChainTrade: onChainTrade
                     },
                     providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getTransactionRequest(
-                    receiverAddress,
-                    maxSlippage,
-                    onChainTrade ? onChainTrade.to : from
-                );
+                ).getTransactionRequest(receiverAddress, onChainTrade ? onChainTrade.to : from);
 
                 const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
                     data,
@@ -134,11 +126,11 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.PULSE_CHAIN_BRIDGE;
 
     public readonly isAggregator = false;
 
-    public readonly bridgeType = BRIDGE_TYPE.CELER_BRIDGE;
+    public readonly bridgeType = BRIDGE_TYPE.PULSE_CHAIN_BRIDGE;
 
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
@@ -150,23 +142,19 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly gasData: GasData | null;
 
-    private get fromBlockchain(): CbridgeCrossChainSupportedBlockchain {
-        return this.from.blockchain as CbridgeCrossChainSupportedBlockchain;
+    private get fromBlockchain(): PulseChainCrossChainSupportedBlockchain {
+        return this.from.blockchain as PulseChainCrossChainSupportedBlockchain;
     }
 
     protected get fromContractAddress(): string {
         return this.isProxyTrade
             ? rubicProxyContractAddress[this.fromBlockchain].gateway
-            : cbridgeContractAddress[this.fromBlockchain].providerGateway;
+            : pulseChainContractAddress[this.fromBlockchain];
     }
 
     public readonly feeInfo: FeeInfo;
 
     private readonly slippage: number;
-
-    private readonly maxSlippage: number;
-
-    private readonly celerContractAddress: string;
 
     public readonly onChainSubtype: OnChainSubtype;
 
@@ -183,13 +171,11 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
             from: PriceTokenAmount<EvmBlockchainName>;
             to: PriceTokenAmount<EvmBlockchainName>;
             gasData: GasData | null;
-            priceImpact: number | null;
             slippage: number;
             feeInfo: FeeInfo;
-            maxSlippage: number;
-            contractAddress: string;
-            transitMinAmount: BigNumber;
+            toTokenAmountMin: BigNumber;
             onChainTrade: EvmOnChainTrade | null;
+            priceImpact: number | null;
         },
         providerAddress: string,
         routePath: RubicStep[]
@@ -199,14 +185,10 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
         this.gasData = crossChainTrade.gasData;
-        this.priceImpact = crossChainTrade.priceImpact;
         this.slippage = crossChainTrade.slippage;
-        this.toTokenAmountMin = crossChainTrade.to.tokenAmount.multipliedBy(
-            1 - crossChainTrade.maxSlippage / 10_000_000
-        );
+        this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.feeInfo = crossChainTrade.feeInfo;
-        this.maxSlippage = crossChainTrade.maxSlippage;
-        this.celerContractAddress = crossChainTrade.contractAddress;
+        this.priceImpact = crossChainTrade.priceImpact;
 
         this.onChainSubtype = crossChainTrade.onChainTrade
             ? { from: crossChainTrade.onChainTrade.type, to: undefined }
@@ -231,7 +213,6 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
         try {
             const { data, to, value } = this.getTransactionRequest(
                 options.receiverAddress || this.walletAddress,
-                this.maxSlippage,
                 this.from
             );
 
@@ -258,7 +239,6 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
             value: providerValue
         } = this.getTransactionRequest(
             receiverAddress,
-            this.maxSlippage,
             this.onChainTrade ? this.onChainTrade.to : this.from
         );
 
@@ -327,28 +307,22 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
-            slippage: this.maxSlippage / 10_000,
+            slippage: this.slippage * 100,
             routePath: this.routePath
         };
     }
 
     private getTransactionRequest(
         receiverAddress: string,
-        maxSlippage: number,
         transitToken: PriceTokenAmount
     ): EvmEncodeConfig {
         const params: (string | number)[] = [receiverAddress];
         if (!transitToken.isNative) {
             params.push(transitToken.address);
         }
-        params.push(
-            transitToken.stringWeiAmount,
-            blockchainId[this.to.blockchain],
-            Date.now(),
-            maxSlippage
-        );
+        params.push(transitToken.stringWeiAmount, blockchainId[this.to.blockchain], Date.now());
         const encode = EvmWeb3Pure.encodeMethodCall(
-            cbridgeContractAddress[this.fromBlockchain].providerRouter,
+            pulseChainContractAddress[this.fromBlockchain],
             cbridgeContractAbi,
             transitToken.isNative ? 'sendNative' : 'send',
             params,
