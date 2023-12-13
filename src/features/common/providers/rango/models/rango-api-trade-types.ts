@@ -1,7 +1,7 @@
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
-const rangoOnChainTradeTypes = {
+export const rangoOnChainTradeTypes = {
     [ON_CHAIN_TRADE_TYPE.PANGOLIN]: 'Pangolin Swap',
     [ON_CHAIN_TRADE_TYPE.SUSHI_SWAP]: 'Sushi Swap',
     [ON_CHAIN_TRADE_TYPE.OSMOSIS_SWAP]: 'Osmosis',
@@ -42,7 +42,7 @@ const rangoOnChainTradeTypes = {
     [ON_CHAIN_TRADE_TYPE.CHERRY_SWAP]: 'Cherry Swap'
 } as const;
 
-const rangoCrossChainTradeTypes = {
+export const rangoCrossChainTradeTypes = {
     [BRIDGE_TYPE.ACROSS]: 'Across',
     [BRIDGE_TYPE.VOYAGER]: 'Voyager',
     [BRIDGE_TYPE.CBRIDGE]: 'CBridge',

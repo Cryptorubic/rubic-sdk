@@ -170,6 +170,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         const type = step.swapperType === 'DEX' ? 'on-chain' : 'cross-chain';
 
         const provider = RangoUtils.getTradeTypeForRubic(
+            type,
             step.swapper.swapperGroup as RangoTradeType
         );
 
