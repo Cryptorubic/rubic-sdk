@@ -87,7 +87,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER]: this.getSquidrouterDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SCROLL_BRIDGE]: this.getScrollBridgeDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.TAIKO_BRIDGE]: this.getTaikoBridgeDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.TAIKO_BRIDGE]: this.getTaikoBridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.PULSE_CHAIN_BRIDGE]: this.getPulseChainDstSwapStatus
     };
 
     /**
@@ -671,6 +672,10 @@ export class CrossChainStatusManager {
             return { status: TX_STATUS.SUCCESS, hash: taikoData.Raw.transactionHash };
         }
 
+        return { status: TX_STATUS.PENDING, hash: null };
+    }
+
+    public async getPulseChainDstSwapStatus(_data: CrossChainTradeData): Promise<TxStatusData> {
         return { status: TX_STATUS.PENDING, hash: null };
     }
 }
