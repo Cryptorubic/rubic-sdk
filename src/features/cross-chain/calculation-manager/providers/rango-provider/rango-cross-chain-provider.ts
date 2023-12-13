@@ -77,13 +77,13 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         const bestRouteParams = await RangoCommonParser.getBestRouteQueryParams(
             fromWithoutFee,
             toToken,
-            { ...options, swappers: options.rangoDisabledProviders }
+            { ...options, swapperGroups: options.rangoDisabledProviders }
         );
 
         const swapQueryParams = await RangoCommonParser.getSwapQueryParams(
             fromWithoutFee,
             toToken,
-            { ...options, swappers: options.rangoDisabledProviders }
+            { ...options, swapperGroups: options.rangoDisabledProviders }
         );
 
         try {
@@ -169,7 +169,9 @@ export class RangoCrossChainProvider extends CrossChainProvider {
 
         const type = step.swapperType === 'DEX' ? 'on-chain' : 'cross-chain';
 
-        const provider = RangoUtils.getTradeType(type, step.swapper.title as RangoTradeType);
+        const provider = RangoUtils.getTradeTypeForRubic(
+            step.swapper.swapperGroup as RangoTradeType
+        );
 
         const fromBlockchain = RangoUtils.getRubicBlockchainByRangoBlockchain(step.from.blockchain);
         const toBlockchain = RangoUtils.getRubicBlockchainByRangoBlockchain(step.to.blockchain);

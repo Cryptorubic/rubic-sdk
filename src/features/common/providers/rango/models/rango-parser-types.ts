@@ -11,11 +11,11 @@ export interface RangoSwapQueryParams {
     /**
      * List of all accepted swappers (e.g. providers), an empty list means no filter is required
      */
-    swappers?: RangoTradeType[];
+    swapperGroups?: RangoTradeType[];
     /**
      * Indicates include/exclude mode for the swappers param
      */
-    swappersExclude?: boolean;
+    swappersGroupsExclude?: boolean;
 }
 
 export interface RangoBestRouteQueryParams {
@@ -24,8 +24,8 @@ export interface RangoBestRouteQueryParams {
     to: string;
     amount: string;
     slippage?: number;
-    swappers?: RangoTradeType[];
-    swappersExclude?: boolean;
+    swapperGroups?: RangoTradeType[];
+    swappersGroupsExclude?: boolean;
 }
 
 /**

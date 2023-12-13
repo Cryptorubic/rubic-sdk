@@ -39,7 +39,6 @@ export const DEFAULT_BRIDGE_TYPE = {
     SYNAPSE: 'synapse',
 
     THORCHAIN: 'thorchain',
-    THORCHAIN_STREAMING: 'thorchain_streaming',
 
     VOYAGER: 'voyager',
 

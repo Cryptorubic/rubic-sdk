@@ -12,9 +12,9 @@ import { rangoApiBlockchainNames, RangoBlockchainName } from '../models/rango-ap
 import { RANGO_SWAP_STATUS, RangoSwapStatus } from '../models/rango-api-status-types';
 import { rangoApiSymbols } from '../models/rango-api-symbol-names';
 import {
-    rangoCrossChainTradeTypes,
-    rangoOnChainTradeTypes,
-    RangoTradeType
+    RangoTradeType,
+    rangoTradeTypes,
+    RubicTypeForRango
 } from '../models/rango-api-trade-types';
 import { RangoSupportedBlockchain } from '../models/rango-supported-blockchains';
 
@@ -58,30 +58,21 @@ export class RangoUtils {
         return blockchainName;
     }
 
-    public static getTradeType(
-        swapType: 'cross-chain' | 'on-chain',
+    public static getTradeTypeForRubic(
         rangoTradeType: RangoTradeType
     ): BridgeType | OnChainTradeType {
-        if (swapType === 'cross-chain') {
-            const found = Object.entries(rangoCrossChainTradeTypes).find(
-                ([_, value]) => value === rangoTradeType
-            );
+        const found = Object.entries(rangoTradeTypes).find(
+            ([_, value]) => value === rangoTradeType
+        );
 
-            if (found) {
-                return found[0] as BridgeType;
-            }
-        }
-
-        if (swapType === 'on-chain') {
-            const found = Object.entries(rangoOnChainTradeTypes).find(
-                ([_, value]) => value === rangoTradeType
-            );
-
-            if (found) {
-                return found[0] as OnChainTradeType;
-            }
+        if (found) {
+            return found[0] as BridgeType | OnChainTradeType;
         }
 
         return CROSS_CHAIN_TRADE_TYPE.RANGO;
+    }
+
+    public static getTradeTypeForRango(rubicTradeType: RubicTypeForRango): RangoTradeType {
+        return rangoTradeTypes[rubicTradeType];
     }
 }

@@ -6,6 +6,7 @@ import { Injector } from 'src/core/injector/injector';
 import { RANGO_API_KEY } from '../constants/rango-api-common';
 import { RangoBestRouteRequestOptions } from '../models/rango-api-best-route-types';
 import { RangoSwapRequestOptions } from '../models/rango-api-swap-types';
+import { RubicTypeForRango } from '../models/rango-api-trade-types';
 import {
     RangoBestRouteQueryParams,
     RangoSwapQueryParams,
@@ -29,14 +30,18 @@ export class RangoCommonParser {
 
         const apiKey = RANGO_API_KEY;
 
+        const swapperGroups = options.swapperGroups?.map(swapper =>
+            RangoUtils.getTradeTypeForRango(swapper as RubicTypeForRango)
+        );
+
         return {
             apiKey,
             from: fromParam,
             to: toParam,
             amount: amountParam,
             ...(options.slippageTolerance && { slippage: options.slippageTolerance * 100 }),
-            ...(options.swappers?.length && { swappers: options.swappers }),
-            swappersExclude: options?.swappersExclude ?? true
+            ...(swapperGroups?.length && { swapperGroups }),
+            swappersGroupsExclude: options?.swappersGroupsExclude ?? true
         };
     }
 
@@ -59,6 +64,10 @@ export class RangoCommonParser {
         const slippage = options.slippageTolerance * 100;
         const apiKey = RANGO_API_KEY;
 
+        const swapperGroups = options.swapperGroups?.map(swapper =>
+            RangoUtils.getTradeTypeForRango(swapper as RubicTypeForRango)
+        );
+
         return {
             apiKey,
             amount,
@@ -67,8 +76,8 @@ export class RangoCommonParser {
             fromAddress,
             slippage,
             toAddress,
-            ...(options.swappers?.length && { swappers: options.swappers }),
-            swappersExclude: options?.swappersExclude ?? true
+            ...(swapperGroups?.length && { swapperGroups }),
+            swappersGroupsExclude: options?.swappersGroupsExclude ?? true
         };
     }
 
