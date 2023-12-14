@@ -18,7 +18,6 @@ export interface RangoCrossChainTradeConstructorParams {
         priceImpact: number | null;
         slippage: number;
         swapQueryParams: RangoSwapQueryParams;
-        rangoRequestId: string;
     };
     providerAddress: string;
     routePath: RubicStep[];
@@ -32,7 +31,6 @@ export interface GetCrossChainTradeConstructorParamsType {
     feeInfo: FeeInfo;
     toTokenAmountMin: BigNumber;
     swapQueryParams: RangoSwapQueryParams;
-    rangoRequestId: string;
 }
 
 export type RangoGetGasDataParams = Omit<

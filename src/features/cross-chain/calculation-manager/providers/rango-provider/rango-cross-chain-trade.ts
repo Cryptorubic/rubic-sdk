@@ -149,7 +149,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
     /**
      * @description UUID returned by rango-api to track transaction status in getRangoDstSwapStatus
      */
-    public readonly rangoRequestId: string;
+    public rangoRequestId: string | undefined;
 
     private readonly swapQueryParams: RangoSwapQueryParams;
 
@@ -177,7 +177,6 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         this.priceImpact = params.crossChainTrade.priceImpact;
         this.slippage = params.crossChainTrade.slippage;
         this.swapQueryParams = params.crossChainTrade.swapQueryParams;
-        this.rangoRequestId = params.crossChainTrade.rangoRequestId;
     }
 
     public async getContractParams(
@@ -286,9 +285,11 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             };
         }
 
-        const { route, tx, error } = await RangoCrossChainApiService.getSwapTransaction(
+        const { route, tx, error, requestId } = await RangoCrossChainApiService.getSwapTransaction(
             this.swapQueryParams
         );
+
+        this.rangoRequestId = requestId;
 
         if (!route || !tx) {
             throw new RubicSdkError('Invalid data after sending swap request. Error text:' + error);

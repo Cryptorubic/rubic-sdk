@@ -23,7 +23,6 @@ import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fe
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { CrossChainProvider } from '../common/cross-chain-provider';
-import { CrossChainTrade } from '../common/cross-chain-trade';
 import { CalculationResult } from '../common/models/calculation-result';
 import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
@@ -65,30 +64,26 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             };
         }
 
-        const feeInfo = await this.getFeeInfo(
-            fromBlockchain,
-            options.providerAddress,
-            from,
-            useProxy
-        );
-
-        const fromWithoutFee = getFromWithoutFee(from, feeInfo.rubicProxy?.platformFee?.percent);
-
-        const bestRouteParams = await RangoCommonParser.getBestRouteQueryParams(
-            fromWithoutFee,
-            toToken,
-            { ...options, swapperGroups: options.rangoDisabledProviders }
-        );
-
-        const swapQueryParams = await RangoCommonParser.getSwapQueryParams(
-            fromWithoutFee,
-            toToken,
-            { ...options, swapperGroups: options.rangoDisabledProviders }
-        );
-
         try {
-            const { route, requestId: rangoRequestId } =
-                await RangoCrossChainApiService.getBestRoute(bestRouteParams);
+            const feeInfo = await this.getFeeInfo(
+                fromBlockchain,
+                options.providerAddress,
+                from,
+                useProxy
+            );
+
+            const fromWithoutFee = getFromWithoutFee(
+                from,
+                feeInfo.rubicProxy?.platformFee?.percent
+            );
+
+            const bestRouteParams = await RangoCommonParser.getBestRouteQueryParams(
+                fromWithoutFee,
+                toToken,
+                { ...options, swapperGroups: options.rangoDisabledProviders }
+            );
+
+            const { route } = await RangoCrossChainApiService.getBestRoute(bestRouteParams);
             const { outputAmountMin, outputAmount, path } = route as RangoBestRouteSimulationResult;
 
             const toTokenAmountMin = Web3Pure.fromWei(outputAmountMin, toToken.decimals);
@@ -98,6 +93,12 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             });
             const routePath = await this.getRoutePath(from, to, path);
 
+            const swapQueryParams = await RangoCommonParser.getSwapQueryParams(
+                fromWithoutFee,
+                toToken,
+                { ...options, swapperGroups: options.rangoDisabledProviders }
+            );
+
             const tradeParams = await RangoCrossChainParser.getTradeConstructorParams({
                 fromToken: from,
                 toToken: to,
@@ -105,8 +106,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 routePath,
                 feeInfo,
                 toTokenAmountMin,
-                swapQueryParams,
-                rangoRequestId
+                swapQueryParams
             });
 
             const trade = new RangoCrossChainTrade(tradeParams);
@@ -114,27 +114,11 @@ export class RangoCrossChainProvider extends CrossChainProvider {
 
             return { trade, tradeType };
         } catch (err) {
-            const mockTo = new PriceTokenAmount({
-                ...toToken.asStruct,
-                tokenAmount: Web3Pure.fromWei(0, toToken.decimals)
-            });
-
-            const mockRoutePath = await this.getRoutePath(from, mockTo, null);
-
-            const mockTradeParams = await RangoCrossChainParser.getTradeConstructorParams({
-                fromToken: from,
-                toToken: mockTo,
-                options,
-                routePath: mockRoutePath,
-                feeInfo,
-                toTokenAmountMin: new BigNumber(0),
-                swapQueryParams,
-                rangoRequestId: ''
-            });
+            const rubicSdkError = CrossChainProvider.parseError(err);
 
             return {
-                trade: new RangoCrossChainTrade(mockTradeParams) as CrossChainTrade,
-                error: err,
+                trade: null,
+                error: rubicSdkError,
                 tradeType: this.type
             };
         }
