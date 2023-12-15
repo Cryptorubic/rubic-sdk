@@ -3,8 +3,6 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 export const DEFAULT_BRIDGE_TYPE = {
     ...CROSS_CHAIN_TRADE_TYPE,
 
-    '10K_SWAP': '10k_swap',
-
     ACROSS: 'across',
     AMAROK: 'connext',
     ANY_SWAP: 'anyswap',

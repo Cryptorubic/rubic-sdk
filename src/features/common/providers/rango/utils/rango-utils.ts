@@ -1,5 +1,9 @@
 import { PriceToken, Token } from 'src/common/tokens';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import {
     TX_STATUS,
     TxStatus
@@ -33,9 +37,10 @@ export class RangoUtils {
             : (await Token.createToken({ address: token.address, blockchain: token.blockchain }))
                   .symbol;
 
-        const param = token.isNative
-            ? `${rangoBlockchainName}.${symbol}`
-            : `${rangoBlockchainName}.${symbol}--${token.address}`;
+        const param =
+            token.isNative && token.blockchain !== BLOCKCHAIN_NAME.METIS
+                ? `${rangoBlockchainName}.${symbol}`
+                : `${rangoBlockchainName}.${symbol}--${token.address}`;
 
         return param;
     }
