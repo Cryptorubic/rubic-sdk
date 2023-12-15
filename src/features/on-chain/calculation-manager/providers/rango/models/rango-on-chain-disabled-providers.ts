@@ -1,8 +1,8 @@
-import { RubicTypeForRango } from 'src/features/common/providers/rango/models/rango-api-trade-types';
+import { RubicOnChainTradeTypeForRango } from 'src/features/common/providers/rango/models/rango-api-trade-types';
 
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 
-export const rangoOnChainDisabledProviders: RubicTypeForRango[] = [
+export const rangoOnChainDisabledProviders: RubicOnChainTradeTypeForRango[] = [
     ON_CHAIN_TRADE_TYPE.OSMOSIS_SWAP,
     ON_CHAIN_TRADE_TYPE.OOLONG_SWAP,
     ON_CHAIN_TRADE_TYPE['10K_SWAP'],
@@ -15,4 +15,4 @@ export const rangoOnChainDisabledProviders: RubicTypeForRango[] = [
     ON_CHAIN_TRADE_TYPE.MDEX,
     ON_CHAIN_TRADE_TYPE.BEAM_SWAP,
     ON_CHAIN_TRADE_TYPE.OKC_SWAP
-] as const;
+];

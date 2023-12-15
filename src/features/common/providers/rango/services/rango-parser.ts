@@ -6,7 +6,7 @@ import { Injector } from 'src/core/injector/injector';
 import { RANGO_API_KEY } from '../constants/rango-api-common';
 import { RangoBestRouteRequestOptions } from '../models/rango-api-best-route-types';
 import { RangoSwapRequestOptions } from '../models/rango-api-swap-types';
-import { RubicTypeForRango } from '../models/rango-api-trade-types';
+import { RubicTradeTypeForRango } from '../models/rango-api-trade-types';
 import {
     RangoBestRouteQueryParams,
     RangoSwapQueryParams,
@@ -31,7 +31,7 @@ export class RangoCommonParser {
         const apiKey = RANGO_API_KEY;
 
         const swapperGroups = options.swapperGroups?.map(swapper =>
-            RangoUtils.getTradeTypeForRango(swapper as RubicTypeForRango)
+            RangoUtils.getTradeTypeForRango(swapper as RubicTradeTypeForRango)
         );
 
         return {
@@ -65,7 +65,7 @@ export class RangoCommonParser {
         const apiKey = RANGO_API_KEY;
 
         const swapperGroups = options.swapperGroups?.map(swapper =>
-            RangoUtils.getTradeTypeForRango(swapper as RubicTypeForRango)
+            RangoUtils.getTradeTypeForRango(swapper as RubicTradeTypeForRango)
         );
 
         return {

@@ -5,11 +5,11 @@ import {
     RangoRoutingResultType,
     RangoSwapperType
 } from './rango-api-common-types';
-import { RubicTypeForRango } from './rango-api-trade-types';
+import { RubicTradeTypeForRango } from './rango-api-trade-types';
 
 export interface RangoBestRouteRequestOptions {
     slippageTolerance: number;
-    swapperGroups?: RubicTypeForRango[];
+    swapperGroups?: RubicTradeTypeForRango[];
     swappersGroupsExclude?: boolean;
 }
 

@@ -16,7 +16,7 @@ import {
     rangoOnChainTradeTypes,
     RangoTradeType,
     rangoTradeTypes,
-    RubicTypeForRango
+    RubicTradeTypeForRango
 } from '../models/rango-api-trade-types';
 import { RangoSupportedBlockchain } from '../models/rango-supported-blockchains';
 
@@ -87,7 +87,7 @@ export class RangoUtils {
         return CROSS_CHAIN_TRADE_TYPE.RANGO;
     }
 
-    public static getTradeTypeForRango(rubicTradeType: RubicTypeForRango): RangoTradeType {
+    public static getTradeTypeForRango(rubicTradeType: RubicTradeTypeForRango): RangoTradeType {
         return rangoTradeTypes[rubicTradeType];
     }
 }

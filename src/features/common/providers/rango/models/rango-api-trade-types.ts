@@ -67,6 +67,8 @@ export const rangoCrossChainTradeTypes = {
 
 export const rangoTradeTypes = { ...rangoOnChainTradeTypes, ...rangoCrossChainTradeTypes } as const;
 
-export type RubicTypeForRango = keyof typeof rangoTradeTypes;
+export type RubicOnChainTradeTypeForRango = keyof typeof rangoOnChainTradeTypes;
+
+export type RubicTradeTypeForRango = keyof typeof rangoTradeTypes;
 
 export type RangoTradeType = (typeof rangoTradeTypes)[keyof typeof rangoTradeTypes];
