@@ -260,12 +260,15 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
         let toAddress = '';
 
         if (this.to.blockchain === BLOCKCHAIN_NAME.TRON) {
-            receiverAddress = await this.tronWeb3Public.convertTronAddressToHex(
+            const tronHexReceiverAddress = await this.tronWeb3Public.convertTronAddressToHex(
                 options.receiverAddress!
             );
-            receiverAddress = `0x${receiverAddress.slice(2)}`;
-            toAddress = await this.tronWeb3Public.convertTronAddressToHex(this.to.address);
-            toAddress = `0x${toAddress.slice(2)}`;
+            receiverAddress = `0x${tronHexReceiverAddress.slice(2)}`;
+
+            const toTokenTronAddress = await this.tronWeb3Public.convertTronAddressToHex(
+                this.to.address
+            );
+            toAddress = `0x${toTokenTronAddress.slice(2)}`;
         }
 
         if (this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS) {
@@ -421,7 +424,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             {
                 ...this.swappingParams,
                 from: walletAddress,
-                to: walletAddress,
+                to: receiverAddress || walletAddress,
                 revertableAddress: receiverAddress || walletAddress
             } as SymbiosisSwappingParams
         );
