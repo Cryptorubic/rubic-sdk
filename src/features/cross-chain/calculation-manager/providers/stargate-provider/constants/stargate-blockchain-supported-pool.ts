@@ -4,6 +4,7 @@ import { stargatePoolId } from 'src/features/cross-chain/calculation-manager/pro
 
 import { StargateCrossChainSupportedBlockchain } from './stargate-cross-chain-supported-blockchain';
 
+// Stargate close pools for BUSD and MAI
 export const stargateBlockchainSupportedPools: Record<
     StargateCrossChainSupportedBlockchain,
     number[]

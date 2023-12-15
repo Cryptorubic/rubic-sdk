@@ -1,3 +1,4 @@
+// Stargate close pools for BUSD and MAI
 export const stargateBridgeToken = {
     USDC: 'USDC',
     USDT: 'USDT',

@@ -3,6 +3,7 @@ import {
     stargateBridgeToken
 } from 'src/features/cross-chain/calculation-manager/providers/stargate-provider/constants/stargate-bridge-token';
 
+// Stargate close pools for BUSD and MAI
 export const stargatePoolsDecimals: Record<StargateBridgeToken, number> = {
     [stargateBridgeToken.USDC]: 6,
     [stargateBridgeToken.USDT]: 6,

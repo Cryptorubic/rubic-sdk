@@ -15,6 +15,7 @@ type StargatePoolMapping = Record<
     >
 >;
 
+// Stargate close pools for BUSD and MAI
 export const stargatePoolMapping: StargatePoolMapping = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
         [stargateBridgeToken.USDC]: {
