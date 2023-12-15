@@ -2,6 +2,8 @@
  * List of on-chain trade types.
  */
 export const ON_CHAIN_TRADE_TYPE = {
+    '10K_SWAP': '10K_SWAP',
+
     AERODROME: 'AERODROME',
     ACRYPTOS: 'ACRYPTOS',
     ALDRIN_EXCHANGE: 'ALDRIN_EXCHANGE',

@@ -2,6 +2,7 @@ import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/provid
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 export const rangoOnChainTradeTypes = {
+    [ON_CHAIN_TRADE_TYPE['10K_SWAP']]: '10KSwap',
     [ON_CHAIN_TRADE_TYPE.PANGOLIN]: 'Pangolin Swap',
     [ON_CHAIN_TRADE_TYPE.SUSHI_SWAP]: 'Sushi Swap',
     [ON_CHAIN_TRADE_TYPE.OSMOSIS_SWAP]: 'Osmosis',
@@ -49,7 +50,6 @@ export const rangoCrossChainTradeTypes = {
     [BRIDGE_TYPE.RAINBOW]: 'Rainbow Bridge',
     [BRIDGE_TYPE.SYNAPSE]: 'Synapse Bridge',
     [BRIDGE_TYPE.OPTIMISM_GATEWAY]: 'Optimism Bridge',
-    [BRIDGE_TYPE['10K_SWAP']]: '10KSwap',
     [BRIDGE_TYPE.ORBITER_BRIDGE]: 'Orbiter',
     [BRIDGE_TYPE.MAYA_PROTOCOL]: 'Maya Protocol',
     [BRIDGE_TYPE.XY]: 'XY Finance',

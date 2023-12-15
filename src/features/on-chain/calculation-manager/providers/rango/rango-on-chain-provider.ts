@@ -17,7 +17,7 @@ import { GasFeeInfo } from '../common/on-chain-trade/evm-on-chain-trade/models/g
 import { OnChainTrade } from '../common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from '../common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from '../common/utils/get-gas-price-info';
-import { RangoOnChainOptions } from './models/rango-on-chain-api-types';
+import { rangoOnChainDisabledProviders } from './models/rango-on-chain-disabled-providers';
 import { RangoOnChainTradeStruct } from './models/rango-on-chain-trade-types';
 import { RangoOnChainTrade } from './rango-on-chain-trade';
 import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
@@ -32,7 +32,7 @@ export class RangoOnChainProvider {
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
-        options: RangoOnChainOptions
+        options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
         if (!this.isSupportedBlockchain(from.blockchain)) {
             throw new RubicSdkError(`Rango doesn't support ${from.blockchain} chain!`);
@@ -43,11 +43,10 @@ export class RangoOnChainProvider {
 
             const path = this.getRoutePath(from, toToken);
 
-            const swapParams = await RangoCommonParser.getSwapQueryParams(
-                fromWithoutFee,
-                toToken,
-                options
-            );
+            const swapParams = await RangoCommonParser.getSwapQueryParams(fromWithoutFee, toToken, {
+                ...options,
+                swapperGroups: rangoOnChainDisabledProviders
+            });
 
             const { route, tx } = await RangoOnChainApiService.getSwapTransaction(swapParams);
             const { outputAmountMin, outputAmount } = route as RangoBestRouteSimulationResult;
