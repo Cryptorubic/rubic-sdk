@@ -116,10 +116,10 @@ export const stargatePoolMapping: StargatePoolMapping = {
             [BLOCKCHAIN_NAME.ETHEREUM]: [stargateBridgeToken.METIS],
             [BLOCKCHAIN_NAME.AVALANCHE]: [stargateBridgeToken.METIS],
             [BLOCKCHAIN_NAME.METIS]: [stargateBridgeToken.METIS]
-        },
-        [stargateBridgeToken.mUSD]: {
-            [BLOCKCHAIN_NAME.METIS]: [stargateBridgeToken.mUSD]
         }
+        // [stargateBridgeToken.mUSD]: {
+        //     [BLOCKCHAIN_NAME.METIS]: [stargateBridgeToken.mUSD]
+        // }
     },
     [BLOCKCHAIN_NAME.POLYGON]: {
         [stargateBridgeToken.USDC]: {
@@ -321,7 +321,7 @@ export const stargatePoolMapping: StargatePoolMapping = {
         },
         [stargateBridgeToken.mUSD]: {
             [BLOCKCHAIN_NAME.ETHEREUM]: [stargateBridgeToken.mUSD],
-            [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: [stargateBridgeToken.mUSD],
+            // [BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN]: [stargateBridgeToken.mUSD],
             [BLOCKCHAIN_NAME.AVALANCHE]: [stargateBridgeToken.mUSD]
         }
     },
