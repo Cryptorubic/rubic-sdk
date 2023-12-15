@@ -3,7 +3,7 @@ import { RangoResponseToken } from './rango-api-common-types';
 export const RANGO_SWAP_STATUS = {
     SUCCESS: 'success',
     FAILED: 'failed',
-    RUNNING: 'runnig'
+    RUNNING: 'running'
 } as const;
 
 export type RangoSwapStatus = (typeof RANGO_SWAP_STATUS)[keyof typeof RANGO_SWAP_STATUS];
