@@ -1,23 +1,23 @@
 import BigNumber from 'bignumber.js';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { Injector } from 'src/core/injector/injector';
+import { feeManagerAbi } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/constants/fee-manager-abi';
+import { foreignBridgeAbi } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/constants/foreign-bridge-abi';
+import { homeBridgeAbi } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/constants/home-bridge-abi';
 import { pulseChainContractAddress } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/constants/pulse-chain-contract-address';
 import { PulseChainCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/constants/pulse-chain-supported-blockchains';
+import { AbiItem } from 'web3-utils';
 
 export abstract class OmniBridge {
-    protected get sourceBridgeAddress(): string {
-        return pulseChainContractAddress[this.sourceBlockchain];
-    }
+    protected readonly sourceBridgeAddress: string;
 
-    protected get targetBridgeAddress(): string {
-        return pulseChainContractAddress[this.targetBlockchain];
-    }
+    protected readonly targetBridgeAddress: string;
 
-    protected constructor(
-        private readonly sourceBlockchain: PulseChainCrossChainSupportedBlockchain,
-        private readonly targetBlockchain: PulseChainCrossChainSupportedBlockchain
-    ) {}
+    protected readonly sourceBridgeAbi: AbiItem[];
+
+    protected readonly targetBridgeAbi: AbiItem[];
 
     protected get web3Private(): EvmWeb3Private {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.sourceBlockchain);
@@ -29,6 +29,22 @@ export abstract class OmniBridge {
 
     protected get targetWeb3Public(): EvmWeb3Public {
         return Injector.web3PublicService.getWeb3Public(this.targetBlockchain);
+    }
+
+    protected constructor(
+        private readonly sourceBlockchain: PulseChainCrossChainSupportedBlockchain,
+        private readonly targetBlockchain: PulseChainCrossChainSupportedBlockchain
+    ) {
+        this.sourceBridgeAddress = pulseChainContractAddress[sourceBlockchain];
+        this.targetBridgeAddress = pulseChainContractAddress[targetBlockchain];
+
+        if (sourceBlockchain === BLOCKCHAIN_NAME.ETHEREUM) {
+            this.sourceBridgeAbi = foreignBridgeAbi;
+            this.targetBridgeAbi = homeBridgeAbi;
+        } else {
+            this.sourceBridgeAbi = foreignBridgeAbi;
+            this.targetBridgeAbi = homeBridgeAbi;
+        }
     }
 
     /**
@@ -104,13 +120,31 @@ export abstract class OmniBridge {
     /**
      * Get fee manager address.
      */
-    protected abstract getFeeManager(): Promise<string>;
+    private getFeeManager(): Promise<string> {
+        const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.PULSECHAIN);
+        return web3Public.callContractMethod<string>(
+            pulseChainContractAddress[BLOCKCHAIN_NAME.PULSECHAIN],
+            homeBridgeAbi,
+            'feeManager',
+            []
+        );
+    }
 
     /**
      *
      * Get fee type for trade.
      */
-    protected abstract getFeeType(): Promise<string>;
+    private getFeeType(): Promise<string> {
+        const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.PULSECHAIN);
+        return web3Public.callContractMethod<string>(
+            pulseChainContractAddress[BLOCKCHAIN_NAME.PULSECHAIN],
+            feeManagerAbi,
+            this.sourceBlockchain === BLOCKCHAIN_NAME.ETHEREUM
+                ? 'FOREIGN_TO_HOME_FEE'
+                : 'HOME_TO_FOREIGN_FEE',
+            []
+        );
+    }
 
     /**
      * Calculate output amount for trade.
@@ -119,12 +153,21 @@ export abstract class OmniBridge {
      * @param feeType Type of fee.
      * @param fromAmount Amount of tokens to send.
      */
-    protected abstract getOutputAmount(
+    private async getOutputAmount(
         toAddress: string,
         feeManagerAddress: string,
         feeType: string,
         fromAmount: string
-    ): Promise<BigNumber>;
+    ): Promise<BigNumber> {
+        const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.PULSECHAIN);
+        const amount = await web3Public.callContractMethod<string>(
+            feeManagerAddress,
+            feeManagerAbi,
+            'calculateFee',
+            [feeType, toAddress, fromAmount]
+        );
+        return new BigNumber(amount);
+    }
 
     /**
      * Calculate output amount for trade.

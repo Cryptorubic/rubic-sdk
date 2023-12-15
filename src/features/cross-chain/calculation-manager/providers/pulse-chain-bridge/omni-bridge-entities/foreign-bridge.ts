@@ -14,7 +14,7 @@ export class ForeignBridge extends OmniBridge {
     public isTokenRegistered(address: string): Promise<boolean> {
         return this.sourceWeb3Public.callContractMethod<boolean>(
             this.sourceBridgeAddress,
-            [],
+            this.sourceBridgeAbi,
             'isTokenRegistered',
             [address]
         );
@@ -23,7 +23,7 @@ export class ForeignBridge extends OmniBridge {
     protected isRegisteredAsNative(address: string): Promise<boolean> {
         return this.sourceWeb3Public.callContractMethod<boolean>(
             this.sourceBridgeAddress,
-            [],
+            this.sourceBridgeAbi,
             'isRegisteredAsNativeToken',
             [address]
         );
@@ -32,7 +32,7 @@ export class ForeignBridge extends OmniBridge {
     protected getNonNativeToken(address: string): Promise<string> {
         return this.sourceWeb3Public.callContractMethod<string>(
             this.sourceBridgeAddress,
-            [],
+            this.sourceBridgeAbi,
             'nativeTokenAddress',
             [address]
         );
@@ -41,7 +41,7 @@ export class ForeignBridge extends OmniBridge {
     protected getNativeToken(address: string): Promise<string> {
         return this.targetWeb3Public.callContractMethod<string>(
             this.targetBridgeAddress,
-            [],
+            this.targetBridgeAbi,
             'bridgetTokenAddress',
             [address]
         );
@@ -50,7 +50,7 @@ export class ForeignBridge extends OmniBridge {
     public async getMinAmountToken(address: string): Promise<BigNumber> {
         const amount = await this.sourceWeb3Public.callContractMethod<string>(
             this.sourceBridgeAddress,
-            [],
+            this.sourceBridgeAbi,
             'minPerTx',
             [address]
         );
@@ -60,7 +60,7 @@ export class ForeignBridge extends OmniBridge {
     protected async checkSourceLimits(address: string, amount: string): Promise<void> {
         const allowSend = await this.sourceWeb3Public.callContractMethod<string>(
             this.sourceBridgeAddress,
-            [],
+            this.sourceBridgeAbi,
             'withinLimit',
             [address, amount]
         );
@@ -72,45 +72,12 @@ export class ForeignBridge extends OmniBridge {
     protected async checkTargetLimits(address: string, amount: string): Promise<void> {
         const allowSend = await this.targetWeb3Public.callContractMethod<string>(
             this.targetBridgeAddress,
-            [],
+            this.targetBridgeAbi,
             'withinExecutionLimit',
             [address, amount]
         );
         if (!allowSend) {
             throw new RubicSdkError('Swap is not allowed due to contract limitations');
         }
-    }
-
-    protected getFeeManager(): Promise<string> {
-        return this.sourceWeb3Public.callContractMethod<string>(
-            this.sourceBridgeAddress,
-            [],
-            'feeManager',
-            []
-        );
-    }
-
-    protected getFeeType(): Promise<string> {
-        return this.sourceWeb3Public.callContractMethod<string>(
-            this.sourceBridgeAddress,
-            [],
-            'FOREIGN_TO_HOME_FEE',
-            []
-        );
-    }
-
-    protected async getOutputAmount(
-        toAddress: string,
-        feeManagerAddress: string,
-        feeType: string,
-        fromAmount: string
-    ): Promise<BigNumber> {
-        const amount = await this.sourceWeb3Public.callContractMethod<string>(
-            feeManagerAddress,
-            [],
-            'calculateFee',
-            [feeType, toAddress, fromAmount]
-        );
-        return new BigNumber(amount);
     }
 }
