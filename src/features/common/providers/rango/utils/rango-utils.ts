@@ -37,10 +37,13 @@ export class RangoUtils {
             : (await Token.createToken({ address: token.address, blockchain: token.blockchain }))
                   .symbol;
 
-        const param =
-            token.isNative && token.blockchain !== BLOCKCHAIN_NAME.METIS
-                ? `${rangoBlockchainName}.${symbol}`
-                : `${rangoBlockchainName}.${symbol}--${token.address}`;
+        if (token.isNative && token.blockchain === BLOCKCHAIN_NAME.METIS) {
+            return `${rangoBlockchainName}.${symbol}--0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000`;
+        }
+
+        const param = token.isNative
+            ? `${rangoBlockchainName}.${symbol}`
+            : `${rangoBlockchainName}.${symbol}--${token.address}`;
 
         return param;
     }
