@@ -20,6 +20,7 @@ import {
 import { Injector } from 'src/core/injector/injector';
 import { changenowApiKey } from 'src/features/common/providers/changenow/constants/changenow-api-key';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
+import { XY_API_ENDPOINT } from 'src/features/common/providers/xy/constants/xy-api-params';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils/get-bridgers-trade-status';
 import { getSrcTxStatus } from 'src/features/common/status-manager/utils/get-src-tx-status';
@@ -43,7 +44,6 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-swap-status';
 import { SquidrouterCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/squidrouter-cross-chain-provider';
 import { SYMBIOSIS_SWAP_STATUS } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
-import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
 import { MULTICHAIN_STATUS_MAPPING } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
 import {
@@ -455,7 +455,7 @@ export class CrossChainStatusManager {
     private async getXyDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
             const { isSuccess, status, txHash } = await this.httpClient.get<XyApiResponse>(
-                `${XyCrossChainProvider.apiEndpoint}/crossChainStatus?srcChainId=${
+                `${XY_API_ENDPOINT}/crossChainStatus?srcChainId=${
                     blockchainId[data.fromBlockchain]
                 }&transactionHash=${data.srcTxHash}`
             );

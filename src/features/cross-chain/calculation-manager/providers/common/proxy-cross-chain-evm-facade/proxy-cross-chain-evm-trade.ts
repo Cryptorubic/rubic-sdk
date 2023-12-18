@@ -9,7 +9,7 @@ import {
 } from 'src/common/tokens';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { compareAddresses } from 'src/common/utils/blockchain';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
@@ -26,7 +26,7 @@ import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/c
 import { OnChainManager } from 'src/features/on-chain/calculation-manager/on-chain-manager';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
-import { AbiItem } from 'web3-utils';
+import { AbiItem, utf8ToHex } from 'web3-utils';
 
 type BridgeParams = [
     string,
@@ -245,15 +245,16 @@ export class ProxyCrossChainEvmTrade {
             ? tradeParams.srcChainTrade.toTokenAmountMin
             : tradeParams.fromTokenAmount;
         const hasSwapBeforeBridge = tradeParams.srcChainTrade !== null;
-
         const toAddress = tradeParams.toAddress || tradeParams.toTokenAmount.address;
 
         return [
             EvmWeb3Pure.randomHex(32),
             tradeParams.type.toLowerCase(),
             tradeParams.providerAddress,
-            EvmWeb3Pure.randomHex(20),
-            fromToken.address,
+            ProxyCrossChainEvmTrade.getReferrerAddress(swapOptions?.referrer),
+            fromToken.isNative && fromToken.blockchain === BLOCKCHAIN_NAME.METIS
+                ? toAddress
+                : fromToken.address,
             toAddress,
             receiverAddress,
             tradeParams.fromAddress,
@@ -262,6 +263,14 @@ export class ProxyCrossChainEvmTrade {
             hasSwapBeforeBridge,
             Boolean(tradeParams?.dstChainTrade)
         ];
+    }
+
+    private static getReferrerAddress(referrer: string | undefined): string {
+        if (referrer) {
+            return '0x' + utf8ToHex(referrer).slice(2, 42).padStart(40, '0');
+        }
+
+        return '0x0000000000000000000000000000000000000000';
     }
 
     public static async getSwapData(

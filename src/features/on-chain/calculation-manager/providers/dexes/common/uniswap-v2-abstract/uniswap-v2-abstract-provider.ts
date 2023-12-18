@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import {
     createTokenNativeAddressProxy,
@@ -95,6 +95,20 @@ export abstract class UniswapV2AbstractProvider<
         options?: OnChainCalculationOptions
     ): Promise<UniswapV2AbstractTrade> {
         const fullOptions = combineOptions(options, this.defaultOptions);
+
+        if (fromToken.blockchain === BLOCKCHAIN_NAME.METIS && fromToken.isNative) {
+            fromToken = new PriceToken({
+                ...fromToken.asStruct,
+                address: '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
+            });
+        }
+
+        if (toToken.blockchain === BLOCKCHAIN_NAME.METIS && toToken.isNative) {
+            toToken = new PriceToken({
+                ...toToken.asStruct,
+                address: '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
+            });
+        }
 
         let weiAmountWithoutFee = weiAmount;
         let proxyFeeInfo: OnChainProxyFeeInfo | undefined;

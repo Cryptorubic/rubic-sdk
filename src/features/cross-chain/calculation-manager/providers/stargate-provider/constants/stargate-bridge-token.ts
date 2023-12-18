@@ -1,13 +1,14 @@
+// Stargate close pools for BUSD and MAI
 export const stargateBridgeToken = {
     USDC: 'USDC',
     USDT: 'USDT',
     DAI: 'DAI',
-    MAI: 'MAI',
+    // MAI: 'MAI',
     FRAX: 'FRAX',
     USDD: 'USDD',
     sUSD: 'sUSD',
     LUSD: 'LUSD',
-    BUSD: 'BUSD',
+    // BUSD: 'BUSD',
     mUSD: 'm.USDT',
     METIS: 'METIS',
     // ETHs

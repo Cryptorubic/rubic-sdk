@@ -267,7 +267,11 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.fetchSwapData(options?.receiverAddress, skipAmountChangeCheck);
+        } = await this.fetchSwapData(
+            options?.receiverAddress,
+            skipAmountChangeCheck,
+            options?.directTransaction
+        );
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: this.walletAddress,

@@ -181,7 +181,8 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         transitAmount: Web3Pure.fromWei(transitToken.amount, transitToken.decimals),
                         toTokenAmountMin,
                         maxTheoreticalAmount: Web3Pure.fromWei(
-                            estimation.dstChainTokenOut.maxTheoreticalAmount
+                            estimation.dstChainTokenOut.maxTheoreticalAmount,
+                            estimation.dstChainTokenOut.decimals
                         ),
                         cryptoFeeToken,
                         onChainTrade: null

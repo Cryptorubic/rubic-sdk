@@ -4,6 +4,7 @@ import {
     NotWhitelistedProviderError,
     UnnecessaryApproveError
 } from 'src/common/errors';
+import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { nativeTokensList, PriceTokenAmount, Token } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -34,6 +35,7 @@ import {
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
+import { utf8ToHex } from 'web3-utils';
 
 export abstract class EvmOnChainTrade extends OnChainTrade {
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
@@ -142,8 +144,13 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 ? this.from.weiAmount
                 : amount;
 
+        const fromTokenAddress =
+            this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS
+                ? '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
+                : this.from.address;
+
         return this.web3Private.approveTokens(
-            this.from.address,
+            fromTokenAddress,
             this.spenderAddress,
             approveAmount,
             options
@@ -181,7 +188,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         await this.checkWalletState();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm } = options;
+        const { onConfirm, directTransaction } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -196,7 +203,9 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         try {
             const transactionConfig = await this.encode({
                 fromAddress,
-                receiverAddress
+                receiverAddress,
+                ...(directTransaction && { directTransaction }),
+                ...(options?.referrer && { referrer: options?.referrer })
             });
 
             let method: 'trySendTransaction' | 'sendTransaction' = 'trySendTransaction';
@@ -260,7 +269,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         const methodArguments = [
             EvmWeb3Pure.randomHex(32),
             this.providerAddress,
-            EvmWeb3Pure.randomHex(20),
+            EvmOnChainTrade.getReferrerAddress(options.referrer),
             receiverAddress,
             this.toTokenAmountMin.stringWeiAmount,
             swapData
@@ -291,6 +300,14 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             methodArguments: [sendingToken, sendingAmount, txConfig.data],
             value
         };
+    }
+
+    private static getReferrerAddress(referrer: string | undefined): string {
+        if (referrer) {
+            return '0x' + utf8ToHex(referrer).slice(2, 42).padStart(40, '0');
+        }
+
+        return '0x0000000000000000000000000000000000000000';
     }
 
     /**
@@ -355,5 +372,32 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 true
             ]
         ];
+    }
+
+    public static checkAmountChange(
+        transactionRequest: EvmEncodeConfig,
+        newWeiAmount: string,
+        oldWeiAmount: string
+    ): void {
+        const oldAmount = new BigNumber(oldWeiAmount);
+        const newAmount = new BigNumber(newWeiAmount);
+        const changePercent = 0.01;
+        const acceptablePercentPriceChange = new BigNumber(changePercent).dividedBy(100);
+
+        const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
+        const amountMinusPercent = oldAmount.multipliedBy(
+            new BigNumber(1).minus(acceptablePercentPriceChange)
+        );
+
+        const shouldThrowError =
+            newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
+
+        if (shouldThrowError) {
+            throw new UpdatedRatesError({
+                ...transactionRequest,
+                newAmount: newWeiAmount,
+                oldAmount: oldWeiAmount
+            });
+        }
     }
 }
