@@ -1,4 +1,4 @@
-export interface OdosSwapRequestParams {
+export interface OdosSwapRequestBody {
     userAddr: string;
     pathId: string;
     simulate?: boolean;

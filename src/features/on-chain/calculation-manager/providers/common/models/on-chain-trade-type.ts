@@ -62,6 +62,7 @@ export const ON_CHAIN_TRADE_TYPE = {
 
     NET_SWAP: 'NET_SWAP',
 
+    ODOS: 'ODOS',
     ONE_INCH: 'ONE_INCH',
     ONE_MOON: 'ONE_MOON',
     ONE_SOL: 'ONE_SOL',

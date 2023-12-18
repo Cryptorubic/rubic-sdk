@@ -2,7 +2,7 @@ import { Any } from 'src/common/utils/types';
 
 import { OnChainTradeType } from '../../common/models/on-chain-trade-type';
 
-export interface OdosBestRouteRequestParams {
+export interface OdosBestRouteRequestBody {
     chainId: number;
     inputTokens: OdosInputTokenRequest[];
     outputTokens: OdosOutputTokenRequest[];
