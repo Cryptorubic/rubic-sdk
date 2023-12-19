@@ -1,8 +1,9 @@
 import { EvmOnChainTradeStruct } from '../../common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
+import { OdosBestRouteRequestBody } from './odos-api-best-route-types';
 
-export interface OdosTradeStruct extends EvmOnChainTradeStruct {
+export interface OdosOnChainTradeStruct extends EvmOnChainTradeStruct {
     /**
-     * Used to make swap request with calculation data available by this unique id
+     * Used to get fresh active pathId for swap request
      */
-    pathId: string;
+    bestRouteRequestBody: OdosBestRouteRequestBody;
 }

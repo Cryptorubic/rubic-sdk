@@ -1,29 +1,30 @@
 import { Any } from 'src/common/utils/types';
 
-import { OnChainTradeType } from '../../common/models/on-chain-trade-type';
-
 export interface OdosBestRouteRequestBody {
     chainId: number;
     inputTokens: OdosInputTokenRequest[];
     outputTokens: OdosOutputTokenRequest[];
     userAddr: string;
     slippageLimitPercent: number;
-    sourceBlacklist: OnChainTradeType[];
-    sourceWhitelist: OnChainTradeType[];
+    /**
+     * to exclude/include swappers need to find name in odos-api - check /info/liquidity-sources/{chain_id} endpoint
+     */
+    sourceBlacklist: string[];
+    sourceWhitelist: string[];
 }
 
-interface OdosInputTokenRequest {
+export interface OdosInputTokenRequest {
     tokenAddress: string;
-    amount: number;
+    amount: string;
 }
 
-interface OdosOutputTokenRequest {
+export interface OdosOutputTokenRequest {
     tokenAddress: string;
     proportion: number;
 }
 
 export interface OdosBestRouteResponse {
-    pathId: string | null;
+    pathId: string;
     inTokens: string[];
     outTokens: string[];
     /**
