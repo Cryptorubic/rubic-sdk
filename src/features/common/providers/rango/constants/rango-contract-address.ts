@@ -40,7 +40,6 @@ export const RangoContractAddresses: Record<RangoSupportedBlockchain, UniversalC
         providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
         rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ETHEREUM].router
     },
-
     [BLOCKCHAIN_NAME.POLYGON_ZKEVM]: {
         providerGateway: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
         providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
@@ -61,11 +60,11 @@ export const RangoContractAddresses: Record<RangoSupportedBlockchain, UniversalC
         providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
         rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ETHEREUM].router
     },
-    [BLOCKCHAIN_NAME.ZK_SYNC]: {
-        providerGateway: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
-        providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
-        rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ETHEREUM].router
-    },
+    // [BLOCKCHAIN_NAME.ZK_SYNC]: {
+    //     providerGateway: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
+    //     providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
+    //     rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.ETHEREUM].router
+    // },
     [BLOCKCHAIN_NAME.BASE]: {
         providerGateway: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
         providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',

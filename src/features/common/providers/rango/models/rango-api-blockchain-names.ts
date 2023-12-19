@@ -14,7 +14,7 @@ export const rangoApiBlockchainNames: Record<RangoSupportedBlockchain, string> =
     [BLOCKCHAIN_NAME.AURORA]: 'AURORA',
     [BLOCKCHAIN_NAME.BASE]: 'BASE',
     [BLOCKCHAIN_NAME.METIS]: 'METIS',
-    [BLOCKCHAIN_NAME.ZK_SYNC]: 'ZKSYNC',
+    // [BLOCKCHAIN_NAME.ZK_SYNC]: 'ZKSYNC',
     [BLOCKCHAIN_NAME.LINEA]: 'LINEA'
 };
 
