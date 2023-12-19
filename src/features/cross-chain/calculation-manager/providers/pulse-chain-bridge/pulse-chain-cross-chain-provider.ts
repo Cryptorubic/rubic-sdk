@@ -1,7 +1,12 @@
 import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
@@ -39,7 +44,11 @@ export class PulseChainCrossChainProvider extends CrossChainProvider {
         const toBlockchain = toToken.blockchain as PulseChainCrossChainSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
-        if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
+        if (
+            !this.areSupportedBlockchains(fromBlockchain, toBlockchain) ||
+            // @TODO Remove after home bridge development
+            fromToken.blockchain === BLOCKCHAIN_NAME.PULSECHAIN
+        ) {
             return {
                 trade: null,
                 error: new NotSupportedTokensError(),
@@ -55,13 +64,27 @@ export class PulseChainCrossChainProvider extends CrossChainProvider {
         );
 
         try {
-            const fromAddress = fromToken.isNative
-                ? '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
-                : fromToken.address;
-            const sourceBridgeManager = BridgeManager.createBridge(fromBlockchain);
-            const targetBridgeManager = BridgeManager.createBridge(toBlockchain);
+            const sourceBridgeManager = BridgeManager.createBridge(
+                fromToken as Token<PulseChainCrossChainSupportedBlockchain>,
+                toToken as Token<PulseChainCrossChainSupportedBlockchain>
+            );
+            const targetBridgeManager = BridgeManager.createBridge(
+                fromToken as Token<PulseChainCrossChainSupportedBlockchain>,
+                toToken as Token<PulseChainCrossChainSupportedBlockchain>
+            );
+            const fromTokenAddress = this.getTokenAddress(fromToken);
+            const toTokenAddress = this.getTokenAddress(toToken);
 
-            const tokenRegistered = await sourceBridgeManager.isTokenRegistered(fromAddress);
+            const tokenRegistered = await sourceBridgeManager.isTokenRegistered(fromTokenAddress);
+            const targetTokenAddress = await sourceBridgeManager.getBridgeToken(fromTokenAddress);
+
+            if (!compareAddresses(toTokenAddress, targetTokenAddress)) {
+                return {
+                    trade: null,
+                    error: new NotSupportedTokensError(),
+                    tradeType: this.type
+                };
+            }
 
             const fromWithoutFee = getFromWithoutFee(
                 fromToken,
@@ -114,7 +137,7 @@ export class PulseChainCrossChainProvider extends CrossChainProvider {
             );
 
             const amountsErrors = await this.getMinMaxAmountsErrors(
-                fromAddress,
+                fromTokenAddress,
                 sourceBridgeManager,
                 transitToken
             );
@@ -137,7 +160,9 @@ export class PulseChainCrossChainProvider extends CrossChainProvider {
                           feeInfo,
                           targetAmountMin,
                           options.providerAddress,
-                          options.receiverAddress || this.getWalletAddress(fromToken.blockchain)
+                          options.receiverAddress || this.getWalletAddress(fromToken.blockchain),
+                          sourceBridgeManager.sourceBridgeAddress,
+                          tokenRegistered
                       )
                     : null;
 
@@ -151,7 +176,9 @@ export class PulseChainCrossChainProvider extends CrossChainProvider {
                         feeInfo: feeInfo,
                         toTokenAmountMin: targetAmountMin,
                         onChainTrade,
-                        priceImpact: fromToken.calculatePriceImpactPercent(to)
+                        priceImpact: fromToken.calculatePriceImpactPercent(to),
+                        routerAddress: sourceBridgeManager.sourceBridgeAddress,
+                        tokenRegistered
                     },
                     options.providerAddress,
                     await this.getRoutePath(fromToken, transitToken, to, onChainTrade)
@@ -261,5 +288,12 @@ export class PulseChainCrossChainProvider extends CrossChainProvider {
             provider: CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE
         });
         return routePath;
+    }
+
+    private getTokenAddress(token: Token): string {
+        if (token.blockchain === BLOCKCHAIN_NAME.ETHEREUM) {
+            return token.isNative ? '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' : token.address;
+        }
+        return token.isNative ? '0xA1077a294dDE1B09bB078844df40758a5D0f9a27' : token.address;
     }
 }

@@ -1,7 +1,10 @@
 import BigNumber from 'bignumber.js';
+import { Token } from 'src/common/tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { feeManagerAbi } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/constants/fee-manager-abi';
 import { foreignBridgeAbi } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/constants/foreign-bridge-abi';
@@ -11,13 +14,17 @@ import { PulseChainCrossChainSupportedBlockchain } from 'src/features/cross-chai
 import { AbiItem } from 'web3-utils';
 
 export abstract class OmniBridge {
-    protected readonly sourceBridgeAddress: string;
+    public readonly sourceBridgeAddress: string;
 
     protected readonly targetBridgeAddress: string;
 
     protected readonly sourceBridgeAbi: AbiItem[];
 
     protected readonly targetBridgeAbi: AbiItem[];
+
+    protected readonly sourceBlockchain: PulseChainCrossChainSupportedBlockchain;
+
+    protected readonly targetBlockchain: PulseChainCrossChainSupportedBlockchain;
 
     protected get web3Private(): EvmWeb3Private {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.sourceBlockchain);
@@ -31,14 +38,22 @@ export abstract class OmniBridge {
         return Injector.web3PublicService.getWeb3Public(this.targetBlockchain);
     }
 
-    protected constructor(
-        private readonly sourceBlockchain: PulseChainCrossChainSupportedBlockchain,
-        private readonly targetBlockchain: PulseChainCrossChainSupportedBlockchain
+    constructor(
+        private readonly fromToken: Token<PulseChainCrossChainSupportedBlockchain>,
+        private readonly toToken: Token<PulseChainCrossChainSupportedBlockchain>
     ) {
-        this.sourceBridgeAddress = pulseChainContractAddress[sourceBlockchain];
-        this.targetBridgeAddress = pulseChainContractAddress[targetBlockchain];
+        this.sourceBlockchain = fromToken.blockchain;
+        this.targetBlockchain = toToken.blockchain;
 
-        if (sourceBlockchain === BLOCKCHAIN_NAME.ETHEREUM) {
+        this.sourceBridgeAddress = this.isCustomWrap(fromToken)
+            ? pulseChainContractAddress[this.sourceBlockchain].omniBridgeWrapped
+            : pulseChainContractAddress[this.sourceBlockchain].omniBridge;
+
+        this.targetBridgeAddress = this.isCustomWrap(toToken)
+            ? pulseChainContractAddress[this.targetBlockchain].omniBridgeWrapped
+            : pulseChainContractAddress[this.targetBlockchain].omniBridge;
+
+        if (this.sourceBlockchain === BLOCKCHAIN_NAME.ETHEREUM) {
             this.sourceBridgeAbi = foreignBridgeAbi;
             this.targetBridgeAbi = homeBridgeAbi;
         } else {
@@ -123,7 +138,9 @@ export abstract class OmniBridge {
     private getFeeManager(): Promise<string> {
         const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.PULSECHAIN);
         return web3Public.callContractMethod<string>(
-            pulseChainContractAddress[BLOCKCHAIN_NAME.PULSECHAIN],
+            this.sourceBlockchain === BLOCKCHAIN_NAME.PULSECHAIN
+                ? this.sourceBridgeAddress
+                : this.targetBridgeAddress,
             homeBridgeAbi,
             'feeManager',
             []
@@ -134,10 +151,10 @@ export abstract class OmniBridge {
      *
      * Get fee type for trade.
      */
-    private getFeeType(): Promise<string> {
+    private getFeeType(feeManagerAddress: string): Promise<string> {
         const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.PULSECHAIN);
         return web3Public.callContractMethod<string>(
-            pulseChainContractAddress[BLOCKCHAIN_NAME.PULSECHAIN],
+            feeManagerAddress,
             feeManagerAbi,
             this.sourceBlockchain === BLOCKCHAIN_NAME.ETHEREUM
                 ? 'FOREIGN_TO_HOME_FEE'
@@ -160,13 +177,13 @@ export abstract class OmniBridge {
         fromAmount: string
     ): Promise<BigNumber> {
         const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.PULSECHAIN);
-        const amount = await web3Public.callContractMethod<string>(
+        const feeAmount = await web3Public.callContractMethod<string>(
             feeManagerAddress,
             feeManagerAbi,
             'calculateFee',
             [feeType, toAddress, fromAmount]
         );
-        return new BigNumber(amount);
+        return new BigNumber(fromAmount).minus(feeAmount);
     }
 
     /**
@@ -176,7 +193,35 @@ export abstract class OmniBridge {
      */
     public async calculateAmount(toAddress: string, fromAmount: string): Promise<BigNumber> {
         const feeManagerAddress = await this.getFeeManager();
-        const feeType = await this.getFeeType();
+        const feeType = await this.getFeeType(feeManagerAddress);
         return this.getOutputAmount(toAddress, feeManagerAddress, feeType, fromAmount);
     }
+
+    private isCustomWrap(token: Token): boolean {
+        return (
+            token.blockchain === BLOCKCHAIN_NAME.ETHEREUM &&
+            compareAddresses(token.address, '0xA882606494D86804B5514E07e6Bd2D6a6eE6d68A')
+        );
+    }
+
+    /**
+     * Get swap data for native token trade.
+     * @param receiverAddress Receiver address user get money to.
+     * @param value Amount of money user spend.
+     */
+    public abstract getDataForNativeSwap(receiverAddress: string, value: string): EvmEncodeConfig;
+
+    /**
+     * Get swap data for native token trade.
+     * @param receiverAddress Receiver address user get money to.
+     * @param amount Amount of money user spend.
+     * @param isERC677 Is token part of ERC677 token standard.
+     * @param tokenAddress Address of sending token.
+     */
+    public abstract getDataForTokenSwap(
+        receiverAddress: string,
+        amount: string,
+        isERC677: boolean,
+        tokenAddress: string
+    ): EvmEncodeConfig;
 }

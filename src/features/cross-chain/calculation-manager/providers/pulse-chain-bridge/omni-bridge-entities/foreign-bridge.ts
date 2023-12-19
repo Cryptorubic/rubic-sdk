@@ -1,16 +1,13 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
-import { PulseChainCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/constants/pulse-chain-supported-blockchains';
+import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { erc677Abi } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/constants/erc-677-abi';
+import { nativeBridgeAbi } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/constants/native-bridge-abi';
+import { omniBridgeNativeRouter } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/constants/pulse-chain-contract-address';
 import { OmniBridge } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/omni-bridge-entities/omni-bridge';
 
 export class ForeignBridge extends OmniBridge {
-    constructor(
-        sourceBlockchain: PulseChainCrossChainSupportedBlockchain,
-        targetBlockchain: PulseChainCrossChainSupportedBlockchain
-    ) {
-        super(sourceBlockchain, targetBlockchain);
-    }
-
     public isTokenRegistered(address: string): Promise<boolean> {
         return this.sourceWeb3Public.callContractMethod<boolean>(
             this.sourceBridgeAddress,
@@ -42,7 +39,7 @@ export class ForeignBridge extends OmniBridge {
         return this.targetWeb3Public.callContractMethod<string>(
             this.targetBridgeAddress,
             this.targetBridgeAbi,
-            'bridgetTokenAddress',
+            'bridgedTokenAddress',
             [address]
         );
     }
@@ -79,5 +76,40 @@ export class ForeignBridge extends OmniBridge {
         if (!allowSend) {
             throw new RubicSdkError('Swap is not allowed due to contract limitations');
         }
+    }
+
+    public getDataForNativeSwap(receiverAddress: string, value: string): EvmEncodeConfig {
+        return EvmWeb3Pure.encodeMethodCall(
+            omniBridgeNativeRouter,
+            nativeBridgeAbi,
+            'wrapAndRelayTokens',
+            [receiverAddress],
+            value
+        );
+    }
+
+    public getDataForTokenSwap(
+        receiverAddress: string,
+        amount: string,
+        isERC677: boolean,
+        tokenAddress: string
+    ): EvmEncodeConfig {
+        if (isERC677) {
+            return EvmWeb3Pure.encodeMethodCall(
+                tokenAddress,
+                erc677Abi,
+                'transferAndCall',
+                [this.sourceBridgeAddress, amount, receiverAddress],
+                '0'
+            );
+        }
+
+        return EvmWeb3Pure.encodeMethodCall(
+            this.sourceBridgeAddress,
+            this.sourceBridgeAbi,
+            'relayTokens',
+            [tokenAddress, receiverAddress, amount],
+            '0'
+        );
     }
 }
