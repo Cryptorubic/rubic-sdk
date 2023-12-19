@@ -285,7 +285,7 @@ export class PulseChainCrossChainProvider extends CrossChainProvider {
         routePath.push({
             type: 'cross-chain',
             path: [transit, to],
-            provider: CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE
+            provider: CROSS_CHAIN_TRADE_TYPE.PULSE_CHAIN_BRIDGE
         });
         return routePath;
     }

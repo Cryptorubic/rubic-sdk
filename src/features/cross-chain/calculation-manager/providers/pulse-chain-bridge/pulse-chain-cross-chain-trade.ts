@@ -9,7 +9,6 @@ import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
-import { CbridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/cbridge/constants/cbridge-supported-blockchains';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
@@ -41,7 +40,7 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
         routerAddress: string,
         tokenRegistered: boolean
     ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as CbridgeCrossChainSupportedBlockchain;
+        const fromBlockchain = from.blockchain as PulseChainCrossChainSupportedBlockchain;
         const walletAddress =
             Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
         if (!walletAddress) {
@@ -171,6 +170,11 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
     public readonly onChainTrade: EvmOnChainTrade | null;
 
     protected get methodName(): string {
+        if (this.isTokenRegistered) {
+            return this.onChainTrade
+                ? 'swapAndStartBridgeViaTransferAndCall'
+                : 'startBridgeViaTransferAndCall';
+        }
         return this.onChainTrade
             ? 'swapAndStartBridgeTokensViaGenericCrossChain'
             : 'startBridgeTokensViaGenericCrossChain';
@@ -200,7 +204,10 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
         this.to = crossChainTrade.to;
         this.gasData = crossChainTrade.gasData;
         this.slippage = crossChainTrade.slippage;
-        this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
+        this.toTokenAmountMin = Web3Pure.fromWei(
+            crossChainTrade.toTokenAmountMin,
+            crossChainTrade.to.decimals
+        );
         this.feeInfo = crossChainTrade.feeInfo;
         this.priceImpact = crossChainTrade.priceImpact;
         this.routerAddress = crossChainTrade.routerAddress;
