@@ -66,7 +66,7 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
 
     public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.RANGO;
 
-    public readonly _toTokenAmountMin: PriceTokenAmount;
+    private readonly _toTokenAmountMin: PriceTokenAmount;
 
     public get toTokenAmountMin(): PriceTokenAmount {
         return this._toTokenAmountMin;

@@ -19,6 +19,7 @@ import {
 } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { changenowApiKey } from 'src/features/common/providers/changenow/constants/changenow-api-key';
+import { RANGO_SWAP_STATUS } from 'src/features/common/providers/rango/models/rango-api-status-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { XY_API_ENDPOINT } from 'src/features/common/providers/xy/constants/xy-api-params';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
@@ -67,7 +68,6 @@ import {
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
-import { RangoUtils } from '../../common/providers/rango/utils/rango-utils';
 import { RangoCrossChainApiService } from '../calculation-manager/providers/rango-provider/services/rango-cross-chain-api-service';
 import { TAIKO_API_STATUS, TaikoApiResponse } from './models/taiko-api-response';
 
@@ -689,7 +689,16 @@ export class CrossChainStatusManager {
             params
         );
 
-        const status = RangoUtils.convertStatusForRubic(txStatus!);
+        let status: TxStatus;
+
+        if (txStatus === RANGO_SWAP_STATUS.SUCCESS) {
+            status = TX_STATUS.SUCCESS;
+        } else if (txStatus === RANGO_SWAP_STATUS.RUNNING) {
+            status = TX_STATUS.PENDING;
+        } else {
+            status = TX_STATUS.FAIL;
+        }
+
         const hash = bridgeData!.destTxHash;
 
         return { hash, status };

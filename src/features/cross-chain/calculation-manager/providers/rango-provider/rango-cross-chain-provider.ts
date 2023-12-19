@@ -133,53 +133,41 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             return [{ type: 'cross-chain', provider: this.type, path: [fromToken, toToken] }];
         }
 
-        const routePath: RubicStep[] = [];
-
-        await this.pushStep(0, path, routePath);
-
-        return routePath;
+        return Promise.all(path.map(path => this.getStep(path)));
     }
 
-    private async pushStep(
-        stepCount: number,
-        rangoPath: RangoQuotePath[],
-        rubicPath: RubicStep[]
-    ): Promise<void> {
-        const step = rangoPath[stepCount];
-
-        if (!step || !!!rangoPath.find(st => st === step)) return;
-
-        stepCount++;
-
-        const type = step.swapperType === 'DEX' ? 'on-chain' : 'cross-chain';
+    private async getStep(rangoPath: RangoQuotePath): Promise<RubicStep> {
+        const type = rangoPath.swapperType === 'DEX' ? 'on-chain' : 'cross-chain';
 
         const provider = RangoUtils.getTradeTypeForRubic(
             type,
-            step.swapper.swapperGroup as RangoTradeType
+            rangoPath.swapper.swapperGroup as RangoTradeType
         );
 
-        const fromBlockchain = RangoUtils.getRubicBlockchainByRangoBlockchain(step.from.blockchain);
-        const toBlockchain = RangoUtils.getRubicBlockchainByRangoBlockchain(step.to.blockchain);
+        const fromBlockchain = RangoUtils.getRubicBlockchainByRangoBlockchain(
+            rangoPath.from.blockchain
+        );
+        const toBlockchain = RangoUtils.getRubicBlockchainByRangoBlockchain(
+            rangoPath.to.blockchain
+        );
 
         const fromTokenAmount = await TokenAmount.createToken({
-            address: step.from.address || nativeTokensList[fromBlockchain].address,
+            address: rangoPath.from.address || nativeTokensList[fromBlockchain].address,
             blockchain: fromBlockchain,
-            weiAmount: new BigNumber(step.inputAmount)
+            weiAmount: new BigNumber(rangoPath.inputAmount)
         });
 
         const toTokenAmount = await TokenAmount.createToken({
-            address: step.to.address || nativeTokensList[toBlockchain].address,
+            address: rangoPath.to.address || nativeTokensList[toBlockchain].address,
             blockchain: toBlockchain,
-            weiAmount: new BigNumber(step.expectedOutput)
+            weiAmount: new BigNumber(rangoPath.expectedOutput)
         });
 
-        rubicPath.push({
+        return {
             provider: provider as Any,
             type: type,
             path: [fromTokenAmount, toTokenAmount]
-        });
-
-        await this.pushStep(stepCount, rangoPath, rubicPath);
+        };
     }
 
     protected async getFeeInfo(
