@@ -37,6 +37,8 @@ import { LifiProvider } from 'src/features/on-chain/calculation-manager/provider
 import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
 import { OpenOceanProvider } from 'src/features/on-chain/calculation-manager/providers/open-ocean/open-ocean-provider';
 
+import { OdosOnChainProvider } from './providers/odos/odos-on-chain-provider';
+
 /**
  * Contains methods to calculate on-chain trades.
  */
@@ -51,6 +53,8 @@ export class OnChainManager {
     public readonly lifiProvider = new LifiProvider();
 
     public readonly openOceanProvider = new OpenOceanProvider();
+
+    public readonly odosProvider = new OdosOnChainProvider();
 
     public readonly deflationTokenManager = new DeflationTokenManager();
 
@@ -97,7 +101,18 @@ export class OnChainManager {
                     ? []
                     : [this.getOpenOceanCalculationPromise(from, to, fullOptions)];
 
-                const totalTrades = [...nativeProviders, ...lifiTrades, ...openOceanTrades].length;
+                const odosTrades = fullOptions.disabledProviders
+                    .map(provider => provider.toUpperCase())
+                    .includes(ON_CHAIN_TRADE_TYPE.ODOS)
+                    ? []
+                    : [this.getOdosCalculationPromise(from, to, fullOptions)];
+
+                const totalTrades = [
+                    ...nativeProviders,
+                    ...lifiTrades,
+                    ...openOceanTrades,
+                    ...odosTrades
+                ].length;
 
                 return merge(
                     ...nativeProviders.map(([_, provider]) =>
@@ -106,7 +121,8 @@ export class OnChainManager {
                         )
                     ),
                     ...lifiTrades,
-                    ...openOceanTrades
+                    ...openOceanTrades,
+                    ...odosTrades
                 ).pipe(
                     map((wrappedTrade, index) => ({
                         total: totalTrades,
@@ -440,6 +456,45 @@ export class OnChainManager {
             return {
                 trade: null,
                 tradeType: ON_CHAIN_TRADE_TYPE.OPEN_OCEAN,
+                error: CrossChainProvider.parseError(err)
+            };
+        }
+    }
+
+    private async getOdosCalculationPromise(
+        from: PriceTokenAmount,
+        to: PriceToken,
+        options: RequiredOnChainManagerCalculationOptions
+    ): Promise<WrappedOnChainTradeOrNull> {
+        try {
+            const wrappedTrade = await pTimeout(
+                this.odosProvider.calculate(
+                    from as PriceTokenAmount<EvmBlockchainName>,
+                    to as PriceTokenAmount<EvmBlockchainName>,
+                    options as RequiredOnChainCalculationOptions
+                ),
+                options.timeout
+            );
+            if ('error' in wrappedTrade) {
+                throw wrappedTrade.error;
+            }
+
+            if (!wrappedTrade) {
+                return null;
+            }
+
+            return {
+                trade: wrappedTrade,
+                tradeType: ON_CHAIN_TRADE_TYPE.ODOS
+            };
+        } catch (err) {
+            console.debug(
+                `[RUBIC_SDK] Trade calculation error occurred for ${ON_CHAIN_TRADE_TYPE.ODOS} trade provider.`,
+                err
+            );
+            return {
+                trade: null,
+                tradeType: ON_CHAIN_TRADE_TYPE.ODOS,
                 error: CrossChainProvider.parseError(err)
             };
         }
