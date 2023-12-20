@@ -23,7 +23,7 @@ export class OdosOnChainParser {
             Injector.web3PrivateService.getWeb3PrivateByBlockchain(from.blockchain).address;
 
         const inputTokens = [
-            { tokenAddress: from.address, amount: Web3Pure.toWei(from.address, from.decimals) }
+            { tokenAddress: from.address, amount: Web3Pure.toWei(from.tokenAmount, from.decimals) }
         ] as OdosInputTokenRequest[];
         const outputTokens = [
             { proportion: 1, tokenAddress: toToken.address }

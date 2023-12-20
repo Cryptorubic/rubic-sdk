@@ -93,7 +93,7 @@ export class PriceTokenAmount<T extends BlockchainName = BlockchainName> extends
      * @param slippage Slippage in range from 0 to 1.
      */
     public weiAmountMinusSlippage(slippage: number): BigNumber {
-        return new BigNumber(this._weiAmount).multipliedBy(new BigNumber(1).minus(slippage));
+        return this._weiAmount.multipliedBy(new BigNumber(1).minus(slippage));
     }
 
     /**
@@ -101,7 +101,7 @@ export class PriceTokenAmount<T extends BlockchainName = BlockchainName> extends
      * @param slippage Slippage in range from 0 to 1.
      */
     public weiAmountPlusSlippage(slippage: number): BigNumber {
-        return new BigNumber(this._weiAmount).multipliedBy(new BigNumber(1).plus(slippage));
+        return this._weiAmount.multipliedBy(new BigNumber(1).plus(slippage));
     }
 
     public async cloneAndCreate(

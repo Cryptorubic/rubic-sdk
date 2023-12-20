@@ -4,7 +4,6 @@ import {
     RubicSdkError,
     SwapRequestError
 } from 'src/common/errors';
-import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -63,16 +62,10 @@ export class OdosOnChainTrade extends EvmOnChainTrade {
 
     public readonly providerGateway: string;
 
-    private readonly _toTokenAmountMin: PriceTokenAmount;
-
     private bestRouteRequestBody: OdosBestRouteRequestBody;
 
     public get dexContractAddress(): string {
         throw new RubicSdkError('Dex address is unknown before swap is started');
-    }
-
-    public get toTokenAmountMin(): PriceTokenAmount {
-        return this._toTokenAmountMin;
     }
 
     protected get spenderAddress(): string {
@@ -89,7 +82,6 @@ export class OdosOnChainTrade extends EvmOnChainTrade {
         providerGateway: string
     ) {
         super(tradeStruct, providerAddress);
-        this._toTokenAmountMin = tradeStruct.to;
         this.bestRouteRequestBody = tradeStruct.bestRouteRequestBody;
         this.providerGateway = providerGateway;
     }

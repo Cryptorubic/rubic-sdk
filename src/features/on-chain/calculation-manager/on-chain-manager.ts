@@ -38,7 +38,6 @@ import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manage
 import { OpenOceanProvider } from 'src/features/on-chain/calculation-manager/providers/open-ocean/open-ocean-provider';
 
 import { OdosOnChainProvider } from './providers/odos/odos-on-chain-provider';
-
 import { RangoOnChainProvider } from './providers/rango/rango-on-chain-provider';
 
 /**
