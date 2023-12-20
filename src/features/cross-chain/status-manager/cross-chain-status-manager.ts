@@ -19,6 +19,8 @@ import {
 } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { changenowApiKey } from 'src/features/common/providers/changenow/constants/changenow-api-key';
+import { RANGO_SWAP_STATUS } from 'src/features/common/providers/rango/models/rango-api-status-types';
+import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { XY_API_ENDPOINT } from 'src/features/common/providers/xy/constants/xy-api-params';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 import { getBridgersTradeStatus } from 'src/features/common/status-manager/utils/get-bridgers-trade-status';
@@ -66,6 +68,7 @@ import {
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
+import { RangoCrossChainApiService } from '../calculation-manager/providers/rango-provider/services/rango-cross-chain-api-service';
 import { TAIKO_API_STATUS, TaikoApiResponse } from './models/taiko-api-response';
 
 /**
@@ -87,7 +90,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER]: this.getSquidrouterDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SCROLL_BRIDGE]: this.getScrollBridgeDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.TAIKO_BRIDGE]: this.getTaikoBridgeDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.TAIKO_BRIDGE]: this.getTaikoBridgeDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus
     };
 
     /**
@@ -672,5 +676,31 @@ export class CrossChainStatusManager {
         }
 
         return { status: TX_STATUS.PENDING, hash: null };
+    }
+
+    private async getRangoDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        if (!data.rangoRequestId) {
+            throw new RubicSdkError('Must provide rangoRequestId');
+        }
+        const { srcTxHash, rangoRequestId } = data;
+        const params = RangoCommonParser.getTxStatusQueryParams(srcTxHash, rangoRequestId!);
+
+        const { bridgeData, status: txStatus } = await RangoCrossChainApiService.getTxStatus(
+            params
+        );
+
+        let status: TxStatus;
+
+        if (txStatus === RANGO_SWAP_STATUS.SUCCESS) {
+            status = TX_STATUS.SUCCESS;
+        } else if (txStatus === RANGO_SWAP_STATUS.RUNNING) {
+            status = TX_STATUS.PENDING;
+        } else {
+            status = TX_STATUS.FAIL;
+        }
+
+        const hash = bridgeData!.destTxHash;
+
+        return { hash, status };
     }
 }
