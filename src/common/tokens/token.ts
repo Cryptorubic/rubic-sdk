@@ -122,9 +122,7 @@ export class Token<T extends BlockchainName = BlockchainName> {
         const chainType: ChainType = BlockchainsInfo.getChainType(this.blockchain);
 
         if (chainType && Web3Pure[chainType].isNativeAddress(this.address)) {
-            return Web3Pure[BlockchainsInfo.getChainType(this.blockchain)].isNativeAddress(
-                this.address
-            );
+            return Web3Pure[chainType].isNativeAddress(this.address);
         }
 
         return this.address === Web3Pure[chainType].nativeTokenAddress;

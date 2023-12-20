@@ -11,7 +11,8 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     ARBITRUM: 'arbitrum',
     SQUIDROUTER: 'squidrouter',
     SCROLL_BRIDGE: 'scroll_bridge',
-    TAIKO_BRIDGE: 'taiko_bridge'
+    TAIKO_BRIDGE: 'taiko_bridge',
+    RANGO: 'rango'
 } as const;
 
 export type CrossChainTradeType =
