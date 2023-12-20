@@ -1060,14 +1060,23 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
             },
             {
                 components: [
-                    { internalType: 'address payable', name: 'destination', type: 'address' }
+                    {
+                        internalType: 'address',
+                        name: 'receiver',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'data',
+                        type: 'bytes'
+                    }
                 ],
-                internalType: 'struct TransferFacet.TransferData',
-                name: '_transferData',
+                internalType: 'struct TransferFacet.TransferAndCallData',
+                name: '_transferAndCallData',
                 type: 'tuple'
             }
         ],
-        name: 'startBridgeTokensViaTransfer',
+        name: 'startBridgeViaTransferAndCall',
         outputs: [],
         stateMutability: 'payable',
         type: 'function'
@@ -1109,14 +1118,23 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
             },
             {
                 components: [
-                    { internalType: 'address payable', name: 'destination', type: 'address' }
+                    {
+                        internalType: 'address',
+                        name: 'receiver',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'data',
+                        type: 'bytes'
+                    }
                 ],
-                internalType: 'struct TransferFacet.TransferData',
-                name: '_transferData',
+                internalType: 'struct TransferFacet.TransferAndCallData',
+                name: '_transferAndCallData',
                 type: 'tuple'
             }
         ],
-        name: 'swapAndStartBridgeTokensViaTransfer',
+        name: 'swapAndStartBridgeViaTransferAndCall',
         outputs: [],
         stateMutability: 'payable',
         type: 'function'

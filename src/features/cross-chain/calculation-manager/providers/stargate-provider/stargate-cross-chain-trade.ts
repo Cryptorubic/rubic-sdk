@@ -477,7 +477,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
         return undefined;
     }
 
-    protected getProviderData(
+    private getProviderData(
         _sourceData: BytesLike,
         dstSwapData?: string,
         receiverAddress?: string

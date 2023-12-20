@@ -170,7 +170,7 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
     public readonly onChainTrade: EvmOnChainTrade | null;
 
     protected get methodName(): string {
-        if (this.isTokenRegistered) {
+        if (!this.isTokenRegistered && this.from.blockchain === BLOCKCHAIN_NAME.ETHEREUM) {
             return this.onChainTrade
                 ? 'swapAndStartBridgeViaTransferAndCall'
                 : 'startBridgeViaTransferAndCall';
@@ -218,10 +218,25 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
         this.isTokenRegistered = crossChainTrade.tokenRegistered;
     }
 
+    public async needApprove(): Promise<boolean> {
+        this.checkWalletConnected();
+
+        if (this.from.isNative || (!this.isTokenRegistered && !this.isProxyTrade)) {
+            return false;
+        }
+
+        const allowance = await this.fromWeb3Public.getAllowance(
+            this.from.address,
+            this.walletAddress,
+            this.fromContractAddress
+        );
+        return this.from.weiAmount.gt(allowance);
+    }
+
     protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkTradeErrors();
 
-        if (this.isProxyTrade || !this.isTokenRegistered) {
+        if (!this.isProxyTrade || this.isTokenRegistered) {
             await this.checkAllowanceAndApprove(options);
         }
 
@@ -288,23 +303,21 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
                 onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
             }));
 
-        const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
-            to,
-            data!,
-            this.fromBlockchain,
-            to,
-            '0'
-        );
+        const providerData = !this.isTokenRegistered
+            ? this.getProviderDataForErc677(receiverAddress, data)
+            : await ProxyCrossChainEvmTrade.getGenericProviderData(
+                  to,
+                  data!,
+                  this.fromBlockchain,
+                  to,
+                  '0'
+              );
 
         const methodArguments = swapData
             ? [bridgeData, swapData, providerData]
             : [bridgeData, providerData];
 
-        const value = this.getSwapValue(
-            new BigNumber(this.from.isNative ? this.from.stringWeiAmount : 0).plus(
-                providerValue?.toString()
-            )
-        );
+        const value = this.getSwapValue(providerValue);
 
         const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,
@@ -370,5 +383,9 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
             return token.isNative ? '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' : token.address;
         }
         return token.isNative ? '0xA1077a294dDE1B09bB078844df40758a5D0f9a27' : token.address;
+    }
+
+    private getProviderDataForErc677(receiverAddress: string, transferData: string): unknown[] {
+        return [receiverAddress, transferData];
     }
 }
