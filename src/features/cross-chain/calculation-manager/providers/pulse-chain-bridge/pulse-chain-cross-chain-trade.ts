@@ -23,6 +23,7 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { PulseChainCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/constants/pulse-chain-supported-blockchains';
 import { BridgeManager } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/omni-bridge-entities/bridge-manager';
+import { OmniBridge } from 'src/features/cross-chain/calculation-manager/providers/pulse-chain-bridge/omni-bridge-entities/omni-bridge';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
@@ -170,7 +171,7 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
     public readonly onChainTrade: EvmOnChainTrade | null;
 
     protected get methodName(): string {
-        if (!this.isTokenRegistered && this.from.blockchain === BLOCKCHAIN_NAME.ETHEREUM) {
+        if (this.isErc677 && this.from.blockchain === BLOCKCHAIN_NAME.ETHEREUM) {
             return this.onChainTrade
                 ? 'swapAndStartBridgeViaTransferAndCall'
                 : 'startBridgeViaTransferAndCall';
@@ -181,6 +182,10 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
     }
 
     private readonly isTokenRegistered: boolean;
+
+    private get isErc677(): boolean {
+        return !this.isTokenRegistered || OmniBridge.isCustomWrap(this.from);
+    }
 
     constructor(
         crossChainTrade: {
@@ -221,7 +226,7 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
     public async needApprove(): Promise<boolean> {
         this.checkWalletConnected();
 
-        if (this.from.isNative || (!this.isTokenRegistered && !this.isProxyTrade)) {
+        if (this.from.isNative || (this.isErc677 && !this.isProxyTrade)) {
             return false;
         }
 
@@ -303,7 +308,7 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
                 onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
             }));
 
-        const providerData = !this.isTokenRegistered
+        const providerData = this.isErc677
             ? this.getProviderDataForErc677(receiverAddress, data)
             : await ProxyCrossChainEvmTrade.getGenericProviderData(
                   to,
@@ -373,7 +378,7 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
         return sourceBridgeManager.getDataForTokenSwap(
             receiverAddress,
             fromToken.stringWeiAmount,
-            !this.isTokenRegistered,
+            this.isErc677,
             tokenAddress
         );
     }

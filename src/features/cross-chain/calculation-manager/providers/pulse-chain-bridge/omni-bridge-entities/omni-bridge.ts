@@ -45,11 +45,11 @@ export abstract class OmniBridge {
         this.sourceBlockchain = fromToken.blockchain;
         this.targetBlockchain = toToken.blockchain;
 
-        this.sourceBridgeAddress = this.isCustomWrap(fromToken)
+        this.sourceBridgeAddress = OmniBridge.isCustomWrap(fromToken)
             ? pulseChainContractAddress[this.sourceBlockchain].omniBridgeWrapped
             : pulseChainContractAddress[this.sourceBlockchain].omniBridge;
 
-        this.targetBridgeAddress = this.isCustomWrap(toToken)
+        this.targetBridgeAddress = OmniBridge.isCustomWrap(toToken)
             ? pulseChainContractAddress[this.targetBlockchain].omniBridgeWrapped
             : pulseChainContractAddress[this.targetBlockchain].omniBridge;
 
@@ -197,7 +197,7 @@ export abstract class OmniBridge {
         return this.getOutputAmount(toAddress, feeManagerAddress, feeType, fromAmount);
     }
 
-    private isCustomWrap(token: Token): boolean {
+    public static isCustomWrap(token: Token): boolean {
         return (
             token.blockchain === BLOCKCHAIN_NAME.ETHEREUM &&
             compareAddresses(token.address, '0xA882606494D86804B5514E07e6Bd2D6a6eE6d68A')

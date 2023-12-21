@@ -1071,7 +1071,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                         type: 'bytes'
                     }
                 ],
-                internalType: 'struct TransferFacet.TransferAndCallData',
+                internalType: 'struct TransferAndCallData',
                 name: '_transferAndCallData',
                 type: 'tuple'
             }
@@ -1129,7 +1129,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                         type: 'bytes'
                     }
                 ],
-                internalType: 'struct TransferFacet.TransferAndCallData',
+                internalType: 'struct TransferAndCallData',
                 name: '_transferAndCallData',
                 type: 'tuple'
             }
