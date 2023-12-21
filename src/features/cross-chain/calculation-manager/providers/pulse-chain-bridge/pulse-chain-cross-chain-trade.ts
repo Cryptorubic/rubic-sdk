@@ -173,8 +173,8 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
     protected get methodName(): string {
         if (this.isErc677 && this.from.blockchain === BLOCKCHAIN_NAME.ETHEREUM) {
             return this.onChainTrade
-                ? 'swapAndStartBridgeViaTransferAndCall'
-                : 'startBridgeViaTransferAndCall';
+                ? 'swapAndStartBridgeTokensViaTransferAndCall'
+                : 'startBridgeTokensViaTransferAndCall';
         }
         return this.onChainTrade
             ? 'swapAndStartBridgeTokensViaGenericCrossChain'
@@ -309,7 +309,7 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
             }));
 
         const providerData = this.isErc677
-            ? this.getProviderDataForErc677(receiverAddress, data)
+            ? this.getProviderDataForErc677(this.from, this.to, receiverAddress)
             : await ProxyCrossChainEvmTrade.getGenericProviderData(
                   to,
                   data!,
@@ -390,7 +390,16 @@ export class PulseChainCrossChainTrade extends EvmCrossChainTrade {
         return token.isNative ? '0xA1077a294dDE1B09bB078844df40758a5D0f9a27' : token.address;
     }
 
-    private getProviderDataForErc677(receiverAddress: string, transferData: string): unknown[] {
-        return [receiverAddress, transferData];
+    private getProviderDataForErc677(
+        fromToken: Token,
+        toToken: Token,
+        receiverAddress: string
+    ): unknown[] {
+        const sourceBridgeManager = BridgeManager.createBridge(
+            fromToken as Token<PulseChainCrossChainSupportedBlockchain>,
+            toToken as Token<PulseChainCrossChainSupportedBlockchain>
+        );
+
+        return [sourceBridgeManager.sourceBridgeAddress, receiverAddress];
     }
 }

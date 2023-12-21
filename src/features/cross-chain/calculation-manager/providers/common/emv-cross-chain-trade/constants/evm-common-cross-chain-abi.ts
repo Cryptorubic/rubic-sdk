@@ -1076,7 +1076,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                 type: 'tuple'
             }
         ],
-        name: 'startBridgeViaTransferAndCall',
+        name: 'startBridgeTokensViaTransferAndCall',
         outputs: [],
         stateMutability: 'payable',
         type: 'function'
@@ -1134,7 +1134,7 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
                 type: 'tuple'
             }
         ],
-        name: 'swapAndStartBridgeViaTransferAndCall',
+        name: 'swapAndStartBridgeTokensViaTransferAndCall',
         outputs: [],
         stateMutability: 'payable',
         type: 'function'
