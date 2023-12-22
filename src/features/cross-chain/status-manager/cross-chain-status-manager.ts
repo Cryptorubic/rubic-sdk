@@ -685,7 +685,7 @@ export class CrossChainStatusManager {
             const network =
                 data.fromBlockchain === BLOCKCHAIN_NAME.ETHEREUM ? 'ethereum' : 'ethereum';
             const result = await Injector.httpClient.get<RubicBackendPsStatus>(
-                `https://dev-api.rubic.exchange/api/v2/trades/crosschain/pulsechain_bridge_status?tx_hash=${data.srcTxHash}&network=${network}`
+                `https://prod-api.rubic.exchange/api/v2/trades/crosschain/pulsechain_bridge_status?tx_hash=${data.srcTxHash}&network=${network}`
             );
 
             if (result.status === 'SUCCESS') {
