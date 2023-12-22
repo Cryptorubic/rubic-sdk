@@ -24,7 +24,7 @@ export class SolanaWeb3Pure {
         return isChangenowReceiverAddressCorrect(
             address,
             changenowApiBlockchain.SOLANA,
-            /^[1-9A-HJ-NP-Za-km-z]{32,44}$/
+            /^(So[1-9A-HJ-NP-Za-km-z]{50}|[1-9A-HJ-NP-Za-km-z]{32,44}|[1-9A-HJ-NP-Za-km-z]{64})$/
         );
     }
 }
