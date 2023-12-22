@@ -171,13 +171,13 @@ export class LifiTrade extends EvmOnChainTrade {
             transactionRequest.gasPrice && parseInt(transactionRequest.gasPrice, 16).toString();
         const value = transactionRequest.value && parseInt(transactionRequest.value, 16).toString();
 
-        await EvmOnChainTrade.checkAmountChange(
+        EvmOnChainTrade.checkAmountChange(
             {
                 data: transactionRequest.data,
                 value: value,
                 to: transactionRequest.to
             },
-            estimate.toAmount,
+            estimate.toAmountMin,
             this.to.stringWeiAmount
         );
 
