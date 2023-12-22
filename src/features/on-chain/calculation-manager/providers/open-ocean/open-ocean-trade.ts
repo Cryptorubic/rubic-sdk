@@ -221,7 +221,7 @@ export class OpenOceanTrade extends EvmOnChainTrade {
             [
                 routerAddress,
                 routerAddress,
-                this.from.isNative
+                this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS
                     ? '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
                     : this.from.address,
                 this.to.address,

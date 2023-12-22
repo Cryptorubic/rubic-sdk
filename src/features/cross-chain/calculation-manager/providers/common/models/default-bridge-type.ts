@@ -14,16 +14,21 @@ export const DEFAULT_BRIDGE_TYPE = {
 
     HOP: 'hop',
     HYPHEN: 'hyphen',
-    OPEN_OCEAN: 'openocean',
+
+    IBC: 'ibc',
 
     MAKERS_WORMHOLE: 'maker',
+    MAYA_PROTOCOL: 'mayaprotocol',
     MULTICHAIN: 'multichain',
 
+    OPEN_OCEAN: 'openocean',
     OPTIMISM_GATEWAY: 'optimism',
+    ORBITER_BRIDGE: 'orbiter',
     OSMOSIS_BRIDGE: 'osmosis',
 
     POLYGON: 'polygon',
 
+    RAINBOW: 'rainbow',
     REFUEL: 'refuel',
 
     SATELLITE: 'satellite',
@@ -32,6 +37,8 @@ export const DEFAULT_BRIDGE_TYPE = {
     SYNAPSE: 'synapse',
 
     THORCHAIN: 'thorchain',
+
+    VOYAGER: 'voyager',
 
     WORMHOLE: 'wormhole',
 

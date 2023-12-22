@@ -10,6 +10,7 @@ import { SquidrouterCrossChainProvider } from 'src/features/cross-chain/calculat
 import { SymbiosisCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-provider';
 import { XyCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/xy-cross-chain-provider';
 
+import { RangoCrossChainProvider } from '../providers/rango-provider/rango-cross-chain-provider';
 import { StargateCrossChainProvider } from '../providers/stargate-provider/stargate-cross-chain-provider';
 import { TaikoBridgeProvider } from '../providers/taiko-bridge/taiko-bridge-provider';
 
@@ -20,6 +21,7 @@ const proxyProviders = [
     CbridgeCrossChainProvider,
     LifiCrossChainProvider,
     SquidrouterCrossChainProvider,
+    RangoCrossChainProvider,
     PulseChainCrossChainProvider
 ] as const;
 

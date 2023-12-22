@@ -83,8 +83,13 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
                 ? this.from.weiAmount
                 : amount;
 
+        const fromTokenAddress =
+            this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS
+                ? '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
+                : this.from.address;
+
         return this.web3Private.approveTokens(
-            this.from.address,
+            fromTokenAddress,
             this.fromContractAddress,
             approveAmount,
             options
@@ -111,6 +116,10 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
 
     protected abstract swapDirect(options?: SwapTransactionOptions): Promise<string | never>;
 
+    /**
+     *
+     * @returns txHash(srcTxHash) | never
+     */
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         if (!this.isProxyTrade) {
             return this.swapDirect(options);

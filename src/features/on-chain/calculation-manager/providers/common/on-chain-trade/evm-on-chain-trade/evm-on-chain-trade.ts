@@ -35,6 +35,7 @@ import {
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
+import { utf8ToHex } from 'web3-utils';
 
 export abstract class EvmOnChainTrade extends OnChainTrade {
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
@@ -143,8 +144,13 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 ? this.from.weiAmount
                 : amount;
 
+        const fromTokenAddress =
+            this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS
+                ? '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
+                : this.from.address;
+
         return this.web3Private.approveTokens(
-            this.from.address,
+            fromTokenAddress,
             this.spenderAddress,
             approveAmount,
             options
@@ -198,7 +204,8 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             const transactionConfig = await this.encode({
                 fromAddress,
                 receiverAddress,
-                ...(directTransaction && { directTransaction })
+                ...(directTransaction && { directTransaction }),
+                ...(options?.referrer && { referrer: options?.referrer })
             });
 
             let method: 'trySendTransaction' | 'sendTransaction' = 'trySendTransaction';
@@ -262,7 +269,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         const methodArguments = [
             EvmWeb3Pure.randomHex(32),
             this.providerAddress,
-            EvmWeb3Pure.randomHex(20),
+            EvmOnChainTrade.getReferrerAddress(options.referrer),
             receiverAddress,
             this.toTokenAmountMin.stringWeiAmount,
             swapData
@@ -293,6 +300,14 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             methodArguments: [sendingToken, sendingAmount, txConfig.data],
             value
         };
+    }
+
+    private static getReferrerAddress(referrer: string | undefined): string {
+        if (referrer) {
+            return '0x' + utf8ToHex(referrer).slice(2, 42).padStart(40, '0');
+        }
+
+        return '0x0000000000000000000000000000000000000000';
     }
 
     /**

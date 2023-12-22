@@ -12,6 +12,7 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     SQUIDROUTER: 'squidrouter',
     SCROLL_BRIDGE: 'scroll_bridge',
     TAIKO_BRIDGE: 'taiko_bridge',
+    RANGO: 'rango',
     PULSE_CHAIN_BRIDGE: 'pulse_chain_bridge'
 } as const;
 

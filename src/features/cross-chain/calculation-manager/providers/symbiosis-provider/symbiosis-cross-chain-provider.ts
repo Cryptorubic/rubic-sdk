@@ -102,9 +102,19 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
+            let tokenInAddress;
+
+            if (from.isNative && from.blockchain === BLOCKCHAIN_NAME.METIS) {
+                tokenInAddress = '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
+            } else if (from.isNative) {
+                tokenInAddress = '';
+            } else {
+                tokenInAddress = from.address;
+            }
+
             const tokenIn: SymbiosisToken = {
                 chainId: blockchainId[fromBlockchain],
-                address: from.isNative ? '' : from.address,
+                address: tokenInAddress,
                 decimals: from.decimals,
                 isNative: from.isNative,
                 symbol: from.symbol
@@ -147,9 +157,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
-                tokenAmount: new BigNumber(
-                    Web3Pure.fromWei(tokenAmountOut.amount, tokenAmountOut.decimals)
-                )
+                tokenAmount: Web3Pure.fromWei(tokenAmountOut.amount, tokenAmountOut.decimals)
             });
 
             const gasData =
