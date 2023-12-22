@@ -54,6 +54,7 @@ import {
 import { CrossChainStatus } from 'src/features/cross-chain/status-manager/models/cross-chain-status';
 import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
+import { RubicBackendPsStatus } from 'src/features/cross-chain/status-manager/models/rubic-backend-ps-status';
 import { ScrollApiResponse } from 'src/features/cross-chain/status-manager/models/scroll-api-response';
 import { SquidrouterApiResponse } from 'src/features/cross-chain/status-manager/models/squidrouter-api-response';
 import { SQUIDROUTER_TRANSFER_STATUS } from 'src/features/cross-chain/status-manager/models/squidrouter-transfer-status.enum';
@@ -91,7 +92,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER]: this.getSquidrouterDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SCROLL_BRIDGE]: this.getScrollBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.TAIKO_BRIDGE]: this.getTaikoBridgeDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.PULSE_CHAIN_BRIDGE]: this.getPulseChainDstSwapStatus
     };
 
     /**
@@ -676,6 +678,23 @@ export class CrossChainStatusManager {
         }
 
         return { status: TX_STATUS.PENDING, hash: null };
+    }
+
+    public async getPulseChainDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        try {
+            const network =
+                data.fromBlockchain === BLOCKCHAIN_NAME.ETHEREUM ? 'ethereum' : 'ethereum';
+            const result = await Injector.httpClient.get<RubicBackendPsStatus>(
+                `https://dev-api.rubic.exchange/api/v2/trades/crosschain/pulsechain_bridge_status?tx_hash=${data.srcTxHash}&network=${network}`
+            );
+
+            if (result.status === 'SUCCESS') {
+                return { status: TX_STATUS.SUCCESS, hash: result.dest_transaction };
+            }
+            return { status: TX_STATUS.PENDING, hash: null };
+        } catch {
+            return { status: TX_STATUS.PENDING, hash: null };
+        }
     }
 
     private async getRangoDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
