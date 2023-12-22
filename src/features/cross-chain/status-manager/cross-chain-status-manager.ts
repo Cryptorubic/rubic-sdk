@@ -279,16 +279,9 @@ export class CrossChainStatusManager {
      * @returns Cross-chain transaction status and hash.
      */
     private async getLifiDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        if (!data.lifiBridgeType) {
-            return {
-                status: TX_STATUS.PENDING,
-                hash: null
-            };
-        }
-
         try {
             const params = {
-                bridge: data.lifiBridgeType,
+                ...(data.lifiBridgeType && { bridge: data.lifiBridgeType }),
                 fromChain: blockchainId[data.fromBlockchain],
                 toChain: blockchainId[data.toBlockchain],
                 txHash: data.srcTxHash
