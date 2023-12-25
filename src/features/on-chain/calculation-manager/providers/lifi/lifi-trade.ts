@@ -178,7 +178,7 @@ export class LifiTrade extends EvmOnChainTrade {
                 to: transactionRequest.to
             },
             estimate.toAmountMin,
-            this.to.stringWeiAmount
+            this.toTokenAmountMin.stringWeiAmount
         );
 
         return {
