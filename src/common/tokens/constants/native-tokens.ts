@@ -366,7 +366,7 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         blockchain: BLOCKCHAIN_NAME.MANTA_PACIFIC,
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'ETH',
-        symbol: 'MNT',
+        symbol: 'ETH',
         decimals: 18
     }),
     [BLOCKCHAIN_NAME.SCROLL]: new Token({
