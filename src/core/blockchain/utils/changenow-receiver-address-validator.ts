@@ -11,7 +11,7 @@ export const isChangenowReceiverAddressCorrect = async (
             `https://api.changenow.io/v2/validate/address?currency=${chain}&address=${address}`
         );
 
-        return response.result || regEx.test(address);
+        return response.result;
     } catch (error) {
         return regEx.test(address);
     }
