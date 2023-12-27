@@ -279,16 +279,9 @@ export class CrossChainStatusManager {
      * @returns Cross-chain transaction status and hash.
      */
     private async getLifiDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        if (!data.lifiBridgeType) {
-            return {
-                status: TX_STATUS.PENDING,
-                hash: null
-            };
-        }
-
         try {
             const params = {
-                bridge: data.lifiBridgeType,
+                ...(data.lifiBridgeType && { bridge: data.lifiBridgeType }),
                 fromChain: blockchainId[data.fromBlockchain],
                 toChain: blockchainId[data.toBlockchain],
                 txHash: data.srcTxHash
@@ -685,7 +678,7 @@ export class CrossChainStatusManager {
             const network =
                 data.fromBlockchain === BLOCKCHAIN_NAME.ETHEREUM ? 'ethereum' : 'ethereum';
             const result = await Injector.httpClient.get<RubicBackendPsStatus>(
-                `https://dev-api.rubic.exchange/api/v2/trades/crosschain/pulsechain_bridge_status?tx_hash=${data.srcTxHash}&network=${network}`
+                `https://api.rubic.exchange/api/v2/trades/crosschain/pulsechain_bridge_status?tx_hash=${data.srcTxHash}&network=${network}`
             );
 
             if (result.status === 'SUCCESS') {
