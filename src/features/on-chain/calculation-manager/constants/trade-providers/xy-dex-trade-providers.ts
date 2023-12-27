@@ -5,6 +5,7 @@ import { XyDexBscProvider } from 'src/features/on-chain/calculation-manager/prov
 import { XyDexEthereumProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/ethereum/xy-dex-ethereum/xy-dex-ethereum-provider';
 import { XyDexFantomProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/fantom/xy-dex-fantom/xy-dex-fantom-provider';
 import { XyDexLineaProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/xy-dex-linea/xy-dex-linea-provider';
+import { XyDexMantleProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/mantle/xy-dex-mantle/xy-dex-mantle-provider';
 import { XyDexMoonriverProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonriver/xy-dex-moonriver/xy-dex-moonriver-provider';
 import { XyDexOptimismProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/optimism/xy-dex-optimism/xy-dex-optimism-provider';
 import { XyDexPolygonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/xy-dex-polygon/xy-dex-polygon-provider';
@@ -25,5 +26,6 @@ export const xyDexTradeProviders = [
     XyDexZkevmProvider,
     XyDexLineaProvider,
     XyDexBaseProvider,
-    XyDexScrollProvider
+    XyDexScrollProvider,
+    XyDexMantleProvider
 ];
