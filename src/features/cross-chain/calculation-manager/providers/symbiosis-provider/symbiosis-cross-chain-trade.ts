@@ -428,7 +428,9 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             revertableAddress: receiverAddress || walletAddress
         };
 
-        const tradeData = await this.getResponseFromApiToTransactionRequest(params);
+        const tradeData = await SymbiosisCrossChainTrade.getResponseFromApiToTransactionRequest(
+            params
+        );
 
         const config = {
             data: tradeData.tx.data!.toString(),
@@ -448,7 +450,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
     @Cache({
         maxAge: 15_000
     })
-    private async getResponseFromApiToTransactionRequest(
+    public static async getResponseFromApiToTransactionRequest(
         params: SymbiosisSwappingParams
     ): Promise<SymbiosisTradeData> {
         return Injector.httpClient.post<SymbiosisTradeData>(
