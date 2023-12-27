@@ -1,6 +1,6 @@
 export interface XyApiResponse {
-    isSuccess: boolean;
+    success: boolean;
     msg: string;
     status: 'Done' | 'Processing' | string;
-    txHash: string | null;
+    tx: string | null;
 }
