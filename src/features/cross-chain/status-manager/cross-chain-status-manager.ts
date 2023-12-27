@@ -452,7 +452,7 @@ export class CrossChainStatusManager {
             const { isSuccess, status, txHash } = await this.httpClient.get<XyApiResponse>(
                 `${XY_API_ENDPOINT}/crossChainStatus?srcChainId=${
                     blockchainId[data.fromBlockchain]
-                }&transactionHash=${data.srcTxHash}`
+                }&srcTxHash=${data.srcTxHash}`
             );
 
             if (isSuccess && status === 'Done') {
