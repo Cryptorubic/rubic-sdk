@@ -1,4 +1,5 @@
 import { RubicSdkError } from 'src/common/errors';
+import { Cache } from 'src/common/utils/decorators';
 import { Injector } from 'src/core/injector/injector';
 import { RANGO_API_ENDPOINT } from 'src/features/common/providers/rango/constants/rango-api-common';
 import { RangoBestRouteResponse } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
@@ -29,6 +30,9 @@ export class RangoOnChainApiService {
         return res;
     }
 
+    @Cache({
+        maxAge: 15_000
+    })
     public static async getSwapTransaction(
         params: RangoSwapQueryParams
     ): Promise<RangoSwapTransactionResponse> {

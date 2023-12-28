@@ -16,7 +16,6 @@ import {
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -36,8 +35,7 @@ import {
 import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
 import {
     SymbiosisToken,
-    SymbiosisTokenAmount,
-    SymbiosisTradeData
+    SymbiosisTokenAmount
 } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import { SymbiosisCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/symbiosis-cross-chain-trade';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
@@ -150,10 +148,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             };
 
             const { tokenAmountOut, inTradeType, outTradeType, tx, approveTo, route } =
-                await Injector.httpClient.post<SymbiosisTradeData>(
-                    `${SymbiosisCrossChainTrade.symbiosisApi}/swapping/exact_in?partnerId=rubic`,
-                    swapParams
-                );
+                await SymbiosisCrossChainTrade.getResponseFromApiToTransactionRequest(swapParams);
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,

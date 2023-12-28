@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { Cache } from 'src/common/utils/decorators';
 import { parseError } from 'src/common/utils/errors';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -126,12 +127,7 @@ export class XyDexTrade extends EvmOnChainTrade {
             srcSwapProvider: this.provider
         };
 
-        const tradeData = await this.httpClient.get<XyBuildTxResponse>(
-            `${XY_API_ENDPOINT}/buildTx`,
-            {
-                params: { ...quoteTradeParams }
-            }
-        );
+        const tradeData = await this.getResponseFromApiToTransactionRequest(quoteTradeParams);
 
         if (!tradeData.success) {
             xyAnalyzeStatusCode(tradeData.errorCode, tradeData.errorMsg);
@@ -144,5 +140,16 @@ export class XyDexTrade extends EvmOnChainTrade {
         );
 
         return tradeData.tx;
+    }
+
+    @Cache({
+        maxAge: 15_000
+    })
+    private async getResponseFromApiToTransactionRequest(
+        params: XyBuildTxRequest
+    ): Promise<XyBuildTxResponse> {
+        return Injector.httpClient.get<XyBuildTxResponse>(`${XY_API_ENDPOINT}/buildTx`, {
+            params: { ...params }
+        });
     }
 }
