@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { Cache } from 'src/common/utils/decorators';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
@@ -419,15 +420,18 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                 to: transactionConfig.to
             };
         }
-        const tradeData = await Injector.httpClient.post<SymbiosisTradeData>(
-            `${SymbiosisCrossChainTrade.symbiosisApi}/swapping/exact_in?partnerId=rubic`,
-            {
-                ...this.swappingParams,
-                from: walletAddress,
-                to: receiverAddress || walletAddress,
-                revertableAddress: receiverAddress || walletAddress
-            } as SymbiosisSwappingParams
+
+        const params: SymbiosisSwappingParams = {
+            ...this.swappingParams,
+            from: walletAddress,
+            to: receiverAddress || walletAddress,
+            revertableAddress: receiverAddress || walletAddress
+        };
+
+        const tradeData = await SymbiosisCrossChainTrade.getResponseFromApiToTransactionRequest(
+            params
         );
+
         const config = {
             data: tradeData.tx.data!.toString(),
             value: tradeData.tx.value?.toString() || '0',
@@ -441,5 +445,17 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             );
         }
         return config;
+    }
+
+    @Cache({
+        maxAge: 15_000
+    })
+    public static async getResponseFromApiToTransactionRequest(
+        params: SymbiosisSwappingParams
+    ): Promise<SymbiosisTradeData> {
+        return Injector.httpClient.post<SymbiosisTradeData>(
+            `${SymbiosisCrossChainTrade.symbiosisApi}/swapping/exact_in?partnerId=rubic`,
+            params
+        );
     }
 }
