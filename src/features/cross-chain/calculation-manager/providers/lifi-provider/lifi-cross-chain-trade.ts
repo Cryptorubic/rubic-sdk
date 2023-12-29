@@ -356,8 +356,8 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         if (!skipAmountChangeCheck) {
             EvmCrossChainTrade.checkAmountChange(
                 swapResponse.transactionRequest,
-                swapResponse.estimate.toAmount,
-                this.to.stringWeiAmount
+                swapResponse.estimate.toAmountMin,
+                Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals)
             );
         }
 
