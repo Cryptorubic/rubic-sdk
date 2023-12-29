@@ -113,27 +113,34 @@ export class TronWeb3Public extends Web3Public {
             ]);
         });
 
-        const outputs = await this.multicall(calls.flat());
+        try {
+            const outputs = await this.multicall(calls.flat());
 
-        let outputIndex = 0;
-        return contractsData.map(contractData =>
-            contractData.methodsData.map(methodData => {
-                const success = outputs.results[outputIndex]!;
-                const returnData = outputs.returnData[outputIndex]!;
-                outputIndex++;
+            let outputIndex = 0;
+            return contractsData.map(contractData =>
+                contractData.methodsData.map(methodData => {
+                    const success = outputs.results[outputIndex]!;
+                    const returnData = outputs.returnData[outputIndex]!;
+                    outputIndex++;
 
-                const methodOutputAbi = contractAbi.find(
-                    funcSignature => funcSignature.name === methodData.methodName
-                )!.outputs!;
+                    const methodOutputAbi = contractAbi.find(
+                        funcSignature => funcSignature.name === methodData.methodName
+                    )!.outputs!;
 
-                return {
-                    success,
-                    output: success
-                        ? (TronWeb3Pure.decodeMethodOutput(methodOutputAbi, returnData) as Output)
-                        : null
-                };
-            })
-        );
+                    return {
+                        success,
+                        output: success
+                            ? (TronWeb3Pure.decodeMethodOutput(
+                                  methodOutputAbi,
+                                  returnData
+                              ) as Output)
+                            : null
+                    };
+                })
+            );
+        } catch {
+            return this.multicallContractsMethodsByOne(contractAbi, contractsData);
+        }
     }
 
     /**
@@ -186,5 +193,39 @@ export class TronWeb3Public extends Web3Public {
 
     public async getBlockNumber(): Promise<number> {
         return (await this.getBlock()).block_header.raw_data.number;
+    }
+
+    private multicallContractsMethodsByOne<Output extends Web3PrimitiveType>(
+        contractAbi: AbiItem[],
+        contractsData: {
+            contractAddress: string;
+            methodsData: MethodData[];
+        }[]
+    ): Promise<ContractMulticallResponse<Output>[][]> {
+        return Promise.all(
+            contractsData.map(contractData => {
+                return Promise.all(
+                    contractData.methodsData.map(async methodData => {
+                        try {
+                            const output = (await this.callContractMethod(
+                                contractData.contractAddress,
+                                contractAbi,
+                                methodData.methodName,
+                                methodData.methodArguments
+                            )) as Output;
+                            return {
+                                success: true,
+                                output
+                            };
+                        } catch {
+                            return {
+                                success: false,
+                                output: null
+                            };
+                        }
+                    })
+                );
+            })
+        );
     }
 }
