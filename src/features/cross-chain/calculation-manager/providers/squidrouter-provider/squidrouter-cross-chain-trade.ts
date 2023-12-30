@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { FailedToCheckForTransactionReceiptError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { Cache } from 'src/common/utils/decorators';
 import { parseError } from 'src/common/utils/errors';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
@@ -353,15 +354,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
 
         const {
             route: { transactionRequest, estimate: routeEstimate }
-        } = await Injector.httpClient.get<SquidrouterTransactionResponse>(
-            `${SquidrouterCrossChainProvider.apiEndpoint}route`,
-            {
-                params: requestParams as unknown as {},
-                headers: {
-                    'x-integrator-id': 'rubic-api'
-                }
-            }
-        );
+        } = await SquidrouterCrossChainTrade.getResponseFromApiToTransactionRequest(requestParams);
 
         if (!skipAmountChangeCheck) {
             EvmCrossChainTrade.checkAmountChange(
@@ -380,5 +373,22 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
             value: transactionRequest.value,
             to: transactionRequest.targetAddress
         };
+    }
+
+    @Cache({
+        maxAge: 15_000
+    })
+    public static async getResponseFromApiToTransactionRequest(
+        requestParams: SquidrouterTransactionRequest
+    ): Promise<SquidrouterTransactionResponse> {
+        return Injector.httpClient.get<SquidrouterTransactionResponse>(
+            `${SquidrouterCrossChainProvider.apiEndpoint}route`,
+            {
+                params: requestParams as unknown as {},
+                headers: {
+                    'x-integrator-id': 'rubic-api'
+                }
+            }
+        );
     }
 }
