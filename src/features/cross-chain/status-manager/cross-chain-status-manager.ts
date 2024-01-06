@@ -449,18 +449,14 @@ export class CrossChainStatusManager {
 
     private async getXyDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
-            const { success, status, tx } = await this.httpClient.get<XyApiResponse>(
+            const { success, tx } = await this.httpClient.get<XyApiResponse>(
                 `${XY_API_ENDPOINT}/crossChainStatus?srcChainId=${
                     blockchainId[data.fromBlockchain]
                 }&srcTxHash=${data.srcTxHash}`
             );
 
-            if (success && status === 'Done') {
+            if (success && tx) {
                 return { status: TX_STATUS.SUCCESS, hash: tx };
-            }
-
-            if (!success) {
-                return { status: TX_STATUS.FAIL, hash: null };
             }
             return { status: TX_STATUS.PENDING, hash: null };
         } catch {
