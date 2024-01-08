@@ -350,18 +350,25 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             }
         };
 
-        const swapResponse: { transactionRequest: LifiTransactionRequest; estimate: Estimate } =
-            await this.getResponseFromApiToTransactionRequest(step);
+        try {
+            const swapResponse: { transactionRequest: LifiTransactionRequest; estimate: Estimate } =
+                await this.getResponseFromApiToTransactionRequest(step);
 
-        if (!skipAmountChangeCheck) {
-            EvmCrossChainTrade.checkAmountChange(
-                swapResponse.transactionRequest,
-                swapResponse.estimate.toAmountMin,
-                Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals)
-            );
+            if (!skipAmountChangeCheck) {
+                EvmCrossChainTrade.checkAmountChange(
+                    swapResponse.transactionRequest,
+                    swapResponse.estimate.toAmountMin,
+                    Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals)
+                );
+            }
+
+            return swapResponse.transactionRequest;
+        } catch (err) {
+            if ('statusCode' in err && 'message' in err) {
+                throw new RubicSdkError(err.message);
+            }
+            throw err;
         }
-
-        return swapResponse.transactionRequest;
     }
 
     @Cache({

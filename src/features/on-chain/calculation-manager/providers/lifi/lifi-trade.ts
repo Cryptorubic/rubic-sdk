@@ -121,7 +121,7 @@ export class LifiTrade extends EvmOnChainTrade {
             if (this.isDeflationError()) {
                 throw new LowSlippageDeflationaryTokenError();
             }
-            if (err instanceof UpdatedRatesError) {
+            if (err instanceof UpdatedRatesError || err instanceof RubicSdkError) {
                 throw err;
             }
             throw new LifiPairIsUnavailableError();
@@ -157,36 +157,44 @@ export class LifiTrade extends EvmOnChainTrade {
             }
         };
 
-        const swapResponse: {
-            transactionRequest: LifiTransactionRequest;
-            estimate: Route;
-        } = await this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
-            ...step
-        });
+        try {
+            const swapResponse: {
+                transactionRequest: LifiTransactionRequest;
+                estimate: Route;
+            } = await this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
+                ...step
+            });
 
-        const { transactionRequest, estimate } = swapResponse;
-        const gasLimit =
-            transactionRequest.gasLimit && parseInt(transactionRequest.gasLimit, 16).toString();
-        const gasPrice =
-            transactionRequest.gasPrice && parseInt(transactionRequest.gasPrice, 16).toString();
-        const value = transactionRequest.value && parseInt(transactionRequest.value, 16).toString();
+            const { transactionRequest, estimate } = swapResponse;
+            const gasLimit =
+                transactionRequest.gasLimit && parseInt(transactionRequest.gasLimit, 16).toString();
+            const gasPrice =
+                transactionRequest.gasPrice && parseInt(transactionRequest.gasPrice, 16).toString();
+            const value =
+                transactionRequest.value && parseInt(transactionRequest.value, 16).toString();
 
-        EvmOnChainTrade.checkAmountChange(
-            {
+            EvmOnChainTrade.checkAmountChange(
+                {
+                    data: transactionRequest.data,
+                    value: value,
+                    to: transactionRequest.to
+                },
+                estimate.toAmountMin,
+                this.toTokenAmountMin.stringWeiAmount
+            );
+
+            return {
+                to: transactionRequest.to,
                 data: transactionRequest.data,
-                value: value,
-                to: transactionRequest.to
-            },
-            estimate.toAmountMin,
-            this.toTokenAmountMin.stringWeiAmount
-        );
-
-        return {
-            to: transactionRequest.to,
-            data: transactionRequest.data,
-            gas: gasLimit,
-            gasPrice,
-            value
-        };
+                gas: gasLimit,
+                gasPrice,
+                value
+            };
+        } catch (err) {
+            if ('statusCode' in err && 'message' in err) {
+                throw new RubicSdkError(err.message);
+            }
+            throw err;
+        }
     }
 }
