@@ -41,6 +41,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         feeInfo,
         routePath,
         swapQueryParams,
+        bridgeSubtype,
         receiverAddress
     }: RangoGetGasDataParams): Promise<GasData | null> {
         const fromBlockchain = fromToken.blockchain;
@@ -63,6 +64,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
                     gasData: null,
                     priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
                     slippage: swapQueryParams.slippage,
+                    bridgeSubtype,
                     swapQueryParams
                 },
                 routePath,
@@ -178,6 +180,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         this.priceImpact = params.crossChainTrade.priceImpact;
         this.slippage = params.crossChainTrade.slippage;
         this.swapQueryParams = params.crossChainTrade.swapQueryParams;
+        this.bridgeType = params.crossChainTrade.bridgeSubtype || BRIDGE_TYPE.RANGO;
     }
 
     public async getContractParams(
@@ -202,7 +205,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             toTokenAmount: this.to,
             srcChainTrade: null,
             providerAddress: this.providerAddress,
-            type: `native:${this.type}`,
+            type: `rango:${this.bridgeType}`,
             fromAddress: this.walletAddress
         });
 
@@ -261,7 +264,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
 
         // eslint-disable-next-line no-useless-catch
         try {
-            const receiverAddress = options.receiverAddress || this.walletAddress;
+            const receiverAddress = options?.receiverAddress || this.walletAddress;
             const { data, value, to } = await this.getTransactionRequest(
                 receiverAddress,
                 options.directTransaction

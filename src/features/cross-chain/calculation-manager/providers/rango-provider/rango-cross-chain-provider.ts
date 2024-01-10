@@ -25,7 +25,7 @@ import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-
 import { CrossChainProvider } from '../common/cross-chain-provider';
 import { CalculationResult } from '../common/models/calculation-result';
 import { FeeInfo } from '../common/models/fee-info';
-import { RubicStep } from '../common/models/rubicStep';
+import { CrossChainStep, RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { RangoCrossChainOptions } from './model/rango-cross-chain-api-types';
 import { RangoCrossChainTrade } from './rango-cross-chain-trade';
@@ -98,10 +98,10 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 toToken,
                 { ...options, swapperGroups: options.rangoDisabledProviders }
             );
-            const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
-            const receiverAddress =
-                options?.receiverAddress || this.getWalletAddress(fromBlockchain) || fakeAddress;
 
+            const bridgeSubtype = (
+                routePath.find(el => el.type === 'cross-chain') as CrossChainStep
+            )?.provider;
             const tradeParams = await RangoCrossChainParser.getTradeConstructorParams({
                 fromToken: from,
                 toToken: to,
@@ -110,7 +110,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 feeInfo,
                 toTokenAmountMin,
                 swapQueryParams,
-                receiverAddress
+                bridgeSubtype
             });
 
             const trade = new RangoCrossChainTrade(tradeParams);

@@ -1,3 +1,5 @@
+import { Injector } from 'src/core/injector/injector';
+
 import {
     GetCrossChainTradeConstructorParamsType,
     RangoCrossChainTradeConstructorParams
@@ -13,8 +15,14 @@ export class RangoCrossChainParser {
         swapQueryParams,
         toToken,
         toTokenAmountMin,
-        receiverAddress
+        bridgeSubtype
     }: GetCrossChainTradeConstructorParamsType): Promise<RangoCrossChainTradeConstructorParams> {
+        const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
+        const receiverAddress =
+            options?.receiverAddress ||
+            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromToken.blockchain).address ||
+            fakeAddress;
+
         const gasData =
             options.gasCalculation === 'enabled'
                 ? await RangoCrossChainTrade.getGasData({
@@ -23,13 +31,14 @@ export class RangoCrossChainParser {
                       swapQueryParams,
                       feeInfo,
                       routePath,
+                      bridgeSubtype,
                       receiverAddress
                   })
                 : null;
         const priceImpact = fromToken.calculatePriceImpactPercent(toToken);
         const slippage = options.slippageTolerance;
 
-        const crossChainTrade = {
+        const crossChainTrade: RangoCrossChainTradeConstructorParams['crossChainTrade'] = {
             from: fromToken,
             to: toToken,
             gasData,
@@ -37,7 +46,8 @@ export class RangoCrossChainParser {
             priceImpact,
             slippage,
             feeInfo,
-            swapQueryParams
+            swapQueryParams,
+            bridgeSubtype
         };
 
         const providerAddress = options.providerAddress;
