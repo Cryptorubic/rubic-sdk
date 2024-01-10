@@ -40,7 +40,8 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         toToken,
         feeInfo,
         routePath,
-        swapQueryParams
+        swapQueryParams,
+        receiverAddress
     }: RangoGetGasDataParams): Promise<GasData | null> {
         const fromBlockchain = fromToken.blockchain;
         const walletAddress = swapQueryParams.fromAddress;
@@ -94,7 +95,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             } else {
                 const { data, value, to } = await new RangoCrossChainTrade(
                     tradeParams
-                ).getTransactionRequest(undefined, true);
+                ).getTransactionRequest(receiverAddress, undefined, true);
 
                 const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
                     data,
@@ -189,7 +190,11 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.getTransactionRequest(options.directTransaction, skipAmountChangeCheck);
+        } = await this.getTransactionRequest(
+            receiverAddress,
+            options.directTransaction,
+            skipAmountChangeCheck
+        );
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
@@ -256,7 +261,11 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
 
         // eslint-disable-next-line no-useless-catch
         try {
-            const { data, value, to } = await this.getTransactionRequest(options.directTransaction);
+            const receiverAddress = options.receiverAddress || this.walletAddress;
+            const { data, value, to } = await this.getTransactionRequest(
+                receiverAddress,
+                options.directTransaction
+            );
 
             await this.web3Private.trySendTransaction(to, {
                 data,
@@ -274,6 +283,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
     }
 
     private async getTransactionRequest(
+        receiverAddress?: string,
         transactionConfig?: EvmEncodeConfig,
         skipAmountChangeCheck: boolean = false
     ): Promise<EvmEncodeConfig> {
@@ -285,9 +295,10 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             };
         }
 
-        const { route, tx, error, requestId } = await RangoCrossChainApiService.getSwapTransaction(
-            this.swapQueryParams
-        );
+        const { route, tx, error, requestId } = await RangoCrossChainApiService.getSwapTransaction({
+            ...this.swapQueryParams,
+            toAddress: receiverAddress || this.swapQueryParams.toAddress
+        });
 
         this.rangoRequestId = requestId;
 

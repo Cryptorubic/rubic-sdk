@@ -31,6 +31,7 @@ export interface GetCrossChainTradeConstructorParamsType {
     feeInfo: FeeInfo;
     toTokenAmountMin: BigNumber;
     swapQueryParams: RangoSwapQueryParams;
+    receiverAddress?: string;
 }
 
 export type RangoGetGasDataParams = Omit<

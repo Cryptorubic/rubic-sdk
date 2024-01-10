@@ -98,6 +98,9 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 toToken,
                 { ...options, swapperGroups: options.rangoDisabledProviders }
             );
+            const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
+            const receiverAddress =
+                options?.receiverAddress || this.getWalletAddress(fromBlockchain) || fakeAddress;
 
             const tradeParams = await RangoCrossChainParser.getTradeConstructorParams({
                 fromToken: from,
@@ -106,7 +109,8 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 routePath,
                 feeInfo,
                 toTokenAmountMin,
-                swapQueryParams
+                swapQueryParams,
+                receiverAddress
             });
 
             const trade = new RangoCrossChainTrade(tradeParams);
