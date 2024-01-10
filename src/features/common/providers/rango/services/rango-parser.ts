@@ -59,7 +59,8 @@ export class RangoCommonParser {
             fromToken.blockchain
         ).address;
         const fromAddress = options.fromAddress || walletAddress;
-        const toAddress = options.receiverAddress || walletAddress;
+        const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
+        const toAddress = options?.receiverAddress || walletAddress || fakeAddress;
 
         const slippage = options.slippageTolerance * 100;
         const apiKey = RANGO_API_KEY;

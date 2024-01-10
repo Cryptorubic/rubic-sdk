@@ -10,7 +10,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { RangoContractAddresses } from 'src/features/common/providers/rango/constants/rango-contract-address';
+import { rangoContractAddresses } from 'src/features/common/providers/rango/constants/rango-contract-address';
 import { RangoSwapQueryParams } from 'src/features/common/providers/rango/models/rango-parser-types';
 import { RangoSupportedBlockchain } from 'src/features/common/providers/rango/models/rango-supported-blockchains';
 
@@ -163,7 +163,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
     protected get fromContractAddress(): string {
         return this.isProxyTrade
             ? rubicProxyContractAddress[this.fromBlockchain].gateway
-            : RangoContractAddresses[this.fromBlockchain].providerGateway;
+            : rangoContractAddresses[this.fromBlockchain].providerGateway;
     }
 
     protected get methodName(): string {
