@@ -142,21 +142,23 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
             throw new RubicSdkError(`Transaction status is undefined!`);
         }
 
-        EvmOnChainTrade.checkAmountChange(
-            { data: tx.txData!, to: tx.txTo, value: tx.value! },
-            outputAmount,
-            this.toTokenAmountMin.stringWeiAmount
-        );
-
         const gasLimit = tx.gasLimit && parseInt(tx.gasLimit, 16).toString();
         const gasPrice = tx.gasPrice && parseInt(tx.gasPrice, 16).toString();
 
-        return {
+        const evmEncodeConfig = {
             data: tx.txData!,
             to: tx.txTo,
             value: tx.value!,
             gas: gasLimit!,
             gasPrice: gasPrice!
         };
+
+        EvmOnChainTrade.checkAmountChange(
+            evmEncodeConfig,
+            outputAmount,
+            this.toTokenAmountMin.stringWeiAmount
+        );
+
+        return evmEncodeConfig;
     }
 }
