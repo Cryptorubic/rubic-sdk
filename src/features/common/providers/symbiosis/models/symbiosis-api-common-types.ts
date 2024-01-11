@@ -10,6 +10,5 @@ export interface SymbiosisTokenInfo {
 }
 
 export interface SymbiosisTokenInfoWithAmount extends SymbiosisTokenInfo {
-    /* wei amount */
     amount: string;
 }

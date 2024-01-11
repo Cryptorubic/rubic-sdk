@@ -31,13 +31,13 @@ export class SymbiosisOnChainTrade extends EvmOnChainTrade {
             return null;
         }
 
-        const rangoTrade = new SymbiosisOnChainTrade(
+        const symbiosisTrade = new SymbiosisOnChainTrade(
             tradeStruct,
             EvmWeb3Pure.EMPTY_ADDRESS,
             providerGateway
         );
         try {
-            const transactionConfig = await rangoTrade.encode({ fromAddress: walletAddress });
+            const transactionConfig = await symbiosisTrade.encode({ fromAddress: walletAddress });
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const gasLimit = (
@@ -49,7 +49,7 @@ export class SymbiosisOnChainTrade extends EvmOnChainTrade {
             }
         } catch {}
         try {
-            const transactionData = await rangoTrade.getTransactionData();
+            const transactionData = await symbiosisTrade.getTransactionData();
 
             if (transactionData.gas) {
                 return new BigNumber(transactionData.gas);

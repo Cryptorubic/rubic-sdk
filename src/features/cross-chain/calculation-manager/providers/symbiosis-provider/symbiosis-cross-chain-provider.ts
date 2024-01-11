@@ -16,6 +16,10 @@ import {
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import {
+    SymbiosisSupportedBlockchain,
+    symbiosisSupportedBlockchains
+} from 'src/features/common/providers/symbiosis/constants/symbiosis-supported-blockchains';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -24,10 +28,6 @@ import { CalculationResult } from 'src/features/cross-chain/calculation-manager/
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import {
-    SymbiosisCrossChainSupportedBlockchain,
-    symbiosisCrossChainSupportedBlockchains
-} from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import {
     errorCode,
     SymbiosisError
@@ -46,8 +46,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
-    ): blockchain is SymbiosisCrossChainSupportedBlockchain {
-        return symbiosisCrossChainSupportedBlockchains.some(
+    ): blockchain is SymbiosisSupportedBlockchain {
+        return symbiosisSupportedBlockchains.some(
             supportedBlockchain => supportedBlockchain === blockchain
         );
     }
@@ -68,8 +68,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         toToken: PriceToken,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
-        const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
-        const toBlockchain = toToken.blockchain as SymbiosisCrossChainSupportedBlockchain;
+        const fromBlockchain = from.blockchain as SymbiosisSupportedBlockchain;
+        const toBlockchain = toToken.blockchain as SymbiosisSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
         // @TODO remove Tron check
         if (
@@ -230,7 +230,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     }
 
     protected async getFeeInfo(
-        fromBlockchain: SymbiosisCrossChainSupportedBlockchain,
+        fromBlockchain: SymbiosisSupportedBlockchain,
         providerAddress: string,
         percentFeeToken: PriceTokenAmount,
         useProxy: boolean

@@ -20,6 +20,9 @@ import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/mod
 import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
 import { RequiredOnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/required-on-chain-manager-calculation-options';
 import { WrappedOnChainTradeOrNull } from 'src/features/on-chain/calculation-manager/models/wrapped-on-chain-trade-or-null';
+import { LifiProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-provider';
+import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-calculation-options';
+import { OpenOceanProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/open-ocean-provider';
 import { EvmWrapTrade } from 'src/features/on-chain/calculation-manager/providers/common/evm-wrap-trade/evm-wrap-trade';
 import {
     OnChainCalculationOptions,
@@ -33,11 +36,9 @@ import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/p
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
-import { LifiProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-provider';
-import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-calculation-options';
-import { OpenOceanProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/open-ocean-provider';
 
 import { RangoOnChainProvider } from './providers/aggregators/rango/rango-on-chain-provider';
+import { SymbiosisOnChainProvider } from './providers/aggregators/symbiosis/symbiosis-on-chain-provider';
 
 /**
  * Contains methods to calculate on-chain trades.
@@ -55,6 +56,8 @@ export class OnChainManager {
     public readonly openOceanProvider = new OpenOceanProvider();
 
     public readonly rangoProvider = new RangoOnChainProvider();
+
+    public readonly symbiosisProvider = new SymbiosisOnChainProvider();
 
     public readonly deflationTokenManager = new DeflationTokenManager();
 
@@ -107,11 +110,18 @@ export class OnChainManager {
                     ? []
                     : [this.getRangoCalculationPromise(from, to, fullOptions)];
 
+                const symbiosisTrades = fullOptions.disabledProviders
+                    .map(provider => provider.toUpperCase())
+                    .includes(ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP)
+                    ? []
+                    : [this.getSymbiosisCalculationPromise(from, to, fullOptions)];
+
                 const totalTrades = [
                     ...nativeProviders,
                     ...lifiTrades,
                     ...openOceanTrades,
-                    ...rangoTrades
+                    ...rangoTrades,
+                    ...symbiosisTrades
                 ].length;
 
                 return merge(
@@ -494,6 +504,44 @@ export class OnChainManager {
             return {
                 trade: null,
                 tradeType: ON_CHAIN_TRADE_TYPE.RANGO,
+                error: CrossChainProvider.parseError(err)
+            };
+        }
+    }
+
+    private async getSymbiosisCalculationPromise(
+        from: PriceTokenAmount,
+        to: PriceToken,
+        options: RequiredOnChainManagerCalculationOptions
+    ): Promise<WrappedOnChainTradeOrNull> {
+        try {
+            const wrappedTrade = await pTimeout(
+                this.symbiosisProvider.calculate(
+                    from,
+                    to,
+                    options as RequiredOnChainCalculationOptions
+                ),
+                options.timeout
+            );
+
+            if ('error' in wrappedTrade) {
+                throw wrappedTrade.error;
+            }
+
+            if (!wrappedTrade) {
+                return null;
+            }
+
+            return { trade: wrappedTrade, tradeType: ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP };
+        } catch (err) {
+            console.debug(
+                `[RUBIC_SDK] Trade calculation error occurred for ${ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP} trade provider.`,
+                err
+            );
+
+            return {
+                trade: null,
+                tradeType: ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP,
                 error: CrossChainProvider.parseError(err)
             };
         }

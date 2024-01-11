@@ -41,8 +41,6 @@ interface SymbiosisSwapResponseFee {
     decimals: number;
     symbol: string;
     icon: string;
-
-    /* wei amount */
     amount: string;
 }
 

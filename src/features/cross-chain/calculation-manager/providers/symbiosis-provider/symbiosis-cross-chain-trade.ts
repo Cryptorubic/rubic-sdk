@@ -17,6 +17,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { SymbiosisSupportedBlockchain } from 'src/features/common/providers/symbiosis/constants/symbiosis-supported-blockchains';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
@@ -30,7 +31,6 @@ import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/pro
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
 import {
     SymbiosisTradeData,
@@ -186,8 +186,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly contractAddresses: { providerRouter: string; providerGateway: string };
 
-    private get fromBlockchain(): SymbiosisCrossChainSupportedBlockchain {
-        return this.from.blockchain as SymbiosisCrossChainSupportedBlockchain;
+    private get fromBlockchain(): SymbiosisSupportedBlockchain {
+        return this.from.blockchain as SymbiosisSupportedBlockchain;
     }
 
     protected get fromContractAddress(): string {

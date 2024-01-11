@@ -1,5 +1,5 @@
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
@@ -26,21 +26,14 @@ export abstract class AggregatorOnChain {
         providerGateway?: string
     ): Promise<GasFeeInfo | null>;
 
-    protected async handleProxyContract(
-        from: PriceTokenAmount<EvmBlockchainName>,
+    protected async handleProxyContract<T extends BlockchainName>(
+        from: PriceTokenAmount<T>,
         fullOptions: RequiredOnChainCalculationOptions
     ): Promise<{
-        fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
-        proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-    }>;
-    protected async handleProxyContract(
-        from: PriceTokenAmount<BlockchainName>,
-        fullOptions: RequiredOnChainCalculationOptions
-    ): Promise<{
-        fromWithoutFee: PriceTokenAmount<BlockchainName>;
+        fromWithoutFee: PriceTokenAmount<T>;
         proxyFeeInfo: OnChainProxyFeeInfo | undefined;
     }> {
-        let fromWithoutFee: PriceTokenAmount<BlockchainName>;
+        let fromWithoutFee: PriceTokenAmount<T>;
         let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
 
         if (fullOptions.useProxy) {
