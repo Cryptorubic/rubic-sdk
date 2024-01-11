@@ -315,6 +315,11 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
      */
     public abstract encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig>;
 
+    protected abstract getTransactionData(
+        receiverAddress?: string,
+        fromAddress?: string
+    ): Promise<EvmEncodeConfig>;
+
     protected isDeflationError(): boolean {
         return (
             (this.withDeflation.from.isDeflation || this.withDeflation.to.isDeflation) &&

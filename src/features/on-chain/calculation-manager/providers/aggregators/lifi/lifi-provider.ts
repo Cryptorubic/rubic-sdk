@@ -8,6 +8,17 @@ import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/bl
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
+import {
+    LifiForbiddenBlockchains,
+    lifiForbiddenBlockchains
+} from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-forbidden-blockchains';
+import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
+import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-trade';
+import {
+    LifiCalculationOptions,
+    RequiredLifiCalculationOptions
+} from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-calculation-options';
+import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import {
@@ -20,17 +31,6 @@ import { OnChainTrade } from 'src/features/on-chain/calculation-manager/provider
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
-import {
-    LifiForbiddenBlockchains,
-    lifiForbiddenBlockchains
-} from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-forbidden-blockchains';
-import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-providers';
-import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/lifi/lifi-trade';
-import {
-    LifiCalculationOptions,
-    RequiredLifiCalculationOptions
-} from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
-import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-trade-struct';
 
 export class LifiProvider {
     private readonly lifi = new LiFi(getLifiConfig());
@@ -44,12 +44,10 @@ export class LifiProvider {
 
     constructor() {}
 
-    private isForbiddenBlockchain(
+    private isSupportedBlockchain(
         blockchain: BlockchainName
     ): blockchain is LifiForbiddenBlockchains {
-        return lifiForbiddenBlockchains.some(
-            supportedBlockchain => supportedBlockchain === blockchain
-        );
+        return !lifiForbiddenBlockchains.some(forbiddenChain => forbiddenChain === blockchain);
     }
 
     public async calculate(
@@ -57,7 +55,7 @@ export class LifiProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: LifiCalculationOptions
     ): Promise<OnChainTrade> {
-        if (this.isForbiddenBlockchain(from.blockchain)) {
+        if (this.isSupportedBlockchain(from.blockchain)) {
             throw new RubicSdkError('Blockchain is not supported');
         }
 

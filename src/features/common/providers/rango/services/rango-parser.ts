@@ -58,7 +58,7 @@ export class RangoCommonParser {
         const walletAddress = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
             fromToken.blockchain
         ).address;
-        const fromAddress = options.fromAddress || walletAddress;
+        const fromAddress = walletAddress;
         const toAddress = options.receiverAddress || walletAddress;
 
         const slippage = options.slippageTolerance * 100;

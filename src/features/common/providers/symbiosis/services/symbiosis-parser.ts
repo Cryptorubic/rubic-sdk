@@ -3,19 +3,19 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
-import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
 
 import {
     SymbiosisTokenInfo,
     SymbiosisTokenInfoWithAmount
 } from '../models/symbiosis-api-common-types';
+import { SymbiosisSwapRequestOptions } from '../models/symbiosis-api-parser-types';
 import { SymbiosisSwapRequestBody } from '../models/symbiosis-api-swap-types';
 
 export class SymbiosisParser {
     public static getSwapRequestBody(
         fromToken: PriceTokenAmount,
         toToken: PriceToken,
-        options: OnChainCalculationOptions
+        options: SymbiosisSwapRequestOptions
     ): SymbiosisSwapRequestBody {
         const walletAddress = (
             Injector.web3PrivateService.getWeb3PrivateByBlockchain(
@@ -23,9 +23,8 @@ export class SymbiosisParser {
             ) as Web3Private
         ).address as string;
 
-        const fromAddress = options?.fromAddress ?? walletAddress;
-        const toAddress = walletAddress;
-        const slippage = options?.slippageTolerance ? options.slippageTolerance * 10000 : 100;
+        const toAddress = options.receiverAddress ?? walletAddress;
+        const slippage = options.slippage * 10000;
 
         const tokenAmountIn = {
             address: fromToken.address,
@@ -41,7 +40,7 @@ export class SymbiosisParser {
         } as SymbiosisTokenInfo;
 
         return {
-            from: fromAddress,
+            from: walletAddress,
             to: toAddress,
             slippage,
             tokenAmountIn,

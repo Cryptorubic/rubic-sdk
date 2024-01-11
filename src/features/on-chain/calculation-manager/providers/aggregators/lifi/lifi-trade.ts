@@ -13,9 +13,9 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-trade-struct';
 
 interface LifiTransactionRequest {
     to: string;
@@ -49,7 +49,7 @@ export class LifiTrade extends EvmOnChainTrade {
             }
         } catch {}
         try {
-            const transactionData = await lifiTrade.getTransactionData(walletAddress);
+            const transactionData = await lifiTrade.getTransactionData();
 
             if (transactionData.gas) {
                 return new BigNumber(transactionData.gas);
@@ -97,11 +97,7 @@ export class LifiTrade extends EvmOnChainTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            const transactionData = await this.getTransactionData(
-                options.fromAddress,
-                options.receiverAddress,
-                options.directTransaction
-            );
+            const transactionData = await this.getTransactionData(options.receiverAddress);
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,
                 gasPrice: transactionData.gasPrice
@@ -128,21 +124,14 @@ export class LifiTrade extends EvmOnChainTrade {
         }
     }
 
-    private async getTransactionData(
-        fromAddress?: string,
-        receiverAddress?: string,
-        directTransaction?: EvmEncodeConfig
-    ): Promise<EvmEncodeConfig> {
-        if (directTransaction) {
-            return directTransaction;
-        }
+    protected async getTransactionData(receiverAddress?: string): Promise<EvmEncodeConfig> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
             action: {
                 ...firstStep.action,
-                fromAddress: fromAddress || this.walletAddress,
-                toAddress: receiverAddress || fromAddress || this.walletAddress
+                fromAddress: this.walletAddress,
+                toAddress: receiverAddress || this.walletAddress
             },
             execution: {
                 status: 'NOT_STARTED',

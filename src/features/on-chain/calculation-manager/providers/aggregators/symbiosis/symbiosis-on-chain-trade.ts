@@ -4,24 +4,23 @@ import {
     RubicSdkError,
     SwapRequestError
 } from 'src/common/errors';
-import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
+import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
+import { SymbiosisParser } from 'src/features/common/providers/symbiosis/services/symbiosis-parser';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 
-import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../common/models/on-chain-trade-type';
-import { EvmOnChainTrade } from '../common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { RangoOnChainTradeStruct } from './models/rango-on-chain-trade-types';
-import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
+import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
+import { EvmOnChainTrade } from '../../common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { SymbiosisTradeStruct } from './models/symbiosis-on-chain-trade-types';
 
-export class RangoOnChainTrade extends EvmOnChainTrade {
+export class SymbiosisOnChainTrade extends EvmOnChainTrade {
     /* @internal */
     public static async getGasLimit(
-        tradeStruct: RangoOnChainTradeStruct,
+        tradeStruct: SymbiosisTradeStruct,
         providerGateway: string
     ): Promise<BigNumber | null> {
         const fromBlockchain = tradeStruct.from.blockchain;
@@ -32,7 +31,7 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
             return null;
         }
 
-        const rangoTrade = new RangoOnChainTrade(
+        const rangoTrade = new SymbiosisOnChainTrade(
             tradeStruct,
             EvmWeb3Pure.EMPTY_ADDRESS,
             providerGateway
@@ -59,18 +58,9 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
         return null;
     }
 
-    /**
-     * approveTo address - used in this.web3Public.getAllowance() method
-     */
+    public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP;
+
     public readonly providerGateway: string;
-
-    public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.RANGO;
-
-    private readonly _toTokenAmountMin: PriceTokenAmount;
-
-    public get toTokenAmountMin(): PriceTokenAmount {
-        return this._toTokenAmountMin;
-    }
 
     protected get spenderAddress(): string {
         return this.useProxy
@@ -83,16 +73,11 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
     }
 
     constructor(
-        tradeStruct: RangoOnChainTradeStruct,
+        tradeStruct: SymbiosisTradeStruct,
         providerAddress: string,
         providerGateway: string
     ) {
         super(tradeStruct, providerAddress);
-
-        this._toTokenAmountMin = new PriceTokenAmount({
-            ...this.to.asStruct,
-            weiAmount: tradeStruct.toTokenWeiAmountMin
-        });
 
         this.providerGateway = providerGateway;
     }
@@ -102,10 +87,7 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            const transactionData = await this.getTransactionData(
-                this.walletAddress,
-                options.receiverAddress
-            );
+            const transactionData = await this.getTransactionData(options.receiverAddress);
 
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,
@@ -130,31 +112,18 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
         }
     }
 
-    private async getTransactionData(
-        fromAddress?: string,
-        receiverAddress?: string
-    ): Promise<EvmEncodeConfig> {
-        const params = await RangoCommonParser.getSwapQueryParams(this.from, this.to, {
-            slippageTolerance: this.slippageTolerance,
-            fromAddress: fromAddress || this.walletAddress,
-            receiverAddress: receiverAddress || fromAddress || this.walletAddress
+    protected async getTransactionData(receiverAddress?: string): Promise<EvmEncodeConfig> {
+        const requestBody = await SymbiosisParser.getSwapRequestBody(this.from, this.to, {
+            receiverAddress,
+            slippage: this.slippageTolerance
         });
 
-        const { tx } = await RangoOnChainApiService.getSwapTransaction(params);
-
-        if (!tx) {
-            throw new RubicSdkError(`Transaction status is undefined!`);
-        }
-
-        const gasLimit = tx.gasLimit && parseInt(tx.gasLimit, 16).toString();
-        const gasPrice = tx.gasPrice && parseInt(tx.gasPrice, 16).toString();
+        const { tx } = await SymbiosisApiService.getSwapTx(requestBody);
 
         return {
-            data: tx.txData!,
-            to: tx.txTo,
-            value: tx.value!,
-            gas: gasLimit!,
-            gasPrice: gasPrice!
+            data: tx.data,
+            to: tx.to,
+            value: tx.value
         };
     }
 }

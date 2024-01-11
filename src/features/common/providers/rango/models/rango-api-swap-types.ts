@@ -1,7 +1,6 @@
 import { RangoBestRouteRequestOptions, RangoBestRouteResponse } from './rango-api-best-route-types';
 
 export interface RangoSwapRequestOptions extends RangoBestRouteRequestOptions {
-    fromAddress?: string;
     receiverAddress?: string;
 }
 

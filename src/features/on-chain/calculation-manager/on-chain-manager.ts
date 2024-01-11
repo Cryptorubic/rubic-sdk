@@ -33,11 +33,11 @@ import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/p
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
-import { LifiProvider } from 'src/features/on-chain/calculation-manager/providers/lifi/lifi-provider';
-import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-calculation-options';
-import { OpenOceanProvider } from 'src/features/on-chain/calculation-manager/providers/open-ocean/open-ocean-provider';
+import { LifiProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-provider';
+import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-calculation-options';
+import { OpenOceanProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/open-ocean-provider';
 
-import { RangoOnChainProvider } from './providers/rango/rango-on-chain-provider';
+import { RangoOnChainProvider } from './providers/aggregators/rango/rango-on-chain-provider';
 
 /**
  * Contains methods to calculate on-chain trades.
