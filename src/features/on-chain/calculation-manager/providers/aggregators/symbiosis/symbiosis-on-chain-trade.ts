@@ -118,12 +118,20 @@ export class SymbiosisOnChainTrade extends EvmOnChainTrade {
             slippage: this.slippageTolerance
         });
 
-        const { tx } = await SymbiosisApiService.getSwapTx(requestBody);
+        const { tx, tokenAmountOut } = await SymbiosisApiService.getSwapTx(requestBody);
 
-        return {
+        const evmEncodeConfig = {
             data: tx.data,
             to: tx.to,
             value: tx.value
         };
+
+        EvmOnChainTrade.checkAmountChange(
+            evmEncodeConfig,
+            tokenAmountOut.amount,
+            this.toTokenAmountMin.stringWeiAmount
+        );
+
+        return evmEncodeConfig;
     }
 }

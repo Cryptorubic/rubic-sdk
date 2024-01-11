@@ -10,6 +10,7 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { RangoBestRouteSimulationResult } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 
@@ -133,11 +134,19 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
             receiverAddress: receiverAddress || this.walletAddress
         });
 
-        const { tx } = await RangoOnChainApiService.getSwapTransaction(params);
+        const { tx, route } = await RangoOnChainApiService.getSwapTransaction(params);
+
+        const { outputAmount } = route as RangoBestRouteSimulationResult;
 
         if (!tx) {
             throw new RubicSdkError(`Transaction status is undefined!`);
         }
+
+        EvmOnChainTrade.checkAmountChange(
+            { data: tx.txData!, to: tx.txTo, value: tx.value! },
+            outputAmount,
+            this.toTokenAmountMin.stringWeiAmount
+        );
 
         const gasLimit = tx.gasLimit && parseInt(tx.gasLimit, 16).toString();
         const gasPrice = tx.gasPrice && parseInt(tx.gasPrice, 16).toString();
