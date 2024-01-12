@@ -132,7 +132,8 @@ export class OnChainManager {
                     ),
                     ...lifiTrades,
                     ...openOceanTrades,
-                    ...rangoTrades
+                    ...rangoTrades,
+                    ...symbiosisTrades
                 ).pipe(
                     map((wrappedTrade, index) => ({
                         total: totalTrades,
