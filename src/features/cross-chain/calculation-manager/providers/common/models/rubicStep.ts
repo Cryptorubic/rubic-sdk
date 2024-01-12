@@ -3,7 +3,7 @@ import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/prov
 
 import { BridgeType } from './bridge-type';
 
-interface CrossChainStep {
+export interface CrossChainStep {
     provider: BridgeType;
     type: 'cross-chain';
     path: (TokenAmount | Token)[];

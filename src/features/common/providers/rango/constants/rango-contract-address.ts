@@ -4,7 +4,7 @@ import { rubicProxyContractAddress } from '../../../../cross-chain/calculation-m
 import { UniversalContract } from '../../../../cross-chain/calculation-manager/providers/common/models/universal-contract';
 import { RangoSupportedBlockchain } from '../models/rango-supported-blockchains';
 
-export const RangoContractAddresses: Record<RangoSupportedBlockchain, UniversalContract> = {
+export const rangoContractAddresses: Record<RangoSupportedBlockchain, UniversalContract> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: {
         providerGateway: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
         providerRouter: '0x69460570c93f9DE5E2edbC3052bf10125f0Ca22d',
