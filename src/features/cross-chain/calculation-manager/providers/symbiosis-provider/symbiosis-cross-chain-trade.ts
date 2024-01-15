@@ -32,13 +32,13 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
 import { SymbiosisTradeType } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
-import { SymbiosisOnChainSupportedBlockchain } from 'src/features/on-chain/calculation-manager/providers/aggregators/symbiosis/models/symbiosis-on-chain-supported-blockchains';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
+import { SymbiosisCrossChainSupportedBlockchain } from './models/symbiosis-cross-chain-supported-blockchains';
 
 /**
  * Calculated Symbiosis cross-chain trade.
@@ -181,8 +181,8 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly contractAddresses: { providerRouter: string; providerGateway: string };
 
-    private get fromBlockchain(): SymbiosisOnChainSupportedBlockchain {
-        return this.from.blockchain as SymbiosisOnChainSupportedBlockchain;
+    private get fromBlockchain(): SymbiosisCrossChainSupportedBlockchain {
+        return this.from.blockchain as SymbiosisCrossChainSupportedBlockchain;
     }
 
     protected get fromContractAddress(): string {
