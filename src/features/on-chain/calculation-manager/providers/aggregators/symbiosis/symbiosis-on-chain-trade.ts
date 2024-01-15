@@ -87,7 +87,10 @@ export class SymbiosisOnChainTrade extends AggregatorOnChaiTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            const transactionData = await this.getTransactionData(options.receiverAddress);
+            const transactionData = await this.getTransactionData(
+                options.receiverAddress,
+                options.fromAddress
+            );
 
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,
@@ -114,9 +117,13 @@ export class SymbiosisOnChainTrade extends AggregatorOnChaiTrade {
         }
     }
 
-    protected async getTransactionData(receiverAddress?: string): Promise<EvmEncodeConfig> {
+    protected async getTransactionData(
+        receiverAddress?: string,
+        fromAddress?: string
+    ): Promise<EvmEncodeConfig> {
         const requestBody = await SymbiosisParser.getSwapRequestBody(this.from, this.to, {
             receiverAddress,
+            fromAddress,
             slippage: this.slippageTolerance
         });
 

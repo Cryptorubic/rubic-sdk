@@ -8,10 +8,10 @@ export interface SymbiosisSwapRequestBody {
     slippage: number;
 
     /* senderAddress */
-    from: string;
+    from?: string;
 
     /* receiverAddress */
-    to: string;
+    to?: string;
 }
 
 export interface SymbiosisSwapResponse {

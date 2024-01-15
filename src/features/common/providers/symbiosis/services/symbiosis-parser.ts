@@ -24,6 +24,7 @@ export class SymbiosisParser {
         ).address as string;
 
         const toAddress = options.receiverAddress ?? walletAddress;
+        const fromAddress = options.fromAddress ?? walletAddress;
         const slippage = options.slippage * 10000;
 
         const tokenAmountIn = {
@@ -40,7 +41,7 @@ export class SymbiosisParser {
         } as SymbiosisTokenInfo;
 
         return {
-            from: walletAddress,
+            from: fromAddress,
             to: toAddress,
             slippage,
             tokenAmountIn,
