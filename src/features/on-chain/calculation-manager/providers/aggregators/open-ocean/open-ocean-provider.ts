@@ -27,10 +27,12 @@ import { OnChainTrade } from 'src/features/on-chain/calculation-manager/provider
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 
-import { AggregatorOnChain } from '../../common/on-chain-aggregator/on-chain-aggregator-abstract';
+import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 import { ARBITRUM_GAS_PRICE } from './constants/arbitrum-gas-price';
 
-export class OpenOceanProvider extends AggregatorOnChain {
+export class OpenOceanProvider extends AggregatorOnChainProvider {
+    public tradeType = ON_CHAIN_TRADE_TYPE.OPEN_OCEAN;
+
     public static readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
     protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
@@ -44,7 +46,7 @@ export class OpenOceanProvider extends AggregatorOnChain {
     ): Promise<OnChainTrade | OnChainTradeError> {
         try {
             if (!this.isSupportedBlockchain(from.blockchain)) {
-                throw new RubicSdkError(`Rango doesn't support ${from.blockchain} chain!`);
+                throw new RubicSdkError(`Open Ocean doesn't support ${from.blockchain} chain!`);
             }
 
             await this.checkIsSupportedTokens(from, toToken);

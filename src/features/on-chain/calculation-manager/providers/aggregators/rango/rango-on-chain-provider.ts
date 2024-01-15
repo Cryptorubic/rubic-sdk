@@ -10,7 +10,7 @@ import { RangoCommonParser } from 'src/features/common/providers/rango/services/
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
-import { AggregatorOnChain } from '../../common/on-chain-aggregator/on-chain-aggregator-abstract';
+import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
@@ -20,7 +20,9 @@ import { RangoOnChainTradeStruct } from './models/rango-on-chain-trade-types';
 import { RangoOnChainTrade } from './rango-on-chain-trade';
 import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
 
-export class RangoOnChainProvider extends AggregatorOnChain {
+export class RangoOnChainProvider extends AggregatorOnChainProvider {
+    public tradeType = ON_CHAIN_TRADE_TYPE.RANGO;
+
     protected isSupportedBlockchain(blockchainName: BlockchainName): boolean {
         return rangoSupportedBlockchains.some(chain => chain === blockchainName);
     }

@@ -22,7 +22,7 @@ export interface SymbiosisSwapResponse {
     tokenAmountOutMin: SymbiosisTokenInfoWithAmount;
     amountInUsd: SymbiosisTokenInfoWithAmount;
     tx: SymbiosisSwapResponseTx;
-    approveTo: 'TVVWGAGWUBVuoMWrRM1ZhPAh18Van7YrLc';
+    approveTo: string;
     route: SymbiosisTokenInfo[];
     outTradeType: string;
     type: 'tron' | 'evm';

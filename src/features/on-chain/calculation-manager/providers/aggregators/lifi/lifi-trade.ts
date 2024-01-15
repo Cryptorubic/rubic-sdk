@@ -17,6 +17,8 @@ import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/provi
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
+import { AggregatorOnChaiTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
+
 interface LifiTransactionRequest {
     to: string;
     data: string;
@@ -25,7 +27,7 @@ interface LifiTransactionRequest {
     value: string;
 }
 
-export class LifiTrade extends EvmOnChainTrade {
+export class LifiTrade extends AggregatorOnChaiTrade {
     /** @internal */
     public static async getGasLimit(lifiTradeStruct: LifiTradeStruct): Promise<BigNumber | null> {
         const fromBlockchain = lifiTradeStruct.from.blockchain;
@@ -97,7 +99,11 @@ export class LifiTrade extends EvmOnChainTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            const transactionData = await this.getTransactionData(options.receiverAddress);
+            const transactionData = await this.getTransactionData(
+                options.receiverAddress,
+                options.fromAddress,
+                options.directTransaction
+            );
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,
                 gasPrice: transactionData.gasPrice
@@ -124,13 +130,21 @@ export class LifiTrade extends EvmOnChainTrade {
         }
     }
 
-    protected async getTransactionData(receiverAddress?: string): Promise<EvmEncodeConfig> {
+    protected async getTransactionData(
+        receiverAddress?: string,
+        fromAddress?: string,
+        directTransaction?: EvmEncodeConfig
+    ): Promise<EvmEncodeConfig> {
+        if (directTransaction) {
+            return directTransaction;
+        }
+
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
             action: {
                 ...firstStep.action,
-                fromAddress: this.walletAddress,
+                fromAddress: fromAddress || this.walletAddress,
                 toAddress: receiverAddress || this.walletAddress
             },
             execution: {

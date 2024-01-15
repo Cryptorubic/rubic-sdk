@@ -1,6 +1,6 @@
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 
-export const symbiosisSupportedBlockchains = [
+export const symbiosisOnChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.ETHEREUM,
     BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
     BLOCKCHAIN_NAME.POLYGON,
@@ -29,4 +29,5 @@ export const symbiosisSupportedBlockchains = [
     BLOCKCHAIN_NAME.MANTA_PACIFIC
 ] as const;
 
-export type SymbiosisSupportedBlockchain = (typeof symbiosisSupportedBlockchains)[number];
+export type SymbiosisOnChainSupportedBlockchain =
+    (typeof symbiosisOnChainSupportedBlockchains)[number];

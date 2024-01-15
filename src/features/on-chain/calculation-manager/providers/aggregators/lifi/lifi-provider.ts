@@ -1,17 +1,13 @@
-import { LiFi, LifiStep, RouteOptions, RoutesRequest } from '@lifi/sdk';
+import { LiFi, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { notNull } from 'src/common/utils/object';
 import { combineOptions } from 'src/common/utils/options';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
-import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
-import {
-    LifiForbiddenBlockchains,
-    lifiForbiddenBlockchains
-} from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-forbidden-blockchains';
+import { lifiForbiddenBlockchains } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-forbidden-blockchains';
 import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
 import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-trade';
 import {
@@ -19,34 +15,30 @@ import {
     RequiredLifiCalculationOptions
 } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-calculation-options';
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
-import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
-import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { OnChainProxyService } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-proxy-service/on-chain-proxy-service';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 
-export class LifiProvider {
-    private readonly lifi = new LiFi(getLifiConfig());
+import { OnChainTradeError } from '../../../models/on-chain-trade-error';
+import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 
-    private readonly onChainProxyService = new OnChainProxyService();
+export class LifiProvider extends AggregatorOnChainProvider {
+    public tradeType = ON_CHAIN_TRADE_TYPE.LIFI;
+
+    private readonly lifi = new LiFi(getLifiConfig());
 
     private readonly defaultOptions: Omit<RequiredLifiCalculationOptions, 'disabledProviders'> = {
         ...evmProviderDefaultOptions,
         gasCalculation: 'calculate'
     };
 
-    constructor() {}
-
-    private isSupportedBlockchain(
-        blockchain: BlockchainName
-    ): blockchain is LifiForbiddenBlockchains {
+    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return !lifiForbiddenBlockchains.some(forbiddenChain => forbiddenChain === blockchain);
     }
 
@@ -54,9 +46,13 @@ export class LifiProvider {
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: LifiCalculationOptions
-    ): Promise<OnChainTrade> {
-        if (this.isSupportedBlockchain(from.blockchain)) {
+    ): Promise<OnChainTrade | OnChainTradeError> {
+        if (!this.isSupportedBlockchain(from.blockchain)) {
             throw new RubicSdkError('Blockchain is not supported');
+        }
+
+        if (options.withDeflation.from.isDeflation) {
+            throw new RubicSdkError('[RUBIC_SDK] Lifi does not work if source token is deflation.');
         }
 
         const fullOptions = combineOptions(options, {
@@ -108,7 +104,7 @@ export class LifiProvider {
                         ...toToken.asStruct,
                         weiAmount: new BigNumber(route.toAmount)
                     });
-                    const path = await this.getPath(step, from, to);
+                    const path = this.getRoutePath(from, to);
 
                     let lifiTradeStruct: LifiTradeStruct = {
                         from,
@@ -154,31 +150,7 @@ export class LifiProvider {
         return best;
     }
 
-    protected async handleProxyContract(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        fullOptions: RequiredOnChainCalculationOptions
-    ): Promise<{
-        fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
-        proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-    }> {
-        let fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
-        let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-        if (fullOptions.useProxy) {
-            proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
-                from,
-                fullOptions.providerAddress
-            );
-            fromWithoutFee = getFromWithoutFee(from, proxyFeeInfo.platformFee.percent);
-        } else {
-            fromWithoutFee = from;
-        }
-        return {
-            fromWithoutFee,
-            proxyFeeInfo
-        };
-    }
-
-    private async getGasFeeInfo(lifiTradeStruct: LifiTradeStruct): Promise<GasFeeInfo | null> {
+    protected async getGasFeeInfo(lifiTradeStruct: LifiTradeStruct): Promise<GasFeeInfo | null> {
         try {
             const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
             const gasLimit = await LifiTrade.getGasLimit(lifiTradeStruct);
@@ -186,21 +158,5 @@ export class LifiProvider {
         } catch {
             return null;
         }
-    }
-
-    private async getPath(
-        step: LifiStep,
-        from: Token<EvmBlockchainName>,
-        to: Token
-    ): Promise<ReadonlyArray<Token>> {
-        const estimatedPath = step.includedSteps
-            .map(item => {
-                return [item.action.fromToken.address, item.action.toToken.address];
-            })
-            .flat();
-
-        return estimatedPath
-            ? await Token.createTokens(estimatedPath, from.blockchain)
-            : [from, to];
     }
 }

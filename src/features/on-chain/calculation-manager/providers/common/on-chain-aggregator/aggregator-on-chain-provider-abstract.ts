@@ -5,13 +5,16 @@ import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fe
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { RequiredOnChainCalculationOptions } from '../models/on-chain-calculation-options';
 import { OnChainProxyFeeInfo } from '../models/on-chain-proxy-fee-info';
+import { OnChainTradeType } from '../models/on-chain-trade-type';
 import { OnChainProxyService } from '../on-chain-proxy-service/on-chain-proxy-service';
 import { EvmOnChainTradeStruct } from '../on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from '../on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../on-chain-trade/on-chain-trade';
 
-export abstract class AggregatorOnChain {
+export abstract class AggregatorOnChainProvider {
     private readonly onChainProxyService = new OnChainProxyService();
+
+    public abstract tradeType: OnChainTradeType;
 
     public abstract calculate(
         from: PriceTokenAmount<BlockchainName>,

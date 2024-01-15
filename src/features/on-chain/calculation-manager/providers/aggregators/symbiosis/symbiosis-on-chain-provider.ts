@@ -2,24 +2,26 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { symbiosisSupportedBlockchains } from 'src/features/common/providers/symbiosis/constants/symbiosis-supported-blockchains';
 import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
 import { SymbiosisParser } from 'src/features/common/providers/symbiosis/services/symbiosis-parser';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
-import { AggregatorOnChain } from '../../common/on-chain-aggregator/on-chain-aggregator-abstract';
+import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
+import { symbiosisOnChainSupportedBlockchains } from './models/symbiosis-on-chain-supported-blockchains';
 import { SymbiosisTradeStruct } from './models/symbiosis-on-chain-trade-types';
 import { SymbiosisOnChainTrade } from './symbiosis-on-chain-trade';
 
-export class SymbiosisOnChainProvider extends AggregatorOnChain {
+export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
+    public tradeType = ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP;
+
     protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
-        return symbiosisSupportedBlockchains.some(chain => chain === blockchain);
+        return symbiosisOnChainSupportedBlockchains.some(chain => chain === blockchain);
     }
 
     public async calculate(

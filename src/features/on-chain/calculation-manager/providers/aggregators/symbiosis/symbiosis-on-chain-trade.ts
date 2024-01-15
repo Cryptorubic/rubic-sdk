@@ -14,10 +14,10 @@ import { SymbiosisParser } from 'src/features/common/providers/symbiosis/service
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
-import { EvmOnChainTrade } from '../../common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { AggregatorOnChaiTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
 import { SymbiosisTradeStruct } from './models/symbiosis-on-chain-trade-types';
 
-export class SymbiosisOnChainTrade extends EvmOnChainTrade {
+export class SymbiosisOnChainTrade extends AggregatorOnChaiTrade {
     /* @internal */
     public static async getGasLimit(
         tradeStruct: SymbiosisTradeStruct,
@@ -94,10 +94,12 @@ export class SymbiosisOnChainTrade extends EvmOnChainTrade {
                 gasPrice: transactionData.gasPrice
             });
 
+            const value = this.getSwapValue(transactionData.value);
+
             return {
                 to: transactionData.to,
                 data: transactionData.data,
-                value: this.fromWithoutFee.isNative ? this.fromWithoutFee.stringWeiAmount : '0',
+                value,
                 gas,
                 gasPrice
             };
@@ -118,7 +120,7 @@ export class SymbiosisOnChainTrade extends EvmOnChainTrade {
             slippage: this.slippageTolerance
         });
 
-        const { tx, tokenAmountOut } = await SymbiosisApiService.getSwapTx(requestBody);
+        const { tx } = await SymbiosisApiService.getSwapTx(requestBody);
 
         const evmEncodeConfig = {
             data: tx.data,
@@ -126,11 +128,11 @@ export class SymbiosisOnChainTrade extends EvmOnChainTrade {
             value: tx.value
         };
 
-        EvmOnChainTrade.checkAmountChange(
-            evmEncodeConfig,
-            tokenAmountOut.amount,
-            this.toTokenAmountMin.stringWeiAmount
-        );
+        // EvmOnChainTrade.checkAmountChange(
+        //     evmEncodeConfig,
+        //     tokenAmountOut.amount,
+        //     this.toTokenAmountMin.stringWeiAmount
+        // );
 
         return evmEncodeConfig;
     }
