@@ -375,5 +375,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'ETH',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.HORIZEN_EON]: new Token({
+        blockchain: BLOCKCHAIN_NAME.HORIZEN_EON,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ZEN',
+        symbol: 'ZEN',
+        decimals: 18
     })
 };

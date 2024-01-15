@@ -366,5 +366,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped ETH',
         symbol: 'WETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.HORIZEN_EON]: new Token({
+        blockchain: BLOCKCHAIN_NAME.HORIZEN_EON,
+        address: '0xF5cB8652a84329A2016A386206761f455bCEDab6',
+        name: 'Wrapped ZEN',
+        symbol: 'WZEN',
+        decimals: 18
     })
 };

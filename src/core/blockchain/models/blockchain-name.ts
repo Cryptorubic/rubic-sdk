@@ -55,7 +55,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     BASE: 'BASE',
     MANTLE: 'MANTLE',
     MANTA_PACIFIC: 'MANTA_PACIFIC',
-    SCROLL: 'SCROLL'
+    SCROLL: 'SCROLL',
+    HORIZEN_EON: 'HORIZEN_EON'
 } as const;
 
 export const BLOCKCHAIN_NAME = {
