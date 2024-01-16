@@ -28,6 +28,7 @@ import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 import { AggregatorOnChaiTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
+import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { ARBITRUM_GAS_PRICE } from './constants/arbitrum-gas-price';
 
 export class OpenOceanTrade extends AggregatorOnChaiTrade {
@@ -56,7 +57,7 @@ export class OpenOceanTrade extends AggregatorOnChaiTrade {
             }
         } catch {}
         try {
-            const transactionData = await openOceanTrade.getTransactionData();
+            const transactionData = await openOceanTrade.getTxConfigAndCheckAmount();
 
             if (transactionData.gas) {
                 return new BigNumber(transactionData.gas);
@@ -107,7 +108,7 @@ export class OpenOceanTrade extends AggregatorOnChaiTrade {
         );
 
         try {
-            const transactionData = await this.getTransactionData(options?.receiverAddress);
+            const transactionData = await this.getTxConfigAndCheckAmount(options?.receiverAddress);
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,
                 gasPrice: transactionData.gasPrice
@@ -131,7 +132,9 @@ export class OpenOceanTrade extends AggregatorOnChaiTrade {
         }
     }
 
-    protected async getTransactionData(receiverAddress?: string): Promise<EvmEncodeConfig> {
+    protected async getToAmountAndTxData(
+        receiverAddress?: string
+    ): Promise<GetToAmountAndTxDataResponse> {
         const gasPrice = await Injector.web3PublicService
             .getWeb3Public(this.from.blockchain)
             .getGasPrice();
@@ -166,12 +169,15 @@ export class OpenOceanTrade extends AggregatorOnChaiTrade {
                 }
             }
         );
-        const { data, to, value } = swapQuoteResponse.data;
+        const { data, to, value, outAmount: toAmount } = swapQuoteResponse.data;
 
         return {
-            data,
-            to,
-            value
+            tx: {
+                data,
+                to,
+                value
+            },
+            toAmount
         };
     }
 

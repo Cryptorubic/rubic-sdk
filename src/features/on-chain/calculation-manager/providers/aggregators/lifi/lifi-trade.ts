@@ -15,9 +15,9 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 import { AggregatorOnChaiTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
+import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 
 interface LifiTransactionRequest {
     to: string;
@@ -51,7 +51,7 @@ export class LifiTrade extends AggregatorOnChaiTrade {
             }
         } catch {}
         try {
-            const transactionData = await lifiTrade.getTransactionData();
+            const transactionData = await lifiTrade.getTxConfigAndCheckAmount();
 
             if (transactionData.gas) {
                 return new BigNumber(transactionData.gas);
@@ -99,7 +99,7 @@ export class LifiTrade extends AggregatorOnChaiTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            const transactionData = await this.getTransactionData(
+            const transactionData = await this.getTxConfigAndCheckAmount(
                 options.receiverAddress,
                 options.fromAddress,
                 options.directTransaction
@@ -130,15 +130,10 @@ export class LifiTrade extends AggregatorOnChaiTrade {
         }
     }
 
-    protected async getTransactionData(
+    protected async getToAmountAndTxData(
         receiverAddress?: string,
-        fromAddress?: string,
-        directTransaction?: EvmEncodeConfig
-    ): Promise<EvmEncodeConfig> {
-        if (directTransaction) {
-            return directTransaction;
-        }
-
+        fromAddress?: string
+    ): Promise<GetToAmountAndTxDataResponse> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
@@ -168,30 +163,20 @@ export class LifiTrade extends AggregatorOnChaiTrade {
                 ...step
             });
 
-            const { transactionRequest, estimate } = swapResponse;
-            const gasLimit =
-                transactionRequest.gasLimit && parseInt(transactionRequest.gasLimit, 16).toString();
-            const gasPrice =
-                transactionRequest.gasPrice && parseInt(transactionRequest.gasPrice, 16).toString();
-            const value =
-                transactionRequest.value && parseInt(transactionRequest.value, 16).toString();
-
-            EvmOnChainTrade.checkAmountChange(
-                {
-                    data: transactionRequest.data,
-                    value: value,
-                    to: transactionRequest.to
-                },
-                estimate.toAmountMin,
-                this.toTokenAmountMin.stringWeiAmount
-            );
+            const {
+                transactionRequest,
+                estimate: { toAmount }
+            } = swapResponse;
 
             return {
-                to: transactionRequest.to,
-                data: transactionRequest.data,
-                gas: gasLimit,
-                gasPrice,
-                value
+                tx: {
+                    data: transactionRequest.data,
+                    to: transactionRequest.to,
+                    value: transactionRequest.value,
+                    gas: transactionRequest.gasLimit,
+                    gasPrice: transactionRequest.gasPrice
+                },
+                toAmount
             };
         } catch (err) {
             if ('statusCode' in err && 'message' in err) {

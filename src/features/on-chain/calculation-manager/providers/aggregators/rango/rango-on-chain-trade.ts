@@ -16,7 +16,7 @@ import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChaiTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
-import { EvmOnChainTrade } from '../../common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { RangoOnChainTradeStruct } from './models/rango-on-chain-trade-types';
 import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
 
@@ -52,7 +52,7 @@ export class RangoOnChainTrade extends AggregatorOnChaiTrade {
             }
         } catch {}
         try {
-            const transactionData = await rangoTrade.getTransactionData();
+            const transactionData = await rangoTrade.getTxConfigAndCheckAmount();
 
             if (transactionData.gas) {
                 return new BigNumber(transactionData.gas);
@@ -104,7 +104,7 @@ export class RangoOnChainTrade extends AggregatorOnChaiTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            const transactionData = await this.getTransactionData(options.receiverAddress);
+            const transactionData = await this.getTxConfigAndCheckAmount(options.receiverAddress);
 
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,
@@ -129,37 +129,27 @@ export class RangoOnChainTrade extends AggregatorOnChaiTrade {
         }
     }
 
-    protected async getTransactionData(receiverAddress?: string): Promise<EvmEncodeConfig> {
+    protected async getToAmountAndTxData(
+        receiverAddress?: string
+    ): Promise<GetToAmountAndTxDataResponse> {
         const params = await RangoCommonParser.getSwapQueryParams(this.from, this.to, {
             slippageTolerance: this.slippageTolerance,
             receiverAddress: receiverAddress || this.walletAddress
         });
 
-        const { tx, route } = await RangoOnChainApiService.getSwapTransaction(params);
+        const { tx: transaction, route } = await RangoOnChainApiService.getSwapTransaction(params);
 
-        const { outputAmount } = route as RangoBestRouteSimulationResult;
+        const { outputAmount: toAmount } = route as RangoBestRouteSimulationResult;
 
-        if (!tx) {
-            throw new RubicSdkError(`Transaction status is undefined!`);
-        }
-
-        const gasLimit = tx.gasLimit && parseInt(tx.gasLimit, 16).toString();
-        const gasPrice = tx.gasPrice && parseInt(tx.gasPrice, 16).toString();
-
-        const evmEncodeConfig = {
-            data: tx.txData!,
-            to: tx.txTo,
-            value: tx.value!,
-            gas: gasLimit!,
-            gasPrice: gasPrice!
+        return {
+            tx: {
+                data: transaction!.txData!,
+                to: transaction!.txTo!,
+                value: transaction!.value!,
+                gas: transaction!.gasLimit ?? undefined,
+                gasPrice: transaction!.gasPrice ?? undefined
+            },
+            toAmount
         };
-
-        EvmOnChainTrade.checkAmountChange(
-            evmEncodeConfig,
-            outputAmount,
-            this.toTokenAmountMin.stringWeiAmount
-        );
-
-        return evmEncodeConfig;
     }
 }

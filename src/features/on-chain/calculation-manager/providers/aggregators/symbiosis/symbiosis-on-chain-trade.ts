@@ -15,6 +15,7 @@ import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChaiTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
+import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { SymbiosisTradeStruct } from './models/symbiosis-on-chain-trade-types';
 
 export class SymbiosisOnChainTrade extends AggregatorOnChaiTrade {
@@ -49,7 +50,7 @@ export class SymbiosisOnChainTrade extends AggregatorOnChaiTrade {
             }
         } catch {}
         try {
-            const transactionData = await symbiosisTrade.getTransactionData();
+            const transactionData = await symbiosisTrade.getTxConfigAndCheckAmount();
 
             if (transactionData.gas) {
                 return new BigNumber(transactionData.gas);
@@ -87,7 +88,7 @@ export class SymbiosisOnChainTrade extends AggregatorOnChaiTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            const transactionData = await this.getTransactionData(
+            const transactionData = await this.getTxConfigAndCheckAmount(
                 options.receiverAddress,
                 options.fromAddress
             );
@@ -117,30 +118,21 @@ export class SymbiosisOnChainTrade extends AggregatorOnChaiTrade {
         }
     }
 
-    protected async getTransactionData(
+    protected async getToAmountAndTxData(
         receiverAddress?: string,
         fromAddress?: string
-    ): Promise<EvmEncodeConfig> {
+    ): Promise<GetToAmountAndTxDataResponse> {
         const requestBody = await SymbiosisParser.getSwapRequestBody(this.from, this.to, {
             receiverAddress,
             fromAddress,
             slippage: this.slippageTolerance
         });
 
-        const { tx } = await SymbiosisApiService.getSwapTx(requestBody);
+        const { tx, tokenAmountOut } = await SymbiosisApiService.getSwapTx(requestBody);
 
-        const evmEncodeConfig = {
-            data: tx.data,
-            to: tx.to,
-            value: tx.value
+        return {
+            tx,
+            toAmount: tokenAmountOut.amount
         };
-
-        // EvmOnChainTrade.checkAmountChange(
-        //     evmEncodeConfig,
-        //     tokenAmountOut.amount,
-        //     this.toTokenAmountMin.stringWeiAmount
-        // );
-
-        return evmEncodeConfig;
     }
 }
