@@ -4,7 +4,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { EvmOnChainTrade } from '../on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { GetToAmountAndTxDataResponse } from './models/aggregator-on-chain-types';
 
-export abstract class AggregatorOnChaiTrade extends EvmOnChainTrade {
+export abstract class AggregatorOnChainTrade extends EvmOnChainTrade {
     protected async getTxConfigAndCheckAmount(
         receiverAddress?: string,
         fromAddress?: string,

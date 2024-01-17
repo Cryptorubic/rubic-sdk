@@ -31,7 +31,7 @@ import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggr
 import { ARBITRUM_GAS_PRICE } from './constants/arbitrum-gas-price';
 
 export class OpenOceanProvider extends AggregatorOnChainProvider {
-    public tradeType = ON_CHAIN_TRADE_TYPE.OPEN_OCEAN;
+    public readonly tradeType = ON_CHAIN_TRADE_TYPE.OPEN_OCEAN;
 
     public static readonly nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 

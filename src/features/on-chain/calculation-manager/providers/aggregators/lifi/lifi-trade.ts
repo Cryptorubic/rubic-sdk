@@ -16,7 +16,7 @@ import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
-import { AggregatorOnChaiTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
+import { AggregatorOnChainTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 
 interface LifiTransactionRequest {
@@ -27,7 +27,7 @@ interface LifiTransactionRequest {
     value: string;
 }
 
-export class LifiTrade extends AggregatorOnChaiTrade {
+export class LifiTrade extends AggregatorOnChainTrade {
     /** @internal */
     public static async getGasLimit(lifiTradeStruct: LifiTradeStruct): Promise<BigNumber | null> {
         const fromBlockchain = lifiTradeStruct.from.blockchain;

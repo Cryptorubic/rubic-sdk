@@ -18,7 +18,7 @@ import { SymbiosisTradeStruct } from './models/symbiosis-on-chain-trade-types';
 import { SymbiosisOnChainTrade } from './symbiosis-on-chain-trade';
 
 export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
-    public tradeType = ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP;
+    public readonly tradeType = ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP;
 
     protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
         return symbiosisOnChainSupportedBlockchains.some(chain => chain === blockchain);
@@ -43,7 +43,7 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
             const {
                 approveTo: providerGateway,
                 tokenAmountOut: { amount: toTokenAmount }
-            } = await SymbiosisApiService.getSwapTx(swapBody);
+            } = await SymbiosisApiService.getOnChainSwapTx(swapBody);
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,

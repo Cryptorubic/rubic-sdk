@@ -20,9 +20,7 @@ import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/mod
 import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
 import { RequiredOnChainManagerCalculationOptions } from 'src/features/on-chain/calculation-manager/models/required-on-chain-manager-calculation-options';
 import { WrappedOnChainTradeOrNull } from 'src/features/on-chain/calculation-manager/models/wrapped-on-chain-trade-or-null';
-import { LifiProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-provider';
 import { LifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-calculation-options';
-import { OpenOceanProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/open-ocean-provider';
 import { EvmWrapTrade } from 'src/features/on-chain/calculation-manager/providers/common/evm-wrap-trade/evm-wrap-trade';
 import {
     OnChainCalculationOptions,
@@ -37,9 +35,10 @@ import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/provi
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
 
-import { RangoOnChainProvider } from './providers/aggregators/rango/rango-on-chain-provider';
-import { SymbiosisOnChainProvider } from './providers/aggregators/symbiosis/symbiosis-on-chain-provider';
-import { AggregatorOnChainProvider } from './providers/common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
+import {
+    AggregatorOnChain,
+    AGGREGATORS_ON_CHAIN
+} from './models/on-chain-manager-aggregators-types';
 
 /**
  * Contains methods to calculate on-chain trades.
@@ -52,18 +51,9 @@ export class OnChainManager {
      */
     public readonly tradeProviders: OnChainTypedTradeProviders = typedTradeProviders;
 
-    private readonly aggregators: AggregatorOnChainProvider[] = [
-        new LifiProvider(),
-        new OpenOceanProvider(),
-        new RangoOnChainProvider(),
-        new SymbiosisOnChainProvider()
-    ];
-
-    public readonly lifiProvider = new LifiProvider();
-
-    public readonly openOceanProvider = new OpenOceanProvider();
-
     public readonly deflationTokenManager = new DeflationTokenManager();
+
+    private readonly AGGREGATORS = AGGREGATORS_ON_CHAIN;
 
     private readonly LIFI_DISABLED_PROVIDERS: OnChainTradeType[] = [];
 
@@ -238,15 +228,10 @@ export class OnChainManager {
             ([type]) => !options.disabledProviders.includes(type as OnChainTradeType)
         ) as [OnChainTradeType, OnChainProvider][];
         const dexesTradesPromise = this.calculateDexes(from, to, dexesProviders, options);
-        const lifiTradePromise = this.calculateLifiTrade(from, to, options);
-        const openOceanTradePromise = this.openOceanProvider.calculate(
-            from as PriceTokenAmount<EvmBlockchainName>,
-            to as PriceTokenAmount<EvmBlockchainName>,
-            options as RequiredOnChainCalculationOptions
-        );
+        const aggregatorsTradesPromises = this.getAggregatorsCalculationPromises(from, to, options);
 
         const allTrades = (
-            await Promise.all([dexesTradesPromise, lifiTradePromise, openOceanTradePromise])
+            await Promise.all([dexesTradesPromise, ...aggregatorsTradesPromises])
         ).flat();
 
         return allTrades.filter(notNull).sort((tradeA, tradeB) => {
@@ -303,7 +288,7 @@ export class OnChainManager {
                 disabledProviders
             };
 
-            const lifiCalculationCall = this.lifiProvider.calculate(
+            const lifiCalculationCall = this.AGGREGATORS.LIFI.calculate(
                 from as PriceTokenAmount<EvmBlockchainName>,
                 to as PriceTokenAmount<EvmBlockchainName>,
                 calculationOptions
@@ -383,27 +368,35 @@ export class OnChainManager {
         to: PriceToken,
         options: RequiredOnChainManagerCalculationOptions
     ): Array<Promise<WrappedOnChainTradeOrNull>> {
-        const availableAggregators = this.aggregators.filter(aggregator => {
+        const availableAggregators = Object.values(this.AGGREGATORS).filter(aggregator => {
             return !this.isDisabledAggregator(options.disabledProviders, aggregator.tradeType);
         });
 
         const promises = availableAggregators.map(async aggregator => {
-            try {
-                let wrappedTrade: OnChainTrade | OnChainTradeError;
+            const promise =
+                aggregator.tradeType === ON_CHAIN_TRADE_TYPE.LIFI
+                    ? this.calculateLifiTrade(from, to, options)
+                    : pTimeout(
+                          aggregator.calculate(
+                              from as PriceTokenAmount<EvmBlockchainName>,
+                              to as PriceTokenAmount<EvmBlockchainName>,
+                              options as RequiredOnChainCalculationOptions
+                          ),
+                          options.timeout
+                      );
 
-                if (aggregator.tradeType === ON_CHAIN_TRADE_TYPE.LIFI) {
-                    wrappedTrade = await this.calculateLifiTrade(from, to, options);
-                } else {
-                    wrappedTrade = await pTimeout(
-                        aggregator.calculate(
-                            from as PriceTokenAmount<EvmBlockchainName>,
-                            to as PriceTokenAmount<EvmBlockchainName>,
-                            options as RequiredOnChainCalculationOptions
-                        ),
-                        options.timeout
-                    );
-                }
+            return this.handleTradePromise(promise, aggregator);
+        });
 
+        return promises;
+    }
+
+    private handleTradePromise(
+        promise: Promise<OnChainTrade | OnChainTradeError>,
+        aggregator: AggregatorOnChain
+    ): Promise<WrappedOnChainTradeOrNull> {
+        return promise
+            .then(wrappedTrade => {
                 if ('error' in wrappedTrade) {
                     throw wrappedTrade.error;
                 }
@@ -413,7 +406,8 @@ export class OnChainManager {
                 }
 
                 return { trade: wrappedTrade, tradeType: aggregator.tradeType };
-            } catch (err) {
+            })
+            .catch(err => {
                 console.debug(
                     `[RUBIC_SDK] Trade calculation error occurred for ${aggregator.tradeType} trade provider.`,
                     err
@@ -424,10 +418,7 @@ export class OnChainManager {
                     tradeType: aggregator.tradeType,
                     error: CrossChainProvider.parseError(err)
                 };
-            }
-        });
-
-        return promises;
+            });
     }
 
     private isDisabledAggregator(

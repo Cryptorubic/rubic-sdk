@@ -21,7 +21,7 @@ import { RangoOnChainTrade } from './rango-on-chain-trade';
 import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
 
 export class RangoOnChainProvider extends AggregatorOnChainProvider {
-    public tradeType = ON_CHAIN_TRADE_TYPE.RANGO;
+    public readonly tradeType = ON_CHAIN_TRADE_TYPE.RANGO;
 
     protected isSupportedBlockchain(blockchainName: BlockchainName): boolean {
         return rangoSupportedBlockchains.some(chain => chain === blockchainName);

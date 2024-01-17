@@ -29,7 +29,7 @@ import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 
 export class LifiProvider extends AggregatorOnChainProvider {
-    public tradeType = ON_CHAIN_TRADE_TYPE.LIFI;
+    public readonly tradeType = ON_CHAIN_TRADE_TYPE.LIFI;
 
     private readonly lifi = new LiFi(getLifiConfig());
 

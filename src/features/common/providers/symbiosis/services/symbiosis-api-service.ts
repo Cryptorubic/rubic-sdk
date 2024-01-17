@@ -18,7 +18,9 @@ export class SymbiosisApiService {
     @Cache({
         maxAge: 15_000
     })
-    public static async getSwapTx(body: SymbiosisSwapRequestBody): Promise<SymbiosisSwapResponse> {
+    public static async getOnChainSwapTx(
+        body: SymbiosisSwapRequestBody
+    ): Promise<SymbiosisSwapResponse> {
         const res = await Injector.httpClient.post<SymbiosisSwapResponse | SymbiosisErrorResponse>(
             `${SYMBIOSIS_API_ENDPOINT}/v1/swap`,
             body

@@ -14,7 +14,7 @@ import { OnChainTrade } from '../on-chain-trade/on-chain-trade';
 export abstract class AggregatorOnChainProvider {
     private readonly onChainProxyService = new OnChainProxyService();
 
-    public abstract tradeType: OnChainTradeType;
+    public abstract readonly tradeType: OnChainTradeType;
 
     public abstract calculate(
         from: PriceTokenAmount<BlockchainName>,

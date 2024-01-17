@@ -27,11 +27,11 @@ import { OpenoceanSwapQuoteResponse } from 'src/features/on-chain/calculation-ma
 import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-trade-struct';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
-import { AggregatorOnChaiTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
+import { AggregatorOnChainTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { ARBITRUM_GAS_PRICE } from './constants/arbitrum-gas-price';
 
-export class OpenOceanTrade extends AggregatorOnChaiTrade {
+export class OpenOceanTrade extends AggregatorOnChainTrade {
     /** @internal */
     public static async getGasLimit(
         openOceanTradeStruct: OpenOceanTradeStruct
