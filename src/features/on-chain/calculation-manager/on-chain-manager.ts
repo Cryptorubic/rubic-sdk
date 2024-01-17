@@ -35,10 +35,8 @@ import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/provi
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
 
-import {
-    AggregatorOnChain,
-    AGGREGATORS_ON_CHAIN
-} from './models/on-chain-manager-aggregators-types';
+import { AGGREGATORS_ON_CHAIN } from './models/on-chain-manager-aggregators-types';
+import { AggregatorOnChainProvider } from './providers/common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 
 /**
  * Contains methods to calculate on-chain trades.
@@ -288,7 +286,9 @@ export class OnChainManager {
                 disabledProviders
             };
 
-            const lifiCalculationCall = this.AGGREGATORS.LIFI.calculate(
+            const lifiAggregator = new this.AGGREGATORS.LIFI();
+
+            const lifiCalculationCall = lifiAggregator.calculate(
                 from as PriceTokenAmount<EvmBlockchainName>,
                 to as PriceTokenAmount<EvmBlockchainName>,
                 calculationOptions
@@ -368,9 +368,11 @@ export class OnChainManager {
         to: PriceToken,
         options: RequiredOnChainManagerCalculationOptions
     ): Array<Promise<WrappedOnChainTradeOrNull>> {
-        const availableAggregators = Object.values(this.AGGREGATORS).filter(aggregator => {
-            return !this.isDisabledAggregator(options.disabledProviders, aggregator.tradeType);
-        });
+        const availableAggregators = Object.values(this.AGGREGATORS)
+            .map(AggregatorClass => new AggregatorClass())
+            .filter(aggregator => {
+                return !this.isDisabledAggregator(options.disabledProviders, aggregator.tradeType);
+            });
 
         const promises = availableAggregators.map(async aggregator => {
             const promise =
@@ -393,7 +395,7 @@ export class OnChainManager {
 
     private handleTradePromise(
         promise: Promise<OnChainTrade | OnChainTradeError>,
-        aggregator: AggregatorOnChain
+        aggregator: AggregatorOnChainProvider
     ): Promise<WrappedOnChainTradeOrNull> {
         return promise
             .then(wrappedTrade => {

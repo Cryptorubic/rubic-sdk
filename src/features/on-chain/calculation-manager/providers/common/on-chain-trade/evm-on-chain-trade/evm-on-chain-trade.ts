@@ -408,7 +408,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     ): void {
         const oldAmount = new BigNumber(oldWeiAmount);
         const newAmount = new BigNumber(newWeiAmount);
-        const changePercent = 0.01;
+        const changePercent = 0.1;
         const acceptablePercentPriceChange = new BigNumber(changePercent).dividedBy(100);
 
         const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));

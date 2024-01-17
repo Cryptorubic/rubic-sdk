@@ -1,5 +1,6 @@
+import BigNumber from 'bignumber.js';
+import { TokenUtils } from 'src/common/utils/token-utils';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
 import { EvmOnChainTrade } from '../on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { GetToAmountAndTxDataResponse } from './models/aggregator-on-chain-types';
@@ -27,11 +28,14 @@ export abstract class AggregatorOnChainTrade extends EvmOnChainTrade {
             gasPrice
         };
 
-        const toAmountWei = Web3Pure.toWei(toAmount, this.to.decimals);
+        const newToTokenAmountMin = TokenUtils.getMinWeiAmountString(
+            new BigNumber(toAmount),
+            this.slippageTolerance
+        );
 
         EvmOnChainTrade.checkAmountChange(
             evmEncodeConfig,
-            toAmountWei,
+            newToTokenAmountMin,
             this.toTokenAmountMin.stringWeiAmount
         );
 
@@ -39,7 +43,7 @@ export abstract class AggregatorOnChainTrade extends EvmOnChainTrade {
     }
 
     /**
-     * Returns data for method EvmOnChainTrade.checkAmountChange and EvmEncodeConfig value
+     * @description Returns data for method EvmOnChainTrade.checkAmountChange and EvmEncodeConfig value
      */
     protected abstract getToAmountAndTxData(
         receiverAddress?: string,

@@ -4,10 +4,8 @@ import { RangoOnChainProvider } from '../providers/aggregators/rango/rango-on-ch
 import { SymbiosisOnChainProvider } from '../providers/aggregators/symbiosis/symbiosis-on-chain-provider';
 
 export const AGGREGATORS_ON_CHAIN = {
-    LIFI: new LifiProvider(),
-    OPEN_OCEAN: new OpenOceanProvider(),
-    RANGO: new RangoOnChainProvider(),
-    SYMBIOSIS: new SymbiosisOnChainProvider()
+    LIFI: LifiProvider,
+    OPEN_OCEAN: OpenOceanProvider,
+    RANGO: RangoOnChainProvider,
+    SYMBIOSIS: SymbiosisOnChainProvider
 } as const;
-
-export type AggregatorOnChain = (typeof AGGREGATORS_ON_CHAIN)[keyof typeof AGGREGATORS_ON_CHAIN];
