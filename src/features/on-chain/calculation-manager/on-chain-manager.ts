@@ -374,7 +374,7 @@ export class OnChainManager {
                 return !this.isDisabledAggregator(options.disabledProviders, aggregator.tradeType);
             });
 
-        const promises = availableAggregators.map(async aggregator => {
+        const promises = availableAggregators.map(aggregator => {
             const promise =
                 aggregator.tradeType === ON_CHAIN_TRADE_TYPE.LIFI
                     ? this.calculateLifiTrade(from, to, options)
