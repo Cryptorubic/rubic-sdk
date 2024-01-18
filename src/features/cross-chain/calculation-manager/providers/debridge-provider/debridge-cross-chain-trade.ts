@@ -58,7 +58,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
         providerAddress: string,
         receiverAddress?: string
     ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain as DeBridgeCrossChainSupportedBlockchain;
+        const fromBlockchain = from.blockchain as DeBridgeCrossChainSupportedBlockchain &
+            EvmBlockchainName;
         const walletAddress =
             Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
         if (!walletAddress) {
@@ -180,8 +181,8 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly gasData: GasData | null;
 
-    private get fromBlockchain(): DeBridgeCrossChainSupportedBlockchain {
-        return this.from.blockchain as DeBridgeCrossChainSupportedBlockchain;
+    private get fromBlockchain(): DeBridgeCrossChainSupportedBlockchain & EvmBlockchainName {
+        return this.from.blockchain as DeBridgeCrossChainSupportedBlockchain & EvmBlockchainName;
     }
 
     protected get fromContractAddress(): string {

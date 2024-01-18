@@ -76,7 +76,8 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
     ): Promise<CalculationResult> {
-        const fromBlockchain = from.blockchain as DeBridgeCrossChainSupportedBlockchain;
+        const fromBlockchain = from.blockchain as DeBridgeCrossChainSupportedBlockchain &
+            EvmBlockchainName;
         const toBlockchain = toToken.blockchain as DeBridgeCrossChainSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
@@ -205,7 +206,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
     }
 
     protected async getFeeInfo(
-        fromBlockchain: DeBridgeCrossChainSupportedBlockchain,
+        fromBlockchain: DeBridgeCrossChainSupportedBlockchain & EvmBlockchainName,
         providerAddress: string,
         percentFeeToken: PriceTokenAmount,
         useProxy: boolean
@@ -248,39 +249,48 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             .find(el => el.chain === fromChainId);
         const transitTo = estimation.costsDetails.find(el => el.chain === toChainId);
 
-        const fromTokenAmount = transitFrom
-            ? await TokenAmount.createToken({
-                  blockchain: from.blockchain,
-                  address: transitFrom!.tokenOut,
-                  weiAmount: new BigNumber(transitFrom!.amountOut)
-              })
-            : from;
+        try {
+            const fromTokenAmount = transitFrom
+                ? await TokenAmount.createToken({
+                      blockchain: from.blockchain,
+                      address: transitFrom!.tokenOut,
+                      weiAmount: new BigNumber(transitFrom!.amountOut)
+                  })
+                : from;
 
-        const toTokenAmount = transitTo
-            ? await TokenAmount.createToken({
-                  blockchain: to.blockchain,
-                  address: transitTo!.tokenIn,
-                  weiAmount: new BigNumber(transitTo!.amountIn)
-              })
-            : to;
+            const toTokenAmount = transitTo
+                ? await TokenAmount.createToken({
+                      blockchain: to.blockchain,
+                      address: transitTo!.tokenIn,
+                      weiAmount: new BigNumber(transitTo!.amountIn)
+                  })
+                : to;
 
-        // @TODO Add dex true provider and path
-        return [
-            {
-                type: 'on-chain',
-                path: [from, fromTokenAmount],
-                provider: ON_CHAIN_TRADE_TYPE.ONE_INCH
-            },
-            {
-                type: 'cross-chain',
-                path: [fromTokenAmount, toTokenAmount],
-                provider: CROSS_CHAIN_TRADE_TYPE.DEBRIDGE
-            },
-            {
-                type: 'on-chain',
-                path: [toTokenAmount, to],
-                provider: ON_CHAIN_TRADE_TYPE.ONE_INCH
-            }
-        ];
+            return [
+                {
+                    type: 'on-chain',
+                    path: [from, fromTokenAmount],
+                    provider: ON_CHAIN_TRADE_TYPE.ONE_INCH
+                },
+                {
+                    type: 'cross-chain',
+                    path: [fromTokenAmount, toTokenAmount],
+                    provider: CROSS_CHAIN_TRADE_TYPE.DEBRIDGE
+                },
+                {
+                    type: 'on-chain',
+                    path: [toTokenAmount, to],
+                    provider: ON_CHAIN_TRADE_TYPE.ONE_INCH
+                }
+            ];
+        } catch {
+            return [
+                {
+                    type: 'cross-chain',
+                    path: [from, to],
+                    provider: CROSS_CHAIN_TRADE_TYPE.DEBRIDGE
+                }
+            ];
+        }
     }
 }

@@ -1,7 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { InsufficientFundsError, RubicSdkError } from 'src/common/errors';
 import { Token } from 'src/common/tokens';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -11,7 +10,6 @@ import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-servi
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
 import { SupportedTokenField } from 'src/core/blockchain/web3-public-service/web3-public/models/supported-token-field';
 import { TxStatus } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
-import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { AbiItem } from 'web3-utils';
 
@@ -23,8 +21,6 @@ export abstract class Web3Public {
     protected readonly multicallAddress = MULTICALL_ADDRESSES[this.blockchainName];
 
     protected readonly Web3Pure = Web3Pure[BlockchainsInfo.getChainType(this.blockchainName)];
-
-    protected abstract readonly tokenContractAbi: AbiItem[];
 
     protected constructor(protected readonly blockchainName: Web3PublicSupportedBlockchain) {}
 
@@ -55,50 +51,10 @@ export abstract class Web3Public {
      */
     public abstract getTokenBalance(userAddress: string, tokenAddress: string): Promise<BigNumber>;
 
-    /**
-     * Gets balances of multiple tokens via multicall.
-     * @param userAddress Wallet address, which contains tokens.
-     * @param tokensAddresses Tokens addresses.
-     */
-    public async getTokensBalances(
+    public abstract getTokensBalances(
         userAddress: string,
         tokensAddresses: string[]
-    ): Promise<BigNumber[]> {
-        const indexOfNativeCoin = tokensAddresses.findIndex(TronWeb3Pure.isNativeAddress);
-        const promises = [];
-
-        if (indexOfNativeCoin !== -1) {
-            tokensAddresses.splice(indexOfNativeCoin, 1);
-            promises[1] = this.getBalance(userAddress);
-        }
-
-        promises[0] = this.multicallContractsMethods<string>(
-            this.tokenContractAbi,
-            tokensAddresses.map(tokenAddress => ({
-                contractAddress: tokenAddress,
-                methodsData: [
-                    {
-                        methodName: 'balanceOf',
-                        methodArguments: [userAddress]
-                    }
-                ]
-            }))
-        );
-
-        const results = await Promise.all(
-            promises as [Promise<ContractMulticallResponse<string>[][]>, Promise<BigNumber>]
-        );
-        const tokensBalances = results[0].map(tokenResults => {
-            const { success, output } = tokenResults[0]!;
-            return success ? new BigNumber(output!) : new BigNumber(0);
-        });
-
-        if (indexOfNativeCoin !== -1) {
-            tokensBalances.splice(indexOfNativeCoin, 0, results[1]);
-        }
-
-        return tokensBalances;
-    }
+    ): Promise<BigNumber[]>;
 
     /**
      * Checks that user has enough balance.
@@ -136,53 +92,10 @@ export abstract class Web3Public {
      * @param tokenAddresses Addresses of tokens.
      * @param tokenFields Token's fields to get.
      */
-    @Cache
-    public async callForTokensInfo(
+    public abstract callForTokensInfo(
         tokenAddresses: string[] | ReadonlyArray<string>,
-        tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
-    ): Promise<Partial<Record<SupportedTokenField, string>>[]> {
-        const nativeTokenIndex = tokenAddresses.findIndex(address =>
-            this.Web3Pure.isNativeAddress(address)
-        );
-        const filteredTokenAddresses = tokenAddresses.filter(
-            (_, index) => index !== nativeTokenIndex
-        );
-        const contractsData = filteredTokenAddresses.map(contractAddress => ({
-            contractAddress,
-            methodsData: tokenFields.map(methodName => ({
-                methodName,
-                methodArguments: []
-            }))
-        }));
-
-        const results = contractsData.length
-            ? await this.multicallContractsMethods<[string]>(this.tokenContractAbi, contractsData)
-            : [];
-        const tokens = results.map((tokenFieldsResults, tokenIndex) => {
-            const tokenAddress = tokenAddresses[tokenIndex]!;
-            return tokenFieldsResults.reduce((acc, field, fieldIndex) => {
-                if (!field.success) {
-                    throw new RubicSdkError(`Cannot retrieve information about ${tokenAddress}`);
-                }
-                return {
-                    ...acc,
-                    [tokenFields[fieldIndex]!]: field.success ? field.output : undefined
-                };
-            }, {});
-        });
-
-        if (nativeTokenIndex === -1) {
-            return tokens;
-        }
-
-        const blockchainNativeToken = nativeTokensList[this.blockchainName];
-        const nativeToken = {
-            ...blockchainNativeToken,
-            decimals: blockchainNativeToken.decimals.toString()
-        };
-        tokens.splice(nativeTokenIndex, 0, nativeToken);
-        return tokens;
-    }
+        tokenFields?: SupportedTokenField[]
+    ): Promise<Partial<Record<SupportedTokenField, string>>[]>;
 
     /**
      * Calls allowance method in token contract.

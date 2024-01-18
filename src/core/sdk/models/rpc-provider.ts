@@ -1,4 +1,8 @@
-import { EvmBlockchainName, TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    EvmBlockchainName,
+    SolanaBlockchainName,
+    TronBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { TronWebProvider } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/models/tron-web-provider';
 
 /**
@@ -18,5 +22,6 @@ export interface RpcProvider<T> {
 
 export type RpcProviders = Partial<
     Record<EvmBlockchainName, RpcProvider<string>> &
-        Record<TronBlockchainName, RpcProvider<TronWebProvider>>
+        Record<TronBlockchainName, RpcProvider<TronWebProvider>> &
+        Record<SolanaBlockchainName, RpcProvider<string>>
 >;

@@ -2,6 +2,7 @@ import { RubicSdkError } from 'src/common/errors';
 import {
     BlockchainName,
     EvmBlockchainName,
+    SolanaBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE, ChainType } from 'src/core/blockchain/models/chain-type';
@@ -15,10 +16,12 @@ import {
 import { Web3PrivateStorage } from 'src/core/blockchain/web3-private-service/models/web3-private-storage';
 import { EmptyWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/empty-web3-private';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
+import { SolanaWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/solana-web3-private/solana-web3-private';
 import { TronWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/tron-web3-private/tron-web3-private';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import {
     EvmWalletProviderCore,
+    SolanaWalletProviderCore,
     TronWalletProviderCore,
     WalletProvider,
     WalletProviderCore
@@ -38,7 +41,8 @@ export class Web3PrivateService {
 
     private readonly createWeb3Private: CreateWeb3Private = {
         [CHAIN_TYPE.EVM]: this.createEvmWeb3Private.bind(this),
-        [CHAIN_TYPE.TRON]: this.createTronWeb3Private.bind(this)
+        [CHAIN_TYPE.TRON]: this.createTronWeb3Private.bind(this),
+        [CHAIN_TYPE.SOLANA]: this.createSolanaWeb3Private.bind(this)
     };
 
     constructor(walletProvider?: WalletProvider) {
@@ -47,6 +51,7 @@ export class Web3PrivateService {
 
     public getWeb3Private(chainType: 'EVM'): EvmWeb3Private;
     public getWeb3Private(chainType: 'TRON'): TronWeb3Private;
+    public getWeb3Private(chainType: 'SOLANA'): SolanaWeb3Private;
     public getWeb3Private(chainType: ChainType): never;
     public getWeb3Private(chainType: ChainType) {
         if (!Web3PrivateService.isSupportedChainType(chainType)) {
@@ -61,6 +66,7 @@ export class Web3PrivateService {
     }
 
     public getWeb3PrivateByBlockchain(blockchain: EvmBlockchainName): EvmWeb3Private;
+    public getWeb3PrivateByBlockchain(blockchain: SolanaBlockchainName): SolanaWeb3Private;
     public getWeb3PrivateByBlockchain(blockchain: TronBlockchainName): TronWeb3Private;
     public getWeb3PrivateByBlockchain(blockchain: Web3PrivateSupportedBlockchain): Web3Private;
     public getWeb3PrivateByBlockchain(blockchain: BlockchainName): never;
@@ -119,5 +125,20 @@ export class Web3PrivateService {
 
     public updateWeb3PrivateAddress(chainType: Web3PrivateSupportedChainType, address: string) {
         this.web3PrivateStorage[chainType]?.setAddress(address);
+    }
+
+    private createSolanaWeb3Private(solanaWallet: SolanaWalletProviderCore): SolanaWeb3Private {
+        let { core } = solanaWallet;
+        if (!(core instanceof Web3)) {
+            core = new Web3(core);
+        }
+        const web3 = core as Web3;
+        if (!web3) {
+            throw new RubicSdkError('Web3 is not initialized');
+        }
+
+        const address = web3.utils.toChecksumAddress(solanaWallet.address);
+
+        return new SolanaWeb3Private(address);
     }
 }

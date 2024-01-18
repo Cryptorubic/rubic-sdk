@@ -70,7 +70,11 @@ module.exports = function(env, argv) {
         output: {
             filename: 'rubic-sdk.min.js',
             path: path.resolve(__dirname, 'dist'),
-            library: 'RubicSDK',
+            library: {
+                name: "RubicSDK",
+                type: "umd",
+                export: "default",
+            },
             clean: true
         },
         // optimization: {
