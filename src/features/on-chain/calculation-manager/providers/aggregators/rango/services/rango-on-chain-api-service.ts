@@ -41,7 +41,7 @@ export class RangoOnChainApiService {
             { params: params as unknown as HttpClientParams }
         );
 
-        if (!res.route || res.error) {
+        if (!res.route || res.error || !res.tx) {
             throw new RubicSdkError(res.error ?? 'No available routes in rango.');
         }
 

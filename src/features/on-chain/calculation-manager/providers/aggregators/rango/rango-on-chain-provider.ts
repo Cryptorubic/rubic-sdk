@@ -1,30 +1,29 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { RangoBestRouteSimulationResult } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
+import { RangoTransaction } from 'src/features/common/providers/rango/models/rango-api-swap-types';
 import { rangoSupportedBlockchains } from 'src/features/common/providers/rango/models/rango-supported-blockchains';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
-import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
-import { OnChainTradeError } from '../../models/on-chain-trade-error';
-import { RequiredOnChainCalculationOptions } from '../common/models/on-chain-calculation-options';
-import { OnChainProxyFeeInfo } from '../common/models/on-chain-proxy-fee-info';
-import { ON_CHAIN_TRADE_TYPE } from '../common/models/on-chain-trade-type';
-import { OnChainProxyService } from '../common/on-chain-proxy-service/on-chain-proxy-service';
-import { GasFeeInfo } from '../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
-import { OnChainTrade } from '../common/on-chain-trade/on-chain-trade';
-import { getGasFeeInfo } from '../common/utils/get-gas-fee-info';
-import { getGasPriceInfo } from '../common/utils/get-gas-price-info';
+import { OnChainTradeError } from '../../../models/on-chain-trade-error';
+import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
+import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
+import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
+import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
+import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
+import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
+import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
 import { rangoOnChainDisabledProviders } from './models/rango-on-chain-disabled-providers';
 import { RangoOnChainTradeStruct } from './models/rango-on-chain-trade-types';
 import { RangoOnChainTrade } from './rango-on-chain-trade';
 import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
 
-export class RangoOnChainProvider {
-    private readonly onChainProxyService = new OnChainProxyService();
+export class RangoOnChainProvider extends AggregatorOnChainProvider {
+    public readonly tradeType = ON_CHAIN_TRADE_TYPE.RANGO;
 
-    private isSupportedBlockchain(blockchainName: BlockchainName): boolean {
+    protected isSupportedBlockchain(blockchainName: BlockchainName): boolean {
         return rangoSupportedBlockchains.some(chain => chain === blockchainName);
     }
 
@@ -47,8 +46,9 @@ export class RangoOnChainProvider {
                 swapperGroups: rangoOnChainDisabledProviders
             });
 
-            const { route } = await RangoOnChainApiService.getBestRoute(swapParams);
+            const { route, tx } = await RangoOnChainApiService.getSwapTransaction(swapParams);
             const { outputAmountMin, outputAmount } = route as RangoBestRouteSimulationResult;
+            const { approveTo: providerGateway } = tx as RangoTransaction;
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -74,7 +74,7 @@ export class RangoOnChainProvider {
 
             const gasFeeInfo =
                 options.gasCalculation === 'calculate'
-                    ? await this.getGasFeeInfo(tradeStruct)
+                    ? await this.getGasFeeInfo(tradeStruct, providerGateway!)
                     : null;
 
             return new RangoOnChainTrade(
@@ -82,7 +82,8 @@ export class RangoOnChainProvider {
                     ...tradeStruct,
                     gasFeeInfo
                 },
-                options.providerAddress
+                options.providerAddress,
+                providerGateway!
             );
         } catch (err) {
             return {
@@ -92,44 +93,16 @@ export class RangoOnChainProvider {
         }
     }
 
-    protected async handleProxyContract(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        fullOptions: RequiredOnChainCalculationOptions
-    ): Promise<{
-        fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
-        proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-    }> {
-        let fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
-        let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-        if (fullOptions.useProxy) {
-            proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
-                from,
-                fullOptions.providerAddress
-            );
-            fromWithoutFee = getFromWithoutFee(from, proxyFeeInfo.platformFee.percent);
-        } else {
-            fromWithoutFee = from;
-        }
-        return {
-            fromWithoutFee,
-            proxyFeeInfo
-        };
-    }
-
-    private async getGasFeeInfo(tradeStruct: RangoOnChainTradeStruct): Promise<GasFeeInfo | null> {
+    protected async getGasFeeInfo(
+        tradeStruct: RangoOnChainTradeStruct,
+        providerGateway: string
+    ): Promise<GasFeeInfo | null> {
         try {
             const gasPriceInfo = await getGasPriceInfo(tradeStruct.from.blockchain);
-            const gasLimit = await RangoOnChainTrade.getGasLimit(tradeStruct);
+            const gasLimit = await RangoOnChainTrade.getGasLimit(tradeStruct, providerGateway);
             return getGasFeeInfo(gasLimit, gasPriceInfo);
         } catch {
             return null;
         }
-    }
-
-    private getRoutePath(
-        from: Token<EvmBlockchainName>,
-        to: Token<EvmBlockchainName>
-    ): ReadonlyArray<Token> {
-        return [from, to];
     }
 }

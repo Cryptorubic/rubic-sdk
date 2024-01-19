@@ -10,20 +10,21 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { rangoContractAddresses } from 'src/features/common/providers/rango/constants/rango-contract-address';
-import { RangoSupportedBlockchain } from 'src/features/common/providers/rango/models/rango-supported-blockchains';
+import { RangoBestRouteSimulationResult } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 
-import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../common/models/on-chain-trade-type';
-import { EvmOnChainTrade } from '../common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
+import { AggregatorOnChainTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
+import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { RangoOnChainTradeStruct } from './models/rango-on-chain-trade-types';
 import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
 
-export class RangoOnChainTrade extends EvmOnChainTrade {
+export class RangoOnChainTrade extends AggregatorOnChainTrade {
     /* @internal */
     public static async getGasLimit(
-        tradeStruct: RangoOnChainTradeStruct
+        tradeStruct: RangoOnChainTradeStruct,
+        providerGateway: string
     ): Promise<BigNumber | null> {
         const fromBlockchain = tradeStruct.from.blockchain;
         const walletAddress =
@@ -33,7 +34,11 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
             return null;
         }
 
-        const rangoTrade = new RangoOnChainTrade(tradeStruct, EvmWeb3Pure.EMPTY_ADDRESS);
+        const rangoTrade = new RangoOnChainTrade(
+            tradeStruct,
+            EvmWeb3Pure.EMPTY_ADDRESS,
+            providerGateway
+        );
         try {
             const transactionConfig = await rangoTrade.encode({ fromAddress: walletAddress });
 
@@ -47,7 +52,7 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
             }
         } catch {}
         try {
-            const transactionData = await rangoTrade.getTransactionData();
+            const transactionData = await rangoTrade.getTxConfigAndCheckAmount();
 
             if (transactionData.gas) {
                 return new BigNumber(transactionData.gas);
@@ -55,6 +60,11 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
         } catch {}
         return null;
     }
+
+    /**
+     * approveTo address - used in this.web3Public.getAllowance() method
+     */
+    public readonly providerGateway: string;
 
     public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.RANGO;
 
@@ -67,21 +77,26 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
     protected get spenderAddress(): string {
         return this.useProxy
             ? rubicProxyContractAddress[this.from.blockchain].gateway
-            : rangoContractAddresses[this.from.blockchain as RangoSupportedBlockchain]
-                  .providerGateway;
+            : this.providerGateway;
     }
 
     public get dexContractAddress(): string {
         throw new RubicSdkError('Dex address is unknown before swap is started');
     }
 
-    constructor(tradeStruct: RangoOnChainTradeStruct, providerAddress: string) {
+    constructor(
+        tradeStruct: RangoOnChainTradeStruct,
+        providerAddress: string,
+        providerGateway: string
+    ) {
         super(tradeStruct, providerAddress);
 
         this._toTokenAmountMin = new PriceTokenAmount({
             ...this.to.asStruct,
             weiAmount: tradeStruct.toTokenWeiAmountMin
         });
+
+        this.providerGateway = providerGateway;
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
@@ -89,10 +104,7 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            const transactionData = await this.getTransactionData(
-                this.walletAddress,
-                options.receiverAddress
-            );
+            const transactionData = await this.getTxConfigAndCheckAmount(options.receiverAddress);
 
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,
@@ -117,32 +129,27 @@ export class RangoOnChainTrade extends EvmOnChainTrade {
         }
     }
 
-    private async getTransactionData(
-        fromAddress?: string,
+    protected async getToAmountAndTxData(
         receiverAddress?: string
-    ): Promise<EvmEncodeConfig> {
+    ): Promise<GetToAmountAndTxDataResponse> {
         const params = await RangoCommonParser.getSwapQueryParams(this.from, this.to, {
             slippageTolerance: this.slippageTolerance,
-            fromAddress: fromAddress || this.walletAddress,
-            receiverAddress: receiverAddress || fromAddress || this.walletAddress
+            receiverAddress: receiverAddress || this.walletAddress
         });
 
-        const { tx } = await RangoOnChainApiService.getSwapTransaction(params);
+        const { tx: transaction, route } = await RangoOnChainApiService.getSwapTransaction(params);
 
-        if (!tx) {
-            throw new RubicSdkError(`Transaction status is undefined!`);
-        }
-
-        const gasLimit = tx.gasLimit && parseInt(tx.gasLimit, 16).toString();
-        const gasPrice = tx.gasPrice && parseInt(tx.gasPrice, 16).toString();
+        const { outputAmount: toAmount } = route as RangoBestRouteSimulationResult;
 
         return {
-            data: tx.txData!,
-            to: rangoContractAddresses[this.from.blockchain as RangoSupportedBlockchain]
-                .providerGateway,
-            value: tx.value!,
-            gas: gasLimit!,
-            gasPrice: gasPrice!
+            tx: {
+                data: transaction!.txData!,
+                to: transaction!.txTo!,
+                value: transaction!.value!,
+                gas: transaction!.gasLimit ?? undefined,
+                gasPrice: transaction!.gasPrice ?? undefined
+            },
+            toAmount
         };
     }
 }

@@ -13,9 +13,11 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/lifi/models/lifi-trade-struct';
+
+import { AggregatorOnChainTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
+import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 
 interface LifiTransactionRequest {
     to: string;
@@ -25,7 +27,7 @@ interface LifiTransactionRequest {
     value: string;
 }
 
-export class LifiTrade extends EvmOnChainTrade {
+export class LifiTrade extends AggregatorOnChainTrade {
     /** @internal */
     public static async getGasLimit(lifiTradeStruct: LifiTradeStruct): Promise<BigNumber | null> {
         const fromBlockchain = lifiTradeStruct.from.blockchain;
@@ -49,7 +51,7 @@ export class LifiTrade extends EvmOnChainTrade {
             }
         } catch {}
         try {
-            const transactionData = await lifiTrade.getTransactionData(walletAddress);
+            const transactionData = await lifiTrade.getTxConfigAndCheckAmount();
 
             if (transactionData.gas) {
                 return new BigNumber(transactionData.gas);
@@ -97,9 +99,9 @@ export class LifiTrade extends EvmOnChainTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            const transactionData = await this.getTransactionData(
-                options.fromAddress,
+            const transactionData = await this.getTxConfigAndCheckAmount(
                 options.receiverAddress,
+                options.fromAddress,
                 options.directTransaction
             );
             const { gas, gasPrice } = this.getGasParams(options, {
@@ -128,21 +130,17 @@ export class LifiTrade extends EvmOnChainTrade {
         }
     }
 
-    private async getTransactionData(
-        fromAddress?: string,
+    protected async getToAmountAndTxData(
         receiverAddress?: string,
-        directTransaction?: EvmEncodeConfig
-    ): Promise<EvmEncodeConfig> {
-        if (directTransaction) {
-            return directTransaction;
-        }
+        fromAddress?: string
+    ): Promise<GetToAmountAndTxDataResponse> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
             action: {
                 ...firstStep.action,
                 fromAddress: fromAddress || this.walletAddress,
-                toAddress: receiverAddress || fromAddress || this.walletAddress
+                toAddress: receiverAddress || this.walletAddress
             },
             execution: {
                 status: 'NOT_STARTED',
@@ -165,30 +163,20 @@ export class LifiTrade extends EvmOnChainTrade {
                 ...step
             });
 
-            const { transactionRequest, estimate } = swapResponse;
-            const gasLimit =
-                transactionRequest.gasLimit && parseInt(transactionRequest.gasLimit, 16).toString();
-            const gasPrice =
-                transactionRequest.gasPrice && parseInt(transactionRequest.gasPrice, 16).toString();
-            const value =
-                transactionRequest.value && parseInt(transactionRequest.value, 16).toString();
-
-            EvmOnChainTrade.checkAmountChange(
-                {
-                    data: transactionRequest.data,
-                    value: value,
-                    to: transactionRequest.to
-                },
-                estimate.toAmountMin,
-                this.toTokenAmountMin.stringWeiAmount
-            );
+            const {
+                transactionRequest,
+                estimate: { toAmount }
+            } = swapResponse;
 
             return {
-                to: transactionRequest.to,
-                data: transactionRequest.data,
-                gas: gasLimit,
-                gasPrice,
-                value
+                tx: {
+                    data: transactionRequest.data,
+                    to: transactionRequest.to,
+                    value: transactionRequest.value,
+                    gas: transactionRequest.gasLimit,
+                    gasPrice: transactionRequest.gasPrice
+                },
+                toAmount
             };
         } catch (err) {
             if ('statusCode' in err && 'message' in err) {
