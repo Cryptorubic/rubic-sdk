@@ -35,7 +35,6 @@ import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/provi
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { OnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/on-chain-provider';
 
-import { OdosOnChainProvider } from './providers/odos/odos-on-chain-provider';
 import { AGGREGATORS_ON_CHAIN } from './models/on-chain-manager-aggregators-types';
 import { AggregatorOnChainProvider } from './providers/common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 
@@ -429,74 +428,6 @@ export class OnChainManager {
         provider: OnChainTradeType
     ): boolean {
         return disabledProviders.map(provider => provider.toUpperCase()).includes(provider);
-    }
-
-    private async getOdosCalculationPromise(
-        from: PriceTokenAmount,
-        to: PriceToken,
-        options: RequiredOnChainManagerCalculationOptions
-    ): Promise<WrappedOnChainTradeOrNull> {
-        try {
-            const wrappedTrade = await pTimeout(
-                this.odosProvider.calculate(
-                    from as PriceTokenAmount<EvmBlockchainName>,
-                    to as PriceTokenAmount<EvmBlockchainName>,
-                    options as RequiredOnChainCalculationOptions
-                ),
-                options.timeout
-            );
-            if ('error' in wrappedTrade) {
-                throw wrappedTrade.error;
-            }
-
-            if (!wrappedTrade) {
-                return null;
-            }
-
-            return {
-                trade: wrappedTrade,
-                tradeType: ON_CHAIN_TRADE_TYPE.OPEN_OCEAN
-            };
-        } catch (err: unknown) {
-            console.debug(
-                `[RUBIC_SDK] Trade calculation error occurred for ${ON_CHAIN_TRADE_TYPE.OPEN_OCEAN} trade provider.`,
-                err
-            );
-            return {
-                trade: null,
-                tradeType: ON_CHAIN_TRADE_TYPE.OPEN_OCEAN,
-                error: CrossChainProvider.parseError(err)
-            };
-        }
-    }
-
-    private async getRangoCalculationPromise(
-        from: PriceTokenAmount,
-        to: PriceToken,
-        options: RequiredOnChainManagerCalculationOptions
-    ): Promise<WrappedOnChainTradeOrNull> {
-        return promise
-            .then(wrappedTrade => {
-                if ('error' in wrappedTrade) {
-                    throw wrappedTrade.error;
-                }
-
-                if (!wrappedTrade) {
-                    return null;
-                }
-
-            return { trade: wrappedTrade, tradeType: ON_CHAIN_TRADE_TYPE.RANGO };
-        } catch (err) {
-            console.debug(
-                `[RUBIC_SDK] Trade calculation error occurred for ${ON_CHAIN_TRADE_TYPE.ODOS} trade provider.`,
-                err
-            );
-            return {
-                trade: null,
-                tradeType: ON_CHAIN_TRADE_TYPE.ODOS,
-                error: CrossChainProvider.parseError(err)
-            };
-        }
     }
 
     private getWrappedWrapTrade(
