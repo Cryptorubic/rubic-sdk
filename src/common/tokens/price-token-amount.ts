@@ -5,6 +5,8 @@ import { TokenStruct } from 'src/common/tokens/token';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 
+import { TokenUtils } from '../utils/token-utils';
+
 export type PriceTokenAmountStruct<T extends BlockchainName = BlockchainName> =
     PriceTokenStruct<T> & ({ weiAmount: BigNumber } | { tokenAmount: BigNumber });
 
@@ -49,7 +51,7 @@ export class PriceTokenAmount<T extends BlockchainName = BlockchainName> extends
      * Gets set amount in wei.
      */
     get weiAmount(): BigNumber {
-        return new BigNumber(this._weiAmount);
+        return this._weiAmount;
     }
 
     /**
@@ -80,7 +82,7 @@ export class PriceTokenAmount<T extends BlockchainName = BlockchainName> extends
     constructor(tokenStruct: PriceTokenAmountStruct<T>) {
         super(tokenStruct);
         if ('weiAmount' in tokenStruct) {
-            this._weiAmount = new BigNumber(tokenStruct.weiAmount);
+            this._weiAmount = tokenStruct.weiAmount;
         } else {
             this._weiAmount = new BigNumber(
                 Web3Pure.toWei(tokenStruct.tokenAmount, tokenStruct.decimals)
@@ -93,7 +95,7 @@ export class PriceTokenAmount<T extends BlockchainName = BlockchainName> extends
      * @param slippage Slippage in range from 0 to 1.
      */
     public weiAmountMinusSlippage(slippage: number): BigNumber {
-        return this._weiAmount.multipliedBy(new BigNumber(1).minus(slippage));
+        return TokenUtils.getMinWeiAmount(this._weiAmount, slippage);
     }
 
     /**
@@ -101,7 +103,7 @@ export class PriceTokenAmount<T extends BlockchainName = BlockchainName> extends
      * @param slippage Slippage in range from 0 to 1.
      */
     public weiAmountPlusSlippage(slippage: number): BigNumber {
-        return this._weiAmount.multipliedBy(new BigNumber(1).plus(slippage));
+        return TokenUtils.getMaxWeiAmount(this._weiAmount, slippage);
     }
 
     public async cloneAndCreate(

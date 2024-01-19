@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { Cache } from 'src/common/utils/decorators';
 import { getGasOptions } from 'src/common/utils/options';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -35,6 +36,16 @@ import { MarkRequired } from 'ts-essentials';
 import { TransactionConfig } from 'web3-core';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
+
+interface PaymentInfo {
+    fromCurrency: string;
+    toCurrency: string;
+    fromNetwork: string;
+    toNetwork: string;
+    fromAmount: string;
+    address: string;
+    flow: string;
+}
 
 export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -258,17 +269,27 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         fromAmount: BigNumber,
         receiverAddress: string
     ): Promise<ChangenowExchangeResponse> {
+        const params: PaymentInfo = {
+            fromCurrency: this.fromCurrency.ticker,
+            toCurrency: this.toCurrency.ticker,
+            fromNetwork: this.fromCurrency.network,
+            toNetwork: this.toCurrency.network,
+            fromAmount: fromAmount.toFixed(),
+            address: receiverAddress,
+            flow: 'standard'
+        };
+        return await this.getResponseFromApiToPaymentInfo(params);
+    }
+
+    @Cache({
+        maxAge: 15_000
+    })
+    private async getResponseFromApiToPaymentInfo(
+        params: PaymentInfo
+    ): Promise<ChangenowExchangeResponse> {
         return Injector.httpClient.post<ChangenowExchangeResponse>(
             'https://api.changenow.io/v2/exchange',
-            {
-                fromCurrency: this.fromCurrency.ticker,
-                toCurrency: this.toCurrency.ticker,
-                fromNetwork: this.fromCurrency.network,
-                toNetwork: this.toCurrency.network,
-                fromAmount: fromAmount.toFixed(),
-                address: receiverAddress,
-                flow: 'standard'
-            },
+            params,
             {
                 headers: {
                     'x-changenow-api-key': changenowApiKey

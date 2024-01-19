@@ -16,6 +16,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
@@ -29,25 +30,20 @@ import { OnChainSubtype } from 'src/features/cross-chain/calculation-manager/pro
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { SymbiosisCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/constants/symbiosis-cross-chain-supported-blockchain';
 import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
-import {
-    SymbiosisTradeData,
-    SymbiosisTradeType
-} from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
+import { SymbiosisTradeType } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-trade-data';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
+import { SymbiosisCrossChainSupportedBlockchain } from './models/symbiosis-cross-chain-supported-blockchains';
 
 /**
  * Calculated Symbiosis cross-chain trade.
  */
 export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
-    public static readonly symbiosisApi = 'https://api-v2.symbiosis.finance/crosschain/v1';
-
     private readonly swappingParams: SymbiosisSwappingParams;
 
     /** @internal */
@@ -298,9 +294,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
 
         const methodArguments = [bridgeData, providerData];
 
-        const value = this.getSwapValue(
-            this.from.isNative ? this.from.stringWeiAmount : providerValue?.toString()
-        );
+        const value = this.getSwapValue(providerValue);
 
         const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,
@@ -419,15 +413,16 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                 to: transactionConfig.to
             };
         }
-        const tradeData = await Injector.httpClient.post<SymbiosisTradeData>(
-            `${SymbiosisCrossChainTrade.symbiosisApi}/swapping/exact_in?partnerId=rubic`,
-            {
-                ...this.swappingParams,
-                from: walletAddress,
-                to: receiverAddress || walletAddress,
-                revertableAddress: receiverAddress || walletAddress
-            } as SymbiosisSwappingParams
-        );
+
+        const params: SymbiosisSwappingParams = {
+            ...this.swappingParams,
+            from: walletAddress,
+            to: receiverAddress || walletAddress,
+            revertableAddress: receiverAddress || walletAddress
+        };
+
+        const tradeData = await SymbiosisApiService.getCrossChainSwapTx(params);
+
         const config = {
             data: tradeData.tx.data!.toString(),
             value: tradeData.tx.value?.toString() || '0',
