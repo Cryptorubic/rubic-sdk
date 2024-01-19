@@ -44,7 +44,7 @@ export class SymbiosisApiService {
         params: SymbiosisSwappingParams
     ): Promise<SymbiosisTradeData> {
         const res = await Injector.httpClient.post<SymbiosisTradeData | SymbiosisErrorResponse>(
-            `${SYMBIOSIS_API_ENDPOINT}/swapping/exact_in?partnerId=rubic`,
+            `${SYMBIOSIS_API_ENDPOINT}/v1/swapping/exact_in?partnerId=rubic`,
             params
         );
 
