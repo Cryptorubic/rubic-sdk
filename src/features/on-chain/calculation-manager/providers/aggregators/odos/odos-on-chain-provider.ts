@@ -1,29 +1,27 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
-import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
-import { OnChainTradeError } from '../../models/on-chain-trade-error';
-import { RequiredOnChainCalculationOptions } from '../common/models/on-chain-calculation-options';
-import { OnChainProxyFeeInfo } from '../common/models/on-chain-proxy-fee-info';
-import { ON_CHAIN_TRADE_TYPE } from '../common/models/on-chain-trade-type';
-import { OnChainProxyService } from '../common/on-chain-proxy-service/on-chain-proxy-service';
-import { GasFeeInfo } from '../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
-import { OnChainTrade } from '../common/on-chain-trade/on-chain-trade';
-import { getGasFeeInfo } from '../common/utils/get-gas-fee-info';
-import { getGasPriceInfo } from '../common/utils/get-gas-price-info';
-import { OdosOnChainTradeStruct } from './model/odos-on-chain-trade-types';
-import { odosSupportedBlockchains } from './model/odos-supported-blockchains';
+import { OnChainTradeError } from '../../../models/on-chain-trade-error';
+import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
+import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
+import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
+import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
+import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
+import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
+import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
+import { OdosOnChainTradeStruct } from './models/odos-on-chain-trade-types';
+import { odosSupportedBlockchains } from './models/odos-supported-blockchains';
 import { OdosOnChainTrade } from './odos-on-chain-trade';
 import { OdosOnChainApiService } from './services/odos-on-chain-api-service';
 import { OdosOnChainParser } from './services/odos-on-chain-parser';
 
-export class OdosOnChainProvider {
-    private readonly onChainProxyService = new OnChainProxyService();
+export class OdosOnChainProvider extends AggregatorOnChainProvider {
+    public readonly tradeType = ON_CHAIN_TRADE_TYPE.ODOS;
 
-    private isSupportedBlockchain(blockchainName: BlockchainName): boolean {
+    protected isSupportedBlockchain(blockchainName: BlockchainName): boolean {
         return odosSupportedBlockchains.some(chain => chain === blockchainName);
     }
 
@@ -106,31 +104,7 @@ export class OdosOnChainProvider {
         }
     }
 
-    protected async handleProxyContract(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        fullOptions: RequiredOnChainCalculationOptions
-    ): Promise<{
-        fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
-        proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-    }> {
-        let fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
-        let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
-        if (fullOptions.useProxy) {
-            proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
-                from,
-                fullOptions.providerAddress
-            );
-            fromWithoutFee = getFromWithoutFee(from, proxyFeeInfo.platformFee.percent);
-        } else {
-            fromWithoutFee = from;
-        }
-        return {
-            fromWithoutFee,
-            proxyFeeInfo
-        };
-    }
-
-    private async getGasFeeInfo(
+    protected async getGasFeeInfo(
         tradeStruct: OdosOnChainTradeStruct,
         providerGateway: string
     ): Promise<GasFeeInfo | null> {
@@ -143,12 +117,5 @@ export class OdosOnChainProvider {
         } catch {
             return null;
         }
-    }
-
-    private getRoutePath(
-        from: Token<EvmBlockchainName>,
-        to: Token<EvmBlockchainName>
-    ): ReadonlyArray<Token> {
-        return [from, to];
     }
 }

@@ -6,8 +6,8 @@ import {
     OdosBestRouteRequestBody,
     OdosInputTokenRequest,
     OdosOutputTokenRequest
-} from '../model/odos-api-best-route-types';
-import { GetBestRouteBodyType } from '../model/odos-on-chain-parser-types';
+} from '../models/odos-api-best-route-types';
+import { GetBestRouteBodyType } from '../models/odos-on-chain-parser-types';
 
 export class OdosOnChainParser {
     public static getBestRouteBody({

@@ -130,11 +130,13 @@ export class RangoOnChainTrade extends AggregatorOnChainTrade {
     }
 
     protected async getToAmountAndTxData(
-        receiverAddress?: string
+        receiverAddress?: string,
+        fromAddress?: string
     ): Promise<GetToAmountAndTxDataResponse> {
         const params = await RangoCommonParser.getSwapQueryParams(this.from, this.to, {
             slippageTolerance: this.slippageTolerance,
-            receiverAddress: receiverAddress || this.walletAddress
+            receiverAddress: receiverAddress || this.walletAddress,
+            fromAddress
         });
 
         const { tx: transaction, route } = await RangoOnChainApiService.getSwapTransaction(params);

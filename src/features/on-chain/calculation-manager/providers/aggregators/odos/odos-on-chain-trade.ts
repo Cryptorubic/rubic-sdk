@@ -10,14 +10,16 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
+import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 
-import { ON_CHAIN_TRADE_TYPE } from '../common/models/on-chain-trade-type';
-import { EvmOnChainTrade } from '../common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { OdosBestRouteRequestBody } from './model/odos-api-best-route-types';
-import { OdosOnChainTradeStruct } from './model/odos-on-chain-trade-types';
+import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
+import { AggregatorOnChainTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
+import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { OdosBestRouteRequestBody } from './models/odos-api-best-route-types';
+import { OdosOnChainTradeStruct } from './models/odos-on-chain-trade-types';
 import { OdosOnChainApiService } from './services/odos-on-chain-api-service';
 
-export class OdosOnChainTrade extends EvmOnChainTrade {
+export class OdosOnChainTrade extends AggregatorOnChainTrade {
     /* @internal */
     public static async getGasLimit(
         tradeStruct: OdosOnChainTradeStruct,
@@ -49,7 +51,7 @@ export class OdosOnChainTrade extends EvmOnChainTrade {
             }
         } catch {}
         try {
-            const transactionData = await odosTrade.getTransactionData();
+            const transactionData = await odosTrade.getTxConfigAndCheckAmount();
 
             if (transactionData.gas) {
                 return new BigNumber(transactionData.gas);
@@ -69,11 +71,9 @@ export class OdosOnChainTrade extends EvmOnChainTrade {
     }
 
     protected get spenderAddress(): string {
-        // @TODO - set back proxy-handling when odos adds receiverAddress property in request body
-        return this.providerGateway;
-        // return this.useProxy
-        //     ? rubicProxyContractAddress[this.from.blockchain].gateway
-        //     : this.providerGateway;
+        return this.useProxy
+            ? rubicProxyContractAddress[this.from.blockchain].gateway
+            : this.providerGateway;
     }
 
     constructor(
@@ -94,7 +94,11 @@ export class OdosOnChainTrade extends EvmOnChainTrade {
         );
 
         try {
-            const transactionData = await this.getTransactionData(options.fromAddress);
+            const transactionData = await this.getTxConfigAndCheckAmount(
+                options.fromAddress,
+                options.receiverAddress,
+                options.directTransaction
+            );
 
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,
@@ -119,27 +123,27 @@ export class OdosOnChainTrade extends EvmOnChainTrade {
         }
     }
 
-    private async getTransactionData(fromAddress?: string): Promise<EvmEncodeConfig> {
+    protected async getToAmountAndTxData(
+        receiverAddress?: string,
+        fromAddress?: string
+    ): Promise<GetToAmountAndTxDataResponse> {
         const { pathId } = await OdosOnChainApiService.getBestRoute(this.bestRouteRequestBody);
 
-        const { transaction: tx } = await OdosOnChainApiService.getSwapTx({
+        const { transaction, outputTokens } = await OdosOnChainApiService.getSwapTx({
             userAddr: fromAddress || this.walletAddress,
+            receiver: receiverAddress,
             pathId
         });
 
-        if (!tx) {
-            throw new RubicSdkError(`Transaction status is undefined!`);
-        }
-
-        const gasLimit = String(tx.gas) && parseInt(String(tx.gas), 16).toString();
-        const gasPrice = String(tx.gasPrice) && parseInt(String(tx.gasPrice), 16).toString();
+        const toAmount = outputTokens[0]!.amount;
 
         return {
-            data: tx.data,
-            to: tx.to,
-            value: tx.value,
-            gas: gasLimit,
-            gasPrice: gasPrice!
+            tx: {
+                data: transaction!.data,
+                to: transaction!.to,
+                value: transaction!.value
+            },
+            toAmount
         };
     }
 }

@@ -2,6 +2,7 @@ export interface OdosSwapRequestBody {
     userAddr: string;
     pathId: string;
     simulate?: boolean;
+    receiver?: string;
 }
 
 export interface OdosSwapResponse {
@@ -42,10 +43,10 @@ interface OdosSimulationError {
 
 interface OdosInputTokenResponse {
     tokenAddress: string;
-    amount: number;
+    amount: string;
 }
 
 interface OdosOutputTokenResponse {
     tokenAddress: string;
-    amount: number;
+    amount: string;
 }

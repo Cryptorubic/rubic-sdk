@@ -1,7 +1,7 @@
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
-import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
+import { RequiredOnChainCalculationOptions } from '../../../common/models/on-chain-calculation-options';
 
 export interface GetBestRouteBodyType {
     from: PriceTokenAmount<EvmBlockchainName>;
