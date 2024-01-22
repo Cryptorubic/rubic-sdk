@@ -6,11 +6,11 @@ export interface OdosBestRouteRequestBody {
     outputTokens: OdosOutputTokenRequest[];
     userAddr: string;
     slippageLimitPercent: number;
-    /**
-     * to exclude/include swappers need to find name in odos-api - check /info/liquidity-sources/{chain_id} endpoint
-     */
+    /* to exclude/include swappers need to find name in odos-api - check /info/liquidity-sources/{chain_id} endpoint */
     sourceBlacklist: string[];
     sourceWhitelist: string[];
+    /* simple: true used to make response faster */
+    simple?: boolean;
 }
 
 export interface OdosInputTokenRequest {
