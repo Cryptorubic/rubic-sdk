@@ -5,7 +5,8 @@ import {
     RubicSdkError,
     SwapRequestError
 } from 'src/common/errors';
-import { nativeTokensList, PriceToken } from 'src/common/tokens';
+import { PriceToken } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { parseError } from 'src/common/utils/errors';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';

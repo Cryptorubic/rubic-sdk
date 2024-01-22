@@ -5,7 +5,8 @@ import {
     UnnecessaryApproveError
 } from 'src/common/errors';
 import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
-import { nativeTokensList, PriceTokenAmount, Token } from 'src/common/tokens';
+import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';

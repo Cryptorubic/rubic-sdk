@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { BytesLike } from 'ethers';
-import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';

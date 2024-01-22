@@ -3,6 +3,7 @@ import { FailedToCheckForTransactionReceiptError, TooLowAmountError } from 'src/
 import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -357,6 +358,9 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
                 fixFee: ''
             };
         }
+        const sameChain =
+            BlockchainsInfo.getChainType(this.from.blockchain) ===
+            BlockchainsInfo.getChainType(this.to.blockchain);
         const walletAddress = this.web3Private.address;
         const params = {
             ...this.transactionRequest,
@@ -364,8 +368,12 @@ export class DebridgeCrossChainTrade extends EvmCrossChainTrade {
             // @TODO Check proxy when deBridge proxy returned
             senderAddress: walletAddress,
             srcChainRefundAddress: walletAddress,
-            dstChainOrderAuthorityAddress: receiverAddress || walletAddress,
-            srcChainOrderAuthorityAddress: receiverAddress || walletAddress,
+            dstChainOrderAuthorityAddress: sameChain
+                ? receiverAddress || walletAddress
+                : receiverAddress!,
+            srcChainOrderAuthorityAddress: sameChain
+                ? receiverAddress || walletAddress
+                : walletAddress,
             referralCode: '4350'
         };
 

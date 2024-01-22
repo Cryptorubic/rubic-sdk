@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
-import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import pTimeout from 'src/common/utils/p-timeout';
 import {
     BLOCKCHAIN_NAME,

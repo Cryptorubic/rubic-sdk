@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { BigNumber as EthersBigNumber } from 'ethers';
 import { RubicSdkError, TimeoutError } from 'src/common/errors';
-import { nativeTokensList } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { Cache } from 'src/common/utils/decorators';
 import pTimeout from 'src/common/utils/p-timeout';
 import {
