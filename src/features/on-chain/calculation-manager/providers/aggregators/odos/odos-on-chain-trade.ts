@@ -91,8 +91,8 @@ export class OdosOnChainTrade extends AggregatorOnChainTrade {
 
         try {
             const transactionData = await this.getTxConfigAndCheckAmount(
-                options.fromAddress,
                 options.receiverAddress,
+                options.fromAddress,
                 options.directTransaction
             );
 
