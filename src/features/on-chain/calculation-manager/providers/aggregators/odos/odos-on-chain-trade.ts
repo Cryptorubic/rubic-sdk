@@ -9,7 +9,6 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
@@ -88,10 +87,7 @@ export class OdosOnChainTrade extends AggregatorOnChainTrade {
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         await this.checkFromAddress(options.fromAddress, true);
-        checkUnsupportedReceiverAddress(
-            options?.receiverAddress,
-            options?.fromAddress || this.walletAddress
-        );
+        await this.checkReceiverAddress(options.receiverAddress);
 
         try {
             const transactionData = await this.getTxConfigAndCheckAmount(
