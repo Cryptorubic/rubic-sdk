@@ -359,5 +359,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped ETH',
         symbol: 'WETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BERACHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BERACHAIN,
+        address: '0x5806E416dA447b267cEA759358cF22Cc41FAE80F',
+        name: 'Wrapped BERA',
+        symbol: 'WBERA',
+        decimals: 18
     })
 };
