@@ -3,6 +3,7 @@ import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Injector } from 'src/core/injector/injector';
+import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
@@ -56,7 +57,7 @@ export class OdosOnChainProvider extends AggregatorOnChainProvider {
             );
             const { transaction: tx } = await OdosOnChainApiService.getSwapTx({
                 pathId,
-                userAddr: options.fromAddress ?? walletAddress
+                userAddr: options.fromAddress ?? walletAddress ?? FAKE_WALLET_ADDRESS
             });
 
             const providerGateway = tx!.to;

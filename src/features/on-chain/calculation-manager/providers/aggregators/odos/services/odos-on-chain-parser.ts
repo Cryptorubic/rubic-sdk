@@ -1,6 +1,7 @@
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 
 import {
     OdosBestRouteRequestBody,
@@ -20,7 +21,8 @@ export class OdosOnChainParser {
         const chainId = blockchainId[from.blockchain];
         const userAddr =
             options.fromAddress ??
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(from.blockchain).address;
+            Injector.web3PrivateService.getWeb3PrivateByBlockchain(from.blockchain).address ??
+            FAKE_WALLET_ADDRESS;
 
         const inputTokens = [
             { tokenAddress: from.address, amount: Web3Pure.toWei(from.tokenAmount, from.decimals) }
