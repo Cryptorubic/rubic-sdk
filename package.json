@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "4.49.3-alpha.odos.5ss",
+    "version": "4.49.3-alpha.odos.6",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
