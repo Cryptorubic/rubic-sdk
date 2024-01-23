@@ -187,7 +187,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         options: GetContractParamsOptions,
         skipAmountChangeCheck: boolean = false
     ): Promise<ContractParams> {
-        const receiverAddress = options?.receiverAddress || this.walletAddress;
+        const receiverAddress = options.receiverAddress ?? this.walletAddress;
 
         const {
             data,
@@ -200,7 +200,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         );
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
-            walletAddress: receiverAddress,
+            walletAddress: this.walletAddress,
             fromTokenAmount: this.from,
             toTokenAmount: this.to,
             srcChainTrade: null,
