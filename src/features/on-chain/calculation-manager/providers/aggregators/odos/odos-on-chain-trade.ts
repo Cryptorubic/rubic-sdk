@@ -120,13 +120,12 @@ export class OdosOnChainTrade extends AggregatorOnChainTrade {
     }
 
     protected async getToAmountAndTxData(
-        receiverAddress?: string,
-        fromAddress?: string
+        receiverAddress?: string
     ): Promise<GetToAmountAndTxDataResponse> {
         const { pathId } = await OdosOnChainApiService.getBestRoute(this.bestRouteRequestBody);
 
         const { transaction, outputTokens } = await OdosOnChainApiService.getSwapTx({
-            userAddr: fromAddress || this.walletAddress,
+            userAddr: this.walletAddress,
             receiver: receiverAddress,
             pathId
         });
