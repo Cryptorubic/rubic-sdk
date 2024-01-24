@@ -100,7 +100,9 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 { ...options, swapperGroups: options.rangoDisabledProviders }
             );
 
-            const feeAmount = Web3Pure.fromWei(fee[0]!.amount, fee[0]!.token.decimals);
+            const feeAmount = fee
+                .filter(fee => fee.expenseType === 'FROM_SOURCE_WALLET')
+                .reduce((acc, fee) => acc.plus(fee.amount), new BigNumber(0));
             const nativeToken = nativeTokensList[fromBlockchain];
             const cryptoFeeToken = await PriceTokenAmount.createFromToken({
                 ...nativeToken,
@@ -119,7 +121,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                     ...feeInfo,
                     provider: {
                         cryptoFee: {
-                            amount: feeAmount,
+                            amount: Web3Pure.fromWei(feeAmount, nativeToken.decimals),
                             token: cryptoFeeToken
                         }
                     }
