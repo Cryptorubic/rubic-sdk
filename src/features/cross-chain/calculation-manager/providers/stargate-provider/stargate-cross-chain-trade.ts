@@ -34,7 +34,7 @@ import { StargateCrossChainProvider } from 'src/features/cross-chain/calculation
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
-import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { rubicProxyAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { stargateChainId } from './constants/stargate-chain-id';
 import {
     stargateContractAddress,
@@ -430,7 +430,7 @@ export class StargateCrossChainTrade extends EvmCrossChainTrade {
 
         const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,
-            evmCommonCrossChainAbi,
+            rubicProxyAbi,
             this.methodName,
             methodArguments,
             value

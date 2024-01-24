@@ -17,7 +17,7 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { rubicProxyAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { ProxyBridgeParams } from 'src/features/cross-chain/calculation-manager/providers/common/models/proxy-bridge-params';
@@ -55,7 +55,7 @@ export class ProxyCrossChainEvmTrade {
                   fromBlockchain,
                   providerAddress,
                   rubicProxyContractAddress[fromBlockchain].router,
-                  evmCommonCrossChainAbi
+                  rubicProxyAbi
               )
             : new BigNumber(0);
 
@@ -64,7 +64,7 @@ export class ProxyCrossChainEvmTrade {
                   fromBlockchain,
                   providerAddress,
                   rubicProxyContractAddress[fromBlockchain].router,
-                  evmCommonCrossChainAbi
+                  rubicProxyAbi
               )
             : 0;
         const nativeToken = await PriceToken.createFromToken(nativeTokensList[fromBlockchain]);
@@ -230,7 +230,7 @@ export class ProxyCrossChainEvmTrade {
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
         return web3Public.callContractMethod<string[]>(
             rubicProxyContractAddress[fromBlockchain].router,
-            evmCommonCrossChainAbi,
+            rubicProxyAbi,
             'approvedDexs'
         );
     }
@@ -331,7 +331,7 @@ export class ProxyCrossChainEvmTrade {
         const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
         const result = await web3Public.callContractMethod<{ isAvailable: boolean }>(
             rubicProxyContractAddress[fromBlockchain].router,
-            evmCommonCrossChainAbi,
+            rubicProxyAbi,
             'getSelectorInfo',
             [routerAddress, offset]
         );
@@ -351,7 +351,7 @@ export class ProxyCrossChainEvmTrade {
         try {
             isRouterApproved = await web3Public.callContractMethod<boolean>(
                 rubicProxyContractAddress[fromBlockchain].router,
-                evmCommonCrossChainAbi,
+                rubicProxyAbi,
                 'isContractApproved',
                 [routerAddress]
             );
@@ -364,7 +364,7 @@ export class ProxyCrossChainEvmTrade {
         try {
             isMethodApproved = await web3Public.callContractMethod<boolean>(
                 rubicProxyContractAddress[fromBlockchain].router,
-                evmCommonCrossChainAbi,
+                rubicProxyAbi,
                 'isFunctionApproved',
                 [method]
             );

@@ -17,7 +17,7 @@ import { RangoSupportedBlockchain } from 'src/features/common/providers/rango/mo
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { rubicProxyAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { gatewayRubicCrossChainAbi } from '../common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from '../common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from '../common/emv-cross-chain-trade/models/gas-data';
@@ -226,7 +226,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
 
         const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,
-            evmCommonCrossChainAbi,
+            rubicProxyAbi,
             this.methodName,
             methodArguments,
             value

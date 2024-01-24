@@ -15,7 +15,7 @@ import {
     OnChainProxyFeeInfo
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 
-import { evmOnChainAbi } from '../../../constants/on-chain-abi/evm-on-chain-abi';
+import { rubicProxyAbi } from '../../../constants/on-chain-abi/evm-on-chain-abi';
 
 export class OnChainProxyService {
     public static isSupportedBlockchain(
@@ -90,7 +90,7 @@ export class OnChainProxyService {
             isIntegrator: boolean;
             fixedFeeAmount: string;
             tokenFee: string;
-        }>(contractAddress, evmOnChainAbi, 'integratorToFeeInfo', [providerAddress]);
+        }>(contractAddress, rubicProxyAbi, 'integratorToFeeInfo', [providerAddress]);
 
         return {
             fixedCryptoFeeWei: integratorToFeeInfo.fixedFeeAmount,
@@ -106,13 +106,13 @@ export class OnChainProxyService {
         const feeInfo = await Promise.all([
             web3Public.callContractMethod<string>(
                 contractAddress,
-                evmOnChainAbi,
+                rubicProxyAbi,
                 'fixedNativeFee',
                 []
             ),
             web3Public.callContractMethod<string>(
                 contractAddress,
-                evmOnChainAbi,
+                rubicProxyAbi,
                 'RubicPlatformFee',
                 []
             )

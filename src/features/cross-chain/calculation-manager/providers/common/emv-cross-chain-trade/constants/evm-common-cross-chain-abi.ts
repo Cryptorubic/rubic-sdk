@@ -1,6 +1,6 @@
 import { AbiItem } from 'web3-utils';
 
-export const evmCommonCrossChainAbi: AbiItem[] = [
+export const rubicProxyAbi: AbiItem[] = [
     {
         inputs: [],
         name: 'fixedNativeFee',
@@ -353,20 +353,73 @@ export const evmCommonCrossChainAbi: AbiItem[] = [
     },
     {
         inputs: [
-            { internalType: 'bytes32', name: '_transactionId', type: 'bytes32' },
-            { internalType: 'address', name: '_integrator', type: 'address' },
-            { internalType: 'address', name: '_referrer', type: 'address' },
-            { internalType: 'address payable', name: '_receiver', type: 'address' },
-            { internalType: 'uint256', name: '_minAmount', type: 'uint256' },
+            {
+                internalType: 'bytes32',
+                name: '_transactionId',
+                type: 'bytes32'
+            },
+            {
+                internalType: 'address',
+                name: '_integrator',
+                type: 'address'
+            },
+            {
+                internalType: 'address',
+                name: '_referrer',
+                type: 'address'
+            },
+            {
+                internalType: 'address payable',
+                name: '_receiver',
+                type: 'address'
+            },
+            {
+                internalType: 'uint256',
+                name: '_minAmount',
+                type: 'uint256'
+            },
             {
                 components: [
-                    { internalType: 'address', name: 'callTo', type: 'address' },
-                    { internalType: 'address', name: 'approveTo', type: 'address' },
-                    { internalType: 'address', name: 'sendingAssetId', type: 'address' },
-                    { internalType: 'address', name: 'receivingAssetId', type: 'address' },
-                    { internalType: 'uint256', name: 'fromAmount', type: 'uint256' },
-                    { internalType: 'bytes', name: 'callData', type: 'bytes' },
-                    { internalType: 'bool', name: 'requiresDeposit', type: 'bool' }
+                    {
+                        internalType: 'address',
+                        name: 'callTo',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'approveTo',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'sendingAssetId',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'address',
+                        name: 'receivingAssetId',
+                        type: 'address'
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'fromAmount',
+                        type: 'uint256'
+                    },
+                    {
+                        internalType: 'uint256',
+                        name: 'extraNative',
+                        type: 'uint256'
+                    },
+                    {
+                        internalType: 'bytes',
+                        name: 'callData',
+                        type: 'bytes'
+                    },
+                    {
+                        internalType: 'bool',
+                        name: 'requiresDeposit',
+                        type: 'bool'
+                    }
                 ],
                 internalType: 'struct LibSwap.SwapData[]',
                 name: '_swapData',
