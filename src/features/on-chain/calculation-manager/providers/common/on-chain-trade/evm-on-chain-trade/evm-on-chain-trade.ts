@@ -410,7 +410,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 this.from.address,
                 this.to.address,
                 this.from.stringWeiAmount,
-                options.extraNativeFee,
+                options.extraNativeFee.toFixed(0),
                 directTransactionConfig.data,
                 true
             ]
