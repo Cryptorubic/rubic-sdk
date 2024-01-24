@@ -84,7 +84,8 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             );
 
             const { route } = await RangoCrossChainApiService.getBestRoute(bestRouteParams);
-            const { outputAmountMin, outputAmount, path } = route as RangoBestRouteSimulationResult;
+            const { outputAmountMin, outputAmount, path, fee } =
+                route as RangoBestRouteSimulationResult;
 
             const toTokenAmountMin = Web3Pure.fromWei(outputAmountMin, toToken.decimals);
             const to = new PriceTokenAmount({
@@ -99,6 +100,13 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 { ...options, swapperGroups: options.rangoDisabledProviders }
             );
 
+            const feeAmount = Web3Pure.fromWei(fee[0]!.amount, fee[0]!.token.decimals);
+            const nativeToken = nativeTokensList[fromBlockchain];
+            const cryptoFeeToken = await PriceTokenAmount.createFromToken({
+                ...nativeToken,
+                weiAmount: new BigNumber(feeAmount)
+            });
+
             const bridgeSubtype = (
                 routePath.find(el => el.type === 'cross-chain') as CrossChainStep
             )?.provider;
@@ -107,7 +115,15 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 toToken: to,
                 options,
                 routePath,
-                feeInfo,
+                feeInfo: {
+                    ...feeInfo,
+                    provider: {
+                        cryptoFee: {
+                            amount: feeAmount,
+                            token: cryptoFeeToken
+                        }
+                    }
+                },
                 toTokenAmountMin,
                 swapQueryParams,
                 bridgeSubtype
