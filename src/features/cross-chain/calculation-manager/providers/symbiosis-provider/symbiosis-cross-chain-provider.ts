@@ -65,6 +65,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         return super.areSupportedBlockchains(fromBlockchain, toBlockchain);
     }
 
+    // eslint-disable-next-line complexity
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
@@ -76,7 +77,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         // @TODO remove Tron check
         if (
             !this.areSupportedBlockchains(fromBlockchain, toBlockchain) ||
-            fromBlockchain === BLOCKCHAIN_NAME.TRON
+            fromBlockchain === BLOCKCHAIN_NAME.TRON ||
+            fromBlockchain === BLOCKCHAIN_NAME.BITCOIN
         ) {
             return {
                 trade: null,
@@ -232,7 +234,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     }
 
     protected async getFeeInfo(
-        fromBlockchain: SymbiosisCrossChainSupportedBlockchain,
+        fromBlockchain: Exclude<SymbiosisCrossChainSupportedBlockchain, 'BITCOIN'>,
         providerAddress: string,
         percentFeeToken: PriceTokenAmount,
         useProxy: boolean
