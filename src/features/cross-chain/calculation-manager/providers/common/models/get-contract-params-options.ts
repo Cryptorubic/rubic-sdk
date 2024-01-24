@@ -6,5 +6,5 @@ export interface GetContractParamsOptions {
     receiverAddress?: string;
     directTransaction?: EvmEncodeConfig;
     referrer?: string;
-    extraNativeFee: BigNumber;
+    extraNativeFee?: BigNumber;
 }
