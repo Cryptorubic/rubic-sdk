@@ -38,7 +38,10 @@ export class SymbiosisOnChainTrade extends AggregatorOnChainTrade {
             providerGateway
         );
         try {
-            const transactionConfig = await symbiosisTrade.encode({ fromAddress: walletAddress });
+            const transactionConfig = await symbiosisTrade.encode({
+                fromAddress: walletAddress,
+                extraNativeFee: tradeStruct.extraNativeFee
+            });
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const gasLimit = (

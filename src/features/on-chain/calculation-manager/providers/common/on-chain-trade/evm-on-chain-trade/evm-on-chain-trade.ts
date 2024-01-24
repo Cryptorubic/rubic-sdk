@@ -20,12 +20,12 @@ import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
+import { evmOnChainAbi } from 'src/features/on-chain/calculation-manager/constants/on-chain-abi/evm-on-chain-abi';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import {
@@ -290,7 +290,10 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     private async getProxyContractParams(
         options: EncodeTransactionOptions
     ): Promise<ContractParams> {
-        const swapData = await this.getSwapData(options);
+        const rubicFee = new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || '0');
+        const extraNativeFee = options.extraNativeFee ?? new BigNumber(0);
+
+        const swapData = await this.getSwapData({ ...options, extraNativeFee });
 
         const receiverAddress = options.receiverAddress || options.fromAddress;
         const methodArguments = [
@@ -302,16 +305,11 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             swapData
         ];
 
-        const nativeToken = nativeTokensList[this.from.blockchain];
-        const proxyFee = new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || '0');
-        const value = Web3Pure.toWei(
-            proxyFee.plus(this.from.isNative ? this.from.tokenAmount : '0'),
-            nativeToken.decimals
-        );
+        const value = this.getProxyContractValue(rubicFee, extraNativeFee);
 
         const txConfig = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,
-            evmCommonCrossChainAbi,
+            evmOnChainAbi,
             'swapTokensGeneric',
             methodArguments,
             value
@@ -327,6 +325,23 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             methodArguments: [sendingToken, sendingAmount, txConfig.data],
             value
         };
+    }
+
+    /**
+     * @param rubicFee
+     * @param extraNativeFee integrator fee
+     */
+    private getProxyContractValue(rubicFee: BigNumber, extraNativeFee: BigNumber): string {
+        const decimals = nativeTokensList[this.from.blockchain].decimals;
+
+        if (this.from.isNative) {
+            return Web3Pure.toWei(
+                rubicFee.plus(this.from.tokenAmount).plus(extraNativeFee),
+                decimals
+            );
+        }
+
+        return Web3Pure.toWei(rubicFee.plus(extraNativeFee), decimals);
     }
 
     private static getReferrerAddress(referrer: string | undefined): string {
@@ -395,6 +410,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 this.from.address,
                 this.to.address,
                 this.from.stringWeiAmount,
+                options.extraNativeFee,
                 directTransactionConfig.data,
                 true
             ]

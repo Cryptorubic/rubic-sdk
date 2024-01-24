@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import {
     EIP1559Gas,
     SingleGasPrice
@@ -40,6 +41,9 @@ export interface EncodeTransactionOptions {
      * Tron-transaction fee limit.
      */
     feeLimit?: number;
+
+    /* Provider fee */
+    extraNativeFee?: BigNumber;
 
     directTransaction?: EvmEncodeConfig;
 
