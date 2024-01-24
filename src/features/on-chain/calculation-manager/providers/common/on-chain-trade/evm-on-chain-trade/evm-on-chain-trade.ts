@@ -20,12 +20,12 @@ import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { rubicProxyAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
-import { rubicProxyAbi } from 'src/features/on-chain/calculation-manager/constants/on-chain-abi/evm-on-chain-abi';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import {

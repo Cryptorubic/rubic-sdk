@@ -10,12 +10,11 @@ import {
     proxySupportedBlockchains
 } from 'src/features/common/constants/proxy-supported-blockchain';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { rubicProxyAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import {
     OnChainPlatformFee,
     OnChainProxyFeeInfo
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
-
-import { rubicProxyAbi } from '../../../constants/on-chain-abi/evm-on-chain-abi';
 
 export class OnChainProxyService {
     public static isSupportedBlockchain(
