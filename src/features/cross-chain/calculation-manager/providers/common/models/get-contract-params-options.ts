@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 
 export interface GetContractParamsOptions {
@@ -6,5 +5,5 @@ export interface GetContractParamsOptions {
     receiverAddress?: string;
     directTransaction?: EvmEncodeConfig;
     referrer?: string;
-    extraNativeFee?: BigNumber;
+    extraNativeFee?: string;
 }

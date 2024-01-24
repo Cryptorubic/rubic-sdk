@@ -43,15 +43,13 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
             const {
                 approveTo: providerGateway,
                 tokenAmountOut: { amount: toTokenAmount },
-                tx: { value }
+                tx: { value: providerFee }
             } = await SymbiosisApiService.getOnChainSwapTx(swapBody);
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 weiAmount: new BigNumber(toTokenAmount)
             });
-
-            const extraNativeFee = this.getExtraNativeFee(from, value);
 
             const tradeStruct: SymbiosisTradeStruct = {
                 from: from as PriceTokenAmount<EvmBlockchainName>,
@@ -65,7 +63,7 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
                 useProxy: options.useProxy,
                 withDeflation: options.withDeflation,
                 path,
-                extraNativeFee
+                providerFee
             };
 
             const gasFeeInfo =
@@ -100,12 +98,5 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
         } catch {
             return null;
         }
-    }
-
-    /* Symbiosis provider fee */
-    private getExtraNativeFee(from: PriceTokenAmount<BlockchainName>, txValue: string): BigNumber {
-        return from.isNative
-            ? new BigNumber(txValue).minus(from.stringWeiAmount)
-            : new BigNumber(txValue);
     }
 }

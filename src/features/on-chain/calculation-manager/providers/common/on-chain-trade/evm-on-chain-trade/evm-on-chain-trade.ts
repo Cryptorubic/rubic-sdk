@@ -186,7 +186,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
     /**
      * Calculates value for swap transaction.
-     * @param providerValue Value, returned from cross-chain provider.
+     * @param providerValue tx-value in swap response.
      */
     protected getSwapValue(providerValue?: BigNumber | string | number | null): string {
         const nativeToken = nativeTokensList[this.from.blockchain];
@@ -208,7 +208,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             fromValue = new BigNumber(providerValue || 0);
         }
 
-        return new BigNumber(fromValue).plus(fixedFeeValue).toFixed(0, 0);
+        return fromValue.plus(fixedFeeValue).toFixed(0, 0);
     }
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -290,8 +290,9 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     private async getProxyContractParams(
         options: EncodeTransactionOptions
     ): Promise<ContractParams> {
-        const rubicFee = new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || '0');
-        const extraNativeFee = options.extraNativeFee ?? new BigNumber(0);
+        const extraNativeFee = this.from.isNative
+            ? new BigNumber(options.providerFee || 0).minus(this.from.stringWeiAmount).toFixed()
+            : new BigNumber(options.providerFee || 0).toFixed();
 
         const swapData = await this.getSwapData({ ...options, extraNativeFee });
 
@@ -305,7 +306,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             swapData
         ];
 
-        const value = this.getProxyContractValue(rubicFee, extraNativeFee);
+        const value = this.getSwapValue(options.providerFee);
 
         const txConfig = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,
@@ -325,23 +326,6 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             methodArguments: [sendingToken, sendingAmount, txConfig.data],
             value
         };
-    }
-
-    /**
-     * @param rubicFee
-     * @param extraNativeFee integrator fee
-     */
-    private getProxyContractValue(rubicFee: BigNumber, extraNativeFee: BigNumber): string {
-        const decimals = nativeTokensList[this.from.blockchain].decimals;
-
-        if (this.from.isNative) {
-            return Web3Pure.toWei(
-                rubicFee.plus(this.from.tokenAmount).plus(extraNativeFee),
-                decimals
-            );
-        }
-
-        return Web3Pure.toWei(rubicFee.plus(extraNativeFee), decimals);
     }
 
     private static getReferrerAddress(referrer: string | undefined): string {
@@ -410,7 +394,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 this.from.address,
                 this.to.address,
                 this.from.stringWeiAmount,
-                options.extraNativeFee?.toFixed(0),
+                options.extraNativeFee,
                 directTransactionConfig.data,
                 true
             ]

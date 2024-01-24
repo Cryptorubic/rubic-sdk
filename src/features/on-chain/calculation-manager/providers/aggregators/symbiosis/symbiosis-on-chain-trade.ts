@@ -40,7 +40,7 @@ export class SymbiosisOnChainTrade extends AggregatorOnChainTrade {
         try {
             const transactionConfig = await symbiosisTrade.encode({
                 fromAddress: walletAddress,
-                extraNativeFee: tradeStruct.extraNativeFee
+                providerFee: tradeStruct.providerFee
             });
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);

@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js';
 import {
     EIP1559Gas,
     SingleGasPrice
@@ -43,7 +42,7 @@ export interface EncodeTransactionOptions {
     feeLimit?: number;
 
     /* Provider fee */
-    extraNativeFee?: BigNumber;
+    providerFee?: string;
 
     directTransaction?: EvmEncodeConfig;
 
