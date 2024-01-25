@@ -143,13 +143,6 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'WBOBA',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.BOBA_AVALANCHE]: new Token({
-        blockchain: BLOCKCHAIN_NAME.BOBA_AVALANCHE,
-        address: '0x26c319B7B2cF823365414d082698C8ac90cbBA63',
-        name: 'Wrapped Boba',
-        symbol: 'WBOBA',
-        decimals: 18
-    }),
     [BLOCKCHAIN_NAME.ASTAR_EVM]: new Token({
         blockchain: BLOCKCHAIN_NAME.ASTAR_EVM,
         address: '0xAeaaf0e2c81Af264101B9129C00F4440cCF0F720',
@@ -363,6 +356,20 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
     [BLOCKCHAIN_NAME.SCROLL]: new Token({
         blockchain: BLOCKCHAIN_NAME.SCROLL,
         address: '0x5300000000000000000000000000000000000004',
+        name: 'Wrapped ETH',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BERACHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BERACHAIN,
+        address: '0x5806E416dA447b267cEA759358cF22Cc41FAE80F',
+        name: 'Wrapped BERA',
+        symbol: 'WBERA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BLAST]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BLAST,
+        address: '0x4200000000000000000000000000000000000023',
         name: 'Wrapped ETH',
         symbol: 'WETH',
         decimals: 18

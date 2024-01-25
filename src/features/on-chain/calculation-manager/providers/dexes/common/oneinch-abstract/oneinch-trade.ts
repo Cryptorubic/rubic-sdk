@@ -8,6 +8,7 @@ import {
 } from 'src/common/errors';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { Cache } from 'src/common/utils/decorators';
 import { parseError } from 'src/common/utils/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -195,12 +196,9 @@ export class OneinchTrade extends EvmOnChainTrade {
             }
         };
 
-        const { tx, toAmount } = await oneInchHttpGetRequest<OneinchSwapResponse>(
-            'swap',
-            this.from.blockchain,
-            swapRequest
-        );
-        await EvmOnChainTrade.checkAmountChange(
+        const { tx, toAmount } = await this.getResponseFromApiToTransactionRequest(swapRequest);
+
+        EvmOnChainTrade.checkAmountChange(
             {
                 data: tx.data,
                 value: tx.value,
@@ -209,6 +207,7 @@ export class OneinchTrade extends EvmOnChainTrade {
             toAmount,
             this.to.stringWeiAmount
         );
+
         return {
             data: tx.data,
             value: tx.value,
@@ -216,6 +215,15 @@ export class OneinchTrade extends EvmOnChainTrade {
             gasPrice: tx.gasPrice,
             gas: String(tx.gas)
         };
+    }
+
+    @Cache({
+        maxAge: 15_000
+    })
+    private async getResponseFromApiToTransactionRequest(
+        params: OneinchSwapRequest
+    ): Promise<OneinchSwapResponse> {
+        return oneInchHttpGetRequest<OneinchSwapResponse>('swap', this.from.blockchain, params);
     }
 
     private specifyError(err: {

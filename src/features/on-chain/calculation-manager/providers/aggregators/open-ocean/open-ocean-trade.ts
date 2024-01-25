@@ -20,24 +20,18 @@ import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { openOceanApiUrl } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/constants/get-open-ocean-api-url';
+import { openOceanBlockchainName } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/constants/open-ocean-blockchain';
+import { OpenoceanOnChainSupportedBlockchain } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/constants/open-ocean-on-chain-supported-blockchain';
+import { OpenoceanSwapQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-cean-swap-quote-response';
+import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-trade-struct';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { openOceanApiUrl } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/get-open-ocean-api-url';
-import { openOceanBlockchainName } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/open-ocean-blockchain';
-import { OpenoceanOnChainSupportedBlockchain } from 'src/features/on-chain/calculation-manager/providers/open-ocean/constants/open-ocean-on-chain-supported-blockchain';
-import { OpenoceanSwapQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/open-ocean/models/open-cean-swap-quote-response';
-import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/open-ocean/models/open-ocean-trade-struct';
 
+import { AggregatorOnChainTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
+import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { ARBITRUM_GAS_PRICE } from './constants/arbitrum-gas-price';
 
-interface OpenOceanTransactionRequest {
-    to: string;
-    data: string;
-    gasLimit?: string;
-    gasPrice?: string;
-}
-
-export class OpenOceanTrade extends EvmOnChainTrade {
+export class OpenOceanTrade extends AggregatorOnChainTrade {
     /** @internal */
     public static async getGasLimit(
         openOceanTradeStruct: OpenOceanTradeStruct
@@ -63,10 +57,10 @@ export class OpenOceanTrade extends EvmOnChainTrade {
             }
         } catch {}
         try {
-            const transactionData = await openOceanTrade.getTransactionData();
+            const transactionData = await openOceanTrade.getTxConfigAndCheckAmount();
 
-            if (transactionData.gasLimit) {
-                return new BigNumber(transactionData.gasLimit);
+            if (transactionData.gas) {
+                return new BigNumber(transactionData.gas);
             }
         } catch {}
         return null;
@@ -114,9 +108,9 @@ export class OpenOceanTrade extends EvmOnChainTrade {
         );
 
         try {
-            const transactionData = await this.getTransactionData(options?.receiverAddress);
+            const transactionData = await this.getTxConfigAndCheckAmount(options?.receiverAddress);
             const { gas, gasPrice } = this.getGasParams(options, {
-                gasLimit: transactionData.gasLimit,
+                gasLimit: transactionData.gas,
                 gasPrice: transactionData.gasPrice
             });
 
@@ -138,9 +132,9 @@ export class OpenOceanTrade extends EvmOnChainTrade {
         }
     }
 
-    private async getTransactionData(
+    protected async getToAmountAndTxData(
         receiverAddress?: string
-    ): Promise<OpenOceanTransactionRequest> {
+    ): Promise<GetToAmountAndTxDataResponse> {
         const gasPrice = await Injector.web3PublicService
             .getWeb3Public(this.from.blockchain)
             .getGasPrice();
@@ -175,11 +169,15 @@ export class OpenOceanTrade extends EvmOnChainTrade {
                 }
             }
         );
-        const { data, to } = swapQuoteResponse.data;
+        const { data, to, value, outAmount: toAmount } = swapQuoteResponse.data;
 
         return {
-            data,
-            to
+            tx: {
+                data,
+                to,
+                value
+            },
+            toAmount
         };
     }
 

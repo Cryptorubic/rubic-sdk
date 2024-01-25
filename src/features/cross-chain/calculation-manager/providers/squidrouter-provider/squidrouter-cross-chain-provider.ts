@@ -6,7 +6,6 @@ import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -22,7 +21,6 @@ import {
 } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/constants/squidrouter-cross-chain-supported-blockchain';
 import { SquidrouterEstimation } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/estimation-response';
 import { SquidrouterTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/transaction-request';
-import { SquidrouterTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/transaction-response';
 import { SquidrouterCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/squidrouter-cross-chain-trade';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
@@ -84,14 +82,8 @@ export class SquidrouterCrossChainProvider extends CrossChainProvider {
             };
             const {
                 route: { transactionRequest, estimate }
-            } = await Injector.httpClient.get<SquidrouterTransactionResponse>(
-                `${SquidrouterCrossChainProvider.apiEndpoint}route`,
-                {
-                    params: requestParams as unknown as {},
-                    headers: {
-                        'x-integrator-id': 'rubic-api'
-                    }
-                }
+            } = await SquidrouterCrossChainTrade.getResponseFromApiToTransactionRequest(
+                requestParams
             );
 
             const squidGasData: GasData = {

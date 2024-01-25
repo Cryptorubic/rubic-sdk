@@ -1,6 +1,13 @@
 export interface XyApiResponse {
-    isSuccess: boolean;
+    success: boolean;
     msg: string;
-    status: 'Done' | 'Processing' | string;
-    txHash: string | null;
+    status:
+        | 'Done'
+        | 'Processing'
+        | 'Not Found'
+        | 'Receive bridge token'
+        | 'Receive synapse bridge token'
+        | 'Pending refund'
+        | 'Refunded';
+    tx: string | null;
 }

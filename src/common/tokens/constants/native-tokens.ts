@@ -73,6 +73,20 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         name: 'Ether',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BERACHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BERACHAIN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'BERA',
+        symbol: 'BERA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BLAST]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BLAST,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ether',
+        symbol: 'ETH',
+        decimals: 18
     })
 };
 
@@ -222,13 +236,6 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         symbol: 'BOBA',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.BOBA_AVALANCHE]: new Token({
-        blockchain: BLOCKCHAIN_NAME.BOBA_AVALANCHE,
-        address: EvmWeb3Pure.nativeTokenAddress,
-        name: 'BOBA',
-        symbol: 'BOBA',
-        decimals: 18
-    }),
     [BLOCKCHAIN_NAME.ASTAR_EVM]: new Token({
         blockchain: BLOCKCHAIN_NAME.ASTAR_EVM,
         address: EvmWeb3Pure.nativeTokenAddress,
@@ -366,7 +373,7 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         blockchain: BLOCKCHAIN_NAME.MANTA_PACIFIC,
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'ETH',
-        symbol: 'MNT',
+        symbol: 'ETH',
         decimals: 18
     }),
     [BLOCKCHAIN_NAME.SCROLL]: new Token({

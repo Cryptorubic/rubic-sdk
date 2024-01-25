@@ -3,6 +3,7 @@ import { Estimate } from '@lifi/types/dist/step';
 import BigNumber from 'bignumber.js';
 import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { Cache } from 'src/common/utils/decorators';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -349,20 +350,36 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             }
         };
 
-        const swapResponse: { transactionRequest: LifiTransactionRequest; estimate: Estimate } =
-            await this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
-                ...step
-            });
+        try {
+            const swapResponse: { transactionRequest: LifiTransactionRequest; estimate: Estimate } =
+                await this.getResponseFromApiToTransactionRequest(step);
 
-        if (!skipAmountChangeCheck) {
-            EvmCrossChainTrade.checkAmountChange(
-                swapResponse.transactionRequest,
-                swapResponse.estimate.toAmount,
-                this.to.stringWeiAmount
-            );
+            if (!skipAmountChangeCheck) {
+                EvmCrossChainTrade.checkAmountChange(
+                    swapResponse.transactionRequest,
+                    swapResponse.estimate.toAmountMin,
+                    Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals)
+                );
+            }
+
+            return swapResponse.transactionRequest;
+        } catch (err) {
+            if ('statusCode' in err && 'message' in err) {
+                throw new RubicSdkError(err.message);
+            }
+            throw err;
         }
+    }
 
-        return swapResponse.transactionRequest;
+    @Cache({
+        maxAge: 15_000
+    })
+    private async getResponseFromApiToTransactionRequest(
+        step: unknown
+    ): Promise<{ transactionRequest: LifiTransactionRequest; estimate: Estimate }> {
+        return this.httpClient.post('https://li.quest/v1/advanced/stepTransaction', {
+            ...(step as {})
+        });
     }
 
     public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {

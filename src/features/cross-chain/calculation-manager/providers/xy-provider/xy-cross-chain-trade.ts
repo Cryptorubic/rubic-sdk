@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { BytesLike } from 'ethers';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { Cache } from 'src/common/utils/decorators';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
@@ -316,9 +317,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         };
 
         const { success, tx, route, errorCode, errorMsg } =
-            await Injector.httpClient.get<XyBuildTxResponse>(`${XY_API_ENDPOINT}/buildTx`, {
-                params: { ...params }
-            });
+            await this.getResponseFromApiToTransactionRequest(params);
 
         if (!success) {
             xyAnalyzeStatusCode(errorCode, errorMsg);
@@ -333,6 +332,17 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         }
 
         return tx!;
+    }
+
+    @Cache({
+        maxAge: 15_000
+    })
+    private async getResponseFromApiToTransactionRequest(
+        params: XyBuildTxRequest
+    ): Promise<XyBuildTxResponse> {
+        return Injector.httpClient.get<XyBuildTxResponse>(`${XY_API_ENDPOINT}/buildTx`, {
+            params: { ...params }
+        });
     }
 
     public getTradeInfo(): TradeInfo {
