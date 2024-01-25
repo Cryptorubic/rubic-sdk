@@ -1,12 +1,14 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
 import { SymbiosisParser } from 'src/features/common/providers/symbiosis/services/symbiosis-parser';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
+import { OnChainProviderFeeInfo } from '../../common/models/on-chain-provider-fee-info';
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
@@ -43,6 +45,7 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
             const {
                 approveTo: providerGateway,
                 tokenAmountOut: { amount: toTokenAmount },
+                fee,
                 tx: { value: providerFee }
             } = await SymbiosisApiService.getOnChainSwapTx(swapBody);
 
@@ -56,6 +59,7 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
                 to: to as PriceTokenAmount<EvmBlockchainName>,
                 fromWithoutFee: fromWithoutFee as PriceTokenAmount<EvmBlockchainName>,
                 proxyFeeInfo,
+                providerFeeInfo: await this.getProviderFeeInfo(from.blockchain, fee?.amount),
                 gasFeeInfo: {
                     gasLimit: undefined
                 },
@@ -98,5 +102,22 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
         } catch {
             return null;
         }
+    }
+
+    /* Get aggregator extra fee object */
+    private async getProviderFeeInfo(
+        fromBlockchain: BlockchainName,
+        feeAmount?: string
+    ): Promise<OnChainProviderFeeInfo | undefined> {
+        if (!feeAmount) return undefined;
+
+        const nativeToken = await PriceToken.createFromToken(nativeTokensList[fromBlockchain]);
+
+        return {
+            cryptoFee: {
+                amount: Web3Pure.fromWei(feeAmount, nativeToken.decimals),
+                token: nativeToken
+            }
+        };
     }
 }

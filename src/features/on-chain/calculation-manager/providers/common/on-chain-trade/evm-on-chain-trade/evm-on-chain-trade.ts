@@ -118,7 +118,10 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                         token: evmOnChainTradeStruct.proxyFeeInfo?.platformFee.token
                     }
                 })
-            }
+            },
+            ...(evmOnChainTradeStruct.providerFeeInfo && {
+                provider: evmOnChainTradeStruct.providerFeeInfo
+            })
         };
         this.withDeflation = evmOnChainTradeStruct.withDeflation;
     }

@@ -16,7 +16,7 @@ export interface SymbiosisSwapRequestBody {
 
 export interface SymbiosisSwapResponse {
     kind: SymbiosisSwapResponseKind;
-    fee: SymbiosisSwapResponseFee;
+    fee: SymbiosisSwapResponseFee | null;
     priceImpact: string;
     tokenAmountOut: SymbiosisTokenInfoWithAmount;
     tokenAmountOutMin: SymbiosisTokenInfoWithAmount;

@@ -4,6 +4,8 @@ import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is
 import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-proxy-fee-info';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 
+import { OnChainProviderFeeInfo } from '../../../models/on-chain-provider-fee-info';
+
 export interface OnChainTradeStruct<T extends BlockchainName> {
     from: PriceTokenAmount<T>;
     to: PriceTokenAmount<T>;
@@ -23,6 +25,7 @@ export interface OnChainTradeStruct<T extends BlockchainName> {
     };
 
     usedForCrossChain?: boolean;
+    providerFeeInfo?: OnChainProviderFeeInfo;
 }
 
 export interface EvmOnChainTradeStruct extends OnChainTradeStruct<EvmBlockchainName> {}

@@ -149,6 +149,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 deadline
             };
 
+            //@TODO HANDLE EXTRA(feeInfo.provider.cryptoFee) FEE OF SYMBIOSIS
             const { tokenAmountOut, inTradeType, outTradeType, tx, approveTo, route } =
                 await SymbiosisApiService.getCrossChainSwapTx(swapParams);
 
