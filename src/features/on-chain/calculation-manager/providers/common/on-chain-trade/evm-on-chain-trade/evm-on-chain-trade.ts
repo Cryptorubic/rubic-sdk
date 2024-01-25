@@ -290,9 +290,10 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     private async getProxyContractParams(
         options: EncodeTransactionOptions
     ): Promise<ContractParams> {
-        const extraNativeFee = this.from.isNative
-            ? new BigNumber(options.providerFee || 0).minus(this.from.stringWeiAmount).toFixed()
-            : new BigNumber(options.providerFee || 0).toFixed();
+        const attachedNativeAmount = this.from.isNative ? this.from.stringWeiAmount : '0';
+        const extraNativeFee = new BigNumber(options?.providerFee || 0)
+            .minus(attachedNativeAmount)
+            .toFixed();
 
         const swapData = await this.getSwapData({ ...options, extraNativeFee });
 
