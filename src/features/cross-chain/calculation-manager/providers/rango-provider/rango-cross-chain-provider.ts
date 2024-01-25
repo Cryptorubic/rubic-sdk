@@ -109,6 +109,15 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 weiAmount: new BigNumber(feeAmount)
             });
 
+            if (feeAmount.gt(0)) {
+                feeInfo.provider = {
+                    cryptoFee: {
+                        amount: Web3Pure.fromWei(feeAmount, nativeToken.decimals),
+                        token: cryptoFeeToken
+                    }
+                };
+            }
+
             const bridgeSubtype = (
                 routePath.find(el => el.type === 'cross-chain') as CrossChainStep
             )?.provider;
@@ -117,15 +126,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 toToken: to,
                 options,
                 routePath,
-                feeInfo: {
-                    ...feeInfo,
-                    provider: {
-                        cryptoFee: {
-                            amount: Web3Pure.fromWei(feeAmount, nativeToken.decimals),
-                            token: cryptoFeeToken
-                        }
-                    }
-                },
+                feeInfo,
                 toTokenAmountMin,
                 swapQueryParams,
                 bridgeSubtype
