@@ -239,13 +239,17 @@ export class ProxyCrossChainEvmTrade {
         swapOptions: GetContractParamsOptions,
         tradeParams: ProxyBridgeParams
     ): BridgeParams {
-        const receiverAddress = swapOptions?.receiverAddress || tradeParams.walletAddress;
+        let receiverAddress = swapOptions?.receiverAddress || tradeParams.walletAddress;
         const toChainId = blockchainId[tradeParams.toTokenAmount.blockchain] || 9999;
         const fromToken = tradeParams.srcChainTrade
             ? tradeParams.srcChainTrade.toTokenAmountMin
             : tradeParams.fromTokenAmount;
         const hasSwapBeforeBridge = tradeParams.srcChainTrade !== null;
         const toAddress = tradeParams.toAddress || tradeParams.toTokenAmount.address;
+
+        if (toChainId === blockchainId[BLOCKCHAIN_NAME.BITCOIN]) {
+            receiverAddress = tradeParams.walletAddress;
+        }
 
         return [
             EvmWeb3Pure.randomHex(32),
