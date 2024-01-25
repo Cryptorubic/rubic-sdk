@@ -80,6 +80,13 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         name: 'BERA',
         symbol: 'BERA',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BLAST]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BLAST,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ether',
+        symbol: 'ETH',
+        decimals: 18
     })
 };
 
