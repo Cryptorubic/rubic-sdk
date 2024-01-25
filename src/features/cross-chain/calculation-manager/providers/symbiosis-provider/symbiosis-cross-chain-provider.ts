@@ -139,17 +139,11 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
             const slippageTolerance = options.slippageTolerance * 10000;
 
-            let swapParamsToAddress = options.receiverAddress || fromAddress;
-
-            if (toBlockchain === BLOCKCHAIN_NAME.BITCOIN && !options.receiverAddress) {
-                swapParamsToAddress = 'bc1qvyf8ufqpeyfe6vshfxdrr970rkqfphgz28ulhr';
-            }
-
             const swapParams: SymbiosisSwappingParams = {
                 tokenAmountIn: symbiosisTokenAmountIn,
                 tokenOut,
                 from: fromAddress,
-                to: swapParamsToAddress,
+                to: this.getSwapParamsToAddress(options.receiverAddress, fromAddress, toBlockchain),
                 revertableAddress: fromAddress,
                 slippage: slippageTolerance,
                 deadline
@@ -319,5 +313,17 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             });
         }
         return routePath;
+    }
+
+    private getSwapParamsToAddress(
+        receiverAddress: string | undefined,
+        fromAddress: string,
+        toBlockchain: BlockchainName
+    ): string {
+        if (toBlockchain === BLOCKCHAIN_NAME.BITCOIN && !receiverAddress) {
+            return 'bc1qvyf8ufqpeyfe6vshfxdrr970rkqfphgz28ulhr';
+        }
+
+        return receiverAddress || fromAddress;
     }
 }

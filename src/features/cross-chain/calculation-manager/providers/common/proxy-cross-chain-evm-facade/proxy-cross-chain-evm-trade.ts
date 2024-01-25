@@ -239,17 +239,17 @@ export class ProxyCrossChainEvmTrade {
         swapOptions: GetContractParamsOptions,
         tradeParams: ProxyBridgeParams
     ): BridgeParams {
-        let receiverAddress = swapOptions?.receiverAddress || tradeParams.walletAddress;
         const toChainId = blockchainId[tradeParams.toTokenAmount.blockchain] || 9999;
         const fromToken = tradeParams.srcChainTrade
             ? tradeParams.srcChainTrade.toTokenAmountMin
             : tradeParams.fromTokenAmount;
         const hasSwapBeforeBridge = tradeParams.srcChainTrade !== null;
         const toAddress = tradeParams.toAddress || tradeParams.toTokenAmount.address;
-
-        if (toChainId === blockchainId[BLOCKCHAIN_NAME.BITCOIN]) {
-            receiverAddress = tradeParams.walletAddress;
-        }
+        const receiverAddress = ProxyCrossChainEvmTrade.getReceiverAddress(
+            swapOptions?.receiverAddress,
+            tradeParams.walletAddress,
+            toChainId
+        );
 
         return [
             EvmWeb3Pure.randomHex(32),
@@ -376,5 +376,17 @@ export class ProxyCrossChainEvmTrade {
         if (!isMethodApproved) {
             throw new UnapprovedMethodError(method, routerAddress);
         }
+    }
+
+    private static getReceiverAddress(
+        receiverAddress: string | undefined,
+        walletAddress: string,
+        toChainId: number
+    ): string {
+        if (toChainId === blockchainId[BLOCKCHAIN_NAME.BITCOIN]) {
+            return walletAddress;
+        }
+
+        return receiverAddress || walletAddress;
     }
 }
