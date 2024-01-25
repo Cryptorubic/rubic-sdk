@@ -52,7 +52,7 @@ export interface RangoQuotePath {
     estimatedTimeInSeconds: number;
 }
 
-interface RangoSwapFee {
+export interface RangoSwapFee {
     name: string;
     token: RangoResponseToken;
     expenseType: RangoExpenseType;
