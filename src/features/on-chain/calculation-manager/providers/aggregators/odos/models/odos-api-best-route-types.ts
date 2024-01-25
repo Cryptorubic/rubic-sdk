@@ -11,6 +11,12 @@ export interface OdosBestRouteRequestBody {
     sourceWhitelist: string[];
     /* simple: true used to make response faster */
     simple?: boolean;
+    /* Use Odos V2 compact call data for transaction, defaults to */
+    compact?: boolean;
+    /* If input and output tokens are the same, only route through like assets for decreased slippage. */
+    likeAsset?: boolean;
+    /* Disable all exchanges that qualify as RFQs with centralized API */
+    disableRFQs?: boolean;
 }
 
 export interface OdosInputTokenRequest {

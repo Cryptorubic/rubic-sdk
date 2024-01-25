@@ -38,7 +38,8 @@ export class OdosOnChainParser {
             userAddr,
             slippageLimitPercent: options.slippageTolerance * 100,
             sourceBlacklist: swappersBlacklist,
-            sourceWhitelist: swappersWhitelist
+            sourceWhitelist: swappersWhitelist,
+            likeAsset: true
         };
     }
 }
