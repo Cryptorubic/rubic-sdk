@@ -294,7 +294,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         options: EncodeTransactionOptions
     ): Promise<ContractParams> {
         const attachedNativeAmount = this.from.isNative ? this.from.stringWeiAmount : '0';
-        const extraNativeFee = new BigNumber(options?.providerFee || 0)
+        const extraNativeFee = new BigNumber(options?.providerValue || 0)
             .minus(attachedNativeAmount)
             .toFixed();
 
@@ -310,7 +310,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             swapData
         ];
 
-        const value = this.getSwapValue(options.providerFee);
+        const value = this.getSwapValue(options.providerValue);
 
         const txConfig = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,

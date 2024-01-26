@@ -45,8 +45,7 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
             const {
                 approveTo: providerGateway,
                 tokenAmountOut: { amount: toTokenAmount },
-                fee,
-                tx: { value: providerFee }
+                tx: { value: providerValue }
             } = await SymbiosisApiService.getOnChainSwapTx(swapBody);
 
             const to = new PriceTokenAmount({
@@ -59,7 +58,7 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
                 to: to as PriceTokenAmount<EvmBlockchainName>,
                 fromWithoutFee: fromWithoutFee as PriceTokenAmount<EvmBlockchainName>,
                 proxyFeeInfo,
-                providerFeeInfo: await this.getProviderFeeInfo(from.blockchain, fee?.amount),
+                providerFeeInfo: await this.getProviderFeeInfo(from, providerValue),
                 gasFeeInfo: {
                     gasLimit: undefined
                 },
@@ -67,7 +66,7 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
                 useProxy: options.useProxy,
                 withDeflation: options.withDeflation,
                 path,
-                providerFee
+                providerValue
             };
 
             const gasFeeInfo =
@@ -106,16 +105,17 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
 
     /* Get aggregator extra fee object */
     private async getProviderFeeInfo(
-        fromBlockchain: BlockchainName,
-        feeAmount?: string
+        from: PriceTokenAmount<BlockchainName>,
+        providerValue: string
     ): Promise<OnChainProviderFeeInfo | undefined> {
-        if (!feeAmount) return undefined;
+        if (from.isNative) return undefined;
 
-        const nativeToken = await PriceToken.createFromToken(nativeTokensList[fromBlockchain]);
+        const nativeToken = await PriceToken.createFromToken(nativeTokensList[from.blockchain]);
+        const extraNativeFee = Web3Pure.fromWei(new BigNumber(providerValue), nativeToken.decimals);
 
         return {
             cryptoFee: {
-                amount: Web3Pure.fromWei(feeAmount, nativeToken.decimals),
+                amount: extraNativeFee,
                 token: nativeToken
             }
         };

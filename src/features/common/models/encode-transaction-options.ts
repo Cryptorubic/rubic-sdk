@@ -41,8 +41,8 @@ export interface EncodeTransactionOptions {
      */
     feeLimit?: number;
 
-    /* Provider fee */
-    providerFee?: string;
+    /* Provider tx-value */
+    providerValue?: string;
 
     directTransaction?: EvmEncodeConfig;
 
