@@ -1,0 +1,24 @@
+export interface ChangenowSwapRequestBody {
+    fromCurrency: string;
+    toCurrency: string;
+    fromNetwork: string;
+    toNetwork: string;
+    fromAmount: string;
+    address: string;
+    flow: string;
+}
+
+export interface ChangenowSwapResponse {
+    /* used for checking tx-status */
+    id: string;
+    payinAddress: string;
+    payoutAddress: string;
+    flow: string;
+    toAmount: number;
+    fromAmount: number;
+    type: 'direct' | 'reverse';
+    payoutExtraId: string;
+    payoutExtraIdName: string;
+    refundAddress: string;
+    refundExtraId: string;
+}
