@@ -117,6 +117,9 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
      */
     public id: string | undefined;
 
+    /* used in web3Private.trySendTransaction when rate updated */
+    private txTo!: string;
+
     private readonly fromCurrency: ChangenowCurrency;
 
     private readonly toCurrency: ChangenowCurrency;
@@ -202,16 +205,20 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         };
 
         try {
-            await this.checkTradeErrors;
+            await this.checkTradeErrors();
 
-            const { id, payinAddress } = await this.getPaymentInfo(
-                this.transitToken.tokenAmount,
-                options.receiverAddress ? options.receiverAddress : this.walletAddress
-            );
-            this.id = id;
+            if (!options.directTransaction) {
+                const { id, payinAddress } = await this.getPaymentInfo(
+                    this.transitToken.tokenAmount,
+                    options.receiverAddress ? options.receiverAddress : this.walletAddress,
+                    false
+                );
+                this.id = id;
+                this.txTo = payinAddress;
+            }
 
             if (this.from.isNative) {
-                await this.web3Private.trySendTransaction(payinAddress, {
+                await this.web3Private.trySendTransaction(this.txTo, {
                     value: this.from.weiAmount,
                     onTransactionHash,
                     gasPrice,
@@ -222,7 +229,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
                     this.from.address,
                     ERC20_TOKEN_ABI,
                     'transfer',
-                    [payinAddress, this.from.stringWeiAmount],
+                    [this.txTo, this.from.stringWeiAmount],
                     {
                         onTransactionHash,
                         gas: gasLimit,
@@ -243,10 +250,17 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
 
     public async getChangenowPostTrade(receiverAddress: string): Promise<ChangenowPaymentInfo> {
         const paymentInfo = await this.getPaymentInfo(this.from.tokenAmount, receiverAddress);
+        const extraField = paymentInfo.payinExtraIdName
+            ? {
+                  name: paymentInfo.payinExtraIdName,
+                  value: paymentInfo.payinExtraId
+              }
+            : null;
 
         return {
             id: paymentInfo.id,
-            depositAddress: paymentInfo.payinAddress
+            depositAddress: paymentInfo.payinAddress,
+            ...(extraField && { extraField })
         };
     }
 

@@ -19,6 +19,8 @@ export interface ChangenowSwapResponse {
     type: 'direct' | 'reverse';
     payoutExtraId: string;
     payoutExtraIdName: string;
+    payinExtraId: string;
+    payinExtraIdName: string;
     refundAddress: string;
     refundExtraId: string;
 }
