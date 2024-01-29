@@ -236,7 +236,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
     ): void {
         const oldAmount = new BigNumber(oldWeiAmount);
         const newAmount = new BigNumber(newWeiAmount);
-        const acceptablePercentPriceChange = new BigNumber(0.5).dividedBy(100);
+        const acceptablePercentPriceChange = new BigNumber(0.1).dividedBy(100);
 
         const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
         const amountMinusPercent = oldAmount.multipliedBy(
