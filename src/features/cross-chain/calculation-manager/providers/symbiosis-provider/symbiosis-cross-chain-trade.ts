@@ -418,7 +418,11 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             ...this.swappingParams,
             from: walletAddress,
             to: receiverAddress || walletAddress,
-            revertableAddress: receiverAddress || walletAddress
+            revertableAddress: this.getRevertableAddress(
+                receiverAddress,
+                walletAddress,
+                this.to.blockchain
+            )
         };
 
         const tradeData = await SymbiosisApiService.getCrossChainSwapTx(params);
@@ -436,5 +440,17 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             );
         }
         return config;
+    }
+
+    private getRevertableAddress(
+        receiverAddress: string | undefined,
+        walletAddress: string,
+        toBlockchain: BlockchainName
+    ): string {
+        if (toBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
+            return walletAddress;
+        }
+
+        return receiverAddress || walletAddress;
     }
 }

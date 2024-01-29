@@ -118,7 +118,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             (el: FeeCost & { included?: boolean }) => el?.included === false
         );
         const nativeToken = await PriceToken.createFromToken(nativeTokensList[from.blockchain]);
-        if (providerFee) {
+        if (providerFee && providerFee.amount !== '0') {
             feeInfo.provider = {
                 cryptoFee: {
                     amount: Web3Pure.fromWei(

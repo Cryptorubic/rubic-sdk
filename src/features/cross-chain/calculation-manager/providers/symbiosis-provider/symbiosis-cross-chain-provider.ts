@@ -65,6 +65,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         return super.areSupportedBlockchains(fromBlockchain, toBlockchain);
     }
 
+    // eslint-disable-next-line complexity
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken,
@@ -76,7 +77,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         // @TODO remove Tron check
         if (
             !this.areSupportedBlockchains(fromBlockchain, toBlockchain) ||
-            fromBlockchain === BLOCKCHAIN_NAME.TRON
+            fromBlockchain === BLOCKCHAIN_NAME.TRON ||
+            fromBlockchain === BLOCKCHAIN_NAME.BITCOIN
         ) {
             return {
                 trade: null,
@@ -134,8 +136,6 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 amount: fromWithoutFee.stringWeiAmount
             };
 
-            const receiverAddress = options.receiverAddress || fromAddress;
-
             const deadline = Math.floor(Date.now() / 1000) + 60 * options.deadline;
             const slippageTolerance = options.slippageTolerance * 10000;
 
@@ -143,7 +143,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 tokenAmountIn: symbiosisTokenAmountIn,
                 tokenOut,
                 from: fromAddress,
-                to: receiverAddress || fromAddress,
+                to: this.getSwapParamsToAddress(options.receiverAddress, fromAddress, toBlockchain),
                 revertableAddress: fromAddress,
                 slippage: slippageTolerance,
                 deadline
@@ -232,7 +232,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     }
 
     protected async getFeeInfo(
-        fromBlockchain: SymbiosisCrossChainSupportedBlockchain,
+        fromBlockchain: Exclude<SymbiosisCrossChainSupportedBlockchain, 'BITCOIN'>,
         providerAddress: string,
         percentFeeToken: PriceTokenAmount,
         useProxy: boolean
@@ -313,5 +313,17 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             });
         }
         return routePath;
+    }
+
+    private getSwapParamsToAddress(
+        receiverAddress: string | undefined,
+        fromAddress: string,
+        toBlockchain: BlockchainName
+    ): string {
+        if (toBlockchain === BLOCKCHAIN_NAME.BITCOIN && !receiverAddress) {
+            return 'bc1qvyf8ufqpeyfe6vshfxdrr970rkqfphgz28ulhr';
+        }
+
+        return receiverAddress || fromAddress;
     }
 }
