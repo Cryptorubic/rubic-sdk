@@ -304,6 +304,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
             skipAmountChangeCheck
         );
         this.id = paymentInfo.id;
+        this.txTo = paymentInfo.payinAddress;
 
         const toToken = this.to.clone({ address: EvmWeb3Pure.EMPTY_ADDRESS });
 
@@ -391,10 +392,13 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         const { gasLimit } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams({
-                fromAddress: options.fromAddress,
-                receiverAddress: options.receiverAddress || options.fromAddress
-            });
+            await this.getContractParams(
+                {
+                    fromAddress: options.fromAddress,
+                    receiverAddress: options.receiverAddress || options.fromAddress
+                },
+                true
+            );
 
         return EvmWeb3Pure.encodeMethodCall(
             contractAddress,
