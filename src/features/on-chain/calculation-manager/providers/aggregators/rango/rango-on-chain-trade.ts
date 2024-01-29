@@ -137,7 +137,7 @@ export class RangoOnChainTrade extends AggregatorOnChainTrade {
         const params = await RangoCommonParser.getSwapQueryParams(this.from, this.to, {
             slippageTolerance: this.slippageTolerance,
             receiverAddress: receiverAddress || this.walletAddress,
-            swapperGroups: rangoOnChainDisabledProviders
+            swapperGroups: rangoOnChainDisabledProviders,
             fromAddress
         });
 
