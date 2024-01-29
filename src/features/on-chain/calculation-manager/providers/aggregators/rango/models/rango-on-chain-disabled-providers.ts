@@ -1,6 +1,6 @@
 import { RubicOnChainTradeTypeForRango } from 'src/features/common/providers/rango/models/rango-api-trade-types';
 
-import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
+import { ON_CHAIN_TRADE_TYPE } from '../../../common/models/on-chain-trade-type';
 
 export const rangoOnChainDisabledProviders: RubicOnChainTradeTypeForRango[] = [
     ON_CHAIN_TRADE_TYPE.OSMOSIS_SWAP,

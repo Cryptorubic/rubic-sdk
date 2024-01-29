@@ -7,7 +7,9 @@ export const TEST_EVM_BLOCKCHAIN_NAME = {
     ARTHERA: 'ARTHERA',
     ZETACHAIN: 'ZETACHAIN',
     TAIKO: 'TAIKO',
-    SEPOLIA: 'SEPOLIA'
+    SEPOLIA: 'SEPOLIA',
+    BERACHAIN: 'BERACHAIN',
+    BLAST: 'BLAST'
 } as const;
 
 export const EVM_BLOCKCHAIN_NAME = {

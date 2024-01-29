@@ -185,6 +185,33 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         await this.approve(approveOptions, false);
     }
 
+    /**
+     * Calculates value for swap transaction.
+     * @param providerValue Value, returned from cross-chain provider.
+     */
+    protected getSwapValue(providerValue?: BigNumber | string | number | null): string {
+        const nativeToken = nativeTokensList[this.from.blockchain];
+        const fixedFeeValue = Web3Pure.toWei(
+            this.feeInfo.rubicProxy?.fixedFee?.amount || 0,
+            nativeToken.decimals
+        );
+
+        let fromValue: BigNumber;
+        if (this.from.isNative) {
+            if (providerValue) {
+                fromValue = new BigNumber(providerValue).dividedBy(
+                    1 - (this.feeInfo.rubicProxy?.platformFee?.percent || 0) / 100
+                );
+            } else {
+                fromValue = this.from.weiAmount;
+            }
+        } else {
+            fromValue = new BigNumber(providerValue || 0);
+        }
+
+        return new BigNumber(fromValue).plus(fixedFeeValue).toFixed(0, 0);
+    }
+
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkWalletState();
         await this.checkAllowanceAndApprove(options);
@@ -382,7 +409,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     ): void {
         const oldAmount = new BigNumber(oldWeiAmount);
         const newAmount = new BigNumber(newWeiAmount);
-        const changePercent = 0.01;
+        const changePercent = 0.1;
         const acceptablePercentPriceChange = new BigNumber(changePercent).dividedBy(100);
 
         const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
