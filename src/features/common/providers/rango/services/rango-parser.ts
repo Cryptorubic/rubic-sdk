@@ -31,9 +31,9 @@ export class RangoCommonParser {
 
         const apiKey = RANGO_API_KEY;
 
-        const swapperGroups = options.swapperGroups?.map(swapper =>
-            RangoUtils.getTradeTypeForRango(swapper as RubicTradeTypeForRango)
-        );
+        const swapperGroups = options.swapperGroups
+            ?.map(swapper => RangoUtils.getTradeTypeForRango(swapper as RubicTradeTypeForRango))
+            .join(',');
 
         return {
             apiKey,
@@ -65,9 +65,9 @@ export class RangoCommonParser {
         const slippage = options.slippageTolerance * 100;
         const apiKey = RANGO_API_KEY;
 
-        const swapperGroups = options.swapperGroups?.map(swapper =>
-            RangoUtils.getTradeTypeForRango(swapper as RubicTradeTypeForRango)
-        );
+        const swapperGroups = options.swapperGroups
+            ?.map(swapper => RangoUtils.getTradeTypeForRango(swapper as RubicTradeTypeForRango))
+            .join(',');
 
         return {
             apiKey,
