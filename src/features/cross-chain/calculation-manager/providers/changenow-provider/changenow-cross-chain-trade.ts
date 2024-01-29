@@ -205,8 +205,6 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         };
 
         try {
-            await this.checkTradeErrors();
-
             if (!options.directTransaction) {
                 const { id, payinAddress } = await this.getPaymentInfo(
                     this.transitToken.tokenAmount,
