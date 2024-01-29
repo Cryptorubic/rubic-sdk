@@ -8,6 +8,7 @@ import {
     BlockchainName,
     EVM_BLOCKCHAIN_NAME,
     EvmBlockchainName,
+    SolanaBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { CreateWeb3Public } from 'src/core/blockchain/web3-public-service/models/create-web3-public-proxy';
@@ -46,6 +47,7 @@ export class Web3PublicService {
 
     public getWeb3Public(blockchainName: EvmBlockchainName): EvmWeb3Public;
     public getWeb3Public(blockchainName: TronBlockchainName): TronWeb3Public;
+    public getWeb3Public(blockchainName: SolanaBlockchainName): SolanaWeb3Public;
     public getWeb3Public(blockchainName: Web3PublicSupportedBlockchain): Web3Public;
     public getWeb3Public(blockchainName: BlockchainName): never;
     public getWeb3Public(blockchainName: BlockchainName) {

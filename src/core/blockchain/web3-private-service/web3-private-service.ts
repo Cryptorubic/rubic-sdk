@@ -80,8 +80,10 @@ export class Web3PrivateService {
             if (!walletProviderCore) {
                 return acc;
             }
+
             return {
                 ...acc,
+                // @ts-ignore
                 [chainType]: this.createWeb3Private[chainType](walletProviderCore)
             };
         }, {} as Web3PrivateStorage);
@@ -109,6 +111,16 @@ export class Web3PrivateService {
         return new TronWeb3Private(tronWalletProviderCore);
     }
 
+    public updateWeb3PrivateAddress(chainType: Web3PrivateSupportedChainType, address: string) {
+        this.web3PrivateStorage[chainType]?.setAddress(address);
+    }
+
+    private createSolanaWeb3Private(solanaWallet: SolanaWalletProviderCore): SolanaWeb3Private {
+        let { core } = solanaWallet;
+
+        return new SolanaWeb3Private(core);
+    }
+
     public updateWeb3PrivateStorage(walletProvider: WalletProvider) {
         this.web3PrivateStorage = this.createWeb3PrivateStorage(walletProvider);
     }
@@ -121,24 +133,5 @@ export class Web3PrivateService {
             ...this.web3PrivateStorage,
             [chainType]: this.createWeb3Private[chainType](walletProviderCore)
         };
-    }
-
-    public updateWeb3PrivateAddress(chainType: Web3PrivateSupportedChainType, address: string) {
-        this.web3PrivateStorage[chainType]?.setAddress(address);
-    }
-
-    private createSolanaWeb3Private(solanaWallet: SolanaWalletProviderCore): SolanaWeb3Private {
-        let { core } = solanaWallet;
-        if (!(core instanceof Web3)) {
-            core = new Web3(core);
-        }
-        const web3 = core as Web3;
-        if (!web3) {
-            throw new RubicSdkError('Web3 is not initialized');
-        }
-
-        const address = web3.utils.toChecksumAddress(solanaWallet.address);
-
-        return new SolanaWeb3Private(address);
     }
 }

@@ -17,6 +17,7 @@ import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/
 import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/solana-web3-pure';
 import { AbiItem } from 'web3-utils';
 
+// @TODO SOLANA
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
  * To send transaction or execute contract method use {@link Web3Private}.

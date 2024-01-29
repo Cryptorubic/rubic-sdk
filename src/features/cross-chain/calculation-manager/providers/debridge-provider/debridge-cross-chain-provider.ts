@@ -1,10 +1,13 @@
 import BigNumber from 'bignumber.js';
 import { NotSupportedTokensError, RubicSdkError, TooLowAmountError } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount, Token, TokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -15,19 +18,17 @@ import { CalculationResult } from 'src/features/cross-chain/calculation-manager/
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { DE_BRIDGE_CONTRACT_ABI } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/contract-abi';
-import { DE_BRIDGE_CONTRACT_ADDRESS } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/contract-address';
+import { DebridgeEvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/chains/debridge-evm-cross-chain-trade';
 import {
     DeBridgeCrossChainSupportedBlockchain,
     deBridgeCrossChainSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-cross-chain-supported-blockchain';
-import { DE_BRIDGE_GATE_CONTRACT_ABI } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/gate-contract-abi';
-import { DebridgeCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-trade';
+import { DebridgeCrossChainFactory } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-factory';
 import { Estimation } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/estimation-response';
 import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
 import {
-    TransactionErrorResponse,
-    TransactionResponse
+    DlnEvmTransactionResponse,
+    TransactionErrorResponse
 } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
@@ -41,33 +42,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
     ): blockchain is DeBridgeCrossChainSupportedBlockchain {
         return deBridgeCrossChainSupportedBlockchains.some(
             supportedBlockchain => supportedBlockchain === blockchain
-        );
-    }
-
-    private static async getDeBridgeGateAddress(
-        web3Public: EvmWeb3Public,
-        fromBlockchain: DeBridgeCrossChainSupportedBlockchain
-    ): Promise<string> {
-        return await web3Public.callContractMethod(
-            DE_BRIDGE_CONTRACT_ADDRESS[fromBlockchain].providerRouter,
-            DE_BRIDGE_CONTRACT_ABI,
-            'deBridgeGate'
-        );
-    }
-
-    private static async getCryptoFeeAmount(
-        web3Public: EvmWeb3Public,
-        fromBlockchain: DeBridgeCrossChainSupportedBlockchain
-    ): Promise<string> {
-        const deBridgeGateAddress = await DebridgeCrossChainProvider.getDeBridgeGateAddress(
-            web3Public,
-            fromBlockchain
-        );
-
-        return web3Public.callContractMethod(
-            deBridgeGateAddress,
-            DE_BRIDGE_GATE_CONTRACT_ABI,
-            'globalFixedNativeFee'
         );
     }
 
@@ -90,7 +64,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
+            const fakeAddress = DebridgeCrossChainFactory.getFakeReceiver(fromBlockchain);
 
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
@@ -105,15 +79,15 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
 
             const requestParams: TransactionRequest = {
                 srcChainId: blockchainId[fromBlockchain],
-                srcChainTokenIn: from.address,
+                srcChainTokenIn: this.getSupportedAddress(from),
                 srcChainTokenInAmount: fromWithoutFee.stringWeiAmount,
                 dstChainId: blockchainId[toBlockchain],
-                dstChainTokenOut: toToken.address,
+                dstChainTokenOut: this.getSupportedAddress(toToken),
                 dstChainTokenOutRecipient: this.getWalletAddress(fromBlockchain) || fakeAddress,
                 prependOperatingExpenses: false
             };
 
-            const { tx, estimation } = await Injector.httpClient.get<TransactionResponse>(
+            const debridgeResponse = await Injector.httpClient.get<DlnEvmTransactionResponse>(
                 `${DebridgeCrossChainProvider.apiEndpoint}/order/quote`,
                 {
                     params: requestParams as unknown as {}
@@ -123,34 +97,30 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
                 tokenAmount: Web3Pure.fromWei(
-                    estimation.dstChainTokenOut.maxTheoreticalAmount,
-                    estimation.dstChainTokenOut.decimals
+                    debridgeResponse.estimation.dstChainTokenOut.maxTheoreticalAmount,
+                    debridgeResponse.estimation.dstChainTokenOut.decimals
                 )
             });
 
             const slippage = 0;
             const toTokenAmountMin = Web3Pure.fromWei(
-                estimation.dstChainTokenOut.amount,
-                estimation.dstChainTokenOut.decimals
+                debridgeResponse.estimation.dstChainTokenOut.amount,
+                debridgeResponse.estimation.dstChainTokenOut.decimals
             ).multipliedBy(1 - slippage);
 
-            const transitToken = estimation.srcChainTokenOut || estimation.srcChainTokenIn;
-
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const cryptoFeeAmount = await DebridgeCrossChainProvider.getCryptoFeeAmount(
-                web3Public,
-                fromBlockchain
-            );
+            const transitToken =
+                debridgeResponse.estimation.srcChainTokenOut ||
+                debridgeResponse.estimation.srcChainTokenIn;
 
             const nativeToken = nativeTokensList[fromBlockchain];
             const cryptoFeeToken = await PriceTokenAmount.createFromToken({
                 ...nativeToken,
-                weiAmount: new BigNumber(cryptoFeeAmount)
+                weiAmount: new BigNumber(debridgeResponse.fixFee)
             });
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await DebridgeCrossChainTrade.getGasData(
+                    ? await DebridgeEvmCrossChainTrade.getGasData(
                           from,
                           to,
                           requestParams,
@@ -161,20 +131,24 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                     : null;
 
             return {
-                trade: new DebridgeCrossChainTrade(
+                trade: DebridgeCrossChainFactory.createTrade(
+                    fromBlockchain,
                     {
                         from,
                         to,
                         transactionRequest: requestParams,
                         gasData,
                         priceImpact: from.calculatePriceImpactPercent(to),
-                        allowanceTarget: tx.allowanceTarget,
+                        allowanceTarget: debridgeResponse?.tx?.allowanceTarget,
                         slippage,
                         feeInfo: {
                             ...feeInfo,
                             provider: {
                                 cryptoFee: {
-                                    amount: Web3Pure.fromWei(new BigNumber(cryptoFeeAmount)),
+                                    amount: Web3Pure.fromWei(
+                                        cryptoFeeToken.stringWeiAmount,
+                                        cryptoFeeToken.decimals
+                                    ),
                                     token: cryptoFeeToken
                                 }
                             }
@@ -182,14 +156,14 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         transitAmount: Web3Pure.fromWei(transitToken.amount, transitToken.decimals),
                         toTokenAmountMin,
                         maxTheoreticalAmount: Web3Pure.fromWei(
-                            estimation.dstChainTokenOut.maxTheoreticalAmount,
-                            estimation.dstChainTokenOut.decimals
+                            debridgeResponse.estimation.dstChainTokenOut.maxTheoreticalAmount,
+                            debridgeResponse.estimation.dstChainTokenOut.decimals
                         ),
                         cryptoFeeToken,
                         onChainTrade: null
                     },
                     options.providerAddress,
-                    await this.getRoutePath(estimation, from, to)
+                    await this.getRoutePath(debridgeResponse.estimation, from, to)
                 ),
                 tradeType: this.type
             };
@@ -206,7 +180,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
     }
 
     protected async getFeeInfo(
-        fromBlockchain: DeBridgeCrossChainSupportedBlockchain & EvmBlockchainName,
+        fromBlockchain: DeBridgeCrossChainSupportedBlockchain,
         providerAddress: string,
         percentFeeToken: PriceTokenAmount,
         useProxy: boolean
@@ -292,5 +266,12 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 }
             ];
         }
+    }
+
+    private getSupportedAddress(token: Token): string {
+        if (token.blockchain === BLOCKCHAIN_NAME.SOLANA && token.isNative) {
+            return '11111111111111111111111111111111';
+        }
+        return token.address;
     }
 }

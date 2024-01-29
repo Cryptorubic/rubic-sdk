@@ -90,10 +90,12 @@ export abstract class OnChainTrade {
             this.checkWalletConnected();
         }
 
+        // Native coin in METIS can be Token required approve
         if (this.from.isNative && this.from.blockchain !== BLOCKCHAIN_NAME.METIS) {
             return false;
         }
 
+        // Special native address for METIS native coin
         const fromTokenAddress =
             this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS
                 ? '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
