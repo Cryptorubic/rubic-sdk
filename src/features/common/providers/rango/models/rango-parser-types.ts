@@ -1,5 +1,3 @@
-import { RangoTradeType } from './rango-api-trade-types';
-
 export interface RangoSwapQueryParams {
     apiKey: string;
     from: string;
@@ -11,7 +9,7 @@ export interface RangoSwapQueryParams {
     /**
      * List of all accepted swappers (e.g. providers), an empty list means no filter is required
      */
-    swapperGroups?: RangoTradeType[];
+    swapperGroups?: string;
     /**
      * Indicates include/exclude mode for the swappers param
      */
@@ -24,7 +22,7 @@ export interface RangoBestRouteQueryParams {
     to: string;
     amount: string;
     slippage?: number;
-    swapperGroups?: RangoTradeType[];
+    swapperGroups?: string;
     swappersGroupsExclude?: boolean;
 }
 
