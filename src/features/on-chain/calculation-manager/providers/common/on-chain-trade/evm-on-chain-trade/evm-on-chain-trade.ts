@@ -64,6 +64,9 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
      */
     protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
 
+    /* Used in getProxyContractParams for providers with extraNativeFee */
+    public providerValue: string | null;
+
     protected readonly withDeflation: {
         from: IsDeflationToken;
         to: IsDeflationToken;
@@ -124,6 +127,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             })
         };
         this.withDeflation = evmOnChainTradeStruct.withDeflation;
+        this.providerValue = evmOnChainTradeStruct.providerValue || null;
     }
 
     public async approve(
@@ -234,6 +238,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             const transactionConfig = await this.encode({
                 fromAddress,
                 receiverAddress,
+                ...(this.providerValue && { providerValue: this.providerValue }),
                 ...(directTransaction && { directTransaction }),
                 ...(options?.referrer && { referrer: options?.referrer })
             });
