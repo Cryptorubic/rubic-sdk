@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "4.50.1-alpha.onchain-abi.11",
+    "version": "4.50.1-alpha.onchain-abi.12ss",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
