@@ -9,19 +9,19 @@ import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-w
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
-import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
-import { SymbiosisParser } from 'src/features/common/providers/symbiosis/services/symbiosis-parser';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 
-import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
+import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChainTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
-import { SymbiosisTradeStruct } from './models/symbiosis-on-chain-trade-types';
+import { OdosBestRouteRequestBody } from './models/odos-api-best-route-types';
+import { OdosOnChainTradeStruct } from './models/odos-on-chain-trade-types';
+import { OdosOnChainApiService } from './services/odos-on-chain-api-service';
 
-export class SymbiosisOnChainTrade extends AggregatorOnChainTrade {
+export class OdosOnChainTrade extends AggregatorOnChainTrade {
     /* @internal */
     public static async getGasLimit(
-        tradeStruct: SymbiosisTradeStruct,
+        tradeStruct: OdosOnChainTradeStruct,
         providerGateway: string
     ): Promise<BigNumber | null> {
         const fromBlockchain = tradeStruct.from.blockchain;
@@ -32,13 +32,13 @@ export class SymbiosisOnChainTrade extends AggregatorOnChainTrade {
             return null;
         }
 
-        const symbiosisTrade = new SymbiosisOnChainTrade(
+        const odosTrade = new OdosOnChainTrade(
             tradeStruct,
             EvmWeb3Pure.EMPTY_ADDRESS,
             providerGateway
         );
         try {
-            const transactionConfig = await symbiosisTrade.encode({ fromAddress: walletAddress });
+            const transactionConfig = await odosTrade.encode({ fromAddress: walletAddress });
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const gasLimit = (
@@ -50,7 +50,7 @@ export class SymbiosisOnChainTrade extends AggregatorOnChainTrade {
             }
         } catch {}
         try {
-            const transactionData = await symbiosisTrade.getTxConfigAndCheckAmount();
+            const transactionData = await odosTrade.getTxConfigAndCheckAmount();
 
             if (transactionData.gas) {
                 return new BigNumber(transactionData.gas);
@@ -59,9 +59,15 @@ export class SymbiosisOnChainTrade extends AggregatorOnChainTrade {
         return null;
     }
 
-    public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.SYMBIOSIS_SWAP;
+    public readonly type = ON_CHAIN_TRADE_TYPE.ODOS;
 
     public readonly providerGateway: string;
+
+    private bestRouteRequestBody: OdosBestRouteRequestBody;
+
+    public get dexContractAddress(): string {
+        throw new RubicSdkError('Dex address is unknown before swap is started');
+    }
 
     protected get spenderAddress(): string {
         return this.useProxy
@@ -69,17 +75,13 @@ export class SymbiosisOnChainTrade extends AggregatorOnChainTrade {
             : this.providerGateway;
     }
 
-    public get dexContractAddress(): string {
-        throw new RubicSdkError('Dex address is unknown before swap is started');
-    }
-
     constructor(
-        tradeStruct: SymbiosisTradeStruct,
+        tradeStruct: OdosOnChainTradeStruct,
         providerAddress: string,
         providerGateway: string
     ) {
         super(tradeStruct, providerAddress);
-
+        this.bestRouteRequestBody = tradeStruct.bestRouteRequestBody;
         this.providerGateway = providerGateway;
     }
 
@@ -90,7 +92,8 @@ export class SymbiosisOnChainTrade extends AggregatorOnChainTrade {
         try {
             const transactionData = await this.getTxConfigAndCheckAmount(
                 options.receiverAddress,
-                options.fromAddress
+                options.fromAddress,
+                options.directTransaction
             );
 
             const { gas, gasPrice } = this.getGasParams(options, {
@@ -98,12 +101,10 @@ export class SymbiosisOnChainTrade extends AggregatorOnChainTrade {
                 gasPrice: transactionData.gasPrice
             });
 
-            const value = this.getSwapValue(transactionData.value);
-
             return {
                 to: transactionData.to,
                 data: transactionData.data,
-                value,
+                value: this.fromWithoutFee.isNative ? this.fromWithoutFee.stringWeiAmount : '0',
                 gas,
                 gasPrice
             };
@@ -118,22 +119,26 @@ export class SymbiosisOnChainTrade extends AggregatorOnChainTrade {
         }
     }
 
-    //@TODO - CHECK IF we need to pass fromAddress with proxy or remove it after listing
     protected async getToAmountAndTxData(
-        receiverAddress?: string,
-        fromAddress?: string
+        receiverAddress?: string
     ): Promise<GetToAmountAndTxDataResponse> {
-        const requestBody = await SymbiosisParser.getSwapRequestBody(this.from, this.to, {
-            receiverAddress,
-            fromAddress,
-            slippage: this.slippageTolerance
+        const { pathId } = await OdosOnChainApiService.getBestRoute(this.bestRouteRequestBody);
+
+        const { transaction, outputTokens } = await OdosOnChainApiService.getSwapTx({
+            userAddr: this.walletAddress,
+            receiver: receiverAddress,
+            pathId
         });
 
-        const { tx, tokenAmountOut } = await SymbiosisApiService.getOnChainSwapTx(requestBody);
+        const toAmount = outputTokens[0]!.amount;
 
         return {
-            tx,
-            toAmount: tokenAmountOut.amount
+            tx: {
+                data: transaction!.data,
+                to: transaction!.to,
+                value: transaction!.value
+            },
+            toAmount
         };
     }
 }
