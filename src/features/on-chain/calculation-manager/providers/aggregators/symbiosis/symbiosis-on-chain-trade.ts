@@ -14,11 +14,11 @@ import { SymbiosisParser } from 'src/features/common/providers/symbiosis/service
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
-import { AggregatorOnChainTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
+import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { SymbiosisTradeStruct } from './models/symbiosis-on-chain-trade-types';
 
-export class SymbiosisOnChainTrade extends AggregatorOnChainTrade {
+export class SymbiosisOnChainTrade extends AggregatorEvmOnChainTrade {
     /* @internal */
     public static async getGasLimit(
         tradeStruct: SymbiosisTradeStruct,

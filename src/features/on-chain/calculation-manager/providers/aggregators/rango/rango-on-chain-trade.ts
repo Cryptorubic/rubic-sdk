@@ -15,12 +15,12 @@ import { RangoCommonParser } from 'src/features/common/providers/rango/services/
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
-import { AggregatorOnChainTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
+import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { RangoOnChainTradeStruct } from './models/rango-on-chain-trade-types';
 import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
 
-export class RangoOnChainTrade extends AggregatorOnChainTrade {
+export class RangoOnChainTrade extends AggregatorEvmOnChainTrade {
     /* @internal */
     public static async getGasLimit(
         tradeStruct: RangoOnChainTradeStruct,

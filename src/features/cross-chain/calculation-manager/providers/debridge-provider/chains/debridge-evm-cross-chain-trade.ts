@@ -11,6 +11,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
@@ -24,7 +25,6 @@ import { RubicStep } from 'src/features/cross-chain/calculation-manager/provider
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-cross-chain-supported-blockchain';
-import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
 import { DebridgeEvmCrossChainTradeConstructor } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/debridge-cross-chain-trade-constructor';
 import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
 import { DlnEvmTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
@@ -364,10 +364,8 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
             referralCode: '4350'
         };
 
-        const { tx, estimation, fixFee } = await Injector.httpClient.get<DlnEvmTransactionResponse>(
-            `${DebridgeCrossChainProvider.apiEndpoint}/order/create-tx`,
-            { params }
-        );
+        const { tx, estimation, fixFee } =
+            await DlnApiService.fetchSwapData<DlnEvmTransactionResponse>(params);
 
         if (!skipAmountChangeCheck) {
             EvmCrossChainTrade.checkAmountChange(

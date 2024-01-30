@@ -4,9 +4,9 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BlockchainName, SolanaBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
@@ -16,7 +16,6 @@ import { RubicStep } from 'src/features/cross-chain/calculation-manager/provider
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { SolanaCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/solana-cross-chain-trade/solana-cross-chain-trade';
 import { DeBridgeCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/constants/debridge-cross-chain-supported-blockchain';
-import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
 import { DebridgeSolanaCrossChainTradeConstructor } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/debridge-cross-chain-trade-constructor';
 import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
 import { DlnSolanaTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
@@ -241,9 +240,8 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
             referralCode: '4350'
         };
 
-        const { tx, fixFee } = await Injector.httpClient.get<DlnSolanaTransactionResponse>(
-            `${DebridgeCrossChainProvider.apiEndpoint}/order/create-tx`,
-            { params }
+        const { tx, fixFee } = await DlnApiService.fetchSwapData<DlnSolanaTransactionResponse>(
+            params
         );
 
         // if (!skipAmountChangeCheck) {

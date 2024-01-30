@@ -1,5 +1,4 @@
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { CrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-trade';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
@@ -34,16 +33,5 @@ export class DebridgeCrossChainFactory {
             );
         }
         throw new Error('Can not create trade instance');
-    }
-
-    public static getFakeReceiver(blockchain: BlockchainName): string {
-        const type = BlockchainsInfo.getChainType(blockchain);
-        if (type === CHAIN_TYPE.EVM) {
-            return '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
-        }
-        if (type === CHAIN_TYPE.SOLANA) {
-            return 'HZgssrdZjBdypDux7tHWWDZ7hF7hhwUXN445t85GaoQT';
-        }
-        throw new Error('Chain type is not supported');
     }
 }

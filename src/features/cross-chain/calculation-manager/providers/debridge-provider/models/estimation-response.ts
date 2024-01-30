@@ -61,9 +61,19 @@ export interface Estimation {
 /**
  * Swap estimates response.
  */
-export interface EstimationResponse {
+export interface EstimationResponse<T> {
     /**
      * Trade estimation object.
      */
     estimation: Estimation;
+
+    /**
+     * Provider fee.
+     */
+    fixFee: string;
+
+    /**
+     * Transaction data.
+     */
+    tx: T;
 }

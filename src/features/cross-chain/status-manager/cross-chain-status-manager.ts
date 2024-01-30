@@ -19,6 +19,7 @@ import {
 } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { changenowApiKey } from 'src/features/common/providers/changenow/constants/changenow-api-key';
+import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { RANGO_SWAP_STATUS } from 'src/features/common/providers/rango/models/rango-api-status-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { XY_API_ENDPOINT } from 'src/features/common/providers/xy/constants/xy-api-params';
@@ -38,7 +39,6 @@ import {
     XFER_STATUS,
     XFER_STATUS_CODE
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
-import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
 import {
     LIFI_SWAP_STATUS,
     LifiSwapStatus
@@ -329,7 +329,7 @@ export class CrossChainStatusManager {
     private async getDebridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
             const { orderIds } = await this.httpClient.get<DeBridgeFilteredListApiResponse>(
-                `${DebridgeCrossChainProvider.apiEndpoint}/tx/${data.srcTxHash}/order-ids`
+                `${DlnApiService.apiEndpoint}/tx/${data.srcTxHash}/order-ids`
             );
 
             if (!orderIds.length) {
@@ -346,7 +346,7 @@ export class CrossChainStatusManager {
             };
 
             const { status } = await this.httpClient.get<DeBridgeOrderApiStatusResponse>(
-                `${DebridgeCrossChainProvider.apiEndpoint}/order/${orderId}/status`
+                `${DlnApiService.apiEndpoint}/order/${orderId}/status`
             );
 
             if (

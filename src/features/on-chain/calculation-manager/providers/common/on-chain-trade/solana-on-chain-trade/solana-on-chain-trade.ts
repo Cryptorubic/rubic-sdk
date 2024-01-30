@@ -1,18 +1,12 @@
 import BigNumber from 'bignumber.js';
-import {
-    FailedToCheckForTransactionReceiptError,
-    NotWhitelistedProviderError,
-    UnnecessaryApproveError
-} from 'src/common/errors';
 import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { parseError } from 'src/common/utils/errors';
-import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
+import { BLOCKCHAIN_NAME, SolanaBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
-import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
+import { SolanaWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/solana-web3-private/solana-web3-private';
+import { SolanaWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/solana-web3-public/solana-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -25,7 +19,6 @@ import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-man
 import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
-import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
 import { OnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
@@ -38,10 +31,10 @@ import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { utf8ToHex } from 'web3-utils';
 
-export abstract class EvmOnChainTrade extends OnChainTrade {
-    public readonly from: PriceTokenAmount<EvmBlockchainName>;
+export abstract class SolanaOnChainTrade extends OnChainTrade {
+    public readonly from: PriceTokenAmount<SolanaBlockchainName>;
 
-    public readonly to: PriceTokenAmount<EvmBlockchainName>;
+    public readonly to: PriceTokenAmount<SolanaBlockchainName>;
 
     public readonly slippageTolerance: number;
 
@@ -63,7 +56,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
      * Contains from amount, from which proxy fees were subtracted.
      * If proxy is not used, then amount is equal to from amount.
      */
-    protected readonly fromWithoutFee: PriceTokenAmount<EvmBlockchainName>;
+    protected readonly fromWithoutFee: PriceTokenAmount<SolanaBlockchainName>;
 
     protected readonly withDeflation: {
         from: IsDeflationToken;
@@ -80,16 +73,16 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             : this.dexContractAddress;
     }
 
-    protected get web3Public(): EvmWeb3Public {
-        return Injector.web3PublicService.getWeb3Public(this.from.blockchain);
+    protected get web3Public(): SolanaWeb3Public {
+        return Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.SOLANA);
     }
 
-    protected get web3Private(): EvmWeb3Private {
-        return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
+    protected get web3Private(): SolanaWeb3Private {
+        return Injector.web3PrivateService.getWeb3PrivateByBlockchain(BLOCKCHAIN_NAME.SOLANA);
     }
 
     protected constructor(
-        evmOnChainTradeStruct: OnChainTradeStruct<EvmBlockchainName>,
+        evmOnChainTradeStruct: OnChainTradeStruct<SolanaBlockchainName>,
         providerAddress: string
     ) {
         super(providerAddress);
@@ -128,46 +121,20 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     }
 
     public async approve(
-        options: EvmBasicTransactionOptions,
-        checkNeedApprove = true,
-        amount: BigNumber | 'infinity' = 'infinity'
+        _options: EvmBasicTransactionOptions,
+        _checkNeedApprove = true,
+        _amount: BigNumber | 'infinity' = 'infinity'
     ): Promise<TransactionReceipt> {
-        if (checkNeedApprove) {
-            const needApprove = await this.needApprove();
-            if (!needApprove) {
-                throw new UnnecessaryApproveError();
-            }
-        }
-
-        this.checkWalletConnected();
-        await this.checkBlockchainCorrect();
-
-        const approveAmount =
-            this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ||
-            this.from.blockchain === BLOCKCHAIN_NAME.CRONOS
-                ? this.from.weiAmount
-                : amount;
-
-        const fromTokenAddress =
-            this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS
-                ? '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
-                : this.from.address;
-
-        return this.web3Private.approveTokens(
-            fromTokenAddress,
-            this.spenderAddress,
-            approveAmount,
-            options
-        );
+        throw new Error('Method is not supported');
     }
 
     public async encodeApprove(
-        tokenAddress: string,
-        spenderAddress: string,
-        value: BigNumber | 'infinity',
-        options: EvmTransactionOptions = {}
+        _tokenAddress: string,
+        _spenderAddress: string,
+        _value: BigNumber | 'infinity',
+        _options: EvmTransactionOptions = {}
     ): Promise<TransactionConfig> {
-        return this.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
+        throw new Error('Method is not supported');
     }
 
     protected async checkAllowanceAndApprove(
@@ -215,52 +182,53 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         return new BigNumber(fromValue).plus(fixedFeeValue).toFixed(0, 0);
     }
 
-    public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        await this.checkWalletState();
-        await this.checkAllowanceAndApprove(options);
+    public async swap(_options: SwapTransactionOptions = {}): Promise<string | never> {
+        throw new Error('Method is not supported');
+        // await this.checkWalletState();
+        // await this.checkAllowanceAndApprove(options);
+        //
+        // const { onConfirm, directTransaction } = options;
+        // let transactionHash: string;
+        // const onTransactionHash = (hash: string) => {
+        //     if (onConfirm) {
+        //         onConfirm(hash);
+        //     }
+        //     transactionHash = hash;
+        // };
+        //
+        // const fromAddress = this.walletAddress;
+        // const receiverAddress = options.receiverAddress || this.walletAddress;
 
-        const { onConfirm, directTransaction } = options;
-        let transactionHash: string;
-        const onTransactionHash = (hash: string) => {
-            if (onConfirm) {
-                onConfirm(hash);
-            }
-            transactionHash = hash;
-        };
-
-        const fromAddress = this.walletAddress;
-        const receiverAddress = options.receiverAddress || this.walletAddress;
-
-        try {
-            const transactionConfig = await this.encode({
-                fromAddress,
-                receiverAddress,
-                ...(directTransaction && { directTransaction }),
-                ...(options?.referrer && { referrer: options?.referrer })
-            });
-
-            let method: 'trySendTransaction' | 'sendTransaction' = 'trySendTransaction';
-            if (options?.testMode) {
-                console.info(transactionConfig, options.gasLimit, options.gasPrice);
-                method = 'sendTransaction';
-            }
-            await this.web3Private[method](transactionConfig.to, {
-                onTransactionHash,
-                data: transactionConfig.data,
-                value: transactionConfig.value,
-                gas: options.gasLimit,
-                gasPrice: options.gasPrice,
-                gasPriceOptions: options.gasPriceOptions
-            });
-
-            return transactionHash!;
-        } catch (err) {
-            if (err instanceof FailedToCheckForTransactionReceiptError) {
-                return transactionHash!;
-            }
-
-            throw parseError(err);
-        }
+        // try {
+        //     const transactionConfig = await this.encode({
+        //         fromAddress,
+        //         receiverAddress,
+        //         ...(directTransaction && { directTransaction }),
+        //         ...(options?.referrer && { referrer: options?.referrer })
+        //     });
+        //
+        //     let method: 'trySendTransaction' | 'sendTransaction' = 'trySendTransaction';
+        //     if (options?.testMode) {
+        //         console.info(transactionConfig, options.gasLimit, options.gasPrice);
+        //         method = 'sendTransaction';
+        //     }
+        //     await this.web3Private[method](transactionConfig.to, {
+        //         onTransactionHash,
+        //         data: transactionConfig.data,
+        //         value: transactionConfig.value,
+        //         gas: options.gasLimit,
+        //         gasPrice: options.gasPrice,
+        //         gasPriceOptions: options.gasPriceOptions
+        //     });
+        //
+        //     return transactionHash!;
+        // } catch (err) {
+        //     if (err instanceof FailedToCheckForTransactionReceiptError) {
+        //         return transactionHash!;
+        //     }
+        //
+        //     throw parseError(err);
+        // }
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
@@ -300,7 +268,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         const methodArguments = [
             EvmWeb3Pure.randomHex(32),
             this.providerAddress,
-            EvmOnChainTrade.getReferrerAddress(options.referrer),
+            SolanaOnChainTrade.getReferrerAddress(options.referrer),
             receiverAddress,
             this.toTokenAmountMin.stringWeiAmount,
             swapData
@@ -369,40 +337,41 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         };
     }
 
-    protected async getSwapData(options: GetContractParamsOptions): Promise<unknown[]> {
-        const directTransactionConfig = await this.encodeDirect({
-            ...options,
-            fromAddress: rubicProxyContractAddress[this.from.blockchain].router,
-            supportFee: false,
-            receiverAddress: rubicProxyContractAddress[this.from.blockchain].router
-        });
-        const availableDexs = (
-            await ProxyCrossChainEvmTrade.getWhitelistedDexes(this.from.blockchain)
-        ).map(address => address.toLowerCase());
-
-        const routerAddress = directTransactionConfig.to;
-        const method = directTransactionConfig.data.slice(0, 10);
-
-        if (!availableDexs.includes(routerAddress.toLowerCase())) {
-            throw new NotWhitelistedProviderError(routerAddress, undefined, 'dex');
-        }
-        await ProxyCrossChainEvmTrade.checkDexWhiteList(
-            this.from.blockchain,
-            routerAddress,
-            method
-        );
-
-        return [
-            [
-                routerAddress,
-                routerAddress,
-                this.from.address,
-                this.to.address,
-                this.from.stringWeiAmount,
-                directTransactionConfig.data,
-                true
-            ]
-        ];
+    protected async getSwapData(_options: GetContractParamsOptions): Promise<unknown[]> {
+        throw new Error('Method is not supported');
+        // const directTransactionConfig = await this.encodeDirect({
+        //     ...options,
+        //     fromAddress: rubicProxyContractAddress[this.from.blockchain].router,
+        //     supportFee: false,
+        //     receiverAddress: rubicProxyContractAddress[this.from.blockchain].router
+        // });
+        // const availableDexs = (
+        //     await ProxyCrossChainEvmTrade.getWhitelistedDexes(this.from.blockchain)
+        // ).map(address => address.toLowerCase());
+        //
+        // const routerAddress = directTransactionConfig.to;
+        // const method = directTransactionConfig.data.slice(0, 10);
+        //
+        // if (!availableDexs.includes(routerAddress.toLowerCase())) {
+        //     throw new NotWhitelistedProviderError(routerAddress, undefined, 'dex');
+        // }
+        // await ProxyCrossChainEvmTrade.checkDexWhiteList(
+        //     this.from.blockchain,
+        //     routerAddress,
+        //     method
+        // );
+        //
+        // return [
+        //     [
+        //         routerAddress,
+        //         routerAddress,
+        //         this.from.address,
+        //         this.to.address,
+        //         this.from.stringWeiAmount,
+        //         directTransactionConfig.data,
+        //         true
+        //     ]
+        // ];
     }
 
     public static checkAmountChange(
