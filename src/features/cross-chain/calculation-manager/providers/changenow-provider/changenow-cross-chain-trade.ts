@@ -7,6 +7,7 @@ import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/bloc
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -120,8 +121,8 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
      */
     public id: string | undefined;
 
-    /* need save cause CN doesn't return tx in api */
-    private txTo: string | undefined;
+    /* Address to send funds to */
+    private payinAddress: string | undefined;
 
     private readonly fromCurrency: ChangenowCurrency;
 
@@ -210,7 +211,9 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         try {
             const { payinAddress } = await this.getPaymentInfo(
                 this.transitToken.tokenAmount,
-                options.receiverAddress ? options.receiverAddress : this.walletAddress
+                options.receiverAddress ? options.receiverAddress : this.walletAddress,
+                false,
+                options.directTransaction
             );
 
             if (this.from.isNative) {
@@ -263,10 +266,11 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
     private async getPaymentInfo(
         fromAmount: BigNumber,
         receiverAddress: string,
-        skipAmountChangeCheck: boolean = false
+        skipAmountChangeCheck: boolean = false,
+        directTransaction?: EvmEncodeConfig
     ): Promise<GetPaymentInfoReturnType> {
-        if (this.id && this.txTo) {
-            return { id: this.id, payinAddress: this.txTo };
+        if (directTransaction) {
+            return { id: this.id!, payinAddress: this.payinAddress! };
         }
 
         const params: ChangenowSwapRequestBody = {
@@ -281,7 +285,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
 
         const res = await ChangeNowCrossChainApiService.getSwapTx(params);
         const toAmountWei = Web3Pure.toWei(res.toAmount, this.to.decimals);
-        this.txTo = res.payinAddress;
+        this.payinAddress = res.payinAddress;
         this.id = res.id;
 
         if (!skipAmountChangeCheck) {

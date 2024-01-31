@@ -145,9 +145,8 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
             transactionHash = hash;
         };
 
-        const skipAmountChangeCheck = options.directTransaction ? true : false;
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams(options, skipAmountChangeCheck);
+            await this.getContractParams(options, false);
 
         try {
             let method: 'tryExecuteContractMethod' | 'executeContractMethod' =
