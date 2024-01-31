@@ -160,21 +160,32 @@ export class EvmWeb3Public extends Web3Public {
                     })
                 );
             } catch (err: unknown) {
-                if (err instanceof Error) {
-                    if (err.message.includes('unsigned transaction')) {
-                        return this.multicallContractsMethodsByOne(contractAbi, contractsData);
-                    }
-                }
-
-                if (this.blockchainName === BLOCKCHAIN_NAME.ZETACHAIN) {
-                    return this.multicallContractsMethodsByOne(contractAbi, contractsData);
-                }
-
-                throw err;
+                return this.allowMultipleRequests(err, contractAbi, contractsData);
             }
         }
 
         return this.multicallContractsMethodsByOne(contractAbi, contractsData);
+    }
+
+    private allowMultipleRequests<Output extends Web3PrimitiveType>(
+        err: unknown,
+        contractAbi: AbiItem[],
+        contractsData: {
+            contractAddress: string;
+            methodsData: MethodData[];
+        }[]
+    ): Promise<ContractMulticallResponse<Output>[][]> {
+        if (err instanceof Error) {
+            if (err.message.includes('unsigned transaction')) {
+                return this.multicallContractsMethodsByOne(contractAbi, contractsData);
+            }
+        }
+
+        if (this.blockchainName === BLOCKCHAIN_NAME.ZETACHAIN) {
+            return this.multicallContractsMethodsByOne(contractAbi, contractsData);
+        }
+
+        throw err;
     }
 
     /**
