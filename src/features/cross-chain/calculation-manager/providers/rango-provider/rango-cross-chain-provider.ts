@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { NotSupportedBlockchain } from 'src/common/errors';
 import { nativeTokensList, PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { Any } from 'src/common/utils/types';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -54,16 +53,7 @@ export class RangoCrossChainProvider extends CrossChainProvider {
         options: RangoCrossChainOptions
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as RangoSupportedBlockchain;
-        const toBlockchain = toToken.blockchain as RangoSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
-
-        if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
-            return {
-                error: new NotSupportedBlockchain(),
-                trade: null,
-                tradeType: this.type
-            };
-        }
 
         try {
             const feeInfo = await this.getFeeInfo(
