@@ -146,7 +146,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         };
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams(options);
+            await this.getContractParams(options, false);
 
         try {
             let method: 'tryExecuteContractMethod' | 'executeContractMethod' =
@@ -226,7 +226,8 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
     }
 
     protected abstract getContractParams(
-        options: GetContractParamsOptions
+        options: GetContractParamsOptions,
+        skipAmountChangeCheck?: boolean
     ): Promise<ContractParams>;
 
     public static checkAmountChange(
@@ -236,7 +237,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
     ): void {
         const oldAmount = new BigNumber(oldWeiAmount);
         const newAmount = new BigNumber(newWeiAmount);
-        const acceptablePercentPriceChange = new BigNumber(0.5).dividedBy(100);
+        const acceptablePercentPriceChange = new BigNumber(0.01).dividedBy(100);
 
         const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
         const amountMinusPercent = oldAmount.multipliedBy(
