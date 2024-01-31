@@ -209,14 +209,12 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         };
 
         try {
-            let { payinAddress } = await this.getPaymentInfo(
+            const { payinAddress } = await this.getPaymentInfo(
                 this.transitToken.tokenAmount,
                 options.receiverAddress ? options.receiverAddress : this.walletAddress,
                 false,
                 options.directTransaction
             );
-
-            payinAddress = payinAddress || this.payinAddress!;
 
             if (this.from.isNative) {
                 await this.web3Private.trySendTransaction(payinAddress, {
