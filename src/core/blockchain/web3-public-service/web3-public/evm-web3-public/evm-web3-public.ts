@@ -175,13 +175,10 @@ export class EvmWeb3Public extends Web3Public {
             methodsData: MethodData[];
         }[]
     ): Promise<ContractMulticallResponse<Output>[][]> {
-        if (err instanceof Error) {
-            if (err.message.includes('unsigned transaction')) {
-                return this.multicallContractsMethodsByOne(contractAbi, contractsData);
-            }
-        }
-
-        if (this.blockchainName === BLOCKCHAIN_NAME.ZETACHAIN) {
+        if (
+            (err instanceof Error && err.message.includes('unsigned transaction')) ||
+            this.blockchainName === BLOCKCHAIN_NAME.ZETACHAIN
+        ) {
             return this.multicallContractsMethodsByOne(contractAbi, contractsData);
         }
 
