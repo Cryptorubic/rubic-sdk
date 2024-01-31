@@ -12,7 +12,7 @@ export const CHANGENOW_API_STATUS = {
 
 export type ChangenowApiStatus = (typeof CHANGENOW_API_STATUS)[keyof typeof CHANGENOW_API_STATUS];
 
-export interface ChangenowApiResponse {
+export interface ChangenowStatusResponse {
     status: ChangenowApiStatus;
     payoutHash: string | null;
 }
