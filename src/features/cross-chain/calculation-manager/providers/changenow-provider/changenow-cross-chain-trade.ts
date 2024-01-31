@@ -271,8 +271,8 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         skipAmountChangeCheck: boolean = false,
         directTransaction?: EvmEncodeConfig
     ): Promise<GetPaymentInfoReturnType> {
-        if (directTransaction) {
-            return { id: this.id!, payinAddress: this.payinAddress! };
+        if (directTransaction && this.payinAddress && this.id) {
+            return { id: this.id, payinAddress: this.payinAddress };
         }
 
         const params: ChangenowSwapRequestBody = {
