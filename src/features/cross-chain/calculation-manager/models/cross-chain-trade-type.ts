@@ -14,7 +14,7 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     TAIKO_BRIDGE: 'taiko_bridge',
     RANGO: 'rango',
     PULSE_CHAIN_BRIDGE: 'pulsechain_bridge',
-    ORBITER: 'orbiter'
+    ORBITER_BRIDGE: 'orbiter_bridge'
 } as const;
 
 export type CrossChainTradeType =

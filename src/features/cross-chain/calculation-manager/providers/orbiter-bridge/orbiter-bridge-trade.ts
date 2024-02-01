@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -9,9 +9,6 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { rangoContractAddresses } from 'src/features/common/providers/rango/constants/rango-contract-address';
-import { RangoSwapQueryParams } from 'src/features/common/providers/rango/models/rango-parser-types';
-import { RangoSupportedBlockchain } from 'src/features/common/providers/rango/models/rango-supported-blockchains';
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
@@ -26,28 +23,30 @@ import { GetContractParamsOptions } from '../common/models/get-contract-params-o
 import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import {
-    RangoCrossChainTradeConstructorParams,
-    RangoGetGasDataParams
-} from './model/rango-cross-chain-parser-types';
-import { RangoCrossChainApiService } from './services/rango-cross-chain-api-service';
+import { OrbiterTokenSymbols } from './models/orbiter-bridge-api-service-types';
+import { OrbiterGetGasDataParams, OrbiterTradeParams } from './models/orbiter-bridge-trade-types';
+import { orbiterContractAddresses } from './models/orbiter-contract-addresses';
+import { OrbiterSupportedBlockchain } from './models/orbiter-supported-blockchains';
+import { OrbiterApiService } from './services/orbiter-api-service';
 
-export class RangoCrossChainTrade extends EvmCrossChainTrade {
+export class OrbiterBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData({
         fromToken,
         toToken,
         feeInfo,
-        routePath,
-        swapQueryParams,
-        bridgeSubtype
-    }: RangoGetGasDataParams): Promise<GasData | null> {
+        receiverAddress,
+        providerAddress,
+        orbiterTokenSymbols
+    }: OrbiterGetGasDataParams): Promise<GasData | null> {
         const fromBlockchain = fromToken.blockchain;
-        const walletAddress = swapQueryParams.fromAddress;
+        const walletAddress =
+            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
 
         if (!walletAddress) {
             return null;
         }
+
         try {
             let gasLimit: BigNumber | null;
             let gasDetails: GasPriceBN | BigNumber | null;
@@ -57,26 +56,20 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
                 crossChainTrade: {
                     from: fromToken,
                     to: toToken,
-                    toTokenAmountMin: new BigNumber(0),
                     feeInfo,
                     gasData: null,
                     priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
-                    slippage: swapQueryParams.slippage,
-                    bridgeSubtype,
-                    swapQueryParams
+                    orbiterTokenSymbols
                 },
-                routePath,
-                providerAddress: swapQueryParams.toAddress
-            } as RangoCrossChainTradeConstructorParams;
+                routePath: [],
+                providerAddress
+            } as OrbiterTradeParams;
 
             if (feeInfo.rubicProxy?.fixedFee?.amount.gt(0)) {
                 const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                    await new RangoCrossChainTrade(tradeParams).getContractParams(
-                        {
-                            receiverAddress: swapQueryParams.toAddress
-                        },
-                        true
-                    );
+                    await new OrbiterBridgeTrade(tradeParams).getContractParams({
+                        receiverAddress
+                    });
 
                 const [proxyGasLimit, proxyGasDetails] = await Promise.all([
                     web3Public.getEstimatedGas(
@@ -93,9 +86,9 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
                 gasLimit = proxyGasLimit;
                 gasDetails = proxyGasDetails;
             } else {
-                const { data, value, to } = await new RangoCrossChainTrade(
+                const { data, value, to } = await new OrbiterBridgeTrade(
                     tradeParams
-                ).getTransactionRequest(swapQueryParams.toAddress, undefined, true);
+                ).getTransactionRequest(receiverAddress);
 
                 const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
                     data,
@@ -124,9 +117,9 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
     }
 
     /**ABSTRACT PROPS */
-    public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.RANGO;
+    public readonly type: CrossChainTradeType = CROSS_CHAIN_TRADE_TYPE.ORBITER_BRIDGE;
 
-    public readonly isAggregator: boolean = true;
+    public readonly isAggregator: boolean = false;
 
     public readonly to: PriceTokenAmount<EvmBlockchainName>;
 
@@ -138,64 +131,88 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
 
     public readonly onChainSubtype: OnChainSubtype = { from: undefined, to: undefined };
 
-    public readonly bridgeType: BridgeType = BRIDGE_TYPE.RANGO;
+    public readonly bridgeType: BridgeType = BRIDGE_TYPE.ORBITER_BRIDGE;
 
     public readonly gasData: GasData;
 
     public readonly priceImpact: number | null;
     /** */
 
-    private readonly slippage: number;
+    private orbiterTokenSymbols: OrbiterTokenSymbols;
 
-    /**
-     * @description UUID returned by rango-api to track transaction status in getRangoDstSwapStatus
-     */
-    public rangoRequestId: string | undefined;
-
-    private readonly swapQueryParams: RangoSwapQueryParams;
-
-    private get fromBlockchain(): RangoSupportedBlockchain {
-        return this.from.blockchain as RangoSupportedBlockchain;
+    private get fromBlockchain(): OrbiterSupportedBlockchain {
+        return this.from.blockchain as OrbiterSupportedBlockchain;
     }
 
     protected get fromContractAddress(): string {
         return this.isProxyTrade
             ? rubicProxyContractAddress[this.fromBlockchain].gateway
-            : rangoContractAddresses[this.fromBlockchain].providerGateway;
+            : orbiterContractAddresses[this.fromBlockchain];
     }
 
     protected get methodName(): string {
         return 'startBridgeTokensViaGenericCrossChain';
     }
 
-    constructor(params: RangoCrossChainTradeConstructorParams) {
+    constructor(params: OrbiterTradeParams) {
         super(params.providerAddress, params.routePath);
         this.to = params.crossChainTrade.to;
         this.from = params.crossChainTrade.from;
-        this.toTokenAmountMin = params.crossChainTrade.toTokenAmountMin;
+        this.toTokenAmountMin = params.crossChainTrade.to.tokenAmount;
         this.feeInfo = params.crossChainTrade.feeInfo;
         this.gasData = params.crossChainTrade.gasData;
         this.priceImpact = params.crossChainTrade.priceImpact;
-        this.slippage = params.crossChainTrade.slippage;
-        this.swapQueryParams = params.crossChainTrade.swapQueryParams;
-        this.bridgeType = params.crossChainTrade.bridgeSubtype || BRIDGE_TYPE.RANGO;
+        this.orbiterTokenSymbols = params.crossChainTrade.orbiterTokenSymbols;
     }
 
-    public async getContractParams(
-        options: GetContractParamsOptions,
-        skipAmountChangeCheck: boolean = false
-    ): Promise<ContractParams> {
+    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
+        await this.checkTradeErrors();
+        await this.checkAllowanceAndApprove(options);
+
+        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+
+        // eslint-disable-next-line no-useless-catch
+        try {
+            const params = await this.getContractParams(options);
+
+            const { data, to, value } = EvmWeb3Pure.encodeMethodCall(
+                params.contractAddress,
+                params.contractAbi,
+                params.methodName,
+                params.methodArguments,
+                params.value
+            );
+
+            await this.web3Private.trySendTransaction(to, {
+                data,
+                value,
+                onTransactionHash,
+                gas: gasLimit,
+                gasPrice,
+                gasPriceOptions
+            });
+
+            return transactionHash!;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const receiverAddress = options?.receiverAddress || this.walletAddress;
 
         const {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.getTransactionRequest(
-            receiverAddress,
-            options.directTransaction,
-            skipAmountChangeCheck
-        );
+        } = await this.getTransactionRequest(receiverAddress, options.directTransaction);
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
@@ -203,10 +220,11 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             toTokenAmount: this.to,
             srcChainTrade: null,
             providerAddress: this.providerAddress,
-            type: `rango:${this.bridgeType}`,
+            type: `native:${this.bridgeType}`,
             fromAddress: this.walletAddress
         });
 
+        //@TODO: CHECK IF ORBITER TAKES EXTRA FEE
         const extraNativeFee = this.from.isNative
             ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
             : new BigNumber(providerValue).toFixed();
@@ -242,47 +260,9 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string> {
-        await this.checkTradeErrors();
-        await this.checkAllowanceAndApprove(options);
-
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
-        let transactionHash: string;
-
-        const onTransactionHash = (hash: string) => {
-            if (onConfirm) {
-                onConfirm(hash);
-            }
-            transactionHash = hash;
-        };
-
-        // eslint-disable-next-line no-useless-catch
-        try {
-            const receiverAddress = options?.receiverAddress || this.walletAddress;
-            const { data, value, to } = await this.getTransactionRequest(
-                receiverAddress,
-                options.directTransaction
-            );
-
-            await this.web3Private.trySendTransaction(to, {
-                data,
-                value,
-                onTransactionHash,
-                gas: gasLimit,
-                gasPrice,
-                gasPriceOptions
-            });
-
-            return transactionHash!;
-        } catch (err) {
-            throw err;
-        }
-    }
-
     private async getTransactionRequest(
         receiverAddress?: string,
-        transactionConfig?: EvmEncodeConfig,
-        skipAmountChangeCheck: boolean = false
+        transactionConfig?: EvmEncodeConfig
     ): Promise<EvmEncodeConfig> {
         if (transactionConfig) {
             return {
@@ -292,47 +272,43 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             };
         }
 
-        const { route, tx, error, requestId } = await RangoCrossChainApiService.getSwapTransaction({
-            ...this.swapQueryParams,
-            toAddress: receiverAddress || this.swapQueryParams.toAddress
+        const fromChainID = blockchainId[this.fromBlockchain].toString();
+        const toChainID = blockchainId[this.to.blockchain].toString();
+        const fromCurrency =
+            this.orbiterTokenSymbols[fromChainID]?.[this.from.address] || this.from.symbol;
+        const toCurrency =
+            this.orbiterTokenSymbols[toChainID]?.[this.from.address] || this.to.symbol;
+
+        const { to, data, value } = await OrbiterApiService.getSwapTx({
+            fromChainID,
+            toChainID,
+            fromCurrency,
+            toCurrency,
+            transferValue: this.from.tokenAmount.toNumber(),
+            crossAddressReceipt: receiverAddress || this.walletAddress
         });
 
-        this.rangoRequestId = requestId;
-
-        if (!route || !tx) {
-            throw new RubicSdkError('Invalid data after sending swap request. Error text:' + error);
-        }
-
-        const config = {
-            data: tx.txData!,
-            value: tx.value || '0',
-            to: tx.txTo
+        //@TODO Check value type in swap response and check if hash in swap() -> onConfirm set
+        return {
+            to: to!,
+            value: value.toString(),
+            data
         };
+    }
 
-        if (!skipAmountChangeCheck) {
-            EvmCrossChainTrade.checkAmountChange(
-                config,
-                route.outputAmount,
-                this.to.stringWeiAmount
-            );
-        }
-        return config;
+    /**
+     * @deprecated */
+    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
+        return fromUsd.dividedBy(this.to.tokenAmount);
     }
 
     public getTradeInfo(): TradeInfo {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact || null,
-            slippage: this.slippage * 100,
+            priceImpact: null,
+            slippage: 0,
             routePath: this.routePath
         };
-    }
-
-    /**
-     * @deprecated
-     */
-    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
-        return fromUsd;
     }
 }

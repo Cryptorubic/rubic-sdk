@@ -4,19 +4,20 @@ import {
     OrbiterQuoteConfig,
     OrbiterQuoteRequestParams,
     OrbiterSwapRequestParams,
+    OrbiterSwapResponse,
     OrbiterTokenSymbols
-} from '../models/orbiter-cross-chain-api-service-types';
+} from '../models/orbiter-bridge-api-service-types';
 
 export class OrbiterApiService {
     /* add in Orbiter constructor {} dealerId to get extra benefits */
     private static readonly orbiterSdk: Orbiter = new Orbiter({});
 
     public static getQuoteConfigs(): Promise<OrbiterQuoteConfig[]> {
-        return OrbiterApiService.orbiterSdk.queryRouters();
+        return this.orbiterSdk.queryRouters();
     }
 
     public static async getTokensData(): Promise<OrbiterTokenSymbols> {
-        const res = await OrbiterApiService.orbiterSdk.queryTokensAllChain();
+        const res = await this.orbiterSdk.queryTokensAllChain();
 
         const tokens = Object.entries(res).reduce((acc, [chainId, tokensInChain]) => {
             tokensInChain?.forEach(({ address, symbol }) => {
@@ -34,12 +35,11 @@ export class OrbiterApiService {
         fromAmount,
         config
     }: OrbiterQuoteRequestParams): Promise<string | 0> {
-        return OrbiterApiService.orbiterSdk.queryReceiveAmount(fromAmount, config);
+        return this.orbiterSdk.queryReceiveAmount(fromAmount, config);
     }
 
-    public static async getSwapTx(params: OrbiterSwapRequestParams): Promise<void> {
-        const res = await this.orbiterSdk.toBridge(params);
-        console.log(res);
-        return;
+    public static async getSwapTx(params: OrbiterSwapRequestParams): Promise<OrbiterSwapResponse> {
+        const res = (await this.orbiterSdk.toBridge(params)) as OrbiterSwapResponse;
+        return res;
     }
 }

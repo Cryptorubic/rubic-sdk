@@ -1,4 +1,9 @@
-import { ICrossRule, ITransferConfig } from '@orbiter-finance/bridge-sdk';
+import {
+    ICrossRule,
+    ISearchTxResponse,
+    ITransferConfig,
+    TTransactionResponse
+} from '@orbiter-finance/bridge-sdk';
 
 export interface OrbiterQuoteRequestParams {
     fromAmount: number;
@@ -14,3 +19,7 @@ export interface OrbiterTokenSymbols {
 export type OrbiterQuoteConfig = ICrossRule;
 
 export type OrbiterSwapRequestParams = ITransferConfig;
+
+export type OrbiterStatusResponse = ISearchTxResponse;
+
+export type OrbiterSwapResponse = TTransactionResponse;
