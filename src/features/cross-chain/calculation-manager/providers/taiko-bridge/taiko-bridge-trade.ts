@@ -134,7 +134,7 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -160,7 +160,6 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
                     data,
                     value,
                     gas: gasLimit,
-                    gasPrice,
                     gasPriceOptions
                 })
                 .then(tx => {

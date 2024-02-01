@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
@@ -6,14 +7,13 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { DlnUtils } from 'src/features/common/providers/dln/dln-utils';
-import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
-import { DlnEvmTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
 import {
     DlnOnChainSupportedBlockchain,
     dlnOnChainSupportedBlockchains
 } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/constants/dln-on-chain-supported-blockchains';
 import { DlnOnChainFactory } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/dln-on-chain-factory';
 import { DlnOnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-on-chain-calculation-options';
+import { DlnOnChainSwapRequest } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-on-chain-swap-request';
 import { DlnTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-trade-struct';
 import { RequiredLifiCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-calculation-options';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
@@ -60,36 +60,32 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
         const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
 
         const fromChainId = blockchainId[from.blockchain];
-        const toChainId = blockchainId[toToken.blockchain];
-        const fakeAddress = DlnUtils.getFakeReceiver(from.blockchain);
+        const fakeReceiver = DlnUtils.getFakeReceiver(from.blockchain);
 
-        const requestParams: TransactionRequest = {
-            srcChainId: fromChainId,
-            srcChainTokenIn: DlnUtils.getSupportedAddress(from),
-            srcChainTokenInAmount: fromWithoutFee.stringWeiAmount,
-            dstChainId: toChainId,
-            dstChainTokenOut: DlnUtils.getSupportedAddress(toToken),
-            dstChainTokenOutRecipient: this.getWalletAddress(from.blockchain) || fakeAddress,
-            prependOperatingExpenses: false
+        const slippage = new BigNumber(options.slippageTolerance).multipliedBy(100).toNumber();
+        const requestParams: DlnOnChainSwapRequest = {
+            chainId: fromChainId,
+            tokenIn: DlnUtils.getSupportedAddress(from),
+            tokenInAmount: fromWithoutFee.stringWeiAmount,
+            slippage,
+            tokenOut: DlnUtils.getSupportedAddress(toToken),
+            tokenOutRecipient: fakeReceiver
         };
 
-        const debridgeResponse = await DlnApiService.fetchQuote<DlnEvmTransactionResponse>(
-            requestParams
-        );
+        const debridgeResponse = await DlnApiService.fetchOnChainSwapData(requestParams);
 
         const to = new PriceTokenAmount({
             ...toToken.asStruct,
             tokenAmount: Web3Pure.fromWei(
-                debridgeResponse.estimation.dstChainTokenOut.maxTheoreticalAmount,
-                debridgeResponse.estimation.dstChainTokenOut.decimals
+                debridgeResponse.tokenOut.amount,
+                debridgeResponse.tokenOut.decimals
             )
         });
 
-        const slippage = 0;
         const toTokenAmountMin = Web3Pure.fromWei(
-            debridgeResponse.estimation.dstChainTokenOut.amount,
-            debridgeResponse.estimation.dstChainTokenOut.decimals
-        ).multipliedBy(1 - slippage);
+            debridgeResponse.tokenOut.minAmount,
+            debridgeResponse.tokenOut.decimals
+        );
 
         // const transitToken =
         //     debridgeResponse.estimation.srcChainTokenOut ||
@@ -117,7 +113,7 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
             fromWithoutFee,
             withDeflation: fullOptions.withDeflation!,
             transactionRequest: requestParams,
-            providerGateway: debridgeResponse.tx.to
+            providerGateway: debridgeResponse.tx.to || ''
         };
         if (fullOptions.gasCalculation === 'calculate') {
             tradeStruct.gasFeeInfo = await this.getGasFeeInfo(tradeStruct);

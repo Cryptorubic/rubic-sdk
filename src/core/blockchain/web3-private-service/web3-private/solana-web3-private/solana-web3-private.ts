@@ -17,6 +17,14 @@ export class SolanaWeb3Private extends Web3Private {
     public async sendTransaction(options: SolanaTransactionOptions = {}): Promise<string> {
         try {
             const tx = VersionedTransaction.deserialize(Buffer.from(options.data!.slice(2), 'hex'));
+            const { blockhash } = await this.solanaWeb3.request<{ blockhash: string }>({
+                method: 'getLatestBlockhash',
+                params: {
+                    message: ''
+                }
+            });
+            tx.message.recentBlockhash = blockhash;
+
             const { signature } = await this.solanaWeb3.signAndSendTransaction(tx);
             options.onTransactionHash?.(signature);
             return signature;

@@ -61,9 +61,6 @@ import { SQUIDROUTER_TRANSFER_STATUS } from 'src/features/cross-chain/status-man
 import {
     BtcStatusResponse,
     DE_BRIDGE_API_STATE_STATUS,
-    DeBridgeFilteredListApiResponse,
-    DeBridgeOrderApiResponse,
-    DeBridgeOrderApiStatusResponse,
     GetDstTxDataFn,
     SymbiosisApiResponse
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
@@ -328,9 +325,7 @@ export class CrossChainStatusManager {
      */
     private async getDebridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
-            const { orderIds } = await this.httpClient.get<DeBridgeFilteredListApiResponse>(
-                `${DlnApiService.apiEndpoint}/tx/${data.srcTxHash}/order-ids`
-            );
+            const { orderIds } = await DlnApiService.fetchCrossChainOrdersByHash(data.srcTxHash);
 
             if (!orderIds.length) {
                 return {
@@ -345,9 +340,7 @@ export class CrossChainStatusManager {
                 hash: null
             };
 
-            const { status } = await this.httpClient.get<DeBridgeOrderApiStatusResponse>(
-                `${DlnApiService.apiEndpoint}/order/${orderId}/status`
-            );
+            const { status } = await DlnApiService.fetchCrossChainStatus(orderId);
 
             if (
                 status === DE_BRIDGE_API_STATE_STATUS.FULFILLED ||
@@ -355,9 +348,7 @@ export class CrossChainStatusManager {
                 status === DE_BRIDGE_API_STATE_STATUS.CLAIMEDUNLOCK
             ) {
                 const { fulfilledDstEventMetadata } =
-                    await this.httpClient.get<DeBridgeOrderApiResponse>(
-                        `https://stats-api.dln.trade/api/Orders/${orderId}`
-                    );
+                    await DlnApiService.fetchCrossChainEventMetaData(orderId);
 
                 dstTxData.hash = fulfilledDstEventMetadata.transactionHash.stringValue;
                 dstTxData.status = TX_STATUS.SUCCESS;

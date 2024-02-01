@@ -3,24 +3,22 @@ import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { SolanaBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
-import { DlnEvmTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
 import {
     DlnEvmOnChainSupportedBlockchain,
     DlnOnChainSupportedBlockchain
 } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/constants/dln-on-chain-supported-blockchains';
+import { DlnOnChainSwapRequest } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-on-chain-swap-request';
 import { DlnTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-trade-struct';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { AggregatorSolanaOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-solana-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 
 export class DlnSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
-    private readonly transactionRequest: TransactionRequest;
+    private readonly transactionRequest: DlnOnChainSwapRequest;
 
     public static async getGasLimit(
         _tradeStruct: DlnTradeStruct<DlnEvmOnChainSupportedBlockchain>
@@ -91,7 +89,7 @@ export class DlnSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
 
         this._toTokenAmountMin = new PriceTokenAmount({
             ...this.to.asStruct,
-            weiAmount: tradeStruct.toTokenWeiAmountMin
+            tokenAmount: tradeStruct.toTokenWeiAmountMin
         });
         this.type = tradeStruct.type;
         this.providerGateway = tradeStruct.providerGateway;
@@ -108,17 +106,11 @@ export class DlnSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
                 options.fromAddress,
                 options.directTransaction
             );
-            const { gas, gasPrice } = this.getGasParams(options, {
-                gasLimit: transactionData.gas,
-                gasPrice: transactionData.gasPrice
-            });
 
             return {
-                to: transactionData.to,
                 data: transactionData.data,
-                value: this.fromWithoutFee.isNative ? this.fromWithoutFee.stringWeiAmount : '0',
-                gas,
-                gasPrice
+                to: '',
+                value: ''
             };
         } catch (err) {
             if ([400, 500, 503].includes(err.code)) {
@@ -134,35 +126,23 @@ export class DlnSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
 
     protected async getToAmountAndTxData(
         receiverAddress?: string,
-        fromAddress?: string
+        _fromAddress?: string
     ): Promise<GetToAmountAndTxDataResponse> {
-        const sameChain =
-            BlockchainsInfo.getChainType(this.from.blockchain) ===
-            BlockchainsInfo.getChainType(this.to.blockchain);
-        const walletAddress = this.web3Private.address;
-        const params = {
+        const params: DlnOnChainSwapRequest = {
             ...this.transactionRequest,
-            ...(receiverAddress && { dstChainTokenOutRecipient: receiverAddress }),
-            // @TODO Check proxy when deBridge proxy returned
-            senderAddress: fromAddress || walletAddress,
-            srcChainRefundAddress: walletAddress,
-            dstChainOrderAuthorityAddress: sameChain
-                ? receiverAddress || walletAddress
-                : receiverAddress!,
-            srcChainOrderAuthorityAddress: sameChain
-                ? receiverAddress || walletAddress
-                : walletAddress,
-            referralCode: '4350'
+            tokenOutRecipient: receiverAddress || this.web3Private.address
         };
 
         try {
-            const { tx, estimation } = await DlnApiService.fetchSwapData<DlnEvmTransactionResponse>(
-                params
-            );
+            const { tx, tokenOut } = await DlnApiService.fetchOnChainSwapData(params);
 
             return {
-                tx,
-                toAmount: estimation.dstChainTokenOut.maxTheoreticalAmount
+                tx: {
+                    data: tx.data,
+                    value: '',
+                    to: ''
+                },
+                toAmount: tokenOut.amount
             };
         } catch (err) {
             if ('statusCode' in err && 'message' in err) {

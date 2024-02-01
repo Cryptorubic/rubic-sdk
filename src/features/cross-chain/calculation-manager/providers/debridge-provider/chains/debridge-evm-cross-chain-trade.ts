@@ -245,7 +245,6 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
                 data,
                 value,
                 gas: options.gasLimit,
-                gasPrice: options.gasPrice,
                 gasPriceOptions: options.gasPriceOptions
             });
 
@@ -365,7 +364,7 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
         };
 
         const { tx, estimation, fixFee } =
-            await DlnApiService.fetchSwapData<DlnEvmTransactionResponse>(params);
+            await DlnApiService.fetchCrossChainSwapData<DlnEvmTransactionResponse>(params);
 
         if (!skipAmountChangeCheck) {
             EvmCrossChainTrade.checkAmountChange(

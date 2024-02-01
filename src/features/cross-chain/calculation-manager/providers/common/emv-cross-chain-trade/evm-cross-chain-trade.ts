@@ -107,7 +107,6 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         const approveOptions: EvmBasicTransactionOptions = {
             onTransactionHash: options?.onApprove,
             gas: options?.approveGasLimit,
-            gasPrice: options?.gasPrice,
             gasPriceOptions: options?.gasPriceOptions
         };
 
@@ -136,7 +135,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
 
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -159,7 +158,6 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
                     methodName,
                     value,
                     gasLimit,
-                    gasPrice,
                     gasPriceOptions
                 );
                 method = 'executeContractMethod';
@@ -174,7 +172,6 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
                     value,
                     onTransactionHash,
                     gas: gasLimit,
-                    gasPrice,
                     gasPriceOptions
                 }
             );

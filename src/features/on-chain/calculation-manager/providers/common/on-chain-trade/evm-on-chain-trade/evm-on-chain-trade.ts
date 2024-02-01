@@ -4,7 +4,6 @@ import {
     NotWhitelistedProviderError,
     UnnecessaryApproveError
 } from 'src/common/errors';
-import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { parseError } from 'src/common/utils/errors';
@@ -181,7 +180,6 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         const approveOptions: EvmBasicTransactionOptions = {
             onTransactionHash: options?.onApprove,
             gas: options?.approveGasLimit || undefined,
-            gasPrice: options?.gasPrice || undefined,
             gasPriceOptions: options?.gasPriceOptions || undefined
         };
 
@@ -241,7 +239,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
             let method: 'trySendTransaction' | 'sendTransaction' = 'trySendTransaction';
             if (options?.testMode) {
-                console.info(transactionConfig, options.gasLimit, options.gasPrice);
+                console.info(transactionConfig, options.gasLimit);
                 method = 'sendTransaction';
             }
             await this.web3Private[method](transactionConfig.to, {
@@ -249,7 +247,6 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 data: transactionConfig.data,
                 value: transactionConfig.value,
                 gas: options.gasLimit,
-                gasPrice: options.gasPrice,
                 gasPriceOptions: options.gasPriceOptions
             });
 
@@ -403,32 +400,5 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 true
             ]
         ];
-    }
-
-    public static checkAmountChange(
-        transactionRequest: EvmEncodeConfig,
-        newWeiAmount: string,
-        oldWeiAmount: string
-    ): void {
-        const oldAmount = new BigNumber(oldWeiAmount);
-        const newAmount = new BigNumber(newWeiAmount);
-        const changePercent = 0.1;
-        const acceptablePercentPriceChange = new BigNumber(changePercent).dividedBy(100);
-
-        const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
-        const amountMinusPercent = oldAmount.multipliedBy(
-            new BigNumber(1).minus(acceptablePercentPriceChange)
-        );
-
-        const shouldThrowError =
-            newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
-
-        if (shouldThrowError) {
-            throw new UpdatedRatesError({
-                ...transactionRequest,
-                newAmount: newWeiAmount,
-                oldAmount: oldWeiAmount
-            });
-        }
     }
 }

@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { getGasOptions } from 'src/common/utils/options';
 import { BLOCKCHAIN_NAME, SolanaBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -9,7 +8,6 @@ import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/
 import { SolanaWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/solana-web3-private/solana-web3-private';
 import { SolanaWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/solana-web3-public/solana-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
@@ -98,7 +96,6 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade {
         const approveOptions: EvmBasicTransactionOptions = {
             onTransactionHash: options?.onApprove,
             gas: options?.approveGasLimit,
-            gasPrice: options?.gasPrice,
             gasPriceOptions: options?.gasPriceOptions
         };
 
@@ -221,32 +218,6 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade {
     protected abstract getContractParams(
         options: GetContractParamsOptions
     ): Promise<ContractParams>;
-
-    public static checkAmountChange(
-        transactionRequest: EvmEncodeConfig,
-        newWeiAmount: string,
-        oldWeiAmount: string
-    ): void {
-        const oldAmount = new BigNumber(oldWeiAmount);
-        const newAmount = new BigNumber(newWeiAmount);
-        const acceptablePercentPriceChange = new BigNumber(0.5).dividedBy(100);
-
-        const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
-        const amountMinusPercent = oldAmount.multipliedBy(
-            new BigNumber(1).minus(acceptablePercentPriceChange)
-        );
-
-        const shouldThrowError =
-            newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
-
-        if (shouldThrowError) {
-            throw new UpdatedRatesError({
-                ...transactionRequest,
-                newAmount: newWeiAmount,
-                oldAmount: oldWeiAmount
-            });
-        }
-    }
 
     public getUsdPrice(providerFeeToken?: BigNumber): BigNumber {
         let feeSum = new BigNumber(0);

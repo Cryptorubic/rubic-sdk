@@ -143,62 +143,6 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
         _skipAmountChangeCheck: boolean = false
     ): Promise<ContractParams> {
         throw new Error('Solana is not implemented yet');
-        // const { tx, fixFee } = await this.getTransactionRequest(
-        //     options?.receiverAddress,
-        //     options?.directTransaction,
-        //     skipAmountChangeCheck
-        // );
-        // const { data, value: providerValue, to } = tx;
-        //
-        // const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
-        //     walletAddress: this.walletAddress,
-        //     fromTokenAmount: this.from,
-        //     toTokenAmount: this.to,
-        //     srcChainTrade: null,
-        //     providerAddress: this.providerAddress,
-        //     type: `native:${this.type}`,
-        //     fromAddress: this.walletAddress
-        // });
-        // const swapData =
-        //     this.onChainTrade &&
-        //     (await ProxyCrossChainEvmTrade.getSwapData(options, {
-        //         walletAddress: this.walletAddress,
-        //         contractAddress: rubicProxyContractAddress[this.from.blockchain].router,
-        //         fromTokenAmount: this.from,
-        //         toTokenAmount: this.onChainTrade.to,
-        //         onChainEncodeFn: this.onChainTrade.encode.bind(this.onChainTrade)
-        //     }));
-        // const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
-        //     to,
-        //     data! as string,
-        //     this.fromBlockchain,
-        //     this.fromContractAddress,
-        //     fixFee
-        // );
-        //
-        // const methodArguments = swapData
-        //     ? [bridgeData, swapData, providerData]
-        //     : [bridgeData, providerData];
-        //
-        // const value = this.getSwapValue(providerValue);
-        //
-        // const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
-        //     rubicProxyContractAddress[this.from.blockchain].router,
-        //     evmCommonCrossChainAbi,
-        //     this.methodName,
-        //     methodArguments,
-        //     value
-        // );
-        // const sendingToken = this.from.isNative ? [] : [this.from.address];
-        // const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
-        //
-        // return {
-        //     contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
-        //     contractAbi: gatewayRubicCrossChainAbi,
-        //     methodName: 'startViaRubic',
-        //     methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
-        //     value
-        // };
     }
 
     private async getTransactionRequest(
@@ -240,9 +184,8 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
             referralCode: '4350'
         };
 
-        const { tx, fixFee } = await DlnApiService.fetchSwapData<DlnSolanaTransactionResponse>(
-            params
-        );
+        const { tx, fixFee } =
+            await DlnApiService.fetchCrossChainSwapData<DlnSolanaTransactionResponse>(params);
 
         // if (!skipAmountChangeCheck) {
         //     EvmCrossChainTrade.checkAmountChange(

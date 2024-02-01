@@ -56,7 +56,7 @@ export class CrossChainSymbiosisManager {
         )![0] as BlockchainName;
         await this.web3Private.checkBlockchainCorrect(blockchain);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
                 onConfirm(hash);
@@ -68,7 +68,6 @@ export class CrossChainSymbiosisManager {
             value: transactionRequest.value?.toString() || '0',
             onTransactionHash,
             gas: gasLimit,
-            gasPrice,
             gasPriceOptions
         });
     }

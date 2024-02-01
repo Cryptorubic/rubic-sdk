@@ -380,8 +380,9 @@ export class OnChainManager {
                     ? this.calculateLifiTrade(from, to, options)
                     : pTimeout(
                           aggregator.calculate(
-                              from as PriceTokenAmount<EvmBlockchainName>,
-                              to as PriceTokenAmount<EvmBlockchainName>,
+                              // @ts-ignore @TODO SOLANA
+                              from,
+                              to,
                               options as RequiredOnChainCalculationOptions
                           ),
                           options.timeout

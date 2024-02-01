@@ -3,7 +3,6 @@ import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -11,20 +10,19 @@ import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { TransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-request';
-import { DlnEvmTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
 import {
     DlnEvmOnChainSupportedBlockchain,
     DlnOnChainSupportedBlockchain
 } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/constants/dln-on-chain-supported-blockchains';
 import { DlnOnChainFactory } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/dln-on-chain-factory';
+import { DlnOnChainSwapRequest } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-on-chain-swap-request';
 import { DlnTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-trade-struct';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 
 export class DlnEvmOnChainTrade extends AggregatorEvmOnChainTrade {
-    private readonly transactionRequest: TransactionRequest;
+    private readonly transactionRequest: DlnOnChainSwapRequest;
 
     public static async getGasLimit(
         tradeStruct: DlnTradeStruct<DlnEvmOnChainSupportedBlockchain>
@@ -94,7 +92,7 @@ export class DlnEvmOnChainTrade extends AggregatorEvmOnChainTrade {
 
         this._toTokenAmountMin = new PriceTokenAmount({
             ...this.to.asStruct,
-            weiAmount: tradeStruct.toTokenWeiAmountMin
+            tokenAmount: tradeStruct.toTokenWeiAmountMin
         });
         this.type = tradeStruct.type;
         this.providerGateway = tradeStruct.providerGateway;
@@ -137,35 +135,21 @@ export class DlnEvmOnChainTrade extends AggregatorEvmOnChainTrade {
 
     protected async getToAmountAndTxData(
         receiverAddress?: string,
-        fromAddress?: string
+        _fromAddress?: string
     ): Promise<GetToAmountAndTxDataResponse> {
-        const sameChain =
-            BlockchainsInfo.getChainType(this.from.blockchain) ===
-            BlockchainsInfo.getChainType(this.to.blockchain);
-        const walletAddress = this.web3Private.address;
-        const params = {
+        const params: DlnOnChainSwapRequest = {
             ...this.transactionRequest,
-            ...(receiverAddress && { dstChainTokenOutRecipient: receiverAddress }),
-            // @TODO Check proxy when deBridge proxy returned
-            senderAddress: fromAddress || walletAddress,
-            srcChainRefundAddress: walletAddress,
-            dstChainOrderAuthorityAddress: sameChain
-                ? receiverAddress || walletAddress
-                : receiverAddress!,
-            srcChainOrderAuthorityAddress: sameChain
-                ? receiverAddress || walletAddress
-                : walletAddress,
-            referralCode: '4350'
+            tokenOutRecipient: receiverAddress || this.web3Private.address
         };
 
         try {
-            const { tx, estimation } = await DlnApiService.fetchSwapData<DlnEvmTransactionResponse>(
+            const { tx, tokenOut } = await DlnApiService.fetchOnChainSwapData<EvmEncodeConfig>(
                 params
             );
 
             return {
                 tx,
-                toAmount: estimation.dstChainTokenOut.maxTheoreticalAmount
+                toAmount: tokenOut.amount
             };
         } catch (err) {
             if ('statusCode' in err && 'message' in err) {

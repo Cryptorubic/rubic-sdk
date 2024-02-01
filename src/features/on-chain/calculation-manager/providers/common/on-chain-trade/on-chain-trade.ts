@@ -5,12 +5,14 @@ import {
     WrongFromAddressError,
     WrongReceiverAddressError
 } from 'src/common/errors';
+import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount, Token, TokenAmount } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
@@ -242,5 +244,32 @@ export abstract class OnChainTrade {
             slippage: this.slippageTolerance * 100,
             routePath: this.getRoutePath()
         };
+    }
+
+    protected checkAmountChange(
+        transactionRequest: EvmEncodeConfig,
+        newWeiAmount: string,
+        oldWeiAmount: string
+    ): void {
+        const oldAmount = new BigNumber(oldWeiAmount);
+        const newAmount = new BigNumber(newWeiAmount);
+        const changePercent = 0.1;
+        const acceptablePercentPriceChange = new BigNumber(changePercent).dividedBy(100);
+
+        const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
+        const amountMinusPercent = oldAmount.multipliedBy(
+            new BigNumber(1).minus(acceptablePercentPriceChange)
+        );
+
+        const shouldThrowError =
+            newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
+
+        if (shouldThrowError) {
+            throw new UpdatedRatesError({
+                ...transactionRequest,
+                newAmount: newWeiAmount,
+                oldAmount: oldWeiAmount
+            });
+        }
     }
 }

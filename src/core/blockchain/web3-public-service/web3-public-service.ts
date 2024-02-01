@@ -145,8 +145,7 @@ export class Web3PublicService {
                         try {
                             const result = await pTimeout(
                                 callMethod(),
-                                rpcProvider.mainRpcTimeout ||
-                                    Web3PublicService.mainRpcDefaultTimeout
+                                Web3PublicService.mainRpcDefaultTimeout
                             );
                             if (prop === 'healthCheck' && result === false) {
                                 throw new HealthcheckError();

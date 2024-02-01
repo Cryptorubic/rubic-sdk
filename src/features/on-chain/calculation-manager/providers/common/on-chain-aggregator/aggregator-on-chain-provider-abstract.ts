@@ -20,8 +20,8 @@ export abstract class AggregatorOnChainProvider {
     public abstract readonly tradeType: OnChainTradeType;
 
     public abstract calculate(
-        from: PriceTokenAmount<BlockchainName>,
-        toToken: PriceToken<BlockchainName>,
+        from: PriceTokenAmount,
+        toToken: PriceToken,
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError>;
 

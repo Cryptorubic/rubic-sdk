@@ -3,7 +3,6 @@ import { TokenUtils } from 'src/common/utils/token-utils';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { SolanaOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/solana-on-chain-trade/solana-on-chain-trade';
 
-import { EvmOnChainTrade } from '../on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { GetToAmountAndTxDataResponse } from './models/aggregator-on-chain-types';
 
 export abstract class AggregatorSolanaOnChainTrade extends SolanaOnChainTrade {
@@ -18,15 +17,10 @@ export abstract class AggregatorSolanaOnChainTrade extends SolanaOnChainTrade {
 
         const { tx, toAmount } = await this.getToAmountAndTxData(receiverAddress, fromAddress);
 
-        const gasLimit = tx.gas && parseInt(tx.gas, 16).toString();
-        const gasPrice = tx.gasPrice && parseInt(tx.gasPrice, 16).toString();
-
         const evmEncodeConfig = {
             data: tx.data,
-            to: tx.to,
-            value: tx.value,
-            gas: gasLimit,
-            gasPrice
+            to: '',
+            value: ''
         };
 
         const newToTokenAmountMin = TokenUtils.getMinWeiAmountString(
@@ -34,7 +28,7 @@ export abstract class AggregatorSolanaOnChainTrade extends SolanaOnChainTrade {
             this.slippageTolerance
         );
 
-        EvmOnChainTrade.checkAmountChange(
+        this.checkAmountChange(
             evmEncodeConfig,
             newToTokenAmountMin,
             this.toTokenAmountMin.stringWeiAmount
@@ -44,7 +38,7 @@ export abstract class AggregatorSolanaOnChainTrade extends SolanaOnChainTrade {
     }
 
     /**
-     * @description Returns data for method EvmOnChainTrade.checkAmountChange and EvmEncodeConfig value
+     * @description Returns data for method OnChainTrade.checkAmountChange and EvmEncodeConfig value
      */
     protected abstract getToAmountAndTxData(
         receiverAddress?: string,

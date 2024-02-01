@@ -252,7 +252,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         let transactionHash: string;
 
         const onTransactionHash = (hash: string) => {
@@ -275,7 +275,6 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
                 value,
                 onTransactionHash,
                 gas: gasLimit,
-                gasPrice,
                 gasPriceOptions
             });
 
@@ -333,12 +332,5 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             slippage: this.slippage * 100,
             routePath: this.routePath
         };
-    }
-
-    /**
-     * @deprecated
-     */
-    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
-        return fromUsd;
     }
 }

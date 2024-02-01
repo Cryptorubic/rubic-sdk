@@ -85,7 +85,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 prependOperatingExpenses: false
             };
 
-            const debridgeResponse = await DlnApiService.fetchQuote<
+            const debridgeResponse = await DlnApiService.fetchCrossChainQuote<
                 DlnEvmTransactionResponse | DlnSolanaTransactionResponse
             >(requestParams);
 

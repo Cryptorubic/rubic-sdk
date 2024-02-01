@@ -1,6 +1,8 @@
 import { Connection, PublicKey } from '@solana/web3.js';
+import { Client as TokenSdk } from '@solflare-wallet/utl-sdk';
 import BigNumber from 'bignumber.js';
 import { catchError, firstValueFrom, from, map, of, timeout } from 'rxjs';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { NATIVE_SOLANA_MINT_ADDRESS } from 'src/core/blockchain/constants/solana/native-solana-mint-address';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
@@ -60,22 +62,49 @@ export class SolanaWeb3Public extends Web3Public {
 
     @Cache
     public async callForTokensInfo(
-        _tokenAddresses: string[] | ReadonlyArray<string>,
-        _tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
+        tokenAddresses: string[] | ReadonlyArray<string>,
+        tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
     ): Promise<Partial<Record<SupportedTokenField, string>>[]> {
-        throw new Error('Method call is not supported');
+        const nativeTokenIndex = tokenAddresses.findIndex(address =>
+            this.Web3Pure.isNativeAddress(address)
+        );
+        const filteredTokenAddresses = tokenAddresses.filter(
+            (_, index) => index !== nativeTokenIndex
+        );
+
+        const mints = filteredTokenAddresses.map(address => new PublicKey(address));
+        const tokenSdk = new TokenSdk();
+        const tokensMint = await tokenSdk.fetchMints(mints);
+
+        const tokens = tokensMint.map(token => {
+            const entries = tokenFields.map(field => [field, token?.[field]]);
+            return Object.fromEntries(entries);
+        });
+
+        if (nativeTokenIndex === -1) {
+            return tokens;
+        }
+
+        const blockchainNativeToken = nativeTokensList[this.blockchainName];
+        const nativeToken = {
+            ...blockchainNativeToken,
+            decimals: blockchainNativeToken.decimals.toString()
+        };
+        tokens.splice(nativeTokenIndex, 0, nativeToken);
+        return tokens;
     }
 
     public async getBalance(userAddress: string, tokenAddress: string): Promise<BigNumber> {
-        if (SolanaWeb3Pure.isNativeAddress(tokenAddress)) {
-            const balance = await this.connection.getBalanceAndContext(
-                new PublicKey(userAddress),
-                'confirmed'
-            );
-            return new BigNumber(balance.value.toString());
+        const isToken = tokenAddress && !SolanaWeb3Pure.isNativeAddress(tokenAddress);
+        if (isToken) {
+            const balance = await this.getTokensBalances(userAddress, [tokenAddress]);
+            return balance?.[0] || new BigNumber(0);
         }
-        const balance = await this.getTokensBalances(userAddress, [tokenAddress]);
-        return balance?.[0] || new BigNumber(0);
+        const balance = await this.connection.getBalanceAndContext(
+            new PublicKey(userAddress),
+            'confirmed'
+        );
+        return new BigNumber(balance.value.toString());
     }
 
     public async getTokenBalance(address: string, tokenAddress: string): Promise<BigNumber> {
