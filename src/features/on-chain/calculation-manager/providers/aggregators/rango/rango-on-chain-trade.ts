@@ -17,6 +17,7 @@ import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorOnChainTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
+import { rangoOnChainDisabledProviders } from './models/rango-on-chain-disabled-providers';
 import { RangoOnChainTradeStruct } from './models/rango-on-chain-trade-types';
 import { RangoOnChainApiService } from './services/rango-on-chain-api-service';
 
@@ -130,11 +131,14 @@ export class RangoOnChainTrade extends AggregatorOnChainTrade {
     }
 
     protected async getToAmountAndTxData(
-        receiverAddress?: string
+        receiverAddress?: string,
+        fromAddress?: string
     ): Promise<GetToAmountAndTxDataResponse> {
         const params = await RangoCommonParser.getSwapQueryParams(this.from, this.to, {
             slippageTolerance: this.slippageTolerance,
-            receiverAddress: receiverAddress || this.walletAddress
+            receiverAddress: receiverAddress || this.walletAddress,
+            swapperGroups: rangoOnChainDisabledProviders,
+            fromAddress
         });
 
         const { tx: transaction, route } = await RangoOnChainApiService.getSwapTransaction(params);
