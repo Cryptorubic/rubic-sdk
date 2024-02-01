@@ -646,7 +646,7 @@ export class CrossChainStatusManager {
             throw new RubicSdkError('Must specify sender account');
         }
         const { items } = await Injector.httpClient.get<TaikoApiResponse>(
-            `https://relayer.jolnir.taiko.xyz/events?address=${data.sender}&msgHash=${data.taikoTransactionId}&event=MessageSent`
+            `https://relayer.katla.taiko.xyz/events?address=${data.sender}&msgHash=${data.taikoTransactionId}&event=MessageSent`
         );
 
         if (!items[0]) {
