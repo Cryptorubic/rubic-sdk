@@ -17,7 +17,7 @@ import {
 import { OrbiterApiService } from './services/orbiter-api-service';
 
 export class OrbiterBridgeProvider extends CrossChainProvider {
-    public readonly type = CROSS_CHAIN_TRADE_TYPE.ORBITER;
+    public readonly type = CROSS_CHAIN_TRADE_TYPE.ORBITER_BRIDGE;
 
     private orbiterTokenSymbols: OrbiterTokenSymbols = {};
 
