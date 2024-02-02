@@ -10,9 +10,9 @@ export interface OrbiterGetGasDataParams {
     fromToken: PriceTokenAmount<EvmBlockchainName>;
     toToken: PriceTokenAmount<EvmBlockchainName>;
     feeInfo: FeeInfo;
-    receiverAddress: string;
     providerAddress: string;
     orbiterTokenSymbols: OrbiterTokenSymbols;
+    receiverAddress?: string;
 }
 
 export interface OrbiterTradeParams {

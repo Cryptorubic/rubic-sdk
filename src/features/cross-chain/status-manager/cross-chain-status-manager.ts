@@ -66,6 +66,8 @@ import {
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
 import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
+import { ORBITER_STATUS } from '../calculation-manager/providers/orbiter-bridge/models/orbiter-bridge-api-service-types';
+import { OrbiterApiService } from '../calculation-manager/providers/orbiter-bridge/services/orbiter-api-service';
 import { RangoCrossChainApiService } from '../calculation-manager/providers/rango-provider/services/rango-cross-chain-api-service';
 import { TAIKO_API_STATUS, TaikoApiResponse } from './models/taiko-api-response';
 
@@ -90,7 +92,8 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.SCROLL_BRIDGE]: this.getScrollBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.TAIKO_BRIDGE]: this.getTaikoBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.PULSE_CHAIN_BRIDGE]: this.getPulseChainDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.PULSE_CHAIN_BRIDGE]: this.getPulseChainDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.ORBITER_BRIDGE]: this.getOrbiterDstSwapStatus
     };
 
     /**
@@ -703,5 +706,25 @@ export class CrossChainStatusManager {
         const hash = bridgeData!.destTxHash;
 
         return { hash, status };
+    }
+
+    private async getOrbiterDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+        const { targetId: hash, status } = await OrbiterApiService.getTxStatus(data.srcTxHash);
+
+        if (status === ORBITER_STATUS.ERROR) {
+            return {
+                hash: null,
+                status: TX_STATUS.SUCCESS
+            };
+        }
+
+        if (status === ORBITER_STATUS.SUCCESS) {
+            return {
+                hash,
+                status: TX_STATUS.SUCCESS
+            };
+        }
+
+        return { hash: null, status: TX_STATUS.PENDING };
     }
 }

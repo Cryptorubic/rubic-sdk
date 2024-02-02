@@ -1,5 +1,6 @@
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
@@ -9,17 +10,21 @@ import { CalculationResult } from '../common/models/calculation-result';
 import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { OrbiterTokenSymbols } from './models/orbiter-bridge-api-service-types';
+import { OrbiterQuoteConfig, OrbiterTokenSymbols } from './models/orbiter-bridge-api-service-types';
 import {
     OrbiterSupportedBlockchain,
     orbiterSupportedBlockchains
 } from './models/orbiter-supported-blockchains';
+import { OrbiterBridgeTrade } from './orbiter-bridge-trade';
 import { OrbiterApiService } from './services/orbiter-api-service';
+import { OrbiterUtils } from './services/orbiter-utils';
 
 export class OrbiterBridgeProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.ORBITER_BRIDGE;
 
     private orbiterTokenSymbols: OrbiterTokenSymbols = {};
+
+    private orbiterQuoteConfigs: OrbiterQuoteConfig[] = [];
 
     public isSupportedBlockchain(blockchain: EvmBlockchainName): boolean {
         return orbiterSupportedBlockchains.some(
@@ -37,6 +42,7 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
 
         try {
             this.orbiterTokenSymbols = await OrbiterApiService.getTokensData();
+            this.orbiterQuoteConfigs = await OrbiterApiService.getQuoteConfigs();
 
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,
@@ -50,7 +56,48 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            return { tradeType: this.type };
+            const quoteConfig = OrbiterUtils.getQuoteConfig(
+                from.blockchain,
+                toToken.blockchain,
+                this.orbiterQuoteConfigs
+            );
+
+            const toAmount = await OrbiterApiService.getQuoteTx({
+                fromAmount: fromWithoutFee.tokenAmount.toNumber(),
+                config: quoteConfig
+            });
+
+            const to = new PriceTokenAmount({
+                ...toToken.asStruct,
+                tokenAmount: Web3Pure.fromWei(toAmount, toToken.decimals)
+            });
+
+            const gasData =
+                options.gasCalculation === 'enabled'
+                    ? await OrbiterBridgeTrade.getGasData({
+                          feeInfo,
+                          fromToken: from,
+                          toToken: to,
+                          orbiterTokenSymbols: this.orbiterTokenSymbols,
+                          receiverAddress: options.receiverAddress,
+                          providerAddress: options.providerAddress
+                      })
+                    : null;
+
+            const trade = new OrbiterBridgeTrade({
+                crossChainTrade: {
+                    feeInfo,
+                    from,
+                    gasData,
+                    to,
+                    orbiterTokenSymbols: this.orbiterTokenSymbols,
+                    priceImpact: from.calculatePriceImpactPercent(to)
+                },
+                providerAddress: options.providerAddress,
+                routePath: await this.getRoutePath(from, to)
+            });
+
+            return { trade, tradeType: this.type };
         } catch (err) {
             const rubicSdkError = CrossChainProvider.parseError(err);
 

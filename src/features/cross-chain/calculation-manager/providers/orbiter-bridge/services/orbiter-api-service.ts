@@ -1,8 +1,12 @@
 import { Orbiter } from '@orbiter-finance/bridge-sdk';
+import { RubicSdkError } from 'src/common/errors';
+import { Injector } from 'src/core/injector/injector';
 
+import { orbiterApiEndpoint } from '../constants/orbiter-api';
 import {
     OrbiterQuoteConfig,
     OrbiterQuoteRequestParams,
+    OrbiterStatusResponse,
     OrbiterSwapRequestParams,
     OrbiterSwapResponse,
     OrbiterTokenSymbols
@@ -31,15 +35,27 @@ export class OrbiterApiService {
         return tokens;
     }
 
-    public static getQuoteTx({
+    public static async getQuoteTx({
         fromAmount,
         config
-    }: OrbiterQuoteRequestParams): Promise<string | 0> {
-        return this.orbiterSdk.queryReceiveAmount(fromAmount, config);
+    }: OrbiterQuoteRequestParams): Promise<string> {
+        const amount = await this.orbiterSdk.queryReceiveAmount(fromAmount, config);
+
+        if (amount === 0) {
+            throw new RubicSdkError('Unsupported token pair.');
+        }
+
+        return amount;
     }
 
     public static async getSwapTx(params: OrbiterSwapRequestParams): Promise<OrbiterSwapResponse> {
         const res = (await this.orbiterSdk.toBridge(params)) as OrbiterSwapResponse;
         return res;
+    }
+
+    public static async getTxStatus(hash: string): Promise<OrbiterStatusResponse> {
+        return Injector.httpClient.get<OrbiterStatusResponse>(
+            `${orbiterApiEndpoint}/transaction/status/${hash}`
+        );
     }
 }
