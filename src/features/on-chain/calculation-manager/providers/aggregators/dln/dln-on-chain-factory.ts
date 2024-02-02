@@ -15,16 +15,12 @@ export class DlnOnChainFactory {
         fromBlockchain: BlockchainName,
         tradeStruct: DlnTradeStruct<DlnOnChainSupportedBlockchain>,
         providerAddress: string
-        // routePath: RubicStep[]
     ): OnChainTrade {
         if (BlockchainsInfo.isSolanaBlockchainName(fromBlockchain)) {
             return new DlnSolanaOnChainTrade(
                 tradeStruct as DlnTradeStruct<DlnSolanaOnChainSupportedBlockchain>,
                 providerAddress
             );
-            // tradeStruct as DlnTradeStruct<DlnSolanaOnChainSupportedBlockchain>,
-            // providerAddress,
-            // routePath
         }
 
         if (BlockchainsInfo.isEvmBlockchainName(fromBlockchain)) {

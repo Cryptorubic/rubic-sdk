@@ -356,7 +356,7 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         } = await SquidrouterCrossChainTrade.getResponseFromApiToTransactionRequest(requestParams);
 
         if (!skipAmountChangeCheck) {
-            EvmCrossChainTrade.checkAmountChange(
+            this.checkAmountChange(
                 {
                     data: transactionRequest.data,
                     value: transactionRequest.value,

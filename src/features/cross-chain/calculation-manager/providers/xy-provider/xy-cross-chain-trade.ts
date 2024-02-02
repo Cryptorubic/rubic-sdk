@@ -323,11 +323,7 @@ export class XyCrossChainTrade extends EvmCrossChainTrade {
         }
 
         if (!skipAmountChangeCheck) {
-            EvmCrossChainTrade.checkAmountChange(
-                tx!,
-                route!.dstQuoteTokenAmount,
-                this.to.stringWeiAmount
-            );
+            this.checkAmountChange(tx!, route!.dstQuoteTokenAmount, this.to.stringWeiAmount);
         }
 
         return tx!;

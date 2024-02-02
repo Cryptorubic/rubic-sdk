@@ -288,7 +288,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
 
         if (!skipAmountChangeCheck) {
             // Mock EvmConfig cause CN doesn't provide tx-data
-            EvmCrossChainTrade.checkAmountChange(
+            this.checkAmountChange(
                 { data: '', to: '', value: '' },
                 toAmountWei,
                 this.to.stringWeiAmount

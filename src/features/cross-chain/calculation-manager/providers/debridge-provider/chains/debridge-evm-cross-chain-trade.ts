@@ -51,6 +51,8 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly onChainTrade: EvmOnChainTrade | null;
 
+    private latestFixedFee: string | null = null;
+
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
@@ -334,14 +336,14 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
         };
         fixFee: string;
     }> {
-        if (transactionConfig) {
+        if (transactionConfig && this.latestFixedFee) {
             return {
                 tx: {
                     data: transactionConfig.data,
                     value: transactionConfig.value,
                     to: transactionConfig.to
                 },
-                fixFee: ''
+                fixFee: this.latestFixedFee
             };
         }
         const sameChain =
@@ -365,13 +367,10 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
 
         const { tx, estimation, fixFee } =
             await DlnApiService.fetchCrossChainSwapData<DlnEvmTransactionResponse>(params);
+        this.latestFixedFee = fixFee;
 
         if (!skipAmountChangeCheck) {
-            EvmCrossChainTrade.checkAmountChange(
-                tx,
-                estimation.dstChainTokenOut.amount,
-                this.to.stringWeiAmount
-            );
+            this.checkAmountChange(tx, estimation.dstChainTokenOut.amount, this.to.stringWeiAmount);
         }
 
         return { tx, fixFee };

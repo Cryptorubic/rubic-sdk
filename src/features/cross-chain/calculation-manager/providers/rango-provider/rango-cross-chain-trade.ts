@@ -310,11 +310,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         };
 
         if (!skipAmountChangeCheck) {
-            EvmCrossChainTrade.checkAmountChange(
-                config,
-                route.outputAmount,
-                this.to.stringWeiAmount
-            );
+            this.checkAmountChange(config, route.outputAmount, this.to.stringWeiAmount);
         }
         return config;
     }

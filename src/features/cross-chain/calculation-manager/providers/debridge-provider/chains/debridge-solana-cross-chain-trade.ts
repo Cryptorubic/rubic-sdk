@@ -4,6 +4,7 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BlockchainName, SolanaBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
@@ -36,8 +37,6 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
 
     private readonly slippage: number;
 
-    // private readonly onChainTrade: EvmOnChainTrade | null;
-
     public readonly type = CROSS_CHAIN_TRADE_TYPE.DEBRIDGE;
 
     public readonly isAggregator = false;
@@ -57,16 +56,14 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
 
     public readonly priceImpact: number | null;
 
-    public readonly allowanceTarget: string;
+    private latestFixedFee: string | null = null;
 
     private get fromBlockchain(): DeBridgeCrossChainSupportedBlockchain & SolanaBlockchainName {
         return this.from.blockchain as DeBridgeCrossChainSupportedBlockchain & SolanaBlockchainName;
     }
 
     protected get fromContractAddress(): string {
-        return this.isProxyTrade
-            ? rubicProxyContractAddress[this.fromBlockchain].gateway
-            : this.allowanceTarget;
+        return this.isProxyTrade ? rubicProxyContractAddress[this.fromBlockchain].gateway : '';
     }
 
     public readonly feeInfo: FeeInfo;
@@ -87,9 +84,7 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
         this.transactionRequest = crossChainTrade.transactionRequest;
         // this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
-        this.allowanceTarget = crossChainTrade.allowanceTarget || '';
         this.slippage = crossChainTrade.slippage;
-        // this.onChainTrade = crossChainTrade.onChainTrade;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
         this.feeInfo = crossChainTrade.feeInfo;
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
@@ -107,8 +102,8 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
             const {
                 tx: { data }
             } = await this.getTransactionRequest(
-                options?.receiverAddress
-                // options?.directTransaction
+                options?.receiverAddress,
+                options?.directTransaction
             );
 
             const { onConfirm } = options;
@@ -142,25 +137,22 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
 
     private async getTransactionRequest(
         receiverAddress?: string,
-        _transactionConfig?: null,
-        _skipAmountChangeCheck: boolean = false
+        transactionConfig?: EvmEncodeConfig | null,
+        skipAmountChangeCheck: boolean = false
     ): Promise<{
         tx: {
             data: string;
         };
         fixFee: string;
     }> {
-        // @TODO SOLANA handle amount change
-        // if (transactionConfig) {
-        //     return {
-        //         tx: {
-        //             data: transactionConfig.data,
-        //             value: transactionConfig.value,
-        //             to: transactionConfig.to
-        //         },
-        //         fixFee: ''
-        //     };
-        // }
+        if (transactionConfig && this.latestFixedFee) {
+            return {
+                tx: {
+                    data: transactionConfig.data
+                },
+                fixFee: this.latestFixedFee
+            };
+        }
         const sameChain =
             BlockchainsInfo.getChainType(this.from.blockchain) ===
             BlockchainsInfo.getChainType(this.to.blockchain);
@@ -179,16 +171,17 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
             referralCode: '4350'
         };
 
-        const { tx, fixFee } =
+        const { tx, fixFee, estimation } =
             await DlnApiService.fetchCrossChainSwapData<DlnSolanaTransactionResponse>(params);
+        this.latestFixedFee = fixFee;
 
-        // if (!skipAmountChangeCheck) {
-        //     EvmCrossChainTrade.checkAmountChange(
-        //         tx,
-        //         estimation.dstChainTokenOut.amount,
-        //         this.to.stringWeiAmount
-        //     );
-        // }
+        if (!skipAmountChangeCheck) {
+            this.checkAmountChange(
+                { data: tx.data, value: '', to: '' },
+                estimation.dstChainTokenOut.amount,
+                this.to.stringWeiAmount
+            );
+        }
 
         return { tx, fixFee };
     }

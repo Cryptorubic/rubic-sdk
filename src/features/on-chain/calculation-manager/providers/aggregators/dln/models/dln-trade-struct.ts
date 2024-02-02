@@ -7,7 +7,6 @@ import { OnChainTradeStruct } from 'src/features/on-chain/calculation-manager/pr
 export interface DlnTradeStruct<T extends DlnOnChainSupportedBlockchain>
     extends OnChainTradeStruct<T> {
     type: OnChainTradeType;
-    // route: Route;
     toTokenWeiAmountMin: BigNumber;
     providerGateway: string;
     transactionRequest: DlnOnChainSwapRequest;

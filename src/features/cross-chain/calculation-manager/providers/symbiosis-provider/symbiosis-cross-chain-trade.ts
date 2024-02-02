@@ -432,7 +432,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             to: tradeData.tx.to!
         };
         if (!skipAmountChangeCheck) {
-            EvmCrossChainTrade.checkAmountChange(
+            this.checkAmountChange(
                 config,
                 tradeData.tokenAmountOut.amount,
                 this.to.stringWeiAmount

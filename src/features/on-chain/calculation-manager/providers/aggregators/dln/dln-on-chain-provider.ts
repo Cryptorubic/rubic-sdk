@@ -87,16 +87,6 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
             debridgeResponse.tokenOut.decimals
         );
 
-        // const transitToken =
-        //     debridgeResponse.estimation.srcChainTokenOut ||
-        //     debridgeResponse.estimation.srcChainTokenIn;
-
-        // const nativeToken = nativeTokensList[from.blockchain];
-        // const cryptoFeeToken = await PriceTokenAmount.createFromToken({
-        //     ...nativeToken,
-        //     weiAmount: new BigNumber(debridgeResponse.fixFee)
-        // });
-
         const path = this.getRoutePath(from, to);
 
         const tradeStruct: DlnTradeStruct<DlnOnChainSupportedBlockchain> = {
@@ -106,7 +96,6 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
             slippageTolerance: fullOptions.slippageTolerance!,
             type: this.tradeType,
             path,
-            // route,
             toTokenWeiAmountMin: toTokenAmountMin,
             useProxy: fullOptions.useProxy!,
             proxyFeeInfo,
