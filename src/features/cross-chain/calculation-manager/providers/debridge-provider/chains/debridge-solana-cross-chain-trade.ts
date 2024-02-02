@@ -173,7 +173,7 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
 
         const { tx, fixFee, estimation } =
             await DlnApiService.fetchCrossChainSwapData<DlnSolanaTransactionResponse>(params);
-        this.latestFixedFee = fixFee;
+        this.latestFixedFee = Boolean(fixFee) ? fixFee : '0';
 
         if (!skipAmountChangeCheck) {
             this.checkAmountChange(

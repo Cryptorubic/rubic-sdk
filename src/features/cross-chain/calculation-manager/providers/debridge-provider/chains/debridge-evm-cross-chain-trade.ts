@@ -367,7 +367,7 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
 
         const { tx, estimation, fixFee } =
             await DlnApiService.fetchCrossChainSwapData<DlnEvmTransactionResponse>(params);
-        this.latestFixedFee = fixFee;
+        this.latestFixedFee = Boolean(fixFee) ? fixFee : '0';
 
         if (!skipAmountChangeCheck) {
             this.checkAmountChange(tx, estimation.dstChainTokenOut.amount, this.to.stringWeiAmount);
