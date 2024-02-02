@@ -1,4 +1,4 @@
-import { Connection, PublicKey } from '@solana/web3.js';
+import { BlockhashWithExpiryBlockHeight, Connection, PublicKey } from '@solana/web3.js';
 import { Client as TokenSdk } from '@solflare-wallet/utl-sdk';
 import BigNumber from 'bignumber.js';
 import { catchError, firstValueFrom, from, map, of, timeout } from 'rxjs';
@@ -703,4 +703,8 @@ export class SolanaWeb3Public extends Web3Public {
     //         );
     //     });
     // }
+
+    public async getRecentBlockhash(): Promise<BlockhashWithExpiryBlockHeight> {
+        return this.connection.getLatestBlockhash();
+    }
 }

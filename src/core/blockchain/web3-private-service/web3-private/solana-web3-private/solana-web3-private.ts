@@ -5,6 +5,7 @@ import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private
 import { SolanaTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/solana-web3-private/models/solana-transaction-options';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/solana-web3-pure';
+import { Injector } from 'src/core/injector/injector';
 import { SolanaWeb3 } from 'src/core/sdk/models/solana-web3';
 
 export class SolanaWeb3Private extends Web3Private {
@@ -16,13 +17,10 @@ export class SolanaWeb3Private extends Web3Private {
 
     public async sendTransaction(options: SolanaTransactionOptions = {}): Promise<string> {
         try {
+            const web3Public = Injector.web3PublicService.getWeb3Public(BLOCKCHAIN_NAME.SOLANA);
+
             const tx = VersionedTransaction.deserialize(Buffer.from(options.data!.slice(2), 'hex'));
-            const { blockhash } = await this.solanaWeb3.request<{ blockhash: string }>({
-                method: 'getLatestBlockhash',
-                params: {
-                    message: ''
-                }
-            });
+            const { blockhash } = await web3Public.getRecentBlockhash();
             tx.message.recentBlockhash = blockhash;
 
             const { signature } = await this.solanaWeb3.signAndSendTransaction(tx);

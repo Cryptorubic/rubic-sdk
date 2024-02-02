@@ -117,7 +117,6 @@ export class Web3PrivateService {
 
     private createSolanaWeb3Private(solanaWallet: SolanaWalletProviderCore): SolanaWeb3Private {
         let { core } = solanaWallet;
-
         return new SolanaWeb3Private(core);
     }
 
