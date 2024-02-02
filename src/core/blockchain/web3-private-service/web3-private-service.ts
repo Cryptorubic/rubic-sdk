@@ -45,7 +45,7 @@ export class Web3PrivateService {
         [CHAIN_TYPE.SOLANA]: this.createSolanaWeb3Private.bind(this)
     };
 
-    constructor(walletProvider?: WalletProvider) {
+    constructor(walletProvider: WalletProvider) {
         this.web3PrivateStorage = this.createWeb3PrivateStorage(walletProvider);
     }
 
@@ -74,17 +74,17 @@ export class Web3PrivateService {
         return this.getWeb3Private(BlockchainsInfo.getChainType(blockchain));
     }
 
-    private createWeb3PrivateStorage(walletProvider?: WalletProvider): Web3PrivateStorage {
+    private createWeb3PrivateStorage(walletProvider: WalletProvider): Web3PrivateStorage {
         return web3PrivateSupportedChainTypes.reduce((acc, chainType) => {
             const walletProviderCore = walletProvider?.[chainType];
             if (!walletProviderCore) {
                 return acc;
             }
+            const createWeb3 = this.createWeb3Private[chainType];
 
             return {
                 ...acc,
-                // @ts-ignore
-                [chainType]: this.createWeb3Private[chainType](walletProviderCore)
+                [chainType]: createWeb3(walletProviderCore)
             };
         }, {} as Web3PrivateStorage);
     }

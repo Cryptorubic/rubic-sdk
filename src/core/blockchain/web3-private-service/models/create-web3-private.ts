@@ -11,12 +11,11 @@ import {
     WalletProviderCore
 } from 'src/core/sdk/models/wallet-provider';
 
-export interface CreateWeb3Private
-    extends Record<
-        Web3PrivateSupportedChainType,
-        (walletProviderCore: WalletProviderCore) => Web3Private
-    > {
+export type CreateWeb3Private = Record<
+    Web3PrivateSupportedChainType,
+    (walletProviderCore: WalletProviderCore) => Web3Private
+> & {
     [CHAIN_TYPE.EVM]: (walletProviderCore: EvmWalletProviderCore) => EvmWeb3Private;
     [CHAIN_TYPE.TRON]: (walletProviderCore: TronWalletProviderCore) => TronWeb3Private;
     [CHAIN_TYPE.SOLANA]: (walletProviderCore: SolanaWalletProviderCore) => SolanaWeb3Private;
-}
+};

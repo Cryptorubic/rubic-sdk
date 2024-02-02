@@ -33,21 +33,6 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade {
      */
     public get estimatedGas(): BigNumber | null {
         return null;
-        // if (!this.gasData) {
-        //     return null;
-        // }
-        //
-        // if (this.gasData.baseFee && this.gasData.maxPriorityFeePerGas) {
-        //     return Web3Pure.fromWei(this.gasData.baseFee).plus(
-        //         Web3Pure.fromWei(this.gasData.maxPriorityFeePerGas)
-        //     );
-        // }
-        //
-        // if (this.gasData.gasPrice) {
-        //     return Web3Pure.fromWei(this.gasData.gasPrice).multipliedBy(this.gasData.gasLimit);
-        // }
-        //
-        // return null;
     }
 
     public async approve(
@@ -55,34 +40,7 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade {
         _checkNeedApprove = true,
         _amount: BigNumber | 'infinity' = 'infinity'
     ): Promise<TransactionReceipt> {
-        throw new Error('Solana is not implemented yet');
-        // if (checkNeedApprove) {
-        //     const needApprove = await this.needApprove();
-        //     if (!needApprove) {
-        //         throw new UnnecessaryApproveError();
-        //     }
-        // }
-        //
-        // this.checkWalletConnected();
-        // await this.checkBlockchainCorrect();
-        //
-        // const approveAmount =
-        //     this.from.blockchain === BLOCKCHAIN_NAME.GNOSIS ||
-        //     this.from.blockchain === BLOCKCHAIN_NAME.CRONOS
-        //         ? this.from.weiAmount
-        //         : amount;
-        //
-        // const fromTokenAddress =
-        //     this.from.isNative && this.from.blockchain === BLOCKCHAIN_NAME.METIS
-        //         ? '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000'
-        //         : this.from.address;
-        //
-        // return this.web3Private.approveTokens(
-        //     fromTokenAddress,
-        //     this.fromContractAddress,
-        //     approveAmount,
-        //     options
-        // );
+        throw new Error('Method is not supported');
     }
 
     protected async checkAllowanceAndApprove(
@@ -116,65 +74,7 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade {
     }
 
     private async swapWithParams(_options: SwapTransactionOptions = {}): Promise<string | never> {
-        throw new Error('Solana is not implemented yet');
-        // await this.checkTradeErrors();
-        // await this.checkReceiverAddress(
-        //     options.receiverAddress,
-        //     !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
-        // );
-        //
-        // await this.checkAllowanceAndApprove(options);
-        //
-        // const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
-        // let transactionHash: string;
-        // const onTransactionHash = (hash: string) => {
-        //     if (onConfirm) {
-        //         onConfirm(hash);
-        //     }
-        //     transactionHash = hash;
-        // };
-        //
-        // const { contractAddress, contractAbi, methodName, methodArguments, value } =
-        //     await this.getContractParams(options);
-        //
-        // try {
-        //     let method: 'tryExecuteContractMethod' | 'executeContractMethod' =
-        //         'tryExecuteContractMethod';
-        //     if (options?.testMode) {
-        //         console.info(
-        //             contractAddress,
-        //             contractAbi,
-        //             methodName,
-        //             methodName,
-        //             value,
-        //             gasLimit,
-        //             gasPrice,
-        //             gasPriceOptions
-        //         );
-        //         method = 'executeContractMethod';
-        //     }
-        //
-        //     await this.web3Private[method](
-        //         contractAddress,
-        //         contractAbi,
-        //         methodName,
-        //         methodArguments,
-        //         {
-        //             value,
-        //             onTransactionHash,
-        //             gas: gasLimit,
-        //             gasPrice,
-        //             gasPriceOptions
-        //         }
-        //     );
-        //
-        //     return transactionHash!;
-        // } catch (err) {
-        //     if (err instanceof FailedToCheckForTransactionReceiptError) {
-        //         return transactionHash!;
-        //     }
-        //     throw err;
-        // }
+        throw new Error("Method is not supported');");
     }
 
     public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
@@ -211,8 +111,7 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade {
         _value: BigNumber | 'infinity',
         _options: EvmTransactionOptions = {}
     ): Promise<TransactionConfig> {
-        throw new Error('Solana is not implemented yet');
-        // return this.web3Private.encodeApprove(tokenAddress, spenderAddress, value, options);
+        throw new Error('Method is not supported');
     }
 
     protected abstract getContractParams(

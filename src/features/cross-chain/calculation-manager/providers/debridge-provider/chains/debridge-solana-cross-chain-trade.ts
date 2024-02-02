@@ -25,8 +25,6 @@ import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/p
  * Calculated DeBridge cross-chain trade.
  */
 export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
-    protected useProxyByDefault = false;
-
     /** @internal */
     public readonly transitAmount: BigNumber;
 
@@ -60,8 +58,6 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
     public readonly priceImpact: number | null;
 
     public readonly allowanceTarget: string;
-
-    // public readonly gasData: GasData | null;
 
     private get fromBlockchain(): DeBridgeCrossChainSupportedBlockchain & SolanaBlockchainName {
         return this.from.blockchain as DeBridgeCrossChainSupportedBlockchain & SolanaBlockchainName;
@@ -108,7 +104,6 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
         let transactionHash: string;
 
         try {
-            // throw new Error('Solana is not implemented yet');
             const {
                 tx: { data }
             } = await this.getTransactionRequest(
