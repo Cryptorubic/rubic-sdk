@@ -11,8 +11,6 @@ import {
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { Web3PublicSupportedBlockchain } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { Injector } from 'src/core/injector/injector';
-import { changenowApiKey } from 'src/features/common/providers/changenow/constants/changenow-api-key';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -31,10 +29,6 @@ import {
     ChangenowCurrenciesResponse,
     ChangenowCurrency
 } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-currencies-api';
-import {
-    ChangenowEstimatedAmountResponse,
-    ChangenowRangeResponse
-} from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-exchange-api';
 import { ChangenowTrade } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-trade';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
@@ -43,6 +37,8 @@ import { RubicStep } from 'src/features/cross-chain/calculation-manager/provider
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { typedTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/typed-trade-providers';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+
+import { ChangeNowCrossChainApiService } from './services/changenow-cross-chain-api-service';
 
 export class ChangenowCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.CHANGENOW;
@@ -214,10 +210,7 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         nativeCurrency?: ChangenowCurrency;
         transitCurrency?: ChangenowCurrency;
     }> {
-        const currencies = await Injector.httpClient.get<ChangenowCurrenciesResponse>(
-            'https://api.changenow.io/v2/exchange/currencies?active=true&flow=standard',
-            { headers: { 'x-changenow-api-key': changenowApiKey } }
-        );
+        const currencies = await ChangeNowCrossChainApiService.getCurrencies();
 
         const nativeToken = nativeTokensList[
             from.blockchain
@@ -264,42 +257,28 @@ export class ChangenowCrossChainProvider extends CrossChainProvider {
         toCurrency: ChangenowCurrency,
         fromAmount: BigNumber
     ): Promise<BigNumber> {
-        const response = await Injector.httpClient.get<ChangenowEstimatedAmountResponse>(
-            `https://api.changenow.io/v2/exchange/estimated-amount?flow=standard`,
-            {
-                params: {
-                    fromCurrency: fromCurrency.ticker,
-                    toCurrency: toCurrency.ticker,
-                    fromAmount: fromAmount.toFixed(),
-                    fromNetwork: fromCurrency.network,
-                    toNetwork: toCurrency.network
-                },
-                headers: {
-                    'x-changenow-api-key': changenowApiKey
-                }
-            }
-        );
-        return new BigNumber(response.toAmount);
+        const res = await ChangeNowCrossChainApiService.getQuoteTx({
+            fromCurrency: fromCurrency.ticker,
+            toCurrency: toCurrency.ticker,
+            fromAmount: fromAmount.toFixed(),
+            fromNetwork: fromCurrency.network,
+            toNetwork: toCurrency.network
+        });
+
+        return new BigNumber(res.toAmount);
     }
 
     private async getMinMaxRange(
         fromCurrency: ChangenowCurrency,
         toCurrency: ChangenowCurrency
     ): Promise<{ minAmount: BigNumber; maxAmount: BigNumber | null }> {
-        const response = await Injector.httpClient.get<ChangenowRangeResponse>(
-            `https://api.changenow.io/v2/exchange/range?flow=standard`,
-            {
-                params: {
-                    fromCurrency: fromCurrency.ticker,
-                    toCurrency: toCurrency.ticker,
-                    fromNetwork: fromCurrency.network,
-                    toNetwork: toCurrency.network
-                },
-                headers: {
-                    'x-changenow-api-key': changenowApiKey
-                }
-            }
-        );
+        const response = await ChangeNowCrossChainApiService.getMinMaxRange({
+            fromCurrency: fromCurrency.ticker,
+            toCurrency: toCurrency.ticker,
+            fromNetwork: fromCurrency.network,
+            toNetwork: toCurrency.network
+        });
+
         return {
             minAmount: new BigNumber(response.minAmount),
             maxAmount: response.maxAmount ? new BigNumber(response.maxAmount) : null

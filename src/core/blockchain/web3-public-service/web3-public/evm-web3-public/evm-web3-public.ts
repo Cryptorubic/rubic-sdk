@@ -7,7 +7,7 @@ import {
     HEALTHCHECK,
     isBlockchainHealthcheckAvailable
 } from 'src/core/blockchain/constants/healthcheck';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
@@ -163,16 +163,22 @@ export class EvmWeb3Public extends Web3Public {
                     })
                 );
             } catch (err: unknown) {
-                if (err instanceof Error) {
-                    if (err.message.includes('unsigned transaction')) {
-                        return this.multicallContractsMethodsByOne(contractAbi, contractsData);
-                    }
+                if (this.allowMultipleRequests(err)) {
+                    return this.multicallContractsMethodsByOne(contractAbi, contractsData);
                 }
+
                 throw err;
             }
         }
 
         return this.multicallContractsMethodsByOne(contractAbi, contractsData);
+    }
+
+    private allowMultipleRequests(err: unknown): boolean {
+        return (
+            (err instanceof Error && err.message.includes('unsigned transaction')) ||
+            this.blockchainName === BLOCKCHAIN_NAME.ZETACHAIN
+        );
     }
 
     /**

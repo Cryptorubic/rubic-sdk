@@ -54,13 +54,6 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         symbol: 'AA',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.ZETACHAIN]: new Token({
-        blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
-        address: EvmWeb3Pure.nativeTokenAddress,
-        name: 'Zeta',
-        symbol: 'ZETA',
-        decimals: 18
-    }),
     [BLOCKCHAIN_NAME.TAIKO]: new Token({
         blockchain: BLOCKCHAIN_NAME.TAIKO,
         address: EvmWeb3Pure.nativeTokenAddress,
@@ -382,6 +375,13 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'ETH',
         symbol: 'ETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ZETACHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Zeta',
+        symbol: 'ZETA',
         decimals: 18
     }),
     [BLOCKCHAIN_NAME.SOLANA]: new Token({

@@ -18,7 +18,6 @@ import {
     TxStatus
 } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
-import { changenowApiKey } from 'src/features/common/providers/changenow/constants/changenow-api-key';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { RANGO_SWAP_STATUS } from 'src/features/common/providers/rango/models/rango-api-status-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
@@ -47,10 +46,7 @@ import { SquidrouterCrossChainProvider } from 'src/features/cross-chain/calculat
 import { SYMBIOSIS_SWAP_STATUS } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
 import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
 import { MULTICHAIN_STATUS_MAPPING } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
-import {
-    CHANGENOW_API_STATUS,
-    ChangenowApiResponse
-} from 'src/features/cross-chain/status-manager/models/changenow-api-response';
+import { CHANGENOW_API_STATUS } from 'src/features/cross-chain/status-manager/models/changenow-api-response';
 import { CrossChainStatus } from 'src/features/cross-chain/status-manager/models/cross-chain-status';
 import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
@@ -66,6 +62,7 @@ import {
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
+import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
 import { RangoCrossChainApiService } from '../calculation-manager/providers/rango-provider/services/rango-cross-chain-api-service';
 import { TAIKO_API_STATUS, TaikoApiResponse } from './models/taiko-api-response';
 
@@ -509,12 +506,8 @@ export class CrossChainStatusManager {
             throw new RubicSdkError('Must provide changenow trade id');
         }
         try {
-            const { status, payoutHash } = await this.httpClient.get<ChangenowApiResponse>(
-                'https://api.changenow.io/v2/exchange/by-id',
-                {
-                    params: { id: data.changenowId },
-                    headers: { 'x-changenow-api-key': changenowApiKey }
-                }
+            const { status, payoutHash } = await ChangeNowCrossChainApiService.getTxStatus(
+                data.changenowId
             );
 
             if (
@@ -644,7 +637,7 @@ export class CrossChainStatusManager {
             throw new RubicSdkError('Must specify sender account');
         }
         const { items } = await Injector.httpClient.get<TaikoApiResponse>(
-            `https://relayer.jolnir.taiko.xyz/events?address=${data.sender}&msgHash=${data.taikoTransactionId}&event=MessageSent`
+            `https://relayer.katla.taiko.xyz/events?address=${data.sender}&msgHash=${data.taikoTransactionId}&event=MessageSent`
         );
 
         if (!items[0]) {

@@ -145,7 +145,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         };
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams(options);
+            await this.getContractParams(options, false);
 
         try {
             let method: 'tryExecuteContractMethod' | 'executeContractMethod' =
@@ -223,7 +223,8 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
     }
 
     protected abstract getContractParams(
-        options: GetContractParamsOptions
+        options: GetContractParamsOptions,
+        skipAmountChangeCheck?: boolean
     ): Promise<ContractParams>;
 
     public static checkAmountChange(

@@ -1,25 +1,26 @@
 import BigNumber from 'bignumber.js';
 import { FailedToCheckForTransactionReceiptError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { Cache } from 'src/common/utils/decorators';
 import { getGasOptions } from 'src/common/utils/options';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
-import { changenowApiKey } from 'src/features/common/providers/changenow/constants/changenow-api-key';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { ChangenowCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/constants/changenow-api-blockchain';
 import { ChangenowCurrency } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-currencies-api';
-import { ChangenowExchangeResponse } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-exchange-api';
 import { ChangenowPaymentInfo } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-payment-info';
-import { ChangenowTrade } from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-trade';
+import {
+    ChangenowTrade,
+    GetPaymentInfoReturnType
+} from 'src/features/cross-chain/calculation-manager/providers/changenow-provider/models/changenow-trade';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { evmCommonCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
 import { gatewayRubicCrossChainAbi } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
@@ -29,23 +30,15 @@ import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/provid
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
-import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { MarkRequired } from 'ts-essentials';
 import { TransactionConfig } from 'web3-core';
 
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
-
-interface PaymentInfo {
-    fromCurrency: string;
-    toCurrency: string;
-    fromNetwork: string;
-    toNetwork: string;
-    fromAmount: string;
-    address: string;
-    flow: string;
-}
+import { TradeInfo } from '../common/models/trade-info';
+import { ChangenowSwapRequestBody } from './models/changenow-swap.api';
+import { ChangeNowCrossChainApiService } from './services/changenow-cross-chain-api-service';
 
 export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -68,7 +61,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
                     changenowTrade,
                     providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getContractParams({ receiverAddress: receiverAddress || walletAddress });
+                ).getContractParams({ receiverAddress: receiverAddress || walletAddress }, true);
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasDetails] = await Promise.all([
@@ -127,6 +120,9 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
      * id of changenow trade, used to get trade status.
      */
     public id: string | undefined;
+
+    /* Address to send funds to */
+    private payinAddress: string | undefined;
 
     private readonly fromCurrency: ChangenowCurrency;
 
@@ -213,11 +209,12 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         };
 
         try {
-            const { id, payinAddress } = await this.getPaymentInfo(
+            const { payinAddress } = await this.getPaymentInfo(
                 this.transitToken.tokenAmount,
-                options.receiverAddress ? options.receiverAddress : this.walletAddress
+                options.receiverAddress ? options.receiverAddress : this.walletAddress,
+                false,
+                options.directTransaction
             );
-            this.id = id;
 
             if (this.from.isNative) {
                 await this.web3Private.trySendTransaction(payinAddress, {
@@ -256,6 +253,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
                   value: paymentInfo.payinExtraId
               }
             : null;
+
         return {
             id: paymentInfo.id,
             depositAddress: paymentInfo.payinAddress,
@@ -265,9 +263,15 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
 
     private async getPaymentInfo(
         fromAmount: BigNumber,
-        receiverAddress: string
-    ): Promise<ChangenowExchangeResponse> {
-        const params: PaymentInfo = {
+        receiverAddress: string,
+        skipAmountChangeCheck: boolean = false,
+        directTransaction?: EvmEncodeConfig
+    ): Promise<GetPaymentInfoReturnType> {
+        if (directTransaction && this.payinAddress && this.id) {
+            return { id: this.id, payinAddress: this.payinAddress };
+        }
+
+        const params: ChangenowSwapRequestBody = {
             fromCurrency: this.fromCurrency.ticker,
             toCurrency: this.toCurrency.ticker,
             fromNetwork: this.fromCurrency.network,
@@ -276,34 +280,34 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
             address: receiverAddress,
             flow: 'standard'
         };
-        return await this.getResponseFromApiToPaymentInfo(params);
-    }
 
-    @Cache({
-        maxAge: 15_000
-    })
-    private async getResponseFromApiToPaymentInfo(
-        params: PaymentInfo
-    ): Promise<ChangenowExchangeResponse> {
-        return Injector.httpClient.post<ChangenowExchangeResponse>(
-            'https://api.changenow.io/v2/exchange',
-            params,
-            {
-                headers: {
-                    'x-changenow-api-key': changenowApiKey
-                }
-            }
-        );
+        const res = await ChangeNowCrossChainApiService.getSwapTx(params);
+        const toAmountWei = Web3Pure.toWei(res.toAmount, this.to.decimals);
+        this.payinAddress = res.payinAddress;
+        this.id = res.id;
+
+        if (!skipAmountChangeCheck) {
+            // Mock EvmConfig cause CN doesn't provide tx-data
+            EvmCrossChainTrade.checkAmountChange(
+                { data: '', to: '', value: '' },
+                toAmountWei,
+                this.to.stringWeiAmount
+            );
+        }
+
+        return res;
     }
 
     protected async getContractParams(
-        options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
+        options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>,
+        skipAmountChangeCheck?: boolean
     ): Promise<ContractParams> {
         const paymentInfo = await this.getPaymentInfo(
             this.transitToken.tokenAmount,
-            options?.receiverAddress || this.walletAddress
+            options?.receiverAddress || this.walletAddress,
+            skipAmountChangeCheck,
+            options.directTransaction
         );
-        this.id = paymentInfo.id;
 
         const toToken = this.to.clone({ address: EvmWeb3Pure.EMPTY_ADDRESS });
 
@@ -391,10 +395,13 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         const { gasLimit } = options;
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams({
-                fromAddress: options.fromAddress,
-                receiverAddress: options.receiverAddress || options.fromAddress
-            });
+            await this.getContractParams(
+                {
+                    fromAddress: options.fromAddress,
+                    receiverAddress: options.receiverAddress || options.fromAddress
+                },
+                true
+            );
 
         return EvmWeb3Pure.encodeMethodCall(
             contractAddress,
