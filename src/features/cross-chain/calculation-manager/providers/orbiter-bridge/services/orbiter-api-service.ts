@@ -1,9 +1,13 @@
 import { Orbiter } from '@orbiter-finance/bridge-sdk';
 import { RubicSdkError } from 'src/common/errors';
+import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
+import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 
 import { orbiterApiEndpoint } from '../constants/orbiter-api';
 import {
+    ORBITER_OP_STATUS,
+    ORBITER_STATUS,
     OrbiterQuoteConfig,
     OrbiterQuoteRequestParams,
     OrbiterStatusResponse,
@@ -53,9 +57,27 @@ export class OrbiterApiService {
         return res;
     }
 
-    public static async getTxStatus(hash: string): Promise<OrbiterStatusResponse> {
-        return Injector.httpClient.get<OrbiterStatusResponse>(
-            `${orbiterApiEndpoint}/transaction/status/${hash}`
+    public static async getTxStatus(txHash: string): Promise<TxStatusData> {
+        const {
+            result: { targetId: hash, status: txStatus, opStatus }
+        } = await Injector.httpClient.get<OrbiterStatusResponse>(
+            `${orbiterApiEndpoint}/transaction/status/${txHash}`
         );
+
+        if (txStatus === ORBITER_STATUS.ERROR) {
+            return {
+                hash,
+                status: TX_STATUS.FAIL
+            };
+        }
+
+        if (txStatus === ORBITER_STATUS.SUCCESS && opStatus === ORBITER_OP_STATUS.SUCCESS_PAYMENT) {
+            return {
+                hash,
+                status: TX_STATUS.SUCCESS
+            };
+        }
+
+        return { hash, status: TX_STATUS.PENDING };
     }
 }

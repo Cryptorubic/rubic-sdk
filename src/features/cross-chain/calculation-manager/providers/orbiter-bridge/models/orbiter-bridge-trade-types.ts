@@ -23,6 +23,7 @@ export interface OrbiterTradeParams {
         feeInfo: FeeInfo;
         priceImpact: number | null;
         orbiterTokenSymbols: OrbiterTokenSymbols;
+        orbiterFee?: string;
     };
     providerAddress: string;
     routePath: RubicStep[];

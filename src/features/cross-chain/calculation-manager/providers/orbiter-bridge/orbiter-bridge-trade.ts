@@ -140,6 +140,9 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
 
     private orbiterTokenSymbols: OrbiterTokenSymbols;
 
+    /* optional, used to calculate extraNative if !== undefined */
+    private orbiterFee: string | undefined;
+
     private get fromBlockchain(): OrbiterSupportedBlockchain {
         return this.from.blockchain as OrbiterSupportedBlockchain;
     }
@@ -163,6 +166,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         this.gasData = params.crossChainTrade.gasData;
         this.priceImpact = params.crossChainTrade.priceImpact;
         this.orbiterTokenSymbols = params.crossChainTrade.orbiterTokenSymbols;
+        this.orbiterFee = params.crossChainTrade?.orbiterFee;
     }
 
     protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -224,10 +228,14 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             fromAddress: this.walletAddress
         });
 
-        //@TODO: CHECK IF ORBITER TAKES EXTRA FEE
-        const extraNativeFee = this.from.isNative
-            ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
-            : new BigNumber(providerValue).toFixed();
+        let extraNativeFee: string;
+        if (this.orbiterFee) {
+            extraNativeFee = this.from.isNative
+                ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
+                : new BigNumber(providerValue).toFixed();
+        } else {
+            extraNativeFee = '0';
+        }
 
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             providerRouter,

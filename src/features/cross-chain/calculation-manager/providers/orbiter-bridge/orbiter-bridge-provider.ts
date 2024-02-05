@@ -1,4 +1,4 @@
-import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
@@ -40,6 +40,10 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as OrbiterSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
+        setInterval(() => {
+            console.log('[MEMORY_USAGE]', process.memoryUsage());
+        }, 1000);
+
         try {
             this.orbiterTokenSymbols = await OrbiterApiService.getTokensData();
             this.orbiterQuoteConfigs = await OrbiterApiService.getQuoteConfigs();
@@ -67,9 +71,11 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                 config: quoteConfig
             });
 
+            const toWeiAmount = Web3Pure.toWei(toAmount, toToken.decimals);
+
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
-                tokenAmount: Web3Pure.fromWei(toAmount, toToken.decimals)
+                tokenAmount: Web3Pure.fromWei(toWeiAmount, toToken.decimals)
             });
 
             const gasData =
@@ -84,6 +90,19 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                       })
                     : null;
 
+            if (quoteConfig.tradeFee) {
+                const nativeToken = nativeTokensList[fromBlockchain];
+
+                feeInfo.provider = {
+                    cryptoFee: {
+                        amount: Web3Pure.fromWei(quoteConfig.tradeFee, nativeToken.decimals),
+                        token: await PriceToken.createFromToken({
+                            ...nativeToken
+                        })
+                    }
+                };
+            }
+
             const trade = new OrbiterBridgeTrade({
                 crossChainTrade: {
                     feeInfo,
@@ -91,7 +110,8 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                     gasData,
                     to,
                     orbiterTokenSymbols: this.orbiterTokenSymbols,
-                    priceImpact: from.calculatePriceImpactPercent(to)
+                    priceImpact: from.calculatePriceImpactPercent(to),
+                    ...(quoteConfig.tradeFee && { orbiterFee: quoteConfig.tradeFee })
                 },
                 providerAddress: options.providerAddress,
                 routePath: await this.getRoutePath(from, to)
