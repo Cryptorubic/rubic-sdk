@@ -180,13 +180,13 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
 
         const account = this.web3Private.address;
 
-        if (this.fromBlockchain === BLOCKCHAIN_NAME.SEPOLIA) {
+        if (this.fromBlockchain === BLOCKCHAIN_NAME.HOLESKY) {
             if (this.from.isNative) {
                 methodArguments = [
                     {
                         id: 0,
                         from: account,
-                        srcChainId: blockchainId[BLOCKCHAIN_NAME.SEPOLIA],
+                        srcChainId: blockchainId[BLOCKCHAIN_NAME.HOLESKY],
                         destChainId: blockchainId[BLOCKCHAIN_NAME.TAIKO],
                         user: account,
                         to: account,
@@ -223,7 +223,7 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
                         id: 0,
                         from: account,
                         srcChainId: blockchainId[BLOCKCHAIN_NAME.TAIKO],
-                        destChainId: blockchainId[BLOCKCHAIN_NAME.SEPOLIA],
+                        destChainId: blockchainId[BLOCKCHAIN_NAME.HOLESKY],
                         user: account,
                         to: account,
                         refundTo: account,
@@ -239,7 +239,7 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
             } else {
                 methodArguments = [
                     {
-                        destChainId: blockchainId[BLOCKCHAIN_NAME.SEPOLIA],
+                        destChainId: blockchainId[BLOCKCHAIN_NAME.HOLESKY],
                         to: account,
                         token: this.from.address,
                         amount: this.from.stringWeiAmount,
