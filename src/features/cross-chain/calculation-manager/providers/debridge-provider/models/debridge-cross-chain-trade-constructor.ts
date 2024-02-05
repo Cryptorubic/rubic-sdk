@@ -18,7 +18,6 @@ export interface DebridgeCrossChainTradeConstructor<T extends BlockchainName> {
     feeInfo: FeeInfo;
     transitAmount: BigNumber;
     toTokenAmountMin: BigNumber;
-    maxTheoreticalAmount: BigNumber;
     cryptoFeeToken: PriceTokenAmount;
 
     transactionRequest?: TransactionRequest;

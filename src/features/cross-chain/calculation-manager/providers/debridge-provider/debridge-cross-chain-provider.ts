@@ -97,11 +97,17 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 )
             });
 
-            const slippage = 0;
             const toTokenAmountMin = Web3Pure.fromWei(
                 debridgeResponse.estimation.dstChainTokenOut.amount,
                 debridgeResponse.estimation.dstChainTokenOut.decimals
-            ).multipliedBy(1 - slippage);
+            );
+            const slippage = Number(
+                to.tokenAmount
+                    .minus(toTokenAmountMin)
+                    .dividedBy(toTokenAmountMin)
+                    .multipliedBy(100)
+                    .toFixed(2)
+            );
 
             const transitToken =
                 debridgeResponse.estimation.srcChainTokenOut ||
@@ -142,10 +148,6 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                         },
                         transitAmount: Web3Pure.fromWei(transitToken.amount, transitToken.decimals),
                         toTokenAmountMin,
-                        maxTheoreticalAmount: Web3Pure.fromWei(
-                            debridgeResponse.estimation.dstChainTokenOut.maxTheoreticalAmount,
-                            debridgeResponse.estimation.dstChainTokenOut.decimals
-                        ),
                         cryptoFeeToken,
                         onChainTrade: null
                     },
@@ -231,12 +233,12 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 {
                     type: 'on-chain',
                     path: [from, fromTokenAmount],
-                    provider: ON_CHAIN_TRADE_TYPE.ONE_INCH
+                    provider: ON_CHAIN_TRADE_TYPE.DLN
                 },
                 {
                     type: 'on-chain',
                     path: [toTokenAmount, to],
-                    provider: ON_CHAIN_TRADE_TYPE.ONE_INCH
+                    provider: ON_CHAIN_TRADE_TYPE.DLN
                 }
             ];
         } catch {

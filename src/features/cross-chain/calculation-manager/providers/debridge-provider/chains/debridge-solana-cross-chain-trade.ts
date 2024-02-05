@@ -29,8 +29,6 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
     /** @internal */
     public readonly transitAmount: BigNumber;
 
-    public readonly maxTheoreticalAmount: BigNumber;
-
     private readonly cryptoFeeToken: PriceTokenAmount;
 
     private readonly transactionRequest: TransactionRequest;
@@ -63,7 +61,10 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
     }
 
     protected get fromContractAddress(): string {
-        return this.isProxyTrade ? rubicProxyContractAddress[this.fromBlockchain].gateway : '';
+        if (this.isProxyTrade) {
+            throw new Error('Solana contract is not implemented yet');
+        }
+        return rubicProxyContractAddress[this.fromBlockchain].gateway;
     }
 
     public readonly feeInfo: FeeInfo;
@@ -82,7 +83,6 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
         this.from = crossChainTrade.from;
         this.to = crossChainTrade.to;
         this.transactionRequest = crossChainTrade.transactionRequest;
-        // this.gasData = crossChainTrade.gasData;
         this.priceImpact = crossChainTrade.priceImpact;
         this.slippage = crossChainTrade.slippage;
         this.toTokenAmountMin = crossChainTrade.toTokenAmountMin;
@@ -90,7 +90,6 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
 
         this.transitAmount = crossChainTrade.transitAmount;
-        this.maxTheoreticalAmount = crossChainTrade.maxTheoreticalAmount;
     }
 
     protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -132,7 +131,7 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
         _options: GetContractParamsOptions,
         _skipAmountChangeCheck: boolean = false
     ): Promise<ContractParams> {
-        throw new Error('Solana is not implemented yet');
+        throw new Error('Solana contracts is not implemented yet');
     }
 
     private async getTransactionRequest(
@@ -191,7 +190,7 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
-            slippage: this.slippage * 100,
+            slippage: this.slippage,
             routePath: this.routePath
         };
     }
@@ -201,21 +200,6 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
             this.cryptoFeeToken.tokenAmount
         );
 
-        return fromUsd
-            .plus(usdCryptoFee.isNaN() ? 0 : usdCryptoFee)
-            .dividedBy(this.maxTheoreticalAmount);
-    }
-
-    public getUsdPrice(providerFeeToken?: BigNumber): BigNumber {
-        let feeSum = new BigNumber(0);
-        const providerFee = this.feeInfo.provider?.cryptoFee;
-
-        if (providerFee) {
-            feeSum = feeSum.plus(
-                providerFee.amount.multipliedBy(providerFeeToken || providerFee.token.price)
-            );
-        }
-
-        return this.to.price.multipliedBy(this.maxTheoreticalAmount).minus(feeSum);
+        return fromUsd.plus(usdCryptoFee.isNaN() ? 0 : usdCryptoFee).dividedBy(this.to.tokenAmount);
     }
 }

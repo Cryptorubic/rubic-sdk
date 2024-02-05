@@ -41,8 +41,6 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
     /** @internal */
     public readonly transitAmount: BigNumber;
 
-    public readonly maxTheoreticalAmount: BigNumber;
-
     private readonly cryptoFeeToken: PriceTokenAmount;
 
     private readonly transactionRequest: TransactionRequest;
@@ -89,7 +87,6 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
                             feeInfo,
                             transitAmount: new BigNumber(NaN),
                             toTokenAmountMin: new BigNumber(NaN),
-                            maxTheoreticalAmount: new BigNumber(NaN),
                             cryptoFeeToken: from,
                             onChainTrade: null
                         },
@@ -124,7 +121,6 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
                         feeInfo,
                         transitAmount: new BigNumber(NaN),
                         toTokenAmountMin: new BigNumber(NaN),
-                        maxTheoreticalAmount: new BigNumber(NaN),
                         cryptoFeeToken: from,
                         onChainTrade: null
                     },
@@ -221,7 +217,6 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
         this.cryptoFeeToken = crossChainTrade.cryptoFeeToken;
 
         this.transitAmount = crossChainTrade.transitAmount;
-        this.maxTheoreticalAmount = crossChainTrade.maxTheoreticalAmount;
     }
 
     protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -381,7 +376,7 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
-            slippage: this.slippage * 100,
+            slippage: this.slippage,
             routePath: this.routePath
         };
     }
@@ -391,21 +386,6 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
             this.cryptoFeeToken.tokenAmount
         );
 
-        return fromUsd
-            .plus(usdCryptoFee.isNaN() ? 0 : usdCryptoFee)
-            .dividedBy(this.maxTheoreticalAmount);
-    }
-
-    public getUsdPrice(providerFeeToken?: BigNumber): BigNumber {
-        let feeSum = new BigNumber(0);
-        const providerFee = this.feeInfo.provider?.cryptoFee;
-
-        if (providerFee) {
-            feeSum = feeSum.plus(
-                providerFee.amount.multipliedBy(providerFeeToken || providerFee.token.price)
-            );
-        }
-
-        return this.to.price.multipliedBy(this.maxTheoreticalAmount).minus(feeSum);
+        return fromUsd.plus(usdCryptoFee.isNaN() ? 0 : usdCryptoFee).dividedBy(this.to.tokenAmount);
     }
 }
