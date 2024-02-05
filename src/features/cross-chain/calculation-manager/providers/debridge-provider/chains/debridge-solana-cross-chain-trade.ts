@@ -42,8 +42,8 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
     public readonly isAggregator = false;
 
     public readonly onChainSubtype = {
-        from: ON_CHAIN_TRADE_TYPE.ONE_INCH,
-        to: ON_CHAIN_TRADE_TYPE.ONE_INCH
+        from: ON_CHAIN_TRADE_TYPE.DLN,
+        to: ON_CHAIN_TRADE_TYPE.DLN
     };
 
     public readonly bridgeType = BRIDGE_TYPE.DEBRIDGE;
@@ -191,7 +191,7 @@ export class DebridgeSolanaCrossChainTrade extends SolanaCrossChainTrade {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
             priceImpact: this.priceImpact ?? null,
-            slippage: 0,
+            slippage: this.slippage * 100,
             routePath: this.routePath
         };
     }
