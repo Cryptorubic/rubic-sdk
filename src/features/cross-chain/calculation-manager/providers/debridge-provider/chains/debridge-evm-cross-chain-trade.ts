@@ -268,6 +268,9 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
         );
         const { data, value: providerValue, to } = tx;
 
+        const isEvmDestination = BlockchainsInfo.isEvmBlockchainName(this.to.blockchain);
+        const receivingAsset = isEvmDestination ? this.to.address : this.from.address;
+
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: this.walletAddress,
             fromTokenAmount: this.from,
@@ -275,7 +278,8 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
             srcChainTrade: null,
             providerAddress: this.providerAddress,
             type: `native:${this.type}`,
-            fromAddress: this.walletAddress
+            fromAddress: this.walletAddress,
+            toAddress: receivingAsset
         });
         const swapData =
             this.onChainTrade &&
