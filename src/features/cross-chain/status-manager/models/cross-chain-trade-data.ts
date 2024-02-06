@@ -46,11 +46,6 @@ export interface CrossChainTradeData {
     rangoRequestId?: string;
 
     /**
-     * Expected minimum output amount.
-     */
-    amountOutMin?: string;
-
-    /**
      * Celer bridge transaction ID.
      */
     celerTransactionId?: string;
