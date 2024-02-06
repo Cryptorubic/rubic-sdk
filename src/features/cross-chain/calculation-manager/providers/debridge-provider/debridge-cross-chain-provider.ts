@@ -31,6 +31,7 @@ import {
     DlnSolanaTransactionResponse,
     TransactionErrorResponse
 } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
+import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 export class DebridgeCrossChainProvider extends CrossChainProvider {
@@ -52,6 +53,8 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain;
         const toBlockchain = toToken.blockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
+
+        await this.checkDeflationTokens(from, toToken);
 
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
             return {
@@ -278,5 +281,14 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         }
         // Chain is not supported
         return null;
+    }
+
+    private async checkDeflationTokens(
+        from: PriceTokenAmount<BlockchainName>,
+        toToken: PriceToken<BlockchainName>
+    ): Promise<void> {
+        const deflationTokenManager = new DeflationTokenManager();
+        await deflationTokenManager.checkToken(from);
+        await deflationTokenManager.checkToken(toToken);
     }
 }

@@ -48,7 +48,7 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
             throw new RubicSdkError('Blockchain is not supported');
         }
 
-        if (options.withDeflation.from.isDeflation) {
+        if (options.withDeflation.from.isDeflation || options.withDeflation.to.isDeflation) {
             throw new RubicSdkError('[RUBIC_SDK] DLN does not work if source token is deflation.');
         }
 
