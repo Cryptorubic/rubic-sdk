@@ -2,7 +2,11 @@ import BigNumber from 'bignumber.js';
 import { NotSupportedTokensError, RubicSdkError, TooLowAmountError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
@@ -32,6 +36,8 @@ import {
     TransactionErrorResponse
 } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/models/transaction-response';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
+import { DlnOnChainSupportedBlockchain } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/constants/dln-on-chain-supported-blockchains';
+import { DlnOnChainSwapRequest } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/models/dln-on-chain-swap-request';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
 export class DebridgeCrossChainProvider extends CrossChainProvider {
@@ -79,6 +85,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
             );
 
             const requestParams: TransactionRequest = {
+                ...this.getAffiliateFee(fromBlockchain),
                 srcChainId: blockchainId[fromBlockchain],
                 srcChainTokenIn: DlnUtils.getSupportedAddress(from),
                 srcChainTokenInAmount: fromWithoutFee.stringWeiAmount,
@@ -290,5 +297,17 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         const deflationTokenManager = new DeflationTokenManager();
         await deflationTokenManager.checkToken(from);
         await deflationTokenManager.checkToken(toToken);
+    }
+
+    private getAffiliateFee(
+        fromBlockchain: DlnOnChainSupportedBlockchain
+    ): Partial<Pick<DlnOnChainSwapRequest, 'affiliateFeePercent' | 'affiliateFeeRecipient'>> {
+        if (fromBlockchain === BLOCKCHAIN_NAME.SOLANA) {
+            return {
+                affiliateFeeRecipient: '4juPxgyQapaKdgxuCS7N8pRxjttXGRZsS5WTVZ42rNjn',
+                affiliateFeePercent: 0.1
+            };
+        }
+        return {};
     }
 }

@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
@@ -64,6 +64,7 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
 
         const slippage = new BigNumber(options.slippageTolerance).multipliedBy(100).toNumber();
         const requestParams: DlnOnChainSwapRequest = {
+            ...this.getAffiliateFee(from.blockchain),
             chainId: fromChainId,
             tokenIn: DlnUtils.getSupportedAddress(from),
             tokenInAmount: fromWithoutFee.stringWeiAmount,
@@ -116,5 +117,17 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
         _providerGateway?: string
     ): Promise<GasFeeInfo | null> {
         return null;
+    }
+
+    private getAffiliateFee(
+        fromBlockchain: DlnOnChainSupportedBlockchain
+    ): Partial<Pick<DlnOnChainSwapRequest, 'affiliateFeePercent' | 'affiliateFeeRecipient'>> {
+        if (fromBlockchain === BLOCKCHAIN_NAME.SOLANA) {
+            return {
+                affiliateFeeRecipient: '4juPxgyQapaKdgxuCS7N8pRxjttXGRZsS5WTVZ42rNjn',
+                affiliateFeePercent: 0.1
+            };
+        }
+        return {};
     }
 }
