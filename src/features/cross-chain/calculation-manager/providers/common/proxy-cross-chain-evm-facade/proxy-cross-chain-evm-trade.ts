@@ -380,7 +380,10 @@ export class ProxyCrossChainEvmTrade {
         walletAddress: string,
         toChainId: number
     ): string {
-        if (toChainId === blockchainId[BLOCKCHAIN_NAME.BITCOIN]) {
+        if (
+            toChainId === blockchainId[BLOCKCHAIN_NAME.BITCOIN] ||
+            toChainId === blockchainId[BLOCKCHAIN_NAME.SOLANA]
+        ) {
             return walletAddress;
         }
 
