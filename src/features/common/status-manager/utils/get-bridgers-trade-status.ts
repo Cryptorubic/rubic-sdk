@@ -23,7 +23,7 @@ export async function getBridgersTradeStatus(
             hash: srcTxHash,
             fromTokenChain: toBridgersBlockchain[fromBlockchain],
             sourceFlag,
-            amountOutMin
+            ...(amountOutMin && { amountOutMin })
         };
         const updateDataAndStatusResponse =
             await Injector.httpClient.post<BridgersUpdateDataAndStatusResponse>(
@@ -66,7 +66,9 @@ export async function getBridgersTradeStatus(
                 hash: null
             };
         }
-    } catch {}
+    } catch (err) {
+        console.debug('[ERROR_getBridgersTradeStatus]', err);
+    }
 
     return {
         status: TX_STATUS.PENDING,

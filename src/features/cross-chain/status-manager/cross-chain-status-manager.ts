@@ -381,9 +381,6 @@ export class CrossChainStatusManager {
      * @returns Cross-chain transaction status.
      */
     private getBridgersDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        if (!data.amountOutMin) {
-            throw new RubicSdkError('field amountOutMin is not set.');
-        }
         return getBridgersTradeStatus(
             data.srcTxHash,
             data.fromBlockchain as BridgersCrossChainSupportedBlockchain,
