@@ -26,7 +26,8 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
     public static async getGasData(
         from: PriceTokenAmount<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>
+        to: PriceTokenAmount<EvmBlockchainName>,
+        options: SwapTransactionOptions
     ): Promise<GasData | null> {
         const fromBlockchain = from.blockchain as LayerZeroBridgeSupportedBlockchain;
         const walletAddress =
@@ -48,7 +49,7 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
                     },
                     EvmWeb3Pure.EMPTY_ADDRESS,
                     []
-                ).getContractParams();
+                ).getContractParams(options);
 
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
             const [gasLimit, gasDetails] = await Promise.all([
@@ -150,7 +151,7 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
 
         // eslint-disable-next-line no-useless-catch
         try {
-            const params = await this.getContractParams();
+            const params = await this.getContractParams(options);
 
             const { data, to, value } = EvmWeb3Pure.encodeMethodCall(
                 params.contractAddress,
@@ -179,17 +180,17 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
         }
     }
 
-    public async getContractParams(): Promise<ContractParams> {
+    public async getContractParams(options: SwapTransactionOptions): Promise<ContractParams> {
         const account = this.web3Private.address;
 
-        const fee = await this.estimateSendFee();
+        const fee = await this.estimateSendFee(options);
 
         const methodArguments = [
             account,
             layerZeroChainIds[this.toBlockchain],
-            account,
+            options.receiverAddress || account,
             this.from.stringWeiAmount,
-            account,
+            options.receiverAddress || account,
             '0x0000000000000000000000000000000000000000',
             '0x'
         ];
@@ -206,7 +207,7 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
         };
     }
 
-    private async estimateSendFee() {
+    private async estimateSendFee(options: SwapTransactionOptions) {
         const adapterParams = solidityPack(
             ['uint16', 'uint256'],
             [1, this.toBlockchain === BLOCKCHAIN_NAME.ARBITRUM ? 2_000_000 : 200_000]
@@ -221,7 +222,7 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
             methodName: 'estimateSendFee',
             methodArguments: [
                 layerZeroChainIds[this.toBlockchain],
-                this.web3Private.address,
+                options.receiverAddress || this.web3Private.address,
                 this.from.stringWeiAmount,
                 false,
                 adapterParams

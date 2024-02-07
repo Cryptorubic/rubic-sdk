@@ -50,7 +50,7 @@ export class LayerZeroBridgeProvider extends CrossChainProvider {
 
             const gasData =
                 options.gasCalculation === 'enabled'
-                    ? await LayerZeroBridgeTrade.getGasData(fromToken, to)
+                    ? await LayerZeroBridgeTrade.getGasData(fromToken, to, options)
                     : null;
 
             return {
