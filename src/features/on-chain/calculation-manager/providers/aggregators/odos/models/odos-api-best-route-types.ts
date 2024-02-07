@@ -17,6 +17,8 @@ export interface OdosBestRouteRequestBody {
     likeAsset?: boolean;
     /* Disable all exchanges that qualify as RFQs with centralized API */
     disableRFQs?: boolean;
+    /* Receiving partner specific benefits */
+    referralCode?: number;
 }
 
 export interface OdosInputTokenRequest {
