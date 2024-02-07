@@ -23,7 +23,7 @@ import { GetContractParamsOptions } from '../common/models/get-contract-params-o
 import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { OrbiterTokenSymbols } from './models/orbiter-bridge-api-service-types';
+import { OrbiterTokenSymbols } from './models/orbiter-api-common-types';
 import { OrbiterGetGasDataParams, OrbiterTradeParams } from './models/orbiter-bridge-trade-types';
 import { orbiterContractAddresses } from './models/orbiter-contract-addresses';
 import { OrbiterSupportedBlockchain } from './models/orbiter-supported-blockchains';
@@ -37,7 +37,8 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         feeInfo,
         receiverAddress,
         providerAddress,
-        orbiterTokenSymbols
+        orbiterTokenSymbols,
+        orbiterFee
     }: OrbiterGetGasDataParams): Promise<GasData | null> {
         const fromBlockchain = fromToken.blockchain;
         const walletAddress =
@@ -59,7 +60,8 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
                     feeInfo,
                     gasData: null,
                     priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
-                    orbiterTokenSymbols
+                    orbiterTokenSymbols,
+                    orbiterFee
                 },
                 routePath: [],
                 providerAddress
@@ -140,8 +142,8 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
 
     private orbiterTokenSymbols: OrbiterTokenSymbols;
 
-    /* optional, used to calculate extraNative if !== undefined */
-    private orbiterFee: string | undefined;
+    /* string or "0", used to calculate extraNative */
+    private orbiterFee: string;
 
     private get fromBlockchain(): OrbiterSupportedBlockchain {
         return this.from.blockchain as OrbiterSupportedBlockchain;
@@ -228,14 +230,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             fromAddress: this.walletAddress
         });
 
-        let extraNativeFee: string;
-        if (this.orbiterFee) {
-            extraNativeFee = this.from.isNative
-                ? new BigNumber(providerValue).minus(this.from.stringWeiAmount).toFixed()
-                : new BigNumber(providerValue).toFixed();
-        } else {
-            extraNativeFee = '0';
-        }
+        const extraNativeFee = this.orbiterFee;
 
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             providerRouter,

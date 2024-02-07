@@ -1,3 +1,4 @@
+import { RubicSdkError } from 'src/common/errors';
 import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -10,7 +11,8 @@ import { CalculationResult } from '../common/models/calculation-result';
 import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { OrbiterQuoteConfig, OrbiterTokenSymbols } from './models/orbiter-bridge-api-service-types';
+import { OrbiterTokenSymbols } from './models/orbiter-api-common-types';
+import { OrbiterQuoteConfig } from './models/orbiter-api-quote-types';
 import {
     OrbiterSupportedBlockchain,
     orbiterSupportedBlockchains
@@ -40,10 +42,6 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
         const fromBlockchain = from.blockchain as OrbiterSupportedBlockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
-        setInterval(() => {
-            console.log('[MEMORY_USAGE]', process.memoryUsage());
-        }, 1000);
-
         try {
             this.orbiterTokenSymbols = await OrbiterApiService.getTokensData();
             this.orbiterQuoteConfigs = await OrbiterApiService.getQuoteConfigs();
@@ -60,22 +58,29 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                 feeInfo.rubicProxy?.platformFee?.percent
             );
 
-            const quoteConfig = OrbiterUtils.getQuoteConfig(
-                from.blockchain,
-                toToken.blockchain,
-                this.orbiterQuoteConfigs
-            );
-
-            const toAmount = await OrbiterApiService.getQuoteTx({
-                fromAmount: fromWithoutFee.tokenAmount.toNumber(),
-                config: quoteConfig
+            const quoteConfig = OrbiterUtils.getQuoteConfig({
+                from,
+                to: toToken,
+                configs: this.orbiterQuoteConfigs
             });
 
-            const toWeiAmount = Web3Pure.toWei(toAmount, toToken.decimals);
+            if (!OrbiterUtils.isAmountCorrect(from.tokenAmount, quoteConfig)) {
+                throw new RubicSdkError(`
+                    [ORBITER] Amount is out of range. 
+                    Min amount - ${quoteConfig.minAmt} ${from.symbol}.
+                    Max amount - ${quoteConfig.maxAmt} ${from.symbol}.
+                `);
+            }
+
+            const toAmount = await OrbiterApiService.calculateAmount({
+                fromAmount: fromWithoutFee.tokenAmount,
+                config: quoteConfig,
+                fromDecimals: from.decimals
+            });
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
-                tokenAmount: Web3Pure.fromWei(toWeiAmount, toToken.decimals)
+                tokenAmount: toAmount
             });
 
             const gasData =
@@ -86,7 +91,8 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                           toToken: to,
                           orbiterTokenSymbols: this.orbiterTokenSymbols,
                           receiverAddress: options.receiverAddress,
-                          providerAddress: options.providerAddress
+                          providerAddress: options.providerAddress,
+                          orbiterFee: quoteConfig.tradeFee
                       })
                     : null;
 
@@ -111,7 +117,7 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                     to,
                     orbiterTokenSymbols: this.orbiterTokenSymbols,
                     priceImpact: from.calculatePriceImpactPercent(to),
-                    ...(quoteConfig.tradeFee && { orbiterFee: quoteConfig.tradeFee })
+                    orbiterFee: quoteConfig.tradeFee
                 },
                 providerAddress: options.providerAddress,
                 routePath: await this.getRoutePath(from, to)

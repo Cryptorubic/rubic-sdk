@@ -1,33 +1,42 @@
 import { Orbiter } from '@orbiter-finance/bridge-sdk';
-import { RubicSdkError } from 'src/common/errors';
+import BigNumber from 'bignumber.js';
 import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 
-import { orbiterApiEndpoint } from '../constants/orbiter-api';
+import { ORBITER_API_ENDPOINT, ORBITER_BASE_FEE } from '../constants/orbiter-api';
 import {
     ORBITER_OP_STATUS,
     ORBITER_STATUS,
-    OrbiterQuoteConfig,
-    OrbiterQuoteRequestParams,
-    OrbiterStatusResponse,
-    OrbiterSwapRequestParams,
-    OrbiterSwapResponse,
+    OrbiterTokensResponse,
     OrbiterTokenSymbols
-} from '../models/orbiter-bridge-api-service-types';
+} from '../models/orbiter-api-common-types';
+import {
+    OrbiterGetToAmountParams,
+    OrbiterQuoteConfig,
+    OrbiterQuoteConfigsResponse
+} from '../models/orbiter-api-quote-types';
+import { OrbiterStatusResponse } from '../models/orbiter-api-status-types';
 
 export class OrbiterApiService {
     /* add in Orbiter constructor {} dealerId to get extra benefits */
     private static readonly orbiterSdk: Orbiter = new Orbiter({});
 
-    public static getQuoteConfigs(): Promise<OrbiterQuoteConfig[]> {
-        return this.orbiterSdk.queryRouters();
+    public static async getQuoteConfigs(): Promise<OrbiterQuoteConfig[]> {
+        const { result } = await Injector.httpClient.get<OrbiterQuoteConfigsResponse>(
+            `${ORBITER_API_ENDPOINT}/routers`,
+            { params: { dealerId: undefined! } }
+        );
+
+        return result;
     }
 
     public static async getTokensData(): Promise<OrbiterTokenSymbols> {
-        const res = await this.orbiterSdk.queryTokensAllChain();
+        const { result } = await Injector.httpClient.get<OrbiterTokensResponse>(
+            `${ORBITER_API_ENDPOINT}/tokens`
+        );
 
-        const tokens = Object.entries(res).reduce((acc, [chainId, tokensInChain]) => {
+        const tokens = Object.entries(result).reduce((acc, [chainId, tokensInChain]) => {
             tokensInChain?.forEach(({ address, symbol }) => {
                 acc[chainId] = {} as Record<string, string>;
                 acc[chainId]![address] = symbol;
@@ -39,29 +48,25 @@ export class OrbiterApiService {
         return tokens;
     }
 
-    public static async getQuoteTx({
+    public static calculateAmount({
         fromAmount,
-        config
-    }: OrbiterQuoteRequestParams): Promise<string> {
-        const amount = await this.orbiterSdk.queryReceiveAmount(fromAmount, config);
+        config,
+        fromDecimals
+    }: OrbiterGetToAmountParams): BigNumber {
+        const digit = fromDecimals === 18 ? 8 : 5;
+        const orbiterFee = fromAmount
+            .multipliedBy(config.tradeFee)
+            .dividedBy(ORBITER_BASE_FEE)
+            .decimalPlaces(digit, BigNumber.ROUND_UP);
 
-        if (amount === 0) {
-            throw new RubicSdkError('Unsupported token pair.');
-        }
-
-        return amount;
-    }
-
-    public static async getSwapTx(params: OrbiterSwapRequestParams): Promise<OrbiterSwapResponse> {
-        const res = (await this.orbiterSdk.toBridge(params)) as OrbiterSwapResponse;
-        return res;
+        return fromAmount.minus(orbiterFee);
     }
 
     public static async getTxStatus(txHash: string): Promise<TxStatusData> {
         const {
             result: { targetId: hash, status: txStatus, opStatus }
         } = await Injector.httpClient.get<OrbiterStatusResponse>(
-            `${orbiterApiEndpoint}/transaction/status/${txHash}`
+            `${ORBITER_API_ENDPOINT}/transaction/status/${txHash}`
         );
 
         if (txStatus === ORBITER_STATUS.ERROR) {
