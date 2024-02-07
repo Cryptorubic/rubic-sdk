@@ -156,15 +156,15 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
                 params.value
             );
 
-            await this.web3Private
-                .trySendTransaction(to, {
-                    data,
-                    value,
-                    gas: gasLimit,
-                    gasPrice,
-                    gasPriceOptions
-                })
-                .then(tx => onTransactionHash(tx.transactionHash));
+            const tx = await this.web3Private.trySendTransaction(to, {
+                data,
+                value,
+                gas: gasLimit,
+                gasPrice,
+                gasPriceOptions
+            });
+
+            onTransactionHash(tx.transactionHash);
 
             return transactionHash!;
         } catch (err) {
