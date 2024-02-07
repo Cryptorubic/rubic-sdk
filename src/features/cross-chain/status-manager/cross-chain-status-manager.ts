@@ -84,13 +84,14 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE]: this.getCelerBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CHANGENOW]: this.getChangenowDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getStargateDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getLayerZeroDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER]: this.getSquidrouterDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SCROLL_BRIDGE]: this.getScrollBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.TAIKO_BRIDGE]: this.getTaikoBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.PULSE_CHAIN_BRIDGE]: this.getPulseChainDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.PULSE_CHAIN_BRIDGE]: this.getPulseChainDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.LAYERZERO]: this.getLayerZeroDstSwapStatus
     };
 
     /**
@@ -167,7 +168,7 @@ export class CrossChainStatusManager {
      * @param data Trade data.
      * @returns Cross-chain transaction status and hash.
      */
-    private async getStargateDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+    private async getLayerZeroDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         const lzPackage = await import('@layerzerolabs/scan-client');
         const client = lzPackage.createClient('mainnet');
         const scanResponse = await client.getMessagesBySrcTxHash(data.srcTxHash);
