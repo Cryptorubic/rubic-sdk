@@ -382,14 +382,10 @@ export class CrossChainStatusManager {
      * @returns Cross-chain transaction status.
      */
     private getBridgersDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        if (!data.amountOutMin) {
-            throw new RubicSdkError('field amountOutMin is not set.');
-        }
         return getBridgersTradeStatus(
             data.srcTxHash,
             data.fromBlockchain as BridgersCrossChainSupportedBlockchain,
-            'rubic',
-            data.amountOutMin
+            'rubic'
         );
     }
 
@@ -647,7 +643,7 @@ export class CrossChainStatusManager {
             throw new RubicSdkError('Must specify sender account');
         }
         const { items } = await Injector.httpClient.get<TaikoApiResponse>(
-            `https://relayer.jolnir.taiko.xyz/events?address=${data.sender}&msgHash=${data.taikoTransactionId}&event=MessageSent`
+            `https://relayer.katla.taiko.xyz/events?address=${data.sender}&msgHash=${data.taikoTransactionId}&event=MessageSent`
         );
 
         if (!items[0]) {
