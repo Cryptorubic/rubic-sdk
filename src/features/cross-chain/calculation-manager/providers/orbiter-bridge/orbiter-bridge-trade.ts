@@ -1,7 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -23,11 +22,12 @@ import { GetContractParamsOptions } from '../common/models/get-contract-params-o
 import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { OrbiterTokenSymbols } from './models/orbiter-api-common-types';
+import { ORBITER_ABI } from './constants/orbiter-contract-abi';
+import { OrbiterQuoteConfig } from './models/orbiter-api-quote-types';
 import { OrbiterGetGasDataParams, OrbiterTradeParams } from './models/orbiter-bridge-trade-types';
 import { orbiterContractAddresses } from './models/orbiter-contract-addresses';
 import { OrbiterSupportedBlockchain } from './models/orbiter-supported-blockchains';
-import { OrbiterApiService } from './services/orbiter-api-service';
+import { OrbiterUtils } from './services/orbiter-utils';
 
 export class OrbiterBridgeTrade extends EvmCrossChainTrade {
     /** @internal */
@@ -37,8 +37,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         feeInfo,
         receiverAddress,
         providerAddress,
-        orbiterTokenSymbols,
-        orbiterFee
+        quoteConfig
     }: OrbiterGetGasDataParams): Promise<GasData | null> {
         const fromBlockchain = fromToken.blockchain;
         const walletAddress =
@@ -60,8 +59,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
                     feeInfo,
                     gasData: null,
                     priceImpact: fromToken.calculatePriceImpactPercent(toToken) || 0,
-                    orbiterTokenSymbols,
-                    orbiterFee
+                    quoteConfig
                 },
                 routePath: [],
                 providerAddress
@@ -90,7 +88,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             } else {
                 const { data, value, to } = await new OrbiterBridgeTrade(
                     tradeParams
-                ).getTransactionRequest(receiverAddress);
+                ).callOrbiterContract(receiverAddress);
 
                 const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
                     data,
@@ -140,10 +138,8 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
     public readonly priceImpact: number | null;
     /** */
 
-    private orbiterTokenSymbols: OrbiterTokenSymbols;
-
-    /* string or "0", used to calculate extraNative */
-    private orbiterFee: string;
+    /* used to get extraNativeFee(tradeFee) and orbiter contract params */
+    private quoteConfig: OrbiterQuoteConfig;
 
     private get fromBlockchain(): OrbiterSupportedBlockchain {
         return this.from.blockchain as OrbiterSupportedBlockchain;
@@ -167,8 +163,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         this.feeInfo = params.crossChainTrade.feeInfo;
         this.gasData = params.crossChainTrade.gasData;
         this.priceImpact = params.crossChainTrade.priceImpact;
-        this.orbiterTokenSymbols = params.crossChainTrade.orbiterTokenSymbols;
-        this.orbiterFee = params.crossChainTrade?.orbiterFee;
+        this.quoteConfig = params.crossChainTrade.quoteConfig;
     }
 
     protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -218,7 +213,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.getTransactionRequest(receiverAddress, options.directTransaction);
+        } = await this.callOrbiterContract(receiverAddress, options.directTransaction);
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
@@ -230,7 +225,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             fromAddress: this.walletAddress
         });
 
-        const extraNativeFee = this.orbiterFee;
+        const extraNativeFee = this.quoteConfig.tradeFee;
 
         const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
             providerRouter,
@@ -263,7 +258,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         };
     }
 
-    private async getTransactionRequest(
+    private async callOrbiterContract(
         receiverAddress?: string,
         transactionConfig?: EvmEncodeConfig
     ): Promise<EvmEncodeConfig> {
@@ -274,28 +269,26 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
                 value: transactionConfig.value
             };
         }
+        const toWalletAddress = receiverAddress || this.walletAddress;
+        const dataArgument = OrbiterUtils.getHexDataArg(this.quoteConfig.vc, toWalletAddress); //@TODO check vc from or to
 
-        const fromChainID = blockchainId[this.fromBlockchain].toString();
-        const toChainID = blockchainId[this.to.blockchain].toString();
-        const fromCurrency =
-            this.orbiterTokenSymbols[fromChainID]?.[this.from.address] || this.from.symbol;
-        const toCurrency =
-            this.orbiterTokenSymbols[toChainID]?.[this.from.address] || this.to.symbol;
+        const methodName = this.from.isNative ? 'transfer' : 'transferToken';
+        const methodArguments = this.from.isNative
+            ? [toWalletAddress, dataArgument]
+            : [this.from.address, toWalletAddress, this.from.stringWeiAmount, dataArgument];
 
-        const { to, data, value } = await OrbiterApiService.getSwapTx({
-            fromChainID,
-            toChainID,
-            fromCurrency,
-            toCurrency,
-            transferValue: this.from.tokenAmount.toNumber(),
-            crossAddressReceipt: receiverAddress || this.walletAddress
-        });
+        const config = EvmWeb3Pure.encodeMethodCall(
+            orbiterContractAddresses[this.fromBlockchain],
+            ORBITER_ABI,
+            methodName,
+            methodArguments,
+            this.from.stringWeiAmount
+        );
 
-        //@TODO Check value type in swap response and check if hash in swap() -> onConfirm set
         return {
-            to: to!,
-            value: value.toString(),
-            data
+            to: config.to,
+            value: config.value,
+            data: config.data
         };
     }
 

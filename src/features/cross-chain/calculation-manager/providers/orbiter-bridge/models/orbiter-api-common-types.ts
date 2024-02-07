@@ -9,24 +9,6 @@ export interface OrbiterResponse<T> {
     result: T;
 }
 
-export interface OrbiterTokenSymbols {
-    [chainId: string | number]: {
-        [tokenAddress: string]: string;
-    };
-}
-
-export interface OrbiterToken {
-    name: string;
-    symbol: string;
-    decimals: number;
-    address: string;
-    id?: number;
-}
-
-export type OrbiterTokensResponse = OrbiterResponse<{
-    [chainId: string | number]: OrbiterToken[];
-}>;
-
 export const ORBITER_STATUS = {
     ERROR: 3,
     SUCCESS: 2

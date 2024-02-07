@@ -11,7 +11,6 @@ import { CalculationResult } from '../common/models/calculation-result';
 import { FeeInfo } from '../common/models/fee-info';
 import { RubicStep } from '../common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { OrbiterTokenSymbols } from './models/orbiter-api-common-types';
 import { OrbiterQuoteConfig } from './models/orbiter-api-quote-types';
 import {
     OrbiterSupportedBlockchain,
@@ -23,8 +22,6 @@ import { OrbiterUtils } from './services/orbiter-utils';
 
 export class OrbiterBridgeProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.ORBITER_BRIDGE;
-
-    private orbiterTokenSymbols: OrbiterTokenSymbols = {};
 
     private orbiterQuoteConfigs: OrbiterQuoteConfig[] = [];
 
@@ -43,7 +40,6 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
         try {
-            this.orbiterTokenSymbols = await OrbiterApiService.getTokensData();
             this.orbiterQuoteConfigs = await OrbiterApiService.getQuoteConfigs();
 
             const feeInfo = await this.getFeeInfo(
@@ -89,10 +85,9 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                           feeInfo,
                           fromToken: from,
                           toToken: to,
-                          orbiterTokenSymbols: this.orbiterTokenSymbols,
                           receiverAddress: options.receiverAddress,
                           providerAddress: options.providerAddress,
-                          orbiterFee: quoteConfig.tradeFee
+                          quoteConfig
                       })
                     : null;
 
@@ -115,9 +110,8 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                     from,
                     gasData,
                     to,
-                    orbiterTokenSymbols: this.orbiterTokenSymbols,
                     priceImpact: from.calculatePriceImpactPercent(to),
-                    orbiterFee: quoteConfig.tradeFee
+                    quoteConfig
                 },
                 providerAddress: options.providerAddress,
                 routePath: await this.getRoutePath(from, to)

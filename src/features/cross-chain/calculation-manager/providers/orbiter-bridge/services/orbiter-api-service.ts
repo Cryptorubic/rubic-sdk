@@ -1,16 +1,10 @@
-import { Orbiter } from '@orbiter-finance/bridge-sdk';
 import BigNumber from 'bignumber.js';
 import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 
 import { ORBITER_API_ENDPOINT, ORBITER_BASE_FEE } from '../constants/orbiter-api';
-import {
-    ORBITER_OP_STATUS,
-    ORBITER_STATUS,
-    OrbiterTokensResponse,
-    OrbiterTokenSymbols
-} from '../models/orbiter-api-common-types';
+import { ORBITER_OP_STATUS, ORBITER_STATUS } from '../models/orbiter-api-common-types';
 import {
     OrbiterGetToAmountParams,
     OrbiterQuoteConfig,
@@ -19,9 +13,6 @@ import {
 import { OrbiterStatusResponse } from '../models/orbiter-api-status-types';
 
 export class OrbiterApiService {
-    /* add in Orbiter constructor {} dealerId to get extra benefits */
-    private static readonly orbiterSdk: Orbiter = new Orbiter({});
-
     public static async getQuoteConfigs(): Promise<OrbiterQuoteConfig[]> {
         const { result } = await Injector.httpClient.get<OrbiterQuoteConfigsResponse>(
             `${ORBITER_API_ENDPOINT}/routers`,
@@ -29,23 +20,6 @@ export class OrbiterApiService {
         );
 
         return result;
-    }
-
-    public static async getTokensData(): Promise<OrbiterTokenSymbols> {
-        const { result } = await Injector.httpClient.get<OrbiterTokensResponse>(
-            `${ORBITER_API_ENDPOINT}/tokens`
-        );
-
-        const tokens = Object.entries(result).reduce((acc, [chainId, tokensInChain]) => {
-            tokensInChain?.forEach(({ address, symbol }) => {
-                acc[chainId] = {} as Record<string, string>;
-                acc[chainId]![address] = symbol;
-            });
-
-            return acc;
-        }, {} as OrbiterTokenSymbols);
-
-        return tokens;
     }
 
     public static calculateAmount({
