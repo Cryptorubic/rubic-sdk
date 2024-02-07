@@ -188,18 +188,18 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
                         from: account,
                         srcChainId: blockchainId[BLOCKCHAIN_NAME.HOLESKY],
                         destChainId: blockchainId[BLOCKCHAIN_NAME.TAIKO],
-                        user: account,
+                        owner: account,
                         to: account,
                         refundTo: account,
                         value: this.from.stringWeiAmount,
-                        fee: '1350000000900000',
+                        fee: '9000000',
                         gasLimit: '140000',
                         data: '0x',
                         memo: ''
                     }
                 ];
 
-                fee = '1350000000900000';
+                fee = '9000000';
             } else {
                 methodArguments = [
                     {
@@ -224,7 +224,7 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
                         from: account,
                         srcChainId: blockchainId[BLOCKCHAIN_NAME.TAIKO],
                         destChainId: blockchainId[BLOCKCHAIN_NAME.HOLESKY],
-                        user: account,
+                        owner: account,
                         to: account,
                         refundTo: account,
                         value: this.from.stringWeiAmount,
