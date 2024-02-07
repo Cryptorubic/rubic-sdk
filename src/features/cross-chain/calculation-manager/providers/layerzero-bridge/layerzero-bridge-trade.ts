@@ -94,11 +94,6 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
 
     public readonly gasData: GasData | null;
 
-    /**
-     * id of layerzero bridge tx, used to get trade status.
-     */
-    public id: string | undefined;
-
     private get fromBlockchain(): LayerZeroBridgeSupportedBlockchain {
         return this.from.blockchain as LayerZeroBridgeSupportedBlockchain;
     }
@@ -169,10 +164,7 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
                     gasPrice,
                     gasPriceOptions
                 })
-                .then(tx => {
-                    this.id = tx?.logs[this.from.isNative ? 0 : 2]?.topics[1];
-                    onTransactionHash(tx.transactionHash);
-                });
+                .then(tx => onTransactionHash(tx.transactionHash));
 
             return transactionHash!;
         } catch (err) {
