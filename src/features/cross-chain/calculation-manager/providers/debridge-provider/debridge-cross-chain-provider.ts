@@ -71,7 +71,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         }
 
         try {
-            const fakeAddress = DlnUtils.getFakeReceiver(fromBlockchain);
+            const fakeAddress = DlnUtils.getFakeReceiver(toBlockchain);
 
             const feeInfo = await this.getFeeInfo(
                 fromBlockchain,

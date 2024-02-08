@@ -60,7 +60,7 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
         const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
 
         const fromChainId = blockchainId[from.blockchain];
-        const fakeReceiver = DlnUtils.getFakeReceiver(from.blockchain);
+        const fakeReceiver = DlnUtils.getFakeReceiver(toToken.blockchain);
 
         const slippage = new BigNumber(options.slippageTolerance).multipliedBy(100).toNumber();
         const requestParams: DlnOnChainSwapRequest = {
