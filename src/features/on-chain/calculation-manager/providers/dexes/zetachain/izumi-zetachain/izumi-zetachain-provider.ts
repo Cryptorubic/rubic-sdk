@@ -8,7 +8,7 @@ export class IzumiZetachainProvider extends IzumiProvider {
     protected readonly dexAddress = '0x34bc1b87f60e0a30c0e24FD7Abada70436c71406';
 
     protected readonly config = {
-        maxTransitTokens: 2,
+        maxTransitTokens: 1,
         quoterAddress: '0x04830cfCED9772b8ACbAF76Cfc7A630Ad82c9148',
         liquidityManagerAddress: '0x2db0AFD0045F3518c77eC6591a542e326Befd3D7',
         routingTokenAddresses: [
