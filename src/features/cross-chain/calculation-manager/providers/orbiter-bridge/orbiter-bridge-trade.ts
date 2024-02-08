@@ -266,12 +266,9 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         }
         const toWalletAddress = receiverAddress || this.walletAddress;
         const dataArgument = OrbiterUtils.getHexDataArg(this.quoteConfig.vc, toWalletAddress);
-        const orbiterFeeWei = this.quoteConfig.tradeFee;
-        const orbiterFee = new BigNumber(orbiterFeeWei);
-        const totalAmount = this.from.tokenAmount.plus(orbiterFee);
-        const totalAmountWei = this.from.isNative
-            ? Web3Pure.toWei(totalAmount, this.from.decimals)
-            : orbiterFeeWei;
+        const orbiterFeeWei = new BigNumber(this.quoteConfig.tradeFee);
+        const nativeAmount = this.from.isNative ? this.from.stringWeiAmount : '0';
+        const totalAmountWei = orbiterFeeWei.plus(nativeAmount).toFixed();
 
         const methodName = this.from.isNative ? 'transfer' : 'transferToken';
         const methodArguments = this.from.isNative
