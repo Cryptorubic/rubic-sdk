@@ -181,14 +181,9 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
 
         // eslint-disable-next-line no-useless-catch
         try {
-            const params = await this.getContractParams(options);
-
-            const { data, to, value } = EvmWeb3Pure.encodeMethodCall(
-                params.contractAddress,
-                params.contractAbi,
-                params.methodName,
-                params.methodArguments,
-                params.value
+            const { data, to, value } = await this.callOrbiterContract(
+                options.receiverAddress,
+                options.directTransaction
             );
 
             await this.web3Private.trySendTransaction(to, {
@@ -271,18 +266,24 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         }
         const toWalletAddress = receiverAddress || this.walletAddress;
         const dataArgument = OrbiterUtils.getHexDataArg(this.quoteConfig.vc, toWalletAddress);
+        const orbiterFeeWei = this.quoteConfig.tradeFee;
+        const orbiterFee = new BigNumber(orbiterFeeWei);
+        const totalAmount = this.from.tokenAmount.plus(orbiterFee);
+        const totalAmountWei = this.from.isNative
+            ? Web3Pure.toWei(totalAmount, this.from.decimals)
+            : orbiterFeeWei;
 
         const methodName = this.from.isNative ? 'transfer' : 'transferToken';
         const methodArguments = this.from.isNative
             ? [toWalletAddress, dataArgument]
-            : [this.from.address, toWalletAddress, this.from.stringWeiAmount, dataArgument];
+            : [this.from.address, toWalletAddress, totalAmountWei, dataArgument];
 
         const config = EvmWeb3Pure.encodeMethodCall(
             orbiterContractAddresses[this.fromBlockchain],
             ORBITER_ABI,
             methodName,
             methodArguments,
-            this.from.stringWeiAmount
+            totalAmountWei
         );
 
         return {
