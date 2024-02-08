@@ -124,7 +124,7 @@ export class DlnOnChainProvider extends AggregatorOnChainProvider {
     ): Partial<Pick<DlnOnChainSwapRequest, 'affiliateFeePercent' | 'affiliateFeeRecipient'>> {
         if (fromBlockchain === BLOCKCHAIN_NAME.SOLANA) {
             return {
-                affiliateFeeRecipient: '4juPxgyQapaKdgxuCS7N8pRxjttXGRZsS5WTVZ42rNjn',
+                affiliateFeeRecipient: '6pvJfh73w1HT3b9eKRMX3EfrKH5AihVqRhasyhN5qtfP',
                 affiliateFeePercent: 0.1
             };
         }
