@@ -45,7 +45,7 @@ export class OrbiterUtils {
     }
 
     public static isAmountCorrect(fromAmount: BigNumber, config: OrbiterQuoteConfig): boolean {
-        return fromAmount.lt(config.maxAmt) || fromAmount.gt(config.minAmt);
+        return fromAmount.lt(config.maxAmt) && fromAmount.gt(config.minAmt);
     }
 
     /**

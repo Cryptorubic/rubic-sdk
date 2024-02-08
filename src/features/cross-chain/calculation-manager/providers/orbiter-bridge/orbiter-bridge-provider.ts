@@ -91,7 +91,7 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                       })
                     : null;
 
-            if (quoteConfig.tradeFee) {
+            if (quoteConfig.tradeFee && quoteConfig.tradeFee !== '0') {
                 const nativeToken = nativeTokensList[fromBlockchain];
 
                 feeInfo.provider = {

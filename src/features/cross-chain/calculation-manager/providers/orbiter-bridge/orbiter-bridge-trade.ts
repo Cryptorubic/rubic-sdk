@@ -270,7 +270,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             };
         }
         const toWalletAddress = receiverAddress || this.walletAddress;
-        const dataArgument = OrbiterUtils.getHexDataArg(this.quoteConfig.vc, toWalletAddress); //@TODO check vc from or to
+        const dataArgument = OrbiterUtils.getHexDataArg(this.quoteConfig.vc, toWalletAddress);
 
         const methodName = this.from.isNative ? 'transfer' : 'transferToken';
         const methodArguments = this.from.isNative
@@ -302,7 +302,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: null,
+            priceImpact: this.priceImpact,
             slippage: 0,
             routePath: this.routePath
         };

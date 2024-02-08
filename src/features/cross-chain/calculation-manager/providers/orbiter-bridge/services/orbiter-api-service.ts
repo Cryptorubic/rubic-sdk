@@ -13,10 +13,12 @@ import {
 import { OrbiterStatusResponse } from '../models/orbiter-api-status-types';
 
 export class OrbiterApiService {
+    private static dealerId: string | null = null;
+
     public static async getQuoteConfigs(): Promise<OrbiterQuoteConfig[]> {
         const { result } = await Injector.httpClient.get<OrbiterQuoteConfigsResponse>(
             `${ORBITER_API_ENDPOINT}/routers`,
-            { params: { dealerId: undefined! } }
+            { params: { ...(this.dealerId && { dealerId: this.dealerId }) } }
         );
 
         return result;
