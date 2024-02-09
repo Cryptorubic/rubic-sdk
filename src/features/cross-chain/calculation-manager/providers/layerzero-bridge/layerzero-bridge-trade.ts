@@ -135,7 +135,7 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -160,7 +160,6 @@ export class LayerZeroBridgeTrade extends EvmCrossChainTrade {
                 data,
                 value,
                 gas: gasLimit,
-                gasPrice,
                 gasPriceOptions
             });
 
