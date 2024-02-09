@@ -65,26 +65,29 @@ export async function getMethodArgumentsAndTransactionData<
         toTokenChain: toBridgersBlockchain[to.blockchain]
     };
 
-    const swapDataPromise = Injector.httpClient.post<BridgersSwapResponse<T>>(
+    const swapData = await Injector.httpClient.post<BridgersSwapResponse<T>>(
         'https://sswap.swft.pro/api/sswap/swap',
         swapRequest
     );
-    const quoteResponsePromise = Injector.httpClient.post<BridgersQuoteResponse>(
-        'https://sswap.swft.pro/api/sswap/quote',
-        quoteRequest
-    );
 
-    const [quoteResponse, swapData] = await Promise.all([quoteResponsePromise, swapDataPromise]);
-
-    const transactionQuoteData = quoteResponse.data?.txData;
     const transactionSwapData = swapData.data.txData;
 
-    if (!skipAmountChangeCheck && transactionQuoteData.amountOutMin) {
-        EvmCrossChainTrade.checkAmountChange(
-            'value' in transactionSwapData ? transactionSwapData : { data: '', to: '', value: '' },
-            transactionQuoteData.amountOutMin,
-            toTokenAmountMin.toString()
+    if (!skipAmountChangeCheck) {
+        const quoteResponse = await Injector.httpClient.post<BridgersQuoteResponse>(
+            'https://sswap.swft.pro/api/sswap/quote',
+            quoteRequest
         );
+        const transactionQuoteData = quoteResponse.data?.txData;
+
+        if (transactionQuoteData.amountOutMin) {
+            EvmCrossChainTrade.checkAmountChange(
+                'value' in transactionSwapData
+                    ? transactionSwapData
+                    : { data: '', to: '', value: '' },
+                transactionQuoteData.amountOutMin,
+                Web3Pure.toWei(toTokenAmountMin, to.decimals)
+            );
+        }
     }
 
     const dstTokenAddress = BlockchainsInfo.isTronBlockchainName(to.blockchain)
