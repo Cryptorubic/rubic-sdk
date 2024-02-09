@@ -3,6 +3,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 
+import { ODOS_REFERRAL_CODE } from '../constants/odos-api-consts';
 import {
     OdosBestRouteRequestBody,
     OdosInputTokenRequest,
@@ -39,7 +40,8 @@ export class OdosOnChainParser {
             slippageLimitPercent: options.slippageTolerance * 100,
             sourceBlacklist: swappersBlacklist,
             sourceWhitelist: swappersWhitelist,
-            likeAsset: true
+            likeAsset: true,
+            referralCode: ODOS_REFERRAL_CODE
         };
     }
 }

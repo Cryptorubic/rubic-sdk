@@ -81,6 +81,13 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         name: 'Ether',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.HOLESKY]: new Token({
+        blockchain: BLOCKCHAIN_NAME.HOLESKY,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ether',
+        symbol: 'ETH',
+        decimals: 18
     })
 };
 
