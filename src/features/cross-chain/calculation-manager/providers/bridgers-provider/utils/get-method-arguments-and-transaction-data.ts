@@ -62,7 +62,6 @@ export async function getMethodArgumentsAndTransactionData<
         'https://sswap.swft.pro/api/sswap/swap',
         swapRequest
     );
-
     const transactionData = swapData.data.txData;
 
     if (!skipAmountChangeCheck) {
@@ -79,7 +78,7 @@ export async function getMethodArgumentsAndTransactionData<
         );
         const transactionQuoteData = quoteResponse.data?.txData;
 
-        if (transactionQuoteData.amountOutMin) {
+        if (transactionQuoteData?.amountOutMin) {
             EvmCrossChainTrade.checkAmountChange(
                 'value' in transactionData ? transactionData : { data: '', to: '', value: '' },
                 transactionQuoteData.amountOutMin,
