@@ -73,25 +73,14 @@ export async function getMethodArgumentsAndTransactionData<
         quoteRequest
     );
 
-    const [quoteResponse, swapData] = await Promise.allSettled([
-        quoteResponsePromise,
-        swapDataPromise
-    ]);
+    const [quoteResponse, swapData] = await Promise.all([quoteResponsePromise, swapDataPromise]);
 
-    const transactionQuoteData =
-        quoteResponse.status === 'fulfilled' && quoteResponse.value.data?.txData;
-    const transactionSwapData = swapData.status === 'fulfilled' && swapData.value.data.txData;
-    let transactionData;
+    const transactionQuoteData = quoteResponse.data?.txData;
+    const transactionSwapData = swapData.data.txData;
 
-    if (transactionSwapData && 'value' in transactionSwapData) {
-        transactionData = transactionSwapData;
-    } else {
-        transactionData = { data: '', to: '', value: '' };
-    }
-
-    if (transactionQuoteData && transactionQuoteData.amountOutMin) {
+    if (transactionQuoteData.amountOutMin) {
         EvmCrossChainTrade.checkAmountChange(
-            transactionData,
+            'value' in transactionSwapData ? transactionSwapData : { data: '', to: '', value: '' },
             transactionQuoteData.amountOutMin,
             toTokenAmountMin.toString()
         );
@@ -113,15 +102,15 @@ export async function getMethodArgumentsAndTransactionData<
             amountOutMin,
             receiverAddress,
             providerAddress,
-            transactionData.to
+            transactionSwapData.to
         ]
     ];
     if (!from.isNative) {
-        methodArguments.push(transactionData.to);
+        methodArguments.push(transactionSwapData.to);
     }
 
     return {
         methodArguments,
-        transactionData: transactionData as T
+        transactionData: transactionSwapData
     };
 }
