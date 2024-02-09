@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -93,10 +94,11 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
 
             if (quoteConfig.tradeFee && quoteConfig.tradeFee !== '0') {
                 const nativeToken = nativeTokensList[fromBlockchain];
+                const orbiterFeeWei = new BigNumber(quoteConfig.tradeFee).multipliedBy(1_000_000);
 
                 feeInfo.provider = {
                     cryptoFee: {
-                        amount: Web3Pure.fromWei(quoteConfig.tradeFee, nativeToken.decimals),
+                        amount: Web3Pure.fromWei(orbiterFeeWei, nativeToken.decimals),
                         token: await PriceToken.createFromToken({
                             ...nativeToken
                         })

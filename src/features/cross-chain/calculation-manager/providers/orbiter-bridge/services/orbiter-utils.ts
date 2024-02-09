@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import Web3 from 'web3';
 
 import { OrbiterQuoteConfig } from '../models/orbiter-api-quote-types';
@@ -55,10 +56,22 @@ export class OrbiterUtils {
      * @returns data argument for orbiter-abi methods as hex string
      */
     public static getHexDataArg(code: string, receiverAddress: string): string {
-        const web3 = new Web3();
         const value = `c=${code}&t=${receiverAddress}`;
-        const hexString = web3.utils.toHex(value);
+        const hexString = Web3.utils.toHex(value);
 
         return hexString;
+    }
+
+    public static getTransferAmount(
+        toAmount: BigNumber,
+        decimals: number,
+        quoteConfig: OrbiterQuoteConfig
+    ): string {
+        const convertedFee = new BigNumber(quoteConfig.withholdingFee);
+        const convertedVC = Web3Pure.fromWei(quoteConfig.vc, decimals);
+        const total = toAmount.plus(convertedFee).plus(convertedVC);
+        const totalWei = Web3Pure.toWei(total, decimals);
+
+        return totalWei;
     }
 }
