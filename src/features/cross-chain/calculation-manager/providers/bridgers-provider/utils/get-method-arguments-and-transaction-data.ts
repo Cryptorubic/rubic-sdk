@@ -32,7 +32,8 @@ export async function getMethodArgumentsAndTransactionData<
     toTokenAmountMin: BigNumber,
     walletAddress: string,
     providerAddress: string,
-    options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
+    options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>,
+    skipAmountChangeCheck: boolean = false
 ): Promise<{
     methodArguments: unknown[];
     transactionData: T;
@@ -78,7 +79,7 @@ export async function getMethodArgumentsAndTransactionData<
     const transactionQuoteData = quoteResponse.data?.txData;
     const transactionSwapData = swapData.data.txData;
 
-    if (transactionQuoteData.amountOutMin) {
+    if (!skipAmountChangeCheck && transactionQuoteData.amountOutMin) {
         EvmCrossChainTrade.checkAmountChange(
             'value' in transactionSwapData ? transactionSwapData : { data: '', to: '', value: '' },
             transactionQuoteData.amountOutMin,
