@@ -57,13 +57,6 @@ export async function getMethodArgumentsAndTransactionData<
         equipmentNo: fromAddress.slice(0, 32),
         sourceFlag: 'rubic'
     };
-    const quoteRequest: BridgersQuoteRequest = {
-        fromTokenAddress,
-        toTokenAddress,
-        fromTokenAmount: fromWithoutFee.stringWeiAmount,
-        fromTokenChain: toBridgersBlockchain[from.blockchain],
-        toTokenChain: toBridgersBlockchain[to.blockchain]
-    };
 
     const swapData = await Injector.httpClient.post<BridgersSwapResponse<T>>(
         'https://sswap.swft.pro/api/sswap/swap',
@@ -73,6 +66,13 @@ export async function getMethodArgumentsAndTransactionData<
     const transactionSwapData = swapData.data.txData;
 
     if (!skipAmountChangeCheck) {
+        const quoteRequest: BridgersQuoteRequest = {
+            fromTokenAddress,
+            toTokenAddress,
+            fromTokenAmount: fromWithoutFee.stringWeiAmount,
+            fromTokenChain: toBridgersBlockchain[from.blockchain],
+            toTokenChain: toBridgersBlockchain[to.blockchain]
+        };
         const quoteResponse = await Injector.httpClient.post<BridgersQuoteResponse>(
             'https://sswap.swft.pro/api/sswap/quote',
             quoteRequest
