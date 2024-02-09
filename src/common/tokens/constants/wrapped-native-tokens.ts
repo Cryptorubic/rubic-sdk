@@ -373,5 +373,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped Zeta',
         symbol: 'WZETA',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.HOLESKY]: new Token({
+        blockchain: BLOCKCHAIN_NAME.HOLESKY,
+        address: '',
+        name: 'Wrapped ETH',
+        symbol: 'WETH',
+        decimals: 18
     })
 };
