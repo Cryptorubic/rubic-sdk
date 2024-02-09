@@ -63,7 +63,7 @@ export async function getMethodArgumentsAndTransactionData<
         swapRequest
     );
 
-    const transactionSwapData = swapData.data.txData;
+    const transactionData = swapData.data.txData;
 
     if (!skipAmountChangeCheck) {
         const quoteRequest: BridgersQuoteRequest = {
@@ -81,9 +81,7 @@ export async function getMethodArgumentsAndTransactionData<
 
         if (transactionQuoteData.amountOutMin) {
             EvmCrossChainTrade.checkAmountChange(
-                'value' in transactionSwapData
-                    ? transactionSwapData
-                    : { data: '', to: '', value: '' },
+                'value' in transactionData ? transactionData : { data: '', to: '', value: '' },
                 transactionQuoteData.amountOutMin,
                 Web3Pure.toWei(toTokenAmountMin, to.decimals)
             );
@@ -106,15 +104,15 @@ export async function getMethodArgumentsAndTransactionData<
             amountOutMin,
             receiverAddress,
             providerAddress,
-            transactionSwapData.to
+            transactionData.to
         ]
     ];
     if (!from.isNative) {
-        methodArguments.push(transactionSwapData.to);
+        methodArguments.push(transactionData.to);
     }
 
     return {
         methodArguments,
-        transactionData: transactionSwapData
+        transactionData
     };
 }
