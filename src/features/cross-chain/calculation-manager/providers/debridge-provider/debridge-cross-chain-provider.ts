@@ -129,7 +129,13 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
                 weiAmount: new BigNumber(debridgeResponse.fixFee)
             });
 
-            const gasData = await this.getGasData(options, from, to, requestParams, feeInfo);
+            const gasData = await this.getGasData(
+                { ...options, receiverAddress: fakeAddress },
+                from,
+                to,
+                requestParams,
+                feeInfo
+            );
 
             return {
                 trade: DebridgeCrossChainFactory.createTrade(

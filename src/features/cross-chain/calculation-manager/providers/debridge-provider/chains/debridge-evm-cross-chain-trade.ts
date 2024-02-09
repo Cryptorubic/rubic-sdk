@@ -92,7 +92,7 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
                         },
                         providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                         []
-                    ).getContractParams({}, true);
+                    ).getContractParams({ receiverAddress }, true);
 
                 const [proxyGasLimit, proxyGasDetails] = await Promise.all([
                     web3Public.getEstimatedGas(
