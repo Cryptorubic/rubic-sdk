@@ -8,6 +8,10 @@ import { Injector } from 'src/core/injector/injector';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
 import {
+    BridgersQuoteRequest,
+    BridgersQuoteResponse
+} from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
+import {
     BridgersSwapRequest,
     BridgersSwapResponse
 } from 'src/features/common/providers/bridgers/models/bridgers-swap-api';
@@ -15,6 +19,7 @@ import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-n
 import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { EvmBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/evm-bridgers-trade/models/evm-bridgers-transaction-data';
 import { TronBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/models/tron-bridgers-transaction-data';
+import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { MarkRequired } from 'ts-essentials';
 
@@ -27,7 +32,8 @@ export async function getMethodArgumentsAndTransactionData<
     toTokenAmountMin: BigNumber,
     walletAddress: string,
     providerAddress: string,
-    options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
+    options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>,
+    skipAmountChangeCheck: boolean = false
 ): Promise<{
     methodArguments: unknown[];
     transactionData: T;
@@ -57,6 +63,29 @@ export async function getMethodArgumentsAndTransactionData<
         swapRequest
     );
     const transactionData = swapData.data.txData;
+
+    if (!skipAmountChangeCheck) {
+        const quoteRequest: BridgersQuoteRequest = {
+            fromTokenAddress,
+            toTokenAddress,
+            fromTokenAmount: fromWithoutFee.stringWeiAmount,
+            fromTokenChain: toBridgersBlockchain[from.blockchain],
+            toTokenChain: toBridgersBlockchain[to.blockchain]
+        };
+        const quoteResponse = await Injector.httpClient.post<BridgersQuoteResponse>(
+            'https://sswap.swft.pro/api/sswap/quote',
+            quoteRequest
+        );
+        const transactionQuoteData = quoteResponse.data?.txData;
+
+        if (transactionQuoteData?.amountOutMin) {
+            EvmCrossChainTrade.checkAmountChange(
+                'value' in transactionData ? transactionData : { data: '', to: '', value: '' },
+                transactionQuoteData.amountOutMin,
+                Web3Pure.toWei(toTokenAmountMin, to.decimals)
+            );
+        }
+    }
 
     const dstTokenAddress = BlockchainsInfo.isTronBlockchainName(to.blockchain)
         ? TronWeb3Pure.addressToHex(to.address)

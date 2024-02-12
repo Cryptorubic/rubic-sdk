@@ -63,7 +63,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                         },
                         providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                         []
-                    ).getContractParams({ receiverAddress });
+                    ).getContractParams({ receiverAddress }, true);
 
                 const [proxyGasLimit, proxyGasDetails] = await Promise.all([
                     web3Public.getEstimatedGas(
@@ -93,7 +93,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                         toTokenAmountMin,
                         walletAddress,
                         providerAddress,
-                        { receiverAddress, fromAddress: walletAddress }
+                        { receiverAddress, fromAddress: walletAddress },
+                        true
                     );
 
                 const defaultGasLimit = await web3Public.getEstimatedGasByData(
@@ -242,7 +243,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected async getContractParams(
-        options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
+        options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>,
+        skipAmountChangeCheck: boolean = false
     ): Promise<ContractParams> {
         const fromWithoutFee = getFromWithoutFee(
             this.from,
@@ -256,7 +258,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                 this.toTokenAmountMin,
                 this.walletAddress,
                 this.providerAddress,
-                options
+                options,
+                skipAmountChangeCheck
             );
 
         const encodedData = transactionData.data;
