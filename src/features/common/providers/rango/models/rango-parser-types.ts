@@ -14,6 +14,8 @@ export interface RangoSwapQueryParams {
      * Indicates include/exclude mode for the swappers param
      */
     swappersGroupsExclude?: boolean;
+    /* true means sending tx only via rango-contracts */
+    contractCall?: boolean;
 }
 
 export interface RangoBestRouteQueryParams {
@@ -24,6 +26,8 @@ export interface RangoBestRouteQueryParams {
     slippage?: number;
     swapperGroups?: string;
     swappersGroupsExclude?: boolean;
+    /* true means sending tx only via rango-contracts */
+    contractCall?: boolean;
 }
 
 /**
