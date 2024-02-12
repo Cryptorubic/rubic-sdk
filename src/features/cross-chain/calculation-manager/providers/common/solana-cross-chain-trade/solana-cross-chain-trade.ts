@@ -67,10 +67,12 @@ export abstract class SolanaCrossChainTrade extends CrossChainTrade {
      * @returns txHash(srcTxHash) | never
      */
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        if (!this.isProxyTrade) {
-            return this.swapDirect(options);
-        }
-        return this.swapWithParams(options);
+        return this.swapDirect(options);
+        // There is no Rubic proxy contracts in Solana for now
+        // if (!this.isProxyTrade) {
+        //     return this.swapDirect(options);
+        // }
+        // return this.swapWithParams(options);
     }
 
     private async swapWithParams(_options: SwapTransactionOptions = {}): Promise<string | never> {

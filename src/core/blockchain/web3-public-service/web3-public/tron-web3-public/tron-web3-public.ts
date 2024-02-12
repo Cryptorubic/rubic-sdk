@@ -232,6 +232,7 @@ export class TronWeb3Public extends Web3Public {
         );
     }
 
+    // @TODO Refactoring
     public async getTokensBalances(
         userAddress: string,
         tokensAddresses: string[]
