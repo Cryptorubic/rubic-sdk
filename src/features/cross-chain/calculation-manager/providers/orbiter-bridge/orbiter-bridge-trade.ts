@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -22,7 +23,6 @@ import { GetContractParamsOptions } from '../common/models/get-contract-params-o
 import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { TradeInfo } from '../common/models/trade-info';
 import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import { ORBITER_ABI } from './constants/orbiter-contract-abi';
 import { OrbiterQuoteConfig } from './models/orbiter-api-quote-types';
 import { OrbiterGetGasDataParams, OrbiterTradeParams } from './models/orbiter-bridge-trade-types';
 import { orbiterContractAddresses } from './models/orbiter-contract-addresses';
@@ -281,10 +281,10 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
 
         const config = EvmWeb3Pure.encodeMethodCall(
             contractAddress,
-            ORBITER_ABI,
+            ERC20_TOKEN_ABI,
             methodName,
             methodArguments,
-            '0' //@TODO handle value
+            '0'
         );
 
         return {

@@ -68,7 +68,8 @@ export class OrbiterUtils {
         quoteConfig: OrbiterQuoteConfig
     ): string {
         const convertedFee = new BigNumber(quoteConfig.withholdingFee);
-        const convertedVC = Web3Pure.fromWei(quoteConfig.vc, decimals);
+        console.log(Web3Pure.fromWei(quoteConfig.vc, decimals));
+        const convertedVC = new BigNumber(quoteConfig.vc);
         const total = toAmount.plus(convertedFee).plus(convertedVC);
         const totalWei = Web3Pure.toWei(total, decimals);
 
