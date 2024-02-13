@@ -48,22 +48,23 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             let gasLimit: BigNumber | null;
             let gasDetails: GasPriceBN | BigNumber | null;
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+            const trade = new EvmBridgersCrossChainTrade(
+                {
+                    from,
+                    to,
+                    toTokenAmountMin: new BigNumber(0),
+                    feeInfo,
+                    gasData: null,
+                    slippage: 0,
+                    contractAddress: ''
+                },
+                providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
+                []
+            );
 
             if (feeInfo.rubicProxy?.fixedFee?.amount.gt(0)) {
                 const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                    await new EvmBridgersCrossChainTrade(
-                        {
-                            from,
-                            to,
-                            toTokenAmountMin: new BigNumber(0),
-                            feeInfo,
-                            gasData: null,
-                            slippage: 0,
-                            contractAddress: ''
-                        },
-                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                        []
-                    ).getContractParams({ receiverAddress }, true);
+                    await trade.getContractParams({ receiverAddress }, true);
 
                 const [proxyGasLimit, proxyGasDetails] = await Promise.all([
                     web3Public.getEstimatedGas(
@@ -94,7 +95,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                         walletAddress,
                         providerAddress,
                         { receiverAddress, fromAddress: walletAddress },
-                        true
+                        trade.checkAmountChange
                     );
 
                 const defaultGasLimit = await web3Public.getEstimatedGasByData(
@@ -218,7 +219,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                     this.toTokenAmountMin,
                     this.walletAddress,
                     this.providerAddress,
-                    options
+                    options,
+                    this.checkAmountChange
                 );
 
             await this.web3Private.trySendTransaction(transactionData.to, {
@@ -258,6 +260,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                 this.walletAddress,
                 this.providerAddress,
                 options,
+                this.checkAmountChange,
                 skipAmountChangeCheck
             );
 
