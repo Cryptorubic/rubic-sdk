@@ -294,7 +294,7 @@ export class DebridgeEvmCrossChainTrade extends EvmCrossChainTrade {
             to,
             data! as string,
             this.fromBlockchain,
-            this.fromContractAddress,
+            this.allowanceTarget,
             fixFee
         );
 

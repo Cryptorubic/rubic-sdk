@@ -6,6 +6,7 @@ import { SolanaBlockchainName } from 'src/core/blockchain/models/blockchain-name
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
+import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import {
     DlnEvmOnChainSupportedBlockchain,
@@ -24,41 +25,6 @@ export class DlnSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
         _tradeStruct: DlnTradeStruct<DlnEvmOnChainSupportedBlockchain>
     ): Promise<BigNumber | null> {
         return null;
-        // const fromBlockchain = tradeStruct.from.blockchain;
-        // const walletAddress =
-        //     Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-        // if (!walletAddress) {
-        //     return null;
-        // }
-        //
-        // const trade = DlnOnChainFactory.createTrade(
-        //     fromBlockchain,
-        //     tradeStruct,
-        //     EvmWeb3Pure.EMPTY_ADDRESS
-        // ) as DlnSolanamOnChainTrade;
-        // try {
-        //     const transactionConfig = await trade.encode({ fromAddress: walletAddress });
-        //
-        //     const web3Public = Injector.web3PublicService.getWeb3Public(
-        //         fromBlockchain
-        //     ) as EvmWeb3Public;
-        //     const gasLimit = (
-        //         await web3Public.batchEstimatedGas(walletAddress, [transactionConfig])
-        //     )[0];
-        //
-        //     if (gasLimit?.isFinite()) {
-        //         return gasLimit;
-        //     }
-        // } catch {}
-        // try {
-        //     const transactionData = await trade.getTxConfigAndCheckAmount();
-        //
-        //     if (transactionData.gas) {
-        //         return new BigNumber(transactionData.gas);
-        //     }
-        // } catch {}
-        //
-        // return null;
     }
 
     public readonly providerGateway: string;
@@ -98,7 +64,10 @@ export class DlnSolanaOnChainTrade extends AggregatorSolanaOnChainTrade {
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         await this.checkFromAddress(options.fromAddress, true);
-        await this.checkReceiverAddress(options.receiverAddress);
+        checkUnsupportedReceiverAddress(
+            options?.receiverAddress,
+            options?.fromAddress || this.walletAddress
+        );
 
         try {
             const transactionData = await this.getTxConfigAndCheckAmount(

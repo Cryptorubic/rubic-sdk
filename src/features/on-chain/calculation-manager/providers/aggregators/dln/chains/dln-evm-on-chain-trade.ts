@@ -9,6 +9,7 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
+import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import {
     DlnEvmOnChainSupportedBlockchain,
@@ -101,7 +102,10 @@ export class DlnEvmOnChainTrade extends AggregatorEvmOnChainTrade {
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         await this.checkFromAddress(options.fromAddress, true);
-        await this.checkReceiverAddress(options.receiverAddress);
+        checkUnsupportedReceiverAddress(
+            options?.receiverAddress,
+            options?.fromAddress || this.walletAddress
+        );
 
         try {
             const transactionData = await this.getTxConfigAndCheckAmount(
