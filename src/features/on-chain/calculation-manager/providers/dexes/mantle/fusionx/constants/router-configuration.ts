@@ -1,4 +1,4 @@
-import { wrappedNativeTokensList } from 'src/common/tokens';
+import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import {
     UniswapV3RouterConfiguration,

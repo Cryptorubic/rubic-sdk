@@ -1,5 +1,8 @@
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
+import { Injector } from 'src/core/injector/injector';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
@@ -7,7 +10,7 @@ import { RequiredOnChainCalculationOptions } from '../models/on-chain-calculatio
 import { OnChainProxyFeeInfo } from '../models/on-chain-proxy-fee-info';
 import { OnChainTradeType } from '../models/on-chain-trade-type';
 import { OnChainProxyService } from '../on-chain-proxy-service/on-chain-proxy-service';
-import { EvmOnChainTradeStruct } from '../on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
+import { OnChainTradeStruct } from '../on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from '../on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { OnChainTrade } from '../on-chain-trade/on-chain-trade';
 
@@ -17,15 +20,19 @@ export abstract class AggregatorOnChainProvider {
     public abstract readonly tradeType: OnChainTradeType;
 
     public abstract calculate(
-        from: PriceTokenAmount<BlockchainName>,
-        toToken: PriceToken<BlockchainName>,
+        from: PriceTokenAmount,
+        toToken: PriceToken,
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError>;
 
     protected abstract isSupportedBlockchain(blockchain: BlockchainName): boolean;
 
+    protected getWalletAddress(blockchain: Web3PrivateSupportedBlockchain): string {
+        return Injector.web3PrivateService.getWeb3PrivateByBlockchain(blockchain).address;
+    }
+
     protected abstract getGasFeeInfo(
-        tradeStruct: EvmOnChainTradeStruct,
+        tradeStruct: OnChainTradeStruct<BlockchainName>,
         providerGateway?: string
     ): Promise<GasFeeInfo | null>;
 
@@ -39,9 +46,9 @@ export abstract class AggregatorOnChainProvider {
         let fromWithoutFee: PriceTokenAmount<T>;
         let proxyFeeInfo: OnChainProxyFeeInfo | undefined;
 
-        if (fullOptions.useProxy) {
+        if (fullOptions.useProxy && BlockchainsInfo.isEvmBlockchainName(from.blockchain)) {
             proxyFeeInfo = await this.onChainProxyService.getFeeInfo(
-                from,
+                from as PriceTokenAmount<EvmBlockchainName>,
                 fullOptions.providerAddress
             );
             fromWithoutFee = getFromWithoutFee(from, proxyFeeInfo.platformFee.percent);

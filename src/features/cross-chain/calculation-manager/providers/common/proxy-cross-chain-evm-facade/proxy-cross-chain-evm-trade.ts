@@ -1,12 +1,9 @@
 import BigNumber from 'bignumber.js';
 import { UnapprovedContractError } from 'src/common/errors/proxy/unapproved-contract-error';
 import { UnapprovedMethodError } from 'src/common/errors/proxy/unapproved-method-error';
-import {
-    nativeTokensList,
-    PriceToken,
-    PriceTokenAmount,
-    wrappedNativeTokensList
-} from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -383,7 +380,10 @@ export class ProxyCrossChainEvmTrade {
         walletAddress: string,
         toChainId: number
     ): string {
-        if (toChainId === blockchainId[BLOCKCHAIN_NAME.BITCOIN]) {
+        if (
+            toChainId === blockchainId[BLOCKCHAIN_NAME.BITCOIN] ||
+            toChainId === blockchainId[BLOCKCHAIN_NAME.SOLANA]
+        ) {
             return walletAddress;
         }
 
