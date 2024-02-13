@@ -75,6 +75,7 @@ export class LifiProvider extends AggregatorOnChainProvider {
         const routeOptions: RouteOptions = {
             order: 'RECOMMENDED',
             slippage: fullOptions.slippageTolerance,
+            maxPriceImpact: 0.5,
             exchanges: {
                 deny: lifiDisabledProviders.concat('openocean')
             }
