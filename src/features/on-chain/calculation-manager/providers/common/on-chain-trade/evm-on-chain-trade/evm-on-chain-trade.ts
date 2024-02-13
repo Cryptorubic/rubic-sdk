@@ -273,7 +273,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     /**
      * Encodes trade to swap it through on-chain proxy.
      */
-    private async encodeProxy(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+    protected async encodeProxy(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getProxyContractParams(options);
         const gasParams = this.getGasParams(options);

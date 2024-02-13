@@ -102,10 +102,6 @@ export class DlnEvmOnChainTrade extends AggregatorEvmOnChainTrade {
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         await this.checkFromAddress(options.fromAddress, true);
-        checkUnsupportedReceiverAddress(
-            options?.receiverAddress,
-            options?.fromAddress || this.walletAddress
-        );
 
         try {
             const transactionData = await this.getTxConfigAndCheckAmount(
@@ -161,5 +157,18 @@ export class DlnEvmOnChainTrade extends AggregatorEvmOnChainTrade {
             }
             throw err;
         }
+    }
+
+    public async encode(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+        await this.checkFromAddress(options.fromAddress, true);
+        checkUnsupportedReceiverAddress(
+            options?.receiverAddress,
+            options?.fromAddress || this.walletAddress
+        );
+
+        if (this.useProxy) {
+            return this.encodeProxy(options);
+        }
+        return this.encodeDirect(options);
     }
 }
