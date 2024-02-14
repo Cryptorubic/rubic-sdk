@@ -13,7 +13,8 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     SCROLL_BRIDGE: 'scroll_bridge',
     TAIKO_BRIDGE: 'taiko_bridge',
     RANGO: 'rango',
-    PULSE_CHAIN_BRIDGE: 'pulsechain_bridge'
+    PULSE_CHAIN_BRIDGE: 'pulsechain_bridge',
+    LAYERZERO: 'layerzero'
 } as const;
 
 export type CrossChainTradeType =

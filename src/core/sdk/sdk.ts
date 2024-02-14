@@ -108,7 +108,7 @@ export class SDK {
     }
 
     private static createWeb3PrivateService(configuration: Configuration): Web3PrivateService {
-        return new Web3PrivateService(configuration.walletProvider);
+        return new Web3PrivateService(configuration.walletProvider || {});
     }
 
     private static createWeb3PublicService(configuration: Configuration): Web3PublicService {

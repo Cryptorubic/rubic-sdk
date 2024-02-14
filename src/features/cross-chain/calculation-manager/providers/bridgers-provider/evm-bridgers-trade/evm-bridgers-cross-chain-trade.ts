@@ -48,22 +48,23 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             let gasLimit: BigNumber | null;
             let gasDetails: GasPriceBN | BigNumber | null;
             const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+            const trade = new EvmBridgersCrossChainTrade(
+                {
+                    from,
+                    to,
+                    toTokenAmountMin: new BigNumber(0),
+                    feeInfo,
+                    gasData: null,
+                    slippage: 0,
+                    contractAddress: ''
+                },
+                providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
+                []
+            );
 
             if (feeInfo.rubicProxy?.fixedFee?.amount.gt(0)) {
                 const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                    await new EvmBridgersCrossChainTrade(
-                        {
-                            from,
-                            to,
-                            toTokenAmountMin: new BigNumber(0),
-                            feeInfo,
-                            gasData: null,
-                            slippage: 0,
-                            contractAddress: ''
-                        },
-                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                        []
-                    ).getContractParams({ receiverAddress });
+                    await trade.getContractParams({ receiverAddress }, true);
 
                 const [proxyGasLimit, proxyGasDetails] = await Promise.all([
                     web3Public.getEstimatedGas(
@@ -93,7 +94,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                         toTokenAmountMin,
                         walletAddress,
                         providerAddress,
-                        { receiverAddress, fromAddress: walletAddress }
+                        { receiverAddress, fromAddress: walletAddress },
+                        trade.checkAmountChange
                     );
 
                 const defaultGasLimit = await web3Public.getEstimatedGasByData(
@@ -193,7 +195,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
 
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -217,7 +219,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                     this.toTokenAmountMin,
                     this.walletAddress,
                     this.providerAddress,
-                    options
+                    options,
+                    this.checkAmountChange
                 );
 
             await this.web3Private.trySendTransaction(transactionData.to, {
@@ -225,7 +228,6 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                 value: transactionData.value,
                 onTransactionHash,
                 gas: gasLimit,
-                gasPrice,
                 gasPriceOptions
             });
 
@@ -242,7 +244,8 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected async getContractParams(
-        options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
+        options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>,
+        skipAmountChangeCheck: boolean = false
     ): Promise<ContractParams> {
         const fromWithoutFee = getFromWithoutFee(
             this.from,
@@ -256,7 +259,9 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                 this.toTokenAmountMin,
                 this.walletAddress,
                 this.providerAddress,
-                options
+                options,
+                this.checkAmountChange,
+                skipAmountChangeCheck
             );
 
         const encodedData = transactionData.data;

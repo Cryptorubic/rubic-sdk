@@ -1,8 +1,9 @@
 import BigNumber from 'bignumber.js';
 import { NotSupportedBlockchain } from 'src/common/errors';
-import { nativeTokensList, PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { Any } from 'src/common/utils/types';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import {
     RANGO_API_ENDPOINT,
@@ -10,7 +11,8 @@ import {
 } from 'src/features/common/providers/rango/constants/rango-api-common';
 import {
     RangoBestRouteSimulationResult,
-    RangoQuotePath
+    RangoQuotePath,
+    RangoSwapFee
 } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
 import { RangoTradeType } from 'src/features/common/providers/rango/models/rango-api-trade-types';
 import {
@@ -84,7 +86,8 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             );
 
             const { route } = await RangoCrossChainApiService.getBestRoute(bestRouteParams);
-            const { outputAmountMin, outputAmount, path } = route as RangoBestRouteSimulationResult;
+            const { outputAmountMin, outputAmount, path, fee } =
+                route as RangoBestRouteSimulationResult;
 
             const toTokenAmountMin = Web3Pure.fromWei(outputAmountMin, toToken.decimals);
             const to = new PriceTokenAmount({
@@ -98,6 +101,14 @@ export class RangoCrossChainProvider extends CrossChainProvider {
                 toToken,
                 { ...options, swapperGroups: options.rangoDisabledProviders }
             );
+
+            const cryptoFee = await this.getCryptoFee(fee, fromBlockchain);
+
+            if (cryptoFee?.amount.gt(0)) {
+                feeInfo.provider = {
+                    cryptoFee
+                };
+            }
 
             const bridgeSubtype = (
                 routePath.find(el => el.type === 'cross-chain') as CrossChainStep
@@ -186,5 +197,38 @@ export class RangoCrossChainProvider extends CrossChainProvider {
             percentFeeToken,
             useProxy
         );
+    }
+
+    private async getCryptoFee(
+        fee: RangoSwapFee[],
+        fromBlockchain: BlockchainName
+    ): Promise<{
+        amount: BigNumber;
+        token: PriceToken;
+    }> {
+        const nativeToken = nativeTokensList[fromBlockchain];
+
+        if (!fee) {
+            return {
+                amount: new BigNumber(0),
+                token: await PriceTokenAmount.createFromToken({
+                    ...nativeToken,
+                    weiAmount: new BigNumber(0)
+                })
+            };
+        }
+
+        const feeAmount = fee
+            .filter(fee => fee.expenseType === 'FROM_SOURCE_WALLET')
+            .reduce((acc, fee) => acc.plus(fee.amount), new BigNumber(0));
+        const cryptoFeeToken = await PriceTokenAmount.createFromToken({
+            ...nativeToken,
+            weiAmount: new BigNumber(feeAmount)
+        });
+
+        return {
+            amount: Web3Pure.fromWei(feeAmount, nativeToken.decimals),
+            token: cryptoFeeToken
+        };
     }
 }

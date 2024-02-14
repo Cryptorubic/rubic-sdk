@@ -134,7 +134,7 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -160,7 +160,6 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
                     data,
                     value,
                     gas: gasLimit,
-                    gasPrice,
                     gasPriceOptions
                 })
                 .then(tx => {
@@ -180,26 +179,26 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
 
         const account = this.web3Private.address;
 
-        if (this.fromBlockchain === BLOCKCHAIN_NAME.SEPOLIA) {
+        if (this.fromBlockchain === BLOCKCHAIN_NAME.HOLESKY) {
             if (this.from.isNative) {
                 methodArguments = [
                     {
                         id: 0,
                         from: account,
-                        srcChainId: blockchainId[BLOCKCHAIN_NAME.SEPOLIA],
+                        srcChainId: blockchainId[BLOCKCHAIN_NAME.HOLESKY],
                         destChainId: blockchainId[BLOCKCHAIN_NAME.TAIKO],
-                        user: account,
+                        owner: account,
                         to: account,
                         refundTo: account,
                         value: this.from.stringWeiAmount,
-                        fee: '1350000000900000',
+                        fee: '9000000',
                         gasLimit: '140000',
                         data: '0x',
                         memo: ''
                     }
                 ];
 
-                fee = '1350000000900000';
+                fee = '9000000';
             } else {
                 methodArguments = [
                     {
@@ -223,8 +222,8 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
                         id: 0,
                         from: account,
                         srcChainId: blockchainId[BLOCKCHAIN_NAME.TAIKO],
-                        destChainId: blockchainId[BLOCKCHAIN_NAME.SEPOLIA],
-                        user: account,
+                        destChainId: blockchainId[BLOCKCHAIN_NAME.HOLESKY],
+                        owner: account,
                         to: account,
                         refundTo: account,
                         value: this.from.stringWeiAmount,
@@ -239,7 +238,7 @@ export class TaikoBridgeTrade extends EvmCrossChainTrade {
             } else {
                 methodArguments = [
                     {
-                        destChainId: blockchainId[BLOCKCHAIN_NAME.SEPOLIA],
+                        destChainId: blockchainId[BLOCKCHAIN_NAME.HOLESKY],
                         to: account,
                         token: this.from.address,
                         amount: this.from.stringWeiAmount,

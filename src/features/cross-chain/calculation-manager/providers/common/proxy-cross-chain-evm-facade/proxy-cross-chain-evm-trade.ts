@@ -1,12 +1,9 @@
 import BigNumber from 'bignumber.js';
 import { UnapprovedContractError } from 'src/common/errors/proxy/unapproved-contract-error';
 import { UnapprovedMethodError } from 'src/common/errors/proxy/unapproved-method-error';
-import {
-    nativeTokensList,
-    PriceToken,
-    PriceTokenAmount,
-    wrappedNativeTokensList
-} from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
 import { TokenBaseStruct } from 'src/common/tokens/models/token-base-struct';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -239,13 +236,17 @@ export class ProxyCrossChainEvmTrade {
         swapOptions: GetContractParamsOptions,
         tradeParams: ProxyBridgeParams
     ): BridgeParams {
-        const receiverAddress = swapOptions?.receiverAddress || tradeParams.walletAddress;
         const toChainId = blockchainId[tradeParams.toTokenAmount.blockchain] || 9999;
         const fromToken = tradeParams.srcChainTrade
             ? tradeParams.srcChainTrade.toTokenAmountMin
             : tradeParams.fromTokenAmount;
         const hasSwapBeforeBridge = tradeParams.srcChainTrade !== null;
         const toAddress = tradeParams.toAddress || tradeParams.toTokenAmount.address;
+        const receiverAddress = ProxyCrossChainEvmTrade.getReceiverAddress(
+            swapOptions?.receiverAddress,
+            tradeParams.walletAddress,
+            toChainId
+        );
 
         return [
             EvmWeb3Pure.randomHex(32),
@@ -372,5 +373,20 @@ export class ProxyCrossChainEvmTrade {
         if (!isMethodApproved) {
             throw new UnapprovedMethodError(method, routerAddress);
         }
+    }
+
+    private static getReceiverAddress(
+        receiverAddress: string | undefined,
+        walletAddress: string,
+        toChainId: number
+    ): string {
+        if (
+            toChainId === blockchainId[BLOCKCHAIN_NAME.BITCOIN] ||
+            toChainId === blockchainId[BLOCKCHAIN_NAME.SOLANA]
+        ) {
+            return walletAddress;
+        }
+
+        return receiverAddress || walletAddress;
     }
 }

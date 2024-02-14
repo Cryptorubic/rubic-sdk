@@ -22,14 +22,6 @@ export interface SwapTransactionOptions {
      */
     receiverAddress?: string;
 
-    // gasPriceOptions: SingleGasPrice | EIP1559Gas
-
-    /**
-     * @deprecated Use gasPriceOptions instead.
-     * Evm-Transaction gas price.
-     */
-    gasPrice?: string;
-
     /**
      * Transaction gas price options.
      */

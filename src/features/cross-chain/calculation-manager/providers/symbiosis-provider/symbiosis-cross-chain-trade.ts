@@ -328,7 +328,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
 
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -349,7 +349,6 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
                 value,
                 onTransactionHash,
                 gas: gasLimit,
-                gasPrice,
                 gasPriceOptions
             });
 
@@ -418,7 +417,11 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             ...this.swappingParams,
             from: walletAddress,
             to: receiverAddress || walletAddress,
-            revertableAddress: receiverAddress || walletAddress
+            revertableAddress: this.getRevertableAddress(
+                receiverAddress,
+                walletAddress,
+                this.to.blockchain
+            )
         };
 
         const tradeData = await SymbiosisApiService.getCrossChainSwapTx(params);
@@ -429,12 +432,24 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             to: tradeData.tx.to!
         };
         if (!skipAmountChangeCheck) {
-            EvmCrossChainTrade.checkAmountChange(
+            this.checkAmountChange(
                 config,
                 tradeData.tokenAmountOut.amount,
                 this.to.stringWeiAmount
             );
         }
         return config;
+    }
+
+    private getRevertableAddress(
+        receiverAddress: string | undefined,
+        walletAddress: string,
+        toBlockchain: BlockchainName
+    ): string {
+        if (toBlockchain === BLOCKCHAIN_NAME.BITCOIN) {
+            return walletAddress;
+        }
+
+        return receiverAddress || walletAddress;
     }
 }

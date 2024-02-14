@@ -1,3 +1,4 @@
+import { Connection } from '@solana/web3.js';
 import cloneDeep from 'lodash.clonedeep';
 import { HealthcheckError, RubicSdkError, TimeoutError } from 'src/common/errors';
 import pTimeout from 'src/common/utils/p-timeout';
@@ -7,6 +8,7 @@ import {
     BlockchainName,
     EVM_BLOCKCHAIN_NAME,
     EvmBlockchainName,
+    SolanaBlockchainName,
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { CreateWeb3Public } from 'src/core/blockchain/web3-public-service/models/create-web3-public-proxy';
@@ -16,6 +18,7 @@ import {
     web3PublicSupportedBlockchains
 } from 'src/core/blockchain/web3-public-service/models/web3-public-storage';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
+import { SolanaWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/solana-web3-public/solana-web3-public';
 import { TronWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/tron-web3-public/tron-web3-public';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
 import { RpcProviders } from 'src/core/sdk/models/rpc-provider';
@@ -44,6 +47,7 @@ export class Web3PublicService {
 
     public getWeb3Public(blockchainName: EvmBlockchainName): EvmWeb3Public;
     public getWeb3Public(blockchainName: TronBlockchainName): TronWeb3Public;
+    public getWeb3Public(blockchainName: SolanaBlockchainName): SolanaWeb3Public;
     public getWeb3Public(blockchainName: Web3PublicSupportedBlockchain): Web3Public;
     public getWeb3Public(blockchainName: BlockchainName): never;
     public getWeb3Public(blockchainName: BlockchainName) {
@@ -74,7 +78,8 @@ export class Web3PublicService {
                     (blockchainName?: EvmBlockchainName) => EvmWeb3Public
                 >
             ),
-            [BLOCKCHAIN_NAME.TRON]: this.createTronWeb3PublicProxy.bind(this)
+            [BLOCKCHAIN_NAME.TRON]: this.createTronWeb3PublicProxy.bind(this),
+            [BLOCKCHAIN_NAME.SOLANA]: this.createSolanaWeb3PublicProxy.bind(this)
         };
     }
 
@@ -105,6 +110,15 @@ export class Web3PublicService {
         return this.createWeb3PublicProxy(BLOCKCHAIN_NAME.TRON, tronWeb3Public);
     }
 
+    private createSolanaWeb3PublicProxy(): SolanaWeb3Public {
+        const rpcProvider = this.rpcProvider[BLOCKCHAIN_NAME.SOLANA]!;
+        const solanaWeb3Public = new SolanaWeb3Public(
+            new Connection(rpcProvider.rpcList[0]!, 'confirmed')
+        );
+
+        return this.createWeb3PublicProxy(BLOCKCHAIN_NAME.SOLANA, solanaWeb3Public);
+    }
+
     private createWeb3PublicProxy<T extends Web3Public = Web3Public>(
         blockchainName: Web3PublicSupportedBlockchain,
         web3Public: T
@@ -131,8 +145,7 @@ export class Web3PublicService {
                         try {
                             const result = await pTimeout(
                                 callMethod(),
-                                rpcProvider.mainRpcTimeout ||
-                                    Web3PublicService.mainRpcDefaultTimeout
+                                Web3PublicService.mainRpcDefaultTimeout
                             );
                             if (prop === 'healthCheck' && result === false) {
                                 throw new HealthcheckError();

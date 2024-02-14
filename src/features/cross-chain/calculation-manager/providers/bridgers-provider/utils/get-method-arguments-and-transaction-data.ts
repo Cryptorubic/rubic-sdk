@@ -2,11 +2,16 @@ import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
+import {
+    BridgersQuoteRequest,
+    BridgersQuoteResponse
+} from 'src/features/common/providers/bridgers/models/bridgers-quote-api';
 import {
     BridgersSwapRequest,
     BridgersSwapResponse
@@ -27,7 +32,13 @@ export async function getMethodArgumentsAndTransactionData<
     toTokenAmountMin: BigNumber,
     walletAddress: string,
     providerAddress: string,
-    options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>
+    options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>,
+    checkAmountFn: (
+        transactionRequest: EvmEncodeConfig,
+        newWeiAmount: string,
+        oldWeiAmount: string
+    ) => void,
+    skipAmountChangeCheck: boolean = false
 ): Promise<{
     methodArguments: unknown[];
     transactionData: T;
@@ -57,6 +68,29 @@ export async function getMethodArgumentsAndTransactionData<
         swapRequest
     );
     const transactionData = swapData.data.txData;
+
+    if (!skipAmountChangeCheck) {
+        const quoteRequest: BridgersQuoteRequest = {
+            fromTokenAddress,
+            toTokenAddress,
+            fromTokenAmount: fromWithoutFee.stringWeiAmount,
+            fromTokenChain: toBridgersBlockchain[from.blockchain],
+            toTokenChain: toBridgersBlockchain[to.blockchain]
+        };
+        const quoteResponse = await Injector.httpClient.post<BridgersQuoteResponse>(
+            'https://sswap.swft.pro/api/sswap/quote',
+            quoteRequest
+        );
+        const transactionQuoteData = quoteResponse.data?.txData;
+
+        if (transactionQuoteData?.amountOutMin) {
+            checkAmountFn(
+                'value' in transactionData ? transactionData : { data: '', to: '', value: '' },
+                transactionQuoteData.amountOutMin,
+                Web3Pure.toWei(toTokenAmountMin, to.decimals)
+            );
+        }
+    }
 
     const dstTokenAddress = BlockchainsInfo.isTronBlockchainName(to.blockchain)
         ? TronWeb3Pure.addressToHex(to.address)

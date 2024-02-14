@@ -23,12 +23,7 @@ export function deadlineMinutesTimestamp(deadlineMinutes: number): number {
 export function getGasOptions(
     options: SwapTransactionOptions | EvmTransactionOptions
 ): EIP1559Gas | SingleGasPrice | Record<never, never> {
-    const { gasPriceOptions, gasPrice } = options;
-
-    if (gasPrice && !gasPriceOptions)
-        return {
-            gasPrice: Web3Private.stringifyAmount(gasPrice)
-        };
+    const { gasPriceOptions } = options;
 
     if (!gasPriceOptions) return {};
 

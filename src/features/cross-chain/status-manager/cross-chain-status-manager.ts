@@ -18,7 +18,7 @@ import {
     TxStatus
 } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
-import { changenowApiKey } from 'src/features/common/providers/changenow/constants/changenow-api-key';
+import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { RANGO_SWAP_STATUS } from 'src/features/common/providers/rango/models/rango-api-status-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { XY_API_ENDPOINT } from 'src/features/common/providers/xy/constants/xy-api-params';
@@ -38,7 +38,6 @@ import {
     XFER_STATUS,
     XFER_STATUS_CODE
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
-import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
 import {
     LIFI_SWAP_STATUS,
     LifiSwapStatus
@@ -47,10 +46,7 @@ import { SquidrouterCrossChainProvider } from 'src/features/cross-chain/calculat
 import { SYMBIOSIS_SWAP_STATUS } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swap-status';
 import { CrossChainCbridgeManager } from 'src/features/cross-chain/cbridge-manager/cross-chain-cbridge-manager';
 import { MULTICHAIN_STATUS_MAPPING } from 'src/features/cross-chain/status-manager/constants/multichain-status-mapping';
-import {
-    CHANGENOW_API_STATUS,
-    ChangenowApiResponse
-} from 'src/features/cross-chain/status-manager/models/changenow-api-response';
+import { CHANGENOW_API_STATUS } from 'src/features/cross-chain/status-manager/models/changenow-api-response';
 import { CrossChainStatus } from 'src/features/cross-chain/status-manager/models/cross-chain-status';
 import { CrossChainTradeData } from 'src/features/cross-chain/status-manager/models/cross-chain-trade-data';
 import { MultichainStatusApiResponse } from 'src/features/cross-chain/status-manager/models/multichain-status-api-response';
@@ -61,14 +57,12 @@ import { SQUIDROUTER_TRANSFER_STATUS } from 'src/features/cross-chain/status-man
 import {
     BtcStatusResponse,
     DE_BRIDGE_API_STATE_STATUS,
-    DeBridgeFilteredListApiResponse,
-    DeBridgeOrderApiResponse,
-    DeBridgeOrderApiStatusResponse,
     GetDstTxDataFn,
     SymbiosisApiResponse
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
 import { XyApiResponse } from 'src/features/cross-chain/status-manager/models/xy-api-response';
 
+import { ChangeNowCrossChainApiService } from '../calculation-manager/providers/changenow-provider/services/changenow-cross-chain-api-service';
 import { RangoCrossChainApiService } from '../calculation-manager/providers/rango-provider/services/rango-cross-chain-api-service';
 import { TAIKO_API_STATUS, TaikoApiResponse } from './models/taiko-api-response';
 
@@ -87,13 +81,14 @@ export class CrossChainStatusManager {
         [CROSS_CHAIN_TRADE_TYPE.XY]: this.getXyDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CELER_BRIDGE]: this.getCelerBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.CHANGENOW]: this.getChangenowDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getStargateDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.STARGATE]: this.getLayerZeroDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.ARBITRUM]: this.getArbitrumBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SQUIDROUTER]: this.getSquidrouterDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.SCROLL_BRIDGE]: this.getScrollBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.TAIKO_BRIDGE]: this.getTaikoBridgeDstSwapStatus,
         [CROSS_CHAIN_TRADE_TYPE.RANGO]: this.getRangoDstSwapStatus,
-        [CROSS_CHAIN_TRADE_TYPE.PULSE_CHAIN_BRIDGE]: this.getPulseChainDstSwapStatus
+        [CROSS_CHAIN_TRADE_TYPE.PULSE_CHAIN_BRIDGE]: this.getPulseChainDstSwapStatus,
+        [CROSS_CHAIN_TRADE_TYPE.LAYERZERO]: this.getLayerZeroDstSwapStatus
     };
 
     /**
@@ -170,7 +165,7 @@ export class CrossChainStatusManager {
      * @param data Trade data.
      * @returns Cross-chain transaction status and hash.
      */
-    private async getStargateDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
+    private async getLayerZeroDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         const lzPackage = await import('@layerzerolabs/scan-client');
         const client = lzPackage.createClient('mainnet');
         const scanResponse = await client.getMessagesBySrcTxHash(data.srcTxHash);
@@ -328,9 +323,7 @@ export class CrossChainStatusManager {
      */
     private async getDebridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
-            const { orderIds } = await this.httpClient.get<DeBridgeFilteredListApiResponse>(
-                `${DebridgeCrossChainProvider.apiEndpoint}/tx/${data.srcTxHash}/order-ids`
-            );
+            const { orderIds } = await DlnApiService.fetchCrossChainOrdersByHash(data.srcTxHash);
 
             if (!orderIds.length) {
                 return {
@@ -345,9 +338,7 @@ export class CrossChainStatusManager {
                 hash: null
             };
 
-            const { status } = await this.httpClient.get<DeBridgeOrderApiStatusResponse>(
-                `${DebridgeCrossChainProvider.apiEndpoint}/order/${orderId}/status`
-            );
+            const { status } = await DlnApiService.fetchCrossChainStatus(orderId);
 
             if (
                 status === DE_BRIDGE_API_STATE_STATUS.FULFILLED ||
@@ -355,9 +346,7 @@ export class CrossChainStatusManager {
                 status === DE_BRIDGE_API_STATE_STATUS.CLAIMEDUNLOCK
             ) {
                 const { fulfilledDstEventMetadata } =
-                    await this.httpClient.get<DeBridgeOrderApiResponse>(
-                        `https://stats-api.dln.trade/api/Orders/${orderId}`
-                    );
+                    await DlnApiService.fetchCrossChainEventMetaData(orderId);
 
                 dstTxData.hash = fulfilledDstEventMetadata.transactionHash.stringValue;
                 dstTxData.status = TX_STATUS.SUCCESS;
@@ -384,14 +373,10 @@ export class CrossChainStatusManager {
      * @returns Cross-chain transaction status.
      */
     private getBridgersDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
-        if (!data.amountOutMin) {
-            throw new RubicSdkError('field amountOutMin is not set.');
-        }
         return getBridgersTradeStatus(
             data.srcTxHash,
             data.fromBlockchain as BridgersCrossChainSupportedBlockchain,
-            'rubic',
-            data.amountOutMin
+            'rubic'
         );
     }
 
@@ -518,12 +503,8 @@ export class CrossChainStatusManager {
             throw new RubicSdkError('Must provide changenow trade id');
         }
         try {
-            const { status, payoutHash } = await this.httpClient.get<ChangenowApiResponse>(
-                'https://api.changenow.io/v2/exchange/by-id',
-                {
-                    params: { id: data.changenowId },
-                    headers: { 'x-changenow-api-key': changenowApiKey }
-                }
+            const { status, payoutHash } = await ChangeNowCrossChainApiService.getTxStatus(
+                data.changenowId
             );
 
             if (
@@ -653,7 +634,7 @@ export class CrossChainStatusManager {
             throw new RubicSdkError('Must specify sender account');
         }
         const { items } = await Injector.httpClient.get<TaikoApiResponse>(
-            `https://relayer.jolnir.taiko.xyz/events?address=${data.sender}&msgHash=${data.taikoTransactionId}&event=MessageSent`
+            `https://relayer.katla.taiko.xyz/events?address=${data.sender}&msgHash=${data.taikoTransactionId}&event=MessageSent`
         );
 
         if (!items[0]) {

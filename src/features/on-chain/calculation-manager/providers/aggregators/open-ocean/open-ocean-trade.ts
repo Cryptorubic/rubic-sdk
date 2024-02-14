@@ -5,7 +5,8 @@ import {
     RubicSdkError,
     SwapRequestError
 } from 'src/common/errors';
-import { nativeTokensList, PriceToken } from 'src/common/tokens';
+import { PriceToken } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { parseError } from 'src/common/utils/errors';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
@@ -27,11 +28,11 @@ import { OpenoceanSwapQuoteResponse } from 'src/features/on-chain/calculation-ma
 import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-trade-struct';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
-import { AggregatorOnChainTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
+import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { ARBITRUM_GAS_PRICE } from './constants/arbitrum-gas-price';
 
-export class OpenOceanTrade extends AggregatorOnChainTrade {
+export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
     /** @internal */
     public static async getGasLimit(
         openOceanTradeStruct: OpenOceanTradeStruct
