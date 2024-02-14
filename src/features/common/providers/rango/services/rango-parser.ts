@@ -42,7 +42,8 @@ export class RangoCommonParser {
             amount: amountParam,
             ...(options.slippageTolerance && { slippage: options.slippageTolerance * 100 }),
             ...(swapperGroups?.length && { swapperGroups }),
-            swappersGroupsExclude: options?.swappersGroupsExclude ?? true
+            swappersGroupsExclude: options?.swappersGroupsExclude ?? true,
+            contractCall: true
         };
     }
 
@@ -78,7 +79,8 @@ export class RangoCommonParser {
             slippage,
             toAddress,
             ...(swapperGroups?.length && { swapperGroups }),
-            swappersGroupsExclude: options?.swappersGroupsExclude ?? true
+            swappersGroupsExclude: options?.swappersGroupsExclude ?? true,
+            contractCall: true
         };
     }
 
