@@ -8,6 +8,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
+import { bridgersContractAddresses } from 'src/features/common/providers/bridgers/models/bridgers-contract-addresses';
 import {
     BridgersQuoteRequest,
     BridgersQuoteResponse
@@ -67,7 +68,7 @@ export async function getMethodArgumentsAndTransactionData<
         'https://sswap.swft.pro/api/sswap/swap',
         swapRequest
     );
-    const transactionData = swapData.data.txData;
+    const transactionData = swapData.data?.txData;
 
     if (!skipAmountChangeCheck) {
         const quoteRequest: BridgersQuoteRequest = {
@@ -98,6 +99,8 @@ export async function getMethodArgumentsAndTransactionData<
     const receiverAddress = BlockchainsInfo.isTronBlockchainName(to.blockchain)
         ? TronWeb3Pure.addressToHex(options.receiverAddress)
         : options.receiverAddress;
+    const contractAddress = transactionData?.to || bridgersContractAddresses[from.blockchain];
+
     const methodArguments: unknown[] = [
         'native:bridgers',
         [
@@ -108,15 +111,15 @@ export async function getMethodArgumentsAndTransactionData<
             amountOutMin,
             receiverAddress,
             providerAddress,
-            transactionData.to
+            contractAddress
         ]
     ];
     if (!from.isNative) {
-        methodArguments.push(transactionData.to);
+        methodArguments.push(contractAddress);
     }
 
     return {
         methodArguments,
-        transactionData
+        transactionData: { ...transactionData, to: contractAddress }
     };
 }
