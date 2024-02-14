@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { MaxAmountError, MinAmountError, NotSupportedTokensError } from 'src/common/errors';
-import { nativeTokensList, PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import {
     BLOCKCHAIN_NAME,

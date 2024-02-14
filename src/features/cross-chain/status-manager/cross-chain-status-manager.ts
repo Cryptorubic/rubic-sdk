@@ -18,6 +18,7 @@ import {
     TxStatus
 } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
+import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { RANGO_SWAP_STATUS } from 'src/features/common/providers/rango/models/rango-api-status-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { XY_API_ENDPOINT } from 'src/features/common/providers/xy/constants/xy-api-params';
@@ -37,7 +38,6 @@ import {
     XFER_STATUS,
     XFER_STATUS_CODE
 } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-status-response';
-import { DebridgeCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/debridge-provider/debridge-cross-chain-provider';
 import {
     LIFI_SWAP_STATUS,
     LifiSwapStatus
@@ -57,9 +57,6 @@ import { SQUIDROUTER_TRANSFER_STATUS } from 'src/features/cross-chain/status-man
 import {
     BtcStatusResponse,
     DE_BRIDGE_API_STATE_STATUS,
-    DeBridgeFilteredListApiResponse,
-    DeBridgeOrderApiResponse,
-    DeBridgeOrderApiStatusResponse,
     GetDstTxDataFn,
     SymbiosisApiResponse
 } from 'src/features/cross-chain/status-manager/models/statuses-api';
@@ -326,9 +323,7 @@ export class CrossChainStatusManager {
      */
     private async getDebridgeDstSwapStatus(data: CrossChainTradeData): Promise<TxStatusData> {
         try {
-            const { orderIds } = await this.httpClient.get<DeBridgeFilteredListApiResponse>(
-                `${DebridgeCrossChainProvider.apiEndpoint}/tx/${data.srcTxHash}/order-ids`
-            );
+            const { orderIds } = await DlnApiService.fetchCrossChainOrdersByHash(data.srcTxHash);
 
             if (!orderIds.length) {
                 return {
@@ -343,9 +338,7 @@ export class CrossChainStatusManager {
                 hash: null
             };
 
-            const { status } = await this.httpClient.get<DeBridgeOrderApiStatusResponse>(
-                `${DebridgeCrossChainProvider.apiEndpoint}/order/${orderId}/status`
-            );
+            const { status } = await DlnApiService.fetchCrossChainStatus(orderId);
 
             if (
                 status === DE_BRIDGE_API_STATE_STATUS.FULFILLED ||
@@ -353,9 +346,7 @@ export class CrossChainStatusManager {
                 status === DE_BRIDGE_API_STATE_STATUS.CLAIMEDUNLOCK
             ) {
                 const { fulfilledDstEventMetadata } =
-                    await this.httpClient.get<DeBridgeOrderApiResponse>(
-                        `https://stats-api.dln.trade/api/Orders/${orderId}`
-                    );
+                    await DlnApiService.fetchCrossChainEventMetaData(orderId);
 
                 dstTxData.hash = fulfilledDstEventMetadata.transactionHash.stringValue;
                 dstTxData.status = TX_STATUS.SUCCESS;

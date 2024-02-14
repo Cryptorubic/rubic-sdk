@@ -69,5 +69,6 @@ export const blockchainId: Record<BlockchainName, number> = {
     [BLOCKCHAIN_NAME.HOLESKY]: 17000,
     // Non EVN blockchains
     [BLOCKCHAIN_NAME.BITCOIN]: 5555,
-    [BLOCKCHAIN_NAME.FILECOIN]: 314
+    [BLOCKCHAIN_NAME.FILECOIN]: 314,
+    [BLOCKCHAIN_NAME.SOLANA]: 7565164
 };
