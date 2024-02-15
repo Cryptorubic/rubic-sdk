@@ -133,7 +133,7 @@ export class XyDexTrade extends EvmOnChainTrade {
             xyAnalyzeStatusCode(tradeData.errorCode, tradeData.errorMsg);
         }
 
-        EvmOnChainTrade.checkAmountChange(
+        this.checkAmountChange(
             tradeData.tx!,
             tradeData.route.dstQuoteTokenAmount,
             this.to.stringWeiAmount
