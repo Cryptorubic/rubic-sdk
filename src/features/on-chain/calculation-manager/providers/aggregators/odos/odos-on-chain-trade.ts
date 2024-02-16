@@ -10,15 +10,15 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { AggregatorEvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 
 import { ON_CHAIN_TRADE_TYPE } from '../../common/models/on-chain-trade-type';
-import { AggregatorOnChainTrade } from '../../common/on-chain-aggregator/aggregator-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { OdosBestRouteRequestBody } from './models/odos-api-best-route-types';
 import { OdosOnChainTradeStruct } from './models/odos-on-chain-trade-types';
 import { OdosOnChainApiService } from './services/odos-on-chain-api-service';
 
-export class OdosOnChainTrade extends AggregatorOnChainTrade {
+export class OdosOnChainTrade extends AggregatorEvmOnChainTrade {
     /* @internal */
     public static async getGasLimit(
         tradeStruct: OdosOnChainTradeStruct,

@@ -374,23 +374,25 @@ export class OnChainManager {
                 return !this.isDisabledAggregator(options.disabledProviders, aggregator.tradeType);
             });
 
-        const promises = availableAggregators.map(aggregator => {
-            const promise =
-                aggregator.tradeType === ON_CHAIN_TRADE_TYPE.LIFI
-                    ? this.calculateLifiTrade(from, to, options)
-                    : pTimeout(
-                          aggregator.calculate(
-                              from as PriceTokenAmount<EvmBlockchainName>,
-                              to as PriceTokenAmount<EvmBlockchainName>,
-                              options as RequiredOnChainCalculationOptions
-                          ),
-                          options.timeout
-                      );
-
+        return availableAggregators.map(aggregator => {
+            const promise = this.getCalcPromise(from, to, options, aggregator);
             return this.handleTradePromise(promise, aggregator);
         });
+    }
 
-        return promises;
+    private getCalcPromise(
+        from: PriceTokenAmount,
+        to: PriceToken,
+        options: RequiredOnChainManagerCalculationOptions,
+        aggregator: AggregatorOnChainProvider
+    ): Promise<OnChainTrade | OnChainTradeError> {
+        if (aggregator.tradeType === ON_CHAIN_TRADE_TYPE.LIFI) {
+            return this.calculateLifiTrade(from, to, options);
+        }
+        return pTimeout(
+            aggregator.calculate(from, to, options as RequiredOnChainCalculationOptions),
+            options.timeout
+        );
     }
 
     private handleTradePromise(

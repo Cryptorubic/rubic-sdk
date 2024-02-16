@@ -8,7 +8,8 @@ export const deBridgeCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.AVALANCHE,
     BLOCKCHAIN_NAME.LINEA,
     BLOCKCHAIN_NAME.OPTIMISM,
-    BLOCKCHAIN_NAME.BASE
+    BLOCKCHAIN_NAME.BASE,
+    BLOCKCHAIN_NAME.SOLANA
 ] as const;
 
 export type DeBridgeCrossChainSupportedBlockchain =

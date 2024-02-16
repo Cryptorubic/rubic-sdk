@@ -150,7 +150,7 @@ export class ArbitrumRbcBridgeTrade extends EvmCrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -176,7 +176,6 @@ export class ArbitrumRbcBridgeTrade extends EvmCrossChainTrade {
                 value,
                 onTransactionHash,
                 gas: gasLimit,
-                gasPrice,
                 gasPriceOptions
             });
 
@@ -282,7 +281,7 @@ export class ArbitrumRbcBridgeTrade extends EvmCrossChainTrade {
         const proof = await messageReader.getOutboxProof(l2Provider);
         const l2network = await getL2Network(42161);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
                 onConfirm(hash);
@@ -307,7 +306,6 @@ export class ArbitrumRbcBridgeTrade extends EvmCrossChainTrade {
             {
                 onTransactionHash,
                 gas: gasLimit,
-                gasPrice,
                 gasPriceOptions
             }
         );
@@ -340,7 +338,7 @@ export class ArbitrumRbcBridgeTrade extends EvmCrossChainTrade {
         );
         await web3Private.checkBlockchainCorrect(BLOCKCHAIN_NAME.ARBITRUM);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
                 onConfirm(hash);
@@ -355,7 +353,6 @@ export class ArbitrumRbcBridgeTrade extends EvmCrossChainTrade {
             {
                 onTransactionHash,
                 gas: gasLimit,
-                gasPrice,
                 gasPriceOptions
             }
         );

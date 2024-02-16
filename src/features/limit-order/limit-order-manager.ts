@@ -278,7 +278,6 @@ export class LimitOrderManager {
                 data: callData,
                 onTransactionHash,
                 gas: options.gasLimit,
-                gasPrice: options.gasPrice,
                 gasPriceOptions: options.gasPriceOptions
             });
             return transactionHash!;
@@ -342,7 +341,6 @@ export class LimitOrderManager {
                 data: callData,
                 onTransactionHash,
                 gas: options.gasLimit,
-                gasPrice: options.gasPrice,
                 gasPriceOptions: options.gasPriceOptions
             });
             return transactionHash!;

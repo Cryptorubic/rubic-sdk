@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
-import { nativeTokensList, PriceTokenAmount } from 'src/common/tokens';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';

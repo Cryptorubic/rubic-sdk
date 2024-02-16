@@ -111,7 +111,8 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
                     this.toTokenAmountMin,
                     this.walletAddress,
                     this.providerAddress,
-                    options
+                    options,
+                    this.checkAmountChange
                 );
 
             await this.web3Private.executeContractMethod(
@@ -147,7 +148,8 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
                 this.toTokenAmountMin,
                 this.walletAddress,
                 this.providerAddress,
-                options
+                options,
+                this.checkAmountChange
             );
 
         const encodedData = TronWeb3Pure.encodeMethodSignature(

@@ -199,7 +199,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
             CROSS_CHAIN_TRADE_TYPE.CHANGENOW
         );
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -220,7 +220,6 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
                 await this.web3Private.trySendTransaction(payinAddress, {
                     value: this.from.weiAmount,
                     onTransactionHash,
-                    gasPrice,
                     gasPriceOptions
                 });
             } else {
@@ -232,7 +231,6 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
                     {
                         onTransactionHash,
                         gas: gasLimit,
-                        gasPrice,
                         gasPriceOptions
                     }
                 );
@@ -290,7 +288,7 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
 
         if (!skipAmountChangeCheck) {
             // Mock EvmConfig cause CN doesn't provide tx-data
-            EvmCrossChainTrade.checkAmountChange(
+            this.checkAmountChange(
                 { data: '', to: '', value: '' },
                 toAmountWei,
                 this.to.stringWeiAmount

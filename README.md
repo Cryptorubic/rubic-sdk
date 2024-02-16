@@ -39,7 +39,8 @@
         "https": require.resolve("https-browserify"),
         "zlib": false,
         "stream": require.resolve("stream-browserify"),
-        "crypto": require.resolve("crypto-browserify")
+        "crypto": require.resolve("crypto-browserify"),
+        "zlib": require.resolve('browserify-zlib')
       }
       ```
 

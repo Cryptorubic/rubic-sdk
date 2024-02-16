@@ -5,8 +5,9 @@ import {
     NotSupportedTokensError,
     RubicSdkError
 } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount, wrappedNativeTokensList } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
 import { PriceTokenAmountStruct } from 'src/common/tokens/price-token-amount';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';

@@ -2,11 +2,13 @@ import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
+import { bridgersContractAddresses } from 'src/features/common/providers/bridgers/models/bridgers-contract-addresses';
 import {
     BridgersQuoteRequest,
     BridgersQuoteResponse
@@ -19,7 +21,6 @@ import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-n
 import { BridgersCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { EvmBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/evm-bridgers-trade/models/evm-bridgers-transaction-data';
 import { TronBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/models/tron-bridgers-transaction-data';
-import { EvmCrossChainTrade } from 'src/features/cross-chain/calculation-manager/providers/common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { MarkRequired } from 'ts-essentials';
 
@@ -33,6 +34,11 @@ export async function getMethodArgumentsAndTransactionData<
     walletAddress: string,
     providerAddress: string,
     options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>,
+    checkAmountFn: (
+        transactionRequest: EvmEncodeConfig,
+        newWeiAmount: string,
+        oldWeiAmount: string
+    ) => void,
     skipAmountChangeCheck: boolean = false
 ): Promise<{
     methodArguments: unknown[];
@@ -62,7 +68,7 @@ export async function getMethodArgumentsAndTransactionData<
         'https://sswap.swft.pro/api/sswap/swap',
         swapRequest
     );
-    const transactionData = swapData.data.txData;
+    const transactionData = swapData.data?.txData;
 
     if (!skipAmountChangeCheck) {
         const quoteRequest: BridgersQuoteRequest = {
@@ -79,7 +85,7 @@ export async function getMethodArgumentsAndTransactionData<
         const transactionQuoteData = quoteResponse.data?.txData;
 
         if (transactionQuoteData?.amountOutMin) {
-            EvmCrossChainTrade.checkAmountChange(
+            checkAmountFn(
                 'value' in transactionData ? transactionData : { data: '', to: '', value: '' },
                 transactionQuoteData.amountOutMin,
                 Web3Pure.toWei(toTokenAmountMin, to.decimals)
@@ -93,6 +99,8 @@ export async function getMethodArgumentsAndTransactionData<
     const receiverAddress = BlockchainsInfo.isTronBlockchainName(to.blockchain)
         ? TronWeb3Pure.addressToHex(options.receiverAddress)
         : options.receiverAddress;
+    const contractAddress = transactionData?.to || bridgersContractAddresses[from.blockchain];
+
     const methodArguments: unknown[] = [
         'native:bridgers',
         [
@@ -103,15 +111,15 @@ export async function getMethodArgumentsAndTransactionData<
             amountOutMin,
             receiverAddress,
             providerAddress,
-            transactionData.to
+            contractAddress
         ]
     ];
     if (!from.isNative) {
-        methodArguments.push(transactionData.to);
+        methodArguments.push(contractAddress);
     }
 
     return {
         methodArguments,
-        transactionData
+        transactionData: { ...transactionData, to: contractAddress }
     };
 }
