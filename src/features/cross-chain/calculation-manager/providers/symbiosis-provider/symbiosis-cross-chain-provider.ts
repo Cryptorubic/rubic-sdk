@@ -147,7 +147,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 tokenAmount: Web3Pure.fromWei(0, toToken.decimals)
             });
 
-            disabledTrade = this.getDisabledTrade(from, mockTo, swapParams, feeInfo);
+            disabledTrade = this.getEmptyTrade(from, mockTo, swapParams, feeInfo);
 
             const { tokenAmountOut, inTradeType, outTradeType, tx, approveTo, route } =
                 await SymbiosisApiService.getCrossChainSwapTx(swapParams);
@@ -316,7 +316,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         return null;
     }
 
-    private getDisabledTrade(
+    private getEmptyTrade(
         from: PriceTokenAmount<EvmBlockchainName>,
         to: PriceTokenAmount<BlockchainName>,
         swapParams: SymbiosisSwappingParams,
