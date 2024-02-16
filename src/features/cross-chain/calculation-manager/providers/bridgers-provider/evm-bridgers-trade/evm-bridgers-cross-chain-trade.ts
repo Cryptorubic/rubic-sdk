@@ -8,6 +8,7 @@ import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
+import { bridgersContractAddresses } from 'src/features/common/providers/bridgers/models/bridgers-contract-addresses';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { BridgersEvmCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
@@ -55,8 +56,7 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
                     toTokenAmountMin: new BigNumber(0),
                     feeInfo,
                     gasData: null,
-                    slippage: 0,
-                    contractAddress: ''
+                    slippage: 0
                 },
                 providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
                 []
@@ -150,12 +150,10 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
 
     private readonly slippage: number;
 
-    private readonly contractAddress: string;
-
     protected get fromContractAddress(): string {
         return this.isProxyTrade
             ? rubicProxyContractAddress[this.from.blockchain].gateway
-            : this.contractAddress;
+            : bridgersContractAddresses[this.from.blockchain];
     }
 
     protected get methodName(): string {
@@ -170,7 +168,6 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
             feeInfo: FeeInfo;
             gasData: GasData;
             slippage: number;
-            contractAddress: string;
         },
         providerAddress: string,
         routePath: RubicStep[]
@@ -184,7 +181,6 @@ export class EvmBridgersCrossChainTrade extends EvmCrossChainTrade {
         this.gasData = crossChainTrade.gasData;
         this.priceImpact = this.from.calculatePriceImpactPercent(this.to);
         this.slippage = crossChainTrade.slippage;
-        this.contractAddress = crossChainTrade.contractAddress;
     }
 
     protected async swapDirect(
