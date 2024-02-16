@@ -30,12 +30,12 @@ export class OrbiterApiService {
         fromDecimals
     }: OrbiterGetToAmountParams): BigNumber {
         const digit = fromDecimals === 18 ? 8 : 5;
-        const orbiterFee = fromAmount
+        const tradingFee = fromAmount
             .multipliedBy(config.tradeFee)
             .dividedBy(ORBITER_BASE_FEE)
             .decimalPlaces(digit, BigNumber.ROUND_UP);
 
-        return fromAmount.minus(orbiterFee);
+        return fromAmount.minus(tradingFee).minus(config.withholdingFee);
     }
 
     public static async getTxStatus(txHash: string): Promise<TxStatusData> {

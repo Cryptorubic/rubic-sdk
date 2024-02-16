@@ -88,7 +88,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             } else {
                 const { data, value, to } = await new OrbiterBridgeTrade(
                     tradeParams
-                ).callOrbiterContract(receiverAddress);
+                ).callOrbiterContract();
 
                 const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
                     data,
@@ -170,7 +170,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -181,17 +181,13 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
 
         // eslint-disable-next-line no-useless-catch
         try {
-            const { data, to, value } = await this.callOrbiterContract(
-                options.receiverAddress,
-                options.directTransaction
-            );
+            const { data, to, value } = await this.callOrbiterContract(options.directTransaction);
 
             await this.web3Private.trySendTransaction(to, {
                 data,
                 value,
                 onTransactionHash,
                 gas: gasLimit,
-                gasPrice,
                 gasPriceOptions
             });
 
@@ -208,7 +204,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.callOrbiterContract(receiverAddress, options.directTransaction);
+        } = await this.callOrbiterContract(options.directTransaction);
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
@@ -254,7 +250,6 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
     }
 
     private async callOrbiterContract(
-        receiverAddress?: string,
         transactionConfig?: EvmEncodeConfig
     ): Promise<EvmEncodeConfig> {
         if (transactionConfig) {
@@ -264,26 +259,22 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
                 value: transactionConfig.value
             };
         }
-        const toWalletAddress = receiverAddress || this.walletAddress;
         const contractAddress = this.quoteConfig.endpoint;
-        const dataArgument = OrbiterUtils.getHexDataArg(this.quoteConfig.vc, toWalletAddress);
-        const value = OrbiterUtils.getTransferAmount(
-            this.from.tokenAmount,
-            this.from.decimals,
-            this.quoteConfig
-        );
+        const value = OrbiterUtils.getTransferAmount(this.from.stringWeiAmount, this.quoteConfig);
 
-        //@TODO find correct method
-        const methodName = this.from.isNative ? 'transferToken' : 'transfer';
-        const methodArguments = this.from.isNative
-            ? [this.from.address, contractAddress, value, dataArgument]
-            : [contractAddress, value];
+        if (this.from.isNative) {
+            return {
+                data: '0x',
+                to: contractAddress,
+                value
+            };
+        }
 
         const config = EvmWeb3Pure.encodeMethodCall(
-            contractAddress,
+            this.from.address,
             ERC20_TOKEN_ABI,
-            methodName,
-            methodArguments,
+            'transfer',
+            [contractAddress, value],
             '0'
         );
 
@@ -292,12 +283,6 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             value: config.value,
             data: config.data
         };
-    }
-
-    /**
-     * @deprecated */
-    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
-        return fromUsd.dividedBy(this.to.tokenAmount);
     }
 
     public getTradeInfo(): TradeInfo {
