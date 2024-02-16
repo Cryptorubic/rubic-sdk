@@ -32,8 +32,8 @@ export class OrbiterUtils {
             return (
                 conf.srcChain === fromChainId &&
                 conf.tgtChain === toChainId &&
-                conf.srcToken.toLowerCase() === from.address &&
-                conf.tgtToken.toLowerCase() === to.address
+                conf.srcToken.toLowerCase() === from.address.toLowerCase() &&
+                conf.tgtToken.toLowerCase() === to.address.toLowerCase()
             );
         });
 
