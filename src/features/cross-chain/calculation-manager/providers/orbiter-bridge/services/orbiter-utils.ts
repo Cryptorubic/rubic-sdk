@@ -73,8 +73,10 @@ export class OrbiterUtils {
         config: OrbiterQuoteConfig
     ): BigNumber {
         const digit = from.decimals === 18 ? 8 : 5;
+        /* added extra half tradeFee amount to supress rounding */
+        const tradeFeeWithExtraMargin = new BigNumber(config.tradeFee).plus(+config.tradeFee * 0.5);
         const tradingFee = from.tokenAmount
-            .multipliedBy(config.tradeFee)
+            .multipliedBy(tradeFeeWithExtraMargin)
             .dividedBy(ORBITER_BASE_FEE)
             .decimalPlaces(digit, BigNumber.ROUND_UP);
 
