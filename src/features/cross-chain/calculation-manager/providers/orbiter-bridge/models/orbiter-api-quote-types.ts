@@ -1,5 +1,3 @@
-import BigNumber from 'bignumber.js';
-
 import { OrbiterResponse } from './orbiter-api-common-types';
 
 export type OrbiterQuoteResponse = OrbiterResponse<{
@@ -8,12 +6,6 @@ export type OrbiterQuoteResponse = OrbiterResponse<{
 }>;
 
 export type OrbiterQuoteConfigsResponse = OrbiterResponse<OrbiterQuoteConfig[]>;
-
-export interface OrbiterGetToAmountParams {
-    fromAmount: BigNumber;
-    config: OrbiterQuoteConfig;
-    fromDecimals: number;
-}
 
 export interface OrbiterQuoteConfig {
     line: string;

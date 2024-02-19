@@ -1,16 +1,15 @@
 import BigNumber from 'bignumber.js';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { TX_STATUS } from 'src/core/blockchain/web3-public-service/web3-public/models/tx-status';
 import { Injector } from 'src/core/injector/injector';
 import { TxStatusData } from 'src/features/common/status-manager/models/tx-status-data';
 
-import { ORBITER_API_ENDPOINT, ORBITER_BASE_FEE } from '../constants/orbiter-api';
+import { ORBITER_API_ENDPOINT } from '../constants/orbiter-api';
 import { ORBITER_OP_STATUS, ORBITER_STATUS } from '../models/orbiter-api-common-types';
-import {
-    OrbiterGetToAmountParams,
-    OrbiterQuoteConfig,
-    OrbiterQuoteConfigsResponse
-} from '../models/orbiter-api-quote-types';
+import { OrbiterQuoteConfig, OrbiterQuoteConfigsResponse } from '../models/orbiter-api-quote-types';
 import { OrbiterStatusResponse } from '../models/orbiter-api-status-types';
+import { OrbiterUtils } from './orbiter-utils';
 
 export class OrbiterApiService {
     private static dealerId: string | null = null;
@@ -24,18 +23,13 @@ export class OrbiterApiService {
         return result;
     }
 
-    public static calculateAmount({
-        fromAmount,
-        config,
-        fromDecimals
-    }: OrbiterGetToAmountParams): BigNumber {
-        const digit = fromDecimals === 18 ? 8 : 5;
-        const tradingFee = fromAmount
-            .multipliedBy(config.tradeFee)
-            .dividedBy(ORBITER_BASE_FEE)
-            .decimalPlaces(digit, BigNumber.ROUND_UP);
+    public static calculateAmount(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        config: OrbiterQuoteConfig
+    ): BigNumber {
+        const tradingFee = OrbiterUtils.getTradingFee(from, config);
 
-        return fromAmount.minus(tradingFee).minus(config.withholdingFee);
+        return from.tokenAmount.minus(tradingFee).minus(config.withholdingFee);
     }
 
     public static async getTxStatus(txHash: string): Promise<TxStatusData> {

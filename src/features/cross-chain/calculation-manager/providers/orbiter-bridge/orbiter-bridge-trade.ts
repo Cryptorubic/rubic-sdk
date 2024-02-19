@@ -260,7 +260,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             };
         }
         const contractAddress = this.quoteConfig.endpoint;
-        const value = OrbiterUtils.getTransferAmount(this.from.stringWeiAmount, this.quoteConfig);
+        const value = OrbiterUtils.getTransferAmount(this.from, this.quoteConfig);
 
         if (this.from.isNative) {
             return {
