@@ -10,7 +10,7 @@ import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constan
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import Web3 from 'web3';
 
-import { ORBITER_BASE_FEE } from '../constants/orbiter-api';
+import { ORBITER_FEE_DIVIDER } from '../constants/orbiter-api';
 import { OrbiterQuoteConfig } from '../models/orbiter-api-quote-types';
 import { OrbiterGetQuoteConfigParams } from '../models/orbiter-utils-types';
 
@@ -73,11 +73,11 @@ export class OrbiterUtils {
         config: OrbiterQuoteConfig
     ): BigNumber {
         const digit = from.decimals === 18 ? 8 : 5;
-        /* added extra half tradeFee amount to supress rounding */
-        const tradeFeeWithExtraMargin = new BigNumber(config.tradeFee).plus(+config.tradeFee * 0.5);
+        const extraRatio = 50;
         const tradingFee = from.tokenAmount
-            .multipliedBy(tradeFeeWithExtraMargin)
-            .dividedBy(ORBITER_BASE_FEE)
+            .multipliedBy(config.tradeFee)
+            .plus(extraRatio)
+            .dividedBy(ORBITER_FEE_DIVIDER)
             .decimalPlaces(digit, BigNumber.ROUND_UP);
 
         return tradingFee;
