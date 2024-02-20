@@ -40,8 +40,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         feeInfo,
         routePath,
         swapQueryParams,
-        bridgeSubtype,
-        receiverAddress
+        bridgeSubtype
     }: RangoGetGasDataParams): Promise<GasData | null> {
         const fromBlockchain = fromToken.blockchain;
         const walletAddress = swapQueryParams.fromAddress;
@@ -96,7 +95,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             } else {
                 const { data, value, to } = await new RangoCrossChainTrade(
                     tradeParams
-                ).getTransactionRequest(receiverAddress, undefined, true);
+                ).getTransactionRequest(swapQueryParams.toAddress, undefined, true);
 
                 const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
                     data,
@@ -144,9 +143,9 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
     public readonly gasData: GasData;
 
     public readonly priceImpact: number | null;
+    /** */
 
     private readonly slippage: number;
-    /** */
 
     /**
      * @description UUID returned by rango-api to track transaction status in getRangoDstSwapStatus
@@ -319,7 +318,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact || null,
+            priceImpact: this.priceImpact,
             slippage: this.slippage * 100,
             routePath: this.routePath
         };
