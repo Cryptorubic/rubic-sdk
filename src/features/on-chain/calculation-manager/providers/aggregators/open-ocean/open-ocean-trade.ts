@@ -149,6 +149,7 @@ export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
         const swapQuoteResponse = await Injector.httpClient.get<OpenoceanSwapQuoteResponse>(
             apiUrl,
             {
+                headers: { apikey: 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4' },
                 params: {
                     chain: openOceanBlockchainName[
                         this.from.blockchain as OpenoceanOnChainSupportedBlockchain
