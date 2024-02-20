@@ -139,6 +139,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         path: Token[];
         data: string | null;
     }> {
+        const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
         const isDefaultWrappedAddress = options.wrappedAddress === oneinchApiParams.nativeAddress;
         const isNative = from.isNative || from.address === oneinchApiParams.nativeAddress;
         const fromTokenAddress =
@@ -182,7 +183,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
                 params: {
                     ...quoteTradeParams.params,
                     slippage: (options.slippageTolerance * 100).toString(),
-                    from: this.walletAddress,
+                    from: this.walletAddress || fakeAddress,
                     disableEstimate: options.gasCalculation === 'disabled'
                 }
             };
