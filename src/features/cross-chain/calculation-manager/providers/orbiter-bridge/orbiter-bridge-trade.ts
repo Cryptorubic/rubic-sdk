@@ -14,16 +14,12 @@ import { SwapTransactionOptions } from 'src/features/common/models/swap-transact
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { convertGasDataToBN } from '../../utils/convert-gas-price';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
-import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
-import { gatewayRubicCrossChainAbi } from '../common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from '../common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from '../common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE, BridgeType } from '../common/models/bridge-type';
 import { FeeInfo } from '../common/models/fee-info';
-import { GetContractParamsOptions } from '../common/models/get-contract-params-options';
 import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { TradeInfo } from '../common/models/trade-info';
-import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { OrbiterQuoteConfig } from './models/orbiter-api-quote-types';
 import { OrbiterGetGasDataParams, OrbiterTradeParams } from './models/orbiter-bridge-trade-types';
 import { orbiterContractAddresses } from './models/orbiter-contract-addresses';
@@ -36,7 +32,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         fromToken,
         toToken,
         feeInfo,
-        receiverAddress,
+        // receiverAddress,
         providerAddress,
         quoteConfig
     }: OrbiterGetGasDataParams): Promise<GasData | null> {
@@ -67,25 +63,23 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             } as OrbiterTradeParams;
 
             if (feeInfo.rubicProxy?.fixedFee?.amount.gt(0)) {
-                const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                    await new OrbiterBridgeTrade(tradeParams).getContractParams({
-                        receiverAddress
-                    });
-
-                const [proxyGasLimit, proxyGasDetails] = await Promise.all([
-                    web3Public.getEstimatedGas(
-                        contractAbi,
-                        contractAddress,
-                        methodName,
-                        methodArguments,
-                        walletAddress,
-                        value
-                    ),
-                    convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
-                ]);
-
-                gasLimit = proxyGasLimit;
-                gasDetails = proxyGasDetails;
+                // const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                //     await new OrbiterBridgeTrade(tradeParams).getContractParams({
+                //         receiverAddress
+                //     });
+                // const [proxyGasLimit, proxyGasDetails] = await Promise.all([
+                //     web3Public.getEstimatedGas(
+                //         contractAbi,
+                //         contractAddress,
+                //         methodName,
+                //         methodArguments,
+                //         walletAddress,
+                //         value
+                //     ),
+                //     convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(fromBlockchain))
+                // ]);
+                // gasLimit = proxyGasLimit;
+                // gasDetails = proxyGasDetails;
             } else {
                 const { data, value, to } = await new OrbiterBridgeTrade(
                     tradeParams
@@ -103,6 +97,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
                 gasDetails = defaultGasDetails;
             }
 
+            //@ts-ignore
             if (!gasLimit?.isFinite()) {
                 return null;
             }
@@ -110,6 +105,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
             return {
                 gasLimit: increasedGasLimit,
+                //@ts-ignore
                 ...gasDetails
             };
         } catch (err) {
