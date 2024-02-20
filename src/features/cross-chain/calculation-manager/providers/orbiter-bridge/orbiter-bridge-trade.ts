@@ -198,7 +198,9 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         }
     }
 
-    //@TODO Handle proxy contracts when orbiter adds reciver-address support
+    /*
+     *@TODO Handle proxy contracts when orbiter adds reciver-address support
+     */
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         throw new RubicSdkError("Orbiter doesn't support proxy contracts!");
         const receiverAddress = options?.receiverAddress || this.walletAddress;

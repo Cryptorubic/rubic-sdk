@@ -1,11 +1,5 @@
 import BigNumber from 'bignumber.js';
-import {
-    MaxAmountError,
-    MinAmountError,
-    NotSupportedTokensError,
-    RubicSdkError,
-    TooLowAmountError
-} from 'src/common/errors';
+import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount as RubicTokenAmount } from 'src/common/tokens';
 import { TokenStruct } from 'src/common/tokens/token';
 import {
@@ -25,10 +19,7 @@ import { CalculationResult } from 'src/features/cross-chain/calculation-manager/
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
-import {
-    errorCode,
-    SymbiosisError
-} from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-error';
+import { SymbiosisError } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-error';
 import { SymbiosisSwappingParams } from 'src/features/cross-chain/calculation-manager/providers/symbiosis-provider/models/symbiosis-swapping-params';
 import {
     SymbiosisToken,
@@ -86,6 +77,8 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 tradeType: this.type
             };
         }
+
+        let disabledTrade = {} as SymbiosisCrossChainTrade;
 
         try {
             const fromAddress =
@@ -149,6 +142,13 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                 deadline
             };
 
+            const mockTo = new PriceTokenAmount({
+                ...toToken.asStruct,
+                tokenAmount: Web3Pure.fromWei(0, toToken.decimals)
+            });
+
+            disabledTrade = this.getEmptyTrade(from, mockTo, swapParams, feeInfo);
+
             const { tokenAmountOut, inTradeType, outTradeType, tx, approveTo, route } =
                 await SymbiosisApiService.getCrossChainSwapTx(swapParams);
 
@@ -194,41 +194,15 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
             };
         } catch (err: unknown) {
             let rubicSdkError = CrossChainProvider.parseError(err);
-            const symbiosisMessage = (err as { error: SymbiosisError })?.error?.message;
-
-            if (symbiosisMessage?.includes('$') || symbiosisMessage?.includes('Min amount')) {
-                const symbiosisError = (err as { error: SymbiosisError }).error;
-                rubicSdkError =
-                    symbiosisError.code === errorCode.AMOUNT_LESS_THAN_FEE ||
-                    symbiosisError.code === 400
-                        ? new TooLowAmountError()
-                        : await this.checkMinMaxErrors(symbiosisError);
-            } else if (symbiosisMessage) {
-                rubicSdkError = new RubicSdkError(symbiosisMessage);
-            }
+            const symbiosisErr = err as SymbiosisError;
+            const symbiosisSdkError = this.handleMinAmountError(symbiosisErr);
 
             return {
-                trade: null,
-                error: rubicSdkError,
+                trade: symbiosisSdkError ? disabledTrade : null,
+                error: symbiosisSdkError || rubicSdkError,
                 tradeType: this.type
             };
         }
-    }
-
-    private async checkMinMaxErrors(err: SymbiosisError): Promise<RubicSdkError> {
-        if (err.code === errorCode.AMOUNT_TOO_LOW) {
-            const index = err.message!.lastIndexOf('$');
-            const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
-            return new MinAmountError(transitTokenAmount, 'USDC');
-        }
-
-        if (err?.code === errorCode.AMOUNT_TOO_HIGH) {
-            const index = err.message!.lastIndexOf('$');
-            const transitTokenAmount = new BigNumber(err.message!.substring(index + 1));
-            return new MaxAmountError(transitTokenAmount, 'USDC');
-        }
-
-        return new RubicSdkError(err.message);
     }
 
     protected async getFeeInfo(
@@ -325,5 +299,53 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         }
 
         return receiverAddress || fromAddress;
+    }
+
+    private handleMinAmountError(err: SymbiosisError): RubicSdkError | null {
+        const msg = err.error.message || '';
+
+        if (msg.includes('too low')) {
+            const [, minAmount] = msg.toLowerCase().split('min amount: ') as [string, string];
+            const minAmountBN = new BigNumber(minAmount);
+            const isFeeInUSDC = minAmountBN.gt(0.5);
+            const symbol = isFeeInUSDC ? 'USDC' : 'WETH';
+
+            return new MinAmountError(minAmountBN, symbol);
+        }
+
+        return null;
+    }
+
+    private getEmptyTrade(
+        from: PriceTokenAmount<EvmBlockchainName>,
+        to: PriceTokenAmount<BlockchainName>,
+        swapParams: SymbiosisSwappingParams,
+        feeInfo: FeeInfo
+    ): SymbiosisCrossChainTrade {
+        return new SymbiosisCrossChainTrade(
+            {
+                from,
+                to: to,
+                gasData: null,
+                priceImpact: null,
+                slippage: 0,
+                swapParams,
+                feeInfo,
+                transitAmount: from.tokenAmount,
+                tradeType: { in: undefined, out: undefined },
+                contractAddresses: {
+                    providerRouter: '',
+                    providerGateway: ''
+                }
+            },
+            '',
+            [
+                {
+                    type: 'cross-chain',
+                    provider: CROSS_CHAIN_TRADE_TYPE.SYMBIOSIS,
+                    path: [from, to]
+                }
+            ]
+        );
     }
 }
