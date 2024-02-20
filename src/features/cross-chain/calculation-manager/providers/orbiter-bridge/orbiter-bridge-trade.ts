@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
@@ -197,7 +198,9 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         }
     }
 
+    //@TODO Handle proxy contracts when orbiter adds reciver-address support
     public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
+        throw new RubicSdkError("Orbiter doesn't support proxy contracts!");
         const receiverAddress = options?.receiverAddress || this.walletAddress;
 
         const {
