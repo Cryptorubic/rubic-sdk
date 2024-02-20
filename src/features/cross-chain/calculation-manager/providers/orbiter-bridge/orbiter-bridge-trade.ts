@@ -201,57 +201,57 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
     /*
      *@TODO Handle proxy contracts when orbiter adds reciver-address support
      */
-    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
+    public async getContractParams(): Promise<ContractParams> {
         throw new RubicSdkError("Orbiter doesn't support proxy contracts!");
-        const receiverAddress = options?.receiverAddress || this.walletAddress;
+        // const receiverAddress = options?.receiverAddress || this.walletAddress;
 
-        const {
-            data,
-            value: providerValue,
-            to: providerRouter
-        } = await this.callOrbiterContract(options.directTransaction);
+        // const {
+        //     data,
+        //     value: providerValue,
+        //     to: providerRouter
+        // } = await this.callOrbiterContract(options.directTransaction);
 
-        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
-            walletAddress: receiverAddress,
-            fromTokenAmount: this.from,
-            toTokenAmount: this.to,
-            srcChainTrade: null,
-            providerAddress: this.providerAddress,
-            type: `native:${this.bridgeType}`,
-            fromAddress: this.walletAddress
-        });
+        // const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
+        //     walletAddress: receiverAddress,
+        //     fromTokenAmount: this.from,
+        //     toTokenAmount: this.to,
+        //     srcChainTrade: null,
+        //     providerAddress: this.providerAddress,
+        //     type: `native:${this.bridgeType}`,
+        //     fromAddress: this.walletAddress
+        // });
 
-        const extraNativeFee = this.quoteConfig.tradeFee;
+        // const extraNativeFee = this.quoteConfig.tradeFee;
 
-        const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
-            providerRouter,
-            data!,
-            this.from.blockchain,
-            providerRouter,
-            extraNativeFee
-        );
+        // const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
+        //     providerRouter,
+        //     data!,
+        //     this.from.blockchain,
+        //     providerRouter,
+        //     extraNativeFee
+        // );
 
-        const methodArguments = [bridgeData, providerData];
-        const value = this.getSwapValue(providerValue);
+        // const methodArguments = [bridgeData, providerData];
+        // const value = this.getSwapValue(providerValue);
 
-        const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
-            rubicProxyContractAddress[this.from.blockchain].router,
-            evmCommonCrossChainAbi,
-            this.methodName,
-            methodArguments,
-            value
-        );
+        // const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
+        //     rubicProxyContractAddress[this.from.blockchain].router,
+        //     evmCommonCrossChainAbi,
+        //     this.methodName,
+        //     methodArguments,
+        //     value
+        // );
 
-        const sendingToken = this.from.isNative ? [] : [this.from.address];
-        const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
+        // const sendingToken = this.from.isNative ? [] : [this.from.address];
+        // const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
 
-        return {
-            contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
-            contractAbi: gatewayRubicCrossChainAbi,
-            methodName: 'startViaRubic',
-            methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
-            value
-        };
+        // return {
+        //     contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
+        //     contractAbi: gatewayRubicCrossChainAbi,
+        //     methodName: 'startViaRubic',
+        //     methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
+        //     value
+        // };
     }
 
     private async callOrbiterContract(
