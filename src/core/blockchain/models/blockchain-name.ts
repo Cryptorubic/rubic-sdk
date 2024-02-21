@@ -57,7 +57,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     MANTLE: 'MANTLE',
     MANTA_PACIFIC: 'MANTA_PACIFIC',
     SCROLL: 'SCROLL',
-    ZETACHAIN: 'ZETACHAIN'
+    ZETACHAIN: 'ZETACHAIN',
+    KROMA: 'KROMA'
 } as const;
 
 export const BLOCKCHAIN_NAME = {
