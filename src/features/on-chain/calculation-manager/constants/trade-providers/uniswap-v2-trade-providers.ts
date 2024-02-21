@@ -29,6 +29,7 @@ import { UniSwapV2GoerliProvider } from 'src/features/on-chain/calculation-manag
 import { SushiSwapHarmonyProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-provider';
 import { TradeHarmonySwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/harmony/trader-harmony/trader-harmony-provider';
 import { ViperSwapHarmonyProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/harmony/viper-swap-harmony/viper-swap-harmony-provider';
+import { SpookySwapHorizenEonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/horizen-eon/spooky-swap-horizen-eon/spooky-swap-horizen-eon-provider';
 import { ElkProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/elk/elk-provider';
 import { JupiterSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/jupiter-swap/jupiter-swap-provider';
 import { PhotonSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/photon-swap/photon-swap-provider';
@@ -136,7 +137,9 @@ export const UniswapV2TradeProviders = [
     QuickSwapMumbaiProvider,
     // Fuji
     JoeFujiProvider,
-    PangolinFujiProvider
+    PangolinFujiProvider,
     // Scroll
     // UniSwapV2ScrollSepoliaProvider
+    // horizen eon
+    SpookySwapHorizenEonProvider
 ] as const;
