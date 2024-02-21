@@ -380,5 +380,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped ETH',
         symbol: 'WETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.KROMA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.KROMA,
+        address: '0x4200000000000000000000000000000000000001',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
     })
 };

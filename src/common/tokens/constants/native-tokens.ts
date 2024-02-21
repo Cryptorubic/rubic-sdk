@@ -397,5 +397,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Solana',
         symbol: 'SOL',
         decimals: 9
+    }),
+    [BLOCKCHAIN_NAME.KROMA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.KROMA,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
     })
 };
