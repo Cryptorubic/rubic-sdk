@@ -1,7 +1,8 @@
 import { FeeCost, LiFi, LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
-import { nativeTokensList, PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -28,11 +29,11 @@ import {
     LIFI_BRIDGE_TYPES,
     LifiBridgeTypes
 } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-bridge-types';
+import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/constants/lifi-providers';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { lifiProviders } from 'src/features/on-chain/calculation-manager/providers/lifi/constants/lifi-providers';
 
 export class LifiCrossChainProvider extends CrossChainProvider {
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
@@ -118,7 +119,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             (el: FeeCost & { included?: boolean }) => el?.included === false
         );
         const nativeToken = await PriceToken.createFromToken(nativeTokensList[from.blockchain]);
-        if (providerFee) {
+        if (providerFee && providerFee.amount !== '0') {
             feeInfo.provider = {
                 cryptoFee: {
                     amount: Web3Pure.fromWei(

@@ -174,8 +174,7 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                             toTokenAmountMin,
                             feeInfo,
                             gasData,
-                            slippage: options.slippageTolerance,
-                            contractAddress: transactionData.contractAddress
+                            slippage: options.slippageTolerance
                         },
                         options.providerAddress,
                         await this.getRoutePath(from, to)

@@ -2,31 +2,52 @@ import { AbiItem } from 'web3-utils';
 
 export const taikoNativeBridgeABI: AbiItem[] = [
     {
-        stateMutability: 'payable',
-        type: 'function',
         inputs: [
             {
-                name: 'message',
-                internalType: 'struct IBridge.Message',
-                type: 'tuple',
                 components: [
-                    { name: 'id', internalType: 'uint256', type: 'uint256' },
-                    { name: 'from', internalType: 'address', type: 'address' },
-                    { name: 'srcChainId', internalType: 'uint256', type: 'uint256' },
-                    { name: 'destChainId', internalType: 'uint256', type: 'uint256' },
-                    { name: 'user', internalType: 'address', type: 'address' },
-                    { name: 'to', internalType: 'address', type: 'address' },
-                    { name: 'refundTo', internalType: 'address', type: 'address' },
-                    { name: 'value', internalType: 'uint256', type: 'uint256' },
-                    { name: 'fee', internalType: 'uint256', type: 'uint256' },
-                    { name: 'gasLimit', internalType: 'uint256', type: 'uint256' },
-                    { name: 'data', internalType: 'bytes', type: 'bytes' },
-                    { name: 'memo', internalType: 'string', type: 'string' }
-                ]
+                    { internalType: 'uint128', name: 'id', type: 'uint128' },
+                    { internalType: 'address', name: 'from', type: 'address' },
+                    { internalType: 'uint64', name: 'srcChainId', type: 'uint64' },
+                    { internalType: 'uint64', name: 'destChainId', type: 'uint64' },
+                    { internalType: 'address', name: 'owner', type: 'address' },
+                    { internalType: 'address', name: 'to', type: 'address' },
+                    { internalType: 'address', name: 'refundTo', type: 'address' },
+                    { internalType: 'uint256', name: 'value', type: 'uint256' },
+                    { internalType: 'uint256', name: 'fee', type: 'uint256' },
+                    { internalType: 'uint256', name: 'gasLimit', type: 'uint256' },
+                    { internalType: 'bytes', name: 'data', type: 'bytes' },
+                    { internalType: 'string', name: 'memo', type: 'string' }
+                ],
+                internalType: 'struct IBridge.Message',
+                name: 'message',
+                type: 'tuple'
             }
         ],
         name: 'sendMessage',
-        outputs: [{ name: 'msgHash', internalType: 'bytes32', type: 'bytes32' }]
+        outputs: [
+            { internalType: 'bytes32', name: 'msgHash', type: 'bytes32' },
+            {
+                components: [
+                    { internalType: 'uint128', name: 'id', type: 'uint128' },
+                    { internalType: 'address', name: 'from', type: 'address' },
+                    { internalType: 'uint64', name: 'srcChainId', type: 'uint64' },
+                    { internalType: 'uint64', name: 'destChainId', type: 'uint64' },
+                    { internalType: 'address', name: 'owner', type: 'address' },
+                    { internalType: 'address', name: 'to', type: 'address' },
+                    { internalType: 'address', name: 'refundTo', type: 'address' },
+                    { internalType: 'uint256', name: 'value', type: 'uint256' },
+                    { internalType: 'uint256', name: 'fee', type: 'uint256' },
+                    { internalType: 'uint256', name: 'gasLimit', type: 'uint256' },
+                    { internalType: 'bytes', name: 'data', type: 'bytes' },
+                    { internalType: 'string', name: 'memo', type: 'string' }
+                ],
+                internalType: 'struct IBridge.Message',
+                name: '_message',
+                type: 'tuple'
+            }
+        ],
+        stateMutability: 'payable',
+        type: 'function'
     }
 ];
 

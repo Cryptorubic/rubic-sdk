@@ -1,11 +1,13 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError, TimeoutError } from 'src/common/errors';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { Cache } from 'src/common/utils/decorators';
 import pTimeout from 'src/common/utils/p-timeout';
 import {
     HEALTHCHECK,
     isBlockchainHealthcheckAvailable
 } from 'src/core/blockchain/constants/healthcheck';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3PrimitiveType } from 'src/core/blockchain/models/web3-primitive-type';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
@@ -16,6 +18,7 @@ import { EvmMulticallResponse } from 'src/core/blockchain/web3-public-service/we
 import { RpcResponse } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/rpc-response';
 import { ContractMulticallResponse } from 'src/core/blockchain/web3-public-service/web3-public/models/contract-multicall-response';
 import { MethodData } from 'src/core/blockchain/web3-public-service/web3-public/models/method-data';
+import { SupportedTokenField } from 'src/core/blockchain/web3-public-service/web3-public/models/supported-token-field';
 import {
     TX_STATUS,
     TxStatus
@@ -160,16 +163,22 @@ export class EvmWeb3Public extends Web3Public {
                     })
                 );
             } catch (err: unknown) {
-                if (err instanceof Error) {
-                    if (err.message.includes('unsigned transaction')) {
-                        return this.multicallContractsMethodsByOne(contractAbi, contractsData);
-                    }
+                if (this.allowMultipleRequests(err)) {
+                    return this.multicallContractsMethodsByOne(contractAbi, contractsData);
                 }
+
                 throw err;
             }
         }
 
         return this.multicallContractsMethodsByOne(contractAbi, contractsData);
+    }
+
+    private allowMultipleRequests(err: unknown): boolean {
+        return (
+            (err instanceof Error && err.message.includes('unsigned transaction')) ||
+            this.blockchainName === BLOCKCHAIN_NAME.ZETACHAIN
+        );
     }
 
     /**
@@ -555,5 +564,93 @@ export class EvmWeb3Public extends Web3Public {
                 }
             );
         });
+    }
+
+    public async getTokensBalances(
+        userAddress: string,
+        tokensAddresses: string[]
+    ): Promise<BigNumber[]> {
+        const indexOfNativeCoin = tokensAddresses.findIndex(EvmWeb3Pure.isNativeAddress);
+        const promises = [];
+
+        if (indexOfNativeCoin !== -1) {
+            tokensAddresses.splice(indexOfNativeCoin, 1);
+            promises[1] = this.getBalance(userAddress);
+        }
+
+        promises[0] = this.multicallContractsMethods<string>(
+            this.tokenContractAbi,
+            tokensAddresses.map(tokenAddress => ({
+                contractAddress: tokenAddress,
+                methodsData: [
+                    {
+                        methodName: 'balanceOf',
+                        methodArguments: [userAddress]
+                    }
+                ]
+            }))
+        );
+
+        const results = await Promise.all(
+            promises as [Promise<ContractMulticallResponse<string>[][]>, Promise<BigNumber>]
+        );
+        const tokensBalances = results[0].map(tokenResults => {
+            const { success, output } = tokenResults[0]!;
+            return success ? new BigNumber(output!) : new BigNumber(0);
+        });
+
+        if (indexOfNativeCoin !== -1) {
+            tokensBalances.splice(indexOfNativeCoin, 0, results[1]);
+        }
+
+        return tokensBalances;
+    }
+
+    @Cache
+    public async callForTokensInfo(
+        tokenAddresses: string[] | ReadonlyArray<string>,
+        tokenFields: SupportedTokenField[] = ['decimals', 'symbol', 'name']
+    ): Promise<Partial<Record<SupportedTokenField, string>>[]> {
+        const nativeTokenIndex = tokenAddresses.findIndex(address =>
+            this.Web3Pure.isNativeAddress(address)
+        );
+        const filteredTokenAddresses = tokenAddresses.filter(
+            (_, index) => index !== nativeTokenIndex
+        );
+        const contractsData = filteredTokenAddresses.map(contractAddress => ({
+            contractAddress,
+            methodsData: tokenFields.map(methodName => ({
+                methodName,
+                methodArguments: []
+            }))
+        }));
+
+        const results = contractsData.length
+            ? await this.multicallContractsMethods<[string]>(this.tokenContractAbi, contractsData)
+            : [];
+        const tokens = results.map((tokenFieldsResults, tokenIndex) => {
+            const tokenAddress = tokenAddresses[tokenIndex]!;
+            return tokenFieldsResults.reduce((acc, field, fieldIndex) => {
+                if (!field.success) {
+                    throw new RubicSdkError(`Cannot retrieve information about ${tokenAddress}`);
+                }
+                return {
+                    ...acc,
+                    [tokenFields[fieldIndex]!]: field.success ? field.output : undefined
+                };
+            }, {});
+        });
+
+        if (nativeTokenIndex === -1) {
+            return tokens;
+        }
+
+        const blockchainNativeToken = nativeTokensList[this.blockchainName];
+        const nativeToken = {
+            ...blockchainNativeToken,
+            decimals: blockchainNativeToken.decimals.toString()
+        };
+        tokens.splice(nativeTokenIndex, 0, nativeToken);
+        return tokens;
     }
 }

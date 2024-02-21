@@ -12,12 +12,6 @@ export interface EvmBasicTransactionOptions extends BasicTransactionOptions {
     gas?: BigNumber | string | number;
 
     /**
-     * @deprecated Use gasPriceOptions instead.
-     * Transaction gas price.
-     */
-    gasPrice?: BigNumber | string | number;
-
-    /**
      * Transaction gas price options.
      */
     gasPriceOptions?: EIP1559Gas | SingleGasPrice;

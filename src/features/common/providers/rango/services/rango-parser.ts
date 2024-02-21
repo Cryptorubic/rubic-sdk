@@ -2,6 +2,7 @@ import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 
 import { RANGO_API_KEY } from '../constants/rango-api-common';
 import { RangoBestRouteRequestOptions } from '../models/rango-api-best-route-types';
@@ -30,9 +31,9 @@ export class RangoCommonParser {
 
         const apiKey = RANGO_API_KEY;
 
-        const swapperGroups = options.swapperGroups?.map(swapper =>
-            RangoUtils.getTradeTypeForRango(swapper as RubicTradeTypeForRango)
-        );
+        const swapperGroups = options.swapperGroups
+            ?.map(swapper => RangoUtils.getTradeTypeForRango(swapper as RubicTradeTypeForRango))
+            .join(',');
 
         return {
             apiKey,
@@ -41,7 +42,8 @@ export class RangoCommonParser {
             amount: amountParam,
             ...(options.slippageTolerance && { slippage: options.slippageTolerance * 100 }),
             ...(swapperGroups?.length && { swapperGroups }),
-            swappersGroupsExclude: options?.swappersGroupsExclude ?? true
+            swappersGroupsExclude: options?.swappersGroupsExclude ?? true,
+            contractCall: true
         };
     }
 
@@ -59,15 +61,14 @@ export class RangoCommonParser {
             fromToken.blockchain
         ).address;
         const fromAddress = options.fromAddress || walletAddress;
-        const fakeAddress = '0xe388Ed184958062a2ea29B7fD049ca21244AE02e';
-        const toAddress = options?.receiverAddress || walletAddress || fakeAddress;
+        const toAddress = options?.receiverAddress || walletAddress || FAKE_WALLET_ADDRESS;
 
         const slippage = options.slippageTolerance * 100;
         const apiKey = RANGO_API_KEY;
 
-        const swapperGroups = options.swapperGroups?.map(swapper =>
-            RangoUtils.getTradeTypeForRango(swapper as RubicTradeTypeForRango)
-        );
+        const swapperGroups = options.swapperGroups
+            ?.map(swapper => RangoUtils.getTradeTypeForRango(swapper as RubicTradeTypeForRango))
+            .join(',');
 
         return {
             apiKey,
@@ -78,7 +79,8 @@ export class RangoCommonParser {
             slippage,
             toAddress,
             ...(swapperGroups?.length && { swapperGroups }),
-            swappersGroupsExclude: options?.swappersGroupsExclude ?? true
+            swappersGroupsExclude: options?.swappersGroupsExclude ?? true,
+            contractCall: true
         };
     }
 

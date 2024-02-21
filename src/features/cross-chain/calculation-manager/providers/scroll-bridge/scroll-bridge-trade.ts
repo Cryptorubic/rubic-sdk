@@ -10,6 +10,7 @@ import { BigNumber as EtherBigNumber } from 'ethers';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -141,7 +142,7 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -167,7 +168,6 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
                 value,
                 onTransactionHash,
                 gas: gasLimit,
-                gasPrice,
                 gasPriceOptions
             });
 
@@ -243,11 +243,11 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
         const rpcProviders = Injector.web3PublicService.rpcProvider;
         const l1Provider = new JsonRpcProvider(
             rpcProviders[BLOCKCHAIN_NAME.ETHEREUM]!.rpcList[0]!,
-            1
+            blockchainId[BLOCKCHAIN_NAME.ETHEREUM]
         );
         const l2Provider = new JsonRpcProvider(
             rpcProviders[BLOCKCHAIN_NAME.ARBITRUM]!.rpcList[0]!,
-            42161
+            blockchainId[BLOCKCHAIN_NAME.ARBITRUM]
         );
         const targetReceipt = await l2Provider.getTransactionReceipt(sourceTransaction);
         const l2TxReceipt = new L2TransactionReceipt(targetReceipt);
@@ -258,9 +258,9 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
         const messageReader = new L2ToL1MessageReader(l1Provider, event);
 
         const proof = await messageReader.getOutboxProof(l2Provider);
-        const l2network = await getL2Network(42161);
+        const l2network = await getL2Network(blockchainId[BLOCKCHAIN_NAME.ARBITRUM]);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
                 onConfirm(hash);
@@ -285,7 +285,6 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
             {
                 onTransactionHash,
                 gas: gasLimit,
-                gasPrice,
                 gasPriceOptions
             }
         );
@@ -298,11 +297,11 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
         const rpcProviders = Injector.web3PublicService.rpcProvider;
         const l1Provider = new JsonRpcProvider(
             rpcProviders[BLOCKCHAIN_NAME.ETHEREUM]!.rpcList[0]!,
-            1
+            blockchainId[BLOCKCHAIN_NAME.ETHEREUM]
         );
         const l2Provider = new JsonRpcProvider(
             rpcProviders[BLOCKCHAIN_NAME.ARBITRUM]!.rpcList[0]!,
-            42161
+            blockchainId[BLOCKCHAIN_NAME.ARBITRUM]
         );
 
         const receipt = await l1Provider.getTransactionReceipt(sourceTransactionHash);
@@ -318,7 +317,7 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
         );
         await web3Private.checkBlockchainCorrect(BLOCKCHAIN_NAME.ARBITRUM);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
                 onConfirm(hash);
@@ -333,7 +332,6 @@ export class ScrollBridgeTrade extends EvmCrossChainTrade {
             {
                 onTransactionHash,
                 gas: gasLimit,
-                gasPrice,
                 gasPriceOptions
             }
         );

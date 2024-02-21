@@ -1,5 +1,5 @@
 // @ts-ignore
-import { getRequestOptions } from 'cbridge-revert-manager';
+import getRequestOptions from 'cbridge-revert-manager';
 import { Injector } from 'src/core/injector/injector';
 import { CbridgeEstimateAmountRequest } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-estimate-amount-request';
 import { CbridgeEstimateAmountResponse } from 'src/features/cross-chain/calculation-manager/providers/cbridge/models/cbridge-estimate-amount-response';

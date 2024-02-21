@@ -64,13 +64,14 @@ module.exports = function(env, argv) {
                 "https": require.resolve("https-browserify"),
                 "stream": require.resolve("stream-browserify"),
                 "crypto": require.resolve("crypto-browserify"),
-                "querystring": require.resolve('querystring-es3')
+                "querystring": require.resolve('querystring-es3'),
+                "zlib": require.resolve('browserify-zlib')
             }
         },
         output: {
             filename: 'rubic-sdk.min.js',
             path: path.resolve(__dirname, 'dist'),
-            library: 'RubicSDK',
+            library: "RubicSDK",
             clean: true
         },
         // optimization: {
