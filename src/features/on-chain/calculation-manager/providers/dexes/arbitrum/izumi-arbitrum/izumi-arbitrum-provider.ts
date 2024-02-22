@@ -2,7 +2,7 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { IzumiProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/izumi-abstract/izumi-provider';
 
 export class IzumiArbitrumProvider extends IzumiProvider {
-    public readonly blockchain = BLOCKCHAIN_NAME.KROMA;
+    public readonly blockchain = BLOCKCHAIN_NAME.ARBITRUM;
 
     protected readonly dexAddress = '0x01fDea353849cA29F778B2663BcaCA1D191bED0e';
 

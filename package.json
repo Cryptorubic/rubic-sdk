@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.3.0-alpha.kroma.3",
+    "version": "5.3.0-alpha.kroma.4",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
