@@ -290,16 +290,9 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'WAA',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.ZETACHAIN]: new Token({
-        blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
-        address: '0x5F0b1a82749cb4E2278EC87F8BF6B618dC71a8bf',
-        name: 'Wrapped Zeta',
-        symbol: 'WZETA',
-        decimals: 18
-    }),
     [BLOCKCHAIN_NAME.TAIKO]: new Token({
         blockchain: BLOCKCHAIN_NAME.TAIKO,
-        address: '0x7be7937A395FD3B527F428124f6a33E10D1C0638',
+        address: '0x0011E559da84dde3f841e22dc33F3adbF184D84A',
         name: 'Wrapped Ether',
         symbol: 'WETH',
         decimals: 18
@@ -370,6 +363,20 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
     [BLOCKCHAIN_NAME.BLAST]: new Token({
         blockchain: BLOCKCHAIN_NAME.BLAST,
         address: '0x4200000000000000000000000000000000000023',
+        name: 'Wrapped ETH',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ZETACHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
+        address: '0x5F0b1a82749cb4E2278EC87F8BF6B618dC71a8bf',
+        name: 'Wrapped Zeta',
+        symbol: 'WZETA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.HOLESKY]: new Token({
+        blockchain: BLOCKCHAIN_NAME.HOLESKY,
+        address: '',
         name: 'Wrapped ETH',
         symbol: 'WETH',
         decimals: 18

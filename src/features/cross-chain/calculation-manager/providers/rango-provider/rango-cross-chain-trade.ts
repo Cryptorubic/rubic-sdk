@@ -2,7 +2,6 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -41,8 +40,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         feeInfo,
         routePath,
         swapQueryParams,
-        bridgeSubtype,
-        receiverAddress
+        bridgeSubtype
     }: RangoGetGasDataParams): Promise<GasData | null> {
         const fromBlockchain = fromToken.blockchain;
         const walletAddress = swapQueryParams.fromAddress;
@@ -97,7 +95,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
             } else {
                 const { data, value, to } = await new RangoCrossChainTrade(
                     tradeParams
-                ).getTransactionRequest(receiverAddress, undefined, true);
+                ).getTransactionRequest(swapQueryParams.toAddress, undefined, true);
 
                 const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
                     data,
@@ -145,9 +143,9 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
     public readonly gasData: GasData;
 
     public readonly priceImpact: number | null;
+    /** */
 
     private readonly slippage: number;
-    /** */
 
     /**
      * @description UUID returned by rango-api to track transaction status in getRangoDstSwapStatus
@@ -245,14 +243,10 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
     }
 
     protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string> {
-        if (!BlockchainsInfo.isEvmBlockchainName(this.from.blockchain)) {
-            throw new RubicSdkError("For non-evm chains use 'getChangenowPostTrade' method");
-        }
-
         await this.checkTradeErrors();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         let transactionHash: string;
 
         const onTransactionHash = (hash: string) => {
@@ -275,7 +269,6 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
                 value,
                 onTransactionHash,
                 gas: gasLimit,
-                gasPrice,
                 gasPriceOptions
             });
 
@@ -316,11 +309,7 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         };
 
         if (!skipAmountChangeCheck) {
-            EvmCrossChainTrade.checkAmountChange(
-                config,
-                route.outputAmount,
-                this.to.stringWeiAmount
-            );
+            this.checkAmountChange(config, route.outputAmount, this.to.stringWeiAmount);
         }
         return config;
     }
@@ -329,16 +318,9 @@ export class RangoCrossChainTrade extends EvmCrossChainTrade {
         return {
             estimatedGas: this.estimatedGas,
             feeInfo: this.feeInfo,
-            priceImpact: this.priceImpact || null,
+            priceImpact: this.priceImpact,
             slippage: this.slippage * 100,
             routePath: this.routePath
         };
-    }
-
-    /**
-     * @deprecated
-     */
-    public getTradeAmountRatio(fromUsd: BigNumber): BigNumber {
-        return fromUsd;
     }
 }

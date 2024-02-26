@@ -10,7 +10,8 @@ export function oneInchHttpGetRequest<T>(
     return Injector.httpClient.get(
         `https://x-api.rubic.exchange/api/swap/v5.2/${blockchainId[blockchain]}/${path}`,
         {
-            ...options
+            ...options,
+            headers: { apikey: 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4' }
         }
     );
 }
@@ -23,7 +24,8 @@ export function oneInchHttpGetApproveRequest<T>(
     return Injector.httpClient.get(
         `https://x-api.rubic.exchange/api/${path}/${blockchainId[blockchain]}`,
         {
-            ...options
+            ...options,
+            headers: { apikey: 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4' }
         }
     );
 }

@@ -160,7 +160,7 @@ export class OnChainManager {
         fromAmount: string | number,
         toToken: Token | string | PriceToken,
         options?: OnChainManagerCalculationOptions
-    ): Promise<Array<OnChainTrade | OnChainTradeError>> {
+    ): Promise<WrappedOnChainTradeOrNull[]> {
         if (toToken instanceof Token && fromToken.blockchain !== toToken.blockchain) {
             throw new RubicSdkError('Blockchains of from and to tokens must be same');
         }
@@ -217,9 +217,14 @@ export class OnChainManager {
         from: PriceTokenAmount,
         to: PriceToken,
         options: RequiredOnChainManagerCalculationOptions
-    ): Promise<Array<OnChainTrade | OnChainTradeError>> {
+    ): Promise<WrappedOnChainTradeOrNull[]> {
         if ((from.isNative && to.isWrapped) || (from.isWrapped && to.isNative)) {
-            return [OnChainManager.getWrapTrade(from, to, options)];
+            return [
+                {
+                    trade: OnChainManager.getWrapTrade(from, to, options),
+                    tradeType: ON_CHAIN_TRADE_TYPE.WRAPPED
+                }
+            ];
         }
 
         const dexesProviders = Object.entries(this.tradeProviders[from.blockchain]).filter(
@@ -240,7 +245,7 @@ export class OnChainManager {
                 return tradeA instanceof OnChainTrade ? 1 : -1;
             }
             return 0;
-        }) as (OnChainTrade | OnChainTradeError)[];
+        });
     }
 
     private isDeflationToken(token: Token): Promise<IsDeflationToken> {
@@ -252,19 +257,24 @@ export class OnChainManager {
         to: PriceToken,
         dexesProviders: [OnChainTradeType, OnChainProvider][],
         options: RequiredOnChainManagerCalculationOptions
-    ): Promise<Array<OnChainTrade | OnChainTradeError>> {
+    ): Promise<WrappedOnChainTradeOrNull[]> {
         return Promise.all(
-            dexesProviders.map(async ([type, provider]) => {
-                try {
-                    return await pTimeout(provider.calculate(from, to, options), options.timeout);
-                } catch (e) {
-                    console.debug(
-                        `[RUBIC_SDK] Trade calculation error occurred for ${type} trade provider.`,
-                        e
-                    );
-                    return { type, error: e };
-                }
-            })
+            dexesProviders.map(([type, provider]) =>
+                pTimeout(provider.calculate(from, to, options), options.timeout)
+                    .then(trade => {
+                        if (trade) {
+                            return { tradeType: type, trade };
+                        }
+                        return null;
+                    })
+                    .catch(error => {
+                        console.debug(
+                            `[RUBIC_SDK] Trade calculation error occurred for ${type} trade provider.`,
+                            error
+                        );
+                        return { tradeType: type, trade: null, error };
+                    })
+            )
         );
     }
 
@@ -374,23 +384,25 @@ export class OnChainManager {
                 return !this.isDisabledAggregator(options.disabledProviders, aggregator.tradeType);
             });
 
-        const promises = availableAggregators.map(aggregator => {
-            const promise =
-                aggregator.tradeType === ON_CHAIN_TRADE_TYPE.LIFI
-                    ? this.calculateLifiTrade(from, to, options)
-                    : pTimeout(
-                          aggregator.calculate(
-                              from as PriceTokenAmount<EvmBlockchainName>,
-                              to as PriceTokenAmount<EvmBlockchainName>,
-                              options as RequiredOnChainCalculationOptions
-                          ),
-                          options.timeout
-                      );
-
+        return availableAggregators.map(aggregator => {
+            const promise = this.getCalcPromise(from, to, options, aggregator);
             return this.handleTradePromise(promise, aggregator);
         });
+    }
 
-        return promises;
+    private getCalcPromise(
+        from: PriceTokenAmount,
+        to: PriceToken,
+        options: RequiredOnChainManagerCalculationOptions,
+        aggregator: AggregatorOnChainProvider
+    ): Promise<OnChainTrade | OnChainTradeError> {
+        if (aggregator.tradeType === ON_CHAIN_TRADE_TYPE.LIFI) {
+            return this.calculateLifiTrade(from, to, options);
+        }
+        return pTimeout(
+            aggregator.calculate(from, to, options as RequiredOnChainCalculationOptions),
+            options.timeout
+        );
     }
 
     private handleTradePromise(
@@ -400,7 +412,7 @@ export class OnChainManager {
         return promise
             .then(wrappedTrade => {
                 if ('error' in wrappedTrade) {
-                    throw wrappedTrade.error;
+                    return { trade: null, tradeType: wrappedTrade.type, error: wrappedTrade.error };
                 }
 
                 if (!wrappedTrade) {

@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
-import { nativeTokensList, PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import pTimeout from 'src/common/utils/p-timeout';
 import {
     BLOCKCHAIN_NAME,
@@ -59,6 +60,7 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
             const apiUrl = openOceanApiUrl.quote(openOceanBlockchainName[blockchain]);
             const quoteResponse = await pTimeout(
                 Injector.httpClient.get<OpenOceanQuoteResponse>(apiUrl, {
+                    headers: { apikey: 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4' },
                     params: {
                         chain: openOceanBlockchainName[blockchain],
                         inTokenAddress: this.getTokenAddress(fromWithoutFee),
@@ -150,7 +152,10 @@ export class OpenOceanProvider extends AggregatorOnChainProvider {
         const apiUrl = openOceanApiUrl.tokenList(
             openOceanBlockchainName[from.blockchain as OpenoceanOnChainSupportedBlockchain]
         );
-        const tokenListResponse = await Injector.httpClient.get<OpenOceanTokenListResponse>(apiUrl);
+        const tokenListResponse = await Injector.httpClient.get<OpenOceanTokenListResponse>(
+            apiUrl,
+            { headers: { apikey: 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4' } }
+        );
         const tokens = tokenListResponse?.data?.map(token => token.address.toLocaleLowerCase());
         const isSupportedTokens =
             Boolean(tokens.length) &&

@@ -4,8 +4,8 @@ import {
     NotWhitelistedProviderError,
     UnnecessaryApproveError
 } from 'src/common/errors';
-import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
-import { nativeTokensList, PriceTokenAmount, Token } from 'src/common/tokens';
+import { PriceTokenAmount, Token } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { parseError } from 'src/common/utils/errors';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Private } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/evm-web3-private';
@@ -26,7 +26,7 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
-import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
+import { OnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import {
     OptionsGasParams,
@@ -87,7 +87,10 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         return Injector.web3PrivateService.getWeb3PrivateByBlockchain(this.from.blockchain);
     }
 
-    protected constructor(evmOnChainTradeStruct: EvmOnChainTradeStruct, providerAddress: string) {
+    protected constructor(
+        evmOnChainTradeStruct: OnChainTradeStruct<EvmBlockchainName>,
+        providerAddress: string
+    ) {
         super(providerAddress);
 
         this.from = evmOnChainTradeStruct.from;
@@ -177,7 +180,6 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         const approveOptions: EvmBasicTransactionOptions = {
             onTransactionHash: options?.onApprove,
             gas: options?.approveGasLimit || undefined,
-            gasPrice: options?.gasPrice || undefined,
             gasPriceOptions: options?.gasPriceOptions || undefined
         };
 
@@ -237,7 +239,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
             let method: 'trySendTransaction' | 'sendTransaction' = 'trySendTransaction';
             if (options?.testMode) {
-                console.info(transactionConfig, options.gasLimit, options.gasPrice);
+                console.info(transactionConfig, options.gasLimit);
                 method = 'sendTransaction';
             }
             await this.web3Private[method](transactionConfig.to, {
@@ -245,7 +247,6 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 data: transactionConfig.data,
                 value: transactionConfig.value,
                 gas: options.gasLimit,
-                gasPrice: options.gasPrice,
                 gasPriceOptions: options.gasPriceOptions
             });
 
@@ -272,7 +273,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     /**
      * Encodes trade to swap it through on-chain proxy.
      */
-    private async encodeProxy(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+    protected async encodeProxy(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
             await this.getProxyContractParams(options);
         const gasParams = this.getGasParams(options);
@@ -399,32 +400,5 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 true
             ]
         ];
-    }
-
-    public static checkAmountChange(
-        transactionRequest: EvmEncodeConfig,
-        newWeiAmount: string,
-        oldWeiAmount: string
-    ): void {
-        const oldAmount = new BigNumber(oldWeiAmount);
-        const newAmount = new BigNumber(newWeiAmount);
-        const changePercent = 0.1;
-        const acceptablePercentPriceChange = new BigNumber(changePercent).dividedBy(100);
-
-        const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
-        const amountMinusPercent = oldAmount.multipliedBy(
-            new BigNumber(1).minus(acceptablePercentPriceChange)
-        );
-
-        const shouldThrowError =
-            newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
-
-        if (shouldThrowError) {
-            throw new UpdatedRatesError({
-                ...transactionRequest,
-                newAmount: newWeiAmount,
-                oldAmount: oldWeiAmount
-            });
-        }
     }
 }

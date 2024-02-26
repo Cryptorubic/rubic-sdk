@@ -8,6 +8,7 @@ import { BitcoinWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/b
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { IcpWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/icp-web3-pure';
 import { KavaCosmosWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/kava-cosmos-web3-pure';
+import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/solana-web3-pure';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 
 const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
@@ -53,13 +54,6 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         symbol: 'AA',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.ZETACHAIN]: new Token({
-        blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
-        address: EvmWeb3Pure.nativeTokenAddress,
-        name: 'Zeta',
-        symbol: 'ZETA',
-        decimals: 18
-    }),
     [BLOCKCHAIN_NAME.TAIKO]: new Token({
         blockchain: BLOCKCHAIN_NAME.TAIKO,
         address: EvmWeb3Pure.nativeTokenAddress,
@@ -83,6 +77,13 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
     }),
     [BLOCKCHAIN_NAME.BLAST]: new Token({
         blockchain: BLOCKCHAIN_NAME.BLAST,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ether',
+        symbol: 'ETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.HOLESKY]: new Token({
+        blockchain: BLOCKCHAIN_NAME.HOLESKY,
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'Ether',
         symbol: 'ETH',
@@ -382,5 +383,19 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'ETH',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ZETACHAIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ZETACHAIN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Zeta',
+        symbol: 'ZETA',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.SOLANA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.SOLANA,
+        address: SolanaWeb3Pure.nativeTokenAddress,
+        name: 'Solana',
+        symbol: 'SOL',
+        decimals: 9
     })
 };

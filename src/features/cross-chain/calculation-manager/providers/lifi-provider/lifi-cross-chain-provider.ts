@@ -1,7 +1,8 @@
 import { FeeCost, LiFi, LifiStep, Route, RouteOptions, RoutesRequest } from '@lifi/sdk';
 import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
-import { nativeTokensList, PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';

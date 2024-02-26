@@ -5,11 +5,14 @@ import {
     WrongFromAddressError,
     WrongReceiverAddressError
 } from 'src/common/errors';
-import { nativeTokensList, PriceTokenAmount } from 'src/common/tokens';
+import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { Injector } from 'src/core/injector/injector';
@@ -105,6 +108,32 @@ export abstract class CrossChainTrade {
         const hasPlatformFee = Number(fee?.platformFee?.percent) > 0;
 
         return hasFixedFee || hasPlatformFee;
+    }
+
+    protected checkAmountChange(
+        transactionRequest: EvmEncodeConfig,
+        newWeiAmount: string,
+        oldWeiAmount: string
+    ): void {
+        const oldAmount = new BigNumber(oldWeiAmount);
+        const newAmount = new BigNumber(newWeiAmount);
+        const acceptablePercentPriceChange = new BigNumber(0.5).dividedBy(100);
+
+        const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
+        const amountMinusPercent = oldAmount.multipliedBy(
+            new BigNumber(1).minus(acceptablePercentPriceChange)
+        );
+
+        const shouldThrowError =
+            newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
+
+        if (shouldThrowError) {
+            throw new UpdatedRatesError({
+                ...transactionRequest,
+                newAmount: newWeiAmount,
+                oldAmount: oldWeiAmount
+            });
+        }
     }
 
     protected constructor(
@@ -246,13 +275,6 @@ export abstract class CrossChainTrade {
             throw new WrongReceiverAddressError();
         }
     }
-
-    /**
-     * @internal
-     * Gets ratio between transit usd amount and to token amount.
-     * @deprecated
-     */
-    public abstract getTradeAmountRatio(fromUsd: BigNumber): BigNumber;
 
     /**
      * Calculates value for swap transaction.

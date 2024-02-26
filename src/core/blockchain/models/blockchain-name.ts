@@ -5,11 +5,11 @@ export const TEST_EVM_BLOCKCHAIN_NAME = {
     FUJI: 'FUJI',
     SCROLL_SEPOLIA: 'SCROLL_SEPOLIA',
     ARTHERA: 'ARTHERA',
-    ZETACHAIN: 'ZETACHAIN',
     TAIKO: 'TAIKO',
     SEPOLIA: 'SEPOLIA',
     BERACHAIN: 'BERACHAIN',
-    BLAST: 'BLAST'
+    BLAST: 'BLAST',
+    HOLESKY: 'HOLESKY'
 } as const;
 
 export const EVM_BLOCKCHAIN_NAME = {
@@ -56,7 +56,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     BASE: 'BASE',
     MANTLE: 'MANTLE',
     MANTA_PACIFIC: 'MANTA_PACIFIC',
-    SCROLL: 'SCROLL'
+    SCROLL: 'SCROLL',
+    ZETACHAIN: 'ZETACHAIN'
 } as const;
 
 export const BLOCKCHAIN_NAME = {

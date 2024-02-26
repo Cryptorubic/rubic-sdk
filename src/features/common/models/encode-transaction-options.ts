@@ -16,12 +16,6 @@ export interface EncodeTransactionOptions {
     receiverAddress?: string;
 
     /**
-     * @deprecated Use gasPriceOptions instead.
-     * Evm-transaction gas price.
-     */
-    gasPrice?: string;
-
-    /**
      * Transaction gas price options.
      */
     gasPriceOptions?: EIP1559Gas | SingleGasPrice;

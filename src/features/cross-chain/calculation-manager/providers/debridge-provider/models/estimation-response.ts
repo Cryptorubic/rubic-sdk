@@ -1,21 +1,8 @@
-interface BaseToken {
-    address: string;
-    name: string;
-    symbol: string;
-    decimals: number;
-}
-
-interface TokenAmount extends BaseToken {
-    amount: string;
-}
-
-interface TokenMinAmount extends TokenAmount {
-    minAmount: string;
-}
-
-interface MaxTheoreticalAmount extends TokenMinAmount {
-    maxTheoreticalAmount: string;
-}
+import { BaseToken } from '@lifi/sdk';
+import {
+    DlnMaxTheoreticalAmountToken,
+    DlnTokenMinAmount
+} from 'src/features/common/providers/dln/models/dln-estimation';
 
 /**
  * Estimation object.
@@ -35,17 +22,17 @@ export interface Estimation {
     /**
      * Source chain token in.
      */
-    readonly srcChainTokenIn: TokenMinAmount;
+    readonly srcChainTokenIn: DlnTokenMinAmount;
 
     /**
      * Source chain token out.
      */
-    readonly srcChainTokenOut: TokenMinAmount;
+    readonly srcChainTokenOut: DlnTokenMinAmount;
 
     /**
      * Destination chain token out.
      */
-    readonly dstChainTokenOut: MaxTheoreticalAmount;
+    readonly dstChainTokenOut: DlnMaxTheoreticalAmountToken;
 
     /**
      *  Details of the token representing execution fee currency, a recommended amount
@@ -61,9 +48,19 @@ export interface Estimation {
 /**
  * Swap estimates response.
  */
-export interface EstimationResponse {
+export interface EstimationResponse<T> {
     /**
      * Trade estimation object.
      */
     estimation: Estimation;
+
+    /**
+     * Provider fee.
+     */
+    fixFee: string;
+
+    /**
+     * Transaction data.
+     */
+    tx: T;
 }
