@@ -93,7 +93,8 @@ export class SymbiosisOnChainTrade extends AggregatorEvmOnChainTrade {
         try {
             const transactionData = await this.getTxConfigAndCheckAmount(
                 options.receiverAddress,
-                options.fromAddress
+                options.fromAddress,
+                options.directTransaction
             );
 
             const { gas, gasPrice } = this.getGasParams(options, {
@@ -145,7 +146,8 @@ export class SymbiosisOnChainTrade extends AggregatorEvmOnChainTrade {
             ...options,
             fromAddress: rubicProxyContractAddress[this.from.blockchain].router,
             supportFee: false,
-            receiverAddress: rubicProxyContractAddress[this.from.blockchain].router
+            receiverAddress: rubicProxyContractAddress[this.from.blockchain].router,
+            directTransaction: options.directTransaction
         });
         const availableDexs = (
             await ProxyCrossChainEvmTrade.getWhitelistedDexes(this.from.blockchain)
