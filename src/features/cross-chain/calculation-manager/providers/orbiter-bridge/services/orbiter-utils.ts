@@ -16,13 +16,6 @@ import { OrbiterGetQuoteConfigParams } from '../models/orbiter-utils-types';
 
 export class OrbiterUtils {
     public static compareChainId(orbiterChainId: string, blockchainName: BlockchainName): boolean {
-        if (blockchainName === BLOCKCHAIN_NAME.ZK_SYNC) {
-            return (
-                orbiterChainId === blockchainId[BLOCKCHAIN_NAME.ZK_SYNC].toString() ||
-                orbiterChainId === 'zksync'
-            );
-        }
-
         if (blockchainName === BLOCKCHAIN_NAME.STARKNET) {
             return orbiterChainId === 'SN_MAIN';
         }
