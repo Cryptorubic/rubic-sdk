@@ -5,11 +5,8 @@ import { RubicSdkError, SwapRequestError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
-import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
@@ -30,8 +27,7 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { LifiCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/constants/lifi-cross-chain-supported-blockchain';
 import { LifiTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/lifi-provider/models/lifi-transaction-request';
-
-import { convertGasDataToBN } from '../../utils/convert-gas-price';
+import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 
 /**
  * Calculated Celer cross-chain trade.
@@ -46,99 +42,27 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         providerAddress: string,
         receiverAddress?: string
     ): Promise<GasData | null> {
-        const fromBlockchain = from.blockchain;
-        const walletAddress =
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-        if (!walletAddress) {
-            return null;
-        }
+        const trade = new LifiCrossChainTrade(
+            {
+                from,
+                to: toToken,
+                route,
+                gasData: null,
+                toTokenAmountMin: new BigNumber(0),
+                feeInfo,
+                priceImpact: from.calculatePriceImpactPercent(toToken) || 0,
+                onChainSubtype: {
+                    from: undefined,
+                    to: undefined
+                },
+                bridgeType: BRIDGE_TYPE.LIFI,
+                slippage: 0
+            },
+            providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
+            []
+        );
 
-        try {
-            let gasLimit: BigNumber | null;
-            let gasDetails: GasPriceBN | BigNumber | null;
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-
-            if (feeInfo.rubicProxy?.fixedFee?.amount.gt(0)) {
-                const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                    await new LifiCrossChainTrade(
-                        {
-                            from,
-                            to: toToken,
-                            route,
-                            gasData: null,
-                            toTokenAmountMin: new BigNumber(0),
-                            feeInfo,
-                            priceImpact: from.calculatePriceImpactPercent(toToken) || 0,
-                            onChainSubtype: {
-                                from: undefined,
-                                to: undefined
-                            },
-                            bridgeType: BRIDGE_TYPE.LIFI,
-                            slippage: 0
-                        },
-                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                        []
-                    ).getContractParams({}, true);
-
-                const [proxyGasLimit, proxyGasDetails] = await Promise.all([
-                    web3Public.getEstimatedGas(
-                        contractAbi,
-                        contractAddress,
-                        methodName,
-                        methodArguments,
-                        walletAddress,
-                        value
-                    ),
-                    convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
-                ]);
-
-                gasLimit = proxyGasLimit;
-                gasDetails = proxyGasDetails;
-            } else {
-                const { data, value, to } = await new LifiCrossChainTrade(
-                    {
-                        from,
-                        to: toToken,
-                        route,
-                        gasData: null,
-                        toTokenAmountMin: new BigNumber(0),
-                        feeInfo,
-                        priceImpact: from.calculatePriceImpactPercent(toToken) || 0,
-                        onChainSubtype: {
-                            from: undefined,
-                            to: undefined
-                        },
-                        bridgeType: BRIDGE_TYPE.LIFI,
-                        slippage: 0
-                    },
-                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                    []
-                ).fetchSwapData(receiverAddress, true);
-
-                const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
-                    data,
-                    value
-                });
-                const defaultGasDetails = convertGasDataToBN(
-                    await Injector.gasPriceApi.getGasPrice(from.blockchain)
-                );
-
-                gasLimit = defaultGasLimit;
-                gasDetails = defaultGasDetails;
-            }
-
-            if (!gasLimit?.isFinite()) {
-                return null;
-            }
-
-            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
-            return {
-                gasLimit: increasedGasLimit,
-                ...gasDetails
-            };
-        } catch (_err) {
-            return null;
-        }
+        return getCrossChainGasData(trade, receiverAddress);
     }
 
     public readonly type = CROSS_CHAIN_TRADE_TYPE.LIFI;
@@ -233,10 +157,10 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
 
             // eslint-disable-next-line no-useless-catch
             try {
-                const { data, value, to } = await this.fetchSwapData(
-                    options?.receiverAddress,
+                const { data, value, to } = await this.setTransactionConfig(
                     false,
-                    options?.directTransaction
+                    options?.useCacheData || false,
+                    options?.receiverAddress
                 );
 
                 await this.web3Private.trySendTransaction(to, {
@@ -259,18 +183,15 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    public async getContractParams(
-        options: GetContractParamsOptions,
-        skipAmountChangeCheck: boolean = false
-    ): Promise<ContractParams> {
+    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.fetchSwapData(
-            options?.receiverAddress,
-            skipAmountChangeCheck,
-            options?.directTransaction
+        } = await this.setTransactionConfig(
+            false,
+            options?.useCacheData || false,
+            options?.receiverAddress
         );
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
@@ -316,18 +237,9 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    private async fetchSwapData(
-        receiverAddress?: string,
-        skipAmountChangeCheck: boolean = false,
-        directTransaction?: EvmEncodeConfig
-    ): Promise<EvmEncodeConfig> {
-        if (directTransaction) {
-            return {
-                data: directTransaction.data,
-                to: directTransaction.to,
-                value: directTransaction.value
-            };
-        }
+    protected async getTransactionConfigAndAmount(
+        receiverAddress?: string
+    ): Promise<{ config: EvmEncodeConfig; amount: string }> {
         const firstStep = this.route.steps[0]!;
         const step = {
             ...firstStep,
@@ -353,15 +265,10 @@ export class LifiCrossChainTrade extends EvmCrossChainTrade {
             const swapResponse: { transactionRequest: LifiTransactionRequest; estimate: Estimate } =
                 await this.getResponseFromApiToTransactionRequest(step);
 
-            if (!skipAmountChangeCheck) {
-                this.checkAmountChange(
-                    swapResponse.transactionRequest,
-                    swapResponse.estimate.toAmountMin,
-                    Web3Pure.toWei(this.toTokenAmountMin, this.to.decimals)
-                );
-            }
-
-            return swapResponse.transactionRequest;
+            return {
+                config: swapResponse.transactionRequest,
+                amount: swapResponse.estimate.toAmount
+            };
         } catch (err) {
             if ('statusCode' in err && 'message' in err) {
                 throw new RubicSdkError(err.message);

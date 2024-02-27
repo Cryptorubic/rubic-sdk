@@ -135,8 +135,7 @@ export class OneinchTrade extends EvmOnChainTrade {
             const txData = await this.getTradeData(
                 true,
                 options.fromAddress,
-                options.receiverAddress,
-                options?.directTransaction
+                options.receiverAddress
             );
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: txData.gas,
@@ -198,15 +197,7 @@ export class OneinchTrade extends EvmOnChainTrade {
 
         const { tx, toAmount } = await this.getResponseFromApiToTransactionRequest(swapRequest);
 
-        this.checkAmountChange(
-            {
-                data: tx.data,
-                value: tx.value,
-                to: tx.to
-            },
-            toAmount,
-            this.to.stringWeiAmount
-        );
+        this.checkAmountChange(toAmount, this.to.stringWeiAmount);
 
         return {
             data: tx.data,

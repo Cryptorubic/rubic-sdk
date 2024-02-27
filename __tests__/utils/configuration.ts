@@ -1,5 +1,5 @@
-import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { Configuration } from 'src/core/sdk/models/configuration';
+import { BLOCKCHAIN_NAME, BlockchainName } from '../../src/core/blockchain/models/blockchain-name';
+import { Configuration } from '../../src/core/sdk/models/configuration';
 
 const baseRpcUrl = 'http://localhost';
 

@@ -33,11 +33,7 @@ export abstract class AggregatorEvmOnChainTrade extends EvmOnChainTrade {
             this.slippageTolerance
         );
 
-        this.checkAmountChange(
-            evmEncodeConfig,
-            newToTokenAmountMin,
-            this.toTokenAmountMin.stringWeiAmount
-        );
+        this.checkAmountChange(newToTokenAmountMin, this.toTokenAmountMin.stringWeiAmount);
 
         return evmEncodeConfig;
     }

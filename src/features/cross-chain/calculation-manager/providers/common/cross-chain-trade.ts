@@ -12,7 +12,6 @@ import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { BasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/models/basic-transaction-options';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { Web3Public } from 'src/core/blockchain/web3-public-service/web3-public/web3-public';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 import { Injector } from 'src/core/injector/injector';
@@ -29,7 +28,9 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 /**
  * Abstract class for all cross-chain providers' trades.
  */
-export abstract class CrossChainTrade {
+export abstract class CrossChainTrade<T> {
+    protected lastTransactionConfig: T | null = null;
+
     /**
      * Type of calculated cross-chain trade.
      */
@@ -110,11 +111,7 @@ export abstract class CrossChainTrade {
         return hasFixedFee || hasPlatformFee;
     }
 
-    protected checkAmountChange(
-        transactionRequest: EvmEncodeConfig,
-        newWeiAmount: string,
-        oldWeiAmount: string
-    ): void {
+    protected checkAmountChange(newWeiAmount: string, oldWeiAmount: string): void {
         const oldAmount = new BigNumber(oldWeiAmount);
         const newAmount = new BigNumber(newWeiAmount);
         const acceptablePercentPriceChange = new BigNumber(0.5).dividedBy(100);
@@ -128,11 +125,7 @@ export abstract class CrossChainTrade {
             newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
 
         if (shouldThrowError) {
-            throw new UpdatedRatesError({
-                ...transactionRequest,
-                newAmount: newWeiAmount,
-                oldAmount: oldWeiAmount
-            });
+            throw new UpdatedRatesError(oldWeiAmount, newWeiAmount);
         }
     }
 
@@ -306,4 +299,29 @@ export abstract class CrossChainTrade {
     public abstract getUsdPrice(providerFeeTokenPrice?: BigNumber): BigNumber;
 
     public abstract getTradeInfo(): TradeInfo;
+
+    protected abstract getTransactionConfigAndAmount(
+        receiverAddress?: string
+    ): Promise<{ config: T; amount: string }>;
+
+    protected async setTransactionConfig(
+        skipAmountChangeCheck: boolean,
+        useCacheData: boolean,
+        receiverAddress?: string
+    ): Promise<T> {
+        if (this.lastTransactionConfig && useCacheData) {
+            return this.lastTransactionConfig;
+        }
+
+        const { config, amount } = await this.getTransactionConfigAndAmount(receiverAddress);
+        this.lastTransactionConfig = config;
+        setTimeout(() => {
+            this.lastTransactionConfig = null;
+        }, 15_000);
+
+        if (!skipAmountChangeCheck) {
+            this.checkAmountChange(amount, this.to.stringWeiAmount);
+        }
+        return config;
+    }
 }

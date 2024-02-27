@@ -12,6 +12,7 @@ import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-ser
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -23,7 +24,7 @@ import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-m
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 
-export abstract class EvmCrossChainTrade extends CrossChainTrade {
+export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig> {
     public abstract readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     /**
@@ -111,17 +112,85 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         await this.approve(approveOptions, false);
     }
 
-    protected abstract swapDirect(options?: SwapTransactionOptions): Promise<string | never>;
+    protected async swapDirect(options: SwapTransactionOptions = {}): Promise<string | never> {
+        await this.checkTradeErrors();
+        await this.checkAllowanceAndApprove(options);
+
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+
+        try {
+            const config = await this.setTransactionConfig(
+                false,
+                options.useCacheData || false,
+                options?.receiverAddress
+            );
+            if ('data' in config) {
+                const { data, value, to } = config;
+                await this.web3Private.trySendTransaction(to, {
+                    data,
+                    value,
+                    onTransactionHash,
+                    gas: gasLimit,
+                    gasPriceOptions
+                });
+                return transactionHash!;
+            }
+
+            throw new Error('Invalid transaction config');
+        } catch (err) {
+            throw err;
+        }
+    }
 
     /**
      *
      * @returns txHash(srcTxHash) | never
      */
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
-        if (!this.isProxyTrade) {
-            return this.swapDirect(options);
+        if (!options?.testMode) {
+            await this.checkTradeErrors();
         }
-        return this.swapWithParams(options);
+        await this.checkReceiverAddress(
+            options.receiverAddress,
+            !BlockchainsInfo.isEvmBlockchainName(this.to.blockchain)
+        );
+        const method = options?.testMode ? 'trySendTransaction' : 'sendTransaction';
+
+        const fromAddress = this.walletAddress;
+        const { data, value, to } = await this.encode({ ...options, fromAddress });
+
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
+        let transactionHash: string;
+        const onTransactionHash = (hash: string) => {
+            if (onConfirm) {
+                onConfirm(hash);
+            }
+            transactionHash = hash;
+        };
+
+        try {
+            await this.web3Private[method](to, {
+                data,
+                value,
+                onTransactionHash,
+                gas: gasLimit,
+                gasPriceOptions
+            });
+
+            return transactionHash!;
+        } catch (err) {
+            if (err instanceof FailedToCheckForTransactionReceiptError) {
+                return transactionHash!;
+            }
+            throw err;
+        }
     }
 
     private async swapWithParams(options: SwapTransactionOptions = {}): Promise<string | never> {
@@ -183,7 +252,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         }
     }
 
-    public async encode(options: EncodeTransactionOptions): Promise<TransactionConfig> {
+    public async encode(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         await this.checkFromAddress(options.fromAddress, true);
         await this.checkReceiverAddress(
             options.receiverAddress,
@@ -191,23 +260,29 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         );
 
         const { gasLimit } = options;
+        if (this.feeInfo?.rubicProxy?.fixedFee?.amount.gt(0)) {
+            const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                await this.getContractParams({
+                    fromAddress: options.fromAddress,
+                    receiverAddress: options.receiverAddress || options.fromAddress
+                });
 
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams({
-                fromAddress: options.fromAddress,
-                receiverAddress: options.receiverAddress || options.fromAddress
-            });
-
-        return EvmWeb3Pure.encodeMethodCall(
-            contractAddress,
-            contractAbi,
-            methodName,
-            methodArguments,
-            value,
-            {
-                gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
-                ...getGasOptions(options)
-            }
+            return EvmWeb3Pure.encodeMethodCall(
+                contractAddress,
+                contractAbi,
+                methodName,
+                methodArguments,
+                value,
+                {
+                    gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
+                    ...getGasOptions(options)
+                }
+            );
+        }
+        return this.setTransactionConfig(
+            options.skipAmountCheck || false,
+            options?.useCacheData || false,
+            options.receiverAddress
         );
     }
 

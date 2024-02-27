@@ -163,7 +163,7 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkWalletState();
 
-        const { onConfirm, directTransaction } = options;
+        const { onConfirm } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -178,7 +178,6 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
         const transactionConfig = await this.encode({
             fromAddress,
             receiverAddress,
-            ...(directTransaction && { directTransaction }),
             ...(options?.referrer && { referrer: options?.referrer })
         });
 

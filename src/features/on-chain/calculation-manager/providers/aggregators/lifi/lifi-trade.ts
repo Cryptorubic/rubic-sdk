@@ -101,8 +101,7 @@ export class LifiTrade extends AggregatorEvmOnChainTrade {
         try {
             const transactionData = await this.getTxConfigAndCheckAmount(
                 options.receiverAddress,
-                options.fromAddress,
-                options.directTransaction
+                options.fromAddress
             );
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,

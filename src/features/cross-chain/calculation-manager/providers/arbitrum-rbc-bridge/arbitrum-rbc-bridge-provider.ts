@@ -3,6 +3,7 @@ import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { RequiredCrossChainOptions } from 'src/features/cross-chain/calculation-manager/models/cross-chain-options';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { ArbitrumRbcBridgeTrade } from 'src/features/cross-chain/calculation-manager/providers/arbitrum-rbc-bridge/arbitrum-rbc-bridge-trade';
@@ -35,7 +36,7 @@ export class ArbitrumRbcBridgeProvider extends CrossChainProvider {
         fromToken: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
         options: RequiredCrossChainOptions
-    ): Promise<CalculationResult> {
+    ): Promise<CalculationResult<EvmEncodeConfig>> {
         const fromBlockchain = fromToken.blockchain as CbridgeCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as CbridgeCrossChainSupportedBlockchain;
 

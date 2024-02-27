@@ -2,7 +2,6 @@ import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -24,7 +23,7 @@ import { TronBridgersTransactionData } from 'src/features/cross-chain/calculatio
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { MarkRequired } from 'ts-essentials';
 
-export async function getMethodArgumentsAndTransactionData<
+export async function getProxyMethodArgumentsAndTransactionData<
     T extends EvmBridgersTransactionData | TronBridgersTransactionData
 >(
     from: PriceTokenAmount<BridgersCrossChainSupportedBlockchain>,
@@ -34,15 +33,11 @@ export async function getMethodArgumentsAndTransactionData<
     walletAddress: string,
     providerAddress: string,
     options: MarkRequired<GetContractParamsOptions, 'receiverAddress'>,
-    checkAmountFn: (
-        transactionRequest: EvmEncodeConfig,
-        newWeiAmount: string,
-        oldWeiAmount: string
-    ) => void,
-    skipAmountChangeCheck: boolean = false
+    checkAmountFn: (newWeiAmount: string, oldWeiAmount: string) => void
 ): Promise<{
     methodArguments: unknown[];
     transactionData: T;
+    amountOut: string;
 }> {
     const amountOutMin = Web3Pure.toWei(toTokenAmountMin, to.decimals);
     const fromTokenAddress = createTokenNativeAddressProxy(
@@ -70,27 +65,24 @@ export async function getMethodArgumentsAndTransactionData<
     );
     const transactionData = swapData.data?.txData;
 
-    if (!skipAmountChangeCheck) {
-        const quoteRequest: BridgersQuoteRequest = {
-            fromTokenAddress,
-            toTokenAddress,
-            fromTokenAmount: fromWithoutFee.stringWeiAmount,
-            fromTokenChain: toBridgersBlockchain[from.blockchain],
-            toTokenChain: toBridgersBlockchain[to.blockchain]
-        };
-        const quoteResponse = await Injector.httpClient.post<BridgersQuoteResponse>(
-            'https://sswap.swft.pro/api/sswap/quote',
-            quoteRequest
-        );
-        const transactionQuoteData = quoteResponse.data?.txData;
+    const quoteRequest: BridgersQuoteRequest = {
+        fromTokenAddress,
+        toTokenAddress,
+        fromTokenAmount: fromWithoutFee.stringWeiAmount,
+        fromTokenChain: toBridgersBlockchain[from.blockchain],
+        toTokenChain: toBridgersBlockchain[to.blockchain]
+    };
+    const quoteResponse = await Injector.httpClient.post<BridgersQuoteResponse>(
+        'https://sswap.swft.pro/api/sswap/quote',
+        quoteRequest
+    );
+    const transactionQuoteData = quoteResponse.data?.txData;
 
-        if (transactionQuoteData?.amountOutMin) {
-            checkAmountFn(
-                'value' in transactionData ? transactionData : { data: '', to: '', value: '' },
-                transactionQuoteData.amountOutMin,
-                Web3Pure.toWei(toTokenAmountMin, to.decimals)
-            );
-        }
+    if (transactionQuoteData?.amountOutMin) {
+        checkAmountFn(
+            transactionQuoteData.amountOutMin,
+            Web3Pure.toWei(toTokenAmountMin, to.decimals)
+        );
     }
 
     const dstTokenAddress = BlockchainsInfo.isTronBlockchainName(to.blockchain)
@@ -120,6 +112,7 @@ export async function getMethodArgumentsAndTransactionData<
 
     return {
         methodArguments,
-        transactionData: { ...transactionData, to: contractAddress }
+        transactionData: { ...transactionData, to: contractAddress },
+        amountOut: amountOutMin
     };
 }

@@ -84,7 +84,7 @@ export class XyDexTrade extends EvmOnChainTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            return await this.getTradeData(options.receiverAddress, options.directTransaction);
+            return await this.getTradeData(options.receiverAddress);
             // const gasPriceInfo = await getGasPriceInfo(this.from.blockchain);
             //
             // const { gas, gasPrice } = getGasFeeInfo(apiTradeData.routers[0]!.estimatedGas, gasPriceInfo);
@@ -133,11 +133,7 @@ export class XyDexTrade extends EvmOnChainTrade {
             xyAnalyzeStatusCode(tradeData.errorCode, tradeData.errorMsg);
         }
 
-        this.checkAmountChange(
-            tradeData.tx!,
-            tradeData.route.dstQuoteTokenAmount,
-            this.to.stringWeiAmount
-        );
+        this.checkAmountChange(tradeData.route.dstQuoteTokenAmount, this.to.stringWeiAmount);
 
         return tradeData.tx;
     }

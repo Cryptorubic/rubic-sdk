@@ -13,6 +13,8 @@ import {
     TronBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';
 import { toBridgersBlockchain } from 'src/features/common/providers/bridgers/constants/to-bridgers-blockchain';
@@ -63,7 +65,7 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
         from: PriceTokenAmount,
         toToken: PriceToken,
         options: RequiredCrossChainOptions
-    ): Promise<CalculationResult> {
+    ): Promise<CalculationResult<EvmEncodeConfig | TronTransactionConfig>> {
         const fromBlockchain = from.blockchain as BridgersCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as BridgersCrossChainSupportedBlockchain;
         if (!this.areSupportedBlockchains(fromBlockchain, toBlockchain)) {
@@ -161,8 +163,7 @@ export class BridgersCrossChainProvider extends CrossChainProvider {
                               to as PriceTokenAmount<TronBlockchainName>,
                               options.receiverAddress,
                               options.providerAddress,
-                              feeInfo,
-                              toTokenAmountMin
+                              feeInfo
                           )
                         : null;
 

@@ -28,11 +28,7 @@ export abstract class AggregatorSolanaOnChainTrade extends SolanaOnChainTrade {
             this.slippageTolerance
         );
 
-        this.checkAmountChange(
-            evmEncodeConfig,
-            newToTokenAmountMin,
-            this.toTokenAmountMin.stringWeiAmount
-        );
+        this.checkAmountChange(newToTokenAmountMin, this.toTokenAmountMin.stringWeiAmount);
 
         return evmEncodeConfig;
     }

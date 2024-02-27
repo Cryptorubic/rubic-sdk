@@ -217,7 +217,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         await this.checkWalletState();
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, directTransaction } = options;
+        const { onConfirm } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -233,8 +233,8 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             const transactionConfig = await this.encode({
                 fromAddress,
                 receiverAddress,
-                ...(directTransaction && { directTransaction }),
-                ...(options?.referrer && { referrer: options?.referrer })
+                ...(options?.referrer && { referrer: options.referrer }),
+                ...(options?.useCacheData && { useCacheData: options.useCacheData })
             });
 
             let method: 'trySendTransaction' | 'sendTransaction' = 'trySendTransaction';

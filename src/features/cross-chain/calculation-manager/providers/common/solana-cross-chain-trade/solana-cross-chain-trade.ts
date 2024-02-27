@@ -17,7 +17,7 @@ import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-m
 import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 
-export abstract class SolanaCrossChainTrade extends CrossChainTrade {
+export abstract class SolanaCrossChainTrade extends CrossChainTrade<{ data: string }> {
     public abstract readonly from: PriceTokenAmount<SolanaBlockchainName>;
 
     protected get fromWeb3Public(): SolanaWeb3Public {
