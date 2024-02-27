@@ -3,6 +3,7 @@ import { searchPathQuery } from 'iziswap-sdk/lib/search/func';
 import { SearchPathQueryParams, SwapDirection } from 'iziswap-sdk/lib/search/types';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { wrappedAddress } from 'src/common/tokens/constants/wrapped-addresses';
 import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { combineOptions } from 'src/common/utils/options';
@@ -83,16 +84,14 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
         const tokenIn = {
             chainId,
             symbol: from.isNative ? wrappedNativeTokensList[this.blockchain]?.symbol : from.symbol,
-            address: from.isNative
-                ? wrappedNativeTokensList[this.blockchain]?.address
-                : from.address,
+            address: from.isNative ? wrappedAddress[this.blockchain] : from.address,
             decimal: from.decimals
         };
 
         const tokenOut = {
             chainId,
             symbol: to.isNative ? wrappedNativeTokensList[this.blockchain]?.symbol : to.symbol,
-            address: to.isNative ? wrappedNativeTokensList[this.blockchain]?.address : to.address,
+            address: to.isNative ? wrappedAddress[this.blockchain] : to.address,
             decimal: to.decimals
         };
 

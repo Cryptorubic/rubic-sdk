@@ -1,4 +1,5 @@
 import { RubicSdkError } from 'src/common/errors';
+import { wrappedAddress } from 'src/common/tokens/constants/wrapped-addresses';
 import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
 import { compareAddresses } from 'src/common/utils/blockchain';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -38,7 +39,7 @@ export class EvmWrapTrade extends EvmOnChainTrade {
     }
 
     public static isSupportedBlockchain(blockchain: EvmBlockchainName): boolean {
-        return Boolean(wrappedNativeTokensList[blockchain]?.address);
+        return Boolean(wrappedAddress[blockchain]);
     }
 
     public static isSupportedTrade(
@@ -49,7 +50,7 @@ export class EvmWrapTrade extends EvmOnChainTrade {
         if (!EvmWrapTrade.isSupportedBlockchain) {
             throw new RubicSdkError('Trade is not supported');
         }
-        const wethAddress = wrappedNativeTokensList[blockchain]!.address;
+        const wethAddress = wrappedAddress[blockchain] as string;
 
         return (
             (compareAddresses(fromAddress, EvmWeb3Pure.EMPTY_ADDRESS) &&
