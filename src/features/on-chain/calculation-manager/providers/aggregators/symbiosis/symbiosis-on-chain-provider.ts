@@ -42,6 +42,7 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
             });
             const {
                 approveTo: providerGateway,
+                tx: { value: providerValue },
                 tokenAmountOut: { amount: toTokenAmount }
             } = await SymbiosisApiService.getOnChainSwapTx(swapBody);
 
@@ -61,7 +62,8 @@ export class SymbiosisOnChainProvider extends AggregatorOnChainProvider {
                 slippageTolerance: options.slippageTolerance,
                 useProxy: options.useProxy,
                 withDeflation: options.withDeflation,
-                path
+                path,
+                providerValue
             };
 
             const gasFeeInfo =

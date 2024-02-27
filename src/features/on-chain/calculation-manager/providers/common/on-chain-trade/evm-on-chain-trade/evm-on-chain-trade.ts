@@ -58,6 +58,9 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
      */
     public readonly useProxy: boolean;
 
+    /* Used in getProxyContractParams for providers with extraNativeFee */
+    public providerValue: string | null;
+
     /**
      * Contains from amount, from which proxy fees were subtracted.
      * If proxy is not used, then amount is equal to from amount.
@@ -124,6 +127,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             }
         };
         this.withDeflation = evmOnChainTradeStruct.withDeflation;
+        this.providerValue = evmOnChainTradeStruct.providerValue || null;
     }
 
     public async approve(
@@ -291,7 +295,12 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     private async getProxyContractParams(
         options: EncodeTransactionOptions
     ): Promise<ContractParams> {
-        const swapData = await this.getSwapData(options);
+        const attachedNativeAmount = this.from.isNative ? this.from.stringWeiAmount : '0';
+        const extraNativeFee = new BigNumber(this.providerValue || 0)
+            .minus(attachedNativeAmount)
+            .toFixed();
+
+        const swapData = await this.getSwapData({ ...options, extraNativeFee });
 
         const receiverAddress = options.receiverAddress || options.fromAddress;
         const methodArguments = [
@@ -303,12 +312,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             swapData
         ];
 
-        const nativeToken = nativeTokensList[this.from.blockchain];
-        const proxyFee = new BigNumber(this.feeInfo.rubicProxy?.fixedFee?.amount || '0');
-        const value = Web3Pure.toWei(
-            proxyFee.plus(this.from.isNative ? this.from.tokenAmount : '0'),
-            nativeToken.decimals
-        );
+        const value = this.getSwapValue(this.providerValue);
 
         const txConfig = EvmWeb3Pure.encodeMethodCall(
             rubicProxyContractAddress[this.from.blockchain].router,
@@ -330,7 +334,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         };
     }
 
-    private static getReferrerAddress(referrer: string | undefined): string {
+    protected static getReferrerAddress(referrer: string | undefined): string {
         if (referrer) {
             return '0x' + utf8ToHex(referrer).slice(2, 42).padStart(40, '0');
         }
@@ -396,6 +400,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 this.from.address,
                 this.to.address,
                 this.from.stringWeiAmount,
+                options.extraNativeFee,
                 directTransactionConfig.data,
                 true
             ]

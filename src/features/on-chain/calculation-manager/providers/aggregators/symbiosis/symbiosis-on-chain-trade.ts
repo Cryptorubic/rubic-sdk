@@ -1,7 +1,6 @@
 import BigNumber from 'bignumber.js';
 import {
     LowSlippageDeflationaryTokenError,
-    NotWhitelistedProviderError,
     RubicSdkError,
     SwapRequestError
 } from 'src/common/errors';
@@ -13,8 +12,6 @@ import { EncodeTransactionOptions } from 'src/features/common/models/encode-tran
 import { SymbiosisApiService } from 'src/features/common/providers/symbiosis/services/symbiosis-api-service';
 import { SymbiosisParser } from 'src/features/common/providers/symbiosis/services/symbiosis-parser';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
-import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
@@ -139,43 +136,5 @@ export class SymbiosisOnChainTrade extends AggregatorEvmOnChainTrade {
             tx,
             toAmount: tokenAmountOut.amount
         };
-    }
-
-    protected override async getSwapData(options: GetContractParamsOptions): Promise<unknown[]> {
-        const directTransactionConfig = await this.encodeDirect({
-            ...options,
-            fromAddress: rubicProxyContractAddress[this.from.blockchain].router,
-            supportFee: false,
-            receiverAddress: rubicProxyContractAddress[this.from.blockchain].router,
-            directTransaction: options.directTransaction
-        });
-        const availableDexs = (
-            await ProxyCrossChainEvmTrade.getWhitelistedDexes(this.from.blockchain)
-        ).map(address => address.toLowerCase());
-
-        const routerAddress = directTransactionConfig.to;
-        const approveToAddress = this.providerGateway;
-        const method = directTransactionConfig.data.slice(0, 10);
-
-        if (!availableDexs.includes(routerAddress.toLowerCase())) {
-            throw new NotWhitelistedProviderError(routerAddress, undefined, 'dex');
-        }
-        await ProxyCrossChainEvmTrade.checkDexWhiteList(
-            this.from.blockchain,
-            routerAddress,
-            method
-        );
-
-        return [
-            [
-                routerAddress,
-                approveToAddress,
-                this.from.address,
-                this.to.address,
-                this.from.stringWeiAmount,
-                directTransactionConfig.data,
-                true
-            ]
-        ];
     }
 }

@@ -23,6 +23,9 @@ export interface OnChainTradeStruct<T extends BlockchainName> {
     };
 
     usedForCrossChain?: boolean;
+
+    /* providerValue including extraFee */
+    providerValue?: string;
 }
 
 export interface EvmOnChainTradeStruct extends OnChainTradeStruct<EvmBlockchainName> {}
