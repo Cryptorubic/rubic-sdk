@@ -397,5 +397,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Solana',
         symbol: 'SOL',
         decimals: 9
+    }),
+    [BLOCKCHAIN_NAME.ROOTSTOCK]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ROOTSTOCK,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'RBTC',
+        symbol: 'RBTC',
+        decimals: 18
     })
 };

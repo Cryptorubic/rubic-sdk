@@ -380,5 +380,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped ETH',
         symbol: 'WETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ROOTSTOCK]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ROOTSTOCK,
+        address: '0x967f8799aF07DF1534d48A95a5C9FEBE92c53ae0',
+        name: 'Wrapped RBTC',
+        symbol: 'WRBTC',
+        decimals: 18
     })
 };
