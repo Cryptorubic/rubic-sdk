@@ -28,7 +28,7 @@ import { TradeInfo } from 'src/features/cross-chain/calculation-manager/provider
 /**
  * Abstract class for all cross-chain providers' trades.
  */
-export abstract class CrossChainTrade<T> {
+export abstract class CrossChainTrade<T = unknown> {
     protected lastTransactionConfig: T | null = null;
 
     /**
