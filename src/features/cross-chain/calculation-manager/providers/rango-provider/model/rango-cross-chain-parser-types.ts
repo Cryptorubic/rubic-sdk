@@ -39,4 +39,4 @@ export interface GetCrossChainTradeConstructorParamsType {
 export type RangoGetGasDataParams = Omit<
     GetCrossChainTradeConstructorParamsType,
     'toTokenAmountMin' | 'options'
-> & { receiverAddress: string };
+>;

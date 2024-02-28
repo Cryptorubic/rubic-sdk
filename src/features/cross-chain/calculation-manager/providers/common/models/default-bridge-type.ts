@@ -23,7 +23,6 @@ export const DEFAULT_BRIDGE_TYPE = {
 
     OPEN_OCEAN: 'openocean',
     OPTIMISM_GATEWAY: 'optimism',
-    ORBITER_BRIDGE: 'orbiter',
     OSMOSIS_BRIDGE: 'osmosis',
 
     POLYGON: 'polygon',
