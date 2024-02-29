@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.3.1-alpha.symba.7",
+    "version": "5.3.2-alpha.orbitter-vc-code.1",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
