@@ -1,5 +1,5 @@
 import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
-import { ArbitrumRbcBridgeSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/arbitrum-rbc-bridge/models/arbitrum-rbc-bridge-supported-blockchain';
+import { ArbitrumRbcBridgeSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/arbitrum-rbc-bridge/constants/arbitrum-rbc-bridge-supported-blockchain';
 import { UniversalContract } from 'src/features/cross-chain/calculation-manager/providers/common/models/universal-contract';
 
 export const arbitrumRbcBridgeContractAddress: Record<
