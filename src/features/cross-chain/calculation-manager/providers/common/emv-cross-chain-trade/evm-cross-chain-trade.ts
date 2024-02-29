@@ -3,7 +3,6 @@ import {
     FailedToCheckForTransactionReceiptError,
     UnnecessaryApproveError
 } from 'src/common/errors';
-import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { getGasOptions } from 'src/common/utils/options';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
@@ -13,7 +12,6 @@ import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-ser
 import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-transaction-options';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -107,7 +105,6 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         const approveOptions: EvmBasicTransactionOptions = {
             onTransactionHash: options?.onApprove,
             gas: options?.approveGasLimit,
-            gasPrice: options?.gasPrice,
             gasPriceOptions: options?.gasPriceOptions
         };
 
@@ -136,7 +133,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
 
         await this.checkAllowanceAndApprove(options);
 
-        const { onConfirm, gasLimit, gasPrice, gasPriceOptions } = options;
+        const { onConfirm, gasLimit, gasPriceOptions } = options;
         let transactionHash: string;
         const onTransactionHash = (hash: string) => {
             if (onConfirm) {
@@ -146,7 +143,7 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
         };
 
         const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams(options);
+            await this.getContractParams(options, false);
 
         try {
             let method: 'tryExecuteContractMethod' | 'executeContractMethod' =
@@ -159,7 +156,6 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
                     methodName,
                     value,
                     gasLimit,
-                    gasPrice,
                     gasPriceOptions
                 );
                 method = 'executeContractMethod';
@@ -174,7 +170,6 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
                     value,
                     onTransactionHash,
                     gas: gasLimit,
-                    gasPrice,
                     gasPriceOptions
                 }
             );
@@ -226,34 +221,9 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade {
     }
 
     protected abstract getContractParams(
-        options: GetContractParamsOptions
+        options: GetContractParamsOptions,
+        skipAmountChangeCheck?: boolean
     ): Promise<ContractParams>;
-
-    public static checkAmountChange(
-        transactionRequest: EvmEncodeConfig,
-        newWeiAmount: string,
-        oldWeiAmount: string
-    ): void {
-        const oldAmount = new BigNumber(oldWeiAmount);
-        const newAmount = new BigNumber(newWeiAmount);
-        const acceptablePercentPriceChange = new BigNumber(0.5).dividedBy(100);
-
-        const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
-        const amountMinusPercent = oldAmount.multipliedBy(
-            new BigNumber(1).minus(acceptablePercentPriceChange)
-        );
-
-        const shouldThrowError =
-            newAmount.lt(amountMinusPercent) || newAmount.gt(amountPlusPercent);
-
-        if (shouldThrowError) {
-            throw new UpdatedRatesError({
-                ...transactionRequest,
-                newAmount: newWeiAmount,
-                oldAmount: oldWeiAmount
-            });
-        }
-    }
 
     public getUsdPrice(providerFeeToken?: BigNumber): BigNumber {
         let feeSum = new BigNumber(0);

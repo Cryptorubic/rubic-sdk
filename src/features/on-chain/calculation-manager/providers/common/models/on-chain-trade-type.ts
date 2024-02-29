@@ -36,6 +36,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     DEFI_PLAZA: 'DEFI_PLAZA',
     DEFI_SWAP: 'DEFI_SWAP',
     DFYN: 'DFYN',
+    DLN: 'DLN',
     DODO: 'DODO',
     DYSTOPIA: 'DYSTOPIA',
 
@@ -69,6 +70,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     NET_SWAP: 'NET_SWAP',
 
     OKC_SWAP: 'OKC_SWAP',
+    ODOS: 'ODOS',
     ONE_INCH: 'ONE_INCH',
     ONE_MOON: 'ONE_MOON',
     ONE_SOL: 'ONE_SOL',

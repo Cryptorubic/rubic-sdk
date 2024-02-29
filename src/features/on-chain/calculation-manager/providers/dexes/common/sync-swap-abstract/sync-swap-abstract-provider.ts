@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { NotSupportedTokensError } from 'src/common/errors';
-import { PriceToken, PriceTokenAmount, Token, wrappedNativeTokensList } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
+import { wrappedNativeTokensList } from 'src/common/tokens/constants/wrapped-native-tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';

@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { BridgersPairIsUnavailableError, MaxAmountError, MinAmountError } from 'src/common/errors';
-import { nativeTokensList, PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { bridgersNativeAddress } from 'src/features/common/providers/bridgers/constants/bridgers-native-address';

@@ -1,7 +1,8 @@
 import BigNumber from 'bignumber.js';
-import { nativeTokensList, PriceTokenAmount } from 'src/common/tokens';
+import { PriceTokenAmount } from 'src/common/tokens';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { Cache } from 'src/common/utils/decorators';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Injector } from 'src/core/injector/injector';
@@ -29,7 +30,7 @@ export class OnChainProxyService {
         maxAge: 15_000
     })
     public async getFeeInfo(
-        from: PriceTokenAmount<EvmBlockchainName>,
+        from: PriceTokenAmount<BlockchainName>,
         providerAddress: string
     ): Promise<OnChainProxyFeeInfo> {
         const fromBlockchain = from.blockchain;

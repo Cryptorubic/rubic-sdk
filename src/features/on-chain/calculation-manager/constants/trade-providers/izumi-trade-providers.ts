@@ -3,6 +3,7 @@ import { IzumiBscProvider } from 'src/features/on-chain/calculation-manager/prov
 import { IzumiLineaProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/linea/izumi-linea/izumi-linea-provider';
 import { IzumiMantaPacificProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/manta-pacific/izumi-manta-pacific/izumi-manta-pacific-provider';
 import { IzumiMantleProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/mantle/izumi-mantle/izumi-mantle-provider';
+import { IzumiZetachainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zetachain/izumi-zetachain/izumi-zetachain-provider';
 import { IzumiZksyncProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/izumi-zksync/izumi-zksync-provider';
 
 export const izumiTradeProviders = [
@@ -11,5 +12,6 @@ export const izumiTradeProviders = [
     IzumiMantleProvider,
     IzumiBaseProvider,
     IzumiLineaProvider,
-    IzumiMantaPacificProvider
+    IzumiMantaPacificProvider,
+    IzumiZetachainProvider
 ];

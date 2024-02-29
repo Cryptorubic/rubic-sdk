@@ -12,7 +12,8 @@ export class RangoCrossChainParser {
         routePath,
         swapQueryParams,
         toToken,
-        toTokenAmountMin
+        toTokenAmountMin,
+        bridgeSubtype
     }: GetCrossChainTradeConstructorParamsType): Promise<RangoCrossChainTradeConstructorParams> {
         const gasData =
             options.gasCalculation === 'enabled'
@@ -21,13 +22,14 @@ export class RangoCrossChainParser {
                       toToken,
                       swapQueryParams,
                       feeInfo,
-                      routePath
+                      routePath,
+                      bridgeSubtype
                   })
                 : null;
         const priceImpact = fromToken.calculatePriceImpactPercent(toToken);
         const slippage = options.slippageTolerance;
 
-        const crossChainTrade = {
+        const crossChainTrade: RangoCrossChainTradeConstructorParams['crossChainTrade'] = {
             from: fromToken,
             to: toToken,
             gasData,
@@ -35,7 +37,8 @@ export class RangoCrossChainParser {
             priceImpact,
             slippage,
             feeInfo,
-            swapQueryParams
+            swapQueryParams,
+            bridgeSubtype
         };
 
         const providerAddress = options.providerAddress;

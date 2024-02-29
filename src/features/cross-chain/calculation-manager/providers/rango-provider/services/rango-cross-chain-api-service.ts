@@ -44,6 +44,7 @@ export class RangoCrossChainApiService {
         if (!res.route || res.error) {
             throw new RubicSdkError(res.error ?? 'No available routes in rango.');
         }
+
         return res;
     }
 
