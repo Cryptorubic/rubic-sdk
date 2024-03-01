@@ -18,7 +18,8 @@ export const openoceanOnChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.BASE,
     BLOCKCHAIN_NAME.MANTA_PACIFIC,
     BLOCKCHAIN_NAME.METIS,
-    BLOCKCHAIN_NAME.SCROLL
+    BLOCKCHAIN_NAME.SCROLL,
+    BLOCKCHAIN_NAME.BLAST
 ] as const;
 
 export type OpenoceanOnChainSupportedBlockchain =
