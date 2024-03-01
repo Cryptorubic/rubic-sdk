@@ -75,8 +75,8 @@ const testnetNativeTokens: Record<TestnetEvmBlockchain, Token> = {
         symbol: 'BERA',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.BLAST]: new Token({
-        blockchain: BLOCKCHAIN_NAME.BLAST,
+    [BLOCKCHAIN_NAME.BLAST_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BLAST_TESTNET,
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'Ether',
         symbol: 'ETH',
@@ -397,5 +397,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Solana',
         symbol: 'SOL',
         decimals: 9
+    }),
+    [BLOCKCHAIN_NAME.BLAST]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BLAST,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Ether',
+        symbol: 'ETH',
+        decimals: 18
     })
 };
