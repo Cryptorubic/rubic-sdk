@@ -58,6 +58,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
      */
     public readonly useProxy: boolean;
 
+    //@TODO add providerValue in feeInfo.provider.cryptoFee
     /* Used in getProxyContractParams for providers with extraNativeFee */
     public providerValue: string | null;
 
