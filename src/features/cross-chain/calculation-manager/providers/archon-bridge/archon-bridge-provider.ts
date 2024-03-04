@@ -1,6 +1,7 @@
 import { NotSupportedTokensError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
+import { compareAddresses } from 'src/common/utils/blockchain';
 import {
     BLOCKCHAIN_NAME,
     BlockchainName,
@@ -13,9 +14,15 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { ArchonBridgeTrade } from 'src/features/cross-chain/calculation-manager/providers/archon-bridge/archon-bridge-trade';
 import { ArchonContractService } from 'src/features/cross-chain/calculation-manager/providers/archon-bridge/archon-contract-service';
 import {
+    ArchonBridgeNonEonSupportedBlockchain,
     ArchonBridgeSupportedBlockchain,
     archonBridgeSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/archon-bridge/constants/archon-bridge-supported-blockchain';
+import {
+    eonAvalancheTokensMapping,
+    eonEthTokensMapping,
+    supportedEonTokens
+} from 'src/features/cross-chain/calculation-manager/providers/archon-bridge/constants/supported-tokens';
 import { CrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/common/cross-chain-provider';
 import { CalculationResult } from 'src/features/cross-chain/calculation-manager/providers/common/models/calculation-result';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
@@ -61,7 +68,7 @@ export class ArchonBridgeProvider extends CrossChainProvider {
             };
         }
 
-        if (await this.checkUnsupportedTokens(fromToken, toToken)) {
+        if (this.checkUnsupportedTokens(fromToken, toToken)) {
             return {
                 trade: null,
                 error: new NotSupportedTokensError(),
@@ -84,10 +91,7 @@ export class ArchonBridgeProvider extends CrossChainProvider {
             const nativeToken = await PriceToken.createFromToken(
                 nativeTokensList[fromToken.blockchain]
             );
-            const cryptoFee = await ArchonContractService.fetchLayerZeroFee(
-                fromBlockchain,
-                toBlockchain
-            );
+            const cryptoFee = await ArchonContractService.fetchLayerZeroFee(fromToken, toToken);
             feeInfo.provider = {
                 cryptoFee: {
                     amount: Web3Pure.fromWei(cryptoFee, nativeToken.decimals),
@@ -96,8 +100,8 @@ export class ArchonBridgeProvider extends CrossChainProvider {
             };
 
             const providerFeePercent = await ArchonContractService.fetchDepositFeeBps(
-                fromBlockchain,
-                toBlockchain
+                fromToken,
+                toToken
             );
             const toAmount = fromWithoutFee.tokenAmount.multipliedBy(1 - providerFeePercent);
 
@@ -113,7 +117,8 @@ export class ArchonBridgeProvider extends CrossChainProvider {
                     {
                         from: fromToken,
                         to,
-                        gasData
+                        gasData,
+                        feeInfo
                     },
                     options.providerAddress,
                     await this.getRoutePath(fromToken, to)
@@ -152,23 +157,33 @@ export class ArchonBridgeProvider extends CrossChainProvider {
         return [{ type: 'cross-chain', provider: this.type, path: [fromToken, toToken] }];
     }
 
-    private async checkUnsupportedTokens(
-        fromToken: PriceTokenAmount,
-        toToken: PriceToken
-    ): Promise<boolean> {
+    private checkUnsupportedTokens(fromToken: PriceTokenAmount, toToken: PriceToken): boolean {
         const fromBlockchain = fromToken.blockchain as ArchonBridgeSupportedBlockchain;
         const toBlockchain = toToken.blockchain as ArchonBridgeSupportedBlockchain;
-        return (
-            !(await ArchonContractService.checkSupportedToken(
-                fromBlockchain,
-                toBlockchain,
-                fromToken.address
-            )) ||
-            !(await ArchonContractService.checkSupportedToken(
-                toBlockchain,
-                fromBlockchain,
-                toToken.address
-            ))
+
+        const [eonToken, nonEonBlockchain, nonEonToken] =
+            fromBlockchain === BLOCKCHAIN_NAME.HORIZEN_EON
+                ? [fromToken, toBlockchain, toToken]
+                : [toToken, fromBlockchain, fromToken];
+
+        const eonTokenAddress = Object.values(supportedEonTokens).find(el =>
+            compareAddresses(el, eonToken.address)
+        );
+        if (!eonTokenAddress) {
+            return true;
+        }
+        const fromNetworkAddresses =
+            nonEonBlockchain === BLOCKCHAIN_NAME.ETHEREUM
+                ? eonEthTokensMapping
+                : eonAvalancheTokensMapping;
+
+        return !compareAddresses(
+            nonEonToken.address,
+            nonEonToken.isNative
+                ? fromNetworkAddresses[
+                      `NATIVE_${nonEonBlockchain as ArchonBridgeNonEonSupportedBlockchain}`
+                  ]
+                : fromNetworkAddresses[eonTokenAddress]
         );
     }
 }

@@ -7,3 +7,7 @@ export const archonBridgeSupportedBlockchains = [
 ] as const;
 
 export type ArchonBridgeSupportedBlockchain = (typeof archonBridgeSupportedBlockchains)[number];
+export type ArchonBridgeNonEonSupportedBlockchain = Exclude<
+    ArchonBridgeSupportedBlockchain,
+    typeof BLOCKCHAIN_NAME.HORIZEN_EON
+>;
