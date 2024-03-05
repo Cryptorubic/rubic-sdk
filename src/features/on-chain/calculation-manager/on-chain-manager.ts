@@ -5,7 +5,11 @@ import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { notNull } from 'src/common/utils/object';
 import { combineOptions } from 'src/common/utils/options';
 import pTimeout from 'src/common/utils/p-timeout';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { ProviderAddress } from 'src/core/sdk/models/provider-address';
 import { getPriceTokensFromInputTokens } from 'src/features/common/utils/get-price-tokens-from-input-tokens';
@@ -189,6 +193,9 @@ export class OnChainManager {
         let useProxy: boolean;
         if (options?.useProxy === false) {
             useProxy = options.useProxy;
+            //@TODO enable Proxy after fix OO Blast
+        } else if (from.blockchain === BLOCKCHAIN_NAME.BLAST) {
+            useProxy = false;
         } else {
             useProxy =
                 OnChainProxyService.isSupportedBlockchain(from.blockchain) &&
