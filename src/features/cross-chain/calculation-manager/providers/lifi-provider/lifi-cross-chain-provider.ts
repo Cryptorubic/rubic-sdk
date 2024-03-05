@@ -3,7 +3,11 @@ import BigNumber from 'bignumber.js';
 import { MinAmountError, NotSupportedTokensError, RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, TokenAmount } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { getLifiConfig } from 'src/features/common/providers/lifi/constants/lifi-config';
@@ -94,10 +98,15 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
         const fromAddress = this.getWalletAddress(fromBlockchain);
         const toAddress = options.receiverAddress || fromAddress;
+        const fromTokenAddress =
+            from.blockchain === BLOCKCHAIN_NAME.METIS && from.isNative
+                ? '0xDeadDeAddeAddEAddeadDEaDDEAdDeaDDeAD0000'
+                : from.address;
+
         const routesRequest: RoutesRequest = {
             fromChainId,
             fromAmount: fromWithoutFee.stringWeiAmount,
-            fromTokenAddress: from.address,
+            fromTokenAddress,
             toChainId,
             toTokenAddress: toToken.address,
             options: routeOptions,
