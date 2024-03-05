@@ -40,7 +40,7 @@ export class LifiCrossChainProvider extends CrossChainProvider {
 
     private readonly lifi = new LiFi(getLifiConfig());
 
-    private readonly MIN_AMOUNT_USD = new BigNumber(30);
+    private readonly MIN_AMOUNT_USD = new BigNumber(1);
 
     public isSupportedBlockchain(
         blockchain: BlockchainName
@@ -77,7 +77,8 @@ export class LifiCrossChainProvider extends CrossChainProvider {
             slippage: options.slippageTolerance,
             order: 'RECOMMENDED',
             allowSwitchChain: false,
-            bridges: { deny: denyBridges }
+            bridges: { deny: denyBridges },
+            integrator: 'rubic'
         };
 
         const fromChainId = blockchainId[fromBlockchain];
