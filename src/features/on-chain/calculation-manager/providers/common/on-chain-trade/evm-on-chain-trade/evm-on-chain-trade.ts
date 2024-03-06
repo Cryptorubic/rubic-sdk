@@ -26,6 +26,7 @@ import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/
 import { GetContractParamsOptions } from 'src/features/cross-chain/calculation-manager/providers/common/models/get-contract-params-options';
 import { ProxyCrossChainEvmTrade } from 'src/features/cross-chain/calculation-manager/providers/common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
 import { IsDeflationToken } from 'src/features/deflation-token-manager/models/is-deflation-token';
+import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { OnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import {
@@ -38,6 +39,8 @@ import { TransactionReceipt } from 'web3-eth';
 import { utf8ToHex } from 'web3-utils';
 
 export abstract class EvmOnChainTrade extends OnChainTrade {
+    protected lastTransactionConfig: EvmEncodeConfig | null = null;
+
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
     public readonly to: PriceTokenAmount<EvmBlockchainName>;
@@ -230,12 +233,12 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         const receiverAddress = options.receiverAddress || this.walletAddress;
 
         try {
-            const transactionConfig = await this.encode({
-                fromAddress,
+            const transactionConfig = await this.setTransactionConfig(
+                false,
+                options?.useCacheData || false,
                 receiverAddress,
-                ...(options?.referrer && { referrer: options.referrer }),
-                ...(options?.useCacheData && { useCacheData: options.useCacheData })
-            });
+                fromAddress
+            );
 
             let method: 'trySendTransaction' | 'sendTransaction' = 'trySendTransaction';
             if (options?.testMode) {
@@ -400,5 +403,41 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
                 true
             ]
         ];
+    }
+
+    protected async getTransactionConfigAndAmount(
+        receiverAddress?: string,
+        fromAddress?: string
+    ): Promise<GetToAmountAndTxDataResponse> {
+        const tx = await this.encode({
+            fromAddress: fromAddress || this.walletAddress,
+            receiverAddress
+        });
+        return { tx, toAmount: this.to.stringWeiAmount };
+    }
+
+    protected async setTransactionConfig(
+        skipAmountChangeCheck: boolean,
+        useCacheData: boolean,
+        receiverAddress?: string,
+        fromAddress?: string
+    ): Promise<EvmEncodeConfig> {
+        if (this.lastTransactionConfig && useCacheData) {
+            return this.lastTransactionConfig;
+        }
+
+        const { tx, toAmount } = await this.getTransactionConfigAndAmount(
+            receiverAddress,
+            fromAddress
+        );
+        this.lastTransactionConfig = tx;
+        setTimeout(() => {
+            this.lastTransactionConfig = null;
+        }, 15_000);
+
+        if (!skipAmountChangeCheck) {
+            this.checkAmountChange(toAmount, this.to.stringWeiAmount);
+        }
+        return tx;
     }
 }

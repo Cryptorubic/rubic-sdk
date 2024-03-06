@@ -114,7 +114,8 @@ export abstract class CrossChainTrade<T = unknown> {
     protected checkAmountChange(newWeiAmount: string, oldWeiAmount: string): void {
         const oldAmount = new BigNumber(oldWeiAmount);
         const newAmount = new BigNumber(newWeiAmount);
-        const acceptablePercentPriceChange = new BigNumber(0.5).dividedBy(100);
+        const changePercent = 0.01;
+        const acceptablePercentPriceChange = new BigNumber(changePercent).dividedBy(100);
 
         const amountPlusPercent = oldAmount.multipliedBy(acceptablePercentPriceChange.plus(1));
         const amountMinusPercent = oldAmount.multipliedBy(

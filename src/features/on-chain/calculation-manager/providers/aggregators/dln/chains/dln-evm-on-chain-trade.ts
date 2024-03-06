@@ -132,9 +132,8 @@ export class DlnEvmOnChainTrade extends AggregatorEvmOnChainTrade {
         }
     }
 
-    protected async getToAmountAndTxData(
-        receiverAddress?: string,
-        _fromAddress?: string
+    protected async getTransactionConfigAndAmount(
+        receiverAddress?: string
     ): Promise<GetToAmountAndTxDataResponse> {
         const params: DlnOnChainSwapRequest = {
             ...this.transactionRequest,

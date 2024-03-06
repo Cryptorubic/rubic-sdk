@@ -119,7 +119,7 @@ export class SymbiosisOnChainTrade extends AggregatorEvmOnChainTrade {
     }
 
     //@TODO - CHECK IF we need to pass fromAddress with proxy or remove it after listing
-    protected async getToAmountAndTxData(
+    protected async getTransactionConfigAndAmount(
         receiverAddress?: string,
         fromAddress?: string
     ): Promise<GetToAmountAndTxDataResponse> {

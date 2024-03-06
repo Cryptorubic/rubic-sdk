@@ -3,7 +3,6 @@ import { TokenUtils } from 'src/common/utils/token-utils';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 
 import { EvmOnChainTrade } from '../on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { GetToAmountAndTxDataResponse } from './models/aggregator-on-chain-types';
 
 export abstract class AggregatorEvmOnChainTrade extends EvmOnChainTrade {
     protected async getTxConfigAndCheckAmount(
@@ -15,7 +14,10 @@ export abstract class AggregatorEvmOnChainTrade extends EvmOnChainTrade {
             return directTransaction;
         }
 
-        const { tx, toAmount } = await this.getToAmountAndTxData(receiverAddress, fromAddress);
+        const { tx, toAmount } = await this.getTransactionConfigAndAmount(
+            receiverAddress,
+            fromAddress
+        );
 
         const gasLimit = tx.gas && parseInt(tx.gas, 16).toString();
         const gasPrice = tx.gasPrice && parseInt(tx.gasPrice, 16).toString();
@@ -37,12 +39,4 @@ export abstract class AggregatorEvmOnChainTrade extends EvmOnChainTrade {
 
         return evmEncodeConfig;
     }
-
-    /**
-     * @description Returns data for method OnChainTrade.checkAmountChange and EvmEncodeConfig value
-     */
-    protected abstract getToAmountAndTxData(
-        receiverAddress?: string,
-        fromAddress?: string
-    ): Promise<GetToAmountAndTxDataResponse>;
 }

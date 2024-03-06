@@ -133,7 +133,7 @@ export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
         }
     }
 
-    protected async getToAmountAndTxData(
+    protected async getTransactionConfigAndAmount(
         receiverAddress?: string
     ): Promise<GetToAmountAndTxDataResponse> {
         const gasPrice = await Injector.web3PublicService

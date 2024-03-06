@@ -118,7 +118,7 @@ export class OdosOnChainTrade extends AggregatorEvmOnChainTrade {
         }
     }
 
-    protected async getToAmountAndTxData(
+    protected async getTransactionConfigAndAmount(
         receiverAddress?: string
     ): Promise<GetToAmountAndTxDataResponse> {
         const { pathId } = await OdosOnChainApiService.getBestRoute(this.bestRouteRequestBody);

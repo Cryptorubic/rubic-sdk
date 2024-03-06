@@ -129,7 +129,7 @@ export class LifiTrade extends AggregatorEvmOnChainTrade {
         }
     }
 
-    protected async getToAmountAndTxData(
+    protected async getTransactionConfigAndAmount(
         receiverAddress?: string,
         fromAddress?: string
     ): Promise<GetToAmountAndTxDataResponse> {
