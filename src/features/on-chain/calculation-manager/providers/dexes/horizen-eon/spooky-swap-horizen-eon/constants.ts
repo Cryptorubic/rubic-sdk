@@ -4,7 +4,7 @@ import { UniswapV2ProviderConfiguration } from 'src/features/on-chain/calculatio
 import { defaultHorizenEonProviderConfiguration } from 'src/features/on-chain/calculation-manager/providers/dexes/horizen-eon/default-constants';
 
 export const SPOOKY_SWAP_HORIZEN_EON_CONTRACT_ADDRESS =
-    '0xF491e7B69E4244ad4002BC14e878a34207E38c29';
+    '0xccEC4EF0228488636B6E8dF77D7d4211c87Ef255';
 
 const routingProvidersAddresses = [
     wrappedNativeTokensList[BLOCKCHAIN_NAME.HORIZEN_EON]!.address, // wZEN
