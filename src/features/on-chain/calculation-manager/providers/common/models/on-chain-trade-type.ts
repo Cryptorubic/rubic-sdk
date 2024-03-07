@@ -69,8 +69,9 @@ export const ON_CHAIN_TRADE_TYPE = {
 
     NET_SWAP: 'NET_SWAP',
 
-    OKC_SWAP: 'OKC_SWAP',
     ODOS: 'ODOS',
+    OKC_SWAP: 'OKC_SWAP',
+    OKU_SWAP: 'OKU_SWAP',
     ONE_INCH: 'ONE_INCH',
     ONE_MOON: 'ONE_MOON',
     ONE_SOL: 'ONE_SOL',
