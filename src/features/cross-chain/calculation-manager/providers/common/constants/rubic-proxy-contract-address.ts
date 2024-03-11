@@ -1,5 +1,20 @@
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
+const CHAINS_WITH_ONLY_DIFFERENT_ROUTER_ADDRESS = [
+    BLOCKCHAIN_NAME.LINEA,
+    BLOCKCHAIN_NAME.BASE,
+    BLOCKCHAIN_NAME.MANTLE,
+    BLOCKCHAIN_NAME.SCROLL,
+    BLOCKCHAIN_NAME.MANTA_PACIFIC,
+    BLOCKCHAIN_NAME.METIS,
+    BLOCKCHAIN_NAME.BLAST,
+    BLOCKCHAIN_NAME.ROOTSTOCK
+] as const;
+
+function isOnlyRouterDifferent(blockchain: BlockchainName): boolean {
+    return CHAINS_WITH_ONLY_DIFFERENT_ROUTER_ADDRESS.some(chain => chain === blockchain);
+}
+
 export const rubicProxyContractAddress: Record<
     BlockchainName,
     {
@@ -20,15 +35,7 @@ export const rubicProxyContractAddress: Record<
             router = '0xa63c029612ddaD00A269383Ab016D1e7c14E851D';
             gateway = '0x8E70e517057e7380587Ea6990dAe81cB1Ba405ce';
         }
-        if (
-            blockchain === BLOCKCHAIN_NAME.LINEA ||
-            blockchain === BLOCKCHAIN_NAME.BASE ||
-            blockchain === BLOCKCHAIN_NAME.MANTLE ||
-            blockchain === BLOCKCHAIN_NAME.SCROLL ||
-            blockchain === BLOCKCHAIN_NAME.MANTA_PACIFIC ||
-            blockchain === BLOCKCHAIN_NAME.METIS ||
-            blockchain === BLOCKCHAIN_NAME.BLAST
-        ) {
+        if (isOnlyRouterDifferent(blockchain)) {
             router = '0xAf14797CcF963B1e3d028a9d51853acE16aedBA1';
         }
 
