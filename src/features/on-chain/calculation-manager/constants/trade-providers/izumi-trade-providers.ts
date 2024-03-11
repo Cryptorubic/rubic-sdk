@@ -19,4 +19,5 @@ export const izumiTradeProviders = [
     IzumiZetachainProvider,
     IzumiKromaProvider,
     IzumiArbitrumProvider
+    // IzumiBlastProvider
 ];

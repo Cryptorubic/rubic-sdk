@@ -360,8 +360,8 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'WBERA',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.BLAST]: new Token({
-        blockchain: BLOCKCHAIN_NAME.BLAST,
+    [BLOCKCHAIN_NAME.BLAST_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BLAST_TESTNET,
         address: '0x4200000000000000000000000000000000000023',
         name: 'Wrapped ETH',
         symbol: 'WETH',
@@ -377,6 +377,13 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
     [BLOCKCHAIN_NAME.HOLESKY]: new Token({
         blockchain: BLOCKCHAIN_NAME.HOLESKY,
         address: '',
+        name: 'Wrapped ETH',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BLAST]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BLAST,
+        address: '0x4300000000000000000000000000000000000004',
         name: 'Wrapped ETH',
         symbol: 'WETH',
         decimals: 18

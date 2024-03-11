@@ -51,6 +51,7 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.LINEA,
     BLOCKCHAIN_NAME.MANTLE,
     BLOCKCHAIN_NAME.BASE,
+    BLOCKCHAIN_NAME.BLAST,
     BLOCKCHAIN_NAME.KROMA
 ] as const;
 
@@ -117,6 +118,7 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.LINEA]: 'ethereum',
             [BLOCKCHAIN_NAME.MANTLE]: 'mantle',
             [BLOCKCHAIN_NAME.BASE]: 'ethereum',
+            [BLOCKCHAIN_NAME.BLAST]: 'blast',
             [BLOCKCHAIN_NAME.KROMA]: 'kroma'
         };
 
@@ -164,6 +166,7 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.LINEA]: 'linea',
             [BLOCKCHAIN_NAME.MANTLE]: 'mantle',
             [BLOCKCHAIN_NAME.BASE]: 'base',
+            [BLOCKCHAIN_NAME.BLAST]: 'blast-2',
             [BLOCKCHAIN_NAME.KROMA]: 'kroma'
         };
     }
