@@ -10,8 +10,9 @@ import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/model
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
-import { OkuSwapOnChainradeStruct } from './models/oku-swap-trade-types';
+import { OkuSwapOnChainTradeStruct } from './models/oku-swap-trade-types';
 import { okuSwapOnChainSupportedBlockchains } from './models/okuswap-on-chain-supported-chains';
+import { OkuSwapOnChainTrade } from './okuswap-on-chain-trade';
 
 export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.OKU_SWAP;
@@ -25,11 +26,13 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
         toToken: PriceToken,
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
+        const func = () => ({ from, toToken, options });
+        func();
         return { type: this.tradeType, error: new RubicSdkError() };
     }
 
     protected async getGasFeeInfo(
-        tradeStruct: OkuSwapOnChainradeStruct,
+        tradeStruct: OkuSwapOnChainTradeStruct,
         providerGateway: string
     ): Promise<GasFeeInfo | null> {
         try {
