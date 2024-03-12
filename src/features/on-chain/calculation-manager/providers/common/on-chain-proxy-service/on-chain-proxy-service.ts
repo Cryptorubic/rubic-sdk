@@ -7,6 +7,7 @@ import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-publ
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import {
+    ON_CHAIN_PROXY_DISABLED_CHAINS,
     ProxySupportedBlockchain,
     proxySupportedBlockchains
 } from 'src/features/common/constants/proxy-supported-blockchain';
@@ -21,9 +22,14 @@ export class OnChainProxyService {
     public static isSupportedBlockchain(
         blockchain: BlockchainName
     ): blockchain is ProxySupportedBlockchain {
-        return proxySupportedBlockchains.some(
+        const isProxySupported = proxySupportedBlockchains.some(
             supportedBlockchain => supportedBlockchain === blockchain
         );
+        const isNotDisabledInOnChain = ON_CHAIN_PROXY_DISABLED_CHAINS.every(
+            chain => chain !== blockchain
+        );
+
+        return isProxySupported && isNotDisabledInOnChain;
     }
 
     @Cache({

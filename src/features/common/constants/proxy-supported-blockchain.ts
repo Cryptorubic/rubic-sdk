@@ -37,4 +37,6 @@ export const proxySupportedBlockchains = [
     // BLOCKCHAIN_NAME.OASIS
 ] as const;
 
+export const ON_CHAIN_PROXY_DISABLED_CHAINS = [BLOCKCHAIN_NAME.ROOTSTOCK] as const;
+
 export type ProxySupportedBlockchain = (typeof proxySupportedBlockchains)[number];
