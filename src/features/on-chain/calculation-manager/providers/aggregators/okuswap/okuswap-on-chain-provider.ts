@@ -1,6 +1,9 @@
+import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
-import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
+import { FAKE_WALLET_ADDRESS } from 'src/features/common/constants/fake-wallet-address';
 
 import { OnChainTradeError } from '../../../models/on-chain-trade-error';
 import { RequiredOnChainCalculationOptions } from '../../common/models/on-chain-calculation-options';
@@ -10,25 +13,130 @@ import { GasFeeInfo } from '../../common/on-chain-trade/evm-on-chain-trade/model
 import { OnChainTrade } from '../../common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from '../../common/utils/get-gas-fee-info';
 import { getGasPriceInfo } from '../../common/utils/get-gas-price-info';
-import { OkuSwapOnChainTradeStruct } from './models/oku-swap-trade-types';
-import { okuSwapOnChainSupportedBlockchains } from './models/okuswap-on-chain-supported-chains';
+import {
+    GetBestRouteReturnType,
+    OkuQuoteRequestBody,
+    OkuQuoteResponse
+} from './models/okuswap-api-types';
+import { OKUSWAP_BLOCKCHAINS } from './models/okuswap-chain-names';
+import {
+    OKUSWAP_ON_CHAIN_SUPPORTED_BLOCKCHAINS,
+    OkuSwapSupportedBlockchain
+} from './models/okuswap-on-chain-supported-chains';
+import { OkuSwapOnChainTradeStruct } from './models/okuswap-trade-types';
 import { OkuSwapOnChainTrade } from './okuswap-on-chain-trade';
+import { OkuSwapApiService } from './services/oku-swap-api-service';
 
 export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.OKU_SWAP;
 
     protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
-        return okuSwapOnChainSupportedBlockchains.some(chain => chain === blockchain);
+        return OKUSWAP_ON_CHAIN_SUPPORTED_BLOCKCHAINS.some(chain => chain === blockchain);
     }
 
     public async calculate(
-        from: PriceTokenAmount,
-        toToken: PriceToken,
+        from: PriceTokenAmount<EvmBlockchainName>,
+        toToken: PriceToken<EvmBlockchainName>,
         options: RequiredOnChainCalculationOptions
     ): Promise<OnChainTrade | OnChainTradeError> {
-        const func = () => ({ from, toToken, options });
-        func();
-        return { type: this.tradeType, error: new RubicSdkError() };
+        if (!this.isSupportedBlockchain(from.blockchain)) {
+            throw new RubicSdkError(`OkuSwap doesn't support ${from.blockchain} chain!`);
+        }
+
+        const fromBlockchain = from.blockchain as OkuSwapSupportedBlockchain;
+        const walletAddress =
+            options.fromAddress || this.getWalletAddress(fromBlockchain) || FAKE_WALLET_ADDRESS;
+
+        try {
+            const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, options);
+            const path = this.getRoutePath(from, toToken);
+
+            const subProviders = await OkuSwapApiService.getOkuSubProvidersForChain(
+                from.blockchain
+            );
+            const quoteReqBody = {
+                account: walletAddress,
+                chain: OKUSWAP_BLOCKCHAINS[fromBlockchain],
+                inTokenAddress: from.address,
+                outTokenAddress: toToken.address,
+                isExactIn: true,
+                slippage: options.slippageTolerance * 10_000,
+                inTokenAmount: from.tokenAmount.toString()
+            } as OkuQuoteRequestBody;
+
+            const { subProvider, swapReqBody, toAmount, gas } = await this.getBestRoute(
+                subProviders,
+                quoteReqBody
+            );
+
+            const { to: providerGateway } = await OkuSwapApiService.makeSwapRequest(
+                subProvider,
+                swapReqBody
+            );
+
+            const to = new PriceTokenAmount({
+                ...toToken.asStruct,
+                weiAmount: new BigNumber(Web3Pure.toWei(toAmount, toToken.decimals))
+            });
+
+            const tradeStruct: OkuSwapOnChainTradeStruct = {
+                from,
+                to,
+                fromWithoutFee,
+                proxyFeeInfo,
+                gasFeeInfo: {
+                    gasLimit: new BigNumber(gas)
+                },
+                slippageTolerance: options.slippageTolerance,
+                useProxy: options.useProxy,
+                withDeflation: options.withDeflation,
+                path,
+                quoteReqBody,
+                swapReqBody,
+                subProvider
+            };
+
+            const gasFeeInfo =
+                options.gasCalculation === 'calculate'
+                    ? await this.getGasFeeInfo(tradeStruct, providerGateway)
+                    : null;
+
+            return new OkuSwapOnChainTrade(
+                {
+                    ...tradeStruct,
+                    gasFeeInfo
+                },
+                options.providerAddress,
+                providerGateway
+            );
+        } catch (err) {
+            return {
+                type: ON_CHAIN_TRADE_TYPE.OKU_SWAP,
+                error: err
+            };
+        }
+    }
+
+    private async getBestRoute(
+        subProviders: string[],
+        body: OkuQuoteRequestBody
+    ): Promise<GetBestRouteReturnType> {
+        const promises = subProviders.map(p => OkuSwapApiService.makeQuoteRequest(p, body));
+        const routes = await Promise.all(promises);
+        const [bestRoute] = routes.sort((a, b) =>
+            new BigNumber(b.outAmount).minus(a.outAmount).toNumber()
+        ) as OkuQuoteResponse[];
+
+        if (!bestRoute) {
+            throw new RubicSdkError('[OKU_SWAP_PROVIDER] No route available!');
+        }
+
+        return {
+            subProvider: bestRoute.market,
+            swapReqBody: { coupon: bestRoute.coupon, signingRequest: bestRoute.signingRequest },
+            toAmount: bestRoute.outAmount,
+            gas: bestRoute.estimatedGas
+        };
     }
 
     protected async getGasFeeInfo(

@@ -2,6 +2,7 @@ import { DlnOnChainProvider } from 'src/features/on-chain/calculation-manager/pr
 
 import { LifiProvider } from '../providers/aggregators/lifi/lifi-provider';
 import { OdosOnChainProvider } from '../providers/aggregators/odos/odos-on-chain-provider';
+import { OkuSwapOnChainProvider } from '../providers/aggregators/okuswap/okuswap-on-chain-provider';
 import { OpenOceanProvider } from '../providers/aggregators/open-ocean/open-ocean-provider';
 import { RangoOnChainProvider } from '../providers/aggregators/rango/rango-on-chain-provider';
 
@@ -10,6 +11,7 @@ export const AGGREGATORS_ON_CHAIN = {
     OPEN_OCEAN: OpenOceanProvider,
     RANGO: RangoOnChainProvider,
     ODOS: OdosOnChainProvider,
-    DLN: DlnOnChainProvider
+    DLN: DlnOnChainProvider,
+    OKU_SWAP: OkuSwapOnChainProvider
     // SYMBIOSIS: SymbiosisOnChainProvider
 } as const;
