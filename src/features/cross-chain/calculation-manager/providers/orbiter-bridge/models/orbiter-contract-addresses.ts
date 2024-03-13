@@ -5,7 +5,7 @@ import { OrbiterSupportedBlockchain } from './orbiter-supported-blockchains';
 export const orbiterContractAddresses: Record<OrbiterSupportedBlockchain, string> = {
     [BLOCKCHAIN_NAME.ETHEREUM]: '0xc741900276cd598060b0fe6594fbe977392928f4',
     [BLOCKCHAIN_NAME.ARBITRUM]: '0x6a065083886ec63d274b8e1fe19ae2ddf498bfdd',
-    [BLOCKCHAIN_NAME.ZK_SYNC]: '0xbf3922a0cebbcd718e715e83d9187cc4bba23f11',
+    [BLOCKCHAIN_NAME.ZK_SYNC]: '0xb4ab2ff34fadc774aff45f1c4566cb5e16bd4867',
     [BLOCKCHAIN_NAME.POLYGON]: '0x653f25dc641544675338cb47057f8ea530c69b78',
     [BLOCKCHAIN_NAME.OPTIMISM]: '0x3191f40de6991b1bb1f61b7cec43d62bb337786b',
     [BLOCKCHAIN_NAME.ZETACHAIN]: '0x13E46b2a3f8512eD4682a8Fb8B560589fE3C2172',

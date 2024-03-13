@@ -260,8 +260,10 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
                 value: transactionConfig.value
             };
         }
-        const contractAddress = this.quoteConfig.endpoint;
-        const value = OrbiterUtils.getTransferAmount(this.from, this.quoteConfig);
+
+        //orbiter wallet address wich sends money to receiverWalletAddress after transfer confirmation
+        const orbiterTokensDispenser = this.quoteConfig.endpoint;
+        const transferAmount = OrbiterUtils.getTransferAmount(this.from, this.quoteConfig);
         const encodedReceiverAndCode = OrbiterUtils.getHexDataArg(
             this.quoteConfig.vc,
             receiverAddress || this.walletAddress
@@ -269,15 +271,16 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
 
         const methodName = this.from.isNative ? 'transfer' : 'transferToken';
         const methodArgs = this.from.isNative
-            ? [contractAddress, encodedReceiverAndCode]
-            : [this.from.address, contractAddress, value, encodedReceiverAndCode];
+            ? [orbiterTokensDispenser, encodedReceiverAndCode]
+            : [this.from.address, orbiterTokensDispenser, transferAmount, encodedReceiverAndCode];
+        const value = this.from.isNative ? transferAmount : '0';
 
         const config = EvmWeb3Pure.encodeMethodCall(
-            contractAddress,
+            orbiterContractAddresses[this.fromBlockchain],
             ORBITER_ROUTER_V3_ABI,
             methodName,
             methodArgs,
-            '0'
+            value
         );
 
         return {
