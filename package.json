@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.4.2",
+    "version": "5.4.3-alpha.orbiter-proxy.1",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
