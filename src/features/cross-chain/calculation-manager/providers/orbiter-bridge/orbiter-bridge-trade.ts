@@ -238,7 +238,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         );
 
         const sendingToken = this.from.isNative ? [] : [this.from.address];
-        const sendingAmount = this.from.isNative ? [] : [this.getSendingAmount()];
+        const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
 
         return {
             contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
@@ -247,19 +247,6 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
             value
         };
-    }
-
-    private getSendingAmount(): string {
-        const transferAmount = OrbiterUtils.getTransferAmount(this.from, this.quoteConfig);
-        const fee = 1_000;
-        const ratio = 1_000_000;
-        const numerator = new BigNumber(ratio).multipliedBy(transferAmount);
-        const fromAmountWei = numerator
-            .dividedBy(ratio - fee)
-            .decimalPlaces(0)
-            .toFixed();
-
-        return fromAmountWei;
     }
 
     private async callOrbiterContract(
@@ -276,7 +263,8 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
 
         //orbiter wallet address wich sends money to receiverWalletAddress after transfer confirmation
         const orbiterTokensDispenser = this.quoteConfig.endpoint;
-        const transferAmount = OrbiterUtils.getTransferAmount(this.from, this.quoteConfig);
+
+        const transferAmount = this.from.stringWeiAmount;
         const encodedReceiverAndCode = OrbiterUtils.getHexDataArg(
             this.quoteConfig.vc,
             receiverAddress || this.walletAddress
