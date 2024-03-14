@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.4.4-alpha-pls-onchain.1",
+    "version": "5.4.4",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
