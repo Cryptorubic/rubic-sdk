@@ -14,4 +14,5 @@ export const izumiTradeProviders = [
     IzumiLineaProvider,
     IzumiMantaPacificProvider,
     IzumiZetachainProvider
+    // IzumiBlastProvider
 ];

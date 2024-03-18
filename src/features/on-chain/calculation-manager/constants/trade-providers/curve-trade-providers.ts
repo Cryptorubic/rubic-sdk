@@ -8,7 +8,6 @@ import { CurveKavaProvider } from 'src/features/on-chain/calculation-manager/pro
 import { CurveMoonbeamProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/moonbeam/curve-moonbeam/curve-moonbeam-provider';
 import { CurveOptimismProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/optimism/curve-optimism/curve-optimism-provider';
 import { CurvePolygonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/curve-polygon/curve-polygon-provider';
-import { CurvePulsechainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/curve-pulsechain/curve-ethereum-provider';
 
 export const CurveTradeProviders = [
     CurveArbitrumProvider,
@@ -20,6 +19,5 @@ export const CurveTradeProviders = [
     CurveGnosisProvider,
     CurveMoonbeamProvider,
     CurveOptimismProvider,
-    CurvePolygonProvider,
-    CurvePulsechainProvider
+    CurvePolygonProvider
 ] as const;

@@ -83,7 +83,8 @@ export class OrbiterUtils {
         const tradingFee = this.getTradingFee(from, config);
         const amountMinusTradingFee = from.tokenAmount.minus(tradingFee);
         const weiAmount = Web3Pure.toWei(amountMinusTradingFee, from.decimals);
-        const total = weiAmount.replace(/\d{4}$/g, config.vc);
+        const pureVC = config.vc.replace(/^0+/g, '');
+        const total = weiAmount.replace(/\d{4}$/g, pureVC);
 
         return total;
     }

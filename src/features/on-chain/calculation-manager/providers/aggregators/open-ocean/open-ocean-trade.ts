@@ -109,7 +109,11 @@ export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
         );
 
         try {
-            const transactionData = await this.getTxConfigAndCheckAmount(options?.receiverAddress);
+            const transactionData = await this.getTxConfigAndCheckAmount(
+                options?.receiverAddress,
+                options?.fromAddress,
+                options?.directTransaction
+            );
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,
                 gasPrice: transactionData.gasPrice
