@@ -261,7 +261,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             };
         }
 
-        //orbiter wallet address wich sends money to receiverWalletAddress after transfer confirmation
+        // Orbiter deposit address to send funds money to receiverWalletAddress after transfer confirmation
         const orbiterTokensDispenser = this.quoteConfig.endpoint;
 
         const transferAmount = this.from.stringWeiAmount;
