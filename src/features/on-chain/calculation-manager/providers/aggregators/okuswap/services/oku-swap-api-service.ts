@@ -3,7 +3,7 @@ import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 
-import { OKUSWAP_API_BASE_URL } from '../constants/okuswap-api';
+import { RUBIC_X_API_OKU_APIKEY, RUBIC_X_API_OKU_BASE_URL } from '../constants/okuswap-api';
 import {
     OkuQuoteRequestBody,
     OkuQuoteResponse,
@@ -22,8 +22,13 @@ export class OkuSwapApiService {
     ): Promise<OkuQuoteResponse> {
         try {
             const res = await Injector.httpClient.post<OkuQuoteResponse>(
-                `${OKUSWAP_API_BASE_URL}/${subProvider}/swap_quote`,
-                body
+                `${RUBIC_X_API_OKU_BASE_URL}/${subProvider}/swap_quote`,
+                body,
+                {
+                    headers: {
+                        apikey: RUBIC_X_API_OKU_APIKEY
+                    }
+                }
             );
 
             return res;
@@ -38,8 +43,13 @@ export class OkuSwapApiService {
     ): Promise<Pick<EvmEncodeConfig, 'data' | 'to' | 'value'>> {
         try {
             const { trade } = await Injector.httpClient.post<OkuSwapResponse>(
-                `${OKUSWAP_API_BASE_URL}/${subProvider}/execution_information`,
-                body
+                `${RUBIC_X_API_OKU_BASE_URL}/${subProvider}/execution_information`,
+                body,
+                {
+                    headers: {
+                        apikey: RUBIC_X_API_OKU_APIKEY
+                    }
+                }
             );
 
             return {
@@ -55,7 +65,12 @@ export class OkuSwapApiService {
     public static async getOkuSubProvidersForChain(blockchain: BlockchainName): Promise<string[]> {
         try {
             const { status: subProviders } = await Injector.httpClient.get<OkuSubProvidersRes>(
-                `${OKUSWAP_API_BASE_URL}/overview`
+                `${RUBIC_X_API_OKU_BASE_URL}/overview`,
+                {
+                    headers: {
+                        apikey: RUBIC_X_API_OKU_APIKEY
+                    }
+                }
             );
             const availableSubProviders = subProviders
                 .filter(p => this.isSupportedProvider(p, blockchain))
