@@ -65,10 +65,8 @@ export class OrbiterUtils {
         config: OrbiterQuoteConfig
     ): BigNumber {
         const digit = from.decimals === 18 ? 8 : 5;
-        const extraRatio = 50;
         const tradingFee = from.tokenAmount
             .multipliedBy(config.tradeFee)
-            .plus(extraRatio)
             .dividedBy(ORBITER_FEE_DIVIDER)
             .decimalPlaces(digit, BigNumber.ROUND_UP);
 
