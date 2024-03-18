@@ -2,8 +2,6 @@ import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { Injector } from 'src/core/injector/injector';
-import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
@@ -42,10 +40,6 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
         try {
-            const walletAddress =
-                Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-            checkUnsupportedReceiverAddress(options?.receiverAddress, walletAddress);
-
             this.orbiterQuoteConfigs = await OrbiterApiService.getQuoteConfigs();
 
             const feeInfo = await this.getFeeInfo(
