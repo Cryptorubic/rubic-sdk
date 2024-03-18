@@ -19,7 +19,8 @@ export const xySupportedBlockchains = [
     BLOCKCHAIN_NAME.LINEA,
     BLOCKCHAIN_NAME.BASE,
     BLOCKCHAIN_NAME.SCROLL,
-    BLOCKCHAIN_NAME.MANTLE
+    BLOCKCHAIN_NAME.MANTLE,
+    BLOCKCHAIN_NAME.BLAST
 ] as const;
 
 export type XyCrossChainSupportedBlockchain = (typeof xySupportedBlockchains)[number];
