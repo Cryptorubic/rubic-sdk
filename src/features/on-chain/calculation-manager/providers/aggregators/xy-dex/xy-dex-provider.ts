@@ -1,8 +1,9 @@
 import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { BlockchainName, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { Injector } from 'src/core/injector/injector';
 import {
     XY_API_ENDPOINT,
     XY_NATIVE_ADDRESS
@@ -11,25 +12,29 @@ import { XyQuoteRequest } from 'src/features/common/providers/xy/models/xy-quote
 import { XyQuoteResponse } from 'src/features/common/providers/xy/models/xy-quote-response';
 import { xyAnalyzeStatusCode } from 'src/features/common/providers/xy/utils/xy-utils';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { xySupportedBlockchains } from 'src/features/cross-chain/calculation-manager/providers/xy-provider/constants/xy-supported-blockchains';
+import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-trade';
+import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
+import { XyDexTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/models/xy-dex-trade-struct';
+import { XyDexTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/xy-dex-trade';
 import {
     OnChainCalculationOptions,
     RequiredOnChainCalculationOptions
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
-import {
-    ON_CHAIN_TRADE_TYPE,
-    OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { AggregatorOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
+import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
+import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
-import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
-import { XyDexTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/xy-dex-abstract/models/xy-dex-trade-struct';
-import { XyDexTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/xy-dex-abstract/xy-dex-trade';
 
-export abstract class XyDexAbstractProvider extends EvmOnChainProvider {
+export class XyDexProvider extends AggregatorOnChainProvider {
     private readonly defaultOptions = evmProviderDefaultOptions;
 
-    public get type(): OnChainTradeType {
-        return ON_CHAIN_TRADE_TYPE.XY_DEX;
+    public readonly tradeType = ON_CHAIN_TRADE_TYPE.XY_DEX;
+
+    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+        return xySupportedBlockchains.some(item => item === blockchain);
     }
 
     public async calculate(
@@ -40,7 +45,7 @@ export abstract class XyDexAbstractProvider extends EvmOnChainProvider {
         const fromAddress =
             options?.useProxy || this.defaultOptions.useProxy
                 ? rubicProxyContractAddress[from.blockchain].gateway
-                : this.walletAddress;
+                : this.getWalletAddress(from.blockchain);
         const fullOptions = combineOptions(options, {
             ...this.defaultOptions,
             fromAddress
@@ -48,8 +53,11 @@ export abstract class XyDexAbstractProvider extends EvmOnChainProvider {
 
         const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
 
-        const { toTokenAmountInWei, estimatedGas, contractAddress, provider } =
-            await this.getTradeInfo(from, toToken, fullOptions);
+        const { toTokenAmountInWei, contractAddress, provider } = await this.getTradeInfo(
+            from,
+            toToken,
+            fullOptions
+        );
 
         const to = new PriceTokenAmount({
             ...toToken.asStruct,
@@ -71,20 +79,7 @@ export abstract class XyDexAbstractProvider extends EvmOnChainProvider {
             provider
         };
 
-        try {
-            const gasPriceInfo = await this.getGasPriceInfo();
-            const gasLimit = (await XyDexTrade.getGasLimit(tradeStruct)) || estimatedGas;
-            const gasFeeInfo = getGasFeeInfo(gasLimit, gasPriceInfo);
-            return new XyDexTrade(
-                {
-                    ...tradeStruct,
-                    gasFeeInfo
-                },
-                fullOptions.providerAddress
-            );
-        } catch {
-            return new XyDexTrade(tradeStruct, fullOptions.providerAddress);
-        }
+        return new XyDexTrade(tradeStruct, fullOptions.providerAddress);
     }
 
     private async getTradeInfo(
@@ -110,7 +105,7 @@ export abstract class XyDexAbstractProvider extends EvmOnChainProvider {
             slippage: options.slippageTolerance * 100
         };
 
-        const trade = await this.httpClient.get<XyQuoteResponse>(`${XY_API_ENDPOINT}/quote`, {
+        const trade = await Injector.httpClient.get<XyQuoteResponse>(`${XY_API_ENDPOINT}/quote`, {
             params: { ...quoteTradeParams }
         });
 
@@ -126,5 +121,15 @@ export abstract class XyDexAbstractProvider extends EvmOnChainProvider {
             contractAddress: bestRoute.contractAddress,
             provider: bestRoute.srcSwapDescription.provider
         };
+    }
+
+    protected async getGasFeeInfo(lifiTradeStruct: LifiTradeStruct): Promise<GasFeeInfo | null> {
+        try {
+            const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
+            const gasLimit = await LifiTrade.getGasLimit(lifiTradeStruct);
+            return getGasFeeInfo(gasLimit, gasPriceInfo);
+        } catch {
+            return null;
+        }
     }
 }

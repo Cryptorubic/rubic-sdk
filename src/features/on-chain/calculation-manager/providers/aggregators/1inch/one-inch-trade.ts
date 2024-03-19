@@ -18,18 +18,18 @@ import {
     createTokenNativeAddressProxy,
     createTokenNativeAddressProxyInPathStartAndEnd
 } from 'src/features/common/utils/token-native-address-proxy';
+import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/constants/constants';
+import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-swap-request';
+import { OneinchSwapResponse } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-swap-response';
+import { OneinchTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-trade-struct';
+import { OneInchApiService } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/one-inch-api-service';
 import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
-import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-request';
-import { OneinchSwapResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-response';
-import { OneinchTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-trade-struct';
-import { oneInchHttpGetRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/utils';
 
-export class OneinchTrade extends EvmOnChainTrade {
+export class OneInchTrade extends EvmOnChainTrade {
     /** @internal */
     public static async getGasLimit(tradeStruct: OneinchTradeStruct): Promise<BigNumber | null> {
         const fromBlockchain = tradeStruct.from.blockchain;
@@ -40,7 +40,7 @@ export class OneinchTrade extends EvmOnChainTrade {
         }
 
         try {
-            const transactionConfig = await new OneinchTrade(
+            const transactionConfig = await new OneInchTrade(
                 tradeStruct,
                 EvmWeb3Pure.EMPTY_ADDRESS
             ).encode({ fromAddress: walletAddress });
@@ -67,7 +67,7 @@ export class OneinchTrade extends EvmOnChainTrade {
         fromAddress: string,
         useProxy: boolean
     ): Promise<void | never> {
-        const needApprove = await new OneinchTrade(
+        const needApprove = await new OneInchTrade(
             {
                 from,
                 to: toToken,
@@ -165,18 +165,8 @@ export class OneinchTrade extends EvmOnChainTrade {
     private async getTradeData(
         disableEstimate = false,
         fromAddress?: string,
-        receiverAddress?: string,
-        directTransactionConfig?: EvmEncodeConfig
+        receiverAddress?: string
     ): Promise<EvmEncodeConfig> {
-        if (directTransactionConfig) {
-            return {
-                data: directTransactionConfig.data,
-                value: directTransactionConfig.value,
-                to: directTransactionConfig.to,
-                gasPrice: directTransactionConfig.gasPrice,
-                gas: String(directTransactionConfig.gas)
-            };
-        }
         const fromTokenAddress = this.nativeSupportedFromWithoutFee.address;
         const toTokenAddress = this.nativeSupportedTo.address;
         const swapRequest: OneinchSwapRequest = {
@@ -195,9 +185,7 @@ export class OneinchTrade extends EvmOnChainTrade {
             }
         };
 
-        const { tx, toAmount } = await this.getResponseFromApiToTransactionRequest(swapRequest);
-
-        this.checkAmountChange(toAmount, this.to.stringWeiAmount);
+        const { tx } = await this.getResponseFromApiToTransactionRequest(swapRequest);
 
         return {
             data: tx.data,
@@ -214,7 +202,11 @@ export class OneinchTrade extends EvmOnChainTrade {
     private async getResponseFromApiToTransactionRequest(
         params: OneinchSwapRequest
     ): Promise<OneinchSwapResponse> {
-        return oneInchHttpGetRequest<OneinchSwapResponse>('swap', this.from.blockchain, params);
+        return OneInchApiService.oneInchHttpGetRequest<OneinchSwapResponse>(
+            'swap',
+            this.from.blockchain,
+            params
+        );
     }
 
     private specifyError(err: {

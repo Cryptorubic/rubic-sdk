@@ -3,67 +3,70 @@ import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount, Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { combineOptions } from 'src/common/utils/options';
-import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import {
+    BLOCKCHAIN_NAME,
+    BlockchainName,
+    EvmBlockchainName
+} from 'src/core/blockchain/models/blockchain-name';
+import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
+import { Injector } from 'src/core/injector/injector';
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { OnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
+import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
+import { oneinchArbitrumProtocols } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/constants/arbitrum-protocols';
+import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/constants/constants';
 import {
-    ON_CHAIN_TRADE_TYPE,
-    OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+    OneInchSupportedBlockchains,
+    oneInchSupportedBlockchains
+} from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/constants/one-inch-supported-blockchains';
+import { OneinchCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-calculation-options';
+import { OneinchQuoteRequest } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-quote-request';
+import { OneinchQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-quote-response';
+import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-swap-request';
+import { OneinchSwapResponse } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-swap-response';
+import { OneinchTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/models/oneinch-trade-struct';
+import { OneInchApiService } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/one-inch-api-service';
+import { OneInchTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/1inch/one-inch-trade';
+import { LifiTrade } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/lifi-trade';
+import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
+import { RequiredOnChainCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
+import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { GasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
+import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
+import { getGasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-price-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
-import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
-import { oneinchApiParams } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/constants';
-import { OneinchCalculationOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-calculation-options';
-import { OneinchQuoteRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-quote-request';
-import { OneinchQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-quote-response';
-import { OneinchSwapRequest } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-request';
-import { OneinchSwapResponse } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-swap-response';
-import { OneinchTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/models/oneinch-trade-struct';
-import { OneinchTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/oneinch-trade';
-import {
-    oneInchHttpGetApproveRequest,
-    oneInchHttpGetRequest
-} from 'src/features/on-chain/calculation-manager/providers/dexes/common/oneinch-abstract/utils';
 
-export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
+import { AggregatorOnChainProvider } from '../../common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
+
+export class OneInchProvider extends AggregatorOnChainProvider {
     private readonly defaultOptions: Omit<OneinchCalculationOptions, 'fromAddress'> = {
         ...evmProviderDefaultOptions,
         disableMultihops: false,
         wrappedAddress: oneinchApiParams.nativeAddress
     };
 
-    public get type(): OnChainTradeType {
-        return ON_CHAIN_TRADE_TYPE.ONE_INCH;
+    public readonly tradeType = ON_CHAIN_TRADE_TYPE.ONE_INCH;
+
+    protected isSupportedBlockchain(blockchain: BlockchainName): boolean {
+        return oneInchSupportedBlockchains.some(item => item === blockchain);
     }
 
-    private async loadContractAddress(): Promise<string> {
-        const response = await oneInchHttpGetApproveRequest<{
-            address: string;
-        }>('approve/spender', this.blockchain);
-        return response.address;
-    }
-
-    /**
-     * Calculates input amount, based on amount, user wants to get.
-     * @param from Token to sell.
-     * @param to Token to get with output amount.
-     * @param options Additional options.
-     */
-    public async calculateExactOutputAmount(
-        from: PriceToken<EvmBlockchainName>,
-        to: PriceTokenAmount<EvmBlockchainName>,
-        options?: OnChainCalculationOptions
-    ): Promise<BigNumber> {
-        return (await this.calculate(to, from, options)).to.tokenAmount;
+    protected get walletAddress(): string {
+        return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address;
     }
 
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
-        options?: OnChainCalculationOptions
-    ): Promise<OneinchTrade> {
+        options: RequiredOnChainCalculationOptions
+    ): Promise<OnChainTrade | OnChainTradeError> {
+        if (!this.isSupportedBlockchain(from.blockchain)) {
+            throw new RubicSdkError('Blockchain is not supported');
+        }
+
+        const fromBlockchain = from.blockchain as OneInchSupportedBlockchains;
+
         const fromAddress =
             options?.useProxy || this.defaultOptions.useProxy
                 ? rubicProxyContractAddress[from.blockchain].gateway
@@ -81,11 +84,10 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         );
         const toTokenClone = createTokenNativeAddressProxy(toToken, oneinchApiParams.nativeAddress);
 
-        const [dexContractAddress, { toTokenAmountInWei, estimatedGas, path, data }] =
-            await Promise.all([
-                this.loadContractAddress(),
-                this.getTradeInfo(fromTokenClone, toTokenClone, fromWithoutFee, fullOptions)
-            ]);
+        const [dexContractAddress, { toTokenAmountInWei, path, data }] = await Promise.all([
+            this.loadContractAddress(fromBlockchain),
+            this.getTradeInfo(fromTokenClone, toTokenClone, fromWithoutFee, fullOptions)
+        ]);
         path[0] = from;
         path[path.length - 1] = toToken;
 
@@ -93,7 +95,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             ...toToken.asStruct,
             weiAmount: toTokenAmountInWei
         });
-        const availableProtocols = this.getAvailableProtocols();
+        const availableProtocols = this.getAvailableProtocols(fromBlockchain);
 
         const oneinchTradeStruct: OneinchTradeStruct = {
             dexContractAddress,
@@ -112,20 +114,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             availableProtocols
         };
 
-        try {
-            const gasPriceInfo = await this.getGasPriceInfo();
-            const gasLimit = (await OneinchTrade.getGasLimit(oneinchTradeStruct)) || estimatedGas;
-            const gasFeeInfo = getGasFeeInfo(gasLimit, gasPriceInfo);
-            return new OneinchTrade(
-                {
-                    ...oneinchTradeStruct,
-                    gasFeeInfo
-                },
-                fullOptions.providerAddress
-            );
-        } catch {
-            return new OneinchTrade(oneinchTradeStruct, fullOptions.providerAddress);
-        }
+        return new OneInchTrade(oneinchTradeStruct, fullOptions.providerAddress);
     }
 
     private async getTradeInfo(
@@ -145,7 +134,9 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         const fromTokenAddress =
             isNative && !isDefaultWrappedAddress ? options.wrappedAddress : from.address;
         const toTokenAddress = toToken.address;
-        const availableProtocols = this.getAvailableProtocols();
+        const availableProtocols = this.getAvailableProtocols(
+            from.blockchain as OneInchSupportedBlockchains
+        );
         const quoteTradeParams: OneinchQuoteRequest = {
             params: {
                 src: fromTokenAddress,
@@ -170,7 +161,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             }
 
             if (options.gasCalculation !== 'disabled') {
-                await OneinchTrade.checkIfNeedApproveAndThrowError(
+                await OneInchTrade.checkIfNeedApproveAndThrowError(
                     from,
                     toToken,
                     fromWithoutFee,
@@ -187,9 +178,9 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
                     disableEstimate: options.gasCalculation === 'disabled'
                 }
             };
-            oneInchTrade = await oneInchHttpGetRequest<OneinchSwapResponse>(
+            oneInchTrade = await OneInchApiService.oneInchHttpGetRequest<OneinchSwapResponse>(
                 'swap',
-                this.blockchain,
+                from.blockchain,
                 swapTradeParams
             );
 
@@ -197,9 +188,9 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             toTokenAmount = oneInchTrade.toAmount;
             data = oneInchTrade.tx.data;
         } catch (_err) {
-            oneInchTrade = await oneInchHttpGetRequest<OneinchQuoteResponse>(
+            oneInchTrade = await OneInchApiService.oneInchHttpGetRequest<OneinchQuoteResponse>(
                 'quote',
-                this.blockchain,
+                from.blockchain,
                 quoteTradeParams
             );
             if (oneInchTrade.hasOwnProperty('errors') || !oneInchTrade.toAmount) {
@@ -215,6 +206,37 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         }
 
         return { toTokenAmountInWei: new BigNumber(toTokenAmount), estimatedGas, path, data };
+    }
+
+    private getTokenAddress(token: PriceToken): string {
+        if (token.isNative) {
+            if (token.blockchain === BLOCKCHAIN_NAME.METIS) {
+                return '0xdeaddeaddeaddeaddeaddeaddeaddeaddead0000';
+            }
+
+            return oneinchApiParams.nativeAddress;
+        }
+        return token.address;
+    }
+
+    protected async getGasFeeInfo(lifiTradeStruct: LifiTradeStruct): Promise<GasFeeInfo | null> {
+        try {
+            const gasPriceInfo = await getGasPriceInfo(lifiTradeStruct.from.blockchain);
+            const gasLimit = await LifiTrade.getGasLimit(lifiTradeStruct);
+            return getGasFeeInfo(gasLimit, gasPriceInfo);
+        } catch {
+            return null;
+        }
+    }
+
+    private getAvailableProtocols(fromBlockchain: OneInchSupportedBlockchains): string | undefined {
+        if (fromBlockchain === BLOCKCHAIN_NAME.ARBITRUM) {
+            return oneinchArbitrumProtocols.join(',');
+        }
+        if (fromBlockchain === BLOCKCHAIN_NAME.ZK_SYNC) {
+            return 'ZKSYNC_MUTE,ZKSYNC_PMMX,ZKSYNC_SPACEFI,ZKSYNC_SYNCSWAP,ZKSYNC_GEM,ZKSYNC_MAVERICK_V1';
+        }
+        return undefined;
     }
 
     /**
@@ -236,12 +258,12 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
 
         const tokensPathWithoutNative = await Token.createTokens(
             addressesPath.filter(tokenAddress => tokenAddress !== oneinchApiParams.nativeAddress),
-            this.blockchain
+            fromToken.blockchain
         );
         let tokensPathWithoutNativeIndex = 0;
         const tokensPath = addressesPath.map(tokenAddress => {
             if (tokenAddress === oneinchApiParams.nativeAddress) {
-                return nativeTokensList[this.blockchain];
+                return nativeTokensList[fromToken.blockchain];
             }
 
             const token = tokensPathWithoutNative[tokensPathWithoutNativeIndex];
@@ -257,7 +279,12 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
         return [fromToken, ...tokensPath, toToken];
     }
 
-    protected getAvailableProtocols(): string | undefined {
-        return undefined;
+    private async loadContractAddress(
+        fromBlockchain: OneInchSupportedBlockchains
+    ): Promise<string> {
+        const response = await OneInchApiService.oneInchHttpGetApproveRequest<{
+            address: string;
+        }>('approve/spender', fromBlockchain);
+        return response.address;
     }
 }

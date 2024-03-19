@@ -15,9 +15,9 @@ import {
 import { XyBuildTxRequest } from 'src/features/common/providers/xy/models/xy-build-tx-request';
 import { XyBuildTxResponse } from 'src/features/common/providers/xy/models/xy-build-tx-response';
 import { xyAnalyzeStatusCode } from 'src/features/common/providers/xy/utils/xy-utils';
+import { XyDexTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/models/xy-dex-trade-struct';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-import { XyDexTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/xy-dex-abstract/models/xy-dex-trade-struct';
 
 export class XyDexTrade extends EvmOnChainTrade {
     /** @internal */
@@ -85,31 +85,12 @@ export class XyDexTrade extends EvmOnChainTrade {
 
         try {
             return await this.getTradeData(options.receiverAddress);
-            // const gasPriceInfo = await getGasPriceInfo(this.from.blockchain);
-            //
-            // const { gas, gasPrice } = getGasFeeInfo(apiTradeData.routers[0]!.estimatedGas, gasPriceInfo);
-            //
-            // return {
-            //     ...apiTradeData.tx,
-            //     gas,
-            //     gasPrice
-            // };
         } catch (err) {
             throw parseError(err, err?.response?.data?.description || err.message);
         }
     }
 
-    private async getTradeData(
-        receiverAddress?: string,
-        directTransaction?: EvmEncodeConfig
-    ): Promise<EvmEncodeConfig> {
-        if (directTransaction) {
-            return {
-                data: directTransaction.data,
-                to: directTransaction.to,
-                value: directTransaction.value
-            };
-        }
+    private async getTradeData(receiverAddress?: string): Promise<EvmEncodeConfig> {
         const receiver = receiverAddress || this.walletAddress;
 
         const chainId = blockchainId[this.from.blockchain];
@@ -132,8 +113,6 @@ export class XyDexTrade extends EvmOnChainTrade {
         if (!tradeData.success) {
             xyAnalyzeStatusCode(tradeData.errorCode, tradeData.errorMsg);
         }
-
-        this.checkAmountChange(tradeData.route.dstQuoteTokenAmount, this.to.stringWeiAmount);
 
         return tradeData.tx;
     }

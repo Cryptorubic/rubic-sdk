@@ -280,9 +280,9 @@ export abstract class EvmCrossChainTrade extends CrossChainTrade<EvmEncodeConfig
             );
         }
         return this.setTransactionConfig(
-            options.skipAmountCheck || false,
+            options?.skipAmountCheck || false,
             options?.useCacheData || false,
-            options.receiverAddress
+            options?.receiverAddress || this.walletAddress
         );
     }
 
