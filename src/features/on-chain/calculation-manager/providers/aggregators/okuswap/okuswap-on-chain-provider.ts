@@ -69,7 +69,10 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
                 quoteReqBody
             );
 
-            const providerGateway = swapReqBody.signingRequest.permit2Address;
+            const { to: providerGateway } = await OkuSwapApiService.makeSwapRequest(
+                subProvider,
+                swapReqBody
+            );
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -130,7 +133,10 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
 
         return {
             subProvider: bestRoute.market,
-            swapReqBody: { coupon: bestRoute.coupon, signingRequest: bestRoute.signingRequest },
+            swapReqBody: {
+                coupon: bestRoute.coupon,
+                signingRequest: bestRoute?.signingRequest
+            },
             toAmount: bestRoute.outAmount,
             gas: bestRoute.estimatedGas
         };

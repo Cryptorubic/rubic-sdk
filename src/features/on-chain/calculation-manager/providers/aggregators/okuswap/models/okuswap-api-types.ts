@@ -27,7 +27,7 @@ export interface OkuQuoteResponse {
     /* non-wei raw amount (100, 100.1 etc) */
     outAmount: string;
     coupon: object;
-    signingRequest: {
+    signingRequest?: {
         typedData: object[];
         permit2Address: string;
         permitSignature: object[];
@@ -52,7 +52,7 @@ export interface OkuQuoteResponse {
 
 export interface OkuSwapRequestBody {
     coupon: object;
-    signingRequest: {
+    signingRequest?: {
         typedData: object[];
         permit2Address: string;
         permitSignature: object[];
