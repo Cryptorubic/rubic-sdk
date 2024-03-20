@@ -84,7 +84,7 @@ export class UniswapV3QuoterController extends UniswapV3AlgebraQuoterController 
     } {
         if (poolsPath.length === 1 && poolsPath?.[0]) {
             const methodName =
-                exact === 'input' ? 'quoteExactInputSingle' : 'quoteExactOutputSingle';
+                exact === 'input' ? 'quoteExacМоtInputSingle' : 'quoteExactOutputSingle';
             const sqrtPriceLimitX96 = 0;
             return {
                 poolsPath,

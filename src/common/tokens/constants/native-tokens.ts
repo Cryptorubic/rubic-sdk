@@ -404,5 +404,19 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'Ether',
         symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.KROMA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.KROMA,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.HORIZEN_EON]: new Token({
+        blockchain: BLOCKCHAIN_NAME.HORIZEN_EON,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ZEN',
+        symbol: 'ZEN',
+        decimals: 18
     })
 };
