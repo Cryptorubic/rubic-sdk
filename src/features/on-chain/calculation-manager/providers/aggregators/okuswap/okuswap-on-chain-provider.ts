@@ -69,10 +69,9 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
                 quoteReqBody
             );
 
-            const { to: providerGateway } = await OkuSwapApiService.makeSwapRequest(
-                subProvider,
-                swapReqBody
-            );
+            const providerGateway = swapReqBody?.signingRequest
+                ? swapReqBody.signingRequest.permit2Address
+                : '0xFcf5986450E4A014fFE7ad4Ae24921B589D039b5';
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
