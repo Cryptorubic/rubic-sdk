@@ -27,6 +27,8 @@ export const rubicProxyContractAddress: Record<
             blockchain === BLOCKCHAIN_NAME.SCROLL ||
             blockchain === BLOCKCHAIN_NAME.MANTA_PACIFIC ||
             blockchain === BLOCKCHAIN_NAME.METIS ||
+            blockchain === BLOCKCHAIN_NAME.BLAST ||
+            blockchain === BLOCKCHAIN_NAME.KROMA ||
             blockchain === BLOCKCHAIN_NAME.HORIZEN_EON
         ) {
             router = '0xAf14797CcF963B1e3d028a9d51853acE16aedBA1';

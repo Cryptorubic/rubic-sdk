@@ -7,7 +7,6 @@ import {
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import Web3 from 'web3';
 
 import { ORBITER_FEE_DIVIDER } from '../constants/orbiter-api';
@@ -66,24 +65,17 @@ export class OrbiterUtils {
         config: OrbiterQuoteConfig
     ): BigNumber {
         const digit = from.decimals === 18 ? 8 : 5;
-        const extraRatio = 50;
         const tradingFee = from.tokenAmount
             .multipliedBy(config.tradeFee)
-            .plus(extraRatio)
             .dividedBy(ORBITER_FEE_DIVIDER)
             .decimalPlaces(digit, BigNumber.ROUND_UP);
 
         return tradingFee;
     }
 
-    public static getTransferAmount(
-        from: PriceTokenAmount<EvmBlockchainName>,
-        config: OrbiterQuoteConfig
-    ): string {
-        const tradingFee = this.getTradingFee(from, config);
-        const amountMinusTradingFee = from.tokenAmount.minus(tradingFee);
-        const weiAmount = Web3Pure.toWei(amountMinusTradingFee, from.decimals);
-        const total = weiAmount.replace(/\d{4}$/g, config.vc);
+    public static getAmountWithVcCode(fromWeiAmount: string, config: OrbiterQuoteConfig): string {
+        const pureVC = config.vc.replace(/^0+/g, '');
+        const total = fromWeiAmount.replace(/\d{4}$/g, pureVC);
 
         return total;
     }
