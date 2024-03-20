@@ -274,7 +274,26 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         const toAmountWei = Web3Pure.toWei(res.toAmount, this.to.decimals);
         this.paymentInfo = res;
 
-        return { config: { data: '', to: '', value: '' }, amount: toAmountWei };
+        const config: EvmEncodeConfig = { to: '', data: '', value: '' };
+
+        if (this.from.isNative) {
+            config.value = this.from.stringWeiAmount;
+            config.data = '0x';
+            config.to = this.paymentInfo.payinAddress;
+        } else {
+            const encodedConfig = EvmWeb3Pure.encodeMethodCall(
+                this.from.address,
+                ERC20_TOKEN_ABI,
+                'transfer',
+                [this.paymentInfo.payinAddress, this.from.stringWeiAmount],
+                '0'
+            );
+            config.value = '0';
+            config.to = this.from.address;
+            config.data = encodedConfig.data;
+        }
+
+        return { config, amount: toAmountWei };
     }
 
     protected async getContractParams(
@@ -374,26 +393,29 @@ export class ChangenowCrossChainTrade extends EvmCrossChainTrade {
         );
 
         const { gasLimit } = options;
-
-        const { contractAddress, contractAbi, methodName, methodArguments, value } =
-            await this.getContractParams(
-                {
+        if (this.feeInfo?.rubicProxy?.fixedFee?.amount.gt(0)) {
+            const { contractAddress, contractAbi, methodName, methodArguments, value } =
+                await this.getContractParams({
                     fromAddress: options.fromAddress,
                     receiverAddress: options.receiverAddress || options.fromAddress
-                },
-                true
-            );
+                });
 
-        return EvmWeb3Pure.encodeMethodCall(
-            contractAddress,
-            contractAbi,
-            methodName,
-            methodArguments,
-            value,
-            {
-                gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
-                ...getGasOptions(options)
-            }
+            return EvmWeb3Pure.encodeMethodCall(
+                contractAddress,
+                contractAbi,
+                methodName,
+                methodArguments,
+                value,
+                {
+                    gas: gasLimit || this.gasData?.gasLimit.toFixed(0),
+                    ...getGasOptions(options)
+                }
+            );
+        }
+        return this.setTransactionConfig(
+            options?.skipAmountCheck || false,
+            options?.useCacheData || false,
+            options?.receiverAddress || this.walletAddress
         );
     }
 
