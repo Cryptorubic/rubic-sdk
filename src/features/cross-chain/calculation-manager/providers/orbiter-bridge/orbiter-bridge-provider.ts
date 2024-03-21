@@ -1,8 +1,7 @@
+import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { Injector } from 'src/core/injector/injector';
-import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 
 import { RequiredCrossChainOptions } from '../../models/cross-chain-options';
@@ -41,10 +40,6 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
         const useProxy = options?.useProxy?.[this.type] ?? true;
 
         try {
-            const walletAddress =
-                Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-            checkUnsupportedReceiverAddress(options?.receiverAddress, walletAddress);
-
             this.orbiterQuoteConfigs = await OrbiterApiService.getQuoteConfigs();
 
             const feeInfo = await this.getFeeInfo(
@@ -80,11 +75,20 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                 tokenAmount: toAmount
             });
 
+            const fromWithoutFeeWithCode = new PriceTokenAmount({
+                ...fromWithoutFee.asStruct,
+                weiAmount: this.getSendingAmount(
+                    fromWithoutFee.stringWeiAmount,
+                    quoteConfig,
+                    feeInfo
+                )
+            });
+
             const gasData =
                 options.gasCalculation === 'enabled'
                     ? await OrbiterBridgeTrade.getGasData({
                           feeInfo,
-                          fromToken: from,
+                          fromToken: fromWithoutFeeWithCode,
                           toToken: to,
                           receiverAddress: options.receiverAddress,
                           providerAddress: options.providerAddress,
@@ -95,7 +99,7 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
             const trade = new OrbiterBridgeTrade({
                 crossChainTrade: {
                     feeInfo,
-                    from,
+                    from: fromWithoutFeeWithCode,
                     gasData,
                     to,
                     priceImpact: from.calculatePriceImpactPercent(to),
@@ -115,6 +119,23 @@ export class OrbiterBridgeProvider extends CrossChainProvider {
                 tradeType: this.type
             };
         }
+    }
+
+    private getSendingAmount(
+        fromStringWeiAmount: string,
+        quoteConfig: OrbiterQuoteConfig,
+        feeInfo: FeeInfo
+    ): BigNumber {
+        const desiredAmount = OrbiterUtils.getAmountWithVcCode(fromStringWeiAmount, quoteConfig);
+        const fee = (feeInfo.rubicProxy?.platformFee?.percent || 0) * 1_000;
+        const denominator = new BigNumber(1_000_000);
+        const sendingAmount = new BigNumber(desiredAmount)
+            .multipliedBy(denominator)
+            .dividedBy(denominator.minus(fee))
+            .decimalPlaces(0, 1)
+            .toFixed();
+
+        return new BigNumber(sendingAmount);
     }
 
     protected async getRoutePath(

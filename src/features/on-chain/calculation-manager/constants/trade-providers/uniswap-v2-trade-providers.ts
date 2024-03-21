@@ -29,6 +29,8 @@ import { UniSwapV2GoerliProvider } from 'src/features/on-chain/calculation-manag
 import { SushiSwapHarmonyProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/harmony/sushi-swap-harmony/sushi-swap-harmony-provider';
 import { TradeHarmonySwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/harmony/trader-harmony/trader-harmony-provider';
 import { ViperSwapHarmonyProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/harmony/viper-swap-harmony/viper-swap-harmony-provider';
+import { AscentHorizenEonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/horizen-eon/ascent-horizon-eon/ascent-horizen-eon-provider';
+import { SpookySwapHorizenEonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/horizen-eon/spooky-swap-horizen-eon/spooky-swap-horizen-eon-provider';
 import { ElkProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/elk/elk-provider';
 import { JupiterSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/jupiter-swap/jupiter-swap-provider';
 import { PhotonSwapProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/kava/photon-swap/photon-swap-provider';
@@ -43,8 +45,6 @@ import { QuickSwapProvider } from 'src/features/on-chain/calculation-manager/pro
 import { SushiSwapPolygonProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/sushi-swap-polygon/sushi-swap-polygon-provider';
 import { PulseXV1Provider } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/pulsex-v1/pulsex-v1-provider';
 import { PulseXV2Provider } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/pulsex-v2/pulsex-v2-provider';
-import { SushiSwapPulsechainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/sushi-swap-pulsechain/sushi-swap-pulsechain-provider';
-import { UniSwapV2PulsechainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/uni-swap-v2-pulsechain/uni-swap-v2-pulsechain-provider';
 import { PegasysProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/syscoin/pegasys/pegasys-provider';
 import { ApeSwapTelosProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/ape-swap/ape-swap-telos-provider';
 import { OmnidexProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/telos/omnidex/omnidex-provider';
@@ -122,8 +122,6 @@ export const UniswapV2TradeProviders = [
     // Pulsechain
     PulseXV1Provider,
     PulseXV2Provider,
-    UniSwapV2PulsechainProvider,
-    SushiSwapPulsechainProvider,
     // Base
     BaseSwapProvider,
     AerodromeProvider,
@@ -136,7 +134,10 @@ export const UniswapV2TradeProviders = [
     QuickSwapMumbaiProvider,
     // Fuji
     JoeFujiProvider,
-    PangolinFujiProvider
+    PangolinFujiProvider,
     // Scroll
     // UniSwapV2ScrollSepoliaProvider
+    // horizen eon
+    SpookySwapHorizenEonProvider,
+    AscentHorizenEonProvider
 ] as const;
