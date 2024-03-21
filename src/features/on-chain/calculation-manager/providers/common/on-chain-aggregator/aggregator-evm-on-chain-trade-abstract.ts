@@ -5,13 +5,14 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { EvmOnChainTrade } from '../on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 export abstract class AggregatorEvmOnChainTrade extends EvmOnChainTrade {
-    protected async getTxConfigAndCheckAmount(
+    public async getTxConfigAndCheckAmount(
+        skipAmountChangeCheck: boolean,
+        useCacheData: boolean,
         receiverAddress?: string,
-        fromAddress?: string,
-        directTransaction?: EvmEncodeConfig
+        fromAddress?: string
     ): Promise<EvmEncodeConfig> {
-        if (directTransaction) {
-            return directTransaction;
+        if (this.lastTransactionConfig && useCacheData) {
+            return this.lastTransactionConfig;
         }
 
         const { tx, toAmount } = await this.getTransactionConfigAndAmount(
@@ -22,7 +23,7 @@ export abstract class AggregatorEvmOnChainTrade extends EvmOnChainTrade {
         const gasLimit = tx.gas && parseInt(tx.gas, 16).toString();
         const gasPrice = tx.gasPrice && parseInt(tx.gasPrice, 16).toString();
 
-        const evmEncodeConfig = {
+        const config = {
             data: tx.data,
             to: tx.to,
             value: tx.value,
@@ -35,8 +36,15 @@ export abstract class AggregatorEvmOnChainTrade extends EvmOnChainTrade {
             this.slippageTolerance
         );
 
-        this.checkAmountChange(newToTokenAmountMin, this.toTokenAmountMin.stringWeiAmount);
+        this.lastTransactionConfig = config;
+        setTimeout(() => {
+            this.lastTransactionConfig = null;
+        }, 15_000);
 
-        return evmEncodeConfig;
+        if (!skipAmountChangeCheck) {
+            this.checkAmountChange(newToTokenAmountMin, this.toTokenAmountMin.stringWeiAmount);
+        }
+
+        return config;
     }
 }

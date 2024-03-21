@@ -105,7 +105,11 @@ export class ArchonBridgeTrade extends EvmCrossChainTrade {
 
         // eslint-disable-next-line no-useless-catch
         try {
-            const { data, value, to } = await this.fetchSwapData(options?.receiverAddress);
+            const { data, value, to } = await this.setTransactionConfig(
+                false,
+                options?.useCacheData || false,
+                options?.receiverAddress
+            );
 
             await this.web3Private.trySendTransaction(to, {
                 data,
@@ -126,7 +130,11 @@ export class ArchonBridgeTrade extends EvmCrossChainTrade {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.fetchSwapData(options?.receiverAddress);
+        } = await this.setTransactionConfig(
+            false,
+            options?.useCacheData || false,
+            options?.receiverAddress
+        );
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: this.walletAddress,
@@ -185,13 +193,16 @@ export class ArchonBridgeTrade extends EvmCrossChainTrade {
         };
     }
 
-    private async fetchSwapData(receiverAddress?: string): Promise<EvmEncodeConfig> {
+    protected async getTransactionConfigAndAmount(
+        receiverAddress?: string
+    ): Promise<{ config: EvmEncodeConfig; amount: string }> {
         const { contract } = ArchonContractService.getWeb3AndAddress(this.from, this.to);
         const providerFee = this.feeInfo.provider?.cryptoFee?.amount || new BigNumber(0);
         const nativeToken = nativeTokensList[this.fromBlockchain];
         const fromValueAmount = this.from.isNative ? this.from.tokenAmount : new BigNumber(0);
         const value = Web3Pure.toWei(fromValueAmount.plus(providerFee), nativeToken.decimals);
         const methodArguments = [];
+        let config: EvmEncodeConfig | null = null;
 
         if (contract.type === 'originRouter') {
             if (!this.from.isNative) {
@@ -204,33 +215,35 @@ export class ArchonBridgeTrade extends EvmCrossChainTrade {
                 '0x'
             );
 
-            return EvmWeb3Pure.encodeMethodCall(
+            config = EvmWeb3Pure.encodeMethodCall(
                 contract.address,
                 archonBridgeAbi,
                 this.from.isNative ? 'bridgeNative' : 'bridge',
                 methodArguments,
                 value
             );
+        } else {
+            methodArguments.push(
+                this.from.address,
+                layerZeroIds[this.to.blockchain as ArchonBridgeSupportedBlockchain],
+                this.from.stringWeiAmount,
+                receiverAddress || this.walletAddress,
+                true,
+                [this.walletAddress, '0x0000000000000000000000000000000000000000'],
+                '0x'
+            );
+
+            config = EvmWeb3Pure.encodeMethodCall(
+                contract.address,
+                archonWrapBridgeAbi,
+                this.from.blockchain === BLOCKCHAIN_NAME.HORIZEN_EON && this.from.isNative
+                    ? 'bridgeNative'
+                    : 'bridge',
+                methodArguments,
+                value
+            );
         }
 
-        methodArguments.push(
-            this.from.address,
-            layerZeroIds[this.to.blockchain as ArchonBridgeSupportedBlockchain],
-            this.from.stringWeiAmount,
-            receiverAddress || this.walletAddress,
-            true,
-            [this.walletAddress, '0x0000000000000000000000000000000000000000'],
-            '0x'
-        );
-
-        return EvmWeb3Pure.encodeMethodCall(
-            contract.address,
-            archonWrapBridgeAbi,
-            this.from.blockchain === BLOCKCHAIN_NAME.HORIZEN_EON && this.from.isNative
-                ? 'bridgeNative'
-                : 'bridge',
-            methodArguments,
-            value
-        );
+        return { config, amount: this.to.stringWeiAmount };
     }
 }

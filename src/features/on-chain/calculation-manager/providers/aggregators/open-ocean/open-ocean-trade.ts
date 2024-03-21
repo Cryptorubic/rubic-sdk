@@ -27,6 +27,7 @@ import { OpenoceanOnChainSupportedBlockchain } from 'src/features/on-chain/calcu
 import { OpenoceanSwapQuoteResponse } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-cean-swap-quote-response';
 import { OpenOceanTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/open-ocean/models/open-ocean-trade-struct';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
@@ -37,34 +38,8 @@ export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
     public static async getGasLimit(
         openOceanTradeStruct: OpenOceanTradeStruct
     ): Promise<BigNumber | null> {
-        const fromBlockchain = openOceanTradeStruct.from.blockchain;
-        const walletAddress =
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-        if (!walletAddress) {
-            return null;
-        }
-
         const openOceanTrade = new OpenOceanTrade(openOceanTradeStruct, EvmWeb3Pure.EMPTY_ADDRESS);
-        try {
-            const transactionConfig = await openOceanTrade.encode({ fromAddress: walletAddress });
-
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const gasLimit = (
-                await web3Public.batchEstimatedGas(walletAddress, [transactionConfig])
-            )[0];
-
-            if (gasLimit?.isFinite()) {
-                return gasLimit;
-            }
-        } catch {}
-        try {
-            const transactionData = await openOceanTrade.getTxConfigAndCheckAmount();
-
-            if (transactionData.gas) {
-                return new BigNumber(transactionData.gas);
-            }
-        } catch {}
-        return null;
+        return getOnChainGasData(openOceanTrade);
     }
 
     public readonly type = ON_CHAIN_TRADE_TYPE.OPEN_OCEAN;
@@ -110,9 +85,10 @@ export class OpenOceanTrade extends AggregatorEvmOnChainTrade {
 
         try {
             const transactionData = await this.getTxConfigAndCheckAmount(
+                false,
+                options?.useCacheData || false,
                 options?.receiverAddress,
-                options?.fromAddress,
-                options?.directTransaction
+                options?.fromAddress
             );
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,

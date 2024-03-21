@@ -10,11 +10,11 @@ import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-e
 import { PriceTokenAmount } from 'src/common/tokens/price-token-amount';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { LifiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/lifi/models/lifi-trade-struct';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
@@ -30,34 +30,8 @@ interface LifiTransactionRequest {
 export class LifiTrade extends AggregatorEvmOnChainTrade {
     /** @internal */
     public static async getGasLimit(lifiTradeStruct: LifiTradeStruct): Promise<BigNumber | null> {
-        const fromBlockchain = lifiTradeStruct.from.blockchain;
-        const walletAddress =
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-        if (!walletAddress) {
-            return null;
-        }
-
         const lifiTrade = new LifiTrade(lifiTradeStruct, EvmWeb3Pure.EMPTY_ADDRESS);
-        try {
-            const transactionConfig = await lifiTrade.encode({ fromAddress: walletAddress });
-
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const gasLimit = (
-                await web3Public.batchEstimatedGas(walletAddress, [transactionConfig])
-            )[0];
-
-            if (gasLimit?.isFinite()) {
-                return gasLimit;
-            }
-        } catch {}
-        try {
-            const transactionData = await lifiTrade.getTxConfigAndCheckAmount();
-
-            if (transactionData.gas) {
-                return new BigNumber(transactionData.gas);
-            }
-        } catch {}
-        return null;
+        return getOnChainGasData(lifiTrade);
     }
 
     public readonly providerGateway: string;
@@ -100,6 +74,8 @@ export class LifiTrade extends AggregatorEvmOnChainTrade {
 
         try {
             const transactionData = await this.getTxConfigAndCheckAmount(
+                false,
+                options?.useCacheData || false,
                 options.receiverAddress,
                 options.fromAddress
             );

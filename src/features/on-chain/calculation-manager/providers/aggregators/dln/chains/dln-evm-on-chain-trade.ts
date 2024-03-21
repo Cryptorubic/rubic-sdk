@@ -54,13 +54,6 @@ export class DlnEvmOnChainTrade extends AggregatorEvmOnChainTrade {
                 return gasLimit;
             }
         } catch {}
-        try {
-            const transactionData = await trade.getTxConfigAndCheckAmount();
-
-            if (transactionData.gas) {
-                return new BigNumber(transactionData.gas);
-            }
-        } catch {}
 
         return null;
     }
@@ -105,6 +98,8 @@ export class DlnEvmOnChainTrade extends AggregatorEvmOnChainTrade {
 
         try {
             const transactionData = await this.getTxConfigAndCheckAmount(
+                false,
+                options?.useCacheData || false,
                 options.receiverAddress,
                 options.fromAddress
             );

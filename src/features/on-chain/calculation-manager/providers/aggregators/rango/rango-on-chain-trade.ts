@@ -8,11 +8,11 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { parseError } from 'src/common/utils/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { RangoBestRouteSimulationResult } from 'src/features/common/providers/rango/models/rango-api-best-route-types';
 import { RangoCommonParser } from 'src/features/common/providers/rango/services/rango-parser';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { getOnChainGasData } from 'src/features/on-chain/calculation-manager/utils/get-on-chain-gas-data';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
@@ -27,39 +27,13 @@ export class RangoOnChainTrade extends AggregatorEvmOnChainTrade {
         tradeStruct: RangoOnChainTradeStruct,
         providerGateway: string
     ): Promise<BigNumber | null> {
-        const fromBlockchain = tradeStruct.from.blockchain;
-        const walletAddress =
-            Injector.web3PrivateService.getWeb3PrivateByBlockchain(fromBlockchain).address;
-
-        if (!walletAddress) {
-            return null;
-        }
-
         const rangoTrade = new RangoOnChainTrade(
             tradeStruct,
             EvmWeb3Pure.EMPTY_ADDRESS,
             providerGateway
         );
-        try {
-            const transactionConfig = await rangoTrade.encode({ fromAddress: walletAddress });
 
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
-            const gasLimit = (
-                await web3Public.batchEstimatedGas(walletAddress, [transactionConfig])
-            )[0];
-
-            if (gasLimit?.isFinite()) {
-                return gasLimit;
-            }
-        } catch {}
-        try {
-            const transactionData = await rangoTrade.getTxConfigAndCheckAmount();
-
-            if (transactionData.gas) {
-                return new BigNumber(transactionData.gas);
-            }
-        } catch {}
-        return null;
+        return getOnChainGasData(rangoTrade);
     }
 
     /**
@@ -106,9 +80,10 @@ export class RangoOnChainTrade extends AggregatorEvmOnChainTrade {
 
         try {
             const transactionData = await this.getTxConfigAndCheckAmount(
+                false,
+                options?.useCacheData || false,
                 options.receiverAddress,
-                options.fromAddress,
-                options.directTransaction
+                options.fromAddress
             );
 
             const { gas, gasPrice } = this.getGasParams(options, {

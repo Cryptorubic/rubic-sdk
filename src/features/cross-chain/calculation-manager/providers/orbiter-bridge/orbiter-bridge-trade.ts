@@ -1,8 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
-import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { ContractParams } from 'src/features/common/models/contract-params';
@@ -34,7 +32,6 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         fromToken,
         toToken,
         feeInfo,
-        receiverAddress,
         providerAddress,
         quoteConfig
     }: OrbiterGetGasDataParams): Promise<GasData | null> {
@@ -149,7 +146,11 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
             data,
             value: providerValue,
             to: providerRouter
-        } = await this.callOrbiterContract(receiverAddress, options.directTransaction);
+        } = await this.setTransactionConfig(
+            false,
+            options?.useCacheData || false,
+            options?.receiverAddress || this.walletAddress
+        );
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
             walletAddress: receiverAddress,
@@ -192,7 +193,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         };
     }
 
-    protected async getTransactionConfigAndAmount(): Promise<{
+    protected async getTransactionConfigAndAmount(receiverAddress?: string): Promise<{
         config: EvmEncodeConfig;
         amount: string;
     }> {
@@ -220,9 +221,8 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         );
 
         return {
-            to: config.to,
-            value: config.value,
-            data: config.data
+            config,
+            amount: this.to.stringWeiAmount
         };
     }
 
