@@ -424,6 +424,6 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'Bitcoin',
         symbol: 'BTC',
-        decimals: 8
+        decimals: 18
     })
 };
