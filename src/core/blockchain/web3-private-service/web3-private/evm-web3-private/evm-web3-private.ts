@@ -354,15 +354,15 @@ export class EvmWeb3Private extends Web3Private {
     public async approveViaPermit2UniV3(
         tokenAddress: string,
         spenderAddress: string,
-        amount: BigNumber,
         options: EvmTransactionOptions = {}
     ): Promise<TransactionReceipt> {
         const contract = new this.web3.eth.Contract(UNI_V3_PERMIT2_ABI, tokenAddress);
         const gaslessParams = { from: this.address };
+        const amountToApprove = new BigNumber(2).pow(256).minus(1).toFixed();
         const methodArgs = await this.getMethodArgsForPermit2(
             tokenAddress,
             spenderAddress,
-            amount.toFixed(0)
+            amountToApprove
         );
 
         const gas = await contract.methods['permitTransferFrom'](...methodArgs).estimateGas(
@@ -405,7 +405,7 @@ export class EvmWeb3Private extends Web3Private {
     private async getSignatureForPermit2(permit: unknown[]): Promise<string> {
         const serializedPermit = this.web3.eth.abi.encodeParameters(
             ['tuple(tuple(address token, uint256 amount), uint256 nonce, uint256 deadline)'],
-            [permit]
+            permit
         );
 
         const signature = await this.web3.eth.sign(

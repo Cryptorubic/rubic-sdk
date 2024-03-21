@@ -2,8 +2,7 @@ import BigNumber from 'bignumber.js';
 import {
     LowSlippageDeflationaryTokenError,
     RubicSdkError,
-    SwapRequestError,
-    UnnecessaryApproveError
+    SwapRequestError
 } from 'src/common/errors';
 import { parseError } from 'src/common/utils/errors';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
@@ -150,15 +149,15 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
 
     public override async approve(
         options: EvmBasicTransactionOptions,
-        checkNeedApprove = true,
-        amount: BigNumber | 'infinity' = 'infinity'
+        checkNeedApprove = true
     ): Promise<TransactionReceipt> {
-        if (checkNeedApprove) {
-            const needApprove = await this.needApprove();
-            if (!needApprove) {
-                throw new UnnecessaryApproveError();
-            }
-        }
+        // if (checkNeedApprove) {
+        //     const needApprove = await this.needApprove();
+        //     if (!needApprove) {
+        //         throw new UnnecessaryApproveError();
+        //     }
+        // }
+        console.log(checkNeedApprove);
 
         this.checkWalletConnected();
         await this.checkBlockchainCorrect();
@@ -166,7 +165,6 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
         return this.web3Private.approveViaPermit2UniV3(
             this.from.address,
             this.spenderAddress,
-            amount as BigNumber,
             options
         );
     }

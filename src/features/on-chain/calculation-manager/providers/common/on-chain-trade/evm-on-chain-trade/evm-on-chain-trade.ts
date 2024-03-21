@@ -172,10 +172,10 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     protected async checkAllowanceAndApprove(
         options?: Omit<SwapTransactionOptions, 'onConfirm' | 'gasLimit'>
     ): Promise<void> {
-        const needApprove = await this.needApprove();
-        if (!needApprove) {
-            return;
-        }
+        // const needApprove = await this.needApprove();
+        // if (!needApprove) {
+        //     return;
+        // }
 
         const approveOptions: EvmBasicTransactionOptions = {
             onTransactionHash: options?.onApprove,

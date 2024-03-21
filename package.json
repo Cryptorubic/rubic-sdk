@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.4.3-alpha.rootstock-oku.12",
+    "version": "5.4.3-alpha.rootstock-oku.14",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
