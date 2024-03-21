@@ -27,7 +27,7 @@ export class MerlinSwapMerlinProvider extends IzumiProvider {
             '0xb880fd278198bd590252621d4cd071b1842e9bcd', // M-BTC
             '0x62e99191071fc1c5947cf1e21aa95708dcc51adb' // Owl
         ],
-        multicallAddress: '',
+        multicallAddress: '0x7a524c7e82874226F0b51aade60A1BE4D430Cf0F',
         supportedFees: [10000, 3000, 500]
     };
 }
