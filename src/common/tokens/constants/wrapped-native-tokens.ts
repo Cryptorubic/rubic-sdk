@@ -360,8 +360,8 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'WBERA',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.BLAST]: new Token({
-        blockchain: BLOCKCHAIN_NAME.BLAST,
+    [BLOCKCHAIN_NAME.BLAST_TESTNET]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BLAST_TESTNET,
         address: '0x4200000000000000000000000000000000000023',
         name: 'Wrapped ETH',
         symbol: 'WETH',
@@ -379,6 +379,27 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         address: '',
         name: 'Wrapped ETH',
         symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.BLAST]: new Token({
+        blockchain: BLOCKCHAIN_NAME.BLAST,
+        address: '0x4300000000000000000000000000000000000004',
+        name: 'Wrapped ETH',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.KROMA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.KROMA,
+        address: '0x4200000000000000000000000000000000000001',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.HORIZEN_EON]: new Token({
+        blockchain: BLOCKCHAIN_NAME.HORIZEN_EON,
+        address: '0xF5cB8652a84329A2016A386206761f455bCEDab6',
+        name: 'Wrapped ZEN',
+        symbol: 'WZEN',
         decimals: 18
     })
 };

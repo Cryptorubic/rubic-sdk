@@ -93,6 +93,11 @@ export const xyContractAddress: Record<XyCrossChainSupportedBlockchain, Universa
         providerGateway: '0x73Ce60416035B8D7019f6399778c14ccf5C9c7A1',
         providerRouter: '0x73Ce60416035B8D7019f6399778c14ccf5C9c7A1',
         rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.MANTLE].router
+    },
+    [BLOCKCHAIN_NAME.BLAST]: {
+        providerGateway: '0x73Ce60416035B8D7019f6399778c14ccf5C9c7A1',
+        providerRouter: '0x73Ce60416035B8D7019f6399778c14ccf5C9c7A1',
+        rubicRouter: rubicProxyContractAddress[BLOCKCHAIN_NAME.BLAST].router
     }
     // [BLOCKCHAIN_NAME.KLAYTN]: {
     //     providerGateway: '0x52075Fd1fF67f03beABCb5AcdA9679b02d98cA37',

@@ -105,7 +105,11 @@ export class RangoOnChainTrade extends AggregatorEvmOnChainTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            const transactionData = await this.getTxConfigAndCheckAmount(options.receiverAddress);
+            const transactionData = await this.getTxConfigAndCheckAmount(
+                options.receiverAddress,
+                options.fromAddress,
+                options.directTransaction
+            );
 
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,

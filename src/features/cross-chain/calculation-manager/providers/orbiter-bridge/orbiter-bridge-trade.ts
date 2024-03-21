@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -11,12 +11,17 @@ import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manag
 
 import { CROSS_CHAIN_TRADE_TYPE, CrossChainTradeType } from '../../models/cross-chain-trade-type';
 import { rubicProxyContractAddress } from '../common/constants/rubic-proxy-contract-address';
+import { evmCommonCrossChainAbi } from '../common/emv-cross-chain-trade/constants/evm-common-cross-chain-abi';
+import { gatewayRubicCrossChainAbi } from '../common/emv-cross-chain-trade/constants/gateway-rubic-cross-chain-abi';
 import { EvmCrossChainTrade } from '../common/emv-cross-chain-trade/evm-cross-chain-trade';
 import { GasData } from '../common/emv-cross-chain-trade/models/gas-data';
 import { BRIDGE_TYPE, BridgeType } from '../common/models/bridge-type';
 import { FeeInfo } from '../common/models/fee-info';
+import { GetContractParamsOptions } from '../common/models/get-contract-params-options';
 import { OnChainSubtype } from '../common/models/on-chain-subtype';
 import { TradeInfo } from '../common/models/trade-info';
+import { ProxyCrossChainEvmTrade } from '../common/proxy-cross-chain-evm-facade/proxy-cross-chain-evm-trade';
+import { ORBITER_ROUTER_V3_ABI } from './constants/orbiter-router-v3-abi';
 import { OrbiterQuoteConfig } from './models/orbiter-api-quote-types';
 import { OrbiterGetGasDataParams, OrbiterTradeParams } from './models/orbiter-bridge-trade-types';
 import { orbiterContractAddresses } from './models/orbiter-contract-addresses';
@@ -29,6 +34,7 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         fromToken,
         toToken,
         feeInfo,
+        receiverAddress,
         providerAddress,
         quoteConfig
     }: OrbiterGetGasDataParams): Promise<GasData | null> {
@@ -137,95 +143,86 @@ export class OrbiterBridgeTrade extends EvmCrossChainTrade {
         }
     }
 
-    /*
-     *@TODO Handle proxy contracts when orbiter adds reciver-address support
-     */
-    public async getContractParams(): Promise<ContractParams> {
-        throw new RubicSdkError("Orbiter doesn't support proxy contracts!");
-        // const receiverAddress = options?.receiverAddress || this.walletAddress;
+    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
+        const receiverAddress = options?.receiverAddress || this.walletAddress;
+        const {
+            data,
+            value: providerValue,
+            to: providerRouter
+        } = await this.callOrbiterContract(receiverAddress, options.directTransaction);
 
-        // const {
-        //     data,
-        //     value: providerValue,
-        //     to: providerRouter
-        // } = await this.callOrbiterContract(options.directTransaction);
+        const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
+            walletAddress: receiverAddress,
+            fromTokenAmount: this.from,
+            toTokenAmount: this.to,
+            srcChainTrade: null,
+            providerAddress: this.providerAddress,
+            type: `native:${this.bridgeType}`,
+            fromAddress: this.walletAddress
+        });
 
-        // const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
-        //     walletAddress: receiverAddress,
-        //     fromTokenAmount: this.from,
-        //     toTokenAmount: this.to,
-        //     srcChainTrade: null,
-        //     providerAddress: this.providerAddress,
-        //     type: `native:${this.bridgeType}`,
-        //     fromAddress: this.walletAddress
-        // });
+        const extraNativeFee = '0';
+        const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
+            providerRouter,
+            data,
+            this.from.blockchain,
+            providerRouter,
+            extraNativeFee
+        );
 
-        // const extraNativeFee = this.quoteConfig.tradeFee;
+        const methodArguments = [bridgeData, providerData];
+        const value = this.getSwapValue(providerValue);
+        const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
+            rubicProxyContractAddress[this.from.blockchain].router,
+            evmCommonCrossChainAbi,
+            this.methodName,
+            methodArguments,
+            value
+        );
 
-        // const providerData = await ProxyCrossChainEvmTrade.getGenericProviderData(
-        //     providerRouter,
-        //     data!,
-        //     this.from.blockchain,
-        //     providerRouter,
-        //     extraNativeFee
-        // );
+        const sendingToken = this.from.isNative ? [] : [this.from.address];
+        const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
 
-        // const methodArguments = [bridgeData, providerData];
-        // const value = this.getSwapValue(providerValue);
-
-        // const transactionConfiguration = EvmWeb3Pure.encodeMethodCall(
-        //     rubicProxyContractAddress[this.from.blockchain].router,
-        //     evmCommonCrossChainAbi,
-        //     this.methodName,
-        //     methodArguments,
-        //     value
-        // );
-
-        // const sendingToken = this.from.isNative ? [] : [this.from.address];
-        // const sendingAmount = this.from.isNative ? [] : [this.from.stringWeiAmount];
-
-        // return {
-        //     contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
-        //     contractAbi: gatewayRubicCrossChainAbi,
-        //     methodName: 'startViaRubic',
-        //     methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
-        //     value
-        // };
+        return {
+            contractAddress: rubicProxyContractAddress[this.from.blockchain].gateway,
+            contractAbi: gatewayRubicCrossChainAbi,
+            methodName: 'startViaRubic',
+            methodArguments: [sendingToken, sendingAmount, transactionConfiguration.data],
+            value
+        };
     }
 
     protected async getTransactionConfigAndAmount(): Promise<{
         config: EvmEncodeConfig;
         amount: string;
     }> {
-        const contractAddress = this.quoteConfig.endpoint;
-        const value = OrbiterUtils.getTransferAmount(this.from, this.quoteConfig);
+        // Orbiter deposit address to send funds money to receiverWalletAddress after transfer confirmation
+        const orbiterTokensDispenser = this.quoteConfig.endpoint;
 
-        if (this.from.isNative) {
-            return {
-                config: {
-                    data: '0x',
-                    to: contractAddress,
-                    value
-                },
-                amount: this.to.stringWeiAmount
-            };
-        }
+        const transferAmount = this.from.stringWeiAmount;
+        const encodedReceiverAndCode = OrbiterUtils.getHexDataArg(
+            this.quoteConfig.vc,
+            receiverAddress || this.walletAddress
+        );
+
+        const methodName = this.from.isNative ? 'transfer' : 'transferToken';
+        const methodArgs = this.from.isNative
+            ? [orbiterTokensDispenser, encodedReceiverAndCode]
+            : [this.from.address, orbiterTokensDispenser, transferAmount, encodedReceiverAndCode];
+        const value = this.from.isNative ? transferAmount : '0';
 
         const config = EvmWeb3Pure.encodeMethodCall(
-            this.from.address,
-            ERC20_TOKEN_ABI,
-            'transfer',
-            [contractAddress, value],
-            '0'
+            orbiterContractAddresses[this.fromBlockchain],
+            ORBITER_ROUTER_V3_ABI,
+            methodName,
+            methodArgs,
+            value
         );
 
         return {
-            config: {
-                to: config.to,
-                value: config.value,
-                data: config.data
-            },
-            amount: this.to.stringWeiAmount
+            to: config.to,
+            value: config.value,
+            data: config.data
         };
     }
 
