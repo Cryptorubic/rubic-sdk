@@ -5,6 +5,9 @@ import {
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 import { IzumiProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/izumi-abstract/izumi-provider';
+import { IzumiTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/izumi-abstract/izumi-trade';
+import { IzumiTradeStruct } from 'src/features/on-chain/calculation-manager/providers/dexes/common/izumi-abstract/models/izumi-trade-struct';
+import { MerlinSwapMerlinTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/merlin/merlin-swap/merlin-swap-merlin-trade';
 
 export class MerlinSwapMerlinProvider extends IzumiProvider {
     public readonly blockchain = BLOCKCHAIN_NAME.MERLIN;
@@ -13,6 +16,10 @@ export class MerlinSwapMerlinProvider extends IzumiProvider {
 
     public get type(): OnChainTradeType {
         return ON_CHAIN_TRADE_TYPE.MERLIN_SWAP;
+    }
+
+    public getProviderTrade(tradeStruct: IzumiTradeStruct, providerAddress: string): IzumiTrade {
+        return new MerlinSwapMerlinTrade(tradeStruct, providerAddress);
     }
 
     protected readonly config = {

@@ -173,6 +173,10 @@ export abstract class IzumiProvider extends EvmOnChainProvider {
             } catch {}
         }
 
-        return new IzumiTrade(tradeStruct, fullOptions.providerAddress);
+        return this.getProviderTrade(tradeStruct, fullOptions.providerAddress);
+    }
+
+    public getProviderTrade(tradeStruct: IzumiTradeStruct, providerAddress: string): IzumiTrade {
+        return new IzumiTrade(tradeStruct, providerAddress);
     }
 }
