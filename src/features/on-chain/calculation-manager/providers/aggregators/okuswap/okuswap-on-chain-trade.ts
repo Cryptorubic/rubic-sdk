@@ -148,8 +148,7 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
     }
 
     public override async approve(
-        options: EvmBasicTransactionOptions,
-        checkNeedApprove = true
+        options: EvmBasicTransactionOptions
     ): Promise<TransactionReceipt> {
         // if (checkNeedApprove) {
         //     const needApprove = await this.needApprove();
@@ -157,7 +156,6 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
         //         throw new UnnecessaryApproveError();
         //     }
         // }
-        console.log(checkNeedApprove);
 
         this.checkWalletConnected();
         await this.checkBlockchainCorrect();
@@ -165,6 +163,7 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
         return this.web3Private.approveViaPermit2UniV3(
             this.from.address,
             this.spenderAddress,
+            '0x244f68e77357f86a8522323eBF80b5FC2F814d3E',
             options
         );
     }

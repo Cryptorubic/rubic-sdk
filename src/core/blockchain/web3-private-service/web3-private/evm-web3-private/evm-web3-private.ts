@@ -353,21 +353,20 @@ export class EvmWeb3Private extends Web3Private {
 
     public async approveViaPermit2UniV3(
         tokenAddress: string,
+        permit2Address: string,
         spenderAddress: string,
         options: EvmTransactionOptions = {}
     ): Promise<TransactionReceipt> {
-        const contract = new this.web3.eth.Contract(UNI_V3_PERMIT2_ABI, tokenAddress);
+        const contract = new this.web3.eth.Contract(UNI_V3_PERMIT2_ABI, permit2Address);
         const gaslessParams = { from: this.address };
-        const amountToApprove = new BigNumber(2).pow(256).minus(1).toFixed();
+        const amountToApprove = '15000000000000000000000';
         const methodArgs = await this.getMethodArgsForPermit2(
             tokenAddress,
             spenderAddress,
             amountToApprove
         );
 
-        const gas = await contract.methods['permitTransferFrom'](...methodArgs).estimateGas(
-            gaslessParams
-        );
+        const gas = await contract.methods['permit'](...methodArgs).estimateGas(gaslessParams);
 
         const gasfullParams = {
             ...gaslessParams,
@@ -376,10 +375,13 @@ export class EvmWeb3Private extends Web3Private {
         };
 
         return new Promise((res, rej) => {
-            contract.methods['permitTransferFrom'](...methodArgs)
+            contract.methods['permit'](...methodArgs)
                 .send(gasfullParams)
                 .on('transactionHash', options.onTransactionHash || (() => {}))
-                .on('receipt', res)
+                .on('receipt', (receipt: TransactionReceipt) => {
+                    console.log('APPROVE_RECEIPT - ', receipt);
+                    res(receipt);
+                })
                 .on('error', (err: Web3Error) => {
                     console.error(`Tokens approveViaPermit2UniV3 error. ${err}`);
                     rej(EvmWeb3Private.parseError(err));
@@ -393,27 +395,34 @@ export class EvmWeb3Private extends Web3Private {
         amountToApprove: string
     ): Promise<unknown[]> {
         const nonce = await this.web3.eth.getTransactionCount(this.address);
-        const deadline = Date.now() + 1000000000000;
-        const permit = [[tokenAddress, amountToApprove], nonce, deadline];
-        const transferDetails = [spenderAddress, amountToApprove];
-        const signature = await this.getSignatureForPermit2(permit);
-        const args = [permit, transferDetails, this.address, signature];
+        const sigDeadline = 1711053197;
+        const expiration = Date.now() + 1000000000000;
+        const details = [
+            [tokenAddress, amountToApprove, expiration, nonce],
+            spenderAddress,
+            sigDeadline
+        ];
+        const signature = await this.getSignatureForPermit2(details);
+        const args = [this.address, details, signature];
 
         return args;
     }
 
-    private async getSignatureForPermit2(permit: unknown[]): Promise<string> {
+    private async getSignatureForPermit2(details: unknown[]): Promise<string> {
         const serializedPermit = this.web3.eth.abi.encodeParameters(
-            ['tuple(tuple(address token, uint256 amount), uint256 nonce, uint256 deadline)'],
-            permit
+            [
+                'tuple(tuple(address token, uint160 amount, uint48 expiration, uint48 nonce), address spender, uint256 sigDeadline)'
+            ],
+            [details]
         );
 
-        const signature = await this.web3.eth.sign(
+        const res = await this.web3.eth.personal.sign(
             this.web3.utils.sha3(serializedPermit) as string,
-            this.address
+            this.address,
+            ''
         );
 
-        return signature;
+        return res;
     }
 
     /**
