@@ -15,7 +15,8 @@ export const CROSS_CHAIN_TRADE_TYPE = {
     RANGO: 'rango',
     PULSE_CHAIN_BRIDGE: 'pulsechain_bridge',
     ORBITER_BRIDGE: 'orbiter_bridge',
-    LAYERZERO: 'layerzero'
+    LAYERZERO: 'layerzero',
+    ARCHON_BRIDGE: 'archon_bridge'
 } as const;
 
 export type CrossChainTradeType =
