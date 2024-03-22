@@ -401,5 +401,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped ZEN',
         symbol: 'WZEN',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MERLIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MERLIN,
+        address: '0xF6D226f9Dc15d9bB51182815b320D3fBE324e1bA',
+        name: 'Wrapped BTC',
+        symbol: 'WBTC',
+        decimals: 18
     })
 };

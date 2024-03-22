@@ -302,7 +302,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     }
 
     private handleMinAmountError(err: SymbiosisError): RubicSdkError | null {
-        const msg = err.error.message || '';
+        const msg = err.error?.message || '';
 
         if (msg.includes('too low')) {
             const [, minAmount] = msg.toLowerCase().split('min amount: ') as [string, string];
