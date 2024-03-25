@@ -30,7 +30,7 @@ export interface OkuQuoteResponse {
     signingRequest?: {
         typedData: object[];
         permit2Address: string;
-        permitSignature: object[];
+        permitSignature: OkuPermitSignature[];
     };
     estimatedGas: string;
 
@@ -50,12 +50,26 @@ export interface OkuQuoteResponse {
     outUsdValue: number;
 }
 
+export interface OkuPermitSignature {
+    permit: {
+        details: {
+            amount: string;
+            expiration: string;
+            nonce: string;
+            token: string;
+        };
+        sigDeadline: string;
+        spender: string;
+    };
+    signature: string;
+}
+
 export interface OkuSwapRequestBody {
     coupon: object;
     signingRequest?: {
         typedData: object[];
         permit2Address: string;
-        permitSignature: object[];
+        permitSignature: OkuPermitSignature[];
     };
 }
 

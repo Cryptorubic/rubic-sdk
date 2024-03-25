@@ -1,11 +1,14 @@
+import { AllowanceTransfer } from '@uniswap/permit2-sdk';
 import BigNumber from 'bignumber.js';
+import { ethers } from 'ethers';
 import {
     LowSlippageDeflationaryTokenError,
     RubicSdkError,
     SwapRequestError
 } from 'src/common/errors';
 import { parseError } from 'src/common/utils/errors';
-import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
+import { Any } from 'src/common/utils/types';
+import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -13,14 +16,19 @@ import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { TransactionReceipt } from 'web3-eth';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { GetToAmountAndTxDataResponse } from '../../common/on-chain-aggregator/models/aggregator-on-chain-types';
-import { OkuQuoteRequestBody, OkuSwapRequestBody } from './models/okuswap-api-types';
+import {
+    OkuPermitSignature,
+    OkuQuoteRequestBody,
+    OkuSwapRequestBody
+} from './models/okuswap-api-types';
+import { OkuSwapSupportedBlockchain } from './models/okuswap-on-chain-supported-chains';
 import { OkuSwapOnChainTradeStruct } from './models/okuswap-trade-types';
 import { OkuSwapApiService } from './services/oku-swap-api-service';
+import { SignatureService } from './services/signature-service';
 
 export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
     /* @internal */
@@ -41,6 +49,9 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
             EvmWeb3Pure.EMPTY_ADDRESS,
             providerGateway
         );
+        const signatureService = SignatureService.getInstance();
+        signatureService.setIsGetGasLimitCall(true);
+
         try {
             const transactionConfig = await okuswapTrade.encode({ fromAddress: walletAddress });
 
@@ -50,9 +61,11 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
             )[0];
 
             if (gasLimit?.isFinite()) {
+                signatureService.setIsGetGasLimitCall(false);
                 return gasLimit;
             }
         } catch {}
+
         try {
             const transactionData = await okuswapTrade.getTxConfigAndCheckAmount();
 
@@ -60,6 +73,8 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
                 return new BigNumber(transactionData.gas);
             }
         } catch {}
+
+        signatureService.setIsGetGasLimitCall(false);
         return null;
     }
 
@@ -77,6 +92,10 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
         return this.useProxy
             ? rubicProxyContractAddress[this.from.blockchain].gateway
             : this.providerGateway;
+    }
+
+    protected get fromBlockchain(): OkuSwapSupportedBlockchain {
+        return this.from.blockchain as OkuSwapSupportedBlockchain;
     }
 
     public get dexContractAddress(): string {
@@ -136,10 +155,26 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
     }
 
     protected async getToAmountAndTxData(): Promise<GetToAmountAndTxDataResponse> {
-        const [{ outAmount, estimatedGas }, evmConfig] = await Promise.all([
-            OkuSwapApiService.makeQuoteRequest(this._okuSubProvider, this._quoteReqBody),
-            OkuSwapApiService.makeSwapRequest(this._okuSubProvider, this._swapReqBody)
-        ]);
+        const { outAmount, estimatedGas } = await OkuSwapApiService.makeQuoteRequest(
+            this._okuSubProvider,
+            this._quoteReqBody
+        );
+
+        // const signatureService = SignatureService.getInstance();
+
+        // if (!signatureService.isGetGasLimitCall && this._swapReqBody.signingRequest) {
+        //     this._swapReqBody.signingRequest.permitSignature[0]!.signature =
+        //         await this.createSignature(
+        //             this._swapReqBody.signingRequest.permit2Address,
+        //             this._swapReqBody.signingRequest.permitSignature[0]!
+        //         );
+        //     this._swapReqBody.signingRequest.permitSignature[0]!.permit.details.expiration =
+        //         this.toDeadline(1000 * 60 * 60 * 24 * 30).toString();
+        // }
+        const evmConfig = await OkuSwapApiService.makeSwapRequest(
+            this._okuSubProvider,
+            this._swapReqBody
+        );
 
         return {
             toAmount: Web3Pure.toWei(outAmount, this.to.decimals),
@@ -147,24 +182,97 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
         };
     }
 
-    public override async approve(
-        options: EvmBasicTransactionOptions
-    ): Promise<TransactionReceipt> {
-        // if (checkNeedApprove) {
-        //     const needApprove = await this.needApprove();
-        //     if (!needApprove) {
-        //         throw new UnnecessaryApproveError();
-        //     }
-        // }
+    private async createSignature(
+        permit2Address: string,
+        permitData: OkuPermitSignature
+    ): Promise<string> {
+        const permitSingle = {
+            details: {
+                token: permitData.permit.details.token,
+                amount: permitData.permit.details.amount,
+                expiration: this.getExpiration(permitData.permit.details.expiration),
+                nonce: permitData.permit.details.nonce
+            },
+            spender: permitData.permit.spender,
+            sigDeadline: permitData.permit.sigDeadline
+        };
+        const chainId = blockchainId[this.fromBlockchain];
 
-        this.checkWalletConnected();
-        await this.checkBlockchainCorrect();
-
-        return this.web3Private.approveViaPermit2UniV3(
-            this.from.address,
-            this.spenderAddress,
-            '0x244f68e77357f86a8522323eBF80b5FC2F814d3E',
-            options
+        const { domain, types, values } = AllowanceTransfer.getPermitData(
+            permitSingle,
+            permit2Address,
+            chainId
         );
+
+        // const rpcProviders = Injector.web3PublicService.rpcProvider;
+        const provider = new ethers.providers.Web3Provider((window as Any).ethereum);
+        const signature = await provider.getSigner()._signTypedData(domain, types, values);
+
+        return signature;
+    }
+
+    // private async createSignature(
+    //     permit2Address: string,
+    //     permitData: OkuPermitSignature
+    // ): Promise<string> {
+    //     const walletAddress = Injector.web3PrivateService.getWeb3PrivateByBlockchain(
+    //         this.fromBlockchain
+    //     ).address;
+    //     const expiration = this.getExpiration(permitData.permit.details.expiration);
+    //     // new Contract()
+
+    //     const typedData = {
+    //         types: {
+    //             EIP712Domain: [
+    //                 { name: 'name', type: 'string' },
+    //                 { name: 'version', type: 'string' },
+    //                 { name: 'chainId', type: 'uint256' },
+    //                 { name: 'verifyingContract', type: 'address' }
+    //             ],
+    //             PermitSingle: [
+    //                 { name: 'details', type: 'PermitDetails' },
+    //                 { name: 'spender', type: 'address' },
+    //                 { name: 'sigDeadline', type: 'uint256' }
+    //             ],
+    //             PermitDetails: [
+    //                 { name: 'token', type: 'address' },
+    //                 { name: 'amount', type: 'uint256' },
+    //                 { name: 'expiration', type: 'uint48' },
+    //                 { name: 'nonce', type: 'uint48' }
+    //             ]
+    //         },
+    //         domain: {
+    //             name: 'PermitSingle',
+    //             version: '1',
+    //             chainId: blockchainId[this.fromBlockchain],
+    //             verifyingContract: permit2Address
+    //         },
+    //         primaryType: 'PermitSingle',
+    //         message: {
+    //             details: {
+    //                 amount: permitData.permit.details.amount,
+    //                 expiration,
+    //                 nonce: permitData.permit.details.nonce,
+    //                 token: permitData.permit.details.token
+    //             },
+    //             spender: permitData.permit.spender,
+    //             sigDeadline: permitData.permit.sigDeadline
+    //         }
+    //     };
+
+    //     const signature = (await (window as Any).ethereum.request({
+    //         method: 'eth_signTypedData_v4',
+    //         params: [walletAddress, typedData]
+    //     })) as string;
+
+    //     return signature;
+    // }
+
+    private getExpiration(deadline: string): string {
+        return new BigNumber(deadline).plus(604800).toFixed(0);
+    }
+
+    private toDeadline(expiration: number): number {
+        return Math.floor((Date.now() + expiration) / 1000);
     }
 }

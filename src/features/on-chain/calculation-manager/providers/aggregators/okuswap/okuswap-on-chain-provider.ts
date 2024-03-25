@@ -133,8 +133,8 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
         return {
             subProvider: bestRoute.market,
             swapReqBody: {
-                coupon: bestRoute.coupon,
-                signingRequest: bestRoute?.signingRequest
+                coupon: bestRoute.coupon
+                // signingRequest: bestRoute?.signingRequest
             },
             toAmount: bestRoute.outAmount,
             gas: bestRoute.estimatedGas

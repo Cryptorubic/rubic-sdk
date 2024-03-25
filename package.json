@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.4.3-alpha.rootstock-oku.29",
+    "version": "5.4.3-alpha.rootstock-oku.56",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -82,6 +82,7 @@
         "@pancakeswap/tokens": "0.1.6",
         "@solana/web3.js": "^1.89.1",
         "@solflare-wallet/utl-sdk": "^1.4.0",
+        "@uniswap/permit2-sdk": "^1.2.0",
         "@viaprotocol/router-sdk": "^1.0.7",
         "assert": "^2.0.0",
         "axios": "^0.26.1",
