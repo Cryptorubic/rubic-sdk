@@ -64,6 +64,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as SymbiosisCrossChainSupportedBlockchain;
+        // @TODO remove after gas fix for metis
         const useProxy =
             from.blockchain === BLOCKCHAIN_NAME.METIS
                 ? false
