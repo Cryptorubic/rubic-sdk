@@ -10,10 +10,12 @@ import { UniswapV2TradeProviders } from 'src/features/on-chain/calculation-manag
 import { UniswapV3TradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/uniswap-v3-trade-providers';
 import { xyDexTradeProviders } from 'src/features/on-chain/calculation-manager/constants/trade-providers/xy-dex-trade-providers';
 import { OnChainTypedTradeProviders } from 'src/features/on-chain/calculation-manager/models/on-chain-typed-trade-provider';
+import { PiteasProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/piteas/piteas-provider';
 
 import { vooiTradeProviders } from './vooi-trade-providers';
 
 export const typedTradeProviders: OnChainTypedTradeProviders = [
+    PiteasProvider,
     ...UniswapV2TradeProviders,
     ...UniswapV3TradeProviders,
     ...OneinchTradeProviders,
