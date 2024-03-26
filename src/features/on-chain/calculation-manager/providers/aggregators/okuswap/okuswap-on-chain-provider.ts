@@ -25,7 +25,7 @@ import {
 } from './models/okuswap-on-chain-supported-chains';
 import { OkuSwapOnChainTradeStruct } from './models/okuswap-trade-types';
 import { OkuSwapOnChainTrade } from './okuswap-on-chain-trade';
-import { OkuSwapApiService } from './services/oku-swap-api-service';
+import { OkuSwapApiService } from './services/okuswap-api-service';
 
 export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
     public readonly tradeType = ON_CHAIN_TRADE_TYPE.OKU_SWAP;
@@ -69,9 +69,8 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
                 quoteReqBody
             );
 
-            const providerGateway = swapReqBody?.signingRequest
-                ? swapReqBody.signingRequest.permit2Address
-                : '0xFcf5986450E4A014fFE7ad4Ae24921B589D039b5';
+            const providerGateway = swapReqBody.coupon.universalRouter;
+            const permit2Address = swapReqBody.signingRequest?.permit2Address;
 
             const to = new PriceTokenAmount({
                 ...toToken.asStruct,
@@ -92,7 +91,8 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
                 path,
                 quoteReqBody,
                 swapReqBody,
-                subProvider
+                subProvider,
+                ...(permit2Address && { permit2ApproveAddress: permit2Address })
             };
 
             const gasFeeInfo =
@@ -133,8 +133,8 @@ export class OkuSwapOnChainProvider extends AggregatorOnChainProvider {
         return {
             subProvider: bestRoute.market,
             swapReqBody: {
-                coupon: bestRoute.coupon
-                // signingRequest: bestRoute?.signingRequest
+                coupon: bestRoute.coupon,
+                signingRequest: bestRoute?.signingRequest
             },
             toAmount: bestRoute.outAmount,
             gas: bestRoute.estimatedGas

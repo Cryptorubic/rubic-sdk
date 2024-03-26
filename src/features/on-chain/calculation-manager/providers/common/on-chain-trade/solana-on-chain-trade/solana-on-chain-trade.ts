@@ -120,6 +120,10 @@ export abstract class SolanaOnChainTrade extends OnChainTrade {
         throw new Error('Method is not supported');
     }
 
+    public approveOnPermit2(): Promise<TransactionReceipt> {
+        throw new Error('Method is not supported!');
+    }
+
     public async encodeApprove(
         _tokenAddress: string,
         _spenderAddress: string,

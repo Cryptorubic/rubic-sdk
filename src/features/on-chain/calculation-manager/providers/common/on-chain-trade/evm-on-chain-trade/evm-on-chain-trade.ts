@@ -105,6 +105,13 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         this.fromWithoutFee = evmOnChainTradeStruct.fromWithoutFee;
         this.usedForCrossChain = evmOnChainTradeStruct.usedForCrossChain || false;
 
+        if (evmOnChainTradeStruct.permit2ApproveAddress) {
+            this.permit2ApproveConfig = {
+                usePermit2Approve: true,
+                permit2Address: evmOnChainTradeStruct.permit2ApproveAddress
+            };
+        }
+
         this.feeInfo = {
             rubicProxy: {
                 ...(evmOnChainTradeStruct.proxyFeeInfo?.fixedFeeToken && {
@@ -160,6 +167,31 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         );
     }
 
+    public async approveOnPermit2(
+        options: Omit<SwapTransactionOptions, 'onConfirm' | 'gasLimit'>,
+        amount: BigNumber | 'infinity' = 'infinity'
+    ): Promise<TransactionReceipt> {
+        const needApprove = await this.needApprove(
+            undefined,
+            this.permit2ApproveConfig.permit2Address
+        );
+        if (!needApprove) {
+            throw new UnnecessaryApproveError();
+        }
+
+        const approveOptions: EvmBasicTransactionOptions = {
+            gas: options?.approveGasLimit || undefined,
+            gasPriceOptions: options?.gasPriceOptions || undefined
+        };
+
+        return this.web3Private.approveTokens(
+            this.from.address,
+            this.permit2ApproveConfig.permit2Address,
+            amount,
+            approveOptions
+        );
+    }
+
     public async encodeApprove(
         tokenAddress: string,
         spenderAddress: string,
@@ -172,10 +204,10 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     protected async checkAllowanceAndApprove(
         options?: Omit<SwapTransactionOptions, 'onConfirm' | 'gasLimit'>
     ): Promise<void> {
-        // const needApprove = await this.needApprove();
-        // if (!needApprove) {
-        //     return;
-        // }
+        const needApprove = await this.needApprove();
+        if (!needApprove) {
+            return;
+        }
 
         const approveOptions: EvmBasicTransactionOptions = {
             onTransactionHash: options?.onApprove,
@@ -183,7 +215,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             gasPriceOptions: options?.gasPriceOptions || undefined
         };
 
-        await this.approve(approveOptions, false);
+        await this.approve(approveOptions, false, this.from.tokenAmount);
     }
 
     /**
@@ -215,6 +247,9 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkWalletState();
+        if (this.permit2ApproveConfig.usePermit2Approve) {
+            await this.approveOnPermit2(options);
+        }
         await this.checkAllowanceAndApprove(options);
 
         const { onConfirm, directTransaction } = options;

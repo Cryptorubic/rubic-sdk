@@ -1,11 +1,9 @@
 import { BehaviorSubject } from 'rxjs';
 
-export class SignatureService {
-    private static _instance: SignatureService;
+export class OkuSwapManager {
+    private static _instance: OkuSwapManager;
 
     private _isGetGasLimitCall$ = new BehaviorSubject<boolean>(false);
-
-    public isGetGasLimitCall$ = this._isGetGasLimitCall$.asObservable();
 
     public get isGetGasLimitCall(): boolean {
         return this._isGetGasLimitCall$.value;
@@ -15,7 +13,7 @@ export class SignatureService {
 
     public static getInstance() {
         if (!this._instance) {
-            this._instance = new SignatureService();
+            this._instance = new OkuSwapManager();
         }
 
         return this._instance;

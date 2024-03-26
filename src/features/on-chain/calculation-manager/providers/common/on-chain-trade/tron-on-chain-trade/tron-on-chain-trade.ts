@@ -10,6 +10,7 @@ import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { OnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/on-chain-trade';
+import { TransactionReceipt } from 'viem';
 
 export abstract class TronOnChainTrade extends OnChainTrade {
     public abstract readonly from: PriceTokenAmount<TronBlockchainName>;
@@ -45,6 +46,10 @@ export abstract class TronOnChainTrade extends OnChainTrade {
             amount,
             options
         );
+    }
+
+    public approveOnPermit2(): Promise<TransactionReceipt> {
+        throw new Error('Method is not supported!');
     }
 
     protected async checkAllowanceAndApprove(

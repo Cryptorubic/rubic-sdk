@@ -26,7 +26,7 @@ export interface OkuQuoteRequestBody {
 export interface OkuQuoteResponse {
     /* non-wei raw amount (100, 100.1 etc) */
     outAmount: string;
-    coupon: object;
+    coupon: OkuCoupon;
     signingRequest?: {
         typedData: object[];
         permit2Address: string;
@@ -65,7 +65,7 @@ export interface OkuPermitSignature {
 }
 
 export interface OkuSwapRequestBody {
-    coupon: object;
+    coupon: OkuCoupon;
     signingRequest?: {
         typedData: object[];
         permit2Address: string;
@@ -91,4 +91,11 @@ export interface GetBestRouteReturnType {
     swapReqBody: OkuSwapRequestBody;
     toAmount: string;
     gas: string;
+}
+
+interface OkuCoupon {
+    chainId: number;
+    swapConfig: object;
+    trade: object;
+    universalRouter: string;
 }
