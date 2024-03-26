@@ -1,8 +1,8 @@
-import BigNumber from 'bignumber.js';
 import { PriceToken, PriceTokenAmount } from 'src/common/tokens';
 import { combineOptions } from 'src/common/utils/options';
 import { BLOCKCHAIN_NAME, EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import {
     OnChainCalculationOptions,
@@ -68,7 +68,7 @@ export class PiteasProvider extends EvmOnChainProvider {
 
         const to = new PriceTokenAmount({
             ...toToken.asStruct,
-            tokenAmount: new BigNumber(destAmount)
+            tokenAmount: Web3Pure.fromWei(destAmount, toToken.decimals)
         });
 
         const tradeStruct: EvmOnChainTradeStruct = {
