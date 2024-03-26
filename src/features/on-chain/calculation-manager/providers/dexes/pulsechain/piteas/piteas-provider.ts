@@ -63,7 +63,6 @@ export class PiteasProvider extends EvmOnChainProvider {
 
         const { destAmount, gasUseEstimate, methodParameters } =
             await this.httpClient.get<PiteasSuccessQuoteResponse>('https://api.piteas.io/quote', {
-                headers: { Referer: 'app.rubic.exchange' },
                 params: { ...quoteRequestParams }
             });
 
