@@ -4,5 +4,5 @@ import { UniswapV3AlgebraProviderConfiguration } from 'src/features/on-chain/cal
 
 export const CAMELOT_ARBITRUM_PROVIDER_CONFIGURATION: UniswapV3AlgebraProviderConfiguration = {
     wethAddress: wrappedNativeTokensList[BLOCKCHAIN_NAME.ARBITRUM]!.address,
-    maxTransitTokens: 3
+    maxTransitTokens: 1
 };
