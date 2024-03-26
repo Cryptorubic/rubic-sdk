@@ -13,6 +13,8 @@ import { XyDexZkevmProvider } from 'src/features/on-chain/calculation-manager/pr
 import { XyDexScrollProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/scroll/xy-dex-scroll/xy-dex-scroll-provider';
 import { XyDexZksyncProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/zksync/xy-dex-zksync/xy-dex-zksync-provider';
 
+import { XyDexBlastProvider } from '../../providers/dexes/blast/xy-dex-blast/xy-dex-blast-provider';
+
 export const xyDexTradeProviders = [
     XyDexBscProvider,
     XyDexEthereumProvider,
@@ -27,5 +29,6 @@ export const xyDexTradeProviders = [
     XyDexLineaProvider,
     XyDexBaseProvider,
     XyDexScrollProvider,
-    XyDexMantleProvider
+    XyDexMantleProvider,
+    XyDexBlastProvider
 ];

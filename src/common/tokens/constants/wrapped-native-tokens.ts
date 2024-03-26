@@ -388,6 +388,27 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         symbol: 'WETH',
         decimals: 18
     }),
+    [BLOCKCHAIN_NAME.KROMA]: new Token({
+        blockchain: BLOCKCHAIN_NAME.KROMA,
+        address: '0x4200000000000000000000000000000000000001',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.HORIZEN_EON]: new Token({
+        blockchain: BLOCKCHAIN_NAME.HORIZEN_EON,
+        address: '0xF5cB8652a84329A2016A386206761f455bCEDab6',
+        name: 'Wrapped ZEN',
+        symbol: 'WZEN',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MERLIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MERLIN,
+        address: '0xF6D226f9Dc15d9bB51182815b320D3fBE324e1bA',
+        name: 'Wrapped BTC',
+        symbol: 'WBTC',
+        decimals: 18
+    }),
     [BLOCKCHAIN_NAME.ROOTSTOCK]: new Token({
         blockchain: BLOCKCHAIN_NAME.ROOTSTOCK,
         address: '0x542fda317318ebf1d3deaf76e0b632741a7e677d',

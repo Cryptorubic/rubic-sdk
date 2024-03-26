@@ -24,7 +24,7 @@ export class TonWeb3Pure {
         return isChangenowReceiverAddressCorrect(
             address,
             changenowApiBlockchain.TON,
-            /^(EQ)[0-9a-zA-Z-_!]{46}/
+            /^(EQ|UQ)[0-9a-zA-Z-_!]{46}$/
         );
     }
 }

@@ -20,6 +20,7 @@ export const symbiosisCrossChainSupportedBlockchains = [
     BLOCKCHAIN_NAME.METIS,
     BLOCKCHAIN_NAME.BITCOIN,
     BLOCKCHAIN_NAME.BLAST,
+    BLOCKCHAIN_NAME.MERLIN,
     BLOCKCHAIN_NAME.ROOTSTOCK,
     // Testnets
     BLOCKCHAIN_NAME.GOERLI,
