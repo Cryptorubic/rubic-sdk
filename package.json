@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.8.2-alpha-merlin-proxy.0",
+    "version": "5.8.3-alpha-merlin-proxy.0",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
