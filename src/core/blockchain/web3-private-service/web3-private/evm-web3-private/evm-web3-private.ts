@@ -17,7 +17,6 @@ import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/
 import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private/models/web3.error';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
-import { UNI_V3_PERMIT2_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/uniswap-v3-permit2-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 import { proxyHashErrors } from 'src/features/cross-chain/calculation-manager/providers/common/constants/proxy-hash-errors';
@@ -349,80 +348,6 @@ export class EvmWeb3Private extends Web3Private {
                     reject(EvmWeb3Private.parseError(err));
                 });
         });
-    }
-
-    public async approveViaPermit2UniV3(
-        tokenAddress: string,
-        permit2Address: string,
-        spenderAddress: string,
-        options: EvmTransactionOptions = {}
-    ): Promise<TransactionReceipt> {
-        const contract = new this.web3.eth.Contract(UNI_V3_PERMIT2_ABI, permit2Address);
-        const gaslessParams = { from: this.address };
-        const amountToApprove = '15000000000000000000000';
-        const methodArgs = await this.getMethodArgsForPermit2(
-            tokenAddress,
-            spenderAddress,
-            amountToApprove
-        );
-
-        const gas = await contract.methods['permit'](...methodArgs).estimateGas(gaslessParams);
-
-        const gasfullParams = {
-            ...gaslessParams,
-            ...getGasOptions(options),
-            gas: Web3Private.stringifyAmount(gas, 1)
-        };
-
-        return new Promise((res, rej) => {
-            contract.methods['permit'](...methodArgs)
-                .send(gasfullParams)
-                .on('transactionHash', options.onTransactionHash || (() => {}))
-                .on('receipt', (receipt: TransactionReceipt) => {
-                    console.log('APPROVE_RECEIPT - ', receipt);
-                    res(receipt);
-                })
-                .on('error', (err: Web3Error) => {
-                    console.error(`Tokens approveViaPermit2UniV3 error. ${err}`);
-                    rej(EvmWeb3Private.parseError(err));
-                });
-        });
-    }
-
-    private async getMethodArgsForPermit2(
-        tokenAddress: string,
-        spenderAddress: string,
-        amountToApprove: string
-    ): Promise<unknown[]> {
-        const nonce = await this.web3.eth.getTransactionCount(this.address);
-        const sigDeadline = 1711053197;
-        const expiration = Date.now() + 1000000000000;
-        const details = [
-            [tokenAddress, amountToApprove, expiration, nonce],
-            spenderAddress,
-            sigDeadline
-        ];
-        const signature = await this.getSignatureForPermit2(details);
-        const args = [this.address, details, signature];
-
-        return args;
-    }
-
-    private async getSignatureForPermit2(details: unknown[]): Promise<string> {
-        const serializedPermit = this.web3.eth.abi.encodeParameters(
-            [
-                'tuple(tuple(address token, uint160 amount, uint48 expiration, uint48 nonce), address spender, uint256 sigDeadline)'
-            ],
-            [details]
-        );
-
-        const res = await this.web3.eth.personal.sign(
-            this.web3.utils.sha3(serializedPermit) as string,
-            this.address,
-            ''
-        );
-
-        return res;
     }
 
     /**
