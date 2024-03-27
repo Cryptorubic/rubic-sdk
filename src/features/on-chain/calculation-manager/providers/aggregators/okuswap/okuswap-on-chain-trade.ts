@@ -20,7 +20,6 @@ import { OkuQuoteRequestBody, OkuSwapRequestBody } from './models/okuswap-api-ty
 import { OkuSwapSupportedBlockchain } from './models/okuswap-on-chain-supported-chains';
 import { OkuSwapOnChainTradeStruct } from './models/okuswap-trade-types';
 import { OkuSwapApiService } from './services/okuswap-api-service';
-import { OkuSwapManager } from './services/okuswap-manager';
 
 export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
     /* @internal */
@@ -41,8 +40,6 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
             EvmWeb3Pure.EMPTY_ADDRESS,
             providerGateway
         );
-        const okuManager = OkuSwapManager.getInstance();
-        okuManager.setIsGetGasLimitCall(true);
 
         try {
             const transactionConfig = await okuswapTrade.encode({ fromAddress: walletAddress });
@@ -53,7 +50,6 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
             )[0];
 
             if (gasLimit?.isFinite()) {
-                okuManager.setIsGetGasLimitCall(false);
                 return gasLimit;
             }
         } catch {}
@@ -62,12 +58,10 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
             const transactionData = await okuswapTrade.getTxConfigAndCheckAmount();
 
             if (transactionData.gas) {
-                okuManager.setIsGetGasLimitCall(false);
                 return new BigNumber(transactionData.gas);
             }
         } catch {}
 
-        okuManager.setIsGetGasLimitCall(false);
         return null;
     }
 

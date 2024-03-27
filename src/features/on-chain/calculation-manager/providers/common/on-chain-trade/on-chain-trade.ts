@@ -23,8 +23,6 @@ import { RubicStep } from 'src/features/cross-chain/calculation-manager/provider
 import { TradeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/trade-info';
 import { OnChainTradeType } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
 
-import { Permit2ApproveConfig } from './evm-on-chain-trade/models/permit2-approve-config';
-
 /**
  * Abstract class for all instant trade providers' trades.
  */
@@ -46,22 +44,6 @@ export abstract class OnChainTrade {
     public abstract readonly path: ReadonlyArray<Token>;
 
     public abstract readonly feeInfo: FeeInfo;
-
-    private _permit2ApproveConfig: Permit2ApproveConfig = {
-        usePermit2Approve: false,
-        permit2Address: ''
-    };
-
-    /**
-     * Filled if approve goes through permit2 contract
-     */
-    public get permit2ApproveConfig(): Permit2ApproveConfig {
-        return this._permit2ApproveConfig;
-    }
-
-    protected set permit2ApproveConfig(config: Permit2ApproveConfig) {
-        this._permit2ApproveConfig = config;
-    }
 
     /**
      * Type of instant trade provider.
@@ -148,7 +130,9 @@ export abstract class OnChainTrade {
      * Sends approve on permit2 contract on UniswapV3 or another unilike contract
      */
     public abstract approveOnPermit2(
-        options: Omit<SwapTransactionOptions, 'onConfirm' | 'gasLimit'>
+        options: BasicTransactionOptions,
+        checkNeedApprove?: boolean,
+        amount?: BigNumber | 'infinity'
     ): Promise<unknown>;
 
     /**

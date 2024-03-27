@@ -37,6 +37,8 @@ import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { utf8ToHex } from 'web3-utils';
 
+import { Permit2ApproveConfig } from './models/permit2-approve-config';
+
 export abstract class EvmOnChainTrade extends OnChainTrade {
     public readonly from: PriceTokenAmount<EvmBlockchainName>;
 
@@ -72,6 +74,14 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     public abstract readonly dexContractAddress: string; // not static because https://github.com/microsoft/TypeScript/issues/34516
 
     private readonly usedForCrossChain: boolean;
+
+    /**
+     * Filled if approve goes through permit2 contract
+     */
+    public readonly permit2ApproveConfig: Permit2ApproveConfig = {
+        usePermit2Approve: false,
+        permit2Address: ''
+    };
 
     protected get spenderAddress(): string {
         return this.useProxy || this.usedForCrossChain
@@ -168,27 +178,25 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     }
 
     public async approveOnPermit2(
-        options: Omit<SwapTransactionOptions, 'onConfirm' | 'gasLimit'>,
+        options: EvmBasicTransactionOptions,
+        checkNeedApprove = true,
         amount: BigNumber | 'infinity' = 'infinity'
     ): Promise<TransactionReceipt> {
-        const needApprove = await this.needApprove(
-            undefined,
-            this.permit2ApproveConfig.permit2Address
-        );
-        if (!needApprove) {
-            throw new UnnecessaryApproveError();
+        if (checkNeedApprove) {
+            const needApprove = await this.needApprove(
+                undefined,
+                this.permit2ApproveConfig.permit2Address
+            );
+            if (!needApprove) {
+                throw new UnnecessaryApproveError();
+            }
         }
-
-        const approveOptions: EvmBasicTransactionOptions = {
-            gas: options?.approveGasLimit || undefined,
-            gasPriceOptions: options?.gasPriceOptions || undefined
-        };
 
         return this.web3Private.approveTokens(
             this.from.address,
             this.permit2ApproveConfig.permit2Address,
             amount,
-            approveOptions
+            options
         );
     }
 
@@ -202,9 +210,15 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     }
 
     protected async checkAllowanceAndApprove(
+        approveType: 'default' | 'permit2',
         options?: Omit<SwapTransactionOptions, 'onConfirm' | 'gasLimit'>
     ): Promise<void> {
-        const needApprove = await this.needApprove();
+        const needApprove = await this.needApprove(
+            undefined,
+            approveType === 'default'
+                ? this.spenderAddress
+                : this.permit2ApproveConfig.permit2Address
+        );
         if (!needApprove) {
             return;
         }
@@ -215,7 +229,11 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             gasPriceOptions: options?.gasPriceOptions || undefined
         };
 
-        await this.approve(approveOptions, false, this.from.tokenAmount);
+        if (approveType === 'default') {
+            await this.approve(approveOptions, false, this.from.tokenAmount);
+        } else {
+            await this.approveOnPermit2(approveOptions, false, this.from.tokenAmount);
+        }
     }
 
     /**
@@ -248,9 +266,9 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkWalletState();
         if (this.permit2ApproveConfig.usePermit2Approve) {
-            await this.approveOnPermit2(options);
+            await this.checkAllowanceAndApprove('permit2', options);
         }
-        await this.checkAllowanceAndApprove(options);
+        await this.checkAllowanceAndApprove('default', options);
 
         const { onConfirm, directTransaction } = options;
         let transactionHash: string;
