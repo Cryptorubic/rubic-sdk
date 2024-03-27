@@ -127,13 +127,13 @@ export class EvmWeb3Public extends Web3Public {
     ): Promise<BigNumber> {
         try {
             const contract = new this.web3.eth.Contract(UNI_V3_PERMIT_2_ABI, permit2Address);
-            const [allowance] = (await contract.methods['allowance'](
+            const res = (await contract.methods['allowance'](
                 walletAddress,
                 tokenAddress,
                 spenderAddress
-            ).call()) as [string, number, number];
+            ).call()) as { amount: string; expiration: string; nonce: string };
 
-            return new BigNumber(allowance);
+            return new BigNumber(res.amount);
         } catch (err) {
             console.error(err);
             return new BigNumber(0);

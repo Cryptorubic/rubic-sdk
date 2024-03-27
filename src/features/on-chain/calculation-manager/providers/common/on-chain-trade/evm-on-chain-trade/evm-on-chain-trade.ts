@@ -200,7 +200,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             gasPriceOptions: options?.gasPriceOptions || undefined
         };
 
-        await this.approve(approveOptions, false, this.from.tokenAmount);
+        await this.approve(approveOptions, false, this.from.weiAmount);
     }
 
     /**

@@ -361,14 +361,14 @@ export class EvmWeb3Private extends Web3Private {
         const contract = new this.web3.eth.Contract(UNI_V3_PERMIT_2_ABI, permit2Address);
         const rawValue = amount === 'infinity' ? new BigNumber(2).pow(256).minus(1) : amount;
         const gaslessParams = { from: this.address };
-        const expiration = new BigNumber(Date.now()).plus(10 ** 10).toNumber();
+        const expiration = new BigNumber(Date.now()).plus(1_000_000).toFixed();
 
         const gas = await contract.methods['approve'](
             tokenAddress,
             spenderAddress,
             rawValue.toFixed(),
             expiration
-        );
+        ).estimateGas();
         const gasfullParams = {
             ...gaslessParams,
             ...getGasOptions(options),

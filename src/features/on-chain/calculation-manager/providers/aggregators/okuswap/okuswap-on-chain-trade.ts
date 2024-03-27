@@ -157,7 +157,7 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
 
         const needApprove = await this.needApprove();
         if (needApprove) {
-            await this.approve(approveOptions, false, this.from.tokenAmount);
+            await this.approve(approveOptions, false, this.from.weiAmount);
         }
 
         const needPermit2Approve = await this.needPermit2Approve();
@@ -166,7 +166,7 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
                 this.from.address,
                 this.permit2ApproveConfig.permit2Address,
                 this.spenderAddress,
-                this.from.tokenAmount,
+                this.from.weiAmount,
                 options
             );
         }
