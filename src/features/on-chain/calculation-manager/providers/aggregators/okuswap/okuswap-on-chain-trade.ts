@@ -2,9 +2,11 @@ import BigNumber from 'bignumber.js';
 import {
     LowSlippageDeflationaryTokenError,
     RubicSdkError,
-    SwapRequestError
+    SwapRequestError,
+    UnnecessaryApproveError
 } from 'src/common/errors';
 import { parseError } from 'src/common/utils/errors';
+import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
@@ -12,6 +14,7 @@ import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
+import { TransactionReceipt } from 'web3-eth';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
@@ -139,6 +142,45 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
             }
             throw parseError(err);
         }
+    }
+
+    /**
+     * Sends approve and if needed permit2Approve on UniswapV3Like-contract
+     */
+    public override async approve(
+        options: EvmBasicTransactionOptions,
+        checkNeedApprove = true,
+        amount: BigNumber | 'infinity' = 'infinity'
+    ): Promise<TransactionReceipt> {
+        if (checkNeedApprove) {
+            const needApprove = await this.needApprove();
+            if (!needApprove) {
+                throw new UnnecessaryApproveError();
+            }
+        }
+
+        this.checkWalletConnected();
+        await this.checkBlockchainCorrect();
+
+        const needPermit2Approve = await this.needApprove(
+            undefined,
+            this.permit2ApproveConfig.permit2Address
+        );
+        if (needPermit2Approve) {
+            await this.web3Private.approveTokens(
+                this.from.address,
+                this.permit2ApproveConfig.permit2Address,
+                amount,
+                options
+            );
+        }
+
+        return this.web3Private.approveTokens(
+            this.from.address,
+            this.spenderAddress,
+            amount,
+            options
+        );
     }
 
     protected async getToAmountAndTxData(): Promise<GetToAmountAndTxDataResponse> {

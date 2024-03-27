@@ -127,15 +127,6 @@ export abstract class OnChainTrade {
     ): Promise<unknown>;
 
     /**
-     * Sends approve on permit2 contract on UniswapV3 or another unilike contract
-     */
-    public abstract approveOnPermit2(
-        options: BasicTransactionOptions,
-        checkNeedApprove?: boolean,
-        amount?: BigNumber | 'infinity'
-    ): Promise<unknown>;
-
-    /**
      * Builds encoded approve transaction config.
      * @param tokenAddress Address of the smart-contract corresponding to the token.
      * @param spenderAddress Wallet or contract address to approve.

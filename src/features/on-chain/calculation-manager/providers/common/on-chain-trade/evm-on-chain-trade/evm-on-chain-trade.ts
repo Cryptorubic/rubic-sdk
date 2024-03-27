@@ -210,15 +210,9 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
     }
 
     protected async checkAllowanceAndApprove(
-        approveType: 'default' | 'permit2',
         options?: Omit<SwapTransactionOptions, 'onConfirm' | 'gasLimit'>
     ): Promise<void> {
-        const needApprove = await this.needApprove(
-            undefined,
-            approveType === 'default'
-                ? this.spenderAddress
-                : this.permit2ApproveConfig.permit2Address
-        );
+        const needApprove = await this.needApprove();
         if (!needApprove) {
             return;
         }
@@ -229,11 +223,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             gasPriceOptions: options?.gasPriceOptions || undefined
         };
 
-        if (approveType === 'default') {
-            await this.approve(approveOptions, false, this.from.tokenAmount);
-        } else {
-            await this.approveOnPermit2(approveOptions, false, this.from.tokenAmount);
-        }
+        await this.approve(approveOptions, false, this.from.tokenAmount);
     }
 
     /**
@@ -265,10 +255,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
     public async swap(options: SwapTransactionOptions = {}): Promise<string | never> {
         await this.checkWalletState();
-        if (this.permit2ApproveConfig.usePermit2Approve) {
-            await this.checkAllowanceAndApprove('permit2', options);
-        }
-        await this.checkAllowanceAndApprove('default', options);
+        await this.checkAllowanceAndApprove(options);
 
         const { onConfirm, directTransaction } = options;
         let transactionHash: string;
