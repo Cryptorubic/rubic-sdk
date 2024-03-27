@@ -2,8 +2,7 @@ import BigNumber from 'bignumber.js';
 import {
     LowSlippageDeflationaryTokenError,
     RubicSdkError,
-    SwapRequestError,
-    UnnecessaryApproveError
+    SwapRequestError
 } from 'src/common/errors';
 import { parseError } from 'src/common/utils/errors';
 import { EvmBasicTransactionOptions } from 'src/core/blockchain/web3-private-service/web3-private/evm-web3-private/models/evm-basic-transaction-options';
@@ -12,9 +11,9 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
+import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { checkUnsupportedReceiverAddress } from 'src/features/common/utils/check-unsupported-receiver-address';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { TransactionReceipt } from 'web3-eth';
 
 import { ON_CHAIN_TRADE_TYPE, OnChainTradeType } from '../../common/models/on-chain-trade-type';
 import { AggregatorEvmOnChainTrade } from '../../common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
@@ -147,40 +146,41 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
     /**
      * Sends approve and if needed permit2Approve on UniswapV3Like-contract
      */
-    public override async approve(
-        options: EvmBasicTransactionOptions,
-        checkNeedApprove = true,
-        amount: BigNumber | 'infinity' = 'infinity'
-    ): Promise<TransactionReceipt> {
-        if (checkNeedApprove) {
-            const needApprove = await this.needApprove();
-            if (!needApprove) {
-                throw new UnnecessaryApproveError();
-            }
+    protected override async checkAllowanceAndApprove(
+        options?: Omit<SwapTransactionOptions, 'onConfirm' | 'gasLimit'>
+    ): Promise<void> {
+        const approveOptions: EvmBasicTransactionOptions = {
+            onTransactionHash: options?.onApprove,
+            gas: options?.approveGasLimit || undefined,
+            gasPriceOptions: options?.gasPriceOptions || undefined
+        };
+
+        const needApprove = await this.needApprove();
+        if (needApprove) {
+            await this.approve(approveOptions, false, this.from.tokenAmount);
         }
 
-        this.checkWalletConnected();
-        await this.checkBlockchainCorrect();
-
-        const needPermit2Approve = await this.needApprove(
-            undefined,
-            this.permit2ApproveConfig.permit2Address
-        );
+        const needPermit2Approve = await this.needPermit2Approve();
         if (needPermit2Approve) {
-            await this.web3Private.approveTokens(
+            await this.web3Private.approveOnPermit2(
                 this.from.address,
                 this.permit2ApproveConfig.permit2Address,
-                amount,
+                this.spenderAddress,
+                this.from.tokenAmount,
                 options
             );
         }
+    }
 
-        return this.web3Private.approveTokens(
+    private async needPermit2Approve(): Promise<boolean> {
+        const allowance = await this.web3Public.getAllowanceOnPermit2(
             this.from.address,
+            this.walletAddress,
             this.spenderAddress,
-            amount,
-            options
+            this.permit2ApproveConfig.permit2Address
         );
+
+        return this.from.weiAmount.gt(allowance);
     }
 
     protected async getToAmountAndTxData(): Promise<GetToAmountAndTxDataResponse> {

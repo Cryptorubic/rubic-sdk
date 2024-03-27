@@ -33,6 +33,7 @@ import { BlockTransactionString, TransactionReceipt } from 'web3-eth';
 import { EventData } from 'web3-eth-contract';
 import { AbiItem } from 'web3-utils';
 
+import { UNI_V3_PERMIT_2_ABI } from './constants/uni-v3-permit2-abi';
 import { GasPrice } from './models/gas-price';
 
 /**
@@ -111,6 +112,27 @@ export class EvmWeb3Public extends Web3Public {
             const contract = new this.web3.eth.Contract(this.tokenContractAbi, tokenAddress);
 
             const allowance = await contract.methods.allowance(ownerAddress, spenderAddress).call();
+            return new BigNumber(allowance);
+        } catch (err) {
+            console.error(err);
+            return new BigNumber(0);
+        }
+    }
+
+    public async getAllowanceOnPermit2(
+        tokenAddress: string,
+        walletAddress: string,
+        spenderAddress: string,
+        permit2Address: string
+    ): Promise<BigNumber> {
+        try {
+            const contract = new this.web3.eth.Contract(UNI_V3_PERMIT_2_ABI, permit2Address);
+            const [allowance] = (await contract.methods['allowance'](
+                walletAddress,
+                tokenAddress,
+                spenderAddress
+            ).call()) as [string, number, number];
+
             return new BigNumber(allowance);
         } catch (err) {
             console.error(err);

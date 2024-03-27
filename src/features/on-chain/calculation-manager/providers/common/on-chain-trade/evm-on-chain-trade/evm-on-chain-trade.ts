@@ -177,29 +177,6 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         );
     }
 
-    public async approveOnPermit2(
-        options: EvmBasicTransactionOptions,
-        checkNeedApprove = true,
-        amount: BigNumber | 'infinity' = 'infinity'
-    ): Promise<TransactionReceipt> {
-        if (checkNeedApprove) {
-            const needApprove = await this.needApprove(
-                undefined,
-                this.permit2ApproveConfig.permit2Address
-            );
-            if (!needApprove) {
-                throw new UnnecessaryApproveError();
-            }
-        }
-
-        return this.web3Private.approveTokens(
-            this.from.address,
-            this.permit2ApproveConfig.permit2Address,
-            amount,
-            options
-        );
-    }
-
     public async encodeApprove(
         tokenAddress: string,
         spenderAddress: string,
