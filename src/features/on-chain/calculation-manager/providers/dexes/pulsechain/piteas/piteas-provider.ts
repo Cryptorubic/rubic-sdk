@@ -59,7 +59,10 @@ export class PiteasProvider extends EvmOnChainProvider {
             allowedSlippage: 0.5
         };
 
-        const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, fullOptions);
+        const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, {
+            ...fullOptions,
+            useProxy: false
+        });
 
         const { destAmount, gasUseEstimate, methodParameters } =
             await this.httpClient.get<PiteasSuccessQuoteResponse>('https://api.piteas.io/quote', {
