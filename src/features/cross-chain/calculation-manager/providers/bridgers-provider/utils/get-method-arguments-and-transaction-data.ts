@@ -47,9 +47,10 @@ export async function getMethodArgumentsAndTransactionData<
     const amountOutMin = Web3Pure.toWei(toTokenAmountMin, to.decimals);
     const fromTokenAddress = createTokenNativeAddressProxy(
         fromWithoutFee,
-        bridgersNativeAddress
+        bridgersNativeAddress,
+        false
     ).address;
-    const toTokenAddress = createTokenNativeAddressProxy(to, bridgersNativeAddress).address;
+    const toTokenAddress = createTokenNativeAddressProxy(to, bridgersNativeAddress, false).address;
     const fromAddress = options.fromAddress || walletAddress;
     const swapRequest: BridgersSwapRequest = {
         fromTokenAddress,
