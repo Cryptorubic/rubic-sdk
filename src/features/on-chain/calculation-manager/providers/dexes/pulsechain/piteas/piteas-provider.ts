@@ -80,7 +80,7 @@ export class PiteasProvider extends EvmOnChainProvider {
             slippageTolerance: fullOptions.slippageTolerance,
             path: [from, to],
             gasFeeInfo: null,
-            useProxy: fullOptions.useProxy,
+            useProxy: false,
             proxyFeeInfo,
             fromWithoutFee,
             withDeflation: fullOptions.withDeflation,
