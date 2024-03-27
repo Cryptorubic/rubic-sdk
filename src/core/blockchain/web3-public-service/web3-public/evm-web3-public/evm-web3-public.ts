@@ -119,12 +119,15 @@ export class EvmWeb3Public extends Web3Public {
         }
     }
 
-    public async getAllowanceOnPermit2(
+    /**
+     * @returns Aray where [0] - allowance(wei amount), [1] - expiration timestamp in ms(string)
+     */
+    public async getAllowanceAndExpirationOnPermit2(
         tokenAddress: string,
         walletAddress: string,
         spenderAddress: string,
         permit2Address: string
-    ): Promise<BigNumber> {
+    ): Promise<[BigNumber, string]> {
         try {
             const contract = new this.web3.eth.Contract(UNI_V3_PERMIT_2_ABI, permit2Address);
             const res = (await contract.methods['allowance'](
@@ -133,10 +136,10 @@ export class EvmWeb3Public extends Web3Public {
                 spenderAddress
             ).call()) as { amount: string; expiration: string; nonce: string };
 
-            return new BigNumber(res.amount);
+            return [new BigNumber(res.amount), res.expiration];
         } catch (err) {
             console.error(err);
-            return new BigNumber(0);
+            return [new BigNumber(0), '0'];
         }
     }
 
