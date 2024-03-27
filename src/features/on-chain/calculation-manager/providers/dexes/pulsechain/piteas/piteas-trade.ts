@@ -51,8 +51,6 @@ export class PiteasTrade extends EvmOnChainTrade {
 
     private readonly methodParameters: PiteasMethodParameters;
 
-    private readonly toContractAddress = '0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6';
-
     constructor(
         tradeStruct: EvmOnChainTradeStruct,
         providerAddress: string,
@@ -60,7 +58,7 @@ export class PiteasTrade extends EvmOnChainTrade {
     ) {
         super(tradeStruct, providerAddress);
 
-        this.dexContractAddress = 'tradeStruct.contractAddress';
+        this.dexContractAddress = '0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6';
         this.methodParameters = methodParameters;
     }
 
@@ -69,7 +67,7 @@ export class PiteasTrade extends EvmOnChainTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         return {
-            to: this.toContractAddress,
+            to: this.dexContractAddress,
             data: this.methodParameters.calldata,
             value: this.methodParameters.value
         };
