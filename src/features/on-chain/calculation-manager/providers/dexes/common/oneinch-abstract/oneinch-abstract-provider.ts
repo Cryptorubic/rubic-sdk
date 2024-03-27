@@ -194,7 +194,7 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
             );
 
             estimatedGas = new BigNumber(oneInchTrade.tx.gas);
-            toTokenAmount = oneInchTrade.dstAmount;
+            toTokenAmount = oneInchTrade.toAmount;
             data = oneInchTrade.tx.data;
         } catch (_err) {
             oneInchTrade = await oneInchHttpGetRequest<OneinchQuoteResponse>(
@@ -202,12 +202,12 @@ export abstract class OneinchAbstractProvider extends EvmOnChainProvider {
                 this.blockchain,
                 quoteTradeParams
             );
-            if (oneInchTrade.hasOwnProperty('errors') || !oneInchTrade.dstAmount) {
+            if (oneInchTrade.hasOwnProperty('errors') || !oneInchTrade.toAmount) {
                 throw new RubicSdkError('1inch quote error');
             }
 
             estimatedGas = new BigNumber(oneInchTrade.gas);
-            toTokenAmount = oneInchTrade.dstAmount;
+            toTokenAmount = oneInchTrade.toAmount;
         }
 
         if (oneInchTrade?.protocols?.length) {

@@ -8,7 +8,7 @@ export function oneInchHttpGetRequest<T>(
     options?: {}
 ): Promise<T> {
     return Injector.httpClient.get(
-        `https://x-api.rubic.exchange/api/swap/v6.0/${blockchainId[blockchain]}/${path}`,
+        `https://x-api.rubic.exchange/api/swap/v5.2/${blockchainId[blockchain]}/${path}`,
         {
             ...options,
             headers: { apikey: 'sndfje3u4b3fnNSDNFUSDNVSunw345842hrnfd3b4nt4' }
