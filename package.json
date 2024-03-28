@@ -1,6 +1,6 @@
 {
     "name": "rubic-sdk",
-    "version": "5.8.3",
+    "version": "5.9.0-alpha-berachain-testnet-algebra-dex.0",
     "description": "Simplify dApp creation",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
