@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
+import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
@@ -47,9 +48,14 @@ export async function getMethodArgumentsAndTransactionData<
     const amountOutMin = Web3Pure.toWei(toTokenAmountMin, to.decimals);
     const fromTokenAddress = createTokenNativeAddressProxy(
         fromWithoutFee,
-        bridgersNativeAddress
+        bridgersNativeAddress,
+        !(from.blockchain === BLOCKCHAIN_NAME.TRON)
     ).address;
-    const toTokenAddress = createTokenNativeAddressProxy(to, bridgersNativeAddress).address;
+    const toTokenAddress = createTokenNativeAddressProxy(
+        to,
+        bridgersNativeAddress,
+        !(to.blockchain === BLOCKCHAIN_NAME.TRON)
+    ).address;
     const fromAddress = options.fromAddress || walletAddress;
     const swapRequest: BridgersSwapRequest = {
         fromTokenAddress,
