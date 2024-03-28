@@ -94,8 +94,8 @@ export class PiteasTrade extends EvmOnChainTrade {
 
         return {
             to: this.dexContractAddress,
-            data: this.methodParameters.calldata,
-            value: this.methodParameters.value
+            data: methodParameters.calldata,
+            value: methodParameters.value
         };
     }
 }
