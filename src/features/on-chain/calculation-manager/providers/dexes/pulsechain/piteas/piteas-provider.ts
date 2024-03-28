@@ -56,7 +56,8 @@ export class PiteasProvider extends EvmOnChainProvider {
             tokenOutAddress: toToken.isNative ? 'PLS' : toToken.address,
             tokenOutChainId: blockchainId[from.blockchain],
             amount: from.stringWeiAmount,
-            allowedSlippage: 0.5
+            allowedSlippage: 0.5,
+            ...(options?.fromAddress && { account: options.fromAddress })
         };
 
         const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, {
@@ -98,10 +99,16 @@ export class PiteasProvider extends EvmOnChainProvider {
                     gasFeeInfo
                 },
                 fullOptions.providerAddress,
-                methodParameters
+                methodParameters,
+                quoteRequestParams
             );
         } catch {
-            return new PiteasTrade(tradeStruct, fullOptions.providerAddress, methodParameters);
+            return new PiteasTrade(
+                tradeStruct,
+                fullOptions.providerAddress,
+                methodParameters,
+                quoteRequestParams
+            );
         }
     }
 }
