@@ -1,24 +1,19 @@
 import BigNumber from 'bignumber.js';
 import { TokenUtils } from 'src/common/utils/token-utils';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
+import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 
 import { EvmOnChainTrade } from '../on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 
 export abstract class AggregatorEvmOnChainTrade extends EvmOnChainTrade {
     public async getTxConfigAndCheckAmount(
-        skipAmountChangeCheck: boolean,
-        useCacheData: boolean,
-        receiverAddress?: string,
-        fromAddress?: string
+        options: EncodeTransactionOptions
     ): Promise<EvmEncodeConfig> {
-        if (this.lastTransactionConfig && useCacheData) {
+        if (this.lastTransactionConfig && options.useCacheData) {
             return this.lastTransactionConfig;
         }
 
-        const { tx, toAmount } = await this.getTransactionConfigAndAmount(
-            receiverAddress,
-            fromAddress
-        );
+        const { tx, toAmount } = await this.getTransactionConfigAndAmount(options);
 
         const gasLimit = tx.gas && parseInt(tx.gas, 16).toString();
         const gasPrice = tx.gasPrice && parseInt(tx.gasPrice, 16).toString();
@@ -41,7 +36,7 @@ export abstract class AggregatorEvmOnChainTrade extends EvmOnChainTrade {
             this.lastTransactionConfig = null;
         }, 15_000);
 
-        if (!skipAmountChangeCheck) {
+        if (!options.skipAmountCheck) {
             this.checkAmountChange(newToTokenAmountMin, this.toTokenAmountMin.stringWeiAmount);
         }
 

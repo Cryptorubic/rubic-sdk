@@ -8,8 +8,7 @@ import {
     BlockchainName,
     EvmBlockchainName
 } from 'src/core/blockchain/models/blockchain-name';
-import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
-import { Injector } from 'src/core/injector/injector';
+import { Web3PrivateSupportedBlockchain } from 'src/core/blockchain/web3-private-service/models/web-private-supported-blockchain';
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
@@ -52,10 +51,6 @@ export class OneInchProvider extends AggregatorOnChainProvider {
         return oneInchSupportedBlockchains.some(item => item === blockchain);
     }
 
-    protected get walletAddress(): string {
-        return Injector.web3PrivateService.getWeb3Private(CHAIN_TYPE.EVM).address;
-    }
-
     public async calculate(
         from: PriceTokenAmount<EvmBlockchainName>,
         toToken: PriceToken<EvmBlockchainName>,
@@ -70,7 +65,7 @@ export class OneInchProvider extends AggregatorOnChainProvider {
         const fromAddress =
             options?.useProxy || this.defaultOptions.useProxy
                 ? rubicProxyContractAddress[from.blockchain].gateway
-                : this.walletAddress;
+                : this.getWalletAddress(from.blockchain as Web3PrivateSupportedBlockchain);
         const fullOptions = combineOptions(options, {
             ...this.defaultOptions,
             fromAddress
@@ -174,7 +169,9 @@ export class OneInchProvider extends AggregatorOnChainProvider {
                 params: {
                     ...quoteTradeParams.params,
                     slippage: (options.slippageTolerance * 100).toString(),
-                    from: this.walletAddress || fakeAddress,
+                    from:
+                        this.getWalletAddress(from.blockchain as Web3PrivateSupportedBlockchain) ||
+                        fakeAddress,
                     disableEstimate: options.gasCalculation === 'disabled'
                 }
             };

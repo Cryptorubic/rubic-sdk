@@ -1,10 +1,8 @@
 import { ZERO_ADDRESS } from '@1inch/limit-order-protocol-utils';
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
-import { parseError } from 'src/common/utils/errors';
 import { deadlineMinutesTimestamp } from 'src/common/utils/options';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { createTokenNativeAddressProxy } from 'src/features/common/utils/token-native-address-proxy';
@@ -13,6 +11,7 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { syncSwapAbi } from 'src/features/on-chain/calculation-manager/providers/dexes/common/sync-swap-abstract/sync-swap-abi';
@@ -84,27 +83,26 @@ export class SyncSwapAbstractTrade extends EvmOnChainTrade {
         this.dexContractAddress = dexContractAddress;
     }
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
+    protected async getTransactionConfigAndAmount(
+        options: EncodeTransactionOptions
+    ): Promise<GetToAmountAndTxDataResponse> {
         await this.checkFromAddress(options.fromAddress, true);
         await this.checkReceiverAddress(options.receiverAddress);
 
-        try {
-            const params = this.getCallParameters(options?.receiverAddress);
-            const gasParams = this.getGasParams(options);
-            const value = this.from.isNative ? this.from.stringWeiAmount : '0';
+        const params = this.getCallParameters(options?.receiverAddress);
+        const gasParams = this.getGasParams(options);
+        const value = this.from.isNative ? this.from.stringWeiAmount : '0';
 
-            return EvmWeb3Pure.encodeMethodCall(
-                this.dexContractAddress,
-                syncSwapAbi,
-                'swap',
-                params,
-                value,
-                gasParams
-            );
-        } catch (err) {
-            console.debug(err);
-            throw parseError(err);
-        }
+        const config = EvmWeb3Pure.encodeMethodCall(
+            this.dexContractAddress,
+            syncSwapAbi,
+            'swap',
+            params,
+            value,
+            gasParams
+        );
+
+        return { tx: config, toAmount: this.to.stringWeiAmount };
     }
 
     public getCallParameters(receiverAddress?: string): unknown[] {

@@ -1,6 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError, SwapRequestError } from 'src/common/errors';
-import { UpdatedRatesError } from 'src/common/errors/cross-chain/updated-rates-error';
+import { RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmWeb3Public } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/evm-web3-public';
@@ -93,46 +92,12 @@ export class DlnEvmOnChainTrade extends AggregatorEvmOnChainTrade {
         this.transactionRequest = tradeStruct.transactionRequest;
     }
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        await this.checkFromAddress(options.fromAddress, true);
-
-        try {
-            const transactionData = await this.getTxConfigAndCheckAmount(
-                false,
-                options?.useCacheData || false,
-                options.receiverAddress,
-                options.fromAddress
-            );
-            const { gas, gasPrice } = this.getGasParams(options, {
-                gasLimit: transactionData.gas,
-                gasPrice: transactionData.gasPrice
-            });
-
-            return {
-                to: transactionData.to,
-                data: transactionData.data,
-                value: this.fromWithoutFee.isNative ? this.fromWithoutFee.stringWeiAmount : '0',
-                gas,
-                gasPrice
-            };
-        } catch (err) {
-            if ([400, 500, 503].includes(err.code)) {
-                throw new SwapRequestError();
-            }
-
-            if (err instanceof UpdatedRatesError || err instanceof RubicSdkError) {
-                throw err;
-            }
-            throw new RubicSdkError('Can not encode trade');
-        }
-    }
-
     protected async getTransactionConfigAndAmount(
-        receiverAddress?: string
+        options: EncodeTransactionOptions
     ): Promise<GetToAmountAndTxDataResponse> {
         const params: DlnOnChainSwapRequest = {
             ...this.transactionRequest,
-            tokenOutRecipient: receiverAddress || this.web3Private.address
+            tokenOutRecipient: options.receiverAddress || this.web3Private.address
         };
 
         try {

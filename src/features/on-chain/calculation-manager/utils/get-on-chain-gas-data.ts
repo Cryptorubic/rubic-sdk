@@ -29,7 +29,12 @@ export const getOnChainGasData: (
         }
     } catch {}
     try {
-        const transactionData = await trade.getTxConfigAndCheckAmount(true, false, receiverAddress);
+        const transactionData = await trade.getTxConfigAndCheckAmount({
+            fromAddress: walletAddress,
+            skipAmountCheck: true,
+            useCacheData: true,
+            receiverAddress: receiverAddress || walletAddress
+        });
 
         if (transactionData.gas) {
             return new BigNumber(transactionData.gas);

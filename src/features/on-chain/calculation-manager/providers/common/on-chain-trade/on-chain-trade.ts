@@ -157,10 +157,12 @@ export abstract class OnChainTrade {
      */
     public abstract encode(options: EncodeTransactionOptions): Promise<unknown>;
 
-    protected async checkWalletState(): Promise<void> {
+    protected async checkWalletState(testMode: boolean = false): Promise<void> {
         this.checkWalletConnected();
         await this.checkBlockchainCorrect();
-        await this.checkBalance();
+        if (!testMode) {
+            await this.checkBalance();
+        }
     }
 
     protected checkWalletConnected(): never | void {

@@ -79,12 +79,7 @@ export class RangoOnChainTrade extends AggregatorEvmOnChainTrade {
         await this.checkReceiverAddress(options.receiverAddress);
 
         try {
-            const transactionData = await this.getTxConfigAndCheckAmount(
-                false,
-                options?.useCacheData || false,
-                options.receiverAddress,
-                options.fromAddress
-            );
+            const transactionData = await this.setTransactionConfig(options);
 
             const { gas, gasPrice } = this.getGasParams(options, {
                 gasLimit: transactionData.gas,
@@ -110,14 +105,13 @@ export class RangoOnChainTrade extends AggregatorEvmOnChainTrade {
     }
 
     protected async getTransactionConfigAndAmount(
-        receiverAddress?: string,
-        fromAddress?: string
+        options: EncodeTransactionOptions
     ): Promise<GetToAmountAndTxDataResponse> {
         const params = await RangoCommonParser.getSwapQueryParams(this.from, this.to, {
             slippageTolerance: this.slippageTolerance,
-            receiverAddress: receiverAddress || this.walletAddress,
+            receiverAddress: options.receiverAddress || this.walletAddress,
             swapperGroups: rangoOnChainDisabledProviders,
-            fromAddress
+            fromAddress: options.fromAddress
         });
 
         const { tx: transaction, route } = await RangoOnChainApiService.getSwapTransaction(params);

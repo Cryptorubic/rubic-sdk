@@ -1,17 +1,9 @@
 import BigNumber from 'bignumber.js';
-import {
-    InsufficientFundsOneinchError,
-    LowSlippageDeflationaryTokenError,
-    LowSlippageError,
-    RubicSdkError,
-    SwapRequestError
-} from 'src/common/errors';
+import { InsufficientFundsOneinchError, LowSlippageError, RubicSdkError } from 'src/common/errors';
 import { PriceTokenAmount, Token } from 'src/common/tokens';
 import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { Cache } from 'src/common/utils/decorators';
-import { parseError } from 'src/common/utils/errors';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import {
@@ -27,9 +19,10 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { AggregatorEvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
+import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 
-export class OneInchTrade extends EvmOnChainTrade {
+export class OneInchTrade extends AggregatorEvmOnChainTrade {
     /** @internal */
     public static async getGasLimit(tradeStruct: OneinchTradeStruct): Promise<BigNumber | null> {
         const fromBlockchain = tradeStruct.from.blockchain;
@@ -127,46 +120,9 @@ export class OneInchTrade extends EvmOnChainTrade {
         );
     }
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        await this.checkFromAddress(options.fromAddress, true);
-        await this.checkReceiverAddress(options.receiverAddress);
-
-        try {
-            const txData = await this.getTradeData(
-                true,
-                options.fromAddress,
-                options.receiverAddress
-            );
-            const { gas, gasPrice } = this.getGasParams(options, {
-                gasLimit: txData.gas,
-                gasPrice: txData.gasPrice
-            });
-
-            return {
-                ...txData,
-                gas,
-                gasPrice
-            };
-        } catch (err) {
-            const inchSpecificError = this.specifyError(err);
-            if (inchSpecificError) {
-                throw inchSpecificError;
-            }
-            if ([400, 500, 503].includes(err.code)) {
-                throw new SwapRequestError();
-            }
-            if (this.isDeflationError()) {
-                throw new LowSlippageDeflationaryTokenError();
-            }
-            throw parseError(err, err?.response?.data?.description || err.message);
-        }
-    }
-
-    private async getTradeData(
-        disableEstimate = false,
-        fromAddress?: string,
-        receiverAddress?: string
-    ): Promise<EvmEncodeConfig> {
+    protected async getTransactionConfigAndAmount(
+        options: EncodeTransactionOptions
+    ): Promise<GetToAmountAndTxDataResponse> {
         const fromTokenAddress = this.nativeSupportedFromWithoutFee.address;
         const toTokenAddress = this.nativeSupportedTo.address;
         const swapRequest: OneinchSwapRequest = {
@@ -175,24 +131,24 @@ export class OneInchTrade extends EvmOnChainTrade {
                 dst: toTokenAddress,
                 amount: this.nativeSupportedFromWithoutFee.stringWeiAmount,
                 slippage: (this.slippageTolerance * 100).toString(),
-                from: fromAddress || this.walletAddress,
-                disableEstimate,
+                from: options.fromAddress || this.walletAddress,
+                disableEstimate: false,
                 ...(this.disableMultihops && {
                     connectorTokens: `${fromTokenAddress},${toTokenAddress}`
                 }),
-                ...(receiverAddress && { receiver: receiverAddress }),
+                ...(options.receiverAddress && { receiver: options.receiverAddress }),
                 ...(this.availableProtocols && { protocols: this.availableProtocols })
             }
         };
 
-        const { tx } = await this.getResponseFromApiToTransactionRequest(swapRequest);
+        const { tx, toAmount } = await this.getResponseFromApiToTransactionRequest(swapRequest);
 
         return {
-            data: tx.data,
-            value: tx.value,
-            to: tx.to,
-            gasPrice: tx.gasPrice,
-            gas: String(tx.gas)
+            tx: {
+                ...tx,
+                gas: String(tx.gas)
+            },
+            toAmount
         };
     }
 

@@ -1,11 +1,7 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError } from 'src/common/errors';
-import { PriceTokenAmount } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
-import { parseError } from 'src/common/utils/errors';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
-import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import {
@@ -17,9 +13,10 @@ import { XyBuildTxResponse } from 'src/features/common/providers/xy/models/xy-bu
 import { xyAnalyzeStatusCode } from 'src/features/common/providers/xy/utils/xy-utils';
 import { XyDexTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/xy-dex/models/xy-dex-trade-struct';
 import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { AggregatorEvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
+import { GetToAmountAndTxDataResponse } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/models/aggregator-on-chain-types';
 
-export class XyDexTrade extends EvmOnChainTrade {
+export class XyDexTrade extends AggregatorEvmOnChainTrade {
     /** @internal */
     public static async getGasLimit(tradeStruct: XyDexTradeStruct): Promise<BigNumber | null> {
         const fromBlockchain = tradeStruct.from.blockchain;
@@ -49,24 +46,6 @@ export class XyDexTrade extends EvmOnChainTrade {
         }
     }
 
-    /** @internal */
-    public static async checkIfNeedApproveAndThrowError(
-        from: PriceTokenAmount,
-        fromAddress: string,
-        useProxy: boolean
-    ): Promise<void | never> {
-        const needApprove = await new XyDexTrade(
-            {
-                from,
-                useProxy
-            } as XyDexTradeStruct,
-            EvmWeb3Pure.EMPTY_ADDRESS
-        ).needApprove(fromAddress);
-        if (needApprove) {
-            throw new RubicSdkError('Approve is needed');
-        }
-    }
-
     public readonly dexContractAddress: string;
 
     public type = ON_CHAIN_TRADE_TYPE.XY_DEX;
@@ -79,19 +58,10 @@ export class XyDexTrade extends EvmOnChainTrade {
         this.provider = tradeStruct.provider;
     }
 
-    public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
-        await this.checkFromAddress(options.fromAddress, true);
-        await this.checkReceiverAddress(options.receiverAddress);
-
-        try {
-            return await this.getTradeData(options.receiverAddress);
-        } catch (err) {
-            throw parseError(err, err?.response?.data?.description || err.message);
-        }
-    }
-
-    private async getTradeData(receiverAddress?: string): Promise<EvmEncodeConfig> {
-        const receiver = receiverAddress || this.walletAddress;
+    public async getTransactionConfigAndAmount(
+        options: EncodeTransactionOptions
+    ): Promise<GetToAmountAndTxDataResponse> {
+        const receiver = options.receiverAddress || this.walletAddress;
 
         const chainId = blockchainId[this.from.blockchain];
         const srcQuoteTokenAddress = this.from.isNative ? XY_NATIVE_ADDRESS : this.from.address;
@@ -114,7 +84,7 @@ export class XyDexTrade extends EvmOnChainTrade {
             xyAnalyzeStatusCode(tradeData.errorCode, tradeData.errorMsg);
         }
 
-        return tradeData.tx;
+        return { tx: tradeData.tx, toAmount: tradeData.route.dstQuoteTokenAmount };
     }
 
     @Cache({
