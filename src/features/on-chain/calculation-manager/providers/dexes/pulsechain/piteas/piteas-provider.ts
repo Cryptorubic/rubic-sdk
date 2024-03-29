@@ -61,8 +61,7 @@ export class PiteasProvider extends EvmOnChainProvider {
         };
 
         const { fromWithoutFee, proxyFeeInfo } = await this.handleProxyContract(from, {
-            ...fullOptions,
-            useProxy: false
+            ...fullOptions
         });
 
         const { destAmount, gasUseEstimate, methodParameters } =
@@ -81,7 +80,7 @@ export class PiteasProvider extends EvmOnChainProvider {
             slippageTolerance: fullOptions.slippageTolerance,
             path: [from, to],
             gasFeeInfo: null,
-            useProxy: false,
+            useProxy: fullOptions.useProxy,
             proxyFeeInfo,
             fromWithoutFee,
             withDeflation: fullOptions.withDeflation,
