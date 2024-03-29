@@ -6,15 +6,21 @@ import {
     ON_CHAIN_TRADE_TYPE,
     OnChainTradeType
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
-import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
+import { AggregatorEvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-evm-on-chain-trade-abstract';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import {
     PiteasMethodParameters,
-    PiteasQuoteRequestParams,
-    PiteasSuccessQuoteResponse
+    PiteasQuoteRequestParams
 } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/piteas/models/piteas-quote';
+import { PiteasApiService } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/piteas/piteas-api-service';
 
-export class PiteasTrade extends EvmOnChainTrade {
+import { GetToAmountAndTxDataResponse } from '../../../common/on-chain-aggregator/models/aggregator-on-chain-types';
+
+export class PiteasTrade extends AggregatorEvmOnChainTrade {
+    protected getToAmountAndTxData(): Promise<GetToAmountAndTxDataResponse> {
+        throw new Error('Method not implemented.');
+    }
+
     public static async getGasLimit(
         tradeStruct: EvmOnChainTradeStruct,
         methodParameters: PiteasMethodParameters
@@ -53,20 +59,16 @@ export class PiteasTrade extends EvmOnChainTrade {
 
     public readonly dexContractAddress: string;
 
-    private readonly methodParameters: PiteasMethodParameters;
-
     private readonly quoteRequestParams: PiteasQuoteRequestParams;
 
     constructor(
         tradeStruct: EvmOnChainTradeStruct,
         providerAddress: string,
-        methodParameters: PiteasMethodParameters,
         quoteRequestParams: PiteasQuoteRequestParams
     ) {
         super(tradeStruct, providerAddress);
 
         this.dexContractAddress = '0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6';
-        this.methodParameters = methodParameters;
         this.quoteRequestParams = quoteRequestParams;
     }
 
@@ -74,13 +76,10 @@ export class PiteasTrade extends EvmOnChainTrade {
         await this.checkFromAddress(options.fromAddress, true);
         await this.checkReceiverAddress(options.receiverAddress);
 
-        const { destAmount, methodParameters } =
-            await this.httpClient.get<PiteasSuccessQuoteResponse>('https://api.piteas.io/quote', {
-                params: {
-                    ...this.quoteRequestParams,
-                    ...(options?.receiverAddress && { account: options?.receiverAddress })
-                }
-            });
+        const { destAmount, methodParameters } = await PiteasApiService.fetchQuote({
+            ...this.quoteRequestParams,
+            ...(options?.receiverAddress && { account: options?.receiverAddress })
+        });
 
         this.checkAmountChange(
             {

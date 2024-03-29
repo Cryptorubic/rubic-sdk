@@ -8,21 +8,19 @@ import {
     OnChainCalculationOptions,
     RequiredOnChainCalculationOptions
 } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-calculation-options';
-import {
-    ON_CHAIN_TRADE_TYPE,
-    OnChainTradeType
-} from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { ON_CHAIN_TRADE_TYPE } from 'src/features/on-chain/calculation-manager/providers/common/models/on-chain-trade-type';
+import { AggregatorOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-aggregator/aggregator-on-chain-provider-abstract';
 import { EvmOnChainTradeStruct } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/evm-on-chain-trade-struct';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
-import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
-import {
-    PiteasQuoteRequestParams,
-    PiteasSuccessQuoteResponse
-} from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/piteas/models/piteas-quote';
+import { PiteasQuoteRequestParams } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/piteas/models/piteas-quote';
+import { PiteasApiService } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/piteas/piteas-api-service';
 import { PiteasTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/piteas/piteas-trade';
 
-export class PiteasProvider extends EvmOnChainProvider {
+import { GasFeeInfo } from '../../../common/on-chain-trade/evm-on-chain-trade/models/gas-fee-info';
+import { getGasPriceInfo } from '../../../common/utils/get-gas-price-info';
+
+export class PiteasProvider extends AggregatorOnChainProvider {
     public readonly blockchain = BLOCKCHAIN_NAME.PULSECHAIN;
 
     private readonly defaultOptions: RequiredOnChainCalculationOptions = {
@@ -31,8 +29,10 @@ export class PiteasProvider extends EvmOnChainProvider {
         disableMultihops: false
     };
 
-    public get type(): OnChainTradeType {
-        return ON_CHAIN_TRADE_TYPE.PITEAS;
+    public readonly tradeType = ON_CHAIN_TRADE_TYPE.PITEAS;
+
+    protected isSupportedBlockchain(): boolean {
+        return true;
     }
 
     public async calculate(
@@ -43,7 +43,7 @@ export class PiteasProvider extends EvmOnChainProvider {
         const fromAddress =
             options?.useProxy || this.defaultOptions.useProxy
                 ? rubicProxyContractAddress[from.blockchain].gateway
-                : this.walletAddress;
+                : this.getWalletAddress(from.blockchain);
 
         const fullOptions = combineOptions(options, {
             ...this.defaultOptions,
@@ -64,10 +64,9 @@ export class PiteasProvider extends EvmOnChainProvider {
             ...fullOptions
         });
 
-        const { destAmount, gasUseEstimate, methodParameters } =
-            await this.httpClient.get<PiteasSuccessQuoteResponse>('https://api.piteas.io/quote', {
-                params: { ...quoteRequestParams }
-            });
+        const { destAmount, gasUseEstimate, methodParameters } = await PiteasApiService.fetchQuote(
+            quoteRequestParams
+        );
 
         const to = new PriceTokenAmount({
             ...toToken.asStruct,
@@ -88,7 +87,7 @@ export class PiteasProvider extends EvmOnChainProvider {
         };
 
         try {
-            const gasPriceInfo = await this.getGasPriceInfo();
+            const gasPriceInfo = await getGasPriceInfo(from.blockchain);
             const gasLimit =
                 (await PiteasTrade.getGasLimit(tradeStruct, methodParameters)) || gasUseEstimate;
             const gasFeeInfo = getGasFeeInfo(gasLimit, gasPriceInfo);
@@ -98,16 +97,14 @@ export class PiteasProvider extends EvmOnChainProvider {
                     gasFeeInfo
                 },
                 fullOptions.providerAddress,
-                methodParameters,
                 quoteRequestParams
             );
         } catch {
-            return new PiteasTrade(
-                tradeStruct,
-                fullOptions.providerAddress,
-                methodParameters,
-                quoteRequestParams
-            );
+            return new PiteasTrade(tradeStruct, fullOptions.providerAddress, quoteRequestParams);
         }
+    }
+
+    protected getGasFeeInfo(): Promise<GasFeeInfo | null> {
+        return Promise.resolve(null);
     }
 }
