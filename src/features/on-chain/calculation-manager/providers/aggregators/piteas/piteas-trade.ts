@@ -1,7 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
 import { parseError } from 'src/common/utils/errors';
-import { TokenUtils } from 'src/common/utils/token-utils';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
@@ -107,38 +106,6 @@ export class PiteasTrade extends AggregatorEvmOnChainTrade {
         } catch (error) {
             throw parseError(error);
         }
-    }
-
-    public async getTxConfigAndCheckAmount(
-        receiverAddress?: string,
-        fromAddress?: string,
-        directTransaction?: EvmEncodeConfig
-    ): Promise<EvmEncodeConfig> {
-        if (directTransaction) {
-            return directTransaction;
-        }
-
-        const { tx, toAmount } = await this.getToAmountAndTxData(receiverAddress, fromAddress);
-
-        const evmEncodeConfig = {
-            data: tx.data,
-            to: tx.to,
-            value: tx.value,
-            gas: tx.gas
-        };
-
-        const newToTokenAmountMin = TokenUtils.getMinWeiAmountString(
-            new BigNumber(toAmount),
-            this.slippageTolerance
-        );
-
-        this.checkAmountChange(
-            evmEncodeConfig,
-            newToTokenAmountMin,
-            this.toTokenAmountMin.stringWeiAmount
-        );
-
-        return evmEncodeConfig;
     }
 
     public async getToAmountAndTxData(
