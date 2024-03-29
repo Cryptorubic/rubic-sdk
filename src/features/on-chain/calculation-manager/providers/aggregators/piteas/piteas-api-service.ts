@@ -2,7 +2,7 @@ import { Injector } from 'src/core/injector/injector';
 import {
     PiteasQuoteRequestParams,
     PiteasSuccessQuoteResponse
-} from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/piteas/models/piteas-quote';
+} from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/models/piteas-quote';
 
 export class PiteasApiService {
     public static apiEndpoint = 'https://api.piteas.io';

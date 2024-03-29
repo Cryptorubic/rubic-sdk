@@ -1,5 +1,5 @@
 import { DlnOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/dln/dln-on-chain-provider';
-import { PiteasProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/pulsechain/piteas/piteas-provider';
+import { PiteasProvider } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/piteas-provider';
 
 import { LifiProvider } from '../providers/aggregators/lifi/lifi-provider';
 import { OdosOnChainProvider } from '../providers/aggregators/odos/odos-on-chain-provider';
