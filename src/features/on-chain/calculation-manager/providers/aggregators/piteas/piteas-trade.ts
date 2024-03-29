@@ -6,7 +6,7 @@ import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/e
 import { Injector } from 'src/core/injector/injector';
 import { EncodeTransactionOptions } from 'src/features/common/models/encode-transaction-options';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
-import { piteasSwapRouterAddress } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/constants/piteas-swap-router-address';
+import { piteasRouterAddress } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/constants/piteas-router-address';
 import {
     PiteasMethodParameters,
     PiteasQuoteRequestParams
@@ -57,7 +57,7 @@ export class PiteasTrade extends AggregatorEvmOnChainTrade {
 
     public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.PITEAS;
 
-    public readonly providerGateway = piteasSwapRouterAddress;
+    public readonly providerGateway = piteasRouterAddress;
 
     private readonly quoteRequestParams: PiteasQuoteRequestParams;
 
@@ -68,7 +68,7 @@ export class PiteasTrade extends AggregatorEvmOnChainTrade {
     }
 
     public get dexContractAddress(): string {
-        return piteasSwapRouterAddress;
+        return piteasRouterAddress;
     }
 
     constructor(
@@ -154,7 +154,7 @@ export class PiteasTrade extends AggregatorEvmOnChainTrade {
                 });
 
             const tx: EvmEncodeConfig = {
-                to: piteasSwapRouterAddress,
+                to: piteasRouterAddress,
                 data: methodParameters.calldata,
                 value: methodParameters.value,
                 gas: gasUseEstimate.toString()

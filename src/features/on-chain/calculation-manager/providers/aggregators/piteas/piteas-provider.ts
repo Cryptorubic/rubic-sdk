@@ -8,7 +8,7 @@ import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { rubicProxyContractAddress } from 'src/features/cross-chain/calculation-manager/providers/common/constants/rubic-proxy-contract-address';
 import { OnChainTradeError } from 'src/features/on-chain/calculation-manager/models/on-chain-trade-error';
 import { piteasOnChainSupportedBlockchains } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/constants/piteas-on-chain-supported-blockchains';
-import { piteasSwapRouterAddress } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/constants/piteas-swap-router-address';
+import { piteasRouterAddress } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/constants/piteas-router-address';
 import { PiteasQuoteRequestParams } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/models/piteas-quote';
 import { PiteasTradeStruct } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/models/piteas-trade-struct';
 import { PiteasApiService } from 'src/features/on-chain/calculation-manager/providers/aggregators/piteas/piteas-api-service';
@@ -97,7 +97,7 @@ export class PiteasProvider extends AggregatorOnChainProvider {
 
             const gasFeeInfo =
                 options?.gasCalculation === 'calculate'
-                    ? await this.getGasFeeInfo(tradeStruct, piteasSwapRouterAddress)
+                    ? await this.getGasFeeInfo(tradeStruct, piteasRouterAddress)
                     : null;
 
             return new PiteasTrade(
