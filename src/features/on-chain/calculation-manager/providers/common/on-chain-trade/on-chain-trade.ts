@@ -87,10 +87,7 @@ export abstract class OnChainTrade {
     /**
      * Returns true, if allowance is not enough.
      */
-    public async needApprove(
-        fromAddress?: string,
-        approveAddress: string = this.spenderAddress
-    ): Promise<boolean> {
+    public async needApprove(fromAddress?: string): Promise<boolean> {
         if (!fromAddress) {
             this.checkWalletConnected();
         }
@@ -109,7 +106,7 @@ export abstract class OnChainTrade {
         const allowance = await this.web3Public.getAllowance(
             fromTokenAddress,
             fromAddress || this.walletAddress,
-            approveAddress
+            this.spenderAddress
         );
         return allowance.lt(this.from.weiAmount);
     }

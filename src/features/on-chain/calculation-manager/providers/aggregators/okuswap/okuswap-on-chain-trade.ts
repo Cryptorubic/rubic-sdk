@@ -152,22 +152,25 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
         checkNeedApprove = true,
         amount: BigNumber | 'infinity' = 'infinity'
     ): Promise<TransactionReceipt> {
-        const needPermit2Approve = await this.needPermit2Approve();
-        if (needPermit2Approve) {
-            await this.web3Private.approveOnPermit2(
-                this.from.address,
-                this.permit2ApproveConfig.permit2Address,
-                this.spenderAddress,
-                this.from.weiAmount,
-                options
-            );
+        const permit2Address =
+            this.permit2ApproveConfig.permit2Address ||
+            '0xFcf5986450E4A014fFE7ad4Ae24921B589D039b5';
+
+        if (this.permit2ApproveConfig.usePermit2Approve) {
+            const needPermit2Approve = await this.needPermit2Approve();
+            if (needPermit2Approve) {
+                await this.web3Private.approveOnPermit2(
+                    this.from.address,
+                    permit2Address,
+                    this.spenderAddress,
+                    amount,
+                    options
+                );
+            }
         }
 
         if (checkNeedApprove) {
-            const needApprove = await this.needApprove(
-                undefined,
-                this.permit2ApproveConfig.permit2Address
-            );
+            const needApprove = await this.needApprove(this.walletAddress);
             if (!needApprove) {
                 throw new UnnecessaryApproveError();
             }
@@ -176,20 +179,38 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
         this.checkWalletConnected();
         await this.checkBlockchainCorrect();
 
-        return this.web3Private.approveTokens(
+        return this.web3Private.approveTokens(this.from.address, permit2Address, amount, options);
+    }
+
+    public override async needApprove(fromAddress?: string): Promise<boolean> {
+        if (!fromAddress) {
+            this.checkWalletConnected();
+        }
+
+        const permit2Address =
+            this.permit2ApproveConfig.permit2Address ||
+            '0xFcf5986450E4A014fFE7ad4Ae24921B589D039b5';
+
+        const needPermit2Approve = await this.needPermit2Approve();
+
+        const allowance = await this.web3Public.getAllowance(
             this.from.address,
-            this.permit2ApproveConfig.permit2Address,
-            amount,
-            options
+            this.walletAddress,
+            permit2Address
         );
+        return allowance.lt(this.from.weiAmount) || needPermit2Approve;
     }
 
     private async needPermit2Approve(): Promise<boolean> {
+        const permit2Address =
+            this.permit2ApproveConfig.permit2Address ||
+            '0xFcf5986450E4A014fFE7ad4Ae24921B589D039b5';
+
         const [allowance, expiration] = await this.web3Public.getAllowanceAndExpirationOnPermit2(
             this.from.address,
             this.walletAddress,
             this.spenderAddress,
-            this.permit2ApproveConfig.permit2Address
+            permit2Address
         );
 
         return this.from.weiAmount.gt(allowance) || new BigNumber(Date.now()).gt(expiration);
