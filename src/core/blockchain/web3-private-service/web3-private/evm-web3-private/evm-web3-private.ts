@@ -351,17 +351,25 @@ export class EvmWeb3Private extends Web3Private {
         });
     }
 
+    /**
+     * @param tokenAddress Token address you want to approve for spending
+     * @param permit2Address Addres of permit2 contract
+     * @param spenderAddress Contract address spending your tokens
+     * @param amount Approved amount
+     * @param deadline Ms number added to current time (Date.now()) until approve expiration
+     */
     public async approveOnPermit2(
         tokenAddress: string,
         permit2Address: string,
         spenderAddress: string,
         amount: BigNumber | 'infinity' = 'infinity',
+        deadline: BigNumber = new BigNumber(1_000_000),
         options: EvmTransactionOptions = {}
     ): Promise<TransactionReceipt> {
         const contract = new this.web3.eth.Contract(UNI_V3_PERMIT_2_ABI, permit2Address);
         const rawValue = amount === 'infinity' ? new BigNumber(2).pow(256).minus(1) : amount;
         const gaslessParams = { from: this.address };
-        const expiration = new BigNumber(Date.now()).plus(1_000_000_000).toFixed();
+        const expiration = new BigNumber(Date.now()).plus(deadline).toFixed();
 
         const gas = await contract.methods['approve'](
             tokenAddress,

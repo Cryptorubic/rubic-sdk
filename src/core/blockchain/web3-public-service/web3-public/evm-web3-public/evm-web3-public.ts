@@ -35,6 +35,10 @@ import { AbiItem } from 'web3-utils';
 
 import { UNI_V3_PERMIT_2_ABI } from './constants/uni-v3-permit2-abi';
 import { GasPrice } from './models/gas-price';
+import {
+    Permit2AllowanceContractResponse,
+    Permit2AllowanceData
+} from './models/permit2-contract-types';
 
 /**
  * Class containing methods for calling contracts in order to obtain information from the blockchain.
@@ -119,22 +123,19 @@ export class EvmWeb3Public extends Web3Public {
         }
     }
 
-    /**
-     * @returns Aray where [0] - allowance(wei amount), [1] - expiration timestamp in ms(string)
-     */
     public async getAllowanceAndExpirationOnPermit2(
         tokenAddress: string,
         walletAddress: string,
         spenderAddress: string,
         permit2Address: string
-    ): Promise<[BigNumber, string]> {
+    ): Promise<Permit2AllowanceData> {
         try {
             const contract = new this.web3.eth.Contract(UNI_V3_PERMIT_2_ABI, permit2Address);
             const res = (await contract.methods['allowance'](
                 walletAddress,
                 tokenAddress,
                 spenderAddress
-            ).call()) as { amount: string; expiration: string; nonce: string };
+            ).call()) as Permit2AllowanceContractResponse;
 
             return [new BigNumber(res.amount), res.expiration];
         } catch (err) {

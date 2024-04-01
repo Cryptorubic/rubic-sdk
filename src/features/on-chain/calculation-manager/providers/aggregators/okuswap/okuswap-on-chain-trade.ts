@@ -70,11 +70,11 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
 
     public readonly type: OnChainTradeType = ON_CHAIN_TRADE_TYPE.OKU_SWAP;
 
-    private _okuSubProvider: string;
+    private okuSubProvider: string;
 
-    private _quoteReqBody: OkuQuoteRequestBody;
+    private quoteReqBody: OkuQuoteRequestBody;
 
-    private _swapReqBody: OkuSwapRequestBody;
+    private swapReqBody: OkuSwapRequestBody;
 
     protected readonly providerGateway: string;
 
@@ -100,9 +100,9 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
         super(tradeStruct, providerAddress);
 
         this.providerGateway = providerGateway;
-        this._okuSubProvider = tradeStruct.subProvider;
-        this._quoteReqBody = tradeStruct.quoteReqBody;
-        this._swapReqBody = tradeStruct.swapReqBody;
+        this.okuSubProvider = tradeStruct.subProvider;
+        this.quoteReqBody = tradeStruct.quoteReqBody;
+        this.swapReqBody = tradeStruct.swapReqBody;
     }
 
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
@@ -164,6 +164,7 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
                     permit2Address,
                     this.spenderAddress,
                     amount,
+                    new BigNumber(1_000_000),
                     options
                 );
             }
@@ -218,8 +219,8 @@ export class OkuSwapOnChainTrade extends AggregatorEvmOnChainTrade {
 
     protected async getToAmountAndTxData(): Promise<GetToAmountAndTxDataResponse> {
         const [{ outAmount, estimatedGas }, evmConfig] = await Promise.all([
-            OkuSwapApiService.makeQuoteRequest(this._okuSubProvider, this._quoteReqBody),
-            OkuSwapApiService.makeSwapRequest(this._okuSubProvider, this._swapReqBody)
+            OkuSwapApiService.makeQuoteRequest(this.okuSubProvider, this.quoteReqBody),
+            OkuSwapApiService.makeSwapRequest(this.okuSubProvider, this.swapReqBody)
         ]);
 
         return {

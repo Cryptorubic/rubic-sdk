@@ -80,7 +80,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
      */
     public readonly permit2ApproveConfig: Permit2ApproveConfig = {
         usePermit2Approve: false,
-        permit2Address: ''
+        permit2Address: null
     };
 
     protected get spenderAddress(): string {
@@ -200,7 +200,7 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
             gasPriceOptions: options?.gasPriceOptions || undefined
         };
 
-        await this.approve(approveOptions, false, this.from.weiAmount);
+        await this.approve(approveOptions, false);
     }
 
     /**
