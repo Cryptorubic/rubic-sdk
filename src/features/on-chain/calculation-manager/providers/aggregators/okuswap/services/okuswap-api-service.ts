@@ -41,9 +41,6 @@ export class OkuSwapApiService {
         }
     }
 
-    @Cache({
-        maxAge: 15_000
-    })
     public static async makeSwapRequest(
         subProvider: string,
         body: OkuSwapRequestBody

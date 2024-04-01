@@ -23,13 +23,12 @@ export class OnChainProxyService {
         blockchain: BlockchainName
     ): blockchain is ProxySupportedBlockchain {
         const isProxySupported = proxySupportedBlockchains.some(
-            supportedBlockchain => supportedBlockchain === blockchain
-        );
-        const isNotDisabledInOnChain = ON_CHAIN_PROXY_DISABLED_CHAINS.every(
-            chain => chain !== blockchain
+            supportedBlockchain =>
+                supportedBlockchain === blockchain &&
+                !ON_CHAIN_PROXY_DISABLED_CHAINS.some(chain => chain === blockchain)
         );
 
-        return isProxySupported && isNotDisabledInOnChain;
+        return isProxySupported;
     }
 
     @Cache({
