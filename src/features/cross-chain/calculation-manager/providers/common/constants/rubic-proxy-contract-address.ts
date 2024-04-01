@@ -1,6 +1,6 @@
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 
-const CHAINS_WITH_ONLY_DIFFERENT_ROUTER_ADDRESS = [
+const ALTERNATIVE_ROUTER1_NETWORKS = [
     BLOCKCHAIN_NAME.LINEA,
     BLOCKCHAIN_NAME.BASE,
     BLOCKCHAIN_NAME.MANTLE,
@@ -14,8 +14,8 @@ const CHAINS_WITH_ONLY_DIFFERENT_ROUTER_ADDRESS = [
     BLOCKCHAIN_NAME.MERLIN
 ] as const;
 
-function isOnlyRouterDifferent(blockchain: BlockchainName): boolean {
-    return CHAINS_WITH_ONLY_DIFFERENT_ROUTER_ADDRESS.some(chain => chain === blockchain);
+function isAlternativeRouter1Network(blockchain: BlockchainName): boolean {
+    return ALTERNATIVE_ROUTER1_NETWORKS.some(chain => chain === blockchain);
 }
 
 export const rubicProxyContractAddress: Record<
@@ -38,7 +38,7 @@ export const rubicProxyContractAddress: Record<
             router = '0xa63c029612ddaD00A269383Ab016D1e7c14E851D';
             gateway = '0x8E70e517057e7380587Ea6990dAe81cB1Ba405ce';
         }
-        if (isOnlyRouterDifferent(blockchain)) {
+        if (isAlternativeRouter1Network(blockchain)) {
             router = '0xAf14797CcF963B1e3d028a9d51853acE16aedBA1';
         }
 
