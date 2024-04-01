@@ -1,4 +1,5 @@
 import { RubicSdkError } from 'src/common/errors';
+import { Cache } from 'src/common/utils/decorators';
 import { BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Injector } from 'src/core/injector/injector';
@@ -16,6 +17,9 @@ import { OKUSWAP_BLOCKCHAINS } from '../models/okuswap-chain-names';
 import { OkuSwapSupportedBlockchain } from '../models/okuswap-on-chain-supported-chains';
 
 export class OkuSwapApiService {
+    @Cache({
+        maxAge: 15_000
+    })
     public static async makeQuoteRequest(
         subProvider: string,
         body: OkuQuoteRequestBody
@@ -37,6 +41,9 @@ export class OkuSwapApiService {
         }
     }
 
+    @Cache({
+        maxAge: 15_000
+    })
     public static async makeSwapRequest(
         subProvider: string,
         body: OkuSwapRequestBody
@@ -62,6 +69,9 @@ export class OkuSwapApiService {
         }
     }
 
+    @Cache({
+        maxAge: 15_000
+    })
     public static async getOkuSubProvidersForChain(blockchain: BlockchainName): Promise<string[]> {
         try {
             const { status: subProviders } = await Injector.httpClient.get<OkuSubProvidersRes>(
