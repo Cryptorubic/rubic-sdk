@@ -196,7 +196,7 @@ export class OneinchTrade extends EvmOnChainTrade {
             }
         };
 
-        const { tx, toAmount } = await this.getResponseFromApiToTransactionRequest(swapRequest);
+        const { tx, dstAmount } = await this.getResponseFromApiToTransactionRequest(swapRequest);
 
         this.checkAmountChange(
             {
@@ -204,7 +204,7 @@ export class OneinchTrade extends EvmOnChainTrade {
                 value: tx.value,
                 to: tx.to
             },
-            toAmount,
+            dstAmount,
             this.to.stringWeiAmount
         );
 
