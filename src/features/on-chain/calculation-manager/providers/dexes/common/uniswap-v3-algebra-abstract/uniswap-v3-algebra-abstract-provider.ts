@@ -10,6 +10,7 @@ import { OnChainProxyFeeInfo } from 'src/features/on-chain/calculation-manager/p
 import { Exact } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/models/exact';
 import { getGasFeeInfo } from 'src/features/on-chain/calculation-manager/providers/common/utils/get-gas-fee-info';
 import { CamelotArbitrumTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/arbitrum/camelot-arbitrum/camelot-arbitrum-trade';
+import { BerachainTestnetAlgebraTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/berachain-testnet/berachain-testnet-algebra/berachain-testnet-algebra-trade';
 import { evmProviderDefaultOptions } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/constants/evm-provider-default-options';
 import { EvmOnChainProvider } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/evm-on-chain-provider';
 import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/models/gas-price-info';
@@ -47,7 +48,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         | typeof QuickSwapV3Trade
         | typeof QuickSwapV3PolygonZKEVMTrade
         | typeof CamelotArbitrumTrade
-        | typeof UniSwapV3ScrollSepoliaTrade;
+        | typeof UniSwapV3ScrollSepoliaTrade
+        | typeof BerachainTestnetAlgebraTrade;
 
     protected abstract readonly quoterController: UniswapV3AlgebraQuoterController;
 
