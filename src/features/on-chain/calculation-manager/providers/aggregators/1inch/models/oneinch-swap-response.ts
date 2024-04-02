@@ -7,7 +7,7 @@ export interface OneinchSwapResponse {
         gasPrice: string;
         gas: number;
     };
-    toAmount: string;
+    dstAmount: string;
     error?: number;
     protocols: [{ fromTokenAddress: string; toTokenAddress: string }[][]];
 }

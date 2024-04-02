@@ -141,7 +141,7 @@ export class OneInchTrade extends AggregatorEvmOnChainTrade {
             }
         };
 
-        const { tx, toAmount } = await this.getResponseFromApiToTransactionRequest(swapRequest);
+        const { tx, dstAmount } = await this.getResponseFromApiToTransactionRequest(swapRequest);
 
         return {
             tx: {

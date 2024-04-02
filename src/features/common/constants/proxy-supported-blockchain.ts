@@ -23,7 +23,9 @@ export const proxySupportedBlockchains = [
     BLOCKCHAIN_NAME.METIS,
     BLOCKCHAIN_NAME.BLAST,
     BLOCKCHAIN_NAME.KROMA,
-    BLOCKCHAIN_NAME.HORIZEN_EON
+    BLOCKCHAIN_NAME.HORIZEN_EON,
+    BLOCKCHAIN_NAME.MERLIN,
+    BLOCKCHAIN_NAME.ROOTSTOCK
     // BLOCKCHAIN_NAME.OKE_X_CHAIN,
     // BLOCKCHAIN_NAME.GNOSIS,
     // BLOCKCHAIN_NAME.FUSE,
@@ -37,5 +39,7 @@ export const proxySupportedBlockchains = [
     // BLOCKCHAIN_NAME.VELAS,
     // BLOCKCHAIN_NAME.OASIS
 ] as const;
+
+export const ON_CHAIN_PROXY_DISABLED_CHAINS = [BLOCKCHAIN_NAME.ROOTSTOCK] as const;
 
 export type ProxySupportedBlockchain = (typeof proxySupportedBlockchains)[number];

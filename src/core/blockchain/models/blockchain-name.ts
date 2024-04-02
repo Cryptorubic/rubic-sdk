@@ -60,7 +60,9 @@ export const EVM_BLOCKCHAIN_NAME = {
     ZETACHAIN: 'ZETACHAIN',
     BLAST: 'BLAST',
     KROMA: 'KROMA',
-    HORIZEN_EON: 'HORIZEN_EON'
+    HORIZEN_EON: 'HORIZEN_EON',
+    MERLIN: 'MERLIN',
+    ROOTSTOCK: 'ROOTSTOCK'
 } as const;
 
 export const BLOCKCHAIN_NAME = {

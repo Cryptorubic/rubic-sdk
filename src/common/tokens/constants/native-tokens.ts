@@ -418,5 +418,19 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'ZEN',
         symbol: 'ZEN',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MERLIN]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MERLIN,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'Bitcoin',
+        symbol: 'BTC',
+        decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ROOTSTOCK]: new Token({
+        blockchain: BLOCKCHAIN_NAME.ROOTSTOCK,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'RBTC',
+        symbol: 'RBTC',
+        decimals: 18
     })
 };

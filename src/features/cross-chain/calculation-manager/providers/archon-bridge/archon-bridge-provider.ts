@@ -14,7 +14,6 @@ import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-man
 import { ArchonBridgeTrade } from 'src/features/cross-chain/calculation-manager/providers/archon-bridge/archon-bridge-trade';
 import { ArchonContractService } from 'src/features/cross-chain/calculation-manager/providers/archon-bridge/archon-contract-service';
 import {
-    ArchonBridgeNonEonSupportedBlockchain,
     ArchonBridgeSupportedBlockchain,
     archonBridgeSupportedBlockchains
 } from 'src/features/cross-chain/calculation-manager/providers/archon-bridge/constants/archon-bridge-supported-blockchain';
@@ -176,14 +175,11 @@ export class ArchonBridgeProvider extends CrossChainProvider {
             nonEonBlockchain === BLOCKCHAIN_NAME.ETHEREUM
                 ? eonEthTokensMapping
                 : eonAvalancheTokensMapping;
-
-        return !compareAddresses(
-            nonEonToken.address,
-            nonEonToken.isNative
-                ? fromNetworkAddresses[
-                      `NATIVE_${nonEonBlockchain as ArchonBridgeNonEonSupportedBlockchain}`
-                  ]
-                : fromNetworkAddresses[eonTokenAddress]
+        const nonEonAddresses = fromNetworkAddresses[eonTokenAddress];
+        const allowSwap = nonEonAddresses.some(address =>
+            compareAddresses(address, nonEonToken.address)
         );
+
+        return !allowSwap;
     }
 }

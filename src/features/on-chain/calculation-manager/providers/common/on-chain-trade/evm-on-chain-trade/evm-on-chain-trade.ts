@@ -40,6 +40,8 @@ import { TransactionConfig } from 'web3-core';
 import { TransactionReceipt } from 'web3-eth';
 import { utf8ToHex } from 'web3-utils';
 
+import { Permit2ApproveConfig } from './models/permit2-approve-config';
+
 export abstract class EvmOnChainTrade extends OnChainTrade {
     protected lastTransactionConfig: EvmEncodeConfig | null = null;
 
@@ -78,6 +80,14 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
 
     private readonly usedForCrossChain: boolean;
 
+    /**
+     * Filled if approve goes through permit2 contract
+     */
+    public readonly permit2ApproveConfig: Permit2ApproveConfig = {
+        usePermit2Approve: false,
+        permit2Address: null
+    };
+
     protected get spenderAddress(): string {
         return this.useProxy || this.usedForCrossChain
             ? rubicProxyContractAddress[this.from.blockchain].gateway
@@ -109,6 +119,13 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         this.useProxy = evmOnChainTradeStruct.useProxy;
         this.fromWithoutFee = evmOnChainTradeStruct.fromWithoutFee;
         this.usedForCrossChain = evmOnChainTradeStruct.usedForCrossChain || false;
+
+        if (evmOnChainTradeStruct.permit2ApproveAddress) {
+            this.permit2ApproveConfig = {
+                usePermit2Approve: true,
+                permit2Address: evmOnChainTradeStruct.permit2ApproveAddress
+            };
+        }
 
         this.feeInfo = {
             rubicProxy: {

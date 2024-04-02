@@ -64,7 +64,12 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     ): Promise<CalculationResult> {
         const fromBlockchain = from.blockchain as SymbiosisCrossChainSupportedBlockchain;
         const toBlockchain = toToken.blockchain as SymbiosisCrossChainSupportedBlockchain;
-        const useProxy = options?.useProxy?.[this.type] ?? true;
+        // @TODO remove after gas fix for metis
+        const useProxy =
+            from.blockchain === BLOCKCHAIN_NAME.METIS
+                ? false
+                : options?.useProxy?.[this.type] ?? true;
+
         // @TODO remove Tron check
         if (
             !this.areSupportedBlockchains(fromBlockchain, toBlockchain) ||
@@ -302,7 +307,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
     }
 
     private handleMinAmountError(err: SymbiosisError): RubicSdkError | null {
-        const msg = err.error.message || '';
+        const msg = err.error?.message || '';
 
         if (msg.includes('too low')) {
             const [, minAmount] = msg.toLowerCase().split('min amount: ') as [string, string];

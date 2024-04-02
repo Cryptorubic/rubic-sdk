@@ -93,10 +93,8 @@ export class ArchonContractService {
                     ? eonEthTokensMapping
                     : eonAvalancheTokensMapping;
 
-            const isWzen = compareAddresses(
-                fromToken.address,
-                fromNetworkAddresses[supportedEonTokens.wzen]
-            );
+            const wzenNonEonAddress = fromNetworkAddresses[supportedEonTokens.wzen][0]!;
+            const isWzen = compareAddresses(fromToken.address, wzenNonEonAddress);
 
             contract.address = isWzen ? contractIn.wrapRouter : contractIn.originRouter;
             contract.type = isWzen ? 'wrapRouter' : 'originRouter';

@@ -17,6 +17,7 @@ import { EvmTransactionOptions } from 'src/core/blockchain/web3-private-service/
 import { Web3Error } from 'src/core/blockchain/web3-private-service/web3-private/models/web3.error';
 import { Web3Private } from 'src/core/blockchain/web3-private-service/web3-private/web3-private';
 import { ERC20_TOKEN_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/erc-20-token-abi';
+import { UNI_V3_PERMIT_2_ABI } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/constants/uni-v3-permit2-abi';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { WalletProviderCore } from 'src/core/sdk/models/wallet-provider';
 import { proxyHashErrors } from 'src/features/cross-chain/calculation-manager/providers/common/constants/proxy-hash-errors';
@@ -342,6 +343,54 @@ export class EvmWeb3Private extends Web3Private {
                 .approve(spenderAddress, rawValue.toFixed(0))
                 .send(gasfullParams)
                 .on('transactionHash', options.onTransactionHash || (() => {}))
+                .on('receipt', resolve)
+                .on('error', (err: Web3Error) => {
+                    console.error(`Tokens approve error. ${err}`);
+                    reject(EvmWeb3Private.parseError(err));
+                });
+        });
+    }
+
+    /**
+     * @param tokenAddress Token address you want to approve for spending
+     * @param permit2Address Addres of permit2 contract
+     * @param spenderAddress Contract address spending your tokens
+     * @param amount Approved amount
+     * @param deadline Ms number added to current time (Date.now()) until approve expiration
+     */
+    public async approveOnPermit2(
+        tokenAddress: string,
+        permit2Address: string,
+        spenderAddress: string,
+        amount: BigNumber | 'infinity' = 'infinity',
+        deadline: BigNumber = new BigNumber(1_000_000),
+        options: EvmTransactionOptions = {}
+    ): Promise<TransactionReceipt> {
+        const contract = new this.web3.eth.Contract(UNI_V3_PERMIT_2_ABI, permit2Address);
+        const rawValue = amount === 'infinity' ? new BigNumber(2).pow(256).minus(1) : amount;
+        const gaslessParams = { from: this.address };
+        const expiration = new BigNumber(Date.now()).plus(deadline).toFixed();
+
+        const gas = await contract.methods['approve'](
+            tokenAddress,
+            spenderAddress,
+            rawValue.toFixed(),
+            expiration
+        ).estimateGas();
+        const gasfullParams = {
+            ...gaslessParams,
+            ...getGasOptions(options),
+            gas: Web3Private.stringifyAmount(gas, 1)
+        };
+
+        return new Promise((resolve, reject) => {
+            contract.methods['approve'](
+                tokenAddress,
+                spenderAddress,
+                rawValue.toFixed(),
+                expiration
+            )
+                .send(gasfullParams)
                 .on('receipt', resolve)
                 .on('error', (err: Web3Error) => {
                     console.error(`Tokens approve error. ${err}`);
