@@ -26,6 +26,7 @@ import { UniswapV3AlgebraRoute } from 'src/features/on-chain/calculation-manager
 import { UniswapV3AlgebraTradeStructOmitPath } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/models/uniswap-v3-algebra-trade-struct';
 import { UniswapV3AlgebraAbstractTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/common/uniswap-v3-algebra-abstract/uniswap-v3-algebra-abstract-trade';
 import { getFromToTokensAmountsByExact } from 'src/features/on-chain/calculation-manager/providers/dexes/common/utils/get-from-to-tokens-amounts-by-exact';
+import { ModeAlgebraTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/mode/algebra-mode/mode-algebra-trade';
 import { AlgebraTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/algebra/algebra-trade';
 import { QuickSwapV3Trade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon/quick-swap-v3/quick-swap-v3-trade';
 import { QuickSwapV3PolygonZKEVMTrade } from 'src/features/on-chain/calculation-manager/providers/dexes/polygon-zkevm/quick-swap-v3/quick-swap-v3-trade';
@@ -49,7 +50,8 @@ export abstract class UniswapV3AlgebraAbstractProvider<
         | typeof QuickSwapV3PolygonZKEVMTrade
         | typeof CamelotArbitrumTrade
         | typeof UniSwapV3ScrollSepoliaTrade
-        | typeof BerachainTestnetAlgebraTrade;
+        | typeof BerachainTestnetAlgebraTrade
+        | typeof ModeAlgebraTrade;
 
     protected abstract readonly quoterController: UniswapV3AlgebraQuoterController;
 
