@@ -11,7 +11,7 @@ export class OneInchApiService {
         options?: {}
     ): Promise<T> {
         return Injector.httpClient.get(
-            `https://x-api.rubic.exchange/api/swap/v5.2/${blockchainId[blockchain]}/${path}`,
+            `https://x-api.rubic.exchange/api/swap/v6.0/${blockchainId[blockchain]}/${path}`,
             {
                 ...options,
                 headers: { apikey: this.apiKey }

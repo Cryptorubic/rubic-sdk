@@ -25,7 +25,7 @@ export class OkuSwapApiService {
         body: OkuQuoteRequestBody
     ): Promise<OkuQuoteResponse> {
         try {
-            const res = await Injector.httpClient.post<OkuQuoteResponse>(
+            return Injector.httpClient.post<OkuQuoteResponse>(
                 `${RUBIC_X_API_OKU_BASE_URL}/${subProvider}/swap_quote`,
                 body,
                 {
@@ -34,8 +34,6 @@ export class OkuSwapApiService {
                     }
                 }
             );
-
-            return res;
         } catch (err) {
             throw new RubicSdkError(`[OKUSWAP] Err in api-method makeQuoteRequest - ${err}!`);
         }
@@ -79,11 +77,9 @@ export class OkuSwapApiService {
                     }
                 }
             );
-            const availableSubProviders = subProviders
+            return subProviders
                 .filter(p => this.isSupportedProvider(p, blockchain))
                 .map(p => p.name);
-
-            return availableSubProviders;
         } catch (err) {
             throw new RubicSdkError(
                 `[OKUSWAP] Err in api-method getOkuSubProvidersForChain - ${err}!`

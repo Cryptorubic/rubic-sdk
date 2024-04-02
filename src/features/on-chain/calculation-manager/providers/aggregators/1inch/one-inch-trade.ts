@@ -148,7 +148,7 @@ export class OneInchTrade extends AggregatorEvmOnChainTrade {
                 ...tx,
                 gas: String(tx.gas)
             },
-            toAmount
+            toAmount: dstAmount
         };
     }
 

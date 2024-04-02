@@ -349,11 +349,10 @@ export abstract class EvmOnChainTrade extends OnChainTrade {
         return '0x0000000000000000000000000000000000000000';
     }
 
-    // /**
-    //  * Encodes trade to swap it directly through dex contract.
-    //  */
-    // public abstract encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig>;
-
+    /**
+     * Encodes trade to swap it directly through dex contract.
+     * @param options Encode options.
+     */
     public async encodeDirect(options: EncodeTransactionOptions): Promise<EvmEncodeConfig> {
         await this.checkFromAddress(options.fromAddress, true);
         await this.checkReceiverAddress(options.receiverAddress);
