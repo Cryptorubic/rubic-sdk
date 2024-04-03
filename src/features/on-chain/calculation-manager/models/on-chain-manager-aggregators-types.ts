@@ -19,6 +19,7 @@ export const AGGREGATORS_ON_CHAIN = {
     OKU_SWAP: OkuSwapOnChainProvider,
     PITEAS: PiteasProvider,
     XY: XyDexProvider,
-    ZRX: ZrxProvider
+    ZRX: ZrxProvider,
+    ONE_INCH: OneInchProvider
     // SYMBIOSIS: SymbiosisOnChainProvider
 } as const;
