@@ -62,7 +62,8 @@ export const EVM_BLOCKCHAIN_NAME = {
     KROMA: 'KROMA',
     HORIZEN_EON: 'HORIZEN_EON',
     MERLIN: 'MERLIN',
-    ROOTSTOCK: 'ROOTSTOCK'
+    ROOTSTOCK: 'ROOTSTOCK',
+    ZK_FAIR: 'ZK_FAIR'
 } as const;
 
 export const BLOCKCHAIN_NAME = {

@@ -53,7 +53,8 @@ const supportedBlockchains = [
     BLOCKCHAIN_NAME.BASE,
     BLOCKCHAIN_NAME.BLAST,
     BLOCKCHAIN_NAME.KROMA,
-    BLOCKCHAIN_NAME.ROOTSTOCK
+    BLOCKCHAIN_NAME.ROOTSTOCK,
+    BLOCKCHAIN_NAME.ZK_FAIR
 ] as const;
 
 type SupportedBlockchain = (typeof supportedBlockchains)[number];
@@ -121,7 +122,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.BASE]: 'ethereum',
             [BLOCKCHAIN_NAME.BLAST]: 'blast',
             [BLOCKCHAIN_NAME.KROMA]: 'kroma',
-            [BLOCKCHAIN_NAME.ROOTSTOCK]: 'rootstock'
+            [BLOCKCHAIN_NAME.ROOTSTOCK]: 'rootstock',
+            [BLOCKCHAIN_NAME.ZK_FAIR]: 'zkfair'
         };
 
         this.tokenBlockchainId = {
@@ -170,7 +172,8 @@ export class CoingeckoApi {
             [BLOCKCHAIN_NAME.BASE]: 'base',
             [BLOCKCHAIN_NAME.BLAST]: 'blast-2',
             [BLOCKCHAIN_NAME.KROMA]: 'kroma',
-            [BLOCKCHAIN_NAME.ROOTSTOCK]: 'rootstock'
+            [BLOCKCHAIN_NAME.ROOTSTOCK]: 'rootstock',
+            [BLOCKCHAIN_NAME.ZK_FAIR]: 'zkfair'
         };
     }
 
