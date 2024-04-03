@@ -132,7 +132,7 @@ export class OneInchTrade extends AggregatorEvmOnChainTrade {
                 amount: this.nativeSupportedFromWithoutFee.stringWeiAmount,
                 slippage: (this.slippageTolerance * 100).toString(),
                 from: options.fromAddress || this.walletAddress,
-                disableEstimate: false,
+                disableEstimate: true,
                 ...(this.disableMultihops && {
                     connectorTokens: `${fromTokenAddress},${toTokenAddress}`
                 }),
