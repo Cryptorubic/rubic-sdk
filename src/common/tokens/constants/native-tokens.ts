@@ -433,11 +433,18 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         symbol: 'RBTC',
         decimals: 18
     }),
-    [BLOCKCHAIN_NAME.ZK_FAIR]: new Token({
-        blockchain: BLOCKCHAIN_NAME.ZK_FAIR,
+    [BLOCKCHAIN_NAME.MODE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MODE,
         address: EvmWeb3Pure.nativeTokenAddress,
-        name: 'USDC',
-        symbol: 'USDC',
+        name: 'ETH',
+        symbol: 'ETH',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.ZK_FAIR]: new Token({
+      blockchain: BLOCKCHAIN_NAME.ZK_FAIR,
+      address: EvmWeb3Pure.nativeTokenAddress,
+      name: 'USDC',
+      symbol: 'USDC',
+      decimals: 18
     })
 };
