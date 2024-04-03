@@ -438,6 +438,6 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         address: EvmWeb3Pure.nativeTokenAddress,
         name: 'USDC',
         symbol: 'USDC',
-        decimals: 6
+        decimals: 18
     })
 };
