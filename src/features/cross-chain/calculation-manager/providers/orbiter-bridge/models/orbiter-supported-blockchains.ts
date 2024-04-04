@@ -16,7 +16,8 @@ export const orbiterSupportedBlockchains = [
     BLOCKCHAIN_NAME.ZETACHAIN,
     BLOCKCHAIN_NAME.BLAST,
     BLOCKCHAIN_NAME.KROMA,
-    BLOCKCHAIN_NAME.STARKNET
+    BLOCKCHAIN_NAME.STARKNET,
+    BLOCKCHAIN_NAME.MODE
 ] as const;
 
 export type OrbiterSupportedBlockchain = (typeof orbiterSupportedBlockchains)[number];

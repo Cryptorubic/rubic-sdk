@@ -415,5 +415,12 @@ export const wrappedNativeTokensList: Partial<Record<EvmBlockchainName, Token>> 
         name: 'Wrapped BTC',
         symbol: 'WBTC',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MODE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MODE,
+        address: '0x4200000000000000000000000000000000000006',
+        name: 'Wrapped Ether',
+        symbol: 'WETH',
+        decimals: 18
     })
 };

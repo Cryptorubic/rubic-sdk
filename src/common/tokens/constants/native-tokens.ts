@@ -432,5 +432,12 @@ export const nativeTokensList: Record<BlockchainName, Token> = {
         name: 'RBTC',
         symbol: 'RBTC',
         decimals: 18
+    }),
+    [BLOCKCHAIN_NAME.MODE]: new Token({
+        blockchain: BLOCKCHAIN_NAME.MODE,
+        address: EvmWeb3Pure.nativeTokenAddress,
+        name: 'ETH',
+        symbol: 'ETH',
+        decimals: 18
     })
 };

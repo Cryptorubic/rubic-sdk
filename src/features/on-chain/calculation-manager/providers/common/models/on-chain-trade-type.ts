@@ -57,6 +57,7 @@ export const ON_CHAIN_TRADE_TYPE = {
     JUPITER_SWAP: 'JUPITER_SWAP',
     J_SWAP: 'J_SWAP',
 
+    KIM: 'KIM',
     KYBER_SWAP: 'KYBER_SWAP',
 
     LUA_SWAP: 'LUA_SWAP',
