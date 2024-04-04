@@ -33,11 +33,15 @@ export class OrbiterApiService {
     }
 
     public static async getTxStatus(txHash: string): Promise<TxStatusData> {
-        const {
-            result: { targetId: hash, status: txStatus, opStatus }
-        } = await Injector.httpClient.get<OrbiterStatusResponse>(
+        const response = await Injector.httpClient.get<OrbiterStatusResponse>(
             `${ORBITER_API_ENDPOINT}/transaction/status/${txHash}`
         );
+
+        if (!response?.result) {
+            return { hash: null, status: TX_STATUS.PENDING };
+        }
+
+        const { targetId: hash, status: txStatus, opStatus } = response.result;
 
         if (txStatus === ORBITER_STATUS.ERROR) {
             return {
