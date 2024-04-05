@@ -76,10 +76,6 @@ export class CoingeckoApi {
         blockchain: BlockchainName,
         tokenAddress: string
     ): Promise<TokenPriceFromBackend> {
-        if (!CoingeckoApi.isSupportedBlockchain(blockchain)) {
-            throw new RubicSdkError(`Blockchain ${blockchain} is not supported by coingecko-api`);
-        }
-
         try {
             return this.httpClient.get<TokenPriceFromBackend>(
                 `https://dev-tokens.rubic.exchange/api/v1/tokens/price/${blockchain}/${tokenAddress}`

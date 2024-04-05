@@ -6,12 +6,10 @@ import { Injector } from 'src/core/injector/injector';
 import { GasPriceInfo } from 'src/features/on-chain/calculation-manager/providers/dexes/common/on-chain-provider/evm-on-chain-provider/models/gas-price-info';
 
 export async function getGasPriceInfo(blockchain: EvmBlockchainName): Promise<GasPriceInfo> {
-    const nativeTokenAddress = nativeTokensList[blockchain].address;
+    const address = nativeTokensList[blockchain].address;
     const [{ gasPrice, maxFeePerGas }, nativeCoinPrice] = await Promise.all([
         Injector.gasPriceApi.getGasPrice(blockchain),
-        Injector.coingeckoApi
-            .getTokenPrice({ address: nativeTokenAddress, blockchain })
-            .catch(() => new BigNumber(0))
+        Injector.coingeckoApi.getTokenPrice({ address, blockchain }).catch(() => new BigNumber(0))
     ]);
 
     const gasPriceInEth = Web3Pure.fromWei(maxFeePerGas || gasPrice || 0);
