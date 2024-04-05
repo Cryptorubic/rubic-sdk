@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
-import { RubicSdkError, TimeoutError } from 'src/common/errors';
+import { RubicSdkError } from 'src/common/errors';
+import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
@@ -60,7 +61,7 @@ type SupportedBlockchain = (typeof supportedBlockchains)[number];
 interface TokenPriceFromBackend {
     network: string;
     address: string;
-    usd_price: number;
+    usd_price: number | null;
 }
 
 /**
@@ -75,53 +76,41 @@ export class CoingeckoApi {
 
     constructor(private readonly httpClient: HttpClient) {}
 
-    private async getTokenPriceFromBackend(
+    public async getTokenPriceFromBackend(
         blockchain: BlockchainName,
         tokenAddress: string
     ): Promise<TokenPriceFromBackend> {
-        return await this.httpClient.get<TokenPriceFromBackend>(
-            `https://dev-tokens.rubic.exchange/api/v1/tokens/price/${blockchain}/${tokenAddress}`
-        );
-    }
-
-    private errorHandling(err: unknown): BigNumber {
-        if (err instanceof TimeoutError) {
-            console.debug('[RUBIC SDK]: Timeout Error. Coingecko cannot retrieve token price');
-        } else if ((err as Error)?.message?.includes('Request failed with status code 429')) {
-            console.debug('[RUBIC SDK]: Too many requests. Coingecko cannot retrieve token price');
-        } else {
-            console.debug(err);
-        }
-        return new BigNumber(NaN);
-    }
-
-    /**
-     * Gets price of native coin in usd from coingecko.
-     * @param blockchain Supported by {@link supportedBlockchains} blockchain.
-     * @param tokenAddress The address of the requested token.
-     */
-    @Cache({
-        maxAge: 15_000
-    })
-    public async getNativeCoinPrice(
-        blockchain: BlockchainName,
-        tokenAddress: string
-    ): Promise<BigNumber> {
         if (!CoingeckoApi.isSupportedBlockchain(blockchain)) {
             throw new RubicSdkError(`Blockchain ${blockchain} is not supported by coingecko-api`);
         }
 
         try {
-            const response = await this.getTokenPriceFromBackend(blockchain, tokenAddress);
+            return this.httpClient.get<TokenPriceFromBackend>(
+                `https://dev-tokens.rubic.exchange/api/v1/tokens/price/${blockchain}/${tokenAddress}`
+            );
+        } catch (error) {
+            console.debug(error);
 
-            if (!response.usd_price) {
-                throw new RubicSdkError('Coingecko price is not defined');
-            }
-
-            return new BigNumber(response.usd_price);
-        } catch (err: unknown) {
-            return this.errorHandling(err);
+            return {
+                network: blockchain,
+                address: tokenAddress,
+                usd_price: null
+            };
         }
+    }
+
+    /**
+     * Gets price of native coin in usd from coingecko.
+     * @param blockchain Supported by {@link supportedBlockchains} blockchain.
+     */
+    @Cache({
+        maxAge: 15_000
+    })
+    public async getNativeCoinPrice(blockchain: BlockchainName): Promise<BigNumber> {
+        const nativeTokenAddress = nativeTokensList[blockchain].address;
+        const response = await this.getTokenPriceFromBackend(blockchain, nativeTokenAddress);
+
+        return new BigNumber(response?.usd_price || NaN);
     }
 
     /**
@@ -135,19 +124,9 @@ export class CoingeckoApi {
         address: string;
         blockchain: BlockchainName;
     }): Promise<BigNumber> {
-        if (!CoingeckoApi.isSupportedBlockchain(token.blockchain)) {
-            throw new RubicSdkError(
-                `Blockchain ${token.blockchain} is not supported by coingecko-api`
-            );
-        }
+        const response = await this.getTokenPriceFromBackend(token.blockchain, token.address);
 
-        try {
-            const response = await this.getTokenPriceFromBackend(token.blockchain, token.address);
-
-            return new BigNumber(response?.usd_price || NaN);
-        } catch (err: unknown) {
-            return this.errorHandling(err);
-        }
+        return new BigNumber(response?.usd_price || NaN);
     }
 
     /**
@@ -166,7 +145,7 @@ export class CoingeckoApi {
 
         const chainType = BlockchainsInfo.getChainType(token.blockchain);
         if (Web3Pure[chainType].isNativeAddress(token.address)) {
-            return this.getNativeCoinPrice(token.blockchain, token.address);
+            return this.getNativeCoinPrice(token.blockchain);
         }
         return this.getErc20TokenPrice(token);
     }
