@@ -1,10 +1,6 @@
 import BigNumber from 'bignumber.js';
 import { RubicSdkError } from 'src/common/errors';
-import { nativeTokensList } from 'src/common/tokens/constants/native-tokens';
-import { Cache } from 'src/common/utils/decorators';
 import { BLOCKCHAIN_NAME, BlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { HttpClient } from 'src/core/http-client/models/http-client';
 
 const supportedBlockchains = [
@@ -76,7 +72,7 @@ export class CoingeckoApi {
 
     constructor(private readonly httpClient: HttpClient) {}
 
-    public async getTokenPriceFromBackend(
+    private async getTokenPriceFromBackend(
         blockchain: BlockchainName,
         tokenAddress: string
     ): Promise<TokenPriceFromBackend> {
@@ -100,36 +96,6 @@ export class CoingeckoApi {
     }
 
     /**
-     * Gets price of native coin in usd from coingecko.
-     * @param blockchain Supported by {@link supportedBlockchains} blockchain.
-     */
-    @Cache({
-        maxAge: 15_000
-    })
-    public async getNativeCoinPrice(blockchain: BlockchainName): Promise<BigNumber> {
-        const nativeTokenAddress = nativeTokensList[blockchain].address;
-        const response = await this.getTokenPriceFromBackend(blockchain, nativeTokenAddress);
-
-        return new BigNumber(response?.usd_price || NaN);
-    }
-
-    /**
-     * Gets price of token in usd from coingecko.
-     * @param token Token to get price for.
-     */
-    @Cache({
-        maxAge: 15_000
-    })
-    public async getErc20TokenPrice(token: {
-        address: string;
-        blockchain: BlockchainName;
-    }): Promise<BigNumber> {
-        const response = await this.getTokenPriceFromBackend(token.blockchain, token.address);
-
-        return new BigNumber(response?.usd_price || NaN);
-    }
-
-    /**
      * Gets price of common token or native coin in usd from coingecko.
      * @param token Token to get price for.
      */
@@ -143,10 +109,8 @@ export class CoingeckoApi {
             );
         }
 
-        const chainType = BlockchainsInfo.getChainType(token.blockchain);
-        if (Web3Pure[chainType].isNativeAddress(token.address)) {
-            return this.getNativeCoinPrice(token.blockchain);
-        }
-        return this.getErc20TokenPrice(token);
+        const response = await this.getTokenPriceFromBackend(token.blockchain, token.address);
+
+        return new BigNumber(response?.usd_price || NaN);
     }
 }
