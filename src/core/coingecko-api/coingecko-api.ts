@@ -76,9 +76,15 @@ export class CoingeckoApi {
         blockchain: BlockchainName,
         tokenAddress: string
     ): Promise<TokenPriceFromBackend> {
+        const network = Object.keys(BLOCKCHAIN_NAME).find(
+            chain => BLOCKCHAIN_NAME[chain as keyof typeof BLOCKCHAIN_NAME] === blockchain
+        );
+
         try {
             return this.httpClient.get<TokenPriceFromBackend>(
-                `https://dev-tokens.rubic.exchange/api/v1/tokens/price/${blockchain}/${tokenAddress}`
+                `https://dev-tokens.rubic.exchange/api/v1/tokens/price/${network
+                    ?.toLowerCase()
+                    .replaceAll('_', '-')}/${tokenAddress}`
             );
         } catch (error) {
             console.debug(error);
