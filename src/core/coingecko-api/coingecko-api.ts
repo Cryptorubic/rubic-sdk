@@ -86,7 +86,7 @@ export class CoingeckoApi {
 
         try {
             const result = await this.httpClient.get<TokenPriceFromBackend>(
-                `https://dev-tokens.rubic.exchange/api/v1/tokens/price/${network
+                `https://tokens.rubic.exchange/api/v1/tokens/price/${network
                     ?.toLowerCase()
                     .replaceAll('_', '-')}/${tokenAddress}`
             );
