@@ -1,6 +1,6 @@
-import { SDK } from 'src/core/sdk/sdk';
-import { BLOCKCHAIN_NAME } from 'src/core/blockchain/models/blockchain-name';
 import { minimalConfiguration } from '../utils/configuration';
+import { SDK } from '../../src/core/sdk/sdk';
+import { BLOCKCHAIN_NAME } from '../../src/core/blockchain/models/blockchain-name';
 
 export const instantTradesApiSpec = () =>
     describe('Instant trades module tests', () => {

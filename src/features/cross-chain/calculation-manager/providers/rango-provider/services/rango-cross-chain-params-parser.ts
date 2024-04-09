@@ -13,7 +13,8 @@ export class RangoCrossChainParser {
         swapQueryParams,
         toToken,
         toTokenAmountMin,
-        bridgeSubtype
+        bridgeSubtype,
+        receiverAddress
     }: GetCrossChainTradeConstructorParamsType): Promise<RangoCrossChainTradeConstructorParams> {
         const gasData =
             options.gasCalculation === 'enabled'
@@ -23,7 +24,8 @@ export class RangoCrossChainParser {
                       swapQueryParams,
                       feeInfo,
                       routePath,
-                      bridgeSubtype
+                      bridgeSubtype,
+                      receiverAddress
                   })
                 : null;
         const priceImpact = fromToken.calculatePriceImpactPercent(toToken);

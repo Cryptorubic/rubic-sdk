@@ -31,7 +31,6 @@ import { PolkadotWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/
 import { RippleWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/ripple-web3-pure';
 import { SecretWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/secret-web3-pure';
 import { SiaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/sia-web3-pure';
-import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/solana-web3-pure';
 import { StellarWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/stellar-web3-pure';
 import { TezosWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/tezos-web3-pure';
 import { TonWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/ton-web3-pure';
@@ -39,6 +38,7 @@ import { WavesWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non
 import { WaxWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/wax-web3-pure';
 import { ZilliqaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/non-evm-web3-pure/zilliqa-web3-pure';
 import { OntologyWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/ontology-web3-pure';
+import { SolanaWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/solana-web3-pure/solana-web3-pure';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { XdcWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/xdc-web3-pure';
 

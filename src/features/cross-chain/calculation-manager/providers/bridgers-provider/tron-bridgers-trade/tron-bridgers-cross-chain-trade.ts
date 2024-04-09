@@ -1,13 +1,14 @@
 import BigNumber from 'bignumber.js';
 import { PriceTokenAmount } from 'src/common/tokens';
 import { TronBlockchainName } from 'src/core/blockchain/models/blockchain-name';
+import { TronTransactionConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/models/tron-transaction-config';
 import { TronWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/tron-web3-pure/tron-web3-pure';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
 import { getFromWithoutFee } from 'src/features/common/utils/get-from-without-fee';
 import { CROSS_CHAIN_TRADE_TYPE } from 'src/features/cross-chain/calculation-manager/models/cross-chain-trade-type';
 import { BridgersEvmCrossChainSupportedBlockchain } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/constants/bridgers-cross-chain-supported-blockchain';
 import { TronBridgersTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/tron-bridgers-trade/models/tron-bridgers-transaction-data';
-import { getMethodArgumentsAndTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/utils/get-method-arguments-and-transaction-data';
+import { getProxyMethodArgumentsAndTransactionData } from 'src/features/cross-chain/calculation-manager/providers/bridgers-provider/utils/get-proxy-method-arguments-and-transaction-data';
 import { BRIDGE_TYPE } from 'src/features/cross-chain/calculation-manager/providers/common/models/bridge-type';
 import { FeeInfo } from 'src/features/cross-chain/calculation-manager/providers/common/models/fee-info';
 import { RubicStep } from 'src/features/cross-chain/calculation-manager/providers/common/models/rubicStep';
@@ -104,7 +105,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
             );
 
             const { transactionData } =
-                await getMethodArgumentsAndTransactionData<TronBridgersTransactionData>(
+                await getProxyMethodArgumentsAndTransactionData<TronBridgersTransactionData>(
                     this.from,
                     fromWithoutFee,
                     this.to,
@@ -141,7 +142,7 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
             this.feeInfo.rubicProxy?.platformFee?.percent
         );
         const { methodArguments, transactionData } =
-            await getMethodArgumentsAndTransactionData<TronBridgersTransactionData>(
+            await getProxyMethodArgumentsAndTransactionData<TronBridgersTransactionData>(
                 this.from,
                 fromWithoutFee,
                 this.to,
@@ -182,6 +183,41 @@ export class TronBridgersCrossChainTrade extends TronCrossChainTrade {
             priceImpact: this.priceImpact ?? null,
             slippage: this.slippage * 100,
             routePath: this.routePath
+        };
+    }
+
+    protected async getTransactionConfigAndAmount(
+        receiverAddress?: string
+    ): Promise<{ config: TronTransactionConfig; amount: string }> {
+        const fromWithoutFee = getFromWithoutFee(
+            this.from,
+            this.feeInfo.rubicProxy?.platformFee?.percent
+        );
+        const { transactionData, amountOut } =
+            await getProxyMethodArgumentsAndTransactionData<TronBridgersTransactionData>(
+                this.from,
+                fromWithoutFee,
+                this.to,
+                this.toTokenAmountMin,
+                this.walletAddress,
+                this.providerAddress,
+                { receiverAddress: receiverAddress! },
+                this.checkAmountChange
+            );
+
+        const encodedData = TronWeb3Pure.encodeMethodSignature(
+            transactionData.functionName,
+            transactionData.parameter
+        );
+
+        return {
+            amount: amountOut,
+            config: {
+                data: encodedData,
+                callValue: transactionData.options.callValue,
+                feeLimit: transactionData.options.feeLimit,
+                to: transactionData.to
+            }
         };
     }
 }

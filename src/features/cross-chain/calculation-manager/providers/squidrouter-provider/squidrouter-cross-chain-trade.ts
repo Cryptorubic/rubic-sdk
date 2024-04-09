@@ -4,10 +4,8 @@ import { PriceTokenAmount } from 'src/common/tokens';
 import { Cache } from 'src/common/utils/decorators';
 import { parseError } from 'src/common/utils/errors';
 import { EvmBlockchainName } from 'src/core/blockchain/models/blockchain-name';
-import { GasPriceBN } from 'src/core/blockchain/web3-public-service/web3-public/evm-web3-public/models/gas-price';
 import { EvmWeb3Pure } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/evm-web3-pure';
 import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
-import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
 import { ContractParams } from 'src/features/common/models/contract-params';
 import { SwapTransactionOptions } from 'src/features/common/models/swap-transaction-options';
@@ -29,9 +27,8 @@ import { SquidrouterCrossChainSupportedBlockchain } from 'src/features/cross-cha
 import { SquidrouterTransactionRequest } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/transaction-request';
 import { SquidrouterTransactionResponse } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/models/transaction-response';
 import { SquidrouterCrossChainProvider } from 'src/features/cross-chain/calculation-manager/providers/squidrouter-provider/squidrouter-cross-chain-provider';
+import { getCrossChainGasData } from 'src/features/cross-chain/calculation-manager/utils/get-cross-chain-gas-data';
 import { EvmOnChainTrade } from 'src/features/on-chain/calculation-manager/providers/common/on-chain-trade/evm-on-chain-trade/evm-on-chain-trade';
-
-import { convertGasDataToBN } from '../../utils/convert-gas-price';
 
 /**
  * Calculated DeBridge cross-chain trade.
@@ -65,86 +62,26 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         }
 
         try {
-            let gasLimit: BigNumber | null;
-            let gasDetails: GasPriceBN | BigNumber | null;
-            const web3Public = Injector.web3PublicService.getWeb3Public(fromBlockchain);
+            const trade = new SquidrouterCrossChainTrade(
+                {
+                    from,
+                    to: toToken,
+                    gasData: null,
+                    priceImpact: 0,
+                    allowanceTarget: '',
+                    slippage: 0,
+                    feeInfo,
+                    transitUSDAmount: new BigNumber(NaN),
+                    cryptoFeeToken: from,
+                    onChainTrade: null,
+                    onChainSubtype: { from: undefined, to: undefined },
+                    transactionRequest
+                },
+                providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
+                []
+            );
 
-            if (feeInfo.rubicProxy?.fixedFee?.amount.gt(0)) {
-                const { contractAddress, contractAbi, methodName, methodArguments, value } =
-                    await new SquidrouterCrossChainTrade(
-                        {
-                            from,
-                            to: toToken,
-                            gasData: null,
-                            priceImpact: 0,
-                            allowanceTarget: '',
-                            slippage: 0,
-                            feeInfo,
-                            transitUSDAmount: new BigNumber(NaN),
-                            cryptoFeeToken: from,
-                            onChainTrade: null,
-                            onChainSubtype: { from: undefined, to: undefined },
-                            transactionRequest
-                        },
-                        providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                        []
-                    ).getContractParams({}, true);
-
-                const [proxyGasLimit, proxyGasDetails] = await Promise.all([
-                    web3Public.getEstimatedGas(
-                        contractAbi,
-                        contractAddress,
-                        methodName,
-                        methodArguments,
-                        walletAddress,
-                        value
-                    ),
-                    convertGasDataToBN(await Injector.gasPriceApi.getGasPrice(from.blockchain))
-                ]);
-
-                gasLimit = proxyGasLimit;
-                gasDetails = proxyGasDetails;
-            } else {
-                const { data, value, to } = await new SquidrouterCrossChainTrade(
-                    {
-                        from,
-                        to: toToken,
-                        gasData: null,
-                        priceImpact: 0,
-                        allowanceTarget: '',
-                        slippage: 0,
-                        feeInfo,
-                        transitUSDAmount: new BigNumber(NaN),
-                        cryptoFeeToken: from,
-                        onChainTrade: null,
-                        onChainSubtype: { from: undefined, to: undefined },
-                        transactionRequest
-                    },
-                    providerAddress || EvmWeb3Pure.EMPTY_ADDRESS,
-                    []
-                ).getTransactionRequest(receiverAddress, null, true);
-
-                const defaultGasLimit = await web3Public.getEstimatedGasByData(walletAddress, to, {
-                    data,
-                    value
-                });
-                const defaultGasDetails = convertGasDataToBN(
-                    await Injector.gasPriceApi.getGasPrice(from.blockchain)
-                );
-
-                gasLimit = defaultGasLimit;
-                gasDetails = defaultGasDetails;
-            }
-
-            if (!gasLimit?.isFinite()) {
-                return null;
-            }
-
-            const increasedGasLimit = Web3Pure.calculateGasMargin(gasLimit, 1.2);
-            return {
-                gasLimit: increasedGasLimit,
-                ...gasDetails
-            };
+            return getCrossChainGasData(trade, receiverAddress);
         } catch (_err) {
             return null;
         }
@@ -230,9 +167,10 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         let transactionHash: string;
 
         try {
-            const { data, value, to } = await this.getTransactionRequest(
-                options?.receiverAddress || this.walletAddress,
-                options?.directTransaction
+            const { data, value, to } = await this.setTransactionConfig(
+                false,
+                options?.useCacheData || false,
+                options?.receiverAddress || this.walletAddress
             );
 
             const { onConfirm } = options;
@@ -259,18 +197,15 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         }
     }
 
-    public async getContractParams(
-        options: GetContractParamsOptions,
-        skipAmountChangeCheck: boolean = false
-    ): Promise<ContractParams> {
+    public async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
         const {
             data,
             value: providerValue,
             to
-        } = await this.getTransactionRequest(
-            options?.receiverAddress || this.walletAddress,
-            options?.directTransaction,
-            skipAmountChangeCheck
+        } = await this.setTransactionConfig(
+            false,
+            options?.useCacheData || false,
+            options?.receiverAddress || this.walletAddress
         );
 
         const bridgeData = ProxyCrossChainEvmTrade.getBridgeData(options, {
@@ -334,46 +269,6 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
         };
     }
 
-    private async getTransactionRequest(
-        receiverAddress: string,
-        transactionConfig?: EvmEncodeConfig | null,
-        skipAmountChangeCheck: boolean = false
-    ): Promise<EvmEncodeConfig> {
-        if (transactionConfig) {
-            return {
-                data: transactionConfig.data,
-                value: transactionConfig.value,
-                to: transactionConfig.to
-            };
-        }
-        const requestParams: SquidrouterTransactionRequest = {
-            ...this.transactionRequest,
-            toAddress: receiverAddress
-        };
-
-        const {
-            route: { transactionRequest, estimate: routeEstimate }
-        } = await SquidrouterCrossChainTrade.getResponseFromApiToTransactionRequest(requestParams);
-
-        if (!skipAmountChangeCheck) {
-            this.checkAmountChange(
-                {
-                    data: transactionRequest.data,
-                    value: transactionRequest.value,
-                    to: transactionRequest.targetAddress
-                },
-                routeEstimate.toAmount,
-                this.to.stringWeiAmount
-            );
-        }
-
-        return {
-            data: transactionRequest.data,
-            value: transactionRequest.value,
-            to: transactionRequest.targetAddress
-        };
-    }
-
     @Cache({
         maxAge: 15_000
     })
@@ -389,5 +284,27 @@ export class SquidrouterCrossChainTrade extends EvmCrossChainTrade {
                 }
             }
         );
+    }
+
+    protected async getTransactionConfigAndAmount(
+        receiverAddress: string
+    ): Promise<{ config: EvmEncodeConfig; amount: string }> {
+        const requestParams: SquidrouterTransactionRequest = {
+            ...this.transactionRequest,
+            toAddress: receiverAddress
+        };
+
+        const {
+            route: { transactionRequest, estimate }
+        } = await SquidrouterCrossChainTrade.getResponseFromApiToTransactionRequest(requestParams);
+
+        return {
+            config: {
+                data: transactionRequest.data,
+                value: transactionRequest.value,
+                to: transactionRequest.targetAddress
+            },
+            amount: estimate.toAmount
+        };
     }
 }

@@ -5,15 +5,7 @@ import { RubicSdkError } from 'src/common/errors';
  * in target network.
  */
 export class UpdatedRatesError extends RubicSdkError {
-    constructor(
-        public readonly transaction: {
-            data: string;
-            to: string;
-            value: string;
-            oldAmount: string;
-            newAmount: string;
-        }
-    ) {
+    constructor(public readonly oldAmount: string, public readonly newAmount: string) {
         super();
         Object.setPrototypeOf(this, UpdatedRatesError.prototype);
     }

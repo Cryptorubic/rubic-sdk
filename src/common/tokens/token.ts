@@ -8,6 +8,7 @@ import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/bloc
 import { Web3PublicService } from 'src/core/blockchain/web3-public-service/web3-public-service';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { Injector } from 'src/core/injector/injector';
+
 import { wrappedAddress } from './constants/wrapped-addresses';
 
 export type TokenStruct<T extends BlockchainName = BlockchainName> = {

@@ -14,7 +14,6 @@ import { CrossChainManager } from 'src/features/cross-chain/calculation-manager/
 import { CrossChainStatusManager } from 'src/features/cross-chain/status-manager/cross-chain-status-manager';
 import { CrossChainSymbiosisManager } from 'src/features/cross-chain/symbiosis-manager/cross-chain-symbiosis-manager';
 import { DeflationTokenManager } from 'src/features/deflation-token-manager/deflation-token-manager';
-import { LimitOrderManager } from 'src/features/limit-order/limit-order-manager';
 import { OnChainManager } from 'src/features/on-chain/calculation-manager/on-chain-manager';
 import { OnChainStatusManager } from 'src/features/on-chain/status-manager/on-chain-status-manager';
 
@@ -51,11 +50,6 @@ export class SDK {
      * Deflation token manager object. Use it to check specific token for fees or deflation.
      */
     public readonly deflationTokenManager: DeflationTokenManager;
-
-    /**
-     * Use it to create limit order.
-     */
-    public readonly limitOrderManager: LimitOrderManager;
 
     /**
      * Can be used to get `Web3Public` instance by blockchain name to get public information from blockchain.
@@ -129,7 +123,6 @@ export class SDK {
         this.onChainStatusManager = new OnChainStatusManager();
         this.crossChainStatusManager = new CrossChainStatusManager();
         this.crossChainSymbiosisManager = new CrossChainSymbiosisManager();
-        this.limitOrderManager = new LimitOrderManager();
     }
 
     /**

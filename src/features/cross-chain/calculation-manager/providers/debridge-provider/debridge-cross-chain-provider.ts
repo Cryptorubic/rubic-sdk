@@ -10,6 +10,7 @@ import {
 import { CHAIN_TYPE } from 'src/core/blockchain/models/chain-type';
 import { BlockchainsInfo } from 'src/core/blockchain/utils/blockchains-info/blockchains-info';
 import { blockchainId } from 'src/core/blockchain/utils/blockchains-info/constants/blockchain-id';
+import { EvmEncodeConfig } from 'src/core/blockchain/web3-pure/typed-web3-pure/evm-web3-pure/models/evm-encode-config';
 import { Web3Pure } from 'src/core/blockchain/web3-pure/web3-pure';
 import { DlnApiService } from 'src/features/common/providers/dln/dln-api-service';
 import { DlnUtils } from 'src/features/common/providers/dln/dln-utils';
@@ -55,7 +56,7 @@ export class DebridgeCrossChainProvider extends CrossChainProvider {
         from: PriceTokenAmount<DeBridgeCrossChainSupportedBlockchain>,
         toToken: PriceToken<DeBridgeCrossChainSupportedBlockchain>,
         options: RequiredCrossChainOptions
-    ): Promise<CalculationResult> {
+    ): Promise<CalculationResult<EvmEncodeConfig | { data: string }>> {
         const fromBlockchain = from.blockchain;
         const toBlockchain = toToken.blockchain;
         const useProxy = options?.useProxy?.[this.type] ?? true;
