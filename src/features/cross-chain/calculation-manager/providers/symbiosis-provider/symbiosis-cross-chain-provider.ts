@@ -192,7 +192,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
                             providerGateway: approveTo
                         },
                         ...(toBlockchain === BLOCKCHAIN_NAME.MANTLE &&
-                            rewards.length && { promotions: this.setPromotions(rewards) })
+                            rewards.length && { promotions: this.getPromotions(rewards) })
                     },
                     options.providerAddress,
                     await this.getRoutePath(from, to, route)
@@ -212,7 +212,7 @@ export class SymbiosisCrossChainProvider extends CrossChainProvider {
         }
     }
 
-    private setPromotions(rewards: SymbiosisTokenAmount[]): string[] {
+    private getPromotions(rewards: SymbiosisTokenAmount[]): string[] {
         return rewards.map(promo => promo.symbol!);
     }
 

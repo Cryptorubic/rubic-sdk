@@ -161,9 +161,7 @@ export class SymbiosisCrossChainTrade extends EvmCrossChainTrade {
             crossChainTrade.to.blockchain
         );
         this.contractAddresses = crossChainTrade.contractAddresses;
-        this.promotions = crossChainTrade?.promotions
-            ? [...this.promotions, ...crossChainTrade?.promotions]
-            : this.promotions;
+        this.promotions = crossChainTrade?.promotions || super.promotions;
     }
 
     protected async getContractParams(options: GetContractParamsOptions): Promise<ContractParams> {
