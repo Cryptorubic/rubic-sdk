@@ -71,6 +71,11 @@ export abstract class CrossChainTrade<T = unknown> {
      */
     public abstract readonly isAggregator: boolean;
 
+    /**
+     * Promotions array.
+     */
+    public promotions: string[] = [];
+
     protected abstract get fromContractAddress(): string;
 
     protected get httpClient(): HttpClient {
