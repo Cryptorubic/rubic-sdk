@@ -230,17 +230,12 @@ export class OnChainManager {
         const dexesProviders = Object.entries(this.tradeProviders[from.blockchain]).filter(
             ([type]) => !options.disabledProviders.includes(type as OnChainTradeType)
         ) as [OnChainTradeType, OnChainProvider][];
-        console.debug('[SDK_LOG] All dexes: ', dexesProviders.join(', '));
         const dexesTradesPromise = this.calculateDexes(from, to, dexesProviders, options);
         const aggregatorsTradesPromises = this.getAggregatorsCalculationPromises(from, to, options);
 
         const allTrades = (
             await Promise.all([dexesTradesPromise, ...aggregatorsTradesPromises])
         ).flat();
-        console.debug(
-            '[SDK_LOG] All trades: ',
-            allTrades.map((el: WrappedOnChainTradeOrNull | OnChainTrade | OnChainTradeError) => el)
-        );
 
         return allTrades.filter(notNull).sort((tradeA, tradeB) => {
             if (tradeA instanceof OnChainTrade || tradeB instanceof OnChainTrade) {
@@ -388,10 +383,6 @@ export class OnChainManager {
             .filter(aggregator => {
                 return !this.isDisabledAggregator(options.disabledProviders, aggregator.tradeType);
             });
-        console.debug(
-            '[SDK_LOG] Available aggregators: ',
-            availableAggregators.map(el => el.tradeType).join(', ')
-        );
 
         return availableAggregators.map(aggregator => {
             const promise = this.getCalcPromise(from, to, options, aggregator);
